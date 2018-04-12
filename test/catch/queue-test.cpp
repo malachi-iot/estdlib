@@ -22,7 +22,7 @@ TEST_CASE("queue-test")
             i++;
         }
     }
-    SECTION("A")
+    SECTION("Basic layer1 queue")
     {
         queue<int, layer1::deque<int, 4 > > queue;
 
@@ -40,5 +40,29 @@ TEST_CASE("queue-test")
 
         REQUIRE(queue.front() == 4);
         REQUIRE(queue.size() == 1);
+    }
+    SECTION("Rollover layer1 queue")
+    {
+        queue<int, layer1::deque<int, 4 > > queue;
+
+        queue.push(1);
+        queue.push(2);
+        queue.push(3);
+        queue.push(4);
+
+        REQUIRE(queue.front() == 1);
+        REQUIRE(queue.size() == 4);
+
+        queue.pop();
+
+        queue.push(5);
+
+        REQUIRE(queue.size() == 4);
+
+        for(int i = 2; i <= 5; i++)
+        {
+            REQUIRE(queue.front() == i);
+            queue.pop();
+        }
     }
 }

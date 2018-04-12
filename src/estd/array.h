@@ -45,14 +45,24 @@ public:
         iterator operator--(ptrdiff_t)
         { iterator temp(*this);--ptr;return temp;}
 
+        bool operator==(const iterator compare) const
+        {
+            return ptr == compare.ptr;
+        }
+
         bool operator!=(const iterator& compare) const
         {
             return compare.ptr != ptr;
         }
 
+        bool operator>(const iterator& compare) const
+        {
+            return ptr > compare.ptr;
+        }
+
         ptrdiff_t operator-(const iterator& compare) const
         {
-            return compare.ptr - ptr;
+            return ptr - compare.ptr;
         }
 
         T& operator*()              { return *ptr; }

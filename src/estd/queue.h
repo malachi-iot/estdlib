@@ -20,28 +20,65 @@ class deque
     typedef array<T, N> array_t;
 
     array_t array;
-    typename array_t::iterator m_front;
-    typename array_t::iterator m_back;
+
+    typedef typename array_t::iterator array_iterator;
+
+    // front aka head aka 'leftmost' part of array,
+    //   where items are traditionally retrieved
+    // back aka tail aka 'rightmost' part of array,
+    //   where items are traditionally added
+    array_iterator m_front;
+    array_iterator m_back;
+
+    // because I don't want to waste a slot
+    bool m_empty;
+
+    void evaluate_rollover(array_iterator* i)
+    {
+        if(*i == array.end())
+            *i = array.begin();
+    }
+
+    size_t _size() const
+    {
+        if(m_front > m_back)
+            return m_front - m_back;
+        else
+            return m_back - m_front;
+    }
 
 public:
     deque() :
         m_front(array.begin()),
-        m_back(array.begin()) {}
+        m_back(array.begin()),
+        m_empty(true) {}
 
     typedef T value_type;
     typedef const value_type& const_reference;
     typedef size_t size_type;
 
-    size_type max_size() const { return array.size(); }
+    bool empty() const { return m_empty; }
 
     size_type size() const
     {
-        return m_front - m_back;
+        if(empty()) return 0;
+
+        size_type s = _size();
+
+        if(s == 0) s = max_size();
+
+        return s;
     }
+
+    size_type max_size() const { return array.size(); }
 
     bool push_back(const T& value)
     {
         *m_back++ = value;
+        m_empty = false;
+
+        evaluate_rollover(&m_back);
+
         return true;
     }
 
@@ -49,6 +86,10 @@ public:
     bool push_front(const T& value)
     {
         *m_front++ = value;
+
+        evaluate_rollover(&m_front);
+        m_empty = false;
+
         return true;
     }
 
@@ -56,6 +97,11 @@ public:
     bool pop_front()
     {
         m_front++;
+
+        evaluate_rollover(&m_front);
+
+        if(m_front == m_back) m_empty = true;
+
         return true;
     }
 
@@ -68,6 +114,10 @@ public:
     bool push_back(const T&& value)
     {
         *m_back++ = value;
+
+        evaluate_rollover(&m_back);
+        m_empty = false;
+
         return true;
     }
 #endif
