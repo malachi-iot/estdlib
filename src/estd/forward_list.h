@@ -92,6 +92,8 @@ struct node_traits
 {
     typedef TForwardNodeValue value_type;
     typedef value_type node_type;
+    // represents EITHER const value ref or non-const node+value ref
+    typedef value_type& nv_reference;
 
     template<class TList>
     static node_type &front(const TList &list) { return list.front(); }
@@ -100,12 +102,14 @@ struct node_traits
 
     static void set_next(node_type &node, node_type *set_to) { node.next(set_to); }
 
-    static value_type &value(node_type &node) { return node.value(); }
+    // replacement for old allocator get associated value
+    static value_type& value(node_type& node) { return node; }
 };
 
 
 template<>
-struct node_traits<experimental::forward_node_base> {
+struct node_traits<experimental::forward_node_base>
+{
     typedef experimental::forward_node_base node_type;
 
     static const node_type *get_next(const node_type &node) { return node.next(); }
@@ -113,25 +117,99 @@ struct node_traits<experimental::forward_node_base> {
     static void set_next(node_type &node, node_type *set_to) { node.next(set_to); }
 };
 
+
+// adapted from util.embedded version
+template <class TNodeTraits>
+struct InputIterator
+{
+    typedef typename TNodeTraits::value_type value_type;
+    typedef typename TNodeTraits::node_type node_type;
+
+protected:
+    node_type* current;
+
+public:
+    InputIterator(node_type* node) : current(node) {}
+
+
+    // FIX: doing for(auto i : list) seems to do a *copy* operation
+    // for(value_type& i : list) is required to get a reference.  Check to see if this is
+    // proper behavior
+    value_type& operator*()
+    {
+        //return *TNodeAllocator::get_associated_value(base_t::getCurrent(), hint);
+        return TNodeTraits::value(*current);
+    }
+};
+
+template <class TNodeTraits>
+struct ForwardIterator : public InputIterator<TNodeTraits>
+{
+    typedef TNodeTraits traits_t;
+    typedef InputIterator<TNodeTraits> base_t;
+    typedef typename base_t::node_type   node_type;
+    typedef typename base_t::value_type  value_type;
+
+    /*
+    ForwardIterator(const ForwardIterator& source) :
+            base_t(source)
+    {
+    } */
+
+    ForwardIterator(node_type* node) :
+            base_t(node)
+    {
+    }
+
+
+    ForwardIterator& operator++()
+    {
+        this->current = traits_t::get_next(*this->current);
+        return *this;
+    }
+
+    // postfix version
+    ForwardIterator operator++(int)
+    {
+        ForwardIterator temp(*this);
+        operator++();
+        return temp;
+    }
+};
+
+
+
+
+
 template<class T, class TNodeTraits = node_traits<T>>
-class forward_list {
+class forward_list
+{
     T *m_front;
 
 public:
     forward_list() : m_front(NULLPTR) {}
 
     typedef T value_type;
-    typedef value_type &reference;
+    typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
+    typedef typename node_traits_t::nv_reference nv_reference;
+    typedef ForwardIterator<node_traits_t> iterator;
+    typedef const iterator   const_iterator;
 
     reference front() { return *m_front; }
 
-    void push_front(T &value) {
+    bool empty() const { return m_front == NULLPTR; }
+
+    void push_front(nv_reference value)
+    {
         if (m_front != NULLPTR)
             node_traits_t::set_next(value, m_front);
 
         m_front = &value;
     }
+
+    iterator begin() { return iterator(m_front); }
+    iterator end() { return iterator(NULLPTR); }
 };
 
 // yanked directly in from util.embedded
