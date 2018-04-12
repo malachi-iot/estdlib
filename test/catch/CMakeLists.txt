@@ -12,6 +12,7 @@ include_directories(${TARGET_PROJ_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
     map-test.cpp
+    list-test.cpp
     queue-test.cpp
     )
 

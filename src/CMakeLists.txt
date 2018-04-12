@@ -6,6 +6,7 @@ set(SOURCE_FILES
        dummy.cpp 
        platform.h
        estd/array.h
+        estd/forward_list.h
        estd/functional.h
        estd/iterator.h
        estd/map.h
