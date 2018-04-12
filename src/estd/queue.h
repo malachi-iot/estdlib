@@ -39,10 +39,13 @@ class deque
             *i = array.begin();
     }
 
+    // FIX: Something is wrong, m_front
+    // never registers as > m_back.  Might just
+    // be permissive test?
     size_t _size() const
     {
         if(m_front > m_back)
-            return m_front - m_back;
+            return N - (m_front - m_back);
         else
             return m_back - m_front;
     }

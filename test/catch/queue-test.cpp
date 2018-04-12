@@ -59,7 +59,11 @@ TEST_CASE("queue-test")
 
         REQUIRE(queue.size() == 4);
 
-        for(int i = 2; i <= 5; i++)
+        REQUIRE(queue.front() == 2);
+        queue.pop();
+        queue.push(6);
+
+        for(int i = 3; i <= 6; i++)
         {
             REQUIRE(queue.front() == i);
             queue.pop();

@@ -60,10 +60,37 @@ public:
             return ptr > compare.ptr;
         }
 
+
+        bool operator<(const iterator& compare) const
+        {
+            return ptr < compare.ptr;
+        }
+
         ptrdiff_t operator-(const iterator& compare) const
         {
             return ptr - compare.ptr;
         }
+
+
+        iterator operator-(const ptrdiff_t& movement) const
+        {
+            iterator temp(*this);
+
+            temp.ptr -= movement;
+
+            return temp;
+        }
+
+
+        iterator operator+(const ptrdiff_t& movement) const
+        {
+            iterator temp(*this);
+
+            temp.ptr += movement;
+
+            return temp;
+        }
+
 
         T& operator*()              { return *ptr; }
         const T& operator*() const  { return *ptr; }
@@ -72,12 +99,12 @@ public:
     typedef const iterator const_iterator;
 
     iterator begin() { return iterator(array); }
-    const_iterator begin() const { return iterator(array); }
+    const_iterator begin() const { return iterator((T* const)array); }
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
     iterator end() { return iterator(&array[N]); }
-    const_iterator end() const { return iterator(&array[N]); }
+    const_iterator end() const { return iterator((T* const)&array[N]); }
 
     CONSTEXPR size_type size() const { return N; }
 
