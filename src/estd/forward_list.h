@@ -11,27 +11,28 @@ namespace experimental {
 // Make list and forward list conform to, but not necessarily depend on, these
 // signatures (C++ concepts would be nice here)
 
-class forward_node_base {
+class forward_node_base
+{
     forward_node_base *m_next;
 
 public:
     forward_node_base() : m_next(NULLPTR) {}
 
-    const forward_node_base *next() const { return m_next; }
+    forward_node_base* next() const { return m_next; }
 
     void next(forward_node_base *set_to) { m_next = set_to; }
 };
 
 class reverse_node_base
 {
-    reverse_node_base *m_prev;
+    reverse_node_base* m_prev;
 
 public:
     reverse_node_base() : m_prev(NULLPTR) {}
 
-    const reverse_node_base *prev() const { return m_prev; }
+    reverse_node_base* prev() const { return m_prev; }
 
-    void prev(reverse_node_base *set_to) { m_prev = set_to; }
+    void prev(reverse_node_base* set_to) { m_prev = set_to; }
 };
 
 
@@ -86,7 +87,8 @@ struct node_traits
 };
 */
 
-// this is where node and value are combined
+// this is where node and value are combined, and no allocator is used
+// (node memory management entirely external to node and list)
 template<class TForwardNodeValue>
 struct node_traits
 {
@@ -96,14 +98,24 @@ struct node_traits
     typedef value_type& nv_reference;
 
     template<class TList>
-    static node_type &front(const TList &list) { return list.front(); }
+    static node_type& front(const TList& list) { return list.front(); }
 
-    static const node_type *get_next(const node_type &node) { return node.next(); }
+    static node_type* get_next(const node_type& node)
+    {
+        // NOTE: we assume that node_type represents a very specific type derived ultimately
+        // from something resembling forward_node_base, specifically in that
+        // a call to next() shall return a pointer to the next node_type*
+        return reinterpret_cast<node_type*>(node.next());
+    }
 
     static void set_next(node_type &node, node_type *set_to) { node.next(set_to); }
 
     // replacement for old allocator get associated value
     static value_type& value(node_type& node) { return node; }
+
+    // pretends to allocate space for a node, when in fact no allocation
+    // is necessary for this type
+    static node_type& alloc_node(value_type& value) { return value; }
 };
 
 
@@ -140,6 +152,20 @@ public:
         //return *TNodeAllocator::get_associated_value(base_t::getCurrent(), hint);
         return TNodeTraits::value(*current);
     }
+
+    bool operator==(const InputIterator<TNodeTraits>& compare_to) const
+    {
+        return current == compare_to.current;
+    }
+
+    bool operator!=(const InputIterator<TNodeTraits>& compare_to) const
+    {
+        return current != compare_to.current;
+    }
+
+    // FIX: call is ok but this should be protected/private and only accessible
+    // via friends list/forward_list
+    node_type* node() const { return current; }
 };
 
 template <class TNodeTraits>
@@ -184,32 +210,73 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 template<class T, class TNodeTraits = node_traits<T>>
 class forward_list
 {
-    T *m_front;
-
 public:
-    forward_list() : m_front(NULLPTR) {}
-
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
+    typedef typename node_traits_t::node_type node_type;
     typedef typename node_traits_t::nv_reference nv_reference;
     typedef ForwardIterator<node_traits_t> iterator;
     typedef const iterator   const_iterator;
 
-    reference front() { return *m_front; }
+protected:
+    node_type* m_front;
+
+    static node_type* next(node_type& from)
+    {
+        return node_traits_t::get_next(from);
+    }
+
+    static void set_next(node_type& node, node_type* next)
+    {
+        node_traits_t::set_next(node, next);
+    }
+
+public:
+    forward_list() : m_front(NULLPTR) {}
+
+    reference front()
+    {
+        value_type& front_value = node_traits_t::value(*m_front);
+
+        return front_value;
+    }
 
     bool empty() const { return m_front == NULLPTR; }
 
+    void pop_front()
+    {
+#ifdef DEBUG
+        // undefined behavior if list is empty, but let's put some asserts in here
+#endif
+        node_type* n = next(*m_front);
+
+        m_front = n;
+    }
+
     void push_front(nv_reference value)
     {
-        if (m_front != NULLPTR)
-            node_traits_t::set_next(value, m_front);
+        node_type& node_pointing_to_value = node_traits_t::alloc_node(value);
 
-        m_front = &value;
+        if (m_front != NULLPTR)
+            set_next(node_pointing_to_value, m_front);
+
+        m_front = &node_pointing_to_value;
     }
 
     iterator begin() { return iterator(m_front); }
-    iterator end() { return iterator(NULLPTR); }
+    const_iterator begin() const { return iterator(m_front); }
+    const_iterator end() const { return iterator(NULLPTR); }
+
+    iterator insert_after(const_iterator pos, nv_reference value)
+    {
+        node_type* node_to_insert_after = pos.node();
+        node_type* old_next_node = next(*node_to_insert_after);
+        node_type& node_pointing_to_value = node_traits_t::alloc_node(value);
+
+        set_next(*node_to_insert_after, &node_pointing_to_value);
+        set_next(node_pointing_to_value, old_next_node);
+    }
 };
 
 // yanked directly in from util.embedded

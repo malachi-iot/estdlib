@@ -31,6 +31,9 @@ struct allocator_traits
     {
         return a.deallocate(n);
     }
+
+    // NOTE: Consider strongly putting nonstandard lock and unlock in here,
+    // to accomodate handle-based memory
 };
 
 
