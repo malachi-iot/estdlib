@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "../platform.h"
+#include "iterator.h"
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach
@@ -45,9 +45,14 @@ public:
         iterator operator--(ptrdiff_t)
         { iterator temp(*this);--ptr;return temp;}
 
-        bool operator!=(const iterator& compare)
+        bool operator!=(const iterator& compare) const
         {
             return compare.ptr != ptr;
+        }
+
+        ptrdiff_t operator-(const iterator& compare) const
+        {
+            return compare.ptr - ptr;
         }
 
         T& operator*()              { return *ptr; }
@@ -57,9 +62,12 @@ public:
     typedef const iterator const_iterator;
 
     iterator begin() { return iterator(array); }
+    const_iterator begin() const { return iterator(array); }
+
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
     iterator end() { return iterator(&array[N]); }
+    const_iterator end() const { return iterator(&array[N]); }
 
     CONSTEXPR size_type size() const { return N; }
 
