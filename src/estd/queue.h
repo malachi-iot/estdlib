@@ -19,7 +19,7 @@ class deque
 {
     typedef array<T, N> array_t;
 
-    array_t array;
+    array_t m_array;
 
     typedef typename array_t::iterator array_iterator;
 
@@ -35,8 +35,8 @@ class deque
 
     void evaluate_rollover(array_iterator* i)
     {
-        if(*i == array.end())
-            *i = array.begin();
+        if(*i == m_array.end())
+            *i = m_array.begin();
     }
 
     // FIX: Something is wrong, m_front
@@ -52,8 +52,8 @@ class deque
 
 public:
     deque() :
-        m_front(array.begin()),
-        m_back(array.begin()),
+        m_front(m_array.begin()),
+        m_back(m_array.begin()),
         m_empty(true) {}
 
     typedef T value_type;
@@ -73,7 +73,7 @@ public:
         return s;
     }
 
-    size_type max_size() const { return array.size(); }
+    size_type max_size() const { return m_array.size(); }
 
     bool push_back(const T& value)
     {

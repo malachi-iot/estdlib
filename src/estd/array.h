@@ -16,7 +16,7 @@ template<
 > struct array
 {
 private:
-    T array[N];
+    T m_array[N];
 
 public:
     typedef size_t size_type;
@@ -98,24 +98,24 @@ public:
 
     typedef const iterator const_iterator;
 
-    iterator begin() { return iterator(array); }
-    const_iterator begin() const { return iterator((T* const)array); }
+    iterator begin() { return iterator(m_array); }
+    const_iterator begin() const { return iterator((T* const)m_array); }
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
-    iterator end() { return iterator(&array[N]); }
-    const_iterator end() const { return iterator((T* const)&array[N]); }
+    iterator end() { return iterator(&m_array[N]); }
+    const_iterator end() const { return iterator((T* const)&m_array[N]); }
 
     CONSTEXPR size_type size() const { return N; }
 
     reference operator[](size_type pos)
     {
-        return array[pos];
+        return m_array[pos];
     }
 
     const_reference operator [](size_type pos) const
     {
-        return array[pos];
+        return m_array[pos];
     }
 };
 
