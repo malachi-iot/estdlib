@@ -11,6 +11,8 @@ include_directories(${TARGET_PROJ_DIR})
 project(estdlib-unittests)
 
 add_executable(${PROJECT_NAME} "main.cpp"
-    map-test.cpp)
+    map-test.cpp
+    queue-test.cpp
+    )
 
 target_link_libraries(${PROJECT_NAME} estdlib_lib)

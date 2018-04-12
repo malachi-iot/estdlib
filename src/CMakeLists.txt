@@ -4,10 +4,13 @@ project(estdlib)
 
 set(SOURCE_FILES
        dummy.cpp 
+       platform.h
        estd/array.h
        estd/functional.h
+       estd/map.h
+       estd/queue.h
        estd/utility.h
-       estd/map.h)
+       )
 
 add_library(estdlib_lib ${SOURCE_FILES})
 
