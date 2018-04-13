@@ -138,6 +138,26 @@ struct node_traits
     static node_pointer lock(node_handle node) { return node; }
     static void unlock(node_handle node) {}
 
+    // instance portion which deals with pushing and pulling things in
+    // and out of handle & allocations.  Use as an instance even if
+    // no instance variables here - should optimize out to static-like
+    // assembly if indeed
+    // no instance variables present
+    // eventually our formalized allocator might be able to displace this
+    struct node
+    {
+        // pretends to allocate space for a node, when in fact no allocation
+        // is necessary for this type
+        node_handle alloc(value_type& value) { return &value; }
+
+        void dealloc(node_handle node) {}
+
+        node_pointer lock(node_handle node) { return node; }
+        void unlock(node_handle node) {}
+
+        node(allocator_t* allocator) {}
+    };
+
     // FIX: this whole allocation model might be broken, since
     // traits tend to be *static* and the allocator in theory would
     // be tracked by an instance variable... perhaps a viable alternative
@@ -269,6 +289,7 @@ public:
 
 protected:
     node_traits_t node_traits;
+    typename node_traits_t::node alloc;
 
     typedef typename node_traits_t::node_pointer node_pointer;
     typedef typename node_traits_t::node_handle node_handle;
@@ -335,6 +356,7 @@ protected:
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
         node_traits(allocator),
+        alloc(allocator),
         m_front(node_traits_t::null_node()) {}
 
     reference front()
@@ -358,7 +380,7 @@ public:
 
     void push_front(nv_reference value)
     {
-        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
+        node_handle node_pointing_to_value = alloc.alloc(value);
 
         if (m_front != node_traits_t::null_node())
         {
@@ -376,7 +398,7 @@ public:
     {
         node_handle node_to_insert_after = pos.node();
         node_handle old_next_node = next(node_to_insert_after);
-        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
+        node_handle node_pointing_to_value = alloc.alloc(value);
 
         set_next(node_to_insert_after, node_pointing_to_value);
         set_next(node_pointing_to_value, old_next_node);

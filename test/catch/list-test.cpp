@@ -65,17 +65,22 @@ struct estd::node_traits<test_node_handle>
     static node_handle get_next(const node_type& node) { return node.next_node(); }
     static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
 
-    static node_handle alloc_node(value_type& value)
-    {
-        handles[handle_count] = value;
-        return handle_count++;
-    }
-
     static node_pointer lock(node_handle node) { return &handles[node]; }
 
     static value_type& value(node_type &node) { return node; }
 
     static void unlock(node_handle node) {}
+
+    struct node
+    {
+        node(void*) {}
+
+        static node_handle alloc(value_type& value)
+        {
+            handles[handle_count] = value;
+            return handle_count++;
+        }
+    };
 
     node_traits(void* allocator) {}
 };
