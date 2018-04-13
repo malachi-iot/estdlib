@@ -12,6 +12,75 @@ struct test_node : public estd::experimental::forward_node_base
     int val;
 };
 
+
+struct test_node_handle
+{
+    uint8_t m_next;
+
+    uint8_t next_node() const { return m_next; }
+    void next_node(uint8_t dummy) { m_next = dummy; }
+
+    int val;
+
+    test_node_handle() : m_next(0xFF) {}
+
+    test_node_handle(const test_node_handle& copy_from)
+    {
+        val = copy_from.val;
+    }
+};
+
+
+struct test_node_handle2 : public test_node_handle
+{
+    int extra_data;
+
+    test_node_handle2(const test_node_handle& copy_from) :
+        test_node_handle(copy_from)
+    {
+
+    }
+
+    test_node_handle2()
+    {
+
+    }
+};
+
+int handle_count = 0;
+test_node_handle2 handles[5];
+
+template <>
+struct estd::node_traits<test_node_handle>
+{
+    typedef test_node_handle node_type;
+    typedef node_type value_type;
+    typedef uint8_t node_handle;
+    typedef test_node_handle& nv_reference;
+    typedef test_node_handle* node_pointer;
+    typedef void allocator_t;
+
+    static node_handle null_node() { return 0xFF; }
+
+    static node_handle get_next(const node_type& node) { return node.next_node(); }
+    static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
+
+    static node_handle alloc_node(void*, value_type& value)
+    {
+        handles[handle_count] = value;
+        return handle_count++;
+    }
+
+    static node_pointer lock(node_handle node) { return &handles[node]; }
+
+    static value_type& value(node_type &node) { return node; }
+
+    static void unlock(node_handle node) {}
+
+    node_traits(void* allocator) {}
+};
+
+
 TEST_CASE("linkedlist")
 {
     SECTION("forward-list")
@@ -85,5 +154,22 @@ TEST_CASE("linkedlist")
         REQUIRE((*i++).val == 1);
         REQUIRE((*i++).val == 2);
         REQUIRE((*i++).val == 3);
+    }
+    SECTION("Forward list custom node")
+    {
+        estd::forward_list<test_node_handle> list;
+        test_node_handle item1;
+
+        item1.val = 7;
+
+        list.push_front(item1);
+
+        // since the allocator does copies, we can change this
+        item1.val = 10;
+
+        // needs some more work before we can do this
+        //list.insert_after(list.begin(), item1);
+
+        REQUIRE(list.front().val == 7);
     }
 }
