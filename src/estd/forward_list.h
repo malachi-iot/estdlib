@@ -97,10 +97,12 @@ struct node_traits
     // represents EITHER const value ref or non-const node+value ref
     typedef value_type& nv_reference;
 
-    template<class TList>
-    static node_type& front(const TList& list) { return list.front(); }
+    // TODO: eventually interact with allocator for this (in
+    // other node_traits where allocation actually happens)
+    typedef node_type* node_pointer;
+    typedef node_type* node_handle;
 
-    static node_type* get_next(const node_type& node)
+    static node_handle get_next(const node_type& node)
     {
         // NOTE: we assume that node_type represents a very specific type derived ultimately
         // from something resembling forward_node_base, specifically in that
@@ -108,14 +110,22 @@ struct node_traits
         return reinterpret_cast<node_type*>(node.next());
     }
 
-    static void set_next(node_type &node, node_type *set_to) { node.next(set_to); }
+    static void set_next(node_type& node, node_handle set_to) { node.next(set_to); }
 
     // replacement for old allocator get associated value
     static value_type& value(node_type& node) { return node; }
 
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
-    static node_type& alloc_node(value_type& value) { return value; }
+    static node_handle alloc_node(value_type& value) { return &value; }
+
+    static void dealloc_node(node_handle node) {}
+
+    // placeholders
+    // only useful when a) list is managing node memory allocations and
+    // b) when they are handle-based
+    static node_pointer lock(node_handle node) { return node; }
+    static void unlock(node_handle node) {}
 };
 
 
@@ -136,12 +146,13 @@ struct InputIterator
 {
     typedef typename TNodeTraits::value_type value_type;
     typedef typename TNodeTraits::node_type node_type;
+    typedef typename TNodeTraits::node_handle node_handle_t;
 
 protected:
-    node_type* current;
+    node_handle_t current;
 
 public:
-    InputIterator(node_type* node) : current(node) {}
+    InputIterator(node_handle_t node) : current(node) {}
 
 
     // FIX: doing for(auto i : list) seems to do a *copy* operation
@@ -165,7 +176,7 @@ public:
 
     // FIX: call is ok but this should be protected/private and only accessible
     // via friends list/forward_list
-    node_type* node() const { return current; }
+    node_handle_t node() const { return current; }
 };
 
 template <class TNodeTraits>
@@ -175,6 +186,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
     typedef InputIterator<TNodeTraits> base_t;
     typedef typename base_t::node_type   node_type;
     typedef typename base_t::value_type  value_type;
+    typedef typename base_t::node_handle_t node_handle_t;
 
     /*
     ForwardIterator(const ForwardIterator& source) :
@@ -182,7 +194,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
     {
     } */
 
-    ForwardIterator(node_type* node) :
+    ForwardIterator(node_handle_t node) :
             base_t(node)
     {
     }
@@ -190,7 +202,12 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 
     ForwardIterator& operator++()
     {
-        this->current = traits_t::get_next(*this->current);
+        node_handle_t c = traits_t::lock(this->current);
+
+        this->current = traits_t::get_next(*c);
+
+        traits_t::unlock(this->current);
+
         return *this;
     }
 
@@ -220,16 +237,53 @@ public:
     typedef const iterator   const_iterator;
 
 protected:
-    node_type* m_front;
+    typedef typename node_traits_t::node_pointer node_pointer;
+    typedef typename node_traits_t::node_handle node_handle;
 
-    static node_type* next(node_type& from)
+    node_handle m_front;
+
+    struct lock_helper
+    {
+        node_handle h;
+        node_pointer ptr;
+
+        lock_helper(node_handle h) : h(h)
+        {
+            ptr = node_traits_t::lock(h);
+        }
+
+        ~lock_helper()
+        {
+            node_traits_t::unlock(h);
+        }
+
+        node_pointer& operator*() { return ptr; }
+    };
+
+    static node_pointer next(node_type& from)
     {
         return node_traits_t::get_next(from);
     }
 
-    static void set_next(node_type& node, node_type* next)
+
+    static node_handle next(node_handle from)
+    {
+        lock_helper f(from);
+
+        return node_traits_t::get_next(*f.ptr);
+    }
+
+    /*
+    static void set_next(node_type& node, node_pointer next)
     {
         node_traits_t::set_next(node, next);
+    }*/
+
+    static void set_next(node_type& node, node_handle next)
+    {
+        lock_helper _next(next);
+
+        node_traits_t::set_next(node, _next.ptr);
     }
 
 public:
@@ -249,19 +303,21 @@ public:
 #ifdef DEBUG
         // undefined behavior if list is empty, but let's put some asserts in here
 #endif
-        node_type* n = next(*m_front);
-
-        m_front = n;
+        m_front = next(m_front);
     }
 
     void push_front(nv_reference value)
     {
-        node_type& node_pointing_to_value = node_traits_t::alloc_node(value);
+        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
 
         if (m_front != NULLPTR)
-            set_next(node_pointing_to_value, m_front);
+        {
+            node_pointer n = node_traits_t::lock(node_pointing_to_value);
+            set_next(*n, m_front);
+            node_traits_t::unlock(node_pointing_to_value);
+        }
 
-        m_front = &node_pointing_to_value;
+        m_front = node_pointing_to_value;
     }
 
     iterator begin() { return iterator(m_front); }
@@ -270,12 +326,12 @@ public:
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
-        node_type* node_to_insert_after = pos.node();
-        node_type* old_next_node = next(*node_to_insert_after);
-        node_type& node_pointing_to_value = node_traits_t::alloc_node(value);
+        node_pointer node_to_insert_after = pos.node();
+        node_pointer old_next_node = next(*node_to_insert_after);
+        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
 
-        set_next(*node_to_insert_after, &node_pointing_to_value);
-        set_next(node_pointing_to_value, old_next_node);
+        set_next(*node_to_insert_after, node_pointing_to_value);
+        set_next(*node_pointing_to_value, old_next_node);
     }
 };
 
