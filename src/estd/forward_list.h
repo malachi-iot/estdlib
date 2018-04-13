@@ -242,6 +242,11 @@ protected:
 
     node_handle m_front;
 
+    // FIX: Consider *not* using this as it adds unecessary overhead to scenarios
+    // which don't do locking (oops)
+    // -OR- put lock_helper itself into allocator_traits or similar so that we only
+    // incur its overhead of locking is actually going on
+    // eventually that may be a kind of unique_ptr-like scenario
     struct lock_helper
     {
         node_handle h;
