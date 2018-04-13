@@ -94,6 +94,27 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
     typedef TValue value_type;
     typedef TAllocator allocator_t;
     typedef estd::smart_inlineref_node_alloc<estd::experimental::forward_node_base, value_type, allocator_t> node_allocator_t;
+
+    // test_node_allocator_t not presently used, trying to decouple node_traits from
+    // value_type, if we can
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <class TValue2, class TAllocator2>
+    using test_node_allocator_t = estd::smart_inlineref_node_alloc<
+        estd::experimental::forward_node_base,
+        TValue2,
+        TAllocator2>;
+#else
+    template <class TValue2, class TAllocator2>
+    struct test_node_allocator_t :
+            estd::smart_inlineref_node_alloc<
+                estd::experimental::forward_node_base, TValue2, TAllocator2>
+    {
+        typedef estd::smart_inlineref_node_alloc<estd::experimental::forward_node_base, TValue2, TAllocator2> base_t;
+
+        test_node_allocator_t(TAllocator2* allocator) : base_t(allocator) {}
+    };
+#endif
+
     typedef typename node_allocator_t::node_t node_type;
 
     typedef const value_type& nv_reference;
@@ -115,10 +136,18 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
         node.next(next);
     }
 
+    /*
+     * More attempts to decouple node_traits from value_type
+    template <class TValue2>
+    static TValue2& value(node_type& node)
+    {
+        return (TValue2&) node.value;
+    } */
 
     static value_type& value(node_type& node)
     {
-        // FIX: clean up this brute-force drop of const
+        // FIX: clean up this brute-force drop of const.  forward_list standard
+        // interactions take a const value_type&
         return (value_type&) node.value;
     }
 };

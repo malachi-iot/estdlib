@@ -132,7 +132,7 @@ protected:
 public:
     typedef TAllocator allocator_t;
     typedef allocator_traits<TAllocator> traits_t;
-    typedef node_traits<TNode> node_traits_t;
+    //typedef node_traits<TNode> node_traits_t;
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
@@ -162,11 +162,18 @@ public:
 };
 
 
+// NOTE: It's possible that in order to implement push_front(&&) and friends,
+// we will not only need a smart_inlinevalue_node_alloc, but also be able to
+// run-time differenciate between inline-ref and inline-value since the inline
+// value we'd be on the hook for allocating and deallocating ourselves (due
+// to && representing a temporary variable)
+// If there was a way to template-compile-time enforce only one mode and not
+// mix and match that might be nice, but so far it only looks #ifdef'able
 template <class TNode, class TValue, class TAllocator>
 class smart_inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
 {
     typedef smart_node_alloc<TNode, TAllocator> base_t;
-    typedef node_traits<TNode, TAllocator> node_traits_t;
+    //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
     typedef typename base_t::node_handle node_handle;
     typedef typename base_t::node_pointer node_pointer;
