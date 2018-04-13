@@ -128,9 +128,9 @@ struct node_traits
 
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
-    static node_handle alloc_node(allocator_t* a, value_type& value) { return &value; }
+    static node_handle alloc_node(value_type& value) { return &value; }
 
-    static void dealloc_node(allocator_t* a, node_handle node) {}
+    static void dealloc_node(node_handle node) {}
 
     // placeholders
     // only useful when a) list is managing node memory allocations and
@@ -138,6 +138,12 @@ struct node_traits
     static node_pointer lock(node_handle node) { return node; }
     static void unlock(node_handle node) {}
 
+    // FIX: this whole allocation model might be broken, since
+    // traits tend to be *static* and the allocator in theory would
+    // be tracked by an instance variable... perhaps a viable alternative
+    // is that global allocators *are* used but segregated out by
+    // template specialization?  I still would prefer the features of
+    // an instance allocator
     node_traits(allocator_t* a) {}
 };
 
@@ -160,6 +166,7 @@ struct InputIterator
     typedef typename TNodeTraits::value_type value_type;
     typedef typename TNodeTraits::node_type node_type;
     typedef typename TNodeTraits::node_handle node_handle_t;
+    typedef typename TNodeTraits::node_pointer node_pointer;
 
 protected:
     node_handle_t current;
@@ -167,14 +174,23 @@ protected:
 public:
     InputIterator(node_handle_t node) : current(node) {}
 
+    //~InputIterator() {}
+
 
     // FIX: doing for(auto i : list) seems to do a *copy* operation
     // for(value_type& i : list) is required to get a reference.  Check to see if this is
     // proper behavior
     value_type& operator*()
     {
-        //return *TNodeAllocator::get_associated_value(base_t::getCurrent(), hint);
-        return TNodeTraits::value(*current);
+        // FIX: likely lock will need to interact with allocator
+        node_pointer p = TNodeTraits::lock(current);
+        value_type& value = TNodeTraits::value(*p);
+        // FIX: strong implications for leaving this unlocked,
+        //      but in practice stronger implications for unlocking it.
+        //      needs attention
+        //TNodeTraits::unlock(current);
+
+        return value;
     }
 
     bool operator==(const InputIterator<TNodeTraits>& compare_to) const
@@ -199,6 +215,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
     typedef InputIterator<TNodeTraits> base_t;
     typedef typename base_t::node_type   node_type;
     typedef typename base_t::value_type  value_type;
+    typedef typename base_t::node_pointer node_pointer;
     typedef typename base_t::node_handle_t node_handle_t;
 
     /*
@@ -215,7 +232,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 
     ForwardIterator& operator++()
     {
-        node_handle_t c = traits_t::lock(this->current);
+        node_pointer c = traits_t::lock(this->current);
 
         this->current = traits_t::get_next(*c);
 
@@ -300,9 +317,19 @@ protected:
         node_traits_t::set_next(node, next);
     }*/
 
+    /*
     static void set_next(node_type& node, node_handle next)
     {
         node_traits_t::set_next(node, next);
+    } */
+
+    static void set_next(node_handle _node, node_handle next)
+    {
+        node_pointer node = node_traits_t::lock(_node);
+
+        node_traits_t::set_next(*node, next);
+
+        node_traits_t::unlock(_node);
     }
 
 public:
@@ -331,13 +358,11 @@ public:
 
     void push_front(nv_reference value)
     {
-        node_handle node_pointing_to_value = node_traits_t::alloc_node(NULLPTR, value);
+        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
 
         if (m_front != node_traits_t::null_node())
         {
-            node_pointer n = node_traits_t::lock(node_pointing_to_value);
-            set_next(*n, m_front);
-            node_traits_t::unlock(node_pointing_to_value);
+            set_next(node_pointing_to_value, m_front);
         }
 
         m_front = node_pointing_to_value;
@@ -349,12 +374,12 @@ public:
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
-        node_pointer node_to_insert_after = pos.node();
-        node_pointer old_next_node = next(*node_to_insert_after);
-        node_handle node_pointing_to_value = node_traits_t::alloc_node(NULLPTR, value);
+        node_handle node_to_insert_after = pos.node();
+        node_handle old_next_node = next(node_to_insert_after);
+        node_handle node_pointing_to_value = node_traits_t::alloc_node(value);
 
-        set_next(*node_to_insert_after, node_pointing_to_value);
-        set_next(*node_pointing_to_value, old_next_node);
+        set_next(node_to_insert_after, node_pointing_to_value);
+        set_next(node_pointing_to_value, old_next_node);
 
         return iterator(node_pointing_to_value);
     }

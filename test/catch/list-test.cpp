@@ -65,7 +65,7 @@ struct estd::node_traits<test_node_handle>
     static node_handle get_next(const node_type& node) { return node.next_node(); }
     static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
 
-    static node_handle alloc_node(void*, value_type& value)
+    static node_handle alloc_node(value_type& value)
     {
         handles[handle_count] = value;
         return handle_count++;
@@ -168,8 +168,9 @@ TEST_CASE("linkedlist")
         item1.val = 10;
 
         // needs some more work before we can do this
-        //list.insert_after(list.begin(), item1);
+        list.insert_after(list.begin(), item1);
 
         REQUIRE(list.front().val == 7);
+        REQUIRE((*++list.begin()).val == 10);
     }
 }
