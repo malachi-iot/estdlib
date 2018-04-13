@@ -103,7 +103,7 @@ struct node_traits
     typedef node_type* node_handle;
     typedef TAllocator allocator_t;
 
-    static node_handle null_node() { return NULLPTR; }
+    static CONSTEXPR node_handle null_node() { return NULLPTR; }
 
     static node_handle get_next(const node_type& node)
     {
@@ -126,18 +126,6 @@ struct node_traits
     // replacement for old allocator get associated value
     static value_type& value(node_type& node) { return node; }
 
-    // pretends to allocate space for a node, when in fact no allocation
-    // is necessary for this type
-    static node_handle alloc_node(value_type& value) { return &value; }
-
-    static void dealloc_node(node_handle node) {}
-
-    // placeholders
-    // only useful when a) list is managing node memory allocations and
-    // b) when they are handle-based
-    static node_pointer lock(node_handle node) { return node; }
-    static void unlock(node_handle node) {}
-
     // instance portion which deals with pushing and pulling things in
     // and out of handle & allocations.  Use as an instance even if
     // no instance variables here - should optimize out to static-like
@@ -152,19 +140,14 @@ struct node_traits
 
         void dealloc(node_handle node) {}
 
+        // placeholders
+        // only useful when a) list is managing node memory allocations and
+        // b) when they are handle-based
         node_pointer lock(node_handle node) { return node; }
         void unlock(node_handle node) {}
 
         node(allocator_t* allocator) {}
     };
-
-    // FIX: this whole allocation model might be broken, since
-    // traits tend to be *static* and the allocator in theory would
-    // be tracked by an instance variable... perhaps a viable alternative
-    // is that global allocators *are* used but segregated out by
-    // template specialization?  I still would prefer the features of
-    // an instance allocator
-    node_traits(allocator_t* a) {}
 };
 
 
@@ -183,6 +166,7 @@ struct node_traits<experimental::forward_node_base>
 template <class TNodeTraits>
 struct InputIterator
 {
+    typedef TNodeTraits traits_t;
     typedef typename TNodeTraits::value_type value_type;
     typedef typename TNodeTraits::node_type node_type;
     typedef typename TNodeTraits::node_handle node_handle_t;
@@ -191,8 +175,15 @@ struct InputIterator
 protected:
     node_handle_t current;
 
+    typedef typename traits_t::node node_alloc_t;
+
+    node_alloc_t alloc;
+
 public:
-    InputIterator(node_handle_t node) : current(node) {}
+    InputIterator(node_handle_t node, const node_alloc_t& alloc) :
+        current(node),
+        alloc(alloc)
+    {}
 
     //~InputIterator() {}
 
@@ -203,7 +194,7 @@ public:
     value_type& operator*()
     {
         // FIX: likely lock will need to interact with allocator
-        node_pointer p = TNodeTraits::lock(current);
+        node_pointer p = alloc.lock(current);
         value_type& value = TNodeTraits::value(*p);
         // FIX: strong implications for leaving this unlocked,
         //      but in practice stronger implications for unlocking it.
@@ -237,6 +228,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
     typedef typename base_t::value_type  value_type;
     typedef typename base_t::node_pointer node_pointer;
     typedef typename base_t::node_handle_t node_handle_t;
+    typedef typename base_t::node_alloc_t node_alloc_t;
 
     /*
     ForwardIterator(const ForwardIterator& source) :
@@ -244,19 +236,19 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
     {
     } */
 
-    ForwardIterator(node_handle_t node) :
-            base_t(node)
+    ForwardIterator(node_handle_t node, const node_alloc_t& alloc) :
+            base_t(node, alloc)
     {
     }
 
 
     ForwardIterator& operator++()
     {
-        node_pointer c = traits_t::lock(this->current);
+        node_pointer c = base_t::alloc.lock(this->current);
 
         this->current = traits_t::get_next(*c);
 
-        traits_t::unlock(this->current);
+        base_t::alloc.unlock(this->current);
 
         return *this;
     }
@@ -288,7 +280,6 @@ public:
     typedef typename node_traits_t::allocator_t allocator_t;
 
 protected:
-    node_traits_t node_traits;
     typename node_traits_t::node alloc;
 
     typedef typename node_traits_t::node_pointer node_pointer;
@@ -296,79 +287,42 @@ protected:
 
     node_handle m_front;
 
-    // FIX: Consider *not* using this as it adds unecessary overhead to scenarios
-    // which don't do locking (oops)
-    // -OR- put lock_helper itself into allocator_traits or similar so that we only
-    // incur its overhead of locking is actually going on
-    // eventually that may be a kind of unique_ptr-like scenario
-    struct lock_helper
+    node_handle next(node_handle from)
     {
-        node_handle h;
-        node_pointer ptr;
+        node_pointer f = alloc.lock(from);
 
-        lock_helper(node_handle h) : h(h)
-        {
-            ptr = node_traits_t::lock(h);
-        }
+        node_handle n = node_traits_t::get_next(*f);
 
-        ~lock_helper()
-        {
-            node_traits_t::unlock(h);
-        }
+        alloc.unlock(from);
 
-        node_pointer& operator*() { return ptr; }
-    };
-
-    static node_pointer next(node_type& from)
-    {
-        return node_traits_t::get_next(from);
+        return n;
     }
 
 
-    static node_handle next(node_handle from)
+    void set_next(node_handle _node, node_handle next)
     {
-        lock_helper f(from);
-
-        return node_traits_t::get_next(*f.ptr);
-    }
-
-    /*
-    static void set_next(node_type& node, node_pointer next)
-    {
-        node_traits_t::set_next(node, next);
-    }*/
-
-    /*
-    static void set_next(node_type& node, node_handle next)
-    {
-        node_traits_t::set_next(node, next);
-    } */
-
-    static void set_next(node_handle _node, node_handle next)
-    {
-        node_pointer node = node_traits_t::lock(_node);
+        node_pointer node = alloc.lock(_node);
 
         node_traits_t::set_next(*node, next);
 
-        node_traits_t::unlock(_node);
+        alloc.unlock(_node);
     }
 
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
-        node_traits(allocator),
         alloc(allocator),
         m_front(node_traits_t::null_node()) {}
 
     reference front()
     {
-        node_pointer p = node_traits_t::lock(m_front);
+        node_pointer p = alloc.lock(m_front);
         value_type& front_value = node_traits_t::value(*p);
-        node_traits_t::unlock(m_front);
+        alloc.unlock(m_front);
 
         return front_value;
     }
 
-    bool empty() const { return m_front == NULLPTR; }
+    bool empty() const { return m_front == node_traits_t::null_node(); }
 
     void pop_front()
     {
@@ -390,9 +344,9 @@ public:
         m_front = node_pointing_to_value;
     }
 
-    iterator begin() { return iterator(m_front); }
-    const_iterator begin() const { return iterator(m_front); }
-    const_iterator end() const { return iterator(NULLPTR); }
+    iterator begin() { return iterator(m_front, alloc); }
+    const_iterator begin() const { return iterator(m_front, alloc); }
+    const_iterator end() const { return iterator(NULLPTR, alloc); }
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
@@ -403,7 +357,18 @@ public:
         set_next(node_to_insert_after, node_pointing_to_value);
         set_next(node_pointing_to_value, old_next_node);
 
-        return iterator(node_pointing_to_value);
+        return iterator(node_pointing_to_value, alloc);
+    }
+
+    iterator erase_after(const_iterator pos)
+    {
+        node_handle node_to_erase_after = pos.node();
+        node_handle node_to_erase = next(node_to_erase_after);
+        node_handle node_following_erased = next(node_to_erase);
+
+        set_next(node_to_erase_after, node_following_erased);
+
+        return iterator(node_following_erased, alloc);
     }
 };
 

@@ -60,16 +60,12 @@ struct estd::node_traits<test_node_handle>
     typedef test_node_handle* node_pointer;
     typedef void allocator_t;
 
-    static node_handle null_node() { return 0xFF; }
+    static CONSTEXPR node_handle null_node() { return 0xFF; }
 
     static node_handle get_next(const node_type& node) { return node.next_node(); }
     static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
 
-    static node_pointer lock(node_handle node) { return &handles[node]; }
-
-    static value_type& value(node_type &node) { return node; }
-
-    static void unlock(node_handle node) {}
+    static value_type& value(node_type& node) { return node; }
 
     struct node
     {
@@ -80,9 +76,13 @@ struct estd::node_traits<test_node_handle>
             handles[handle_count] = value;
             return handle_count++;
         }
-    };
 
-    node_traits(void* allocator) {}
+        // placeholders
+        // only useful when a) list is managing node memory allocations and
+        // b) when they are handle-based
+        node_pointer lock(node_handle node) { return &handles[node]; }
+        void unlock(node_handle node) {}
+    };
 };
 
 
@@ -177,5 +177,27 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.front().val == 7);
         REQUIRE((*++list.begin()).val == 10);
+    }
+    SECTION("Forward list erase_after")
+    {
+        estd::forward_list<test_node> list;
+        test_node nodes[3];
+
+        nodes[0].val = 0;
+        nodes[1].val = 1;
+        nodes[2].val = 2;
+
+        list.push_front(nodes[2]);
+        list.push_front(nodes[1]);
+        list.push_front(nodes[0]);
+
+        auto i = list.begin();
+
+        list.erase_after(i);
+
+        i = list.begin();
+
+        REQUIRE((*i++).val == 0);
+        REQUIRE((*i++).val == 2);
     }
 }
