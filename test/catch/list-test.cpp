@@ -4,12 +4,13 @@
 
 struct test_value
 {
-
+    int val;
 };
 
-struct test_node : public estd::experimental::forward_node_base
+struct test_node :
+        public estd::experimental::forward_node_base,
+        public test_value
 {
-    int val;
 };
 
 
@@ -50,6 +51,65 @@ struct test_node_handle2 : public test_node_handle
 int handle_count = 0;
 test_node_handle2 handles[5];
 
+class _allocator
+{
+public:
+    typedef void* value_type;
+    typedef void* pointer;
+    typedef const void* const_void_pointer;
+    typedef void* handle_type;
+
+    void* allocate(size_t size)
+    {
+        return malloc(size);
+    }
+
+    void deallocate(void* p, size_t size)
+    {
+        free(p);
+    }
+};
+
+
+template <>
+struct estd::node_traits<test_value>
+{
+    typedef test_value value_type;
+    typedef estd::experimental::forward_node_base node_type;
+    typedef const test_value& nv_reference;
+    typedef node_type* node_pointer;
+    typedef _allocator allocator_t;
+    typedef allocator_t::handle_type node_handle;
+
+    typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
+
+    static CONSTEXPR node_handle null_node() { return NULLPTR; }
+
+    static node_handle get_next(const node_type& node)
+    {
+        // NOTE: we assume that node_type represents a very specific type derived ultimately
+        // from something resembling forward_node_base, specifically in that
+        // a call to next() shall return a pointer to the next node_type*
+        return node.next();
+    }
+
+    static void set_next(node_type& node, node_handle set_to)
+    {
+        // FIX: this only works because _allocator handle is
+        // interchangeable with node_pointer
+        node_pointer next = reinterpret_cast<node_pointer>(set_to);
+        node.next(next);
+    }
+
+
+    static value_type& value(node_type& node)
+    {
+        // FIX: very kludgey
+        return (value_type&) ((node::node_t*) (&node))->value;
+        //return node;
+    }
+};
+
 template <>
 struct estd::node_traits<test_node_handle>
 {
@@ -66,6 +126,8 @@ struct estd::node_traits<test_node_handle>
     static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
 
     static value_type& value(node_type& node) { return node; }
+
+    //typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
 
     struct node
     {
@@ -199,5 +261,22 @@ TEST_CASE("linkedlist")
 
         REQUIRE((*i++).val == 0);
         REQUIRE((*i++).val == 2);
+    }
+    SECTION("Forward list: dynamic node allocation, tracking value refs")
+    {
+        estd::forward_list<test_value> list;
+        test_value val1;
+
+        val1.val = 3;
+
+        list.push_front(val1);
+
+        auto i = list.begin();
+
+        REQUIRE((*i).val == 3);
+
+        list.pop_front();
+
+        REQUIRE(list.empty());
     }
 }

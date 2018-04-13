@@ -87,6 +87,108 @@ struct node_traits
 };
 */
 
+
+template <class TNodePointer>
+struct dummy_node_alloc
+{
+    // pretends to allocate space for a node, when in fact no allocation
+    // is necessary for this type
+    template <typename TValue>
+    TNodePointer alloc(TValue& value) { return &value; }
+
+    void dealloc(TNodePointer node) {}
+
+    // placeholders
+    // only useful when a) list is managing node memory allocations and
+    // b) when they are handle-based
+    TNodePointer lock(TNodePointer node) { return node; }
+    void unlock(TNodePointer node) {}
+
+    dummy_node_alloc(void* allocator) {}
+};
+
+
+template <class TNode, class TAllocator>
+class smart_node_alloc
+{
+protected:
+    TAllocator& a;
+
+public:
+    typedef allocator_traits<TAllocator> traits_t;
+    typedef node_traits<TNode> node_traits_t;
+    typedef TNode node_type;
+    typedef node_type* node_pointer;
+    typedef typename traits_t::handle_type node_handle;
+
+    template <typename TValue>
+    node_handle alloc(TValue& value)
+    {
+        // FIX: Need to do something with value
+        return traits_t::allocate(a, sizeof(TNode));
+    }
+
+    void dealloc(node_handle h)
+    {
+        // FIX: Need to do something with value
+        traits_t::deallocate(a, h, sizeof(TNode));
+    }
+
+    node_pointer lock(node_handle node)
+    {
+        return reinterpret_cast<node_pointer>(traits_t::lock(a, node));
+    }
+
+    void unlock(node_handle node) { traits_t::unlock(a, node); }
+
+    smart_node_alloc(TAllocator* allocator) :
+        a(*allocator) {}
+};
+
+
+template <class TNode, class TValue, class TAllocator>
+class smart_inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
+{
+    typedef smart_node_alloc<TNode, TAllocator> base_t;
+    typedef node_traits<TNode, TAllocator> node_traits_t;
+    typedef typename base_t::traits_t traits_t;
+    typedef typename base_t::node_handle node_handle;
+    typedef typename base_t::node_pointer node_pointer;
+
+    struct Node : TNode
+    {
+        const TValue& value;
+
+        Node(const TValue& value) : value(value) {}
+    };
+
+public:
+    typedef Node node_t;
+
+    smart_inlineref_node_alloc(TAllocator* a) :
+        base_t(a) {}
+
+    node_handle alloc(const TValue& value)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(Node));
+
+        void* p = traits_t::lock(this->a, h);
+
+        new (p) Node(value);
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+
+
+    void dealloc(node_handle h)
+    {
+        traits_t::deallocate(this->a, h, sizeof(Node));
+    }
+};
+
+
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
 template<class TForwardNodeValue, class TAllocator>
@@ -132,22 +234,7 @@ struct node_traits
     // assembly if indeed
     // no instance variables present
     // eventually our formalized allocator might be able to displace this
-    struct node
-    {
-        // pretends to allocate space for a node, when in fact no allocation
-        // is necessary for this type
-        node_handle alloc(value_type& value) { return &value; }
-
-        void dealloc(node_handle node) {}
-
-        // placeholders
-        // only useful when a) list is managing node memory allocations and
-        // b) when they are handle-based
-        node_pointer lock(node_handle node) { return node; }
-        void unlock(node_handle node) {}
-
-        node(allocator_t* allocator) {}
-    };
+    typedef dummy_node_alloc<node_pointer> node;
 };
 
 
@@ -329,7 +416,11 @@ public:
 #ifdef DEBUG
         // undefined behavior if list is empty, but let's put some asserts in here
 #endif
+        node_handle old = m_front;
+
         m_front = next(m_front);
+
+        alloc.dealloc(old);
     }
 
     void push_front(nv_reference value)
@@ -372,6 +463,7 @@ public:
     }
 };
 
+#ifdef UNUSED
 // yanked directly in from util.embedded
 // like it, but I don't like how node_traits directly reflect and require a list_type
 namespace exp1 {
@@ -785,5 +877,5 @@ public:
     }
 };
 }
-
+#endif
 }
