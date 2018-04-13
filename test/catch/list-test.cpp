@@ -196,6 +196,11 @@ struct estd::node_traits<test_node_handle>
         node_pointer lock(node_handle node) { return &handles[node]; }
         void unlock(node_handle node) {}
     };
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <class TValue2, class TAllocator2>
+    using test_node_allocator_t = node_allocator_t;
+#endif
 };
 
 

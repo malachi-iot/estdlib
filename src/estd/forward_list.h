@@ -20,6 +20,9 @@ struct nothing_allocator
 
 template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
 
+// trait specifically for extracting value from a node
+template <class TNode, class TValue> struct node_value_traits_experimental;
+
 namespace experimental {
 // Make list and forward list conform to, but not necessarily depend on, these
 // signatures (C++ concepts would be nice here)
@@ -123,6 +126,8 @@ struct dummy_node_alloc
 };
 
 
+// TNode only represents the basic next/reverse tracking portion of the node,
+// not the ref or value managed within
 template <class TNode, class TAllocator>
 class smart_node_alloc
 {
@@ -137,19 +142,6 @@ public:
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
 
-    template <typename TValue>
-    node_handle alloc(TValue& value)
-    {
-        // FIX: Need to do something with value
-        return traits_t::allocate(a, sizeof(TNode));
-    }
-
-    void dealloc(node_handle h)
-    {
-        // FIX: Need to do something with value
-        traits_t::deallocate(a, h, sizeof(TNode));
-    }
-
     node_pointer lock(node_handle node)
     {
         return reinterpret_cast<node_pointer>(traits_t::lock(a, node));
@@ -159,6 +151,26 @@ public:
 
     smart_node_alloc(TAllocator* allocator) :
         a(*allocator) {}
+
+    template <class TValue>
+    struct RefNode : TNode
+    {
+        const TValue& value;
+
+        RefNode(const TValue& value) : value(value) {}
+    };
+
+    template <class TValue>
+    struct ValueNode : TNode
+    {
+        const TValue value;
+
+        ValueNode(const TValue& value) : value(value) {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+        ValueNode(TValue&& value) : value(value) {}
+#endif
+    };
 };
 
 
@@ -178,26 +190,19 @@ class smart_inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
     typedef typename base_t::node_handle node_handle;
     typedef typename base_t::node_pointer node_pointer;
 
-    struct Node : TNode
-    {
-        const TValue& value;
-
-        Node(const TValue& value) : value(value) {}
-    };
-
 public:
-    typedef Node node_t;
+    typedef typename base_t::template RefNode<TValue> node_t;
 
     smart_inlineref_node_alloc(TAllocator* a) :
         base_t(a) {}
 
     node_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(Node));
+        node_handle h = traits_t::allocate(this->a, sizeof(node_t));
 
         void* p = traits_t::lock(this->a, h);
 
-        new (p) Node(value);
+        new (p) node_t(value);
 
         traits_t::unlock(this->a, h);
 
@@ -207,7 +212,7 @@ public:
 
     void dealloc(node_handle h)
     {
-        traits_t::deallocate(this->a, h, sizeof(Node));
+        traits_t::deallocate(this->a, h, sizeof(node_t));
     }
 
     node_t* lock(node_handle node)
@@ -217,6 +222,15 @@ public:
 
 };
 
+/*
+template <class TNode, class TValue, class TAllocator>
+struct node_value_traits_experimental<
+        typename smart_node_alloc<TNode, TAllocator>::template RefNode<TValue>, TValue>
+{
+
+    //const TValue& value()
+};
+*/
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
@@ -263,6 +277,12 @@ struct node_traits_noalloc
     // no instance variables present
     // eventually our formalized allocator might be able to displace this
     typedef dummy_node_alloc<node_pointer> node_allocator_t;
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <class TValue2, class TAllocator2>
+    using test_node_allocator_t = dummy_node_alloc<node_pointer>;
+#endif
+
 };
 
 // default node_traits is the no-alloc variety (since we are embedded oriented)
@@ -409,6 +429,7 @@ public:
     typedef ForwardIterator<node_traits_t> iterator;
     typedef const iterator   const_iterator;
     typedef typename node_traits_t::node_allocator_t::allocator_t allocator_t;
+    typedef typename node_traits_t::template test_node_allocator_t<T, allocator_t > test_node_allocator_t;
 
 protected:
     typename node_traits_t::node_allocator_t alloc;
