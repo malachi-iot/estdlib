@@ -91,6 +91,8 @@ struct node_traits
 template <class TNodePointer>
 struct dummy_node_alloc
 {
+    typedef void allocator_t;
+
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
     template <typename TValue>
@@ -115,6 +117,7 @@ protected:
     TAllocator& a;
 
 public:
+    typedef TAllocator allocator_t;
     typedef allocator_traits<TAllocator> traits_t;
     typedef node_traits<TNode> node_traits_t;
     typedef TNode node_type;
@@ -186,15 +189,21 @@ public:
     {
         traits_t::deallocate(this->a, h, sizeof(Node));
     }
+
+    node_t* lock(node_handle node)
+    {
+        return reinterpret_cast<node_t*>(traits_t::lock(this->a, node));
+    }
+
 };
 
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
-template<class TForwardNodeValue, class TAllocator>
-struct node_traits
+template<class TNodeValue>
+struct node_traits_noalloc
 {
-    typedef TForwardNodeValue value_type;
+    typedef TNodeValue value_type;
     typedef value_type node_type;
     // represents EITHER const value ref or non-const node+value ref
     typedef value_type& nv_reference;
@@ -202,22 +211,21 @@ struct node_traits
     // TODO: eventually interact with allocator for this (in
     // other node_traits where allocation actually happens)
     typedef node_type* node_pointer;
-    typedef node_type* node_handle;
-    typedef TAllocator allocator_t;
+    typedef node_pointer node_handle;
 
-    static CONSTEXPR node_handle null_node() { return NULLPTR; }
+    static CONSTEXPR node_pointer null_node() { return NULLPTR; }
 
-    static node_handle get_next(const node_type& node)
+    static node_pointer get_next(const node_type& node)
     {
         // NOTE: we assume that node_type represents a very specific type derived ultimately
         // from something resembling forward_node_base, specifically in that
         // a call to next() shall return a pointer to the next node_type*
-        return reinterpret_cast<node_type*>(node.next());
+        return reinterpret_cast<node_pointer>(node.next());
     }
 
-    static node_handle get_prev(const node_type& node)
+    static node_pointer get_prev(const node_type& node)
     {
-        return reinterpret_cast<node_type*>(node.prev());
+        return reinterpret_cast<node_pointer>(node.prev());
     }
 
     static void set_next(node_type& node, node_handle set_to)
@@ -234,19 +242,12 @@ struct node_traits
     // assembly if indeed
     // no instance variables present
     // eventually our formalized allocator might be able to displace this
-    typedef dummy_node_alloc<node_pointer> node;
+    typedef dummy_node_alloc<node_pointer> node_allocator_t;
 };
 
-
-template<>
-struct node_traits<experimental::forward_node_base>
-{
-    typedef experimental::forward_node_base node_type;
-
-    static const node_type *get_next(const node_type &node) { return node.next(); }
-
-    static void set_next(node_type &node, node_type *set_to) { node.next(set_to); }
-};
+// default node_traits is the no-alloc variety (since we are embedded oriented)
+template <class TValue, class TAllocator>
+struct node_traits : public node_traits_noalloc<TValue> {};
 
 
 // adapted from util.embedded version
@@ -262,7 +263,7 @@ struct InputIterator
 protected:
     node_handle_t current;
 
-    typedef typename traits_t::node node_alloc_t;
+    typedef typename traits_t::node_allocator_t node_alloc_t;
 
     node_alloc_t alloc;
 
@@ -364,10 +365,10 @@ public:
     typedef typename node_traits_t::nv_reference nv_reference;
     typedef ForwardIterator<node_traits_t> iterator;
     typedef const iterator   const_iterator;
-    typedef typename node_traits_t::allocator_t allocator_t;
+    typedef typename node_traits_t::node_allocator_t::allocator_t allocator_t;
 
 protected:
-    typename node_traits_t::node alloc;
+    typename node_traits_t::node_allocator_t alloc;
 
     typedef typename node_traits_t::node_pointer node_pointer;
     typedef typename node_traits_t::node_handle node_handle;

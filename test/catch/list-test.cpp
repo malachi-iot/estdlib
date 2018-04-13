@@ -59,6 +59,8 @@ public:
     typedef const void* const_void_pointer;
     typedef void* handle_type;
 
+    static handle_type invalid() { return NULLPTR; }
+
     void* allocate(size_t size)
     {
         return malloc(size);
@@ -71,25 +73,31 @@ public:
 };
 
 
-template <>
-struct estd::node_traits<test_value>
+// helper traits class for typical, standard pointer based linked list behavior
+template <class TValue>
+struct node_traits_standard
 {
-    typedef test_value value_type;
-    typedef estd::experimental::forward_node_base node_type;
-    typedef const test_value& nv_reference;
+
+};
+
+// helper traits class for node traits organized like stock-standard std::forward_list
+// forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
+template <class TValue, class TAllocator>
+struct node_traits_inlineref : public node_traits_standard<TValue>
+{
+    typedef TValue value_type;
+    typedef TAllocator allocator_t;
+    typedef estd::smart_inlineref_node_alloc<estd::experimental::forward_node_base, value_type, allocator_t> node_allocator_t;
+    typedef typename node_allocator_t::node_t node_type;
+
+    typedef const value_type& nv_reference;
     typedef node_type* node_pointer;
-    typedef _allocator allocator_t;
-    typedef allocator_t::handle_type node_handle;
+    typedef typename allocator_t::handle_type node_handle;
 
-    typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
-
-    static CONSTEXPR node_handle null_node() { return NULLPTR; }
+    static CONSTEXPR node_handle null_node() { return allocator_t::invalid(); }
 
     static node_handle get_next(const node_type& node)
     {
-        // NOTE: we assume that node_type represents a very specific type derived ultimately
-        // from something resembling forward_node_base, specifically in that
-        // a call to next() shall return a pointer to the next node_type*
         return node.next();
     }
 
@@ -104,10 +112,17 @@ struct estd::node_traits<test_value>
 
     static value_type& value(node_type& node)
     {
-        // FIX: very kludgey
-        return (value_type&) ((node::node_t*) (&node))->value;
-        //return node;
+        // FIX: clean up this brute-force drop of const
+        return (value_type&) node.value;
     }
+};
+
+// this will indicate that all test_values used in forward_list
+// shall have dynamically allocated node portions
+template <>
+struct estd::node_traits<test_value> :
+        public node_traits_inlineref<test_value, _allocator>
+{
 };
 
 template <>
@@ -129,9 +144,11 @@ struct estd::node_traits<test_node_handle>
 
     //typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
 
-    struct node
+    struct node_allocator_t
     {
-        node(void*) {}
+        typedef void allocator_t;
+
+        node_allocator_t(void*) {}
 
         static node_handle alloc(value_type& value)
         {
@@ -274,6 +291,7 @@ TEST_CASE("linkedlist")
         auto i = list.begin();
 
         REQUIRE((*i).val == 3);
+        REQUIRE(!list.empty());
 
         list.pop_front();
 
