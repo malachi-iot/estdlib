@@ -5,7 +5,20 @@
 
 namespace estd {
 
-template <class TNode, class TAllocator = void> struct node_traits;
+struct nothing_allocator
+{
+    struct lock_counter
+    {
+        lock_counter& operator++() {return *this;}
+        lock_counter& operator--() {return *this;}
+        lock_counter& operator++(int) {return *this;}
+        lock_counter& operator--(int) {return *this;}
+
+        CONSTEXPR operator int() const { return 0; }
+    };
+};
+
+template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
 
 namespace experimental {
 // Make list and forward list conform to, but not necessarily depend on, these
@@ -91,7 +104,7 @@ struct node_traits
 template <class TNodePointer>
 struct dummy_node_alloc
 {
-    typedef void allocator_t;
+    typedef nothing_allocator allocator_t;
 
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
@@ -264,6 +277,11 @@ protected:
     node_handle_t current;
 
     typedef typename traits_t::node_allocator_t node_alloc_t;
+    typedef typename node_alloc_t::allocator_t allocator_t;
+
+    // used only when locking allocator is present, otherwise resolves
+    // to noops
+    typename allocator_t::lock_counter lock_counter;
 
     node_alloc_t alloc;
 
@@ -275,21 +293,29 @@ public:
 
     //~InputIterator() {}
 
+    // non standard handle-based mem helpers
+    value_type& lock()
+    {
+        node_pointer p = alloc.lock(current);
+        return TNodeTraits::value(*p);
+    }
+
+    void unlock()
+    {
+        alloc.unlock(current);
+    }
+
 
     // FIX: doing for(auto i : list) seems to do a *copy* operation
     // for(value_type& i : list) is required to get a reference.  Check to see if this is
     // proper behavior
     value_type& operator*()
     {
-        // FIX: likely lock will need to interact with allocator
-        node_pointer p = alloc.lock(current);
-        value_type& value = TNodeTraits::value(*p);
+        lock_counter++;
         // FIX: strong implications for leaving this unlocked,
         //      but in practice stronger implications for unlocking it.
         //      needs attention
-        //TNodeTraits::unlock(current);
-
-        return value;
+        return lock();
     }
 
     bool operator==(const InputIterator<TNodeTraits>& compare_to) const
@@ -332,6 +358,16 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 
     ForwardIterator& operator++()
     {
+        // special iterator behavior: unlocks any locks it itself
+        // put into place.  Useful for iteration evaluation
+        // operations using the lock() and unlock()
+        // do not apply increment lock_counter - track locking for those with external means
+        while(this->lock_counter > 0)
+        {
+            this->lock_counter--;
+            this->unlock();
+        }
+
         node_pointer c = base_t::alloc.lock(this->current);
 
         this->current = traits_t::get_next(*c);

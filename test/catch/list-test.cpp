@@ -54,6 +54,12 @@ test_node_handle2 handles[5];
 class _allocator
 {
 public:
+    // Would like to use this somehow to enable/disable auto-unlocking
+    // for iterators
+    static constexpr bool is_locking() { return false; }
+
+    typedef estd::nothing_allocator::lock_counter lock_counter;
+
     typedef void* value_type;
     typedef void* pointer;
     typedef const void* const_void_pointer;
@@ -133,7 +139,6 @@ struct estd::node_traits<test_node_handle>
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
     typedef test_node_handle* node_pointer;
-    typedef void allocator_t;
 
     static CONSTEXPR node_handle null_node() { return 0xFF; }
 
@@ -146,7 +151,7 @@ struct estd::node_traits<test_node_handle>
 
     struct node_allocator_t
     {
-        typedef void allocator_t;
+        typedef nothing_allocator allocator_t;
 
         node_allocator_t(void*) {}
 
