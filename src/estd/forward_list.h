@@ -432,7 +432,7 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
 
 
 
-template<class T, class TNodeTraits = node_traits<T>>
+template<class T, class TNodeTraits = node_traits_noalloc<T>>
 class forward_list
 {
 public:

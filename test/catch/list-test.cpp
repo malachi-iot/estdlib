@@ -155,23 +155,14 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
     }
 };
 
-// this will indicate that all test_values used in forward_list
-// shall have dynamically allocated node portions
-template <>
-struct estd::node_traits<test_value> :
-        public node_traits_inlineref<test_value, _allocator>
-{
-};
-
-template <>
-struct estd::node_traits<test_node_handle>
+struct explicit_handle_node_traits
 {
     typedef test_node_handle node_type;
     //typedef node_type value_type;
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
     typedef test_node_handle* node_pointer;
-    typedef nothing_allocator allocator_t;
+    typedef estd::nothing_allocator allocator_t;
 
     static CONSTEXPR node_handle null_node() { return 0xFF; }
 
@@ -188,7 +179,7 @@ struct estd::node_traits<test_node_handle>
     struct node_allocator_t
     {
         typedef test_node_handle& nv_ref_t;
-        typedef nothing_allocator allocator_t;
+        typedef estd::nothing_allocator allocator_t;
 
         node_allocator_t(void*) {}
 
@@ -289,7 +280,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list custom node")
     {
-        estd::forward_list<test_node_handle> list;
+        estd::forward_list<test_node_handle, explicit_handle_node_traits> list;
         test_node_handle item1;
 
         item1.val = 7;
@@ -329,7 +320,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list: dynamic node allocation, tracking value refs")
     {
-        estd::forward_list<test_value> list;
+        estd::forward_list<test_value, node_traits_inlineref<test_value, _allocator > > list;
         test_value val1;
 
         val1.val = 3;
