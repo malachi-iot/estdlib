@@ -25,7 +25,7 @@ TEST_CASE("array/vector tests")
         v.push_back(5);
 
         REQUIRE(v.size() == 1);
-        REQUIRE(v.capacity() == 10);
+        REQUIRE(v.capacity() > 5);
         REQUIRE(v[0].lock() == 5);
     }
 }

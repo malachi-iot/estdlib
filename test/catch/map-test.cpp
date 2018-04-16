@@ -3,6 +3,8 @@
 #include <estd/map.h>
 #include <estd/string.h>
 
+#include "mem.h"
+
 using namespace estd;
 
 TEST_CASE("map-test")
@@ -44,9 +46,8 @@ TEST_CASE("map-test")
     }
     SECTION("string tests")
     {
-        string test;
+        basic_string<char, char_traits<char>, _allocator> test;
 
-        test.lock();
-        test.unlock();
+        test += "hello";
     }
 }

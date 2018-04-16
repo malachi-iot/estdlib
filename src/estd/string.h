@@ -20,8 +20,10 @@ template<
     class CharT,
     class Traits = char_traits<CharT>,
     class Allocator = nothing_allocator
-> class basic_string
+> class basic_string :
+        public experimental::dynamic_array<CharT, Allocator>
 {
+    typedef experimental::dynamic_array<CharT, Allocator> base_t;
 public:
     typedef CharT value_type;
     typedef Traits traits_type;
@@ -31,16 +33,20 @@ public:
 
     allocator_type allocator;
 
-protected:
-    handle_type handle;
-
-public:
-    value_type* lock()
+    basic_string& append(const value_type* s)
     {
-        return (value_type*)allocator.lock(handle);
+        size_t len = strlen(s);
+
+        base_t::_append(s, len);
+
+        return *this;
     }
 
-    void unlock() { allocator.unlock(handle); }
+    template <class TString>
+    basic_string& operator += (TString s)
+    {
+        return append(s);
+    }
 };
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../platform.h"
+#include <memory.h>
 
 namespace estd {
 
@@ -75,10 +76,145 @@ struct nothing_allocator
     typedef void* handle_type;
     typedef void* pointer;
 
+    static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
     pointer lock(handle_type h) { return h; }
     void unlock(handle_type h) {}
+
+    // Don't want this here, but needed so far for ~dynamic_array, since
+    // current estd::string specifies nothing_allocator at present
+    void deallocate(handle_type h, int size) {}
+
+    // allocate also will always fail
+    handle_type allocate(int size) { return invalid(); }
+
+    // reallocate also will always fail
+    handle_type reallocate(handle_type h, int size) { return invalid(); }
 };
 
 
+
+namespace experimental {
+
+template <class TAllocator>
+class memory_range_base
+{
+public:
+    typedef TAllocator allocator_t;
+
+    typedef typename allocator_t::handle_type handle_type;
+    typedef typename allocator_t::pointer pointer;
+
+private:
+    //allocator_t
+    handle_type handle;
+
+public:
+    template <class T>
+    T& lock()
+    {
+        //pointer p =
+    }
+};
+
+
+// non standard base class for managing expanding/contracting arrays
+// accounts for lock/unlock behaviors
+template <class T, class TAllocator>
+class dynamic_array
+{
+public:
+    typedef T value_type;
+    typedef TAllocator allocator_type;
+
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::pointer pointer;
+    typedef std::size_t size_type;
+
+private:
+    // hopefully someday we can lean on allocator to tell us this
+    size_type m_capacity;
+
+    size_type m_size;
+
+protected:
+    allocator_type allocator;
+    handle_type handle;
+
+    T* lock()
+    {
+        return (T*) allocator.lock(handle);
+    }
+
+    void unlock() { allocator.unlock(handle); }
+
+public:
+    dynamic_array() :
+            handle(allocator_type::invalid()), m_size(0)
+    {}
+
+    ~dynamic_array()
+    {
+        if(handle != allocator_type::invalid())
+            allocator.deallocate(handle, m_capacity * sizeof(T));
+    }
+
+
+    size_type size() const { return m_size; }
+
+    size_type capacity() const
+    {
+        if(handle == allocator_type::invalid()) return 0;
+
+        return m_capacity;
+    }
+
+    void reserve( size_type new_cap )
+    {
+        if(handle == allocator_type::invalid())
+            handle = allocator.allocate(new_cap * sizeof(T));
+        else
+            handle = allocator.reallocate(handle, new_cap * sizeof(T));
+
+        m_capacity = new_cap;
+    }
+
+    void push_back(const T& value)
+    {
+        size_type cap = capacity();
+
+        if(size() == cap)
+        {
+            reserve(cap + ((32 + sizeof(T)) / sizeof(T)));
+        }
+
+        T* v = lock();
+
+        v[size()] = value;
+
+        unlock();
+
+        m_size++;
+    }
+
+protected:
+    void _append(const T* buf, size_t len)
+    {
+        if(size() + len >= capacity())
+        {
+            reserve(size() + len + (32 + sizeof(T)) / sizeof(T));
+        }
+
+        T* raw = lock();
+
+        memcpy(raw, buf, len);
+
+        unlock();
+
+        m_size += len;
+    }
+};
+
+}
 
 }

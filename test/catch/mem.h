@@ -62,29 +62,3 @@ public:
     }
 };
 
-namespace estd { namespace experimental {
-
-template <class TAllocator>
-class memory_range_base
-{
-public:
-    typedef TAllocator allocator_t;
-
-    typedef typename allocator_t::handle_type handle_type;
-    typedef typename allocator_t::pointer pointer;
-
-private:
-    //allocator_t
-    handle_type handle;
-
-public:
-    template <class T>
-    T& lock()
-    {
-        //pointer p =
-    }
-};
-
-}
-
-}
