@@ -84,56 +84,45 @@ public:
 };
 
 
-// helper traits class for typical, standard pointer based linked list behavior
-template <class TValue>
-struct node_traits_standard
-{
-
-};
-
 // helper traits class for node traits organized like stock-standard std::forward_list
 // forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
-template <class TValue, class TAllocator>
-struct node_traits_inlineref : public node_traits_standard<TValue>
+template <class TAllocator>
+struct node_traits_inlineref
 {
-    typedef TValue value_type;
     typedef TAllocator allocator_t;
-    typedef estd::smart_inlineref_node_alloc<estd::experimental::forward_node_base, value_type, allocator_t> node_allocator_t;
+    typedef estd::experimental::forward_node_base node_type_base;
 
     // test_node_allocator_t not presently used, trying to decouple node_traits from
     // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2, class TAllocator2 = TAllocator>
+    template <class TValue2>
     using test_node_allocator_t = estd::smart_inlineref_node_alloc<
-        estd::experimental::forward_node_base,
+        node_type_base,
         TValue2,
-        TAllocator2>;
+        TAllocator>;
 #else
-    template <class TValue2, class TAllocator2>
+    template <class TValue2>
     struct test_node_allocator_t :
             estd::smart_inlineref_node_alloc<
-                estd::experimental::forward_node_base, TValue2, TAllocator2>
+                node_type_base, TValue2, TAllocator>
     {
-        typedef estd::smart_inlineref_node_alloc<estd::experimental::forward_node_base, TValue2, TAllocator2> base_t;
+        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
 
-        test_node_allocator_t(TAllocator2* allocator) : base_t(allocator) {}
+        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
     };
 #endif
 
-    typedef typename node_allocator_t::node_t node_type;
-
-    typedef const value_type& nv_reference;
-    typedef node_type* node_pointer;
+    typedef node_type_base* node_pointer;
     typedef typename allocator_t::handle_type node_handle;
 
     static CONSTEXPR node_handle null_node() { return allocator_t::invalid(); }
 
-    static node_handle get_next(const node_type& node)
+    static node_handle get_next(const node_type_base& node)
     {
         return node.next();
     }
 
-    static void set_next(node_type& node, node_handle set_to)
+    static void set_next(node_type_base& node, node_handle set_to)
     {
         // FIX: this only works because _allocator handle is
         // interchangeable with node_pointer
@@ -141,45 +130,29 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
         node.next(next);
     }
 
+    // test node allocator base type, use this to extract node_type
+    // for value_exp so that we can fully decouple from value_type
+    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
+
     template <class TValue2>
-    static TValue2& value_exp(node_type& node)
+    static TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
+    //static TValue2& value_exp(node_type& node)
     {
         return (TValue2&) node.value;
-    }
-
-    static value_type& value(node_type& node)
-    {
-        // FIX: clean up this brute-force drop of const.  forward_list standard
-        // interactions take a const value_type&
-        return (value_type&) node.value;
     }
 };
 
 struct explicit_handle_node_traits
 {
-    typedef test_node_handle node_type;
-    //typedef node_type value_type;
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
-    typedef test_node_handle* node_pointer;
     typedef estd::nothing_allocator allocator_t;
-
-    static CONSTEXPR node_handle null_node() { return 0xFF; }
-
-    static node_handle get_next(const node_type& node) { return node.next_node(); }
-    static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
-
-    template <class TValue>
-    static TValue& value_exp(node_type& node) { return node; }
-
-    //static value_type& value(node_type& node) { return node; }
-
-    //typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
 
     struct node_allocator_t
     {
+        typedef test_node_handle node_type;
+        typedef node_type* node_pointer;
         typedef test_node_handle& nv_ref_t;
-        typedef estd::nothing_allocator allocator_t;
 
         node_allocator_t(void*) {}
 
@@ -197,8 +170,19 @@ struct explicit_handle_node_traits
         void unlock(node_handle node) {}
     };
 
+    typedef node_allocator_t::node_type node_type;
+
+    static CONSTEXPR node_handle null_node() { return 0xFF; }
+
+    static node_handle get_next(const node_type& node) { return node.next_node(); }
+    static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
+
+    template <class TValue>
+    static TValue& value_exp(node_type& node) { return node; }
+
+
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2, class TAllocator2 = void>
+    template <class TValue2>
     using test_node_allocator_t = node_allocator_t;
 #endif
 };
@@ -320,7 +304,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list: dynamic node allocation, tracking value refs")
     {
-        estd::forward_list<test_value, node_traits_inlineref<test_value, _allocator > > list;
+        estd::forward_list<test_value, node_traits_inlineref<_allocator > > list;
         test_value val1;
 
         val1.val = 3;
