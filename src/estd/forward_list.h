@@ -104,23 +104,28 @@ struct node_traits
 */
 
 
-template <class TNodePointer>
+// when linked-list node and tracked value are exactly
+// the same
+template <class TNode>
 struct dummy_node_alloc
 {
+    typedef TNode node_type;
+    typedef node_type* node_pointer;
+    typedef node_type& nv_ref_t;
     typedef nothing_allocator allocator_t;
 
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
     template <typename TValue>
-    TNodePointer alloc(TValue& value) { return &value; }
+    node_pointer alloc(TValue& value) { return &value; }
 
-    void dealloc(TNodePointer node) {}
+    void dealloc(node_pointer node) {}
 
     // placeholders
     // only useful when a) list is managing node memory allocations and
     // b) when they are handle-based
-    TNodePointer lock(TNodePointer node) { return node; }
-    void unlock(TNodePointer node) {}
+    node_pointer lock(node_pointer node) { return node; }
+    void unlock(node_pointer node) {}
 
     dummy_node_alloc(void* allocator) {}
 };
@@ -191,6 +196,7 @@ class smart_inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
     typedef typename base_t::node_pointer node_pointer;
 
 public:
+    typedef const TValue& nv_ref_t;
     typedef typename base_t::template RefNode<TValue> node_t;
 
     smart_inlineref_node_alloc(TAllocator* a) :
@@ -234,18 +240,20 @@ struct node_value_traits_experimental<
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
-template<class TNodeValue>
+template<class TNode>
 struct node_traits_noalloc
 {
-    typedef TNodeValue value_type;
-    typedef value_type node_type;
+    //typedef TNodeValue value_type;
+    typedef TNode node_type;
     // represents EITHER const value ref or non-const node+value ref
-    typedef value_type& nv_reference;
+    //typedef value_type& nv_reference;
 
     // TODO: eventually interact with allocator for this (in
     // other node_traits where allocation actually happens)
     typedef node_type* node_pointer;
     typedef node_pointer node_handle;
+
+    typedef void allocator_t;
 
     static CONSTEXPR node_pointer null_node() { return NULLPTR; }
 
@@ -267,8 +275,11 @@ struct node_traits_noalloc
         node.next(set_to);
     }
 
+    template <class TValue2>
+    static TValue2& value_exp(node_type& node) { return node; }
+
     // replacement for old allocator get associated value
-    static value_type& value(node_type& node) { return node; }
+    //static value_type& value(node_type& node) { return node; }
 
     // instance portion which deals with pushing and pulling things in
     // and out of handle & allocations.  Use as an instance even if
@@ -276,11 +287,11 @@ struct node_traits_noalloc
     // assembly if indeed
     // no instance variables present
     // eventually our formalized allocator might be able to displace this
-    typedef dummy_node_alloc<node_pointer> node_allocator_t;
+    typedef dummy_node_alloc<node_type> node_allocator_t;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue2, class TAllocator2 = void>
-    using test_node_allocator_t = dummy_node_alloc<node_pointer>;
+    using test_node_allocator_t = dummy_node_alloc<node_type>;
 #endif
 
 };
@@ -291,14 +302,16 @@ struct node_traits : public node_traits_noalloc<TValue> {};
 
 
 // adapted from util.embedded version
-template <class TNodeTraits>
+template <class TValue, class TNodeTraits>
 struct InputIterator
 {
     typedef TNodeTraits traits_t;
-    typedef typename TNodeTraits::value_type value_type;
+    typedef TValue value_type;
     typedef typename TNodeTraits::node_type node_type;
     typedef typename TNodeTraits::node_handle node_handle_t;
     typedef typename TNodeTraits::node_pointer node_pointer;
+    typedef InputIterator<TValue, TNodeTraits> iterator;
+    typedef const iterator const_iterator;
 
 protected:
     node_handle_t current;
@@ -324,7 +337,8 @@ public:
     value_type& lock()
     {
         node_pointer p = alloc.lock(current);
-        return TNodeTraits::value(*p);
+        return traits_t::template value_exp<value_type>(*p);
+        //return traits_t::value(*p);
     }
 
     void unlock()
@@ -345,12 +359,12 @@ public:
         return lock();
     }
 
-    bool operator==(const InputIterator<TNodeTraits>& compare_to) const
+    bool operator==(const_iterator compare_to) const
     {
         return current == compare_to.current;
     }
 
-    bool operator!=(const InputIterator<TNodeTraits>& compare_to) const
+    bool operator!=(const_iterator compare_to) const
     {
         return current != compare_to.current;
     }
@@ -360,16 +374,17 @@ public:
     node_handle_t node() const { return current; }
 };
 
-template <class TNodeTraits>
-struct ForwardIterator : public InputIterator<TNodeTraits>
+template <class TValue, class TNodeTraits>
+struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
 {
     typedef TNodeTraits traits_t;
-    typedef InputIterator<TNodeTraits> base_t;
+    typedef InputIterator<TValue, TNodeTraits> base_t;
     typedef typename base_t::node_type   node_type;
     typedef typename base_t::value_type  value_type;
     typedef typename base_t::node_pointer node_pointer;
     typedef typename base_t::node_handle_t node_handle_t;
     typedef typename base_t::node_alloc_t node_alloc_t;
+    typedef ForwardIterator<TValue, TNodeTraits> iterator;
 
     /*
     ForwardIterator(const ForwardIterator& source) :
@@ -417,12 +432,7 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 
 
 
-template<class T, class TNodeTraits = node_traits<T>,
-         class TAllocator =
-                //void
-                typename TNodeTraits::
-                    template test_node_allocator_t<T>::allocator_t
-         >
+template<class T, class TNodeTraits = node_traits<T>>
 class forward_list
 {
 public:
@@ -430,11 +440,15 @@ public:
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
     typedef typename node_traits_t::node_type node_type;
-    typedef typename node_traits_t::nv_reference nv_reference;
-    typedef ForwardIterator<node_traits_t> iterator;
+    //typedef typename node_traits_t::nv_reference nv_reference;
+    typedef ForwardIterator<value_type, node_traits_t> iterator;
     typedef const iterator   const_iterator;
-    typedef typename node_traits_t::node_allocator_t::allocator_t allocator_t;
+    typedef typename node_traits_t::allocator_t allocator_t;
+    //typedef typename node_traits_t::node_allocator_t::allocator_t allocator_t;
     typedef typename node_traits_t::template test_node_allocator_t<T, allocator_t > test_node_allocator_t;
+    // to eventually replace nv_reference
+    typedef typename test_node_allocator_t::nv_ref_t nv_ref_t;
+    typedef nv_ref_t nv_reference;
 
 protected:
     typename node_traits_t::node_allocator_t alloc;
@@ -473,7 +487,8 @@ public:
     reference front()
     {
         node_pointer p = alloc.lock(m_front);
-        value_type& front_value = node_traits_t::value(*p);
+        value_type& front_value = node_traits_t::template value_exp<value_type>(*p);
+        //value_type& front_value = node_traits_t::value(*p);
         alloc.unlock(m_front);
 
         return front_value;

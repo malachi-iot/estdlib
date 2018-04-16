@@ -141,13 +141,11 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
         node.next(next);
     }
 
-    /*
-     * More attempts to decouple node_traits from value_type
     template <class TValue2>
-    static TValue2& value(node_type& node)
+    static TValue2& value_exp(node_type& node)
     {
         return (TValue2&) node.value;
-    } */
+    }
 
     static value_type& value(node_type& node)
     {
@@ -169,27 +167,33 @@ template <>
 struct estd::node_traits<test_node_handle>
 {
     typedef test_node_handle node_type;
-    typedef node_type value_type;
+    //typedef node_type value_type;
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
     typedef test_node_handle* node_pointer;
+    typedef nothing_allocator allocator_t;
 
     static CONSTEXPR node_handle null_node() { return 0xFF; }
 
     static node_handle get_next(const node_type& node) { return node.next_node(); }
     static void set_next(node_type& node, node_handle set_to) { node.next_node(set_to); }
 
-    static value_type& value(node_type& node) { return node; }
+    template <class TValue>
+    static TValue& value_exp(node_type& node) { return node; }
+
+    //static value_type& value(node_type& node) { return node; }
 
     //typedef smart_inlineref_node_alloc<node_type, value_type, allocator_t> node;
 
     struct node_allocator_t
     {
+        typedef test_node_handle& nv_ref_t;
         typedef nothing_allocator allocator_t;
 
         node_allocator_t(void*) {}
 
-        static node_handle alloc(value_type& value)
+        template <class TValue>
+        static node_handle alloc(TValue& value)
         {
             handles[handle_count] = value;
             return handle_count++;
