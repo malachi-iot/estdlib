@@ -24,14 +24,26 @@ template<
         public experimental::dynamic_array<CharT, Allocator>
 {
     typedef experimental::dynamic_array<CharT, Allocator> base_t;
+
 public:
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef Allocator allocator_type;
 
+    typedef typename base_t::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
 
     allocator_type allocator;
+
+    size_type length() const { return base_t::size(); }
+
+    basic_string& append(size_type count, value_type c)
+    {
+        while(count--) base_t::push_back(c);
+
+        return *this;
+    }
+
 
     basic_string& append(const value_type* s)
     {
@@ -42,10 +54,23 @@ public:
         return *this;
     }
 
+
     template <class TString>
     basic_string& operator += (TString s)
     {
         return append(s);
+    }
+
+
+    basic_string& operator += (value_type c)
+    {
+        push_back(c);
+    }
+
+
+    const value_type front() const
+    {
+        //value_type* raw = lock();
     }
 };
 

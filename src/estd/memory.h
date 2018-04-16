@@ -139,14 +139,20 @@ private:
 
 protected:
     allocator_type allocator;
+    typename allocator_type::lock_counter lock_counter;
     handle_type handle;
 
     T* lock()
     {
+        lock_counter++;
         return (T*) allocator.lock(handle);
     }
 
-    void unlock() { allocator.unlock(handle); }
+    void unlock()
+    {
+        lock_counter--;
+        allocator.unlock(handle);
+    }
 
 public:
     dynamic_array() :

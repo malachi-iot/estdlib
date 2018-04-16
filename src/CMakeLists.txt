@@ -8,6 +8,7 @@ set(SOURCE_FILES
        estd/array.h
         estd/forward_list.h
        estd/functional.h
+        estd/initializer_list.h
        estd/iterator.h
        estd/map.h
        estd/queue.h
