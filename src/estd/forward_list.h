@@ -304,10 +304,8 @@ struct InputIterator
 {
     typedef TNodeTraits traits_t;
     typedef TValue value_type;
-    typedef typename traits_t::template test_node_allocator_t<value_type> test_node_allocator_t;
-    //typedef typename TNodeTraits::node_type node_type;
+    typedef typename traits_t::template test_node_allocator_t<value_type> node_allocator_t;
     typedef typename TNodeTraits::node_handle node_handle_t;
-    //typedef typename TNodeTraits::node_pointer node_pointer;
     typedef InputIterator<TValue, TNodeTraits> iterator;
     typedef const iterator const_iterator;
 
@@ -315,31 +313,32 @@ protected:
     node_handle_t current;
 
     //typedef typename traits_t::node_allocator_t node_alloc_t;
-    typedef typename test_node_allocator_t::node_type node_type;
-    typedef typename test_node_allocator_t::node_pointer node_pointer;
+    typedef typename node_allocator_t::node_type node_type;
+    typedef typename node_allocator_t::node_pointer node_pointer;
     typedef typename traits_t::allocator_t allocator_t;
 
     // used only when locking allocator is present, otherwise resolves
     // to noops
     typename allocator_t::lock_counter lock_counter;
 
-    test_node_allocator_t alloc;
+    node_allocator_t alloc;
 
 public:
-    InputIterator(node_handle_t node, const test_node_allocator_t& alloc) :
+    InputIterator(node_handle_t node, const node_allocator_t& alloc) :
         current(node),
         alloc(alloc)
     {}
 
     //~InputIterator() {}
 
-    // non standard handle-based mem helpers
-    value_type& lock()
+    static value_type& lock(node_allocator_t& alloc, node_handle_t& handle_to_lock)
     {
-        node_pointer p = alloc.lock(current);
+        node_pointer p = alloc.lock(handle_to_lock);
         return traits_t::template value_exp<value_type>(*p);
-        //return traits_t::value(*p);
     }
+
+    // non standard handle-based mem helpers
+    value_type& lock() { return lock(alloc, current); }
 
     void unlock()
     {
@@ -383,8 +382,7 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
     typedef typename base_t::value_type  value_type;
     typedef typename base_t::node_pointer node_pointer;
     typedef typename base_t::node_handle_t node_handle_t;
-    //typedef typename base_t::node_alloc_t node_alloc_t;
-    typedef typename base_t::test_node_allocator_t node_alloc_t;
+    typedef typename base_t::node_allocator_t node_alloc_t;
     typedef ForwardIterator<TValue, TNodeTraits> iterator;
 
     /*
@@ -485,9 +483,8 @@ public:
 
     reference front()
     {
-        node_pointer p = alloc.lock(m_front);
-        value_type& front_value = node_traits_t::template value_exp<value_type>(*p);
-        //value_type& front_value = node_traits_t::value(*p);
+        reference front_value = iterator::lock(alloc, m_front);
+
         alloc.unlock(m_front);
 
         return front_value;
