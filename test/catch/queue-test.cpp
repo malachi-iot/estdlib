@@ -22,6 +22,42 @@ TEST_CASE("queue-test")
             i++;
         }
     }
+    SECTION("Array layer2")
+    {
+        int buf[5];
+        layer2::array<int, 5> array1(buf);
+
+        int i = 0;
+
+        for(; i < 5; i++)
+            array1[i] = i;
+
+        i = 0;
+
+        for(auto i2 : array1)
+        {
+            REQUIRE(i2 == i);
+            i++;
+        }
+    }
+    SECTION("Array layer3")
+    {
+        int buf[5];
+        layer3::array<int> array1(buf);
+
+        int i = 0;
+
+        for(; i < 5; i++)
+            array1[i] = i;
+
+        i = 0;
+
+        for(auto i2 : array1)
+        {
+            REQUIRE(i2 == i);
+            i++;
+        }
+    }
     SECTION("Basic layer1 queue")
     {
         queue<int, layer1::deque<int, 4 > > queue;
