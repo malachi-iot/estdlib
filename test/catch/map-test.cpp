@@ -42,4 +42,11 @@ TEST_CASE("map-test")
         REQUIRE(result != NULLPTR);
         REQUIRE(*result == 79);
     }
+    SECTION("string tests")
+    {
+        string test;
+
+        test.lock();
+        test.unlock();
+    }
 }

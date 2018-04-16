@@ -71,6 +71,12 @@ struct nothing_allocator
 
         CONSTEXPR operator int() const { return 0; }
     };
+
+    typedef void* handle_type;
+    typedef void* pointer;
+
+    pointer lock(handle_type h) { return h; }
+    void unlock(handle_type h) {}
 };
 
 

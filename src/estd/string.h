@@ -1,5 +1,6 @@
 #pragma once
 
+#include "memory.h"
 
 namespace estd {
 
@@ -18,10 +19,28 @@ template<> struct char_traits<char>
 template<
     class CharT,
     class Traits = char_traits<CharT>,
-    class Allocator = std::allocator<CharT>
+    class Allocator = nothing_allocator
 > class basic_string
 {
+public:
+    typedef CharT value_type;
+    typedef Traits traits_type;
+    typedef Allocator allocator_type;
 
+    typedef typename allocator_type::handle_type handle_type;
+
+    allocator_type allocator;
+
+protected:
+    handle_type handle;
+
+public:
+    value_type* lock()
+    {
+        return (value_type*)allocator.lock(handle);
+    }
+
+    void unlock() { allocator.unlock(handle); }
 };
 
 
