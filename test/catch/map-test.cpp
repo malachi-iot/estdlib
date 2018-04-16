@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include <estd/map.h>
+#include <estd/string.h>
 
 using namespace estd;
 
@@ -23,5 +24,22 @@ TEST_CASE("map-test")
         const int* result = map[3];
 
         REQUIRE(result == NULLPTR);
+    }
+    SECTION("layer 3 map")
+    {
+        layer3::map<int, int>::value_type buf[] =
+        {
+            { 1, 77 },
+            { 2, 78 },
+            { 3, 79 },
+            { 4, 80 }
+        };
+
+        layer3::map<int, int> map(buf);
+
+        const int* result = map[3];
+
+        REQUIRE(result != NULLPTR);
+        REQUIRE(*result == 79);
     }
 }

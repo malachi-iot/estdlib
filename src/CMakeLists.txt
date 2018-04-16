@@ -11,6 +11,7 @@ set(SOURCE_FILES
        estd/iterator.h
        estd/map.h
        estd/queue.h
+        estd/string.h
        estd/utility.h
         estd/vector.h
        )
