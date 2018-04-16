@@ -18,6 +18,8 @@ public:
     typedef void* handle_type;
     typedef void* handle_offset_type;
 
+    // FIX:  not convinced I want gcroot to be directly associated with
+    // handle_offset_type
     template <class T>
     class gcroot
     {
