@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/forward_list.h"
+#include "mem.h"
 
 struct test_value
 {
@@ -55,33 +56,6 @@ struct test_node_handle2 : public test_node_handle
 
 int handle_count = 0;
 test_node_handle2 handles[5];
-
-class _allocator
-{
-public:
-    // Would like to use this somehow to enable/disable auto-unlocking
-    // for iterators
-    static constexpr bool is_locking() { return false; }
-
-    typedef estd::nothing_allocator::lock_counter lock_counter;
-
-    typedef void* value_type;
-    typedef void* pointer;
-    typedef const void* const_void_pointer;
-    typedef void* handle_type;
-
-    static handle_type invalid() { return NULLPTR; }
-
-    void* allocate(size_t size)
-    {
-        return malloc(size);
-    }
-
-    void deallocate(void* p, size_t size)
-    {
-        free(p);
-    }
-};
 
 
 // helper traits class for node traits organized like stock-standard std::forward_list

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../platform.h"
+
 namespace estd {
 
 #ifdef UNUSED
@@ -55,6 +57,22 @@ struct allocator_traits
 
 template <class TPtr> struct pointer_traits;
 template <class T> struct pointer_traits<T*>;
+
+
+// Non standard
+struct nothing_allocator
+{
+    struct lock_counter
+    {
+        lock_counter& operator++() {return *this;}
+        lock_counter& operator--() {return *this;}
+        lock_counter& operator++(int) {return *this;}
+        lock_counter& operator--(int) {return *this;}
+
+        CONSTEXPR operator int() const { return 0; }
+    };
+};
+
 
 
 }

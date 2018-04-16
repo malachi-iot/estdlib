@@ -12,6 +12,7 @@ set(SOURCE_FILES
        estd/map.h
        estd/queue.h
        estd/utility.h
+        estd/vector.h
        )
 
 add_library(estdlib_lib ${SOURCE_FILES})

@@ -11,6 +11,7 @@ add_subdirectory(${TARGET_PROJ_DIR} CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 include_directories(${TARGET_PROJ_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
+    array-test.cpp
     map-test.cpp
     list-test.cpp
     queue-test.cpp

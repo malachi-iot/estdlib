@@ -5,19 +5,6 @@
 
 namespace estd {
 
-struct nothing_allocator
-{
-    struct lock_counter
-    {
-        lock_counter& operator++() {return *this;}
-        lock_counter& operator--() {return *this;}
-        lock_counter& operator++(int) {return *this;}
-        lock_counter& operator--(int) {return *this;}
-
-        CONSTEXPR operator int() const { return 0; }
-    };
-};
-
 template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
 
 // trait specifically for extracting value from a node
