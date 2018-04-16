@@ -279,7 +279,7 @@ struct node_traits_noalloc
     typedef dummy_node_alloc<node_pointer> node_allocator_t;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2, class TAllocator2>
+    template <class TValue2, class TAllocator2 = void>
     using test_node_allocator_t = dummy_node_alloc<node_pointer>;
 #endif
 
@@ -417,7 +417,12 @@ struct ForwardIterator : public InputIterator<TNodeTraits>
 
 
 
-template<class T, class TNodeTraits = node_traits<T>>
+template<class T, class TNodeTraits = node_traits<T>,
+         class TAllocator =
+                //void
+                typename TNodeTraits::
+                    template test_node_allocator_t<T>::allocator_t
+         >
 class forward_list
 {
 public:

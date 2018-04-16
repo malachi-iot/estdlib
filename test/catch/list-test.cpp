@@ -14,16 +14,21 @@ struct test_node :
 };
 
 
-struct test_node_handle
+struct test_node_handle_base
 {
     uint8_t m_next;
 
     uint8_t next_node() const { return m_next; }
     void next_node(uint8_t dummy) { m_next = dummy; }
 
+    test_node_handle_base() : m_next(0xFF) {}
+};
+
+struct test_node_handle : public test_node_handle_base
+{
     int val;
 
-    test_node_handle() : m_next(0xFF) {}
+    test_node_handle() {}
 
     test_node_handle(const test_node_handle& copy_from)
     {
@@ -98,7 +103,7 @@ struct node_traits_inlineref : public node_traits_standard<TValue>
     // test_node_allocator_t not presently used, trying to decouple node_traits from
     // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2, class TAllocator2>
+    template <class TValue2, class TAllocator2 = TAllocator>
     using test_node_allocator_t = estd::smart_inlineref_node_alloc<
         estd::experimental::forward_node_base,
         TValue2,
@@ -198,7 +203,7 @@ struct estd::node_traits<test_node_handle>
     };
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2, class TAllocator2>
+    template <class TValue2, class TAllocator2 = void>
     using test_node_allocator_t = node_allocator_t;
 #endif
 };
