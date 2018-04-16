@@ -7,6 +7,12 @@ namespace estd {
 template<
     class T1,
     class T2
-> struct pair;
+> struct pair
+{
+    T1 first;
+    T2 second;
+
+    //pair(T1& first, T2& second) : first(first), second(second) {}
+};
 
 }
