@@ -315,6 +315,7 @@ protected:
     //typedef typename traits_t::node_allocator_t node_alloc_t;
     typedef typename node_allocator_t::node_type node_type;
     typedef typename node_allocator_t::node_pointer node_pointer;
+    typedef typename node_allocator_t::nv_ref_t nv_reference;
     typedef typename traits_t::allocator_t allocator_t;
 
     // used only when locking allocator is present, otherwise resolves
@@ -331,14 +332,14 @@ public:
 
     //~InputIterator() {}
 
-    static value_type& lock(node_allocator_t& alloc, node_handle_t& handle_to_lock)
+    static nv_reference lock(node_allocator_t& alloc, node_handle_t& handle_to_lock)
     {
         node_pointer p = alloc.lock(handle_to_lock);
         return traits_t::template value_exp<value_type>(*p);
     }
 
     // non standard handle-based mem helpers
-    value_type& lock() { return lock(alloc, current); }
+    nv_reference lock() { return lock(alloc, current); }
 
     void unlock()
     {
@@ -349,7 +350,7 @@ public:
     // FIX: doing for(auto i : list) seems to do a *copy* operation
     // for(value_type& i : list) is required to get a reference.  Check to see if this is
     // proper behavior
-    value_type& operator*()
+    nv_reference operator*()
     {
         lock_counter++;
         // FIX: strong implications for leaving this unlocked,

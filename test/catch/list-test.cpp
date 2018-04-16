@@ -135,10 +135,9 @@ struct node_traits_inlineref
     typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
 
     template <class TValue2>
-    static TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
-    //static TValue2& value_exp(node_type& node)
+    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
     {
-        return (TValue2&) node.value;
+        return node.value;
     }
 };
 
