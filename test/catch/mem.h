@@ -12,6 +12,16 @@ public:
 
     typedef estd::nothing_allocator::lock_counter lock_counter;
 
+    // holds the data (if necessary) to reveal the size of an allocation
+    // some allocators innately have this, some don't.  near as I can tell,
+    // standard malloc does not
+    // As noted here https://stackoverflow.com/questions/1281686/determine-size-of-dynamically-allocated-memory-in-c
+    // C doesn't provide a standard way to track this
+    struct allocated_size_helper
+    {
+        size_t allocated_size;
+    };
+
     typedef void* value_type;
     typedef void* pointer;
     typedef const void* const_void_pointer;
@@ -59,6 +69,11 @@ public:
     static handle_offset_type offset(handle_type h, ptrdiff_t size)
     {
         return (uint8_t*)h + size;
+    }
+
+    size_t allocated_size(handle_type h, const allocated_size_helper& ash)
+    {
+        return ash.allocated_size;
     }
 };
 

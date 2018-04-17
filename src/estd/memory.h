@@ -81,6 +81,8 @@ struct nothing_allocator
         CONSTEXPR operator int() const { return 0; }
     };
 
+    struct allocated_size_helper;
+
     typedef void* handle_type;
     typedef void* pointer;
 
@@ -100,6 +102,12 @@ struct nothing_allocator
     handle_type reallocate(handle_type h, int size) { return invalid(); }
 
     size_t max_size() const { return 0; }
+
+    // return size used by handle, with help from size helper
+    size_t allocated_size(handle_type h, const allocated_size_helper& ash)
+    {
+        return 0;
+    }
 };
 
 
@@ -139,11 +147,14 @@ public:
 
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::pointer pointer;
+    typedef typename allocator_type::allocated_size_helper ash;
     typedef std::size_t size_type;
 
 private:
     // hopefully someday we can lean on allocator to tell us this
     size_type m_capacity;
+
+    ash m_capacity_exp;
 
     size_type m_size;
 
