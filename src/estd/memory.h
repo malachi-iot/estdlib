@@ -53,6 +53,14 @@ struct allocator_traits
 
 
     static void unlock(allocator_type& a, handle_type h) {}
+
+    static size_type max_size(const allocator_type& a)
+    {
+        // note that a.max_size is no longer required (though spec
+        // strongly implies it's optionally permitted) in C++17, though
+        // allocator_traits::max_size is not
+        return a.max_size();
+    }
 };
 
 
@@ -90,6 +98,8 @@ struct nothing_allocator
 
     // reallocate also will always fail
     handle_type reallocate(handle_type h, int size) { return invalid(); }
+
+    size_t max_size() const { return 0; }
 };
 
 
@@ -219,6 +229,18 @@ protected:
 
         m_size += len;
     }
+};
+
+// definitely experimental.  perhaps we can stuff this into would-be dynamic allocated
+// things to make them into fixed-allocated entities
+
+template <size_t size>
+class fixed_allocator
+{
+    uint8_t buffer[size];
+
+public:
+    
 };
 
 }
