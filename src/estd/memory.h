@@ -240,7 +240,7 @@ class fixed_allocator
     uint8_t buffer[size];
 
 public:
-    
+
 };
 
 }

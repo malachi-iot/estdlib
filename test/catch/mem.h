@@ -21,12 +21,12 @@ public:
     // FIX:  not convinced I want gcroot to be directly associated with
     // handle_offset_type
     template <class T>
-    class gcroot
+    class handle_with_offset
     {
         handle_offset_type loc;
 
     public:
-        gcroot(handle_offset_type loc) : loc(loc) {}
+        handle_with_offset(handle_offset_type loc) : loc(loc) {}
 
         T& lock() { return * (T*) loc; }
 

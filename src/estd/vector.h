@@ -27,21 +27,48 @@ public:
 private:
     typedef experimental::dynamic_array<T, Allocator> base_t;
     typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::template gcroot<T> gcroot;
+    typedef typename allocator_type::template handle_with_offset<T> handle_with_offset;
 
 public:
+    // NOTE: accessor may very well become interchangeable with iterator
+    // used to be the most granular access to an array/vector element without
+    // having to lock it
+    class accessor : public handle_with_offset
+    {
+        operator T()
+        {
+            // copies it - beware, some T we don't want to copy!
+            T retval = handle_with_offset::lock();
+
+            handle_with_offset::unlock();
+
+            return retval;
+        }
+
+        accessor& operator=(const T& assign_from)
+        {
+            T& value = handle_with_offset::lock();
+
+            value = assign_from;
+
+            handle_with_offset::unlock();
+
+            return *this;
+        }
+    };
+
     class iterator
     {
     private:
-        gcroot current;
+        handle_with_offset current;
 
     public:
 
     };
 
-    gcroot operator[](size_type pos)
+    handle_with_offset operator[](size_type pos)
     {
-        return gcroot(allocator_type::offset(base_t::handle, pos * sizeof(T)));
+        return handle_with_offset(allocator_type::offset(base_t::handle, pos * sizeof(T)));
     }
 };
 
