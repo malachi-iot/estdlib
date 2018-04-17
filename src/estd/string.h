@@ -37,6 +37,25 @@ public:
 
     size_type length() const { return base_t::size(); }
 
+    // NOTE: dropping const due to locking operation, but it's debatable whether we
+    // want to propagate that const behavior all the way up to here
+    size_type copy(value_type* dest, size_type count, size_type pos = 0)
+    {
+        value_type* src = base_t::lock();
+
+        // TODO: since we aren't gonna throw an exception, determine what to do if
+        // pos > size()
+
+        if(pos + count > length())
+            count = length() - pos;
+
+        memcpy(dest, src + pos, count);
+
+        base_t::unlock();
+
+        return count;
+    }
+
     basic_string& append(size_type count, value_type c)
     {
         while(count--) base_t::push_back(c);

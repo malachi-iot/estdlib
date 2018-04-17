@@ -12,9 +12,10 @@ include_directories(${TARGET_PROJ_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
     array-test.cpp
-    map-test.cpp
     list-test.cpp
+    map-test.cpp
     queue-test.cpp
+    string-test.cpp
     )
 
 target_link_libraries(${PROJECT_NAME} estdlib_lib)

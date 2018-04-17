@@ -44,10 +44,4 @@ TEST_CASE("map-test")
         REQUIRE(result != NULLPTR);
         REQUIRE(*result == 79);
     }
-    SECTION("string tests")
-    {
-        basic_string<char, char_traits<char>, _allocator> test;
-
-        test += "hello";
-    }
 }
