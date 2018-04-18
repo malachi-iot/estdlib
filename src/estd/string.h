@@ -162,6 +162,24 @@ public:
     {
         return append(s);
     }
+
+
+    bool operator==(const basic_string_base& compare_to) const
+    {
+        return strcmp(buffer, compare_to.buffer) == 0;
+    }
+
+
+    bool operator!=(const basic_string_base& compare_to) const
+    {
+        return strcmp(buffer, compare_to.buffer) != 0;
+    }
+
+
+    bool operator>(const basic_string_base& compare_to) const
+    {
+        return strcmp(buffer, compare_to.buffer) > 0;
+    }
 };
 
 namespace layer2 {
@@ -178,7 +196,7 @@ template <class CharT, size_t N = 0, class Traits = char_traits<CharT>>
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 protected:
-    typedef basic_string_base<CharT, CharT*> base_t;
+    typedef basic_string_base<CharT, CharT*, Traits> base_t;
 
 public:
     typedef CharT value_type;
@@ -186,6 +204,16 @@ public:
     typedef typename Traits::nonconst_char_type nonconst_char_type;
 
     basic_string(CharT* buffer) : base_t(buffer) {}
+
+    //basic_string(const basic_string& copy_from) : base_t(copy_from.buffer) {}
+
+#ifdef FEATURE_CPP_STATIC_ASSERT
+    basic_string(const base_t& copy_from) : base_t(copy_from.buffer)
+    {
+        static_assert(N == 0, "May only initialize when length is unspecified");
+    }
+#endif
+
 
     size_type size() const
     {
@@ -202,10 +230,17 @@ public:
         strncpy(dest, base_t::buffer + pos, count);
         return count;
     }
+
+    // "lossy" conversion to make basic_string<CharT> more
+    // passable analgous to classic C char* strings
+    operator basic_string<CharT, 0, Traits>() const
+    {
+        return basic_string<CharT, 0, Traits>(base_t::buffer);
+    }
 };
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template <size_t N>
+template <size_t N = 0>
 using string = basic_string<char, N>;
 #endif
 
