@@ -107,11 +107,33 @@ typedef basic_string<char> string;
 
 namespace experimental {
 
-template <class CharT, class TBuffer, class Traits = char_traits<CharT>>
+
+template <class CharT, class TCharTraits = char_traits<CharT>>
+class string_traits
+{
+    static bool is_null_terminated();
+
+    static bool is_null_terimnation(const CharT& value);
+};
+
+
+struct null_terminated_string_traits
+{
+    static bool is_null_terminated() { return true; }
+
+    static bool is_null_termination(const char& value) { return value == 0; }
+
+    static size_t length(char* str) { return strlen(str); }
+};
+
+template <class CharT, class TBuffer,
+          class Traits = char_traits<CharT>,
+          class StringTraits = null_terminated_string_traits>
 class basic_string_base
 {
 protected:
     TBuffer buffer;
+    typedef StringTraits straits_t;
 
 public:
     template <class TBufferParam>
@@ -119,6 +141,27 @@ public:
 
     typedef CharT value_type;
     typedef size_t size_type;
+
+    // n is the 'at most' specifier. -1 means no upper bound
+    // assumes null termination
+    basic_string_base& append(const value_type* s, int n = -1)
+    {
+        if(straits_t::is_null_terminated())
+        {
+            if(n == -1)
+                strcat(buffer, s);
+            else
+                strncat(buffer, s, n);
+        }
+
+        return *this;
+    }
+
+    template <class TString>
+    basic_string_base& operator += (TString s)
+    {
+        return append(s);
+    }
 };
 
 namespace layer2 {
@@ -129,7 +172,9 @@ namespace layer2 {
 // is both desired but complicated
 // TODO: Probably we want to distinguish this as null-terminated vs not null terminated either with
 // traits or an explicit name
-template <class CharT, size_t N, class Traits = char_traits<CharT>>
+// N defaults to 0, kind of ugly by C++ standards but the norm for C - strings have an unspecified
+// upper bound
+template <class CharT, size_t N = 0, class Traits = char_traits<CharT>>
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 protected:

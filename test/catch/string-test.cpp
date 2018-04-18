@@ -58,5 +58,12 @@ TEST_CASE("string tests")
         REQUIRE(str.size() == 3);
         REQUIRE(str.max_size() == 127);
 
+        str += ":hi2u";
+
+        REQUIRE(str.size() == 8);
+
+        REQUIRE(buf2[3] == ':');
+        REQUIRE(buf2[7] == 'u');
+
     }
 }
