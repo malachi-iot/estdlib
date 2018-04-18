@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/vector.h"
+#include "estd/array.h"
 #include "mem.h"
 
 TEST_CASE("array/vector tests")

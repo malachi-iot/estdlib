@@ -11,6 +11,12 @@ namespace estd {
 
 namespace experimental {
 
+struct array_traits
+{
+    typedef std::size_t size_type;
+};
+
+
 template<class T, class TArray, typename size_type = std::size_t>
 struct array_base
 {

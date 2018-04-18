@@ -31,4 +31,32 @@ TEST_CASE("string tests")
         REQUIRE(buf[3] == 'l');
         REQUIRE(buf[4] == 'o');
     }
+    SECTION("layer 2 null terminated")
+    {
+        char buf[128];
+        experimental::layer2::basic_string<const char, 4> str("val");
+
+        str.copy(buf, 128);
+
+        REQUIRE(buf[0] == 'v');
+        REQUIRE(buf[1] == 'a');
+
+        REQUIRE(str.size() == 3);
+        REQUIRE(str.max_size() == 3);
+    }
+    SECTION("layer 3 null terminated")
+    {
+        char buf[128];
+        char buf2[128] = "val";
+        experimental::layer3::basic_string<char> str(buf2);
+
+        str.copy(buf, 128);
+
+        REQUIRE(buf[0] == 'v');
+        REQUIRE(buf[1] == 'a');
+
+        REQUIRE(str.size() == 3);
+        REQUIRE(str.max_size() == 127);
+
+    }
 }
