@@ -241,6 +241,10 @@ struct node_traits_noalloc
 
     static CONSTEXPR node_pointer null_node() { return NULLPTR; }
 
+    // semi-experimental, since std forward list technically supports a 'before begin'
+    // iterator, we may need a before_begin_node() value
+    static CONSTEXPR node_pointer after_end_node_experimental() { return NULLPTR; }
+
     static node_pointer get_next(const node_type& node)
     {
         // NOTE: we assume that node_type represents a very specific type derived ultimately
@@ -441,6 +445,8 @@ protected:
 
     typedef typename node_traits_t::node_handle node_handle;
 
+    static CONSTEXPR node_handle after_end_node() { return node_traits_t::null_node(); }
+
     node_handle m_front;
 
     node_handle next(node_handle from)
@@ -533,15 +539,41 @@ public:
 
 
 
-    // deviates from std C++ in that this only shall remove the first item found
-    // in the list, rather than all items matching.  For noalloc, remove and remove_first
-    // would be the same
+    // deviates from std C++ in that this optionally shall remove the first item found
+    // in the list, rather than all items matching
+    template <class UnaryPredicate>
+    void remove_if(UnaryPredicate p, bool first_only = false)
+    {
+        node_handle current = m_front;
+        node_handle previous;
+
+        while(current != after_end_node())
+        {
+            node_pointer current_locked = alloc.lock(current);
+
+            if(p(*current_locked))
+            {
+                set_next(previous, next(current));
+
+                if(first_only) return;
+            }
+
+            alloc.unlock(current);
+
+            previous = current;
+            current = next(current);
+        }
+    }
+
+    // deviates from std C++ in that this optionally shall remove the first item found
+    // in the list, rather than all items matching
+    //NOTE: if C++03 will handle it, lean on remove_if instead of duplicating the code
     void remove(nv_reference value, bool first_only = false, bool pointer_comparison = false)
     {
         node_handle current = m_front;
         node_handle previous;
 
-        while(current != node_traits_t::null_node())
+        while(current != after_end_node())
         {
             node_pointer current_locked = alloc.lock(current);
 
