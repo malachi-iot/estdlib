@@ -337,6 +337,8 @@ TEST_CASE("linkedlist")
 
         REQUIRE((*i++).value() == 0);
         REQUIRE((*i++).value() == 2);
+
+        REQUIRE(i == list.end());
     }
     SECTION("Forward list: remove_if")
     {
@@ -359,5 +361,6 @@ TEST_CASE("linkedlist")
 
         REQUIRE((*i++).value() == 0);
         REQUIRE((*i++).value() == 2);
+        REQUIRE(i == list.end());
     }
 }
