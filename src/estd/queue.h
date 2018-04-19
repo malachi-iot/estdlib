@@ -113,7 +113,7 @@ public:
         return *m_front;
     }
 
-#ifdef FEATURE_ESTDLIB_MOVESEMANTIC
+#ifdef FEATURE_CPP_MOVESEMANTIC
     bool push_back(const T&& value)
     {
         *m_back++ = value;
@@ -153,7 +153,7 @@ public:
 
     const_reference front() const { return c.front(); }
 
-#ifdef FEATURE_ESTDLIB_MOVESEMANTIC
+#ifdef FEATURE_CPP_MOVESEMANTIC
     bool push(value_type&& value)
     {
         return c.push_back(value);
