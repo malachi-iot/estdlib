@@ -298,7 +298,7 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
-    SECTION("Forward list: remove_first")
+    SECTION("Forward list: remove")
     {
         estd::forward_list<test_node> list;
         test_node nodes[3];
@@ -317,5 +317,47 @@ TEST_CASE("linkedlist")
 
         REQUIRE((*i++).val == 0);
         REQUIRE((*i++).val == 2);
+    }
+    SECTION("Forward list: remove #2")
+    {
+        estd::forward_list<estd::experimental::forward_node<int>> list;
+        estd::experimental::forward_node<int> nodes[3];
+
+        nodes[0].value() = 0;
+        nodes[1].value() = 1;
+        new (&nodes[2].value()) int(2);
+
+        list.push_front(nodes[2]);
+        list.push_front(nodes[1]);
+        list.push_front(nodes[0]);
+
+        list.remove(nodes[1]);
+
+        auto i = list.begin();
+
+        REQUIRE((*i++).value() == 0);
+        REQUIRE((*i++).value() == 2);
+    }
+    SECTION("Forward list: remove_if")
+    {
+        typedef estd::experimental::forward_node<int> node_t;
+        estd::forward_list<node_t> list;
+        node_t nodes[3];
+
+        nodes[0].value() = 0;
+        nodes[1].value() = 1;
+        new (&nodes[2].value()) int(2);
+
+        list.push_front(nodes[2]);
+        list.push_front(nodes[1]);
+        list.push_front(nodes[0]);
+
+        list.remove_if([](const node_t& compare_to)
+                       { return compare_to.value() == 1; });
+
+        auto i = list.begin();
+
+        REQUIRE((*i++).value() == 0);
+        REQUIRE((*i++).value() == 2);
     }
 }

@@ -54,7 +54,7 @@ public:
 
     const T& value() const { return m_value; }
 
-    const forward_node<T> *next() const {
+    forward_node<T> *next() const {
         return (forward_node<T> *) forward_node_base::next();
     }
 
@@ -556,27 +556,36 @@ public:
 
         while(current != after_end_node())
         {
+            node_handle _next = next(current);
             node_pointer current_locked = alloc.lock(current);
 
-            if(p(*current_locked))
+            bool matched = p(*current_locked);
+
+            alloc.unlock(current);
+
+            if(matched)
             {
-                set_next(previous, next(current));
+                set_next(previous, _next);
 
                 if(first_only) return;
             }
 
-            alloc.unlock(current);
-
             previous = current;
-            current = next(current);
+            current = _next;
         }
     }
 
     // deviates from std C++ in that this optionally shall remove the first item found
     // in the list, rather than all items matching
     //NOTE: if C++03 will handle it, lean on remove_if instead of duplicating the code
-    void remove(nv_reference value, bool first_only = false, bool pointer_comparison = false)
+    void remove(nv_reference value, bool first_only = false)
     {
+#ifdef FEATURE_CPP_LAMBDA
+        remove_if([&value](nv_reference compare_to)
+                  {
+                      return value == compare_to;
+                  }, first_only );
+#else
         node_handle current = m_front;
         node_handle previous;
 
@@ -584,33 +593,21 @@ public:
         {
             node_pointer current_locked = alloc.lock(current);
 
-            // FIX: pointer comparison will do for now, but real
-            // value-based == should eventually be used
-            // FIX: also this won't work well for moveable/locked
-            // memory chunks
-            //if(current_locked == &value)
-            bool match;
+            bool matched = *current_locked == value;
 
-            if(pointer_comparison)
-                match = current_locked == &value;
-            else
-                match = *current_locked == value;
+            alloc.unlock(current);
 
-            if(match)
+            if()
             {
                 set_next(previous, next(current));
 
                 if(first_only) return;
             }
 
-            alloc.unlock(current);
-
             previous = current;
             current = next(current);
         }
-
-
-        //i.node()
+#endif
     }
 };
 
