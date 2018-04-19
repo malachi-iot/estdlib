@@ -50,7 +50,9 @@ class forward_node :
     T m_value;
 
 public:
-    T &value() { return m_value; }
+    T& value() { return m_value; }
+
+    const T& value() const { return m_value; }
 
     const forward_node<T> *next() const {
         return (forward_node<T> *) forward_node_base::next();
@@ -58,6 +60,11 @@ public:
 
     void next(forward_node<T> *set_to) {
         forward_node_base::next(set_to);
+    }
+
+    bool operator==(const forward_node& compare_to) const
+    {
+        return m_value == compare_to.value();
     }
 };
 
