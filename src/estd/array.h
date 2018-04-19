@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "iterator.h"
+#include <type_traits>
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach
@@ -147,6 +148,47 @@ public:
 
     CONSTEXPR size_type size() const { return N; }
 };
+
+#ifdef FEATURE_CPP_VARIADIC
+namespace experimental { namespace layer0 {
+
+// fiddling with idea suggested here:
+// https://stackoverflow.com/questions/19019252/create-n-element-constexpr-array-in-c11
+
+template <class T, T... values>
+class array_exp1
+{
+public:
+    typedef T value_type;
+};
+
+template <class T, T value, T... values>
+class array_exp1<T, value, values...> : array_exp1<T, values...>
+{
+    typedef array_exp1<T, values...> base_t;
+
+public:
+    typedef T value_type;
+};
+
+
+template <class T, T... values>
+class array
+{
+public:
+    typedef T value_type;
+};
+
+template <class T, T value, T... values>
+class array<T, value, values...> : array<T, values...>
+{
+
+};
+
+
+
+}}
+#endif
 
 namespace layer1 {
 // TODO: alias estd::array into here
