@@ -552,7 +552,7 @@ public:
     void remove_if(UnaryPredicate p, bool first_only = false)
     {
         node_handle current = m_front;
-        node_handle previous;
+        node_handle previous = node_traits_t::null_node();
 
         while(current != after_end_node())
         {
@@ -565,7 +565,12 @@ public:
 
             if(matched)
             {
-                set_next(previous, _next);
+                // If we match but there's no previous node
+                if(previous == node_traits_t::null_node())
+                    // then instead of splicing, we are replacing the front node
+                    m_front = _next;
+                else
+                    set_next(previous, _next);
 
                 if(first_only) return;
             }
@@ -587,7 +592,7 @@ public:
                   }, first_only );
 #else
         node_handle current = m_front;
-        node_handle previous;
+        node_handle previous = node_traits_t::null_node();
 
         while(current != after_end_node())
         {
@@ -599,7 +604,12 @@ public:
 
             if()
             {
-                set_next(previous, next(current));
+                // If we match but there's no previous node
+                if(previous == node_traits_t::null_node())
+                    // then instead of splicing, we are replacing the front node
+                    m_front = _next;
+                else
+                    set_next(previous, next(current));
 
                 if(first_only) return;
             }
