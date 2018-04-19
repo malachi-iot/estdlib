@@ -6,6 +6,11 @@
 struct test_value
 {
     int val;
+
+    bool operator ==(const test_value& compare_to)
+    {
+        return compare_to.val == val;
+    }
 };
 
 struct test_node :
@@ -292,5 +297,25 @@ TEST_CASE("linkedlist")
         list.pop_front();
 
         REQUIRE(list.empty());
+    }
+    SECTION("Forward list: remove_first")
+    {
+        estd::forward_list<test_node> list;
+        test_node nodes[3];
+
+        nodes[0].val = 0;
+        nodes[1].val = 1;
+        nodes[2].val = 2;
+
+        list.push_front(nodes[2]);
+        list.push_front(nodes[1]);
+        list.push_front(nodes[0]);
+
+        list.remove(nodes[1]);
+
+        auto i = list.begin();
+
+        REQUIRE((*i++).val == 0);
+        REQUIRE((*i++).val == 2);
     }
 }

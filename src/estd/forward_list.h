@@ -530,6 +530,49 @@ public:
 
         return iterator(node_following_erased, alloc);
     }
+
+
+
+    // deviates from std C++ in that this only shall remove the first item found
+    // in the list, rather than all items matching.  For noalloc, remove and remove_first
+    // would be the same
+    void remove(nv_reference value, bool first_only = false, bool pointer_comparison = false)
+    {
+        node_handle current = m_front;
+        node_handle previous;
+
+        while(current != node_traits_t::null_node())
+        {
+            node_pointer current_locked = alloc.lock(current);
+
+            // FIX: pointer comparison will do for now, but real
+            // value-based == should eventually be used
+            // FIX: also this won't work well for moveable/locked
+            // memory chunks
+            //if(current_locked == &value)
+            bool match;
+
+            if(pointer_comparison)
+                match = current_locked == &value;
+            else
+                match = *current_locked == value;
+
+            if(match)
+            {
+                set_next(previous, next(current));
+
+                if(first_only) return;
+            }
+
+            alloc.unlock(current);
+
+            previous = current;
+            current = next(current);
+        }
+
+
+        //i.node()
+    }
 };
 
 #ifdef UNUSED
