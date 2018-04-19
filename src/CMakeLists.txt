@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(estdlib)
+project(estd)
 
 set(SOURCE_FILES
        dummy.cpp 

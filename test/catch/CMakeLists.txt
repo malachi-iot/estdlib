@@ -19,4 +19,4 @@ add_executable(${PROJECT_NAME} "main.cpp"
     string-test.cpp
     )
 
-target_link_libraries(${PROJECT_NAME} estdlib_lib)
+target_link_libraries(${PROJECT_NAME} estd_lib)

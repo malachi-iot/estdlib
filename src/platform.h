@@ -15,4 +15,4 @@
 #define NULLPTR NULL
 #endif
 
-#include_next "platform.h"
+//#include_next "platform.h"
