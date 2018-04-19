@@ -17,5 +17,5 @@ set(SOURCE_FILES
         estd/vector.h
        )
 
-add_library(estdlib_lib ${SOURCE_FILES})
+add_library(estd_lib ${SOURCE_FILES})
 
