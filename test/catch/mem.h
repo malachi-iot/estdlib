@@ -28,6 +28,29 @@ public:
     typedef void* handle_type;
     typedef void* handle_offset_type;
 
+    // See nothing_allocator::experimental_handle_type
+    template <class T>
+    struct experimental_handle_type
+    {
+        handle_type handle;
+
+    public:
+        // NOTE: whoever initialies this needs to be damn sure handle
+        // can safely be cast to T
+        experimental_handle_type(handle_type handle) : handle(handle) {}
+
+        T* lock(_allocator& a)
+        {
+            return reinterpret_cast<T*>(handle);
+        }
+
+        void unlock(_allocator& a) {}
+
+        operator handle_type() const { return handle; }
+
+        static CONSTEXPR size_t size() { return sizeof(T); }
+    };
+
     // FIX:  not convinced I want gcroot to be directly associated with
     // handle_offset_type
     template <class T>

@@ -55,6 +55,7 @@ public:
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
+    typedef typename allocator_t::template experimental_handle_type<TNode> experimental_handle_type;
 
     node_pointer lock(node_handle node)
     {
@@ -133,13 +134,14 @@ public:
     typedef const TValue& nv_ref_t;
     typedef typename base_t::template RefNode<TValue> node_type;
     typedef node_type* node_pointer;
+    typedef typename TAllocator::template experimental_handle_type<node_type> experimental_handle_type;
 
     static CONSTEXPR bool can_emplace() { return true; }
 
     inlineref_node_alloc(TAllocator* a) :
         base_t(a) {}
 
-    node_handle alloc(const TValue& value)
+    experimental_handle_type alloc(const TValue& value)
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
@@ -158,7 +160,7 @@ public:
     // its memory
     // NOTE: Not sure why overloading doesn't select this properly, but needed to name
     // this alloc_move explicitly
-    node_handle alloc_move(TValue&& value)
+    experimental_handle_type alloc_move(TValue&& value)
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
 
@@ -179,7 +181,7 @@ public:
     // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
     // its memory
     template <class ...TArgs>
-    node_handle alloc_emplace( TArgs&&...args)
+    experimental_handle_type alloc_emplace( TArgs&&...args)
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
 
@@ -205,6 +207,17 @@ public:
         return reinterpret_cast<node_pointer>(traits_t::lock(this->a, node));
     }
 
+    void dealloc(experimental_handle_type& node)
+    {
+        traits_t::deallocate(this->a, node, experimental_handle_type::size());
+    }
+
+    // NOTE: Not really used yet, but eventually we'd like to make all node_handles
+    // be this so that the lock() operation is less scary with its forward casting
+    node_pointer lock(experimental_handle_type& node)
+    {
+        return node.lock(base_t::a);
+    }
 };
 
 
@@ -220,6 +233,7 @@ public:
     typedef const TValue& nv_ref_t;
     typedef typename base_t::template ValueNode<TValue> node_type;
     typedef node_type* node_pointer;
+    typedef typename TAllocator::template experimental_handle_type<node_type> experimental_handle_type;
 
     static CONSTEXPR bool can_emplace() { return true; }
 

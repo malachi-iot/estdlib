@@ -96,6 +96,27 @@ struct nothing_allocator
     typedef void* handle_type;
     typedef void* pointer;
 
+    // this is a strongly-typed wrapper around the native handle type
+    // to aid in safer typecasting.  We don't include allocator ref
+    // itself just to ensure everything stays lightweight
+    template <class T>
+    struct experimental_handle_type
+    {
+        handle_type handle;
+
+    public:
+        experimental_handle_type(handle_type handle) : handle(handle) {}
+
+        T* lock(nothing_allocator& a)
+        {
+            return reinterpret_cast<T*>(handle);
+        }
+
+        void unlock(nothing_allocator& a);
+
+        operator handle_type() const { return handle; }
+    };
+
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
     pointer lock(handle_type h) { return h; }
