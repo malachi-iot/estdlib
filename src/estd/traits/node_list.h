@@ -205,6 +205,7 @@ public:
 
 // standardized node traits base.  You don't have to use this, but it proves convenient if you
 // adhere to the forward_node_base signature
+// FIX: this is hard wired to non-handle based scenarios still
 template <class TNode, class TAllocator>
 struct node_traits_base
 {
@@ -212,6 +213,7 @@ struct node_traits_base
     typedef TNode node_type_base;
     typedef node_type_base* node_pointer;
     typedef typename allocator_t::handle_type node_handle;
+    //typedef node_pointer node_handle;
 
     static node_handle get_next(const node_type_base& node)
     {
@@ -273,7 +275,7 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
 template<class TNodeAndValue>
-struct intrusive_node_traits //: public node_traits_base<TNodeAndValue, nothing_allocator>
+struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_allocator>
 {
     typedef TNodeAndValue node_type;
 
