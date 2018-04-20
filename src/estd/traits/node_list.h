@@ -103,6 +103,12 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
         ValueNode(TValue&& value) : value(value) {}
 #endif
+
+
+#ifdef FEATURE_CPP_VARIADIC
+        template <class... TArgs>
+        ValueNode(TArgs&&... args) : value(args...) {}
+#endif
     };
 };
 
@@ -115,7 +121,7 @@ public:
 // If there was a way to template-compile-time enforce only one mode and not
 // mix and match that might be nice, but so far it only looks #ifdef'able
 template <class TNode, class TValue, class TAllocator>
-class smart_inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
+class inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
 {
     typedef smart_node_alloc<TNode, TAllocator> base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
@@ -129,7 +135,7 @@ public:
 
     static CONSTEXPR bool can_emplace() { return true; }
 
-    smart_inlineref_node_alloc(TAllocator* a) :
+    inlineref_node_alloc(TAllocator* a) :
         base_t(a) {}
 
     node_handle alloc(const TValue& value)
@@ -203,6 +209,90 @@ public:
 };
 
 
+template <class TNode, class TValue, class TAllocator>
+class inlinevalue_node_alloc : public smart_node_alloc<TNode, TAllocator>
+{
+    typedef smart_node_alloc<TNode, TAllocator> base_t;
+    //typedef node_traits<TNode, TAllocator> node_traits_t;
+    typedef typename base_t::traits_t traits_t;
+
+public:
+    typedef typename base_t::node_handle node_handle;
+    typedef const TValue& nv_ref_t;
+    typedef typename base_t::template ValueNode<TValue> node_type;
+    typedef node_type* node_pointer;
+
+    static CONSTEXPR bool can_emplace() { return true; }
+
+    inlinevalue_node_alloc(TAllocator* a) :
+        base_t(a) {}
+
+    node_handle alloc(const TValue& value)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+
+        void* p = traits_t::lock(this->a, h);
+
+        new (p) node_type(value);
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
+    // its memory
+    // FIX: had to make it TValue& instead of TValue&&, definitely hacky but at least
+    // it's functional
+    // NOTE: Not sure why overloading doesn't select this properly, but needed to name
+    // this alloc_move explicitly
+    node_handle alloc_move(TValue&& value)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+
+        void* p = traits_t::lock(this->a, h);
+
+        traits_t::construct(this->a, (node_type*)p, value);
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+#endif
+
+
+#ifdef FEATURE_CPP_VARIADIC
+    // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
+    // its memory
+    template <class ...TArgs>
+    node_handle alloc_emplace( TArgs&&...args)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+
+        void* p = traits_t::lock(this->a, h);
+
+        traits_t::construct(this->a, (node_type*)p, args...);
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+#endif
+
+    void dealloc(node_handle h)
+    {
+        traits_t::deallocate(this->a, h, sizeof(node_type));
+    }
+
+    node_pointer lock(node_handle node)
+    {
+        return reinterpret_cast<node_pointer>(traits_t::lock(this->a, node));
+    }
+
+};
+
 // standardized node traits base.  You don't have to use this, but it proves convenient if you
 // adhere to the forward_node_base signature
 // FIX: this is hard wired to non-handle based scenarios still
@@ -244,14 +334,14 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
     // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue2>
-    using test_node_allocator_t = smart_inlineref_node_alloc<
+    using test_node_allocator_t = inlineref_node_alloc<
         node_type_base,
         TValue2,
         TAllocator>;
 #else
     template <class TValue2>
     struct test_node_allocator_t :
-            smart_inlineref_node_alloc<
+            inlineref_node_alloc<
                 node_type_base, TValue2, TAllocator>
     {
         typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
@@ -271,6 +361,44 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
     }
 };
 
+
+
+template <class TNode, class TAllocator>
+struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
+{
+    typedef TAllocator allocator_t;
+    typedef TNode node_type_base;
+
+    // test_node_allocator_t not presently used, trying to decouple node_traits from
+    // value_type, if we can
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <class TValue2>
+    using test_node_allocator_t = inlinevalue_node_alloc<
+        node_type_base,
+        TValue2,
+        TAllocator>;
+#else
+    template <class TValue2>
+    struct test_node_allocator_t :
+            inlinevalue_node_alloc<
+                node_type_base, TValue2, TAllocator>
+    {
+        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
+
+        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+    };
+#endif
+
+    // test node allocator base type, use this to extract node_type
+    // for value_exp so that we can fully decouple from value_type
+    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
+
+    template <class TValue2>
+    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
+    {
+        return node.value;
+    }
+};
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
