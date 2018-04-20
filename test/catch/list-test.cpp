@@ -363,4 +363,34 @@ TEST_CASE("linkedlist")
         REQUIRE((*i++).value() == 2);
         REQUIRE(i == list.end());
     }
+    SECTION("Ensure alloc_front failure for intrusive-style list")
+    {
+        typedef estd::experimental::forward_node<int> node_t;
+        estd::forward_list<node_t> list;
+
+        node_t node1;
+
+        node1.value() = 3;
+
+        list.push_front(node1);
+        //list.emplace_front(4);
+    }
+    SECTION("Forward list: dynamic node allocation, emplacement")
+    {
+        estd::forward_list<long, node_traits_inlineref<_allocator > > list;
+
+        list.emplace_front(4);
+        list.push_front(3);
+
+        auto i = list.begin();
+
+        REQUIRE((*i++) == 3);
+        REQUIRE((*i++) == 4);
+        REQUIRE(!list.empty());
+
+        list.pop_front();
+        list.pop_front();
+
+        REQUIRE(list.empty());
+    }
 }

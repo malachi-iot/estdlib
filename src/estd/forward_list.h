@@ -107,6 +107,8 @@ struct dummy_node_alloc
     typedef node_type* node_pointer;
     typedef node_type& nv_ref_t;
 
+    static CONSTEXPR bool can_emplace() { return false; }
+
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
     template <typename TValue>
@@ -211,6 +213,8 @@ public:
     typedef typename base_t::template RefNode<TValue> node_type;
     typedef node_type* node_pointer;
 
+    static CONSTEXPR bool can_emplace() { return true; }
+
     smart_inlineref_node_alloc(TAllocator* a) :
         base_t(a) {}
 
@@ -227,6 +231,50 @@ public:
         return h;
     }
 
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
+    // its memory
+    // FIX: had to make it TValue& instead of TValue&&, definitely hacky but at least
+    // it's functional
+    // NOTE: Not sure why overloading doesn't select this properly, but needed to name
+    // this alloc_move explicitly
+    node_handle alloc_move(TValue& value)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+
+        void* p = traits_t::lock(this->a, h);
+        void* v = static_cast<uint8_t*>(p) + sizeof(node_type);
+
+        traits_t::construct(this->a, (TValue*)v, value);
+        traits_t::construct(this->a, (node_type*)p, *((TValue*)v));
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+#endif
+
+
+#ifdef FEATURE_CPP_VARIADIC
+    // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
+    // its memory
+    template <class ...TArgs>
+    node_handle alloc_emplace( TArgs&&...args)
+    {
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+
+        void* p = traits_t::lock(this->a, h);
+        void* value = static_cast<uint8_t*>(p) + sizeof(node_type);
+
+        traits_t::construct(this->a, (TValue*)value, args...);
+        traits_t::construct(this->a, (node_type*)p, *((TValue*)value));
+
+        traits_t::unlock(this->a, h);
+
+        return h;
+    }
+#endif
 
     void dealloc(node_handle h)
     {
@@ -496,6 +544,14 @@ protected:
         alloc.unlock(_node);
     }
 
+
+    void set_front(node_handle new_front)
+    {
+        set_next(new_front, m_front);
+
+        m_front = new_front;
+    }
+
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
         alloc(allocator),
@@ -526,12 +582,16 @@ public:
 
     void push_front(nv_reference value)
     {
-        node_handle node_pointing_to_value = alloc.alloc(value);
-
-        set_next(node_pointing_to_value, m_front);
-
-        m_front = node_pointing_to_value;
+        set_front(alloc.alloc(value));
     }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void push_front(value_type&& value)
+    {
+        set_front(alloc.alloc_move(value));
+    }
+#endif
+
 
     iterator begin() { return iterator(m_front, alloc); }
     const_iterator begin() const { return iterator(m_front, alloc); }
@@ -571,11 +631,13 @@ public:
     // 'semi-intrusive' where really it is intrusive but in reverse, forward_list allocates
     //                  both the node and value_type together as part of the node.  In effect
     //                  keeps copies of items placed into array
-/*
     template <class... TArgs>
     reference emplace_front( TArgs&&... args )
     {
-    } */
+        static_assert(node_allocator_t::can_emplace(), "This allocator cannot emplace");
+
+        set_front(alloc.alloc_emplace(args...));
+    }
 #endif
 
 
