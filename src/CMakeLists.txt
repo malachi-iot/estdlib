@@ -7,13 +7,15 @@ set(SOURCE_FILES
        platform.h
        estd/array.h
         estd/forward_list.h
-       estd/functional.h
+        estd/functional.h
         estd/initializer_list.h
-       estd/iterator.h
+        estd/iterator.h
+        estd/iterators/list.h
        estd/map.h
        estd/queue.h
         estd/string.h
-       estd/utility.h
+        estd/traits/node_list.h
+        estd/utility.h
         estd/vector.h
        )
 
