@@ -346,7 +346,6 @@ TEST_CASE("linkedlist")
         list.push_front(3);
 
         auto i = list.begin();
-        /*
 
         REQUIRE((*i++) == 3);
         REQUIRE((*i++) == 4);
@@ -355,6 +354,6 @@ TEST_CASE("linkedlist")
         list.pop_front();
         list.pop_front();
 
-        REQUIRE(list.empty()); */
+        REQUIRE(list.empty());
     }
 }

@@ -370,10 +370,10 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
     // test_node_allocator_t not presently used, trying to decouple node_traits from
     // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2>
+    template <class TValue>
     using test_node_allocator_t = inlinevalue_node_alloc<
         node_type_base,
-        TValue2,
+        TValue,
         TAllocator>;
 #else
     template <class TValue2>
@@ -389,10 +389,10 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
 
     // test node allocator base type, use this to extract node_type
     // for value_exp so that we can fully decouple from value_type
-    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
+    typedef estd::smart_node_alloc<node_type_base, TAllocator> sna_t;
 
-    template <class TValue2>
-    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
+    template <class TValue>
+    static const TValue& value_exp(const typename sna_t::template ValueNode<TValue>& node)
     {
         return node.value;
     }
