@@ -338,4 +338,23 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
+    SECTION("Forward list: dynamic node allocation, inline value")
+    {
+        estd::forward_list<long, estd::inlinevalue_node_traits<estd::experimental::forward_node_base, _allocator > > list;
+
+        list.emplace_front(4);
+        list.push_front(3);
+
+        auto i = list.begin();
+        /*
+
+        REQUIRE((*i++) == 3);
+        REQUIRE((*i++) == 4);
+        REQUIRE(!list.empty());
+
+        list.pop_front();
+        list.pop_front();
+
+        REQUIRE(list.empty()); */
+    }
 }

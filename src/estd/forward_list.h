@@ -5,6 +5,10 @@
 #include "traits/node_list.h"
 #include "iterators/list.h"
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+#include <utility>
+#endif
+
 namespace estd {
 
 namespace experimental {
@@ -187,7 +191,7 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push_front(value_type&& value)
     {
-        set_front(alloc.alloc_move(value));
+        set_front(alloc.alloc_move(std::forward<value_type>(value)));
     }
 #endif
 

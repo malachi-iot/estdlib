@@ -155,11 +155,9 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
     // its memory
-    // FIX: had to make it TValue& instead of TValue&&, definitely hacky but at least
-    // it's functional
     // NOTE: Not sure why overloading doesn't select this properly, but needed to name
     // this alloc_move explicitly
-    node_handle alloc_move(TValue& value)
+    node_handle alloc_move(TValue&& value)
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
 
