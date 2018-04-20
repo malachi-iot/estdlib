@@ -71,13 +71,13 @@ struct explicit_handle_node_traits
     typedef test_node_handle& nv_reference;
     typedef estd::nothing_allocator allocator_t;
 
-    struct node_allocator_t
+    struct _node_allocator_t
     {
         typedef test_node_handle node_type;
         typedef node_type* node_pointer;
         typedef test_node_handle& nv_ref_t;
 
-        node_allocator_t(void*) {}
+        _node_allocator_t(void*) {}
 
         template <class TValue>
         static node_handle alloc(TValue& value)
@@ -93,7 +93,7 @@ struct explicit_handle_node_traits
         void unlock(node_handle node) {}
     };
 
-    typedef node_allocator_t::node_type node_type;
+    typedef _node_allocator_t::node_type node_type;
 
     static CONSTEXPR node_handle null_node() { return 0xFF; }
 
@@ -105,8 +105,8 @@ struct explicit_handle_node_traits
 
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2>
-    using test_node_allocator_t = node_allocator_t;
+    template <class TValue>
+    using node_allocator_t = _node_allocator_t;
 #endif
 };
 

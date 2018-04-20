@@ -109,7 +109,7 @@ public:
     typedef ForwardIterator<value_type, node_traits_t> iterator;
     typedef const iterator   const_iterator;
     typedef typename node_traits_t::allocator_t allocator_t;
-    typedef typename node_traits_t::template test_node_allocator_t<value_type> node_allocator_t;
+    typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef typename node_allocator_t::node_type node_type;
     typedef typename node_allocator_t::node_pointer node_pointer;
 

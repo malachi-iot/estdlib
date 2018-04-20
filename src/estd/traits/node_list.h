@@ -328,23 +328,21 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
     typedef TAllocator allocator_t;
     typedef TNode node_type_base;
 
-    // test_node_allocator_t not presently used, trying to decouple node_traits from
-    // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue2>
-    using test_node_allocator_t = inlineref_node_alloc<
+    using node_allocator_t = inlineref_node_alloc<
         node_type_base,
         TValue2,
         TAllocator>;
 #else
     template <class TValue2>
-    struct test_node_allocator_t :
+    struct node_allocator_t :
             inlineref_node_alloc<
                 node_type_base, TValue2, TAllocator>
     {
         typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
 
-        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+        node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
     };
 #endif
 
@@ -367,23 +365,21 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
     typedef TAllocator allocator_t;
     typedef TNode node_type_base;
 
-    // test_node_allocator_t not presently used, trying to decouple node_traits from
-    // value_type, if we can
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue>
-    using test_node_allocator_t = inlinevalue_node_alloc<
+    using node_allocator_t = inlinevalue_node_alloc<
         node_type_base,
         TValue,
         TAllocator>;
 #else
     template <class TValue2>
-    struct test_node_allocator_t :
+    struct node_allocator_t :
             inlinevalue_node_alloc<
                 node_type_base, TValue2, TAllocator>
     {
-        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
+        typedef estd::inlinevalue_node_alloc<node_type_base, TValue2, TAllocator> base_t;
 
-        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+        node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
     };
 #endif
 
@@ -439,20 +435,9 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
     template <class TValue2>
     static TValue2& value_exp(node_type& node) { return node; }
 
-    // replacement for old allocator get associated value
-    //static value_type& value(node_type& node) { return node; }
-
-    // instance portion which deals with pushing and pulling things in
-    // and out of handle & allocations.  Use as an instance even if
-    // no instance variables here - should optimize out to static-like
-    // assembly if indeed
-    // no instance variables present
-    // eventually our formalized allocator might be able to displace this
-    typedef dummy_node_alloc<node_type> node_allocator_t;
-
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2>
-    using test_node_allocator_t = dummy_node_alloc<node_type>;
+    template <class TValue>
+    using node_allocator_t = dummy_node_alloc<node_type>;
 #endif
 
 };

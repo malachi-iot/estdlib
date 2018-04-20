@@ -8,7 +8,7 @@ struct InputIterator
 {
     typedef TNodeTraits traits_t;
     typedef TValue value_type;
-    typedef typename traits_t::template test_node_allocator_t<value_type> node_allocator_t;
+    typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef typename TNodeTraits::node_handle node_handle_t;
     typedef InputIterator<TValue, TNodeTraits> iterator;
     typedef const iterator const_iterator;
