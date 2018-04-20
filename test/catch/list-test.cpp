@@ -76,6 +76,9 @@ struct explicit_handle_node_traits
         typedef test_node_handle node_type;
         typedef node_type* node_pointer;
         typedef test_node_handle& nv_ref_t;
+        // node_allocator_t::node_handle must be identical or more specialized form
+        // of node_traits::node_handle
+        typedef uint8_t node_handle;
 
         _node_allocator_t(void*) {}
 

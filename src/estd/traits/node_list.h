@@ -20,6 +20,7 @@ struct dummy_node_alloc
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef node_type& nv_ref_t;
+    typedef node_pointer node_handle;
 
     static CONSTEXPR bool can_emplace() { return false; }
 
