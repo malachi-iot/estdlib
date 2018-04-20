@@ -62,63 +62,8 @@ struct test_node_handle2 : public test_node_handle
 int handle_count = 0;
 test_node_handle2 handles[5];
 
-
-// helper traits class for node traits organized like stock-standard std::forward_list
-// forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
 template <class TAllocator>
-struct node_traits_inlineref
-{
-    typedef TAllocator allocator_t;
-    typedef estd::experimental::forward_node_base node_type_base;
-
-    // test_node_allocator_t not presently used, trying to decouple node_traits from
-    // value_type, if we can
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2>
-    using test_node_allocator_t = estd::smart_inlineref_node_alloc<
-        node_type_base,
-        TValue2,
-        TAllocator>;
-#else
-    template <class TValue2>
-    struct test_node_allocator_t :
-            estd::smart_inlineref_node_alloc<
-                node_type_base, TValue2, TAllocator>
-    {
-        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
-
-        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
-    };
-#endif
-
-    typedef node_type_base* node_pointer;
-    typedef typename allocator_t::handle_type node_handle;
-
-    static CONSTEXPR node_handle null_node() { return allocator_t::invalid(); }
-
-    static node_handle get_next(const node_type_base& node)
-    {
-        return node.next();
-    }
-
-    static void set_next(node_type_base& node, node_handle set_to)
-    {
-        // FIX: this only works because _allocator handle is
-        // interchangeable with node_pointer
-        node_pointer next = reinterpret_cast<node_pointer>(set_to);
-        node.next(next);
-    }
-
-    // test node allocator base type, use this to extract node_type
-    // for value_exp so that we can fully decouple from value_type
-    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
-
-    template <class TValue2>
-    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
-    {
-        return node.value;
-    }
-};
+using node_traits_inlineref = estd::inlineref_node_traits<estd::experimental::forward_node_base, TAllocator>;
 
 struct explicit_handle_node_traits
 {

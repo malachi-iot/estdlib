@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../../platform.h"
+#include "../memory.h"
+
 namespace estd {
 
 template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
@@ -200,11 +203,77 @@ public:
 };
 
 
+// standardized node traits base.  You don't have to use this, but it proves convenient if you
+// adhere to the forward_node_base signature
+template <class TNode, class TAllocator>
+struct node_traits_base
+{
+    typedef TAllocator allocator_t;
+    typedef TNode node_type_base;
+    typedef node_type_base* node_pointer;
+    typedef typename allocator_t::handle_type node_handle;
+
+    static node_handle get_next(const node_type_base& node)
+    {
+        return node.next();
+    }
+
+    static void set_next(node_type_base& node, node_handle set_to)
+    {
+        // FIX: this only works because _allocator handle is
+        // interchangeable with node_pointer
+        node_pointer next = reinterpret_cast<node_pointer>(set_to);
+        node.next(next);
+    }
+
+    static CONSTEXPR node_handle null_node() { return allocator_t::invalid(); }
+};
+
+// helper traits class for node traits organized like stock-standard std::forward_list
+// forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
+// be advised TNode must conform to forward_node_base signature
+template <class TNode, class TAllocator>
+struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
+{
+    typedef TAllocator allocator_t;
+    typedef TNode node_type_base;
+
+    // test_node_allocator_t not presently used, trying to decouple node_traits from
+    // value_type, if we can
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <class TValue2>
+    using test_node_allocator_t = smart_inlineref_node_alloc<
+        node_type_base,
+        TValue2,
+        TAllocator>;
+#else
+    template <class TValue2>
+    struct test_node_allocator_t :
+            smart_inlineref_node_alloc<
+                node_type_base, TValue2, TAllocator>
+    {
+        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
+
+        test_node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+    };
+#endif
+
+    // test node allocator base type, use this to extract node_type
+    // for value_exp so that we can fully decouple from value_type
+    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
+
+    template <class TValue2>
+    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
+    {
+        return node.value;
+    }
+};
+
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
 template<class TNodeAndValue>
-struct intrusive_node_traits
+struct intrusive_node_traits //: public node_traits_base<TNodeAndValue, nothing_allocator>
 {
     typedef TNodeAndValue node_type;
 
