@@ -106,7 +106,6 @@ struct dummy_node_alloc
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef node_type& nv_ref_t;
-    typedef nothing_allocator allocator_t;
 
     // pretends to allocate space for a node, when in fact no allocation
     // is necessary for this type
@@ -131,12 +130,11 @@ template <class TNode, class TAllocator>
 class smart_node_alloc
 {
 protected:
-    TAllocator& a;
+    TAllocator a;
 
 public:
     typedef TAllocator allocator_t;
     typedef allocator_traits<TAllocator> traits_t;
-    //typedef node_traits<TNode> node_traits_t;
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
@@ -158,6 +156,26 @@ public:
 
         RefNode(const TValue& value) : value(value) {}
     };
+
+
+    // ultimately to be used by 'emplace_front'
+    template <class TValue>
+    struct RefNodeManaged : public RefNode<TValue>
+    {
+        typedef RefNode<TValue> base_t;
+
+        RefNodeManaged(const TValue& value) :
+                base_t(value)
+        {}
+
+        ~RefNodeManaged()
+        {
+            base_t::value.~TValue();
+        }
+    };
+
+
+
 
     template <class TValue>
     struct ValueNode : TNode
@@ -234,10 +252,10 @@ struct node_value_traits_experimental<
 
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
-template<class TNode>
-struct node_traits_noalloc
+template<class TNodeAndValue>
+struct intrusive_node_traits
 {
-    typedef TNode node_type;
+    typedef TNodeAndValue node_type;
 
     // TODO: eventually interact with allocator for this (in
     // other node_traits where allocation actually happens)
@@ -293,7 +311,7 @@ struct node_traits_noalloc
 
 // default node_traits is the no-alloc variety (since we are embedded oriented)
 template <class TValue, class TAllocator>
-struct node_traits : public node_traits_noalloc<TValue> {};
+struct node_traits : public intrusive_node_traits<TValue> {};
 
 
 // adapted from util.embedded version
@@ -430,7 +448,7 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
 
 
 
-template<class T, class TNodeTraits = node_traits_noalloc<T>>
+template<class T, class TNodeTraits = node_traits<T>>
 class forward_list
 {
 public:
@@ -453,6 +471,7 @@ protected:
     typedef typename node_traits_t::node_handle node_handle;
 
     static CONSTEXPR node_handle after_end_node() { return node_traits_t::null_node(); }
+    static CONSTEXPR node_handle before_beginning_node() { return node_traits_t::null_node(); }
 
     node_handle m_front;
 
@@ -480,7 +499,7 @@ protected:
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
         alloc(allocator),
-        m_front(node_traits_t::null_node()) {}
+        m_front(after_end_node()) {}
 
     reference front()
     {
@@ -491,7 +510,7 @@ public:
         return front_value;
     }
 
-    bool empty() const { return m_front == node_traits_t::null_node(); }
+    bool empty() const { return m_front == after_end_node(); }
 
     void pop_front()
     {
@@ -509,10 +528,7 @@ public:
     {
         node_handle node_pointing_to_value = alloc.alloc(value);
 
-        if (m_front != node_traits_t::null_node())
-        {
-            set_next(node_pointing_to_value, m_front);
-        }
+        set_next(node_pointing_to_value, m_front);
 
         m_front = node_pointing_to_value;
     }
@@ -544,6 +560,23 @@ public:
         return iterator(node_following_erased, alloc);
     }
 
+#ifdef FEATURE_CPP_VARIADIC
+
+    // a bit tricky because we have 4 allocation possibilities:
+    // 'intrusive' where node data itself is a resident of value_type itself, externally allocated
+    // 'non-intrusive' where node data is managed via a reference (RefNode) - this right now
+    //                 only works with externally-allocated refs.  Ultimately this would split
+    //                 into RefNode and RefNodeManaged where the latter allocs and deletes
+    //                 its own value_type
+    // 'semi-intrusive' where really it is intrusive but in reverse, forward_list allocates
+    //                  both the node and value_type together as part of the node.  In effect
+    //                  keeps copies of items placed into array
+/*
+    template <class... TArgs>
+    reference emplace_front( TArgs&&... args )
+    {
+    } */
+#endif
 
 
     // deviates from std C++ in that this optionally shall remove the first item found
@@ -552,7 +585,7 @@ public:
     void remove_if(UnaryPredicate p, bool first_only = false)
     {
         node_handle current = m_front;
-        node_handle previous = node_traits_t::null_node();
+        node_handle previous = before_beginning_node();
 
         while(current != after_end_node())
         {
@@ -566,7 +599,7 @@ public:
             if(matched)
             {
                 // If we match but there's no previous node
-                if(previous == node_traits_t::null_node())
+                if(previous == before_beginning_node())
                     // then instead of splicing, we are replacing the front node
                     m_front = _next;
                 else

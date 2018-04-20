@@ -20,6 +20,8 @@ struct Allocator
 };
 #endif
 
+// NOTE: May very well be better off using inbuilt version and perhaps extending it with
+// our own lock mechanism
 template <class TAllocator>
 struct allocator_traits
 {
@@ -43,16 +45,16 @@ struct allocator_traits
         return a.deallocate(p, n);
     }
 
-    // NOTE: Consider strongly putting nonstandard lock and unlock in here,
-    // to accomodate handle-based memory
 
     static pointer lock(allocator_type& a, handle_type h)
     {
-        return h;
+        return a.lock(h);
     }
 
-
-    static void unlock(allocator_type& a, handle_type h) {}
+    static void unlock(allocator_type& a, handle_type h)
+    {
+        a.unlock(h);
+    }
 
     static size_type max_size(const allocator_type& a)
     {
@@ -61,6 +63,14 @@ struct allocator_traits
         // allocator_traits::max_size is not
         return a.max_size();
     }
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class T, class... TArgs>
+    static void construct(allocator_type& a, T* p, TArgs&&... args)
+    {
+        new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
+    }
+#endif
 };
 
 
