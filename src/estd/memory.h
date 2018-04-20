@@ -78,6 +78,53 @@ template <class TPtr> struct pointer_traits;
 template <class T> struct pointer_traits<T*>;
 
 
+// TODO: Consider stuffing this into allocator_traits itself
+// this is a strongly-typed wrapper around the native handle type
+// to aid in safer typecasting.  We don't include allocator ref
+// itself just to ensure everything stays lightweight
+template <class T, class TAllocator>
+class typed_handle
+{
+public:
+    typedef typename TAllocator::handle_type handle_type;
+    typedef T value_type;
+    typedef allocator_traits<TAllocator> allocator_traits_t;
+
+protected:
+    typedef typename allocator_traits_t::pointer pointer;
+
+    handle_type handle;
+
+public:
+    // when calling this, be damn sure that this represents a T!
+    typed_handle(handle_type handle) : handle(handle) {}
+
+    value_type& lock(TAllocator& a)
+    {
+        pointer p = allocator_traits_t::lock(a, handle);
+
+        return * reinterpret_cast<value_type*>(p);
+    }
+
+    void unlock(TAllocator& a)
+    {
+        allocator_traits_t::unlock(a, handle);
+    }
+
+
+    // more of an inplace copy
+    void set_experimental(TAllocator& a, const value_type& copy_from)
+    {
+        value_type& copy_to = lock(a);
+
+        new (&copy_to) value_type(copy_from);
+
+        unlock(a);
+    }
+
+    operator handle_type() const { return handle; }
+};
+
 // Non standard
 struct nothing_allocator
 {
@@ -96,16 +143,16 @@ struct nothing_allocator
     typedef void* handle_type;
     typedef void* pointer;
 
-    // this is a strongly-typed wrapper around the native handle type
-    // to aid in safer typecasting.  We don't include allocator ref
-    // itself just to ensure everything stays lightweight
     template <class T>
-    struct experimental_handle_type
+    using typed_handle = typed_handle<T, nothing_allocator>;
+
+    template <class T>
+    struct experimental_handle_type_old
     {
         handle_type handle;
 
     public:
-        experimental_handle_type(handle_type handle) : handle(handle) {}
+        experimental_handle_type_old(handle_type handle) : handle(handle) {}
 
         T* lock(nothing_allocator& a)
         {

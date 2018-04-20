@@ -28,6 +28,9 @@ public:
     typedef void* handle_type;
     typedef void* handle_offset_type;
 
+    template <class T>
+    using typed_handle = estd::typed_handle<T, _allocator>;
+
     // See nothing_allocator::experimental_handle_type
     template <class T>
     struct experimental_handle_type

@@ -55,7 +55,7 @@ public:
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
-    typedef typename allocator_t::template experimental_handle_type<TNode> experimental_handle_type;
+    typedef typename allocator_t::template typed_handle<TNode> typed_handle;
 
     node_pointer lock(node_handle node)
     {
@@ -134,22 +134,22 @@ public:
     typedef const TValue& nv_ref_t;
     typedef typename base_t::template RefNode<TValue> node_type;
     typedef node_type* node_pointer;
-    typedef typename TAllocator::template experimental_handle_type<node_type> experimental_handle_type;
+    typedef typename TAllocator::template typed_handle<node_type> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return true; }
 
     inlineref_node_alloc(TAllocator* a) :
         base_t(a) {}
 
-    experimental_handle_type alloc(const TValue& value)
+    typed_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        typed_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
-        void* p = traits_t::lock(this->a, h);
+        node_type& p = h.lock(this->a);
 
-        new (p) node_type(value);
+        new (&p) node_type(value);
 
-        traits_t::unlock(this->a, h);
+        h.unlock(this->a);
 
         return h;
     }
@@ -160,17 +160,20 @@ public:
     // its memory
     // NOTE: Not sure why overloading doesn't select this properly, but needed to name
     // this alloc_move explicitly
-    experimental_handle_type alloc_move(TValue&& value)
+    typed_handle alloc_move(TValue&& value_to_move)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+        TAllocator& a = this->a;
 
-        void* p = traits_t::lock(this->a, h);
-        void* v = static_cast<uint8_t*>(p) + sizeof(node_type);
+        // we can use typed_handle here because we lead with node_type
+        typed_handle h = traits_t::allocate(a, sizeof(node_type) + sizeof(TValue));
 
-        traits_t::construct(this->a, (TValue*)v, value);
-        traits_t::construct(this->a, (node_type*)p, *((TValue*)v));
+        node_type& p = h.lock(a);
+        TValue* v = (TValue*)(&p + 1);
 
-        traits_t::unlock(this->a, h);
+        traits_t::construct(a, v, value_to_move);
+        traits_t::construct(a, &p, *v);
+
+        traits_t::unlock(a, h);
 
         return h;
     }
@@ -181,9 +184,10 @@ public:
     // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
     // its memory
     template <class ...TArgs>
-    experimental_handle_type alloc_emplace( TArgs&&...args)
+    typed_handle alloc_emplace( TArgs&&...args)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+        // we can use typed_handle here because we lead with node_type
+        typed_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
 
         void* p = traits_t::lock(this->a, h);
         void* value = static_cast<uint8_t*>(p) + sizeof(node_type);
@@ -207,14 +211,14 @@ public:
         return reinterpret_cast<node_pointer>(traits_t::lock(this->a, node));
     }
 
-    void dealloc(experimental_handle_type& node)
+    void dealloc(typed_handle& node)
     {
-        traits_t::deallocate(this->a, node, experimental_handle_type::size());
+        traits_t::deallocate(this->a, node, typed_handle::size());
     }
 
     // NOTE: Not really used yet, but eventually we'd like to make all node_handles
     // be this so that the lock() operation is less scary with its forward casting
-    node_pointer lock(experimental_handle_type& node)
+    node_pointer lock(typed_handle& node)
     {
         return node.lock(base_t::a);
     }
@@ -233,16 +237,16 @@ public:
     typedef const TValue& nv_ref_t;
     typedef typename base_t::template ValueNode<TValue> node_type;
     typedef node_type* node_pointer;
-    typedef typename TAllocator::template experimental_handle_type<node_type> experimental_handle_type;
+    typedef typename TAllocator::template typed_handle<node_type> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return true; }
 
     inlinevalue_node_alloc(TAllocator* a) :
         base_t(a) {}
 
-    node_handle alloc(const TValue& value)
+    typed_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        typed_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
         void* p = traits_t::lock(this->a, h);
 

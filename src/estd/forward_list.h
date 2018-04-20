@@ -121,8 +121,8 @@ protected:
 
     typedef typename node_traits_t::node_handle node_handle;
     typedef typename node_allocator_t::node_handle experimantal_specific_node_handle;
-    typedef typename allocator_t::template experimental_handle_type<experimantal_specific_node_handle>
-        experimental_handle;
+    typedef typename allocator_t::template typed_handle<experimantal_specific_node_handle>
+        typed_handle;
 
     static CONSTEXPR node_handle after_end_node() { return node_traits_t::null_node(); }
     static CONSTEXPR node_handle before_beginning_node() { return node_traits_t::null_node(); }
