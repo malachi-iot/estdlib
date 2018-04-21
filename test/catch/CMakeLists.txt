@@ -5,10 +5,10 @@ project("estdlib-unit-tests")
 set(CMAKE_CXX_STANDARD 11)
 
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include)
-set(TARGET_PROJ_DIR ../../src)
+set(ESTDLIB_DIR ../../src)
 
-add_subdirectory(${TARGET_PROJ_DIR} CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-include_directories(${TARGET_PROJ_DIR})
+add_subdirectory(${ESTDLIB_DIR} estdlib)
+include_directories(${ESTDLIB_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
     array-test.cpp
