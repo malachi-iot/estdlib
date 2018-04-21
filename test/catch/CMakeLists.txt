@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     experimental-test.cpp
     list-test.cpp
     map-test.cpp
+    memory-test.cpp
     queue-test.cpp
     string-test.cpp
     )

@@ -99,14 +99,14 @@ public:
     // when calling this, be damn sure that this represents a T!
     typed_handle(handle_type handle) : handle(handle) {}
 
-    value_type& lock(TAllocator& a)
+    value_type& lock(TAllocator& a) const
     {
         pointer p = allocator_traits_t::lock(a, handle);
 
         return * reinterpret_cast<value_type*>(p);
     }
 
-    void unlock(TAllocator& a)
+    void unlock(TAllocator& a) const
     {
         allocator_traits_t::unlock(a, handle);
     }
@@ -125,11 +125,93 @@ public:
     operator handle_type() const { return handle; }
 };
 
+namespace experimental {
+
+template <class T, class TAllocator>
+class unique_handle : protected typed_handle<T, TAllocator>
+{
+    typedef typed_handle<T, TAllocator> base_t;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::allocator_traits_t allocator_traits_t;
+    typedef T value_type;
+
+    TAllocator a;
+
+public:
+    unique_handle(TAllocator& a) :
+        base_t(allocator_traits_t::allocate(a, sizeof(value_type))),
+        a(a) {}
+
+    unique_handle() :
+       // some allocators are not stateful
+        base_t(allocator_traits_t::allocate(a, sizeof(value_type)))
+    {
+        static_assert(sizeof(TAllocator) == 0, "Only stateless allocator permitted here");
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    unique_handle(unique_handle&& uh) :
+        base_t(uh.handle),
+        a(uh.a)
+    {
+
+    }
+#endif
+
+    T& lock() { return base_t::lock(a); }
+    void unlock() { return base_t::unlock(a); }
+};
+
+
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+template <class T, class TAllocator, class... TArgs>
+unique_handle<T, TAllocator> make_unique_handle(TAllocator& a, TArgs&&...args)
+{
+    unique_handle<T, TAllocator> uh(a);
+
+    T& val = uh.lock();
+
+    allocator_traits<TAllocator>::construct(a, &val, args...);
+
+    uh.unlock();
+
+    return uh;
+}
+
+template <class T, class TAllocator, class... TArgs>
+unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
+{
+    static_assert(sizeof(TAllocator) == 0, "Only stateless allocator permitted here");
+    static TAllocator a;
+    unique_handle<T, TAllocator> uh(a);
+
+    T& val = uh.lock();
+
+    allocator_traits<TAllocator>::construct(a, &val, args...);
+
+    uh.unlock();
+
+    return uh;
+}
+#endif
+
+
+}
+
+
+// Non-standard and doesn't make a difference for some compilers
+// https://stackoverflow.com/questions/621616/c-what-is-the-size-of-an-object-of-an-empty-class
+#define NODATA_MOTIVATOR    char NO_DATA[0]
+
 // Non standard
 struct nothing_allocator
 {
+    NODATA_MOTIVATOR;
+
     struct lock_counter
     {
+        NODATA_MOTIVATOR;
+
         lock_counter& operator++() {return *this;}
         lock_counter& operator--() {return *this;}
         lock_counter& operator++(int) {return *this;}
@@ -138,31 +220,16 @@ struct nothing_allocator
         CONSTEXPR operator int() const { return 0; }
     };
 
-    struct allocated_size_helper;
+    struct allocated_size_helper
+    {
+        NODATA_MOTIVATOR;
+    };
 
     typedef void* handle_type;
     typedef void* pointer;
 
     template <class T>
     using typed_handle = typed_handle<T, nothing_allocator>;
-
-    template <class T>
-    struct experimental_handle_type_old
-    {
-        handle_type handle;
-
-    public:
-        experimental_handle_type_old(handle_type handle) : handle(handle) {}
-
-        T* lock(nothing_allocator& a)
-        {
-            return reinterpret_cast<T*>(handle);
-        }
-
-        void unlock(nothing_allocator& a);
-
-        operator handle_type() const { return handle; }
-    };
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
