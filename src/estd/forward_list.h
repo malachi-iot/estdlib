@@ -99,6 +99,12 @@ template <class TValue, class TAllocator>
 struct node_traits : public intrusive_node_traits<TValue> {};
 
 
+// TODO: Due to the requisite deviation for Allocator to take a <T>,
+// consider adding Allocator (<T>) to forward list and yanking all allocator
+// direct references out of TNodeTraits.  TNodeTraits will have to rely on
+// incoming templatized allocator calls.  One possibility is TNodeTrait can
+// present a 'default' allocator , though this might conflict with a default of
+// std::allocator<T> specialization, but that itself is deprecated for C++17
 template<class T, class TNodeTraits = node_traits<T>>
 class forward_list
 {
