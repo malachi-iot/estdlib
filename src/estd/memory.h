@@ -20,63 +20,9 @@ struct Allocator
 };
 #endif
 
-// NOTE: May very well be better off using inbuilt version and perhaps extending it with
-// our own lock mechanism
+
 template <class TAllocator>
-struct allocator_traits
-{
-    typedef TAllocator                          allocator_type;
-    typedef typename TAllocator::value_type     value_type;
-    typedef typename TAllocator::pointer        pointer;
-    typedef size_t                              size_type;
-
-    // non-standard, for handle based scenarios
-    typedef typename TAllocator::handle_type    handle_type;
-
-    typedef typename allocator_type::const_void_pointer     const_void_pointer;
-
-    static handle_type allocate(allocator_type& a, size_type n)
-    {
-        return a.allocate(n);
-    }
-
-    static void deallocate(allocator_type& a, handle_type p, size_type n)
-    {
-        return a.deallocate(p, n);
-    }
-
-
-    static pointer lock(allocator_type& a, handle_type h)
-    {
-        return a.lock(h);
-    }
-
-    static void unlock(allocator_type& a, handle_type h)
-    {
-        a.unlock(h);
-    }
-
-    static size_type max_size(const allocator_type& a)
-    {
-        // note that a.max_size is no longer required (though spec
-        // strongly implies it's optionally permitted) in C++17, though
-        // allocator_traits::max_size is not
-        return a.max_size();
-    }
-
-#ifdef FEATURE_CPP_VARIADIC
-    template <class T, class... TArgs>
-    static void construct(allocator_type& a, T* p, TArgs&&... args)
-    {
-        new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
-    }
-#endif
-};
-
-
-template <class TPtr> struct pointer_traits;
-template <class T> struct pointer_traits<T*>;
-
+struct allocator_traits;
 
 // TODO: Consider stuffing this into allocator_traits itself
 // this is a strongly-typed wrapper around the native handle type
@@ -124,6 +70,68 @@ public:
 
     operator handle_type() const { return handle; }
 };
+
+
+// NOTE: May very well be better off using inbuilt version and perhaps extending it with
+// our own lock mechanism
+// NOTE: I erroneously made our burgeouning custom allocators not-value_type aware
+template <class TAllocator>
+struct allocator_traits
+{
+    typedef TAllocator                          allocator_type;
+    typedef typename TAllocator::value_type     value_type;
+    typedef typename TAllocator::pointer        pointer;
+    typedef size_t                              size_type;
+
+    // non-standard, for handle based scenarios
+    typedef typename TAllocator::handle_type    handle_type;
+    typedef typed_handle<value_type, TAllocator> typed_handle;
+
+    typedef typename allocator_type::const_void_pointer     const_void_pointer;
+
+    static handle_type allocate(allocator_type& a, size_type n)
+    {
+        return a.allocate(n);
+    }
+
+    static void deallocate(allocator_type& a, handle_type p, size_type n)
+    {
+        return a.deallocate(p, n);
+    }
+
+
+    static pointer lock(allocator_type& a, handle_type h)
+    {
+        return a.lock(h);
+    }
+
+    static void unlock(allocator_type& a, handle_type h)
+    {
+        a.unlock(h);
+    }
+
+    static size_type max_size(const allocator_type& a)
+    {
+        // note that a.max_size is no longer required (though spec
+        // strongly implies it's optionally permitted) in C++17, though
+        // allocator_traits::max_size is not
+        return a.max_size();
+    }
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class T, class... TArgs>
+    static void construct(allocator_type& a, T* p, TArgs&&... args)
+    {
+        new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
+    }
+#endif
+};
+
+
+template <class TPtr> struct pointer_traits;
+template <class T> struct pointer_traits<T*>;
+
+
 
 namespace experimental {
 

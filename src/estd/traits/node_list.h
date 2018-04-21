@@ -5,6 +5,8 @@
 
 namespace estd {
 
+// TODO: Need to resolve descrepency here because actual TAllocator
+// should heed later incoming TValue as well
 template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
 
 // trait specifically for extracting value from a node
@@ -21,6 +23,7 @@ struct dummy_node_alloc
     typedef node_type* node_pointer;
     typedef node_type& nv_ref_t;
     typedef node_pointer node_handle;
+    typedef typed_handle<node_handle, nothing_allocator> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return false; }
 

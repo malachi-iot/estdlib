@@ -12,6 +12,7 @@ set(SOURCE_FILES
         estd/iterator.h
         estd/iterators/list.h
        estd/map.h
+        estd/memory.h
        estd/queue.h
         estd/string.h
         estd/traits/node_list.h
