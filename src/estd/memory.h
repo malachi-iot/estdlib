@@ -43,7 +43,7 @@ struct allocator_traits
     typedef typename TAllocator::handle_type    handle_type;
     typedef typename allocator_type::const_void_pointer     const_void_pointer;
 
-    static handle_type allocate(allocator_type& a, size_type n)
+    static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
         return a.allocate(n);
     }

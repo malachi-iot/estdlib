@@ -130,19 +130,24 @@ public:
 // to && representing a temporary variable)
 // If there was a way to template-compile-time enforce only one mode and not
 // mix and match that might be nice, but so far it only looks #ifdef'able
-template <class TNodeBase, class TValue, template <class> class TAllocator>
+template <class TNodeBase,
+            class TValue,
+            template <class> class TNodeAllocator,
+            template <class> class TValueAllocator = TNodeAllocator
+            >
 class inlineref_node_alloc :
-        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TAllocator>
+        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TNodeAllocator>
 {
 public:
 
 private:
-    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TAllocator> base_t;
+    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TNodeAllocator> base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
 
 public:
     typedef typename base_t::allocator_t allocator_t;
+    typedef TValueAllocator<TValue> value_allocator_t;
     typedef typename base_t::node_type node_type;
     typedef typename base_t::node_handle node_handle;
     typedef const TValue& nv_ref_t;
@@ -257,7 +262,7 @@ public:
 
     node_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1);
 
         void* p = traits_t::lock(this->a, h);
 
@@ -278,7 +283,7 @@ public:
     // this alloc_move explicitly
     node_handle alloc_move(TValue&& value)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1);
 
         node_type& p = traits_t::lock(this->a, h);
 
@@ -297,7 +302,7 @@ public:
     template <class ...TArgs>
     node_handle alloc_emplace( TArgs&&...args)
     {
-        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1);
 
         node_type& p = traits_t::lock(this->a, h);
 
@@ -311,7 +316,7 @@ public:
 
     void dealloc(node_handle h)
     {
-        traits_t::deallocate(this->a, h, sizeof(node_type));
+        traits_t::deallocate(this->a, h, 1);
     }
 
     node_type& lock(node_handle& node)
