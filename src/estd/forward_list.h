@@ -136,9 +136,9 @@ protected:
 
     node_handle next(node_handle from)
     {
-        node_pointer f = alloc.lock(from);
+        node_type& f = alloc.lock(from);
 
-        node_handle n = node_traits_t::get_next(*f);
+        node_handle n = node_traits_t::get_next(f);
 
         alloc.unlock(from);
 
@@ -148,9 +148,9 @@ protected:
 
     void set_next(node_handle _node, node_handle next)
     {
-        node_pointer node = alloc.lock(_node);
+        node_type& node = alloc.lock(_node);
 
-        node_traits_t::set_next(*node, next);
+        node_traits_t::set_next(node, next);
 
         alloc.unlock(_node);
     }
@@ -270,9 +270,9 @@ public:
         while(current != after_end_node())
         {
             node_handle _next = next(current);
-            node_pointer current_locked = alloc.lock(current);
+            node_type& current_locked = alloc.lock(current);
 
-            bool matched = p(*current_locked);
+            bool matched = p(current_locked);
 
             alloc.unlock(current);
 

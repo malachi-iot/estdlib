@@ -273,7 +273,7 @@ protected:
     T* lock()
     {
         lock_counter++;
-        return (T*) allocator.lock(handle);
+        return &allocator.lock(handle);
     }
 
     void unlock()

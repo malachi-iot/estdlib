@@ -38,7 +38,7 @@ struct dummy_node_alloc
     // placeholders
     // only useful when a) list is managing node memory allocations and
     // b) when they are handle-based
-    node_pointer lock(node_pointer node) { return node; }
+    node_type& lock(node_handle node) { return *node; }
     void unlock(node_pointer node) {}
 
     dummy_node_alloc(void* allocator) {}
@@ -112,12 +112,12 @@ public:
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
 
-    node_pointer lock(node_handle node)
+    node_type& lock(node_handle& node)
     {
-        return reinterpret_cast<node_pointer>(traits_t::lock(a, node));
+        return traits_t::lock(a, node);
     }
 
-    void unlock(node_handle node) { traits_t::unlock(a, node); }
+    void unlock(node_handle& node) { traits_t::unlock(a, node); }
 
     smart_node_alloc(allocator_t* allocator) :
         a(*allocator) {}
@@ -314,7 +314,7 @@ public:
         traits_t::deallocate(this->a, h, sizeof(node_type));
     }
 
-    node_handle& lock(node_handle node)
+    node_handle& lock(node_handle& node)
     {
         return traits_t::lock(this->a, node);
     }

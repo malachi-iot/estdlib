@@ -46,7 +46,7 @@ public:
 
     static handle_type invalid() { return NULLPTR; }
 
-    pointer lock(handle_type h) { return h; }
+    T& lock(handle_type h) { return *h; }
 
     void unlock(handle_type) { }
 

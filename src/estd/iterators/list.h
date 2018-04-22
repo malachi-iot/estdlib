@@ -38,8 +38,8 @@ public:
 
     static nv_reference lock(node_allocator_t& alloc, node_handle_t& handle_to_lock)
     {
-        node_pointer p = alloc.lock(handle_to_lock);
-        return traits_t::template value_exp<value_type>(*p);
+        node_type& p = alloc.lock(handle_to_lock);
+        return traits_t::template value_exp<value_type>(p);
     }
 
     // non standard handle-based mem helpers
@@ -114,9 +114,9 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
             this->unlock();
         }
 
-        node_pointer c = base_t::alloc.lock(this->current);
+        node_type& c = base_t::alloc.lock(this->current);
 
-        this->current = traits_t::get_next(*c);
+        this->current = traits_t::get_next(c);
 
         base_t::alloc.unlock(this->current);
 

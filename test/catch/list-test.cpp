@@ -108,7 +108,7 @@ struct explicit_handle_node_traits
         // placeholders
         // only useful when a) list is managing node memory allocations and
         // b) when they are handle-based
-        node_pointer lock(node_handle node) { return &handles[node]; }
+        node_type& lock(node_handle node) { return handles[node]; }
         void unlock(node_handle node) {}
     };
 
