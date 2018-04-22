@@ -9,12 +9,15 @@ struct InputIterator
     typedef TNodeTraits traits_t;
     typedef TValue value_type;
     typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
-    typedef typename TNodeTraits::node_handle node_handle_t;
+    //typedef typename TNodeTraits::node_handle node_handle_t;
     typedef InputIterator<TValue, TNodeTraits> iterator;
     typedef const iterator const_iterator;
 
 protected:
+    typedef typename node_allocator_t::node_handle node_handle_t;
+
     node_handle_t current;
+
 
     //typedef typename traits_t::node_allocator_t node_alloc_t;
     typedef typename node_allocator_t::node_type node_type;
@@ -116,7 +119,8 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
 
         node_type& c = base_t::alloc.lock(this->current);
 
-        this->current = traits_t::get_next(c);
+        // FIX: static cast from node_handle_base to node_handle
+        this->current = (node_handle_t) traits_t::get_next(c);
 
         base_t::alloc.unlock(this->current);
 

@@ -49,7 +49,7 @@ template <class TNodeBase>
 struct inline_node_alloc_base
 {
     template <class TValue>
-    struct RefNode : TNodeBase
+    struct RefNode : public TNodeBase
     {
         const TValue& value;
 
@@ -77,7 +77,7 @@ struct inline_node_alloc_base
 
 
     template <class TValue>
-    struct ValueNode : TNodeBase
+    struct ValueNode : public TNodeBase
     {
         const TValue value;
 
@@ -212,7 +212,7 @@ public:
         // ---
 
         node_type& p = traits_t::lock(this->a, h);
-        void* value = static_cast<uint8_t*>(&p) + sizeof(node_type);
+        void* value = reinterpret_cast<uint8_t*>(&p) + sizeof(node_type);
 
         traits_t::construct(this->a, (TValue*)value, args...);
         traits_t::construct(this->a, &p, *((TValue*)value));
@@ -280,9 +280,9 @@ public:
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
-        void* p = traits_t::lock(this->a, h);
+        node_type& p = traits_t::lock(this->a, h);
 
-        traits_t::construct(this->a, (node_type*)p, value);
+        traits_t::construct(this->a, &p, value);
 
         traits_t::unlock(this->a, h);
 
@@ -314,7 +314,7 @@ public:
         traits_t::deallocate(this->a, h, sizeof(node_type));
     }
 
-    node_handle& lock(node_handle& node)
+    node_type& lock(node_handle& node)
     {
         return traits_t::lock(this->a, node);
     }

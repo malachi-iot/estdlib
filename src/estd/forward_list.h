@@ -127,6 +127,7 @@ protected:
     node_allocator_t alloc;
 
     typedef typename node_allocator_t::node_handle node_handle;
+    //typedef typename node_traits_t::node_handle node_handle;
 
     // FIX: kill these forward casts
     static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
@@ -138,7 +139,8 @@ protected:
     {
         node_type& f = alloc.lock(from);
 
-        node_handle n = node_traits_t::get_next(f);
+        // FIX: have to forward cast from node_handle_base to node_handle
+        node_handle n = (node_handle) node_traits_t::get_next(f);
 
         alloc.unlock(from);
 

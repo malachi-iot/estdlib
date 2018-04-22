@@ -16,12 +16,12 @@ struct handle_with_offset
 
 
 
-template <class T, class Allocator>
+template <class T, template <class> class Allocator>
 class vector : public experimental::dynamic_array<T, Allocator>
 {
 public:
     typedef T value_type;
-    typedef Allocator allocator_type;
+    typedef Allocator<T> allocator_type;
     typedef std::size_t size_type;
 
 private:

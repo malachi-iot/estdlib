@@ -15,7 +15,9 @@ TEST_CASE("memory.h tests")
 {
     SECTION("A")
     {
+#ifdef UNUSED
         estd::experimental::unique_handle<int, _allocator> uh;
         //auto s = sizeof(empty);
+#endif
     }
 }

@@ -245,12 +245,12 @@ public:
 
 // non standard base class for managing expanding/contracting arrays
 // accounts for lock/unlock behaviors
-template <class T, class TAllocator>
+template <class T, template <class> class TAllocator>
 class dynamic_array
 {
 public:
     typedef T value_type;
-    typedef TAllocator allocator_type;
+    typedef TAllocator<T> allocator_type;
 
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::pointer pointer;

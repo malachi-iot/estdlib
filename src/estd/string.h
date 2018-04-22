@@ -28,7 +28,7 @@ template<> struct char_traits<const char>
 template<
     class CharT,
     class Traits = char_traits<CharT>,
-    class Allocator = nothing_allocator
+    template <class> class Allocator = nothing_allocator
 > class basic_string :
         public experimental::dynamic_array<CharT, Allocator>
 {
@@ -37,7 +37,7 @@ template<
 public:
     typedef CharT value_type;
     typedef Traits traits_type;
-    typedef Allocator allocator_type;
+    typedef Allocator<value_type> allocator_type;
 
     typedef typename base_t::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
