@@ -85,11 +85,11 @@ struct explicit_handle_node_traits
 {
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
-    typedef estd::nothing_allocator<test_node_handle> allocator_t;
 
     template <class TValue>
     struct _node_allocator_t
     {
+        typedef estd::nothing_allocator<TValue> allocator_t;
         typedef test_node_handle node_type;
         typedef node_type* node_pointer;
         typedef test_node_handle& nv_ref_t;

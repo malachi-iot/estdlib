@@ -20,7 +20,7 @@ protected:
     typedef typename node_allocator_t::node_type node_type;
     typedef typename node_allocator_t::node_pointer node_pointer;
     typedef typename node_allocator_t::nv_ref_t nv_reference;
-    typedef typename traits_t::allocator_t allocator_t;
+    typedef typename node_allocator_t::allocator_t allocator_t;
 
     // used only when locking allocator is present, otherwise resolves
     // to noops

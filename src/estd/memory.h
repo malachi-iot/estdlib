@@ -37,6 +37,7 @@ struct allocator_traits
     typedef typename TAllocator::value_type     value_type;
     typedef typename TAllocator::pointer        pointer;
     typedef size_t                              size_type;
+    typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
     // non-standard, for handle based scenarios
     typedef typename TAllocator::handle_type    handle_type;
@@ -53,7 +54,7 @@ struct allocator_traits
     }
 
 
-    static pointer lock(allocator_type& a, handle_type h)
+    static reference lock(allocator_type& a, handle_type h)
     {
         return a.lock(h);
     }
@@ -188,12 +189,13 @@ struct nothing_allocator
     };
 
     typedef T value_type;
+    typedef T& reference;
     typedef T* handle_type;
     typedef T* pointer;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
-    pointer lock(handle_type h) { return h; }
+    reference lock(handle_type h) { return *h; }
     void unlock(handle_type h) {}
 
     // Don't want this here, but needed so far for ~dynamic_array, since

@@ -24,6 +24,8 @@ struct dummy_node_alloc
     typedef node_type& nv_ref_t;
     typedef node_pointer node_handle;
 
+    typedef nothing_allocator<TNode> allocator_t;
+
     static CONSTEXPR bool can_emplace() { return false; }
 
     // pretends to allocate space for a node, when in fact no allocation
@@ -43,36 +45,11 @@ struct dummy_node_alloc
 };
 
 
-// TNode only represents the basic next/reverse tracking portion of the node,
-// not the ref or value managed within
-template <class TNode, template <class> class TAllocator>
-class smart_node_alloc
+template <class TNodeBase>
+struct inline_node_alloc_base
 {
-public:
-    typedef TAllocator<TNode> allocator_t;
-
-protected:
-    allocator_t a;
-
-public:
-    typedef allocator_traits<allocator_t> traits_t;
-    typedef TNode node_type;
-    typedef node_type* node_pointer;
-    typedef typename traits_t::handle_type node_handle;
-    typedef typename allocator_t::template typed_handle<TNode> typed_handle;
-
-    node_pointer lock(node_handle node)
-    {
-        return reinterpret_cast<node_pointer>(traits_t::lock(a, node));
-    }
-
-    void unlock(node_handle node) { traits_t::unlock(a, node); }
-
-    smart_node_alloc(TAllocator* allocator) :
-        a(*allocator) {}
-
     template <class TValue>
-    struct RefNode : TNode
+    struct RefNode : TNodeBase
     {
         const TValue& value;
 
@@ -100,7 +77,7 @@ public:
 
 
     template <class TValue>
-    struct ValueNode : TNode
+    struct ValueNode : TNodeBase
     {
         const TValue value;
 
@@ -118,6 +95,33 @@ public:
     };
 };
 
+// TNode only represents the basic next/reverse tracking portion of the node,
+// not the ref or value managed within
+template <class TNode, template <class> class TAllocator>
+class smart_node_alloc
+{
+public:
+    typedef TAllocator<TNode> allocator_t;
+
+protected:
+    allocator_t a;
+
+public:
+    typedef allocator_traits<allocator_t> traits_t;
+    typedef TNode node_type;
+    typedef node_type* node_pointer;
+    typedef typename traits_t::handle_type node_handle;
+
+    node_pointer lock(node_handle node)
+    {
+        return reinterpret_cast<node_pointer>(traits_t::lock(a, node));
+    }
+
+    void unlock(node_handle node) { traits_t::unlock(a, node); }
+
+    smart_node_alloc(allocator_t* allocator) :
+        a(*allocator) {}
+};
 
 // NOTE: It's possible that in order to implement push_front(&&) and friends,
 // we will not only need a smart_inlinevalue_node_alloc, but also be able to
@@ -126,34 +130,38 @@ public:
 // to && representing a temporary variable)
 // If there was a way to template-compile-time enforce only one mode and not
 // mix and match that might be nice, but so far it only looks #ifdef'able
-template <class TNode, class TValue, class TAllocator>
-class inlineref_node_alloc : public smart_node_alloc<TNode, TAllocator>
+template <class TNodeBase, class TValue, template <class> class TAllocator>
+class inlineref_node_alloc :
+        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TAllocator>
 {
-    typedef smart_node_alloc<TNode, TAllocator> base_t;
+public:
+
+private:
+    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TAllocator> base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
 
 public:
+    typedef typename base_t::allocator_t allocator_t;
+    typedef typename base_t::node_type node_type;
     typedef typename base_t::node_handle node_handle;
     typedef const TValue& nv_ref_t;
-    typedef typename base_t::template RefNode<TValue> node_type;
     typedef node_type* node_pointer;
-    typedef typename TAllocator::template typed_handle<node_type> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return true; }
 
-    inlineref_node_alloc(TAllocator* a) :
+    inlineref_node_alloc(allocator_t* a) :
         base_t(a) {}
 
-    typed_handle alloc(const TValue& value)
+    node_handle alloc(const TValue& value)
     {
-        typed_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1);
 
-        node_type& p = h.lock(this->a);
+        node_type& p = traits_t::lock(this->a, h);
 
         new (&p) node_type(value);
 
-        h.unlock(this->a);
+        traits_t::unlock(this->a, h);
 
         return h;
     }
@@ -164,14 +172,16 @@ public:
     // its memory
     // NOTE: Not sure why overloading doesn't select this properly, but needed to name
     // this alloc_move explicitly
-    typed_handle alloc_move(TValue&& value_to_move)
+    node_handle alloc_move(TValue&& value_to_move)
     {
-        TAllocator& a = this->a;
+        allocator_t& a = this->a;
 
         // we can use typed_handle here because we lead with node_type
-        typed_handle h = traits_t::allocate(a, sizeof(node_type) + sizeof(TValue));
+        int hack_oversize = 1 + (sizeof(TValue) / sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1 + hack_oversize);
+        //node_handle h = traits_t::allocate(a, sizeof(node_type) + sizeof(TValue));
 
-        node_type& p = h.lock(a);
+        node_type& p = traits_t::lock(a, h);
         TValue* v = (TValue*)(&p + 1);
 
         traits_t::construct(a, v, value_to_move);
@@ -188,16 +198,24 @@ public:
     // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
     // its memory
     template <class ...TArgs>
-    typed_handle alloc_emplace( TArgs&&...args)
+    node_handle alloc_emplace( TArgs&&...args)
     {
         // we can use typed_handle here because we lead with node_type
-        typed_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+        // +++
+        // FIX: here we have a huge problem, we can't do byte by byte allocation easily when following
+        // TAllocate<T> convention.  However, having TAllocate<T> is so convenient, perhaps deviating
+        // and making an "malloc/free" (byte-oriented only) is reasonable - and possibly also convenient
+        // because things like pool allocators could just not implement those
+        //node_handle h = traits_t::allocate(this->a, sizeof(node_type) + sizeof(TValue));
+        int hack_oversize = 1 + (sizeof(TValue) / sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, 1 + hack_oversize);
+        // ---
 
-        void* p = traits_t::lock(this->a, h);
-        void* value = static_cast<uint8_t*>(p) + sizeof(node_type);
+        node_type& p = traits_t::lock(this->a, h);
+        void* value = static_cast<uint8_t*>(&p) + sizeof(node_type);
 
         traits_t::construct(this->a, (TValue*)value, args...);
-        traits_t::construct(this->a, (node_type*)p, *((TValue*)value));
+        traits_t::construct(this->a, &p, *((TValue*)value));
 
         traits_t::unlock(this->a, h);
 
@@ -205,52 +223,41 @@ public:
     }
 #endif
 
-    void dealloc(node_handle h)
+    node_type& lock(node_handle& node)
     {
-        traits_t::deallocate(this->a, h, sizeof(node_type));
+        return traits_t::lock(this->a, node);
     }
 
-    node_pointer lock(node_handle node)
+    void dealloc(node_handle& node)
     {
-        return reinterpret_cast<node_pointer>(traits_t::lock(this->a, node));
-    }
-
-    void dealloc(typed_handle& node)
-    {
-        traits_t::deallocate(this->a, node, typed_handle::size());
-    }
-
-    // NOTE: Not really used yet, but eventually we'd like to make all node_handles
-    // be this so that the lock() operation is less scary with its forward casting
-    node_pointer lock(typed_handle& node)
-    {
-        return node.lock(base_t::a);
+        traits_t::deallocate(this->a, node, 1);
     }
 };
 
 
-template <class TNode, class TValue, template <class> class TAllocator>
-class inlinevalue_node_alloc : public smart_node_alloc<TNode, TAllocator>
+template <class TNodeBase, class TValue, template <class> class TAllocator>
+class inlinevalue_node_alloc :
+        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template ValueNode<TValue>, TAllocator>
 {
-    typedef smart_node_alloc<TNode, TAllocator> base_t;
+    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template ValueNode<TValue>, TAllocator> base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
 
 public:
+    typedef typename base_t::allocator_t allocator_t;
     typedef typename base_t::node_handle node_handle;
     typedef const TValue& nv_ref_t;
-    typedef typename base_t::template ValueNode<TValue> node_type;
+    typedef typename base_t::node_type node_type;
     typedef node_type* node_pointer;
-    typedef typename TAllocator::template typed_handle<node_type> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return true; }
 
-    inlinevalue_node_alloc(TAllocator* a) :
+    inlinevalue_node_alloc(allocator_t* a) :
         base_t(a) {}
 
-    typed_handle alloc(const TValue& value)
+    node_handle alloc(const TValue& value)
     {
-        typed_handle h = traits_t::allocate(this->a, sizeof(node_type));
+        node_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
         void* p = traits_t::lock(this->a, h);
 
@@ -292,9 +299,9 @@ public:
     {
         node_handle h = traits_t::allocate(this->a, sizeof(node_type));
 
-        void* p = traits_t::lock(this->a, h);
+        node_type& p = traits_t::lock(this->a, h);
 
-        traits_t::construct(this->a, (node_type*)p, args...);
+        traits_t::construct(this->a, &p, args...);
 
         traits_t::unlock(this->a, h);
 
@@ -307,9 +314,9 @@ public:
         traits_t::deallocate(this->a, h, sizeof(node_type));
     }
 
-    node_pointer lock(node_handle node)
+    node_handle& lock(node_handle node)
     {
-        return reinterpret_cast<node_pointer>(traits_t::lock(this->a, node));
+        return traits_t::lock(this->a, node);
     }
 
 };
@@ -317,14 +324,15 @@ public:
 // standardized node traits base.  You don't have to use this, but it proves convenient if you
 // adhere to the forward_node_base signature
 // FIX: this is hard wired to non-handle based scenarios still
-template <class TNode, template <class> class TAllocator>
+template <class TNodeBase, template <class> class TAllocator>
 struct node_traits_base
 {
-    typedef TAllocator<TNode> allocator_t;
-    typedef TNode node_type_base;
+    typedef TNodeBase node_type_base;
     typedef node_type_base* node_pointer;
-    typedef typename allocator_t::handle_type node_handle;
-    //typedef node_pointer node_handle;
+
+    // we expect node_handle and invalid() to not deviate between TAllocator<node_type_base>
+    // and TAllocator<node_type>, though theoretically it could
+    typedef typename TAllocator<node_type_base>::handle_type node_handle;
 
     static node_handle get_next(const node_type_base& node)
     {
@@ -339,18 +347,17 @@ struct node_traits_base
         node.next(next);
     }
 
-    static CONSTEXPR node_handle null_node() { return allocator_t::invalid(); }
+    static CONSTEXPR node_handle null_node() { return TAllocator<node_type_base>::invalid(); }
 };
 
 // helper traits class for node traits organized like stock-standard std::forward_list
 // forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
 // be advised TNode must conform to forward_node_base signature
-template <class TNode, template <class> class TAllocator>
-struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
+template <class TNodeBase, template <class> class TAllocator>
+struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
 {
-    typedef node_traits_base<TNode, TAllocator> base_t;
-    typedef typename base_t::allocator_t allocator_t;
-    typedef TNode node_type_base;
+    typedef node_traits_base<TNodeBase, TAllocator> base_t;
+    typedef TNodeBase node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue2>
@@ -370,12 +377,8 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
     };
 #endif
 
-    // test node allocator base type, use this to extract node_type
-    // for value_exp so that we can fully decouple from value_type
-    typedef estd::smart_node_alloc<node_type_base, TAllocator> tnab_t;
-
     template <class TValue2>
-    static const TValue2& value_exp(typename tnab_t::template RefNode<TValue2>& node)
+    static const TValue2& value_exp(typename inline_node_alloc_base<node_type_base>::template RefNode<TValue2>& node)
     {
         return node.value;
     }
@@ -387,7 +390,6 @@ template <class TNode, template <class> class TAllocator>
 struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
 {
     typedef node_traits_base<TNode, TAllocator> base_t;
-    typedef typename base_t::allocator_t allocator_t;
     typedef TNode node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
@@ -408,12 +410,8 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
     };
 #endif
 
-    // test node allocator base type, use this to extract node_type
-    // for value_exp so that we can fully decouple from value_type
-    typedef estd::smart_node_alloc<node_type_base, TAllocator> sna_t;
-
     template <class TValue>
-    static const TValue& value_exp(const typename sna_t::template ValueNode<TValue>& node)
+    static const TValue& value_exp(typename inline_node_alloc_base<node_type_base>::template ValueNode<TValue>& node)
     {
         return node.value;
     }
@@ -425,7 +423,6 @@ template<class TNodeAndValue>
 struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_allocator >
 {
     typedef node_traits_base<TNodeAndValue, nothing_allocator> base_t;
-    typedef typename base_t::allocator_t allocator_t;
     typedef TNodeAndValue node_type;
 
     // TODO: eventually interact with allocator for this (in
@@ -433,7 +430,7 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
     typedef node_type* node_pointer;
     typedef node_pointer node_handle;
 
-    static CONSTEXPR node_pointer null_node() { return NULLPTR; }
+    static CONSTEXPR node_handle null_node() { return NULLPTR; }
 
     // semi-experimental, since std forward list technically supports a 'before begin'
     // iterator, we may need a before_begin_node() value

@@ -115,8 +115,8 @@ public:
     typedef TNodeTraits node_traits_t;
     typedef ForwardIterator<value_type, node_traits_t> iterator;
     typedef const iterator   const_iterator;
-    typedef typename node_traits_t::allocator_t allocator_t;
     typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
+    typedef typename node_allocator_t::allocator_t allocator_t;
     typedef typename node_allocator_t::node_type node_type;
     typedef typename node_allocator_t::node_pointer node_pointer;
 
@@ -126,10 +126,11 @@ public:
 protected:
     node_allocator_t alloc;
 
-    typedef typename node_traits_t::node_handle node_handle;
+    typedef typename node_allocator_t::node_handle node_handle;
 
-    static CONSTEXPR node_handle after_end_node() { return node_traits_t::null_node(); }
-    static CONSTEXPR node_handle before_beginning_node() { return node_traits_t::null_node(); }
+    // FIX: kill these forward casts
+    static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
+    static CONSTEXPR node_handle before_beginning_node() { return (node_handle) node_traits_t::null_node(); }
 
     node_handle m_front;
 
