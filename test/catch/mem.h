@@ -2,7 +2,9 @@
 
 #include "estd/memory.h"
 
-// reference allocator for inbuild mechanisms
+// reference allocator for inbuild mechanisms.  basically a crummy test-only
+// version of std new_allocator
+template <class T>
 class _allocator
 {
     NODATA_MOTIVATOR;
@@ -12,7 +14,7 @@ public:
     // for iterators
     static constexpr bool is_locking() { return false; }
 
-    typedef estd::nothing_allocator::lock_counter lock_counter;
+    typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
 
     // holds the data (if necessary) to reveal the size of an allocation
     // some allocators innately have this, some don't.  near as I can tell,
@@ -24,41 +26,12 @@ public:
         size_t allocated_size;
     };
 
-    typedef void* value_type;
-    typedef void* pointer;
+    typedef T value_type;
+    typedef value_type* pointer;
     typedef const void* const_void_pointer;
-    typedef void* handle_type;
+    typedef value_type* handle_type;
     typedef void* handle_offset_type;
 
-    template <class T>
-    using typed_handle = estd::typed_handle<T, _allocator>;
-
-    // See nothing_allocator::experimental_handle_type
-    template <class T>
-    struct experimental_handle_type
-    {
-        handle_type handle;
-
-    public:
-        // NOTE: whoever initialies this needs to be damn sure handle
-        // can safely be cast to T
-        experimental_handle_type(handle_type handle) : handle(handle) {}
-
-        T* lock(_allocator& a)
-        {
-            return reinterpret_cast<T*>(handle);
-        }
-
-        void unlock(_allocator& a) {}
-
-        operator handle_type() const { return handle; }
-
-        static CONSTEXPR size_t size() { return sizeof(T); }
-    };
-
-    // FIX:  not convinced I want gcroot to be directly associated with
-    // handle_offset_type
-    template <class T>
     class handle_with_offset
     {
         handle_offset_type loc;
@@ -77,9 +50,10 @@ public:
 
     void unlock(handle_type) { }
 
-    void* allocate(size_t size)
+    pointer allocate(size_t size)
     {
-        return malloc(size);
+        // FIX: unsure if I should be doing a 'new' here or not
+        return (pointer) malloc(size * sizeof(T));
     }
 
     void deallocate(void* p, size_t size)
@@ -90,7 +64,7 @@ public:
 
     handle_type reallocate(handle_type h, size_t size)
     {
-        return realloc(h, size);
+        return (pointer) realloc(h, size);
     }
 
 

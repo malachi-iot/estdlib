@@ -95,7 +95,8 @@ struct node_value_traits_experimental<
 
 
 // default node_traits is the no-alloc variety (since we are embedded oriented)
-template <class TValue, class TAllocator>
+//template <class TValue, template <class> class TAllocator>
+template <class TValue, class TAllocator = nothing_allocator<TValue>>
 struct node_traits : public intrusive_node_traits<TValue> {};
 
 
@@ -126,7 +127,6 @@ protected:
     node_allocator_t alloc;
 
     typedef typename node_traits_t::node_handle node_handle;
-    typedef typename node_allocator_t::typed_handle typed_handle;
 
     static CONSTEXPR node_handle after_end_node() { return node_traits_t::null_node(); }
     static CONSTEXPR node_handle before_beginning_node() { return node_traits_t::null_node(); }

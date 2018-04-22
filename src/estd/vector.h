@@ -27,7 +27,7 @@ public:
 private:
     typedef experimental::dynamic_array<T, Allocator> base_t;
     typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::template handle_with_offset<T> handle_with_offset;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
 
 public:
     // NOTE: accessor may very well become interchangeable with iterator

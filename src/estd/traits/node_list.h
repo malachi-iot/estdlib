@@ -7,7 +7,7 @@ namespace estd {
 
 // TODO: Need to resolve descrepency here because actual TAllocator
 // should heed later incoming TValue as well
-template <class TNode, class TAllocator = nothing_allocator> struct node_traits;
+template <class TNode, class TAllocator> struct node_traits;
 
 // trait specifically for extracting value from a node
 template <class TNode, class TValue> struct node_value_traits_experimental;
@@ -23,7 +23,6 @@ struct dummy_node_alloc
     typedef node_type* node_pointer;
     typedef node_type& nv_ref_t;
     typedef node_pointer node_handle;
-    typedef typed_handle<node_handle, nothing_allocator> typed_handle;
 
     static CONSTEXPR bool can_emplace() { return false; }
 
@@ -46,15 +45,17 @@ struct dummy_node_alloc
 
 // TNode only represents the basic next/reverse tracking portion of the node,
 // not the ref or value managed within
-template <class TNode, class TAllocator>
+template <class TNode, template <class> class TAllocator>
 class smart_node_alloc
 {
+public:
+    typedef TAllocator<TNode> allocator_t;
+
 protected:
-    TAllocator a;
+    allocator_t a;
 
 public:
-    typedef TAllocator allocator_t;
-    typedef allocator_traits<TAllocator> traits_t;
+    typedef allocator_traits<allocator_t> traits_t;
     typedef TNode node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::handle_type node_handle;
@@ -228,7 +229,7 @@ public:
 };
 
 
-template <class TNode, class TValue, class TAllocator>
+template <class TNode, class TValue, template <class> class TAllocator>
 class inlinevalue_node_alloc : public smart_node_alloc<TNode, TAllocator>
 {
     typedef smart_node_alloc<TNode, TAllocator> base_t;
@@ -316,10 +317,10 @@ public:
 // standardized node traits base.  You don't have to use this, but it proves convenient if you
 // adhere to the forward_node_base signature
 // FIX: this is hard wired to non-handle based scenarios still
-template <class TNode, class TAllocator>
+template <class TNode, template <class> class TAllocator>
 struct node_traits_base
 {
-    typedef TAllocator allocator_t;
+    typedef TAllocator<TNode> allocator_t;
     typedef TNode node_type_base;
     typedef node_type_base* node_pointer;
     typedef typename allocator_t::handle_type node_handle;
@@ -344,10 +345,11 @@ struct node_traits_base
 // helper traits class for node traits organized like stock-standard std::forward_list
 // forward_node_bases are dynamically allocated via TAllocator with an extra space for a TValue&
 // be advised TNode must conform to forward_node_base signature
-template <class TNode, class TAllocator>
+template <class TNode, template <class> class TAllocator>
 struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
 {
-    typedef TAllocator allocator_t;
+    typedef node_traits_base<TNode, TAllocator> base_t;
+    typedef typename base_t::allocator_t allocator_t;
     typedef TNode node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
@@ -381,10 +383,11 @@ struct inlineref_node_traits : public node_traits_base<TNode, TAllocator>
 
 
 
-template <class TNode, class TAllocator>
+template <class TNode, template <class> class TAllocator>
 struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
 {
-    typedef TAllocator allocator_t;
+    typedef node_traits_base<TNode, TAllocator> base_t;
+    typedef typename base_t::allocator_t allocator_t;
     typedef TNode node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
@@ -419,16 +422,16 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
 // this is where node and value are combined, and no allocator is used
 // (node memory management entirely external to node and list)
 template<class TNodeAndValue>
-struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_allocator>
+struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_allocator >
 {
+    typedef node_traits_base<TNodeAndValue, nothing_allocator> base_t;
+    typedef typename base_t::allocator_t allocator_t;
     typedef TNodeAndValue node_type;
 
     // TODO: eventually interact with allocator for this (in
     // other node_traits where allocation actually happens)
     typedef node_type* node_pointer;
     typedef node_pointer node_handle;
-
-    typedef nothing_allocator allocator_t;
 
     static CONSTEXPR node_pointer null_node() { return NULLPTR; }
 

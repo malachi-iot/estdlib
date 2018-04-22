@@ -62,8 +62,10 @@ struct test_node_handle2 : public test_node_handle
 uint8_t handle_count = 0;
 test_node_handle2 handles[5];
 
-template <class TAllocator>
-using node_traits_inlineref = estd::inlineref_node_traits<estd::experimental::forward_node_base, TAllocator>;
+template <template <class> class TAllocator>
+using node_traits_inlineref = estd::inlineref_node_traits<
+        estd::experimental::forward_node_base,
+        TAllocator >;
 
 // just to help out typed_handle
 // eventually root allocators will shoulder more of the burden that node allocators
@@ -83,7 +85,7 @@ struct explicit_handle_node_traits
 {
     typedef uint8_t node_handle;
     typedef test_node_handle& nv_reference;
-    typedef estd::nothing_allocator allocator_t;
+    typedef estd::nothing_allocator<test_node_handle> allocator_t;
 
     template <class TValue>
     struct _node_allocator_t
@@ -94,11 +96,10 @@ struct explicit_handle_node_traits
         // node_allocator_t::node_handle must be identical or more specialized form
         // of node_traits::node_handle
         typedef uint8_t node_handle;
-        typedef estd::typed_handle<TValue, dummy_pool_allocator<TValue>> typed_handle;
 
         _node_allocator_t(void*) {}
 
-        static typed_handle alloc(TValue& value)
+        static node_handle alloc(TValue& value)
         {
             handles[handle_count] = value;
             return handle_count++;
@@ -107,7 +108,7 @@ struct explicit_handle_node_traits
         // placeholders
         // only useful when a) list is managing node memory allocations and
         // b) when they are handle-based
-        node_pointer lock(typed_handle node) { return &handles[node]; }
+        node_pointer lock(node_handle node) { return &handles[node]; }
         void unlock(node_handle node) {}
     };
 

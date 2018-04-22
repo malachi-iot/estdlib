@@ -8,7 +8,7 @@ TEST_CASE("array/vector tests")
 {
     SECTION("basic vector")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.reserve(20);
 
@@ -21,7 +21,7 @@ TEST_CASE("array/vector tests")
     }
     SECTION("basic vector 2")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.push_back(5);
 
