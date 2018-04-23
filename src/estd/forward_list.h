@@ -12,19 +12,39 @@
 namespace estd {
 
 namespace experimental {
+
 // Make list and forward list conform to, but not necessarily depend on, these
 // signatures (C++ concepts would be nice here)
+// TODO: fixup these names and move them out of experimental.  Remember, although
+// all our node_traits and friends expect these signatures, you could roll your
+// own node traits and use different signatures along the way
 
-class forward_node_base
+// TNode might be a handle instead of a direct pointer.  Perhaps our own kind of
+// "fancy pointer"
+template <class TNode>
+class forward_node_base_base
 {
-    forward_node_base *m_next;
+protected:
+
+    TNode m_next;
+
+    forward_node_base_base(TNode initial_value) : m_next(initial_value) {}
 
 public:
-    forward_node_base() : m_next(NULLPTR) {}
+    typedef TNode node_t;
 
-    forward_node_base* next() const { return m_next; }
+    node_t next() const { return m_next; }
 
-    void next(forward_node_base *set_to) { m_next = set_to; }
+    void next(node_t set_to) { m_next = set_to; }
+};
+
+class forward_node_base : public forward_node_base_base<forward_node_base*>
+{
+protected:
+    typedef forward_node_base_base<forward_node_base*> base_t;
+
+public:
+    forward_node_base() : base_t(NULLPTR) {}
 };
 
 class reverse_node_base
