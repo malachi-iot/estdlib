@@ -366,9 +366,9 @@ struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
             inlineref_node_alloc<
                 node_type_base, TValue2, TAllocator>
     {
-        typedef estd::smart_inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
+        typedef estd::inlineref_node_alloc<node_type_base, TValue2, TAllocator> base_t;
 
-        node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+        node_allocator_t(typename base_t::allocator_t* allocator) : base_t(allocator) {}
     };
 #endif
 
@@ -401,7 +401,7 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
     {
         typedef estd::inlinevalue_node_alloc<node_type_base, TValue2, TAllocator> base_t;
 
-        node_allocator_t(TAllocator* allocator) : base_t(allocator) {}
+        node_allocator_t(typename base_t::allocator_t* allocator) : base_t(allocator) {}
     };
 #endif
 

@@ -7,6 +7,7 @@
 #define FEATURE_CPP_VARIADIC
 #define FEATURE_CPP_CONSTEXPR
 #define FEATURE_CPP_LAMBDA
+#define FEATURE_CPP_RANGED_FORLOOP
 
 #define CONSTEXPR constexpr
 #define NULLPTR nullptr

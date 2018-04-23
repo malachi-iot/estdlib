@@ -180,7 +180,10 @@ struct nothing_allocator
         lock_counter& operator++(int) {return *this;}
         lock_counter& operator--(int) {return *this;}
 
-        CONSTEXPR operator int() const { return 0; }
+#ifdef FEATURE_CPP_CONSTEXPR
+        constexpr
+#endif
+        operator int() const { return 0; }
     };
 
     struct allocated_size_helper

@@ -116,7 +116,7 @@ struct node_value_traits_experimental<
 
 // default node_traits is the no-alloc variety (since we are embedded oriented)
 //template <class TValue, template <class> class TAllocator>
-template <class TValue, class TAllocator = nothing_allocator<TValue>>
+template <class TValue, class TAllocator = nothing_allocator<TValue > >
 struct node_traits : public intrusive_node_traits<TValue> {};
 
 
@@ -126,7 +126,7 @@ struct node_traits : public intrusive_node_traits<TValue> {};
 // incoming templatized allocator calls.  One possibility is TNodeTrait can
 // present a 'default' allocator , though this might conflict with a default of
 // std::allocator<T> specialization, but that itself is deprecated for C++17
-template<class T, class TNodeTraits = node_traits<T>>
+template<class T, class TNodeTraits = node_traits<T > >
 class forward_list
 {
 public:
@@ -345,13 +345,14 @@ public:
 
         while(current != after_end_node())
         {
+            node_handle _next = next(current);
             node_pointer current_locked = alloc.lock(current);
 
             bool matched = *current_locked == value;
 
             alloc.unlock(current);
 
-            if()
+            if(matched)
             {
                 // If we match but there's no previous node
                 if(previous == node_traits_t::null_node())
@@ -364,7 +365,7 @@ public:
             }
 
             previous = current;
-            current = next(current);
+            current = _next;
         }
 #endif
     }
