@@ -35,16 +35,12 @@ struct dummy_node_alloc
 
     void dealloc(node_pointer node) {}
 
-    // placeholders
-    // only useful when a) list is managing node memory allocations and
-    // b) when they are handle-based
-    node_type& lock(node_handle node) { return *node; }
-    void unlock(node_pointer node) {}
-
     dummy_node_alloc(void* allocator) {}
 };
 
 
+// TODO: yank these inner nodes out of this class make them either freestanding
+// or living within another struct
 template <class TNodeBase>
 struct inline_node_alloc_base
 {
@@ -110,17 +106,22 @@ public:
     typedef allocator_traits<allocator_t> traits_t;
     typedef TNode node_type;
     typedef node_type* node_pointer;
+    typedef typename traits_t::size_type size_type;
     typedef typename traits_t::handle_type node_handle;
-
-    node_type& lock(node_handle& node)
-    {
-        return traits_t::lock(a, node);
-    }
-
-    void unlock(node_handle& node) { traits_t::unlock(a, node); }
 
     smart_node_alloc(allocator_t* allocator) :
         a(*allocator) {}
+
+protected:
+    node_handle allocate(size_type count = 1)
+    {
+        return traits_t::allocate(a, count);
+    }
+
+    node_type& lock(node_handle h)
+    {
+        return traits_t::lock(a, h);
+    }
 };
 
 // NOTE: It's possible that in order to implement push_front(&&) and friends,
@@ -160,9 +161,9 @@ public:
 
     node_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, 1);
+        node_handle h = base_t::allocate();
 
-        node_type& p = traits_t::lock(this->a, h);
+        node_type& p = base_t::lock(h);
 
         new (&p) node_type(value);
 
@@ -228,11 +229,8 @@ public:
     }
 #endif
 
-    node_type& lock(node_handle& node)
-    {
-        return traits_t::lock(this->a, node);
-    }
-
+    // FIX: this dealloc will need more attention since different styles of above alloc
+    // will require different deallocation techniques
     void dealloc(node_handle& node)
     {
         traits_t::deallocate(this->a, node, 1);
@@ -262,11 +260,11 @@ public:
 
     node_handle alloc(const TValue& value)
     {
-        node_handle h = traits_t::allocate(this->a, 1);
+        node_handle h = base_t::allocate();
 
-        void* p = traits_t::lock(this->a, h);
+        node_type& p = base_t::lock(h);
 
-        new (p) node_type(value);
+        new (&p) node_type(value);
 
         traits_t::unlock(this->a, h);
 
@@ -277,15 +275,13 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     // FIX: Still doesn't know to call ~TValue, though it does implicitly deallocate
     // its memory
-    // FIX: had to make it TValue& instead of TValue&&, definitely hacky but at least
-    // it's functional
     // NOTE: Not sure why overloading doesn't select this properly, but needed to name
     // this alloc_move explicitly
     node_handle alloc_move(TValue&& value)
     {
-        node_handle h = traits_t::allocate(this->a, 1);
+        node_handle h = base_t::allocate();
 
-        node_type& p = traits_t::lock(this->a, h);
+        node_type& p = base_t::lock(h);
 
         traits_t::construct(this->a, &p, value);
 
@@ -302,9 +298,9 @@ public:
     template <class ...TArgs>
     node_handle alloc_emplace( TArgs&&...args)
     {
-        node_handle h = traits_t::allocate(this->a, 1);
+        node_handle h = base_t::allocate();
 
-        node_type& p = traits_t::lock(this->a, h);
+        node_type& p = base_t::lock(h);
 
         traits_t::construct(this->a, &p, args...);
 
@@ -318,12 +314,6 @@ public:
     {
         traits_t::deallocate(this->a, h, 1);
     }
-
-    node_type& lock(node_handle& node)
-    {
-        return traits_t::lock(this->a, node);
-    }
-
 };
 
 // standardized node traits base.  You don't have to use this, but it proves convenient if you
@@ -365,10 +355,10 @@ struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
     typedef TNodeBase node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-    template <class TValue2>
+    template <class TValue>
     using node_allocator_t = inlineref_node_alloc<
         node_type_base,
-        TValue2,
+        TValue,
         TAllocator>;
 #else
     template <class TValue2>
@@ -382,8 +372,8 @@ struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
     };
 #endif
 
-    template <class TValue2>
-    static const TValue2& value_exp(typename inline_node_alloc_base<node_type_base>::template RefNode<TValue2>& node)
+    template <class TValue>
+    static const TValue& value_exp(typename inline_node_alloc_base<node_type_base>::template RefNode<TValue>& node)
     {
         return node.value;
     }

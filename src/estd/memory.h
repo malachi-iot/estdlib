@@ -192,6 +192,7 @@ struct nothing_allocator
     typedef T& reference;
     typedef T* handle_type;
     typedef T* pointer;
+    typedef const void* const_void_pointer;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 

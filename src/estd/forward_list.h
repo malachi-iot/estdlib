@@ -123,8 +123,11 @@ public:
     typedef typename node_allocator_t::nv_ref_t nv_ref_t;
     typedef nv_ref_t nv_reference;
 
+    typedef allocator_traits<allocator_t> allocator_traits_t;
+
 protected:
     node_allocator_t alloc;
+    allocator_t _alloc; // Temporary only until we divest alloc operations completely from node allocator
 
     typedef typename node_allocator_t::node_handle node_handle;
     //typedef typename node_traits_t::node_handle node_handle;
@@ -135,14 +138,24 @@ protected:
 
     node_handle m_front;
 
+    node_type& alloc_lock(node_handle& to_lock)
+    {
+        return allocator_traits_t::lock(_alloc, to_lock);
+    }
+
+    void alloc_unlock(node_handle& to_unlock)
+    {
+        allocator_traits_t::unlock(_alloc, to_unlock);
+    }
+
     node_handle next(node_handle from)
     {
-        node_type& f = alloc.lock(from);
+        node_type& f = alloc_lock(from);
 
         // FIX: have to forward cast from node_handle_base to node_handle
         node_handle n = (node_handle) node_traits_t::get_next(f);
 
-        alloc.unlock(from);
+        alloc_unlock(from);
 
         return n;
     }
@@ -150,11 +163,11 @@ protected:
 
     void set_next(node_handle _node, node_handle next)
     {
-        node_type& node = alloc.lock(_node);
+        node_type& node = alloc_lock(_node);
 
         node_traits_t::set_next(node, next);
 
-        alloc.unlock(_node);
+        alloc_unlock(_node);
     }
 
 
@@ -168,13 +181,14 @@ protected:
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
         alloc(allocator),
+        //_alloc(allocator),
         m_front(after_end_node()) {}
 
     reference front()
     {
-        reference front_value = iterator::lock(alloc, m_front);
+        reference front_value = iterator::lock(_alloc, m_front);
 
-        alloc.unlock(m_front);
+        alloc_unlock(m_front);
 
         return front_value;
     }
@@ -272,11 +286,11 @@ public:
         while(current != after_end_node())
         {
             node_handle _next = next(current);
-            node_type& current_locked = alloc.lock(current);
+            node_type& current_locked = alloc_lock(current);
 
             bool matched = p(current_locked);
 
-            alloc.unlock(current);
+            alloc_unlock(current);
 
             if(matched)
             {
