@@ -332,6 +332,9 @@ public:
     // deviates from std C++ in that this optionally shall remove the first item found
     // in the list, rather than all items matching
     //NOTE: if C++03 will handle it, lean on remove_if instead of duplicating the code
+    //TODO: Unlikely C++03 wil handle that, so instead do a #define to wrap up predicate
+    // portion and fold into one remove_internal which is called differently depending
+    // on C++03 or C++11
     void remove(nv_reference value, bool first_only = false)
     {
 #ifdef FEATURE_CPP_LAMBDA
@@ -341,16 +344,16 @@ public:
                   }, first_only );
 #else
         node_handle current = m_front;
-        node_handle previous = node_traits_t::null_node();
+        node_handle previous = before_beginning_node();
 
         while(current != after_end_node())
         {
             node_handle _next = next(current);
-            node_pointer current_locked = alloc.lock(current);
+            node_type& current_locked = alloc_lock(current);
 
-            bool matched = *current_locked == value;
+            bool matched = current_locked == value;
 
-            alloc.unlock(current);
+            alloc_unlock(current);
 
             if(matched)
             {
