@@ -134,6 +134,22 @@ public:
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
+protected:
+    typedef typename node_allocator_t::node_handle node_handle;
+
+    static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
+
+    node_allocator_t alloc;
+    allocator_t _alloc; // Temporary only until we divest alloc operations completely from node allocator
+
+    node_handle m_front;
+
+    linkedlist_base(allocator_t* a) :
+            alloc(a),
+    //_alloc(allocator),
+            m_front(after_end_node())
+
+    {}
 };
 
 }
@@ -145,7 +161,7 @@ public:
 // present a 'default' allocator , though this might conflict with a default of
 // std::allocator<T> specialization, but that itself is deprecated for C++17
 template<class T, class TNodeTraits = node_traits<T > >
-class forward_list
+class forward_list : public internal::linkedlist_base<T, TNodeTraits>
 {
 public:
     typedef T value_type;
@@ -164,8 +180,7 @@ public:
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
 protected:
-    node_allocator_t alloc;
-    allocator_t _alloc; // Temporary only until we divest alloc operations completely from node allocator
+    typedef internal::linkedlist_base<T, TNodeTraits> base_t;
 
     typedef typename node_allocator_t::node_handle node_handle;
     //typedef typename node_traits_t::node_handle node_handle;
@@ -174,16 +189,14 @@ protected:
     static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
     static CONSTEXPR node_handle before_beginning_node() { return (node_handle) node_traits_t::null_node(); }
 
-    node_handle m_front;
-
     node_type& alloc_lock(node_handle& to_lock)
     {
-        return allocator_traits_t::lock(_alloc, to_lock);
+        return allocator_traits_t::lock(base_t::_alloc, to_lock);
     }
 
     void alloc_unlock(node_handle& to_unlock)
     {
-        allocator_traits_t::unlock(_alloc, to_unlock);
+        allocator_traits_t::unlock(base_t::_alloc, to_unlock);
     }
 
     node_handle next(node_handle from)
@@ -211,67 +224,65 @@ protected:
 
     void set_front(node_handle new_front)
     {
-        set_next(new_front, m_front);
+        set_next(new_front, base_t::m_front);
 
-        m_front = new_front;
+        base_t::m_front = new_front;
     }
 
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
-        alloc(allocator),
-        //_alloc(allocator),
-        m_front(after_end_node()) {}
+        base_t(allocator) {}
 
     reference front()
     {
-        reference front_value = iterator::lock(_alloc, m_front);
+        reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
 
-        alloc_unlock(m_front);
+        alloc_unlock(base_t::m_front);
 
         return front_value;
     }
 
-    bool empty() const { return m_front == after_end_node(); }
+    bool empty() const { return base_t::m_front == after_end_node(); }
 
     void pop_front()
     {
 #ifdef DEBUG
         // undefined behavior if list is empty, but let's put some asserts in here
 #endif
-        node_handle old = m_front;
+        node_handle old = base_t::m_front;
 
-        m_front = next(m_front);
+        base_t::m_front = next(base_t::m_front);
 
-        alloc.dealloc(old);
+        base_t::alloc.dealloc(old);
     }
 
     void push_front(nv_reference value)
     {
-        set_front(alloc.alloc(value));
+        set_front(base_t::alloc.alloc(value));
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push_front(value_type&& value)
     {
-        set_front(alloc.alloc_move(std::forward<value_type>(value)));
+        set_front(base_t::alloc.alloc_move(std::forward<value_type>(value)));
     }
 #endif
 
 
-    iterator begin() { return iterator(m_front, alloc); }
-    const_iterator begin() const { return iterator(m_front, alloc); }
-    const_iterator end() const { return iterator(NULLPTR, alloc); }
+    iterator begin() { return iterator(base_t::m_front, base_t::alloc); }
+    const_iterator begin() const { return iterator(base_t::m_front, base_t::alloc); }
+    const_iterator end() const { return iterator(NULLPTR, base_t::alloc); }
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
         node_handle node_to_insert_after = pos.node();
         node_handle old_next_node = next(node_to_insert_after);
-        node_handle node_pointing_to_value = alloc.alloc(value);
+        node_handle node_pointing_to_value = base_t::alloc.alloc(value);
 
         set_next(node_to_insert_after, node_pointing_to_value);
         set_next(node_pointing_to_value, old_next_node);
 
-        return iterator(node_pointing_to_value, alloc);
+        return iterator(node_pointing_to_value, base_t::alloc);
     }
 
     iterator erase_after(const_iterator pos)
@@ -282,7 +293,7 @@ public:
 
         set_next(node_to_erase_after, node_following_erased);
 
-        return iterator(node_following_erased, alloc);
+        return iterator(node_following_erased, base_t::alloc);
     }
 
 #ifdef FEATURE_CPP_VARIADIC
@@ -301,7 +312,7 @@ public:
     {
         static_assert(node_allocator_t::can_emplace(), "This allocator cannot emplace");
 
-        node_handle h = alloc.alloc_emplace(args...);
+        node_handle h = base_t::alloc.alloc_emplace(args...);
 
         set_front(h);
 
@@ -318,7 +329,7 @@ public:
     template <class UnaryPredicate>
     void remove_if(UnaryPredicate p, bool first_only = false)
     {
-        node_handle current = m_front;
+        node_handle current = base_t::m_front;
         node_handle previous = before_beginning_node();
 
         while(current != after_end_node())
@@ -335,7 +346,7 @@ public:
                 // If we match but there's no previous node
                 if(previous == before_beginning_node())
                     // then instead of splicing, we are replacing the front node
-                    m_front = _next;
+                    base_t::m_front = _next;
                 else
                     set_next(previous, _next);
 
