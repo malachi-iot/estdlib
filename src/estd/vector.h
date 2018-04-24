@@ -68,6 +68,42 @@ public:
 
     public:
         iterator(const handle_with_offset& current) : current(current) {}
+
+        iterator(const iterator& copy_from) : current(copy_from.current) {}
+
+        // prefix version
+        iterator& operator++()
+        {
+            ++current;
+            return *this;
+        }
+
+        // postfix version
+        iterator operator++(int)
+        {
+            iterator temp(*this);
+            operator++();
+            return temp;
+        }
+
+        bool operator==(const iterator& compare_to) const
+        {
+            return current == compare_to.current;
+        }
+
+        bool operator!=(const iterator& compare_to) const
+        {
+            return current != compare_to.current;
+        }
+
+        value_type& lock() { return current.lock(); }
+        void unlock() { current.unlock(); }
+
+        T* operator*()
+        {
+            // TODO: consolidate with InputIterator behavior from iterators/list.h
+            return &lock();
+        }
     };
 
     typedef const iterator const_iterator;
@@ -85,16 +121,37 @@ public:
         return iterator(offset);
     }
 
+    iterator end()
+    {
+        handle_with_offset offset = allocator_type::offset(base_t::handle, base_t::size());
+
+        return iterator(offset);
+    }
+
+    const_iterator end() const
+    {
+        handle_with_offset offset = allocator_type::offset(base_t::handle, base_t::size());
+
+        return iterator(offset);
+    }
+
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    iterator insert(const_iterator pos, const_reference value)
+    // NOTE: because pos requires a non-const lock, we can't do traditional
+    // const_iterator here
+    iterator insert(iterator pos, const_reference value)
     {
         T* a = base_t::lock();
 
         T& pos_item = pos.lock();
 
+        // all very raw array dependent
+        base_t::raw_insert(a, &pos_item, &value);
+
         pos.unlock();
 
         base_t::unlock();
+
+        return pos;
     }
 #else
     iterator insert(iterator pos, const T& value)

@@ -288,6 +288,38 @@ protected:
         allocator.unlock(handle);
     }
 
+    // internal method for auto increasing capacity based on pre-set amount
+    void ensure_additional_capacity(size_type increase_by)
+    {
+        size_type cap = capacity();
+
+        // TODO: assert increase_by is a sensible value
+        // above 0 and less than ... something
+
+        if(size() + increase_by >= cap)
+        {
+            // increase by as near to 32 bytes as is practical
+            reserve(cap + increase_by + ((32 + sizeof(T)) / sizeof(T)));
+        }
+    }
+
+
+    void raw_insert(T* a, T* to_insert_pos, const T* to_insert_value)
+    {
+        // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
+        // so later consider doing the insert operation at that level)
+        ensure_additional_capacity(1);
+
+        // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
+        size_type raw_typed_pos = (((to_insert_pos) - a) / sizeof(value_type));
+        size_type remaining = size() - raw_typed_pos;
+
+        memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+        *to_insert_pos = *to_insert_value;
+
+        m_size++;
+    }
+
 public:
     dynamic_array() :
             handle(allocator_type::invalid()), m_size(0)
@@ -321,12 +353,7 @@ public:
 
     void push_back(const T& value)
     {
-        size_type cap = capacity();
-
-        if(size() == cap)
-        {
-            reserve(cap + ((32 + sizeof(T)) / sizeof(T)));
-        }
+        ensure_additional_capacity(1);
 
         T* v = lock();
 
@@ -338,12 +365,9 @@ public:
     }
 
 protected:
-    void _append(const T* buf, size_t len)
+    void _append(const T* buf, size_type len)
     {
-        if(size() + len >= capacity())
-        {
-            reserve(size() + len + (32 + sizeof(T)) / sizeof(T));
-        }
+        ensure_additional_capacity(len);
 
         T* raw = lock();
 

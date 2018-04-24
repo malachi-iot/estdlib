@@ -83,7 +83,7 @@ TEST_CASE("array/vector tests")
         REQUIRE(v.capacity() > 5);
         REQUIRE(v[0].lock() == 5);
     }
-    SECTION("Vector insert")
+    SECTION("Vector iterator")
     {
         estd::vector<int, _allocator> v;
 
@@ -93,6 +93,39 @@ TEST_CASE("array/vector tests")
 
         auto i = v.begin();
 
-        //i++;
+        i++;
+
+        REQUIRE(i.lock() == 2);
+
+        i.unlock();
+
+        i++;
+        i++;
+
+        REQUIRE(i == v.end());
+    }
+    SECTION("Vector insert")
+    {
+        estd::vector<int, _allocator> v;
+
+        v.push_back(1);
+        v.push_back(3);
+        v.push_back(4);
+
+        auto i = v.begin();
+
+        i++;
+
+        v.insert(i, 2);
+
+        int counter = 0;
+
+        for(auto i2 : v)
+        {
+            counter++;
+            INFO("Counter: " << counter);
+            REQUIRE(counter == *i2);
+        }
+
     }
 }

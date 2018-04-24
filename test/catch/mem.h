@@ -41,6 +41,30 @@ public:
         T& lock() { return *loc; }
 
         void unlock() {}
+
+        // prefix version
+        handle_with_offset& operator++()
+        {
+            loc++;
+            return *this;
+        }
+
+
+        handle_with_offset& operator--()
+        {
+            loc--;
+            return *this;
+        }
+
+        bool operator==(const handle_with_offset& compare_to) const
+        {
+            return loc == compare_to.loc;
+        }
+
+        bool operator!=(const handle_with_offset& compare_to) const
+        {
+            return loc != compare_to.loc;
+        }
     };
 
     static handle_type invalid() { return NULLPTR; }
