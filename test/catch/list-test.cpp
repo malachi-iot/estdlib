@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/forward_list.h"
+#include "estd/list.h"
 #include "mem.h"
 
 struct test_value
@@ -379,5 +380,9 @@ TEST_CASE("linkedlist")
         list.pop_front();
 
         REQUIRE(list.empty());
+    }
+    SECTION("double list")
+    {
+        estd::list<long> list;
     }
 }

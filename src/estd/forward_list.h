@@ -113,12 +113,30 @@ struct node_value_traits_experimental<
 };
 */
 
+namespace internal
+{
+template<class T, class TNodeTraits>
+class linkedlist_base
+{
+public:
+    typedef T value_type;
+    typedef value_type& reference;
+    typedef TNodeTraits node_traits_t;
+    typedef ForwardIterator<value_type, node_traits_t> iterator;
+    typedef const iterator   const_iterator;
+    typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
+    typedef typename node_allocator_t::allocator_t allocator_t;
+    typedef typename node_allocator_t::node_type node_type;
+    typedef typename node_allocator_t::node_pointer node_pointer;
 
-// default node_traits is the no-alloc variety (since we are embedded oriented)
-//template <class TValue, template <class> class TAllocator>
-template <class TValue, class TAllocator = nothing_allocator<TValue > >
-struct node_traits : public intrusive_node_traits<TValue> {};
+    typedef typename node_allocator_t::nv_ref_t nv_ref_t;
+    typedef nv_ref_t nv_reference;
 
+    typedef allocator_traits<allocator_t> allocator_traits_t;
+
+};
+
+}
 
 // TODO: Due to the requisite deviation for Allocator to take a <T>,
 // consider adding Allocator (<T>) to forward list and yanking all allocator

@@ -460,4 +460,11 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 };
 
 
+// default node_traits is the no-alloc variety (since we are embedded oriented)
+//template <class TValue, template <class> class TAllocator>
+template <class TValue, class TAllocator = nothing_allocator<TValue > >
+struct node_traits : public intrusive_node_traits<TValue> {};
+
+
+
 }
