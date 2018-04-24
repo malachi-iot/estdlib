@@ -16,7 +16,7 @@ struct handle_with_offset
 
 
 
-template <class T, template <class> class Allocator>
+template <class T, template <class> class Allocator = std::allocator>
 class vector : public experimental::dynamic_array<T, Allocator>
 {
 public:
