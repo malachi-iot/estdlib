@@ -83,4 +83,16 @@ TEST_CASE("array/vector tests")
         REQUIRE(v.capacity() > 5);
         REQUIRE(v[0].lock() == 5);
     }
+    SECTION("Vector insert")
+    {
+        estd::vector<int, _allocator> v;
+
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+
+        auto i = v.begin();
+
+        //i++;
+    }
 }

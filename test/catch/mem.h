@@ -30,16 +30,15 @@ public:
     typedef value_type* pointer;
     typedef const void* const_void_pointer;
     typedef value_type* handle_type;
-    typedef void* handle_offset_type;
 
     class handle_with_offset
     {
-        handle_offset_type loc;
+        pointer loc;
 
     public:
-        handle_with_offset(handle_offset_type loc) : loc(loc) {}
+        handle_with_offset(pointer loc) : loc(loc) {}
 
-        T& lock() { return * (T*) loc; }
+        T& lock() { return *loc; }
 
         void unlock() {}
     };
@@ -68,9 +67,9 @@ public:
     }
 
 
-    static handle_offset_type offset(handle_type h, ptrdiff_t size)
+    static handle_with_offset offset(handle_type h, ptrdiff_t size)
     {
-        return (uint8_t*)h + size;
+        return handle_with_offset(h + size);
     }
 
     size_t allocated_size(handle_type h, const allocated_size_helper& ash)

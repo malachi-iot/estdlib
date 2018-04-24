@@ -23,11 +23,15 @@ public:
     typedef T value_type;
     typedef Allocator<T> allocator_type;
     typedef std::size_t size_type;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
 
 private:
     typedef experimental::dynamic_array<T, Allocator> base_t;
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    typedef allocator_traits<allocator_type> allocator_traits_t;
 
 public:
     // NOTE: accessor may very well become interchangeable with iterator
@@ -63,13 +67,41 @@ public:
         handle_with_offset current;
 
     public:
-
+        iterator(const handle_with_offset& current) : current(current) {}
     };
+
+    typedef const iterator const_iterator;
 
     handle_with_offset operator[](size_type pos)
     {
-        return handle_with_offset(allocator_type::offset(base_t::handle, pos * sizeof(T)));
+        return handle_with_offset(allocator_type::offset(base_t::handle, pos));
     }
+
+    // TODO: consolidate with dynamic_array
+    iterator begin()
+    {
+        handle_with_offset offset = allocator_type::offset(base_t::handle, 0);
+
+        return iterator(offset);
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    iterator insert(const_iterator pos, const_reference value)
+    {
+        T* a = base_t::lock();
+
+        T& pos_item = pos.lock();
+
+        pos.unlock();
+
+        base_t::unlock();
+    }
+#else
+    iterator insert(iterator pos, const T& value)
+    {
+
+    }
+#endif
 };
 
 

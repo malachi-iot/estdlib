@@ -248,7 +248,9 @@ public:
 
 
 // non standard base class for managing expanding/contracting arrays
-// accounts for lock/unlock behaviors
+// accounts for lock/unlock behaviors. Used for vector and string
+// More or less 1:1 with vector
+// and may get rolled back completely into vector at some point -
 template <class T, template <class> class TAllocator>
 class dynamic_array
 {
