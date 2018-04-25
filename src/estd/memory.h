@@ -190,11 +190,68 @@ public:
 };
 
 
+// tracks handle, capacity (via handle_with_size) and
+// "used" size with up to 3 distinctive variables
+// also tracks allocator itself
+template <class TAllocator, class TAllocatorInstance = TAllocator&>
+struct size_tracker_default
+{
+    typedef TAllocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
+
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_traits<TAllocator>::size_type size_type;
+
+    handle_with_size handle;
+    size_type m_size;
+    TAllocatorInstance allocator;
+
+    size_type capacity() const { return allocator.size(handle); }
+    size_type size() const { return m_size; }
+
+    size_tracker_default() {}
+
+    size_tracker_default(allocator_type& a) : allocator(a) {}
+};
+
+
+// tracks handle and capacity (via handle_with_size) with up to 2 distinctive variables,
+// and ascertains size by doing null termination search
+template <class TAllocator, class TAllocatorInstance = TAllocator&>
+struct size_tracker_nullterm
+{
+    typedef TAllocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
+
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_traits<TAllocator>::size_type size_type;
+
+    handle_with_size handle;
+    TAllocatorInstance allocator;
+
+    size_type capacity() const { return allocator.size(handle); }
+    size_type size()
+    {
+        value_type* s = &handle.lock();
+
+        size_type len = ::strlen(s);
+
+        handle.unlock();
+    }
+
+    //size_tracker_nullterm() : allocator(TAllocator()) {}
+
+    size_tracker_nullterm(const TAllocator& a) : allocator(a) {}
+};
+
 // non standard base class for managing expanding/contracting arrays
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
-template <class TAllocator>
+// size_tracker_* are very experimental
+template <class TAllocator, class TTracker = size_tracker_default<TAllocator>>
 class dynamic_array
 {
 public:
@@ -207,12 +264,19 @@ public:
     typedef typename allocator_traits<TAllocator>::size_type size_type;
 
 private:
+    // remember we have 3 sizes to deal with:
+    // "capacity" which is present size of allocated array buffer
+    // "size" which is # of elements actually active within array buffer
+    // "max_size" which abstractly represents maximum potential size of capacity
     size_type m_size;
 
 protected:
     allocator_type allocator;
     typename allocator_type::lock_counter lock_counter;
+    // the 'size' contained in this handle represents capacity
     handle_with_size handle;
+
+    //TTracker tracker_exp;
 
     value_type* lock()
     {

@@ -92,4 +92,27 @@ TEST_CASE("string tests")
 
         REQUIRE(d[0] == 3);
     }
+    SECTION("single_fixedbuf_allocator")
+    {
+        estd::basic_string<char, char_traits<char>, experimental::single_fixedbuf_allocator<char, 30>> s;
+        char buf[128];
+
+        s += "hello";
+
+        buf[s.copy(buf, 128)] = 0;
+
+        REQUIRE(strcmp(buf, "hello") == 0);
+    }
+    SECTION("single_nullterm_fixedbuf_allocator")
+    {
+        estd::basic_string<char, char_traits<char>, experimental::single_nullterm_fixedbuf_allocator<char, 30>> s;
+        int sz = sizeof(s);
+        char buf[128];
+
+        s += "hello";
+
+        buf[s.copy(buf, 128)] = 0;
+
+        REQUIRE(strcmp(buf, "hello") == 0);
+    }
 }
