@@ -28,6 +28,30 @@ struct array_base
 protected:
     TArray m_array;
 
+    array_base() {}
+
+public:
+
+    // FIX: perhaps array_base is overengineered and we can merely use
+    // array
+    CONSTEXPR size_type size() const { return sizeof(m_array) / sizeof(value_type); }
+
+protected:
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    array_base(::std::initializer_list<value_type> init) //: m_array(init)
+    {
+        // init.size() and size() is not integral constant expression, darn - both
+        // technically should be
+        //static_assert(init.size() < size(), "Receiving array too small");
+
+        T* a = m_array;
+
+        for(auto it : init)
+            *a++ = it;
+    }
+#endif
+
 public:
     reference operator[](size_type pos)
     {
@@ -147,6 +171,15 @@ public:
     const_iterator end() const { return iterator((T* const)&m_array()[N]); }
 
     CONSTEXPR size_type size() const { return N; }
+
+    array() {}
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    array(::std::initializer_list<value_type> init) : base_t(init)
+    {
+
+    }
+#endif
 };
 
 #ifdef FEATURE_CPP_VARIADIC

@@ -111,7 +111,7 @@ public:
 #endif
 
 public:
-    map() {}
+    //map() {}
 
     // FIX: Pretty sure this only will ever copy, and we need really an initializer_list
     // type behavior.  However, in lieu of aforementioned this is needed for unit tests

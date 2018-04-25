@@ -25,6 +25,20 @@ TEST_CASE("map-test")
 
         REQUIRE(result == NULLPTR);
     }
+    SECTION("layer 1 map init list")
+    {
+        layer1::map<int, int, 4> map =
+        {
+            { 1, 77 },
+            { 2, 78 },
+            { 3, 79 },
+            { 4, 80 }
+        };
+
+        auto result = map[2];
+
+        REQUIRE(*result == 78);
+    }
     SECTION("layer 2 map")
     {
         layer2::map<int, int, 4>::value_type buf[4];
