@@ -57,21 +57,23 @@ public:
         }
     };
 
+    static handle_type invalid() { return NULLPTR; }
+
     class handle_with_size
     {
         handle_type h;
         size_t m_size;
 
     public:
-        handle_with_size(handle_type h, size_t size) :
+        // FIX: Having a 0 size should never be valid, but we have scenarios where
+        // we need to track an invalid handle type (unallocated)
+        handle_with_size(handle_type h, size_t size = 0) :
             h(h), m_size(size) {}
 
         size_t size() const { return m_size; }
 
         operator handle_type() const { return h; }
     };
-
-    static handle_type invalid() { return NULLPTR; }
 
     T& lock(handle_type h) { return *h; }
 
@@ -90,15 +92,32 @@ public:
     }
 
 
+    size_t size(const handle_with_size& h) const
+    {
+        return h.size();
+    }
+
+
     void deallocate(handle_type p, size_t size)
     {
         free(p);
+    }
+
+    void deallocate(handle_with_size h)
+    {
+        free(h);
     }
 
 
     handle_type reallocate(handle_type h, size_t size)
     {
         return (pointer) realloc(h, size);
+    }
+
+
+    handle_with_size reallocate_ext(handle_type h, size_t size)
+    {
+        return handle_with_size(reallocate(h, size), size);
     }
 
 

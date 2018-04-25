@@ -259,19 +259,17 @@ public:
     typedef TAllocator<T> allocator_type;
 
     typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::pointer pointer;
     typedef std::size_t size_type;
 
 private:
-    // hopefully someday we can lean on allocator to tell us this
-    size_type m_capacity;
-
     size_type m_size;
 
 protected:
     allocator_type allocator;
     typename allocator_type::lock_counter lock_counter;
-    handle_type handle;
+    handle_with_size handle;
 
     T* lock()
     {
@@ -319,13 +317,14 @@ protected:
 
 public:
     dynamic_array() :
-            handle(allocator_type::invalid()), m_size(0)
+            handle(allocator_type::invalid()),
+            m_size(0)
     {}
 
     ~dynamic_array()
     {
         if(handle != allocator_type::invalid())
-            allocator.deallocate(handle, m_capacity * sizeof(T));
+            allocator.deallocate(handle);
     }
 
 
@@ -335,7 +334,7 @@ public:
     {
         if(handle == allocator_type::invalid()) return 0;
 
-        return m_capacity;
+        return allocator.size(handle);
     }
 
     void reserve( size_type new_cap )
@@ -343,9 +342,7 @@ public:
         if(handle == allocator_type::invalid())
             handle = allocator.allocate_ext(new_cap);
         else
-            handle = allocator.reallocate(handle, new_cap);
-
-        m_capacity = new_cap;
+            handle = allocator.reallocate_ext(handle, new_cap);
     }
 
     void push_back(const T& value)
