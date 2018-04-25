@@ -16,6 +16,25 @@
 
 namespace estd {
 
+namespace experimental {
+
+template <class TPair>
+struct kvp_traits
+{
+    typedef typename TPair::first_type key_type;
+
+    static CONSTEXPR key_type invalid_key() { return key_type(); }
+};
+
+
+template <class TValue>
+struct kvp_traits<estd::pair<const int, TValue>>
+{
+    static CONSTEXPR const int invalid_key() { return -1; }
+};
+
+}
+
 namespace internal {
 
 template <
@@ -32,6 +51,8 @@ protected:
     typedef typename TCollection::value_type value_type;
     typedef typename value_type::first_type key_type;
     typedef typename value_type::second_type mapped_type;
+
+    typedef experimental::kvp_traits<value_type> kvp_traits;
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     typedef ::std::initializer_list<value_type> initializer_list;
@@ -52,6 +73,7 @@ public:
 };
 
 }
+
 
 
 template <class Key, class T,
