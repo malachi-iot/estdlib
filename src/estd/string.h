@@ -126,6 +126,10 @@ struct null_terminated_string_traits
     static size_t length(char* str) { return strlen(str); }
 };
 
+// TODO: consolidate with estd::string itself now that allocator is beefing up
+// still have to crack the nut of the '0-byte' vs '1-byte' empty structs, which
+// size_tracker_nullterm and size_tracker_default are attempting (but not yet
+// succeeding) to do
 template <class CharT, class TBuffer,
           class Traits = char_traits<CharT>,
           class StringTraits = null_terminated_string_traits>
@@ -180,6 +184,9 @@ public:
     {
         return strcmp(buffer, compare_to.buffer) > 0;
     }
+
+    // FIX
+    const TBuffer& raw() const { return buffer; }
 };
 
 namespace layer2 {
@@ -266,6 +273,13 @@ protected:
 public:
     typedef CharT value_type;
     typedef typename Traits::nonconst_char_type nonconst_char_type;
+
+    template <size_t N>
+    basic_string(const layer2::basic_string<CharT, N>& copy_from)
+        : base_t(copy_from.raw()), m_length(copy_from.max_size())
+    {
+
+    }
 
     template <size_t N>
     basic_string(CharT (&buffer) [N]) :

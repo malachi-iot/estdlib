@@ -90,7 +90,12 @@ TEST_CASE("string tests")
 
         d.push_back(3);
 
-        REQUIRE(d[0] == 3);
+        auto& v = d[0];
+        auto vv = (int)v;
+
+        // flaky sometimes, likely due to underlying locking magic
+        REQUIRE(v == 3);
+        REQUIRE(vv == 3);
     }
     SECTION("single_fixedbuf_allocator")
     {
@@ -114,5 +119,17 @@ TEST_CASE("string tests")
         buf[s.copy(buf, 128)] = 0;
 
         REQUIRE(strcmp(buf, "hello") == 0);
+    }
+    SECTION("layer2 -> layer3 promotion")
+    {
+        experimental::layer2::basic_string<const char, 10> val = "hello";
+        experimental::layer3::basic_string<const char> val2 = val;
+
+        int sz1 = sizeof(val);
+        int sz2 = sizeof(val2);
+
+        char buf[128];
+
+        buf[val2.copy(buf, 128)] = 0;
     }
 }

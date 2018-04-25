@@ -246,12 +246,51 @@ struct size_tracker_nullterm
     size_tracker_nullterm(const TAllocator& a) : allocator(a) {}
 };
 
+
+// TODO: come up with better name, specialization like traits except stateful to
+// track a singular allocation within an allocator.  Revision of above size_tracker_nullterm
+// and size_tracker_default
+template <class TAllocator>
+class dynamic_array_helper
+{
+    // default implementation is 'full fat' to handle all scenarios
+    typedef TAllocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
+
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_traits<TAllocator>::size_type size_type;
+
+    // handle.size represents currently allocation portion
+    handle_with_size handle;
+    // remember, size represents 'user/app' portion.
+    size_type m_size;
+    // don't fiddle with ref juggling here - if that's absolutely necessary use
+    // the RefAllocator helper
+    allocator_type allocator;
+
+public:
+    size_type capacity() const { return allocator.size(handle); }
+    size_type size() const { return m_size; }
+
+    allocator_type& get_allocator() { return allocator; }
+
+    template <class T>
+    dynamic_array_helper(T init) :
+            //allocator(init),
+            handle(allocator_type::invalid()),
+            m_size(0)
+    {
+
+    }
+};
+
 // non standard base class for managing expanding/contracting arrays
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
-template <class TAllocator, class TTracker = size_tracker_default<TAllocator>>
+template <class TAllocator, class THelper = dynamic_array_helper<TAllocator>>
 class dynamic_array
 {
 public:
@@ -262,6 +301,7 @@ public:
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::pointer pointer;
     typedef typename allocator_traits<TAllocator>::size_type size_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
 
 private:
     // remember we have 3 sizes to deal with:
@@ -276,7 +316,13 @@ protected:
     // the 'size' contained in this handle represents capacity
     handle_with_size handle;
 
-    //TTracker tracker_exp;
+    // experimental only, not used yet
+    THelper helper_exp;
+
+    handle_with_offset offset(size_type  pos)
+    {
+        return allocator.offset(handle, pos);
+    }
 
     value_type* lock()
     {
@@ -325,6 +371,7 @@ protected:
 public:
     dynamic_array() :
             handle(allocator_type::invalid()),
+            helper_exp(NULLPTR),
             m_size(0)
     {}
 

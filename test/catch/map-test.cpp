@@ -41,7 +41,13 @@ TEST_CASE("map-test")
     }
     SECTION("layer 2 map")
     {
-        layer2::map<int, int, 4>::value_type buf[4];
+        layer2::map<int, int, 4>::value_type buf[4] =
+        {
+            { 1, 77 },
+            { 2, 78 },
+            { 4, 79 },
+            { 5, 80 }
+        };
 
         layer2::map<int, int, 4> map(buf);
 

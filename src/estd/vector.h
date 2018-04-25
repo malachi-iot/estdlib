@@ -115,7 +115,7 @@ public:
 
     handle_with_offset operator[](size_type pos)
     {
-        return handle_with_offset(get_allocator().offset(base_t::handle, pos));
+        return base_t::offset(pos);
     }
 
     // TODO: consolidate with dynamic_array

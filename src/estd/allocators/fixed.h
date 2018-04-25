@@ -1,6 +1,7 @@
 #pragma once
 
 #include "generic.h"
+#include <string.h> // for strlen
 
 namespace estd {
 
