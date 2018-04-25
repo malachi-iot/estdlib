@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../platform.h"
+#include "allocators/generic.h"
+#include "allocators/fixed.h"
 #include <memory.h>
 
 namespace estd {
@@ -161,131 +162,10 @@ unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
 }
 
 
-// Non-standard and doesn't make a difference for some compilers
-// https://stackoverflow.com/questions/621616/c-what-is-the-size-of-an-object-of-an-empty-class
-#define NODATA_MOTIVATOR    char NO_DATA[0]
-
-// Non standard
-template <class T>
-struct nothing_allocator
-{
-    NODATA_MOTIVATOR;
-
-    struct lock_counter
-    {
-        NODATA_MOTIVATOR;
-
-        lock_counter& operator++() {return *this;}
-        lock_counter& operator--() {return *this;}
-        lock_counter& operator++(int) {return *this;}
-        lock_counter& operator--(int) {return *this;}
-
-#ifdef FEATURE_CPP_CONSTEXPR
-        constexpr
-#endif
-        operator int() const { return 0; }
-    };
-
-    struct allocated_size_helper
-    {
-        NODATA_MOTIVATOR;
-    };
-
-    typedef T value_type;
-    typedef T& reference;
-    typedef T* handle_type;
-    typedef T* pointer;
-    typedef const void* const_void_pointer;
-
-    static CONSTEXPR handle_type invalid() { return NULLPTR; }
-
-    reference lock(handle_type h) { return *h; }
-    void unlock(handle_type h) {}
-
-    // Don't want this here, but needed so far for ~dynamic_array, since
-    // current estd::string specifies nothing_allocator at present
-    void deallocate(handle_type h, int size) {}
-
-    // allocate also will always fail
-    handle_type allocate(int size) { return invalid(); }
-
-    // reallocate also will always fail
-    handle_type reallocate(handle_type h, int size) { return invalid(); }
-
-    size_t max_size() const { return 0; }
-
-    // return size used by handle, with help from size helper
-    size_t allocated_size(handle_type h, const allocated_size_helper& ash)
-    {
-        return 0;
-    }
-};
 
 
 
 namespace experimental {
-
-// Can only have its allocate function called ONCE
-template <class T, size_t len>
-struct single_fixedbuf_allocator
-{
-    typedef T value_type;
-    typedef T* pointer;
-    typedef bool handle_type; // really I want it an empty struct
-    typedef handle_type handle_with_size;
-    typedef const void* const_void_pointer;
-
-    typedef typename nothing_allocator<T>::lock_counter lock_counter;
-
-    // FIX: Unsure what to do about invalid in this context
-    static CONSTEXPR handle_type invalid() { return false; }
-
-    typedef T& handle_with_offset;
-
-private:
-    T buffer[len];
-    size_t amount_allocated;
-public:
-
-    handle_with_size allocate_ext(size_t size)
-    {
-        // TODO: assert amount_allocated = 0, we can only allocate once
-        // TODO: assert size <= len
-        amount_allocated = size;
-        return true;
-    }
-
-    handle_type allocate(size_t size)
-    {
-        return allocate_ext(size);
-    }
-
-
-    handle_with_size reallocate_ext(handle_type, size_t size)
-    {
-        amount_allocated += size;
-        // TODO: assert size <= len
-        return true;
-    }
-
-    void deallocate(handle_with_size h)
-    {
-        amount_allocated = 0;
-    }
-
-    value_type& lock(handle_type h) { return buffer[0]; }
-
-    void unlock(handle_type h) {}
-
-    size_t size(handle_with_size h) const { return amount_allocated; }
-
-    size_t max_size() const { return len; }
-
-    handle_with_offset offset(handle_type h, size_t pos)
-    {
-        return buffer[pos];
-    }
-};
 
 
 template <class TAllocator>
