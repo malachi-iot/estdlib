@@ -1,10 +1,16 @@
 #include <catch.hpp>
 
 #include <estd/string.h>
+#include <estd/vector.h>
 
 #include "mem.h"
 
 using namespace estd;
+
+template <class T>
+using test_t = experimental::single_fixedbuf_allocator<T, 10>;
+
+
 
 TEST_CASE("string tests")
 {
@@ -76,5 +82,13 @@ TEST_CASE("string tests")
         REQUIRE(buf2[3] == ':');
         REQUIRE(buf2[7] == 'u');
 
+    }
+    SECTION("dynamic_array low level allocator test")
+    {
+        estd::vector<uint8_t, test_t> d;
+
+        d.push_back(3);
+
+        //REQUIRE(d[0] == 3);
     }
 }
