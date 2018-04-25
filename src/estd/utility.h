@@ -12,6 +12,9 @@ template<
     T1 first;
     T2 second;
 
+    typedef T1 first_type;
+    typedef T2 second_type;
+
     //pair(T1& first, T2& second) : first(first), second(second) {}
 };
 
