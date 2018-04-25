@@ -11,7 +11,15 @@ TEST_CASE("map-test")
 {
     SECTION("layer 1 map")
     {
-        layer1::map<int, int, 4> map;
+        typedef layer1::map<int, int, 4> map_t;
+        estd::array<map_t::value_type, 4> buf;
+
+        buf[0].first = 0;
+        buf[1].first = 0;
+        buf[2].first = 0;
+        buf[3].first = 0;
+
+        map_t map(buf);
 
         const int* result = map[3];
 

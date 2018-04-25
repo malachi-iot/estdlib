@@ -32,10 +32,12 @@ class map : public map_base<Key, T, Compare>
     typedef map_base<Key, T, Compare> base_t;
     //typedef typename base_t::value_type value_type;
 
+public:
     // NOTE: not making this const Key just yet, since initiatialization of a layer1::map
     // is kinda tricky
     typedef pair<Key, T> value_type;
 
+private:
     array<value_type, size> _map;
 
 #ifdef FEATURE_ESTDLIB_MAPPTR
@@ -45,6 +47,12 @@ class map : public map_base<Key, T, Compare>
 #endif
 
 public:
+    map() {}
+
+    // FIX: Pretty sure this only will ever copy, and we need really an initializer_list
+    // type behavior.  However, in lieu of aforementioned this is needed for unit tests
+    map(array<value_type, size>& _map) : _map(_map) {}
+
     // Deviates from spec - since this particular map can't grow, we need to detect
     // when an operator[] lookup fails, therefore
     mapped_t operator[] (const key_type& key)
