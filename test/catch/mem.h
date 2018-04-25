@@ -122,7 +122,7 @@ public:
 
 
     // TODO: template this to work with both handle_with_size or not
-    static handle_with_offset offset(handle_type h, ptrdiff_t size)
+    handle_with_offset offset(handle_type h, ptrdiff_t size)
     {
         return handle_with_offset(h + size);
     }

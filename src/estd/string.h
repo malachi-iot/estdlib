@@ -25,24 +25,24 @@ template<> struct char_traits<const char>
 // a) wrapper around standard C null terminated variety
 // b) wrapper around pascal-style length tracking variety (which we'll also combine with dynamic allocation)
 // thinking a) would be a good layer2 string and b) would be a good layer3
+// We can start switching 'layer' version of string to derive from basic_string itself by using
+// fixed allocators
 template<
     class CharT,
     class Traits = char_traits<CharT>,
-    template <class> class Allocator = nothing_allocator
+    class Allocator = std::allocator<CharT>
 > class basic_string :
-        public experimental::dynamic_array<CharT, Allocator>
+        public experimental::dynamic_array<Allocator>
 {
-    typedef experimental::dynamic_array<CharT, Allocator> base_t;
+    typedef experimental::dynamic_array<Allocator> base_t;
 
 public:
     typedef CharT value_type;
     typedef Traits traits_type;
-    typedef Allocator<value_type> allocator_type;
+    typedef Allocator allocator_type;
 
     typedef typename base_t::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
-
-    allocator_type allocator;
 
     size_type length() const { return base_t::size(); }
 

@@ -16,14 +16,14 @@ TEST_CASE("string tests")
 {
     SECTION("string tests")
     {
-        basic_string<char, char_traits<char>, _allocator> test;
+        basic_string<char, char_traits<char>, _allocator<char>> test;
 
         test += "hello";
     }
     SECTION("A")
     {
         //string val;
-        basic_string<char, char_traits<char>, _allocator> val;
+        basic_string<char, char_traits<char>, _allocator<char>> val;
 
         char buf[128];
 
@@ -85,10 +85,11 @@ TEST_CASE("string tests")
     }
     SECTION("dynamic_array low level allocator test")
     {
-        estd::vector<uint8_t, test_t> d;
+        //estd::vector<uint8_t, test_t> d;
+        estd::vector<uint8_t, experimental::single_fixedbuf_allocator<uint8_t, 10>> d;
 
         d.push_back(3);
 
-        //REQUIRE(d[0] == 3);
+        REQUIRE(d[0] == 3);
     }
 }

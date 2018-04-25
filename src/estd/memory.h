@@ -233,6 +233,7 @@ struct single_fixedbuf_allocator
     typedef T* pointer;
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
+    typedef const void* const_void_pointer;
 
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 
@@ -248,10 +249,17 @@ public:
 
     handle_with_size allocate_ext(size_t size)
     {
-        amount_allocated = size;
+        // TODO: assert amount_allocated = 0, we can only allocate once
         // TODO: assert size <= len
+        amount_allocated = size;
         return true;
     }
+
+    handle_type allocate(size_t size)
+    {
+        return allocate_ext(size);
+    }
+
 
     handle_with_size reallocate_ext(handle_type, size_t size)
     {
@@ -270,6 +278,8 @@ public:
     void unlock(handle_type h) {}
 
     size_t size(handle_with_size h) const { return amount_allocated; }
+
+    size_t max_size() const { return len; }
 
     handle_with_offset offset(handle_type h, size_t pos)
     {
@@ -304,17 +314,17 @@ public:
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
-template <class T, template <class> class TAllocator>
+template <class TAllocator>
 class dynamic_array
 {
 public:
-    typedef T value_type;
-    typedef TAllocator<T> allocator_type;
+    typedef TAllocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
 
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::pointer pointer;
-    typedef std::size_t size_type;
+    typedef typename allocator_traits<TAllocator>::size_type size_type;
 
 private:
     size_type m_size;
@@ -324,7 +334,7 @@ protected:
     typename allocator_type::lock_counter lock_counter;
     handle_with_size handle;
 
-    T* lock()
+    value_type* lock()
     {
         lock_counter++;
         return &allocator.lock(handle);
@@ -347,12 +357,12 @@ protected:
         if(size() + increase_by >= cap)
         {
             // increase by as near to 32 bytes as is practical
-            reserve(cap + increase_by + ((32 + sizeof(T)) / sizeof(T)));
+            reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
         }
     }
 
 
-    void raw_insert(T* a, T* to_insert_pos, const T* to_insert_value)
+    void raw_insert(value_type* a, value_type* to_insert_pos, const value_type* to_insert_value)
     {
         // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
         // so later consider doing the insert operation at that level)
@@ -380,6 +390,10 @@ public:
             allocator.deallocate(handle);
     }
 
+    allocator_type get_allocator() const
+    {
+        return allocator;
+    }
 
     size_type size() const { return m_size; }
 
@@ -398,11 +412,11 @@ public:
             handle = allocator.reallocate_ext(handle, new_cap);
     }
 
-    void push_back(const T& value)
+    void push_back(const value_type& value)
     {
         ensure_additional_capacity(1);
 
-        T* v = lock();
+        value_type* v = lock();
 
         v[size()] = value;
 
@@ -412,11 +426,11 @@ public:
     }
 
 protected:
-    void _append(const T* buf, size_type len)
+    void _append(const value_type* buf, size_type len)
     {
         ensure_additional_capacity(len);
 
-        T* raw = lock();
+        value_type* raw = lock();
 
         memcpy(raw + m_size, buf, len);
 

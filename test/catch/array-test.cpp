@@ -62,7 +62,7 @@ TEST_CASE("array/vector tests")
     }
     SECTION("basic vector")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.reserve(20);
 
@@ -75,7 +75,7 @@ TEST_CASE("array/vector tests")
     }
     SECTION("basic vector 2")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.push_back(5);
 
@@ -85,7 +85,7 @@ TEST_CASE("array/vector tests")
     }
     SECTION("Vector iterator")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.push_back(1);
         v.push_back(2);
@@ -106,7 +106,7 @@ TEST_CASE("array/vector tests")
     }
     SECTION("Vector insert")
     {
-        estd::vector<int, _allocator> v;
+        estd::vector<int, _allocator<int>> v;
 
         v.push_back(1);
         v.push_back(3);

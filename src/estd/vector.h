@@ -16,18 +16,18 @@ struct handle_with_offset
 
 
 
-template <class T, template <class> class Allocator = std::allocator>
-class vector : public experimental::dynamic_array<T, Allocator>
+template <class T, class Allocator = std::allocator<T>>
+class vector : public experimental::dynamic_array<Allocator>
 {
 public:
     typedef T value_type;
-    typedef Allocator<T> allocator_type;
+    typedef Allocator allocator_type;
     typedef std::size_t size_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
 private:
-    typedef experimental::dynamic_array<T, Allocator> base_t;
+    typedef experimental::dynamic_array<Allocator> base_t;
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
@@ -108,29 +108,34 @@ public:
 
     typedef const iterator const_iterator;
 
+    allocator_type get_allocator() const
+    {
+        return base_t::allocator;
+    }
+
     handle_with_offset operator[](size_type pos)
     {
-        return handle_with_offset(allocator_type::offset(base_t::handle, pos));
+        return handle_with_offset(get_allocator().offset(base_t::handle, pos));
     }
 
     // TODO: consolidate with dynamic_array
     iterator begin()
     {
-        handle_with_offset offset = allocator_type::offset(base_t::handle, 0);
+        handle_with_offset offset = get_allocator().offset(base_t::handle, 0);
 
         return iterator(offset);
     }
 
     iterator end()
     {
-        handle_with_offset offset = allocator_type::offset(base_t::handle, base_t::size());
+        handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
 
         return iterator(offset);
     }
 
     const_iterator end() const
     {
-        handle_with_offset offset = allocator_type::offset(base_t::handle, base_t::size());
+        handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
 
         return iterator(offset);
     }
