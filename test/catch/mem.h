@@ -16,16 +16,6 @@ public:
 
     typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
 
-    // holds the data (if necessary) to reveal the size of an allocation
-    // some allocators innately have this, some don't.  near as I can tell,
-    // standard malloc does not
-    // As noted here https://stackoverflow.com/questions/1281686/determine-size-of-dynamically-allocated-memory-in-c
-    // C doesn't provide a standard way to track this
-    struct allocated_size_helper
-    {
-        size_t allocated_size;
-    };
-
     typedef T value_type;
     typedef value_type* pointer;
     typedef const void* const_void_pointer;
@@ -67,6 +57,20 @@ public:
         }
     };
 
+    class handle_with_size
+    {
+        handle_type h;
+        size_t m_size;
+
+    public:
+        handle_with_size(handle_type h, size_t size) :
+            h(h), m_size(size) {}
+
+        size_t size() const { return m_size; }
+
+        operator handle_type() const { return h; }
+    };
+
     static handle_type invalid() { return NULLPTR; }
 
     T& lock(handle_type h) { return *h; }
@@ -75,11 +79,18 @@ public:
 
     pointer allocate(size_t size)
     {
-        // FIX: unsure if I should be doing a 'new' here or not
         return (pointer) malloc(size * sizeof(T));
     }
 
-    void deallocate(void* p, size_t size)
+    // consider merging this with regular allocate and letting optimizer shake out
+    // pointer access
+    handle_with_size allocate_ext(size_t size)
+    {
+        return handle_with_size(allocate(size), size);
+    }
+
+
+    void deallocate(handle_type p, size_t size)
     {
         free(p);
     }
@@ -91,14 +102,10 @@ public:
     }
 
 
+    // TODO: template this to work with both handle_with_size or not
     static handle_with_offset offset(handle_type h, ptrdiff_t size)
     {
         return handle_with_offset(h + size);
-    }
-
-    size_t allocated_size(handle_type h, const allocated_size_helper& ash)
-    {
-        return ash.allocated_size;
     }
 };
 

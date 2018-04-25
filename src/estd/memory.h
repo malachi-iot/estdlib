@@ -260,14 +260,11 @@ public:
 
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::pointer pointer;
-    typedef typename allocator_type::allocated_size_helper ash;
     typedef std::size_t size_type;
 
 private:
     // hopefully someday we can lean on allocator to tell us this
     size_type m_capacity;
-
-    ash m_capacity_exp;
 
     size_type m_size;
 
@@ -344,7 +341,7 @@ public:
     void reserve( size_type new_cap )
     {
         if(handle == allocator_type::invalid())
-            handle = allocator.allocate(new_cap);
+            handle = allocator.allocate_ext(new_cap);
         else
             handle = allocator.reallocate(handle, new_cap);
 
