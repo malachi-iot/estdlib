@@ -102,6 +102,21 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == "hello");
     }
+    SECTION("layer 2 (non-experimental) null terimnated")
+    {
+        char buf[128];
+        layer2::basic_string<char, 20> s(buf);
+        //layer2::basic_string<const char, 20> s2 = "hi";
+
+        int sz = sizeof(s);
+
+        REQUIRE(s.length() == 0);
+
+        s += "hello";
+
+        REQUIRE(s.length() == 5);
+        REQUIRE(s == "hello");
+    }
     SECTION("layer 2 null terminated")
     {
         char buf[128];

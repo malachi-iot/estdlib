@@ -52,7 +52,12 @@ protected:
         return const_cast<this_t*>(this)->unlock();
     }
 
+    template <class THelperParam>
+    basic_string(const THelperParam& p) : base_t(p) {}
+
 public:
+    basic_string() {}
+
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef Allocator allocator_type;
@@ -358,6 +363,36 @@ class basic_string
                 estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
 {
 
+};
+
+}
+
+
+namespace layer2 {
+
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+class basic_string
+        : public estd::basic_string<
+                CharT, Traits,
+                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* > >
+{
+    typedef estd::basic_string<
+            CharT, Traits,
+            estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* > >
+            base_t;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::helper_type helper_type;
+
+public:
+    basic_string(const CharT* str_buffer) : base_t(str_buffer)
+    {
+
+    }
+
+    basic_string(CharT* str_buffer) : base_t(str_buffer)
+    {
+
+    }
 };
 
 }

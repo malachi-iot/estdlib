@@ -113,6 +113,8 @@ protected:
 public:
     dynamic_array_helper(allocator_type*) : m_size(0) {}
 
+    dynamic_array_helper() : m_size(0) {}
+
     size_type capacity() const { return allocator.max_size(); }
     size_type size() const { return m_size; }
 
@@ -157,14 +159,29 @@ protected:
     allocator_type allocator;
 
 public:
-    // TODO: Need to improve parameter passing in for initialization of allocator_type
-    dynamic_array_helper(allocator_type*)
+    struct InitParam
     {
-        // auto init null-termination
-        // normally we leave buffers untouched but dynamic array it's by design
-        // we start with 0 'utilized'
+        const TBuffer& b;
+        bool is_initialized;
+
+        InitParam(const TBuffer& b, bool is_initialized = false) :
+                b(b),
+                is_initialized(is_initialized) {}
+    };
+
+    dynamic_array_helper(const TBuffer& b) : allocator(b)
+    {
+        // FIX: this won't work when we initialize to a string literal or otherwise
+        // existing buffer
         allocator.lock(true) = 0;
     }
+
+    dynamic_array_helper()
+    {
+        // null-terminate
+        allocator.lock(true) = 0;
+    }
+
 
     size_type capacity() const { return allocator.max_size(); }
 

@@ -170,7 +170,14 @@ public:
 
     template <class T>
     dynamic_array_helper(T init) :
-    //allocator(init),
+            allocator(init),
+            handle(allocator_type::invalid()),
+            m_size(0)
+    {
+
+    }
+
+    dynamic_array_helper() :
             handle(allocator_type::invalid()),
             m_size(0)
     {
@@ -195,6 +202,7 @@ class dynamic_array
 {
 public:
     typedef TAllocator allocator_type;
+    typedef THelper helper_type;
     typedef typename allocator_type::value_type value_type;
 
     typedef typename allocator_type::handle_type handle_type;
@@ -262,9 +270,11 @@ protected:
     }
 
 public:
-    dynamic_array() :
-            helper(NULLPTR)
-    {}
+    dynamic_array() {}
+
+    template <class THelperParam>
+    dynamic_array(const THelperParam& p) :
+            helper(p) {}
 
     allocator_type get_allocator() const
     {
@@ -282,14 +292,10 @@ public:
     // return true = successful reserve, false = fail
     bool reserve( size_type new_cap )
     {
-        bool success = true;
-
         if(helper.is_allocated())
-            helper.allocate(new_cap);
+            return helper.allocate(new_cap);
         else
-            helper.reallocate(new_cap);
-
-        return success;
+            return helper.reallocate(new_cap);
     }
 
 protected:
