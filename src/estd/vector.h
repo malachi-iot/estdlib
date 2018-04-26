@@ -111,7 +111,7 @@ public:
 
     allocator_type get_allocator() const
     {
-        return base_t::allocator;
+        return base_t::get_allocator();
     }
 
     handle_with_offset operator[](size_type pos)
@@ -122,21 +122,24 @@ public:
     // TODO: consolidate with dynamic_array
     iterator begin()
     {
-        handle_with_offset offset = get_allocator().offset(base_t::handle, 0);
+        //handle_with_offset offset = get_allocator().offset(base_t::handle, 0);
+        handle_with_offset offset = base_t::helper.offset(0);
 
         return iterator(offset);
     }
 
     iterator end()
     {
-        handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
+        //handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
+        handle_with_offset offset = base_t::helper.offset(base_t::size());
 
         return iterator(offset);
     }
 
     const_iterator end() const
     {
-        handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
+        //handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
+        handle_with_offset offset = base_t::helper.offset(base_t::size());
 
         return iterator(offset);
     }

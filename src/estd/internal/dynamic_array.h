@@ -176,6 +176,7 @@ class dynamic_array_helper
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_traits<TAllocator>::size_type size_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
 
     // handle.size represents currently allocation portion
     handle_with_size handle;
@@ -189,7 +190,36 @@ public:
     size_type capacity() const { return allocator.size(handle); }
     size_type size() const { return m_size; }
 
-    allocator_type& get_allocator() { return allocator; }
+    allocator_type& get_allocator() const { return allocator; }
+
+    // +++ intermediate calls, phase these out eventually
+    handle_with_size get_handle() { return handle; }
+    void size(size_type s) { m_size = s; }
+    // ---
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(handle, pos);
+    }
+
+    value_type& lock() { return allocator.lock(handle); }
+    void unlock() { allocator.unlock(handle); }
+
+    void allocate(size_type capacity)
+    {
+        handle = allocator.allocate_ext(capacity);
+    }
+
+
+    void reallocate(size_type capacity)
+    {
+        handle = allocator.reallocate_ext(handle, capacity);
+    }
+
+    bool is_allocated() const
+    {
+        return handle != allocator_type::invalid();
+    }
 
     template <class T>
     dynamic_array_helper(T init) :
@@ -198,6 +228,12 @@ public:
             m_size(0)
     {
 
+    }
+
+    ~dynamic_array_helper()
+    {
+        if(handle != allocator_type::invalid())
+            allocator.deallocate(handle);
     }
 };
 
@@ -220,37 +256,26 @@ public:
     typedef typename allocator_traits<TAllocator>::size_type size_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
-private:
-    // remember we have 3 sizes to deal with:
-    // "capacity" which is present size of allocated array buffer
-    // "size" which is # of elements actually active within array buffer
-    // "max_size" which abstractly represents maximum potential size of capacity
-    size_type m_size;
-
 protected:
-    allocator_type allocator;
     typename allocator_type::lock_counter lock_counter;
-    // the 'size' contained in this handle represents capacity
-    handle_with_size handle;
 
-    // experimental only, not used yet
-    THelper helper_exp;
+    THelper helper;
 
     handle_with_offset offset(size_type  pos)
     {
-        return allocator.offset(handle, pos);
+        return helper.offset(pos);
     }
 
     value_type* lock()
     {
         lock_counter++;
-        return &allocator.lock(handle);
+        return &helper.lock();
     }
 
     void unlock()
     {
         lock_counter--;
-        allocator.unlock(handle);
+        helper.unlock();
     }
 
     // internal method for auto increasing capacity based on pre-set amount
@@ -282,42 +307,32 @@ protected:
         memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
         *to_insert_pos = *to_insert_value;
 
-        m_size++;
+        helper.size(helper.size() + 1);
     }
 
 public:
     dynamic_array() :
-            handle(allocator_type::invalid()),
-            helper_exp(NULLPTR),
-            m_size(0)
+            helper(NULLPTR)
     {}
-
-    ~dynamic_array()
-    {
-        if(handle != allocator_type::invalid())
-            allocator.deallocate(handle);
-    }
 
     allocator_type get_allocator() const
     {
-        return allocator;
+        return helper.get_allocator();
     }
 
-    size_type size() const { return m_size; }
+    size_type size() const { return helper.size(); }
 
     size_type capacity() const
     {
-        if(handle == allocator_type::invalid()) return 0;
-
-        return allocator.size(handle);
+        return helper.capacity();
     }
 
     void reserve( size_type new_cap )
     {
-        if(handle == allocator_type::invalid())
-            handle = allocator.allocate_ext(new_cap);
+        if(helper.is_allocated())
+            helper.allocate(new_cap);
         else
-            handle = allocator.reallocate_ext(handle, new_cap);
+            helper.reallocate(new_cap);
     }
 
     void push_back(const value_type& value)
@@ -330,7 +345,7 @@ public:
 
         unlock();
 
-        m_size++;
+        helper.size(helper.size() + 1);
     }
 
 protected:
@@ -340,11 +355,11 @@ protected:
 
         value_type* raw = lock();
 
-        memcpy(raw + m_size, buf, len);
+        memcpy(raw + size(), buf, len);
 
         unlock();
 
-        m_size += len;
+        helper.size(size() + len);
     }
 };
 

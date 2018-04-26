@@ -102,6 +102,9 @@ protected:
     typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_traits::value_type value_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
 
     allocator_type allocator;
 
@@ -113,7 +116,26 @@ public:
     size_type capacity() const { return allocator.max_size(); }
     size_type size() const { return m_size; }
 
+    // +++ intermediate
+    void size(size_type s) { m_size = s; }
+    // ---
+
+    value_type& lock() { return allocator.lock(true); }
+    void unlock() {}
+
     allocator_type& get_allocator() { return allocator; }
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(true, pos);
+    }
+
+    // TODO: ensure sz doesn't exceed len
+    void allocate(size_type sz) {}
+    void reallocate(size_type sz) {}
+
+
+    bool is_allocated() const { return true; }
 };
 
 
@@ -127,6 +149,8 @@ protected:
     typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
     typedef T value_type;
 
     // fixed length buffer in which a null terminated string is/shall be located
@@ -143,14 +167,43 @@ public:
     }
 
     size_type capacity() const { return allocator.max_size(); }
-    size_type size()
+
+    size_type size() const
     {
         // FIX: Make this work with any value_type, not just char, since
         // dynamic_array can be utilized not just with string
-        return ::strlen(allocator.lock(true));
+        // FIX: Do away with this nasty const-forcing.  It's an artifact of our
+        // underlying nature of lock/unlock having side effects but necessary
+        // to get at what is normally expected to be an unchanging pointer location
+        allocator_type& nonconst_a = const_cast<allocator_type&>(allocator);
+        return ::strlen(&nonconst_a.lock(true));
     }
 
-    allocator_type& get_allocator() { return allocator; }
+    // TODO: ensure sz doesn't exceed len
+    void allocate(size_type sz) {}
+    void reallocate(size_type sz) {}
+
+
+    // +++ intermediate
+    void size(size_type s)
+    {
+        // FIX: Not 100% sure this is what we should do here yet
+        (&allocator.lock(true))[s] = 0;
+    }
+    // ---
+
+    value_type& lock() { return allocator.lock(true); }
+    void unlock() {}
+
+
+    allocator_type& get_allocator() const { return allocator; }
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(true, pos);
+    }
+
+    bool is_allocated() const { return true; }
 };
 
 }
