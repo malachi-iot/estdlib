@@ -64,7 +64,13 @@ public:
 
     handle_with_size allocate_ext(size_t size)
     {
-        return true;
+        // we can't be sure if alloc fails or succeeds with unspecified length (when TBuffer = *)
+        // but since we are embedded-oriented, permit it to succeed and trust the programmer
+        // took precautions
+        if(len == -1)   return true;
+
+        // remember our handle is a true/false
+        return size <= len;
     }
 
     handle_type allocate(size_t size)
@@ -75,8 +81,9 @@ public:
 
     handle_with_size reallocate_ext(handle_type, size_t size)
     {
-        // TODO: assert size <= len
-        return true;
+        // NOTE: assuming incoming handle_type is valid
+
+        return allocate_ext(size);
     }
 
     void deallocate(handle_with_size h)
@@ -92,11 +99,43 @@ public:
 template <class TAllocator>
 struct dynamic_array_helper;
 
+template <class T, size_t len, bool null_terminated, class TBuffer>
+class dynamic_array_fixedbuf_helper_base
+{
+    typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
+    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_traits::value_type value_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    allocator_type allocator;
+public:
+
+    value_type& lock() { return allocator.lock(true); }
+    void unlock() {}
+
+    size_type capacity() const { return allocator.max_size(); }
+
+    allocator_type& get_allocator() { return allocator; }
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(true, pos);
+    }
+
+    bool allocate(size_type sz) { return sz <= capacity(); }
+    bool reallocate(size_type sz) { return sz <= capacity(); }
+
+    bool is_allocated() const { return true; }
+};
+
 // as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
 // and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
 // template <>
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
+        : public dynamic_array_fixedbuf_helper_base<T, len, false, TBuffer>
 {
 protected:
     typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
@@ -106,8 +145,6 @@ protected:
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
-    allocator_type allocator;
-
     size_type m_size;
 
 public:
@@ -115,29 +152,11 @@ public:
 
     dynamic_array_helper() : m_size(0) {}
 
-    size_type capacity() const { return allocator.max_size(); }
     size_type size() const { return m_size; }
 
     // +++ intermediate
     void size(size_type s) { m_size = s; }
     // ---
-
-    value_type& lock() { return allocator.lock(true); }
-    void unlock() {}
-
-    allocator_type& get_allocator() { return allocator; }
-
-    handle_with_offset offset(size_type pos)
-    {
-        return allocator.offset(true, pos);
-    }
-
-    // TODO: ensure sz doesn't exceed len
-    bool allocate(size_type sz) { return sz <= capacity(); }
-    bool reallocate(size_type sz) { return sz <= capacity(); }
-
-
-    bool is_allocated() const { return true; }
 };
 
 
@@ -146,6 +165,7 @@ public:
 
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
+        //: public dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer>
 {
 protected:
     typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
