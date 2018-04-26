@@ -106,61 +106,6 @@ public:
 };
 
 
-// tracks handle, capacity (via handle_with_size) and
-// "used" size with up to 3 distinctive variables
-// also tracks allocator itself
-template <class TAllocator, class TAllocatorInstance = TAllocator&>
-struct size_tracker_default
-{
-    typedef TAllocator allocator_type;
-    typedef typename allocator_type::value_type value_type;
-
-    typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_traits<TAllocator>::size_type size_type;
-
-    handle_with_size handle;
-    size_type m_size;
-    TAllocatorInstance allocator;
-
-    size_type capacity() const { return allocator.size(handle); }
-    size_type size() const { return m_size; }
-
-    size_tracker_default() {}
-
-    size_tracker_default(allocator_type& a) : allocator(a) {}
-};
-
-
-// tracks handle and capacity (via handle_with_size) with up to 2 distinctive variables,
-// and ascertains size by doing null termination search
-template <class TAllocator, class TAllocatorInstance = TAllocator&>
-struct size_tracker_nullterm
-{
-    typedef TAllocator allocator_type;
-    typedef typename allocator_type::value_type value_type;
-
-    typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_traits<TAllocator>::size_type size_type;
-
-    handle_with_size handle;
-    TAllocatorInstance allocator;
-
-    size_type capacity() const { return allocator.size(handle); }
-    size_type size()
-    {
-        value_type* s = &handle.lock();
-
-        size_type len = ::strlen(s);
-
-        handle.unlock();
-    }
-
-    //size_tracker_nullterm() : allocator(TAllocator()) {}
-
-    size_tracker_nullterm(const TAllocator& a) : allocator(a) {}
-};
 
 
 // TODO: come up with better name, specialization like traits except stateful to
@@ -205,20 +150,22 @@ public:
     value_type& lock() { return allocator.lock(handle); }
     void unlock() { allocator.unlock(handle); }
 
-    void allocate(size_type capacity)
-    {
-        handle = allocator.allocate_ext(capacity);
-    }
-
-
-    void reallocate(size_type capacity)
-    {
-        handle = allocator.reallocate_ext(handle, capacity);
-    }
-
     bool is_allocated() const
     {
         return handle != allocator_type::invalid();
+    }
+
+    bool allocate(size_type capacity)
+    {
+        handle = allocator.allocate_ext(capacity);
+        return is_allocated();
+    }
+
+
+    bool reallocate(size_type capacity)
+    {
+        handle = allocator.reallocate_ext(handle, capacity);
+        return is_allocated();
     }
 
     template <class T>
@@ -289,7 +236,11 @@ protected:
         if(size() + increase_by >= cap)
         {
             // increase by as near to 32 bytes as is practical
-            reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
+            bool success = reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
+
+#ifdef DEBUG
+            // TODO: Do a debug log print here to notify of allocation failure
+#endif
         }
     }
 
@@ -327,12 +278,18 @@ public:
         return helper.capacity();
     }
 
-    void reserve( size_type new_cap )
+    // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
+    // return true = successful reserve, false = fail
+    bool reserve( size_type new_cap )
     {
+        bool success = true;
+
         if(helper.is_allocated())
             helper.allocate(new_cap);
         else
             helper.reallocate(new_cap);
+
+        return success;
     }
 
 protected:

@@ -2,6 +2,7 @@
 
 #include "memory.h"
 #include "internal/dynamic_array.h"
+#include "allocators/fixed.h"
 
 namespace estd {
 
@@ -225,6 +226,9 @@ public:
     const TBuffer& raw() const { return buffer; }
 };
 
+
+
+
 namespace layer2 {
 
 // represents a null-terminated string with a constexpr-size.  Should be nearly identical to
@@ -340,6 +344,21 @@ public:
     }
 };
 }
+
+}
+
+
+namespace layer1 {
+
+
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+class basic_string
+        : public estd::basic_string<
+                CharT, Traits,
+                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
+{
+
+};
 
 }
 

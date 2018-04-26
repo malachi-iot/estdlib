@@ -90,6 +90,18 @@ TEST_CASE("string tests")
         REQUIRE(buf[3] == 'l');
         REQUIRE(buf[4] == 'o');
     }
+    SECTION("layer 1 null terminated")
+    {
+        layer1::basic_string<char, 20> s;
+        int sz = sizeof(s);
+
+        REQUIRE(s.length() == 0);
+
+        s += "hello";
+
+        REQUIRE(s.length() == 5);
+        REQUIRE(s == "hello");
+    }
     SECTION("layer 2 null terminated")
     {
         char buf[128];

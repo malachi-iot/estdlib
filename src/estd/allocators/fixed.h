@@ -131,8 +131,8 @@ public:
     }
 
     // TODO: ensure sz doesn't exceed len
-    void allocate(size_type sz) {}
-    void reallocate(size_type sz) {}
+    bool allocate(size_type sz) { return sz <= capacity(); }
+    bool reallocate(size_type sz) { return sz <= capacity(); }
 
 
     bool is_allocated() const { return true; }
@@ -180,8 +180,8 @@ public:
     }
 
     // TODO: ensure sz doesn't exceed len
-    void allocate(size_type sz) {}
-    void reallocate(size_type sz) {}
+    bool allocate(size_type sz) { return sz <= capacity(); }
+    bool reallocate(size_type sz) { return sz <= capacity(); }
 
 
     // +++ intermediate
