@@ -1,6 +1,7 @@
 #pragma once
 
 #include "estd/memory.h"
+#include <cstddef> // for ptrdiff_t
 
 // reference allocator for inbuild mechanisms.  basically a crummy test-only
 // version of std new_allocator

@@ -36,6 +36,19 @@ template<
         public experimental::dynamic_array<Allocator>
 {
     typedef experimental::dynamic_array<Allocator> base_t;
+    typedef basic_string<CharT, Traits, Allocator> this_t;
+
+protected:
+    CharT* fake_const_lock() const
+    {
+        // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
+        return const_cast<this_t*>(this)->lock();
+    }
+
+    void fake_const_unlock() const
+    {
+        return const_cast<this_t*>(this)->unlock();
+    }
 
 public:
     typedef CharT value_type;
@@ -49,9 +62,9 @@ public:
 
     // NOTE: dropping const due to locking operation, but it's debatable whether we
     // want to propagate that const behavior all the way up to here
-    size_type copy(value_type* dest, size_type count, size_type pos = 0)
+    size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
-        value_type* src = base_t::lock();
+        value_type* src = fake_const_lock();
 
         // TODO: since we aren't gonna throw an exception, determine what to do if
         // pos > size()
@@ -61,7 +74,7 @@ public:
 
         memcpy(dest, src + pos, count);
 
-        base_t::unlock();
+        fake_const_unlock();
 
         return count;
     }
@@ -81,6 +94,22 @@ public:
         base_t::_append(s, len);
 
         return *this;
+    }
+
+    // NOTE: deviates const from spec due to lock necessity
+    int compare( const CharT* s ) const
+    {
+        CharT* raw = fake_const_lock();
+
+        size_type raw_size = base_t::size();
+
+        // FIX: This will not compare properly if incoming s is longer than raw
+        int result = strncmp(raw, s, raw_size);
+
+        fake_const_unlock();
+
+        return result;
+
     }
 
 
@@ -309,5 +338,19 @@ public:
 }
 
 }
+
+
+template <class CharT, class Traits, class Alloc>
+bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc>& rhs)
+{
+    return rhs.compare(lhs) == 0;
+};
+
+template <class CharT, class Traits, class Alloc>
+bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
+{
+    return lhs.compare(rhs) == 0;
+};
+
 
 }

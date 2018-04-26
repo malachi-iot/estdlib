@@ -1,7 +1,7 @@
-#include <catch.hpp>
-
 #include <estd/string.h>
 #include <estd/vector.h>
+#include <cstdlib>
+#include <ostream>
 
 #include "mem.h"
 
@@ -10,7 +10,60 @@ using namespace estd;
 template <class T>
 using test_t = experimental::single_fixedbuf_allocator<T, 10>;
 
+// neither << or toString is helping output string value during unit test, dang
+template <class TChar, class TCharTraits, class TAllocator>
+std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+{
+    int len = value.size();
+    /*
+    TChar* s = value.lock();
+    // because we can't be sure of null termination without doing more checks
 
+    while(len--) os << *s++;
+
+    value.unlock(); */
+
+    char buf[256];
+    char* s = buf;
+
+    value.copy(buf, sizeof(buf));
+
+    while(len--) os << *s++;
+
+    return os;
+}
+
+template <class TChar, class TCharTraits, class TAllocator>
+std::string toString(const estd::basic_string<TChar, TCharTraits, TAllocator>& value)
+{
+    std::string s;
+
+    char buf[256];
+
+    value.copy(&buf, sizeof(buf));
+
+    s.append(buf, value.size());
+
+    return s;
+};
+
+#include <catch.hpp>
+
+
+namespace Catch {
+
+// partial function specialization not permitted
+/*
+template<class TChar, class TCharTraits, class TAllocator> std::string
+    toString<estd::basic_string<TChar, TCharTraits, TAllocator > >(
+            const estd::basic_string<TChar, TCharTraits, TAllocator>& value)
+{
+    std::string s;
+
+    return s;
+}; */
+
+}
 
 TEST_CASE("string tests")
 {
@@ -114,7 +167,13 @@ TEST_CASE("string tests")
         int sz = sizeof(s);
         char buf[128];
 
+        REQUIRE(s.size() == 0);
+
         s += "hello";
+
+        REQUIRE(s == "hello");
+
+        REQUIRE(s.size() == 5);
 
         buf[s.copy(buf, 128)] = 0;
 

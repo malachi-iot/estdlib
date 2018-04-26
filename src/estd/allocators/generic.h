@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../platform.h"
+#include <stdlib.h> // for size_t
+#include <memory> // for allocator_traits
 
 namespace estd {
 

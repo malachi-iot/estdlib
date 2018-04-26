@@ -335,31 +335,28 @@ public:
             helper.reallocate(new_cap);
     }
 
-    void push_back(const value_type& value)
-    {
-        ensure_additional_capacity(1);
-
-        value_type* v = lock();
-
-        v[size()] = value;
-
-        unlock();
-
-        helper.size(helper.size() + 1);
-    }
-
 protected:
     void _append(const value_type* buf, size_type len)
     {
         ensure_additional_capacity(len);
 
-        value_type* raw = lock();
+        // Doing this before memcpy for null-terminated
+        // scenarios
+        size_type current_size = size();
 
-        memcpy(raw + size(), buf, len);
+        helper.size(current_size + len);
+
+        value_type* raw = lock() + current_size;
+
+        while(len--) *raw++ = *buf++;
 
         unlock();
+    }
 
-        helper.size(size() + len);
+public:
+    void push_back(const value_type& value)
+    {
+        _append(&value, 1);
     }
 };
 
