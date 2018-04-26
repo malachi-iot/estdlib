@@ -96,6 +96,34 @@ public:
     size_t max_size() const { return len; }
 };
 
+// See reference implementation in dynamic_array.h
+template <class TAllocator>
+struct dynamic_array_helper;
+
+// as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
+// and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
+// template <>
+template <class T, size_t len, class TBuffer>
+class dynamic_array_helper<single_fixedbuf_allocator<T, len, TBuffer> >
+{
+protected:
+    typedef single_fixedbuf_allocator<T, len, TBuffer> allocator_type;
+    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::size_type size_type;
+
+    allocator_type allocator;
+
+    size_type m_size;
+
+public:
+    dynamic_array_helper(allocator_type*) {}
+
+    size_type capacity() const { return allocator.max_size(); }
+    size_type size() const { return m_size; }
+
+    allocator_type& get_allocator() { return allocator; }
+};
+
 
 
 // Can only have its allocate function called ONCE
@@ -146,6 +174,25 @@ public:
     size_t max_size() const { return len; }
 };
 
+
+template <class T, size_t len, class TBuffer>
+class dynamic_array_helper<single_nullterm_fixedbuf_allocator<T, len, TBuffer> >
+{
+protected:
+    typedef single_fixedbuf_allocator<T, len, TBuffer> allocator_type;
+    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::size_type size_type;
+
+    allocator_type allocator;
+
+public:
+    dynamic_array_helper(allocator_type*) {}
+
+    size_type capacity() const { return allocator.max_size(); }
+    //size_type size() const { return m_size; }
+
+    allocator_type& get_allocator() { return allocator; }
+};
 
 }
 

@@ -201,6 +201,7 @@ public:
     }
 };
 
+
 // non standard base class for managing expanding/contracting arrays
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
