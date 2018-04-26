@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     memory-test.cpp
     queue-test.cpp
     string-test.cpp
+        vector-test.cpp
     )
 
 target_link_libraries(${PROJECT_NAME} estd_lib)
