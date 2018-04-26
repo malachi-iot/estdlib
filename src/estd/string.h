@@ -5,6 +5,7 @@
 
 namespace estd {
 
+/*
 template<class CharT> struct char_traits;
 
 template<> struct char_traits<char>
@@ -20,7 +21,7 @@ template<> struct char_traits<const char>
     typedef const char char_type;
     typedef int int_type;
     typedef char nonconst_char_type;
-};
+}; */
 
 // TODO: Determine how to organize different string implementations
 // a) wrapper around standard C null terminated variety
@@ -30,7 +31,7 @@ template<> struct char_traits<const char>
 // fixed allocators
 template<
     class CharT,
-    class Traits = char_traits<CharT>,
+    class Traits = std::char_traits<CharT>,
     class Allocator = std::allocator<CharT>
 > class basic_string :
         public experimental::dynamic_array<Allocator>
@@ -99,12 +100,16 @@ public:
     // NOTE: deviates const from spec due to lock necessity
     int compare( const CharT* s ) const
     {
+        size_type raw_size = base_t::size();
+        size_type s_size = strlen(s);
+
+        if(raw_size < s_size) return -1;
+        if(raw_size > s_size) return 1;
+
+        // gets here if size matches
         CharT* raw = fake_const_lock();
 
-        size_type raw_size = base_t::size();
-
-        // FIX: This will not compare properly if incoming s is longer than raw
-        int result = strncmp(raw, s, raw_size);
+        int result = traits_type::compare(raw, s, raw_size);
 
         fake_const_unlock();
 
@@ -138,7 +143,7 @@ typedef basic_string<char> string;
 namespace experimental {
 
 
-template <class CharT, class TCharTraits = char_traits<CharT>>
+template <class CharT, class TCharTraits = std::char_traits<CharT>>
 class string_traits
 {
     static bool is_null_terminated();
@@ -161,7 +166,7 @@ struct null_terminated_string_traits
 // size_tracker_nullterm and size_tracker_default are attempting (but not yet
 // succeeding) to do
 template <class CharT, class TBuffer,
-          class Traits = char_traits<CharT>,
+          class Traits = std::char_traits<CharT>,
           class StringTraits = null_terminated_string_traits>
 class basic_string_base
 {
@@ -170,8 +175,9 @@ protected:
     typedef StringTraits straits_t;
 
 public:
+    // temporarily allowing const char* to char* since basic_string_base is going away anyway
     template <class TBufferParam>
-    basic_string_base(TBufferParam in) : buffer(in) {}
+    basic_string_base(TBufferParam in) : buffer((char*)in) {}
 
     typedef CharT value_type;
     typedef size_t size_type;
@@ -229,7 +235,7 @@ namespace layer2 {
 // traits or an explicit name
 // N defaults to 0, kind of ugly by C++ standards but the norm for C - strings have an unspecified
 // upper bound
-template <class CharT, size_t N = 0, class Traits = char_traits<CharT>>
+template <class CharT, size_t N = 0, class Traits = std::char_traits<CharT>>
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 protected:
@@ -238,9 +244,8 @@ protected:
 public:
     typedef CharT value_type;
     typedef size_t size_type;
-    typedef typename Traits::nonconst_char_type nonconst_char_type;
 
-    basic_string(CharT* buffer) : base_t(buffer) {}
+    basic_string(const CharT* buffer) : base_t(buffer) {}
 
     //basic_string(const basic_string& copy_from) : base_t(copy_from.buffer) {}
 
@@ -261,7 +266,7 @@ public:
 
     size_type max_size() const { return N - 1; }
 
-    size_type copy(nonconst_char_type* dest, size_type count, size_type pos = 0)
+    size_type copy(value_type* dest, size_type count, size_type pos = 0)
     {
         // TODO: Do bounds checking etc.
         strncpy(dest, base_t::buffer + pos, count);
@@ -290,7 +295,7 @@ namespace layer3 {
 // represents a null-terminated string with a particular specified size
 // TODO: Probably we want to distinguish this as null-terminated vs not null terminated either with
 // traits or an explicit name
-template <class CharT, class Traits = char_traits<CharT>>
+template <class CharT, class Traits = std::char_traits<CharT>>
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 public:
@@ -302,7 +307,6 @@ protected:
 
 public:
     typedef CharT value_type;
-    typedef typename Traits::nonconst_char_type nonconst_char_type;
 
     template <size_t N>
     basic_string(const layer2::basic_string<CharT, N>& copy_from)
@@ -328,7 +332,7 @@ public:
 
     size_type max_size() const { return m_length - 1; }
 
-    size_type copy(nonconst_char_type* dest, size_type count, size_type pos = 0)
+    size_type copy(value_type* dest, size_type count, size_type pos = 0)
     {
         // TODO: Do bounds checking etc.
         strncpy(dest, base_t::buffer + pos, count);

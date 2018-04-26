@@ -69,14 +69,14 @@ TEST_CASE("string tests")
 {
     SECTION("string tests")
     {
-        basic_string<char, char_traits<char>, _allocator<char>> test;
+        basic_string<char, std::char_traits<char>, _allocator<char>> test;
 
         test += "hello";
     }
     SECTION("A")
     {
         //string val;
-        basic_string<char, char_traits<char>, _allocator<char>> val;
+        basic_string<char, std::char_traits<char>, _allocator<char>> val;
 
         char buf[128];
 
@@ -93,7 +93,7 @@ TEST_CASE("string tests")
     SECTION("layer 2 null terminated")
     {
         char buf[128];
-        experimental::layer2::basic_string<const char, 4> str("val");
+        experimental::layer2::basic_string<char, 4> str("val");
 
         str.copy(buf, 128);
 
@@ -106,7 +106,7 @@ TEST_CASE("string tests")
         // only viable in C++11 right now, due to N == 0 behavior
         // probably should make a distinct base class 'unbounded' basic_string
         // but I kind of like the conveinience of N == 0 behavior
-        experimental::layer2::basic_string<const char> str2 = str;
+        experimental::layer2::basic_string<char> str2 = str;
 
         REQUIRE(str2.size() == 3);
         REQUIRE(str == str2);
@@ -152,7 +152,7 @@ TEST_CASE("string tests")
     }
     SECTION("single_fixedbuf_allocator")
     {
-        estd::basic_string<char, char_traits<char>, experimental::single_fixedbuf_allocator<char, 30>> s;
+        estd::basic_string<char, std::char_traits<char>, experimental::single_fixedbuf_allocator<char, 30>> s;
         char buf[128];
 
         s += "hello";
@@ -163,7 +163,7 @@ TEST_CASE("string tests")
     }
     SECTION("single_nullterm_fixedbuf_allocator")
     {
-        estd::basic_string<char, char_traits<char>, experimental::single_fixedbuf_allocator<char, 30, true>> s;
+        estd::basic_string<char, std::char_traits<char>, experimental::single_fixedbuf_allocator<char, 30, true>> s;
         int sz = sizeof(s);
         char buf[128];
 
@@ -181,8 +181,8 @@ TEST_CASE("string tests")
     }
     SECTION("layer2 -> layer3 promotion")
     {
-        experimental::layer2::basic_string<const char, 10> val = "hello";
-        experimental::layer3::basic_string<const char> val2 = val;
+        experimental::layer2::basic_string<char, 10> val = "hello";
+        experimental::layer3::basic_string<char> val2 = val;
 
         int sz1 = sizeof(val);
         int sz2 = sizeof(val2);
