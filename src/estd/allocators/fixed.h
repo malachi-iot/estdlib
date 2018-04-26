@@ -41,7 +41,8 @@ public:
 
 // Can only have its allocate function called ONCE
 // tracks how much of the allocator has been allocated
-template <class T, size_t len, class TBuffer = T[len]>
+// null_terminated flag mainly serves as a trait/clue to specializations
+template <class T, size_t len, bool null_terminated = false, class TBuffer = T[len]>
 struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
 {
     typedef single_allocator_base<T, TBuffer> base_t;
@@ -55,10 +56,6 @@ struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
 
     typedef T& handle_with_offset;
 
-private:
-    // FIX: superfluous, as technically TBuffer is always allocated to
-    // 'len' size
-    size_t amount_allocated;
 public:
     single_fixedbuf_allocator() {}
 
@@ -67,9 +64,6 @@ public:
 
     handle_with_size allocate_ext(size_t size)
     {
-        // TODO: assert amount_allocated = 0, we can only allocate once
-        // TODO: assert size <= len
-        amount_allocated = size;
         return true;
     }
 
@@ -81,17 +75,15 @@ public:
 
     handle_with_size reallocate_ext(handle_type, size_t size)
     {
-        amount_allocated += size;
         // TODO: assert size <= len
         return true;
     }
 
     void deallocate(handle_with_size h)
     {
-        amount_allocated = 0;
     }
 
-    size_t size(handle_with_size h) const { return amount_allocated; }
+    size_t size(handle_with_size h) const { return len; }
 
     size_t max_size() const { return len; }
 };
@@ -104,10 +96,10 @@ struct dynamic_array_helper;
 // and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
 // template <>
 template <class T, size_t len, class TBuffer>
-class dynamic_array_helper<single_fixedbuf_allocator<T, len, TBuffer> >
+class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
 {
 protected:
-    typedef single_fixedbuf_allocator<T, len, TBuffer> allocator_type;
+    typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
 
@@ -116,7 +108,7 @@ protected:
     size_type m_size;
 
 public:
-    dynamic_array_helper(allocator_type*) {}
+    dynamic_array_helper(allocator_type*) : m_size(0) {}
 
     size_type capacity() const { return allocator.max_size(); }
     size_type size() const { return m_size; }
@@ -126,70 +118,37 @@ public:
 
 
 
-// Can only have its allocate function called ONCE
-// for traditional C-style null terminated strings
-template <class T, size_t len, class TBuffer = T[len]>
-struct single_nullterm_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
-{
-    typedef single_allocator_base<T, TBuffer> base_t;
-    typedef T value_type;
-    typedef bool handle_type; // really I want it an empty struct
-    typedef handle_type handle_with_size;
-
-    // FIX: Unsure what to do about invalid in this context
-    static CONSTEXPR handle_type invalid() { return false; }
-
-    typedef T& handle_with_offset;
-
-public:
-    single_nullterm_fixedbuf_allocator() {}
-
-    single_nullterm_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
-
-
-    handle_with_size allocate_ext(size_t size)
-    {
-        // TODO: assert size <= len
-        return true;
-    }
-
-    handle_type allocate(size_t size)
-    {
-        return allocate_ext(size);
-    }
-
-
-    handle_with_size reallocate_ext(handle_type, size_t size)
-    {
-        // TODO: assert size <= len
-        return true;
-    }
-
-    void deallocate(handle_with_size h)
-    {
-    }
-
-    size_t size(handle_with_size h) const { return ::strlen(base_t::buffer); }
-
-    size_t max_size() const { return len; }
-};
 
 
 template <class T, size_t len, class TBuffer>
-class dynamic_array_helper<single_nullterm_fixedbuf_allocator<T, len, TBuffer> >
+class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
 {
 protected:
-    typedef single_fixedbuf_allocator<T, len, TBuffer> allocator_type;
+    typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
+    typedef T value_type;
 
+    // fixed length buffer in which a null terminated string is/shall be located
     allocator_type allocator;
 
 public:
-    dynamic_array_helper(allocator_type*) {}
+    // TODO: Need to improve parameter passing in for initialization of allocator_type
+    dynamic_array_helper(allocator_type*)
+    {
+        // auto init null-termination
+        // normally we leave buffers untouched but dynamic array it's by design
+        // we start with 0 'utilized'
+        allocator.lock(true) = 0;
+    }
 
     size_type capacity() const { return allocator.max_size(); }
-    //size_type size() const { return m_size; }
+    size_type size()
+    {
+        // FIX: Make this work with any value_type, not just char, since
+        // dynamic_array can be utilized not just with string
+        return ::strlen(allocator.lock(true));
+    }
 
     allocator_type& get_allocator() { return allocator; }
 };
