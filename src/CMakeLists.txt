@@ -12,6 +12,7 @@ set(SOURCE_FILES
         estd/functional.h
         estd/initializer_list.h
         estd/iterator.h
+        estd/internal/dynamic_array.h
         estd/iterators/list.h
         estd/list.h
        estd/map.h

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "memory.h"
+#include "internal/dynamic_array.h"
 
 namespace estd {
 
