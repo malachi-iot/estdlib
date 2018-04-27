@@ -70,6 +70,8 @@ struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
 public:
     single_fixedbuf_allocator() {}
 
+    // FIX: something bizzare is happening here and base_t is ending
+    // up as map_base during debug session
     single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
 
 
@@ -298,8 +300,13 @@ public:
     // +++ intermediate
     void size(size_type s)
     {
-        // FIX: Not 100% sure this is what we should do here yet
-        (&allocator.lock(true))[s] = 0;
+        if(s > len)
+        {
+            // FIX: issue some kind of warning
+        }
+
+        lock(s) = 0;
+        unlock();
     }
     // ---
 

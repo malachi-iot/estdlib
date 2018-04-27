@@ -229,13 +229,15 @@ TEST_CASE("string tests")
         char buf3[100];
 
         layer1::string<100> s1;
-        layer2::string<> s2(buf2);
-        layer3::string s3(buf3);
 
         return;
 
         // This invokes some kind of infinite loop program never ends
+        // Filters down into map_base somehow... ??
         s1 = "Hello";
+
+        layer2::string<> s2(buf2);
+        layer3::string s3(buf3);
 
         s2 = s1;
 
