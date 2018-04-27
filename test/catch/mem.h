@@ -76,7 +76,7 @@ public:
         operator handle_type() const { return h; }
     };
 
-    T& lock(handle_type h) { return *h; }
+    T& lock(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
 
     void unlock(handle_type) { }
 

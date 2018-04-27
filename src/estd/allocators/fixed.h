@@ -27,7 +27,10 @@ protected:
     single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
 
 public:
-    value_type& lock(handle_type h) { return buffer[0]; }
+    value_type& lock(handle_type h, int pos = 0, int count = 0)
+    {
+        return buffer[pos];
+    }
 
     void unlock(handle_type h) {}
 
@@ -112,7 +115,11 @@ class dynamic_array_fixedbuf_helper_base
     allocator_type allocator;
 public:
 
-    value_type& lock() { return allocator.lock(true); }
+    value_type& lock(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.lock(true, pos, count);
+    }
+
     void unlock() {}
 
     size_type capacity() const { return allocator.max_size(); }
@@ -179,6 +186,11 @@ protected:
     allocator_type allocator;
 
 public:
+    value_type& lock(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.lock(true, pos, count);
+    }
+
     struct InitParam
     {
         const TBuffer& b;
@@ -229,7 +241,6 @@ public:
     }
     // ---
 
-    value_type& lock() { return allocator.lock(true); }
     void unlock() {}
 
 

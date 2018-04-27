@@ -147,7 +147,11 @@ public:
         return allocator.offset(handle, pos);
     }
 
-    value_type& lock() { return allocator.lock(handle); }
+    value_type& lock(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.lock(handle, pos, count);
+    }
+
     void unlock() { allocator.unlock(handle); }
 
     bool is_allocated() const
@@ -222,10 +226,10 @@ protected:
         return helper.offset(pos);
     }
 
-    value_type* lock()
+    value_type* lock(size_type pos = 0, size_type count = 0)
     {
         lock_counter++;
-        return &helper.lock();
+        return &helper.lock(pos, count);
     }
 
     void unlock()
