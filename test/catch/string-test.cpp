@@ -212,7 +212,6 @@ TEST_CASE("string tests")
 
         layer1::basic_string<char, 100> s1;
         layer2::basic_string<char, 100> s2(buf2);
-        layer3::basic_string<char> s3(buf3);
 
         s1 = "Hello";
 
@@ -230,8 +229,6 @@ TEST_CASE("string tests")
 
         layer1::string<100> s1;
 
-        return;
-
         // This invokes some kind of infinite loop program never ends
         // Filters down into map_base somehow... ??
         s1 = "Hello";
@@ -248,5 +245,23 @@ TEST_CASE("string tests")
 
         // this works if we get by s2 == hello test
         REQUIRE(s1 == "HelloHello");
+
+        s3 = s1;
+
+        REQUIRE(s3 == s1);
+
+        s1 = s2;
+
+        REQUIRE(s1 == "Hello");
+    }
+    SECTION("indexer: layer1")
+    {
+        layer1::string<20> s = "hi2u";
+
+        REQUIRE(s == "hi2u");
+
+        s[2] = '3';
+
+        REQUIRE(s == "hi3u");
     }
 }

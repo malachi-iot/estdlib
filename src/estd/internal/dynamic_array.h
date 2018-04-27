@@ -355,6 +355,12 @@ public:
         unlock();
         return *this;
     }
+
+    handle_with_offset operator[](size_type pos)
+    {
+        return offset(pos);
+    }
+
 };
 
 

@@ -255,6 +255,20 @@ public:
         return allocator.lock(true, pos, count);
     }
 
+    // +++ intermediate
+    void size(size_type s)
+    {
+        if(s > len)
+        {
+            // FIX: issue some kind of warning
+        }
+
+        lock(s) = 0;
+        unlock();
+    }
+    // ---
+
+
     struct InitParam
     {
         const TBuffer& b;
@@ -269,13 +283,15 @@ public:
     {
         // FIX: this won't work when we initialize to a string literal or otherwise
         // existing buffer
-        allocator.lock(true) = 0;
+        size(0);
     }
 
     dynamic_array_helper()
     {
+        // FIX: do a static assert of some kind to ensure TBuffer is actually
+        // a regular array here
         // null-terminate
-        allocator.lock(true) = 0;
+        size(0);
     }
 
 
@@ -296,19 +312,6 @@ public:
     bool allocate(size_type sz) { return sz <= capacity(); }
     bool reallocate(size_type sz) { return sz <= capacity(); }
 
-
-    // +++ intermediate
-    void size(size_type s)
-    {
-        if(s > len)
-        {
-            // FIX: issue some kind of warning
-        }
-
-        lock(s) = 0;
-        unlock();
-    }
-    // ---
 
     void unlock() {}
 

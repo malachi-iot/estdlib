@@ -22,6 +22,7 @@ public:
     typedef const void* const_void_pointer;
     typedef value_type* handle_type;
 
+    // primarily for subscript/array operations
     class handle_with_offset
     {
         pointer loc;
@@ -55,6 +56,18 @@ public:
         bool operator!=(const handle_with_offset& compare_to) const
         {
             return loc != compare_to.loc;
+        }
+
+        handle_with_offset& operator=(const T& value)
+        {
+            // will autolock and unlock if necessary
+            *loc = value;
+        }
+
+        const operator T&()
+        {
+            // will autolock and unlock if necessary, returning only a const copy
+            return *loc;
         }
     };
 

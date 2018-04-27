@@ -437,6 +437,13 @@ public:
     {
         base_t::operator =(s);
     }
+
+    template <class ForeignAllocator>
+    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    {
+        base_t::operator =(copy_from);
+        return *this;
+    }
 };
 
 
@@ -482,10 +489,19 @@ public:
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
     }
 
+    /*
+     * Something seems to go wrong with allocator initialization on this one
     template <class ForeignAllocator>
     basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from) : base_t(copy_from)
     {
 
+    } */
+
+    template <class ForeignAllocator>
+    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    {
+        base_t::operator =(copy_from);
+        return *this;
     }
 };
 
@@ -525,6 +541,14 @@ public:
 
     basic_string(CharT* buffer, size_type buffer_size) :
         base_t(typename allocator_type::InitParam(buffer, buffer_size)) {}
+
+
+    template <class ForeignAllocator>
+    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    {
+        base_t::operator =(copy_from);
+        return *this;
+    }
 };
 
 
