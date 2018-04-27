@@ -7,8 +7,6 @@
 using namespace estd;
 
 
-
-
 TEST_CASE("vector tests")
 {
     SECTION("basic vector")

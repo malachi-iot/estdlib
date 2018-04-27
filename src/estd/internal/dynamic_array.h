@@ -152,7 +152,8 @@ public:
 
     bool is_allocated() const
     {
-        return handle != allocator_type::invalid();
+        handle_type h = handle;
+        return h != allocator_type::invalid();
     }
 
     bool allocate(size_type capacity)
@@ -259,14 +260,17 @@ protected:
         // so later consider doing the insert operation at that level)
         ensure_additional_capacity(1);
 
+        helper.size(helper.size() + 1);
+
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
-        size_type raw_typed_pos = (((to_insert_pos) - a) / sizeof(value_type));
+        size_type raw_typed_pos = to_insert_pos - a;
         size_type remaining = size() - raw_typed_pos;
 
+        // FIX: This is causing a memory allocation issue, probably a buffer overrun
+        // but not sure why
         memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
-        *to_insert_pos = *to_insert_value;
 
-        helper.size(helper.size() + 1);
+        *to_insert_pos = *to_insert_value;
     }
 
 public:
@@ -292,7 +296,7 @@ public:
     // return true = successful reserve, false = fail
     bool reserve( size_type new_cap )
     {
-        if(helper.is_allocated())
+        if(!helper.is_allocated())
             return helper.allocate(new_cap);
         else
             return helper.reallocate(new_cap);

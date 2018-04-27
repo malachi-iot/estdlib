@@ -7,9 +7,9 @@
 
 using namespace estd;
 
-// For some reason macOS (presumably clang) doesn't like this
-#ifndef __MACH__
-// neither << or toString is helping output string value during unit test, dang
+namespace std
+{
+
 template <class TChar, class TCharTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
 {
@@ -31,7 +31,10 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 
     return os;
 }
-#endif
+
+}
+
+
 
 #include <catch.hpp>
 
