@@ -7,9 +7,8 @@
 
 using namespace estd;
 
-template <class T>
-using test_t = experimental::single_fixedbuf_allocator<T, 10>;
-
+// For some reason macOS (presumably clang) doesn't like this
+#ifndef __MACH__
 // neither << or toString is helping output string value during unit test, dang
 template <class TChar, class TCharTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
@@ -32,38 +31,10 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 
     return os;
 }
-
-template <class TChar, class TCharTraits, class TAllocator>
-std::string toString(const estd::basic_string<TChar, TCharTraits, TAllocator>& value)
-{
-    std::string s;
-
-    char buf[256];
-
-    value.copy(&buf, sizeof(buf));
-
-    s.append(buf, value.size());
-
-    return s;
-};
+#endif
 
 #include <catch.hpp>
 
-
-namespace Catch {
-
-// partial function specialization not permitted
-/*
-template<class TChar, class TCharTraits, class TAllocator> std::string
-    toString<estd::basic_string<TChar, TCharTraits, TAllocator > >(
-            const estd::basic_string<TChar, TCharTraits, TAllocator>& value)
-{
-    std::string s;
-
-    return s;
-}; */
-
-}
 
 TEST_CASE("string tests")
 {
