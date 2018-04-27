@@ -80,8 +80,6 @@ public:
 
     size_type length() const { return base_t::size(); }
 
-    // NOTE: dropping const due to locking operation, but it's debatable whether we
-    // want to propagate that const behavior all the way up to here
     size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
         value_type* src = fake_const_lock();

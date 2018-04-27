@@ -55,6 +55,7 @@ public:
 // Can only have its allocate function called ONCE
 // tracks how much of the allocator has been allocated
 // null_terminated flag mainly serves as a trait/clue to specializations
+// len can == 0 in which case we're in unbounded mode
 template <class T, size_t len, bool null_terminated = false, class TBuffer = T[len]>
 struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
 {
@@ -98,7 +99,8 @@ public:
 
     size_t size(handle_with_size h) const { return len; }
 
-    size_t max_size() const { return len; }
+    // returns basically infinite max_size if we're in unbounded mode
+    size_t max_size() const { return len == 0 ? -1 : len; }
 };
 
 
