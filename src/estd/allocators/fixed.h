@@ -14,9 +14,11 @@ struct single_allocator_base
 {
     typedef const void* const_void_pointer;
     typedef bool handle_type; // really I want it an empty struct
+    typedef handle_type handle_with_size;
     typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
     typedef T value_type;
     typedef T* pointer;
+    typedef std::size_t size_type;
 
 protected:
 
@@ -27,6 +29,9 @@ protected:
     single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
 
 public:
+    static CONSTEXPR handle_type invalid() { return false; }
+
+
     value_type& lock(handle_type h, int pos = 0, int count = 0)
     {
         return buffer[pos];
@@ -38,6 +43,11 @@ public:
     {
         return buffer[pos];
     }
+
+    void deallocate(handle_with_size h)
+    {
+    }
+
 
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 };
@@ -54,9 +64,6 @@ struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
 
-    // FIX: Unsure what to do about invalid in this context
-    static CONSTEXPR handle_type invalid() { return false; }
-
     typedef T& handle_with_offset;
 
 public:
@@ -70,7 +77,7 @@ public:
         // we can't be sure if alloc fails or succeeds with unspecified length (when TBuffer = *)
         // but since we are embedded-oriented, permit it to succeed and trust the programmer
         // took precautions
-        if(len == -1)   return true;
+        if(len == 0)   return true;
 
         // remember our handle is a true/false
         return size <= len;
@@ -89,13 +96,66 @@ public:
         return allocate_ext(size);
     }
 
-    void deallocate(handle_with_size h)
-    {
-    }
-
     size_t size(handle_with_size h) const { return len; }
 
     size_t max_size() const { return len; }
+};
+
+
+// mainly for layer3:
+// runtime (but otherwise constant) size()
+// runtime (but otherwise constant) buffer*
+// as before, null_terminated is merely a clue/trait for consumer class
+template <class T, bool null_terminated = false>
+class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*>
+{
+public:
+    typedef single_allocator_base<T, T*> base_t;
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::handle_type handle_type;
+    typedef handle_type handle_with_size;
+
+private:
+    size_type m_buffer_size;
+
+public:
+    struct InitParam
+    {
+        T* buffer;
+        size_type size;
+
+        InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
+    };
+
+    single_fixedbuf_runtimesize_allocator(const InitParam& p)
+        : base_t(p.buffer), m_buffer_size(p.size)
+    {}
+
+    size_type size(handle_with_size h) const { return m_buffer_size; }
+
+    size_type max_size() const { return m_buffer_size; }
+
+    handle_with_size allocate_ext(size_t size)
+    {
+        // TODO: put in a flag only in debug mode to detect multiple alloc
+        // (should only have one for single+fixed allocator)
+
+        // remember our handle is a true/false
+        return size <= max_size();
+    }
+
+    handle_type allocate(size_t size)
+    {
+        return allocate_ext(size);
+    }
+
+
+    handle_with_size reallocate_ext(handle_type, size_t size)
+    {
+        // NOTE: assuming incoming handle_type is valid
+
+        return allocate_ext(size);
+    }
 };
 
 // See reference implementation in dynamic_array.h

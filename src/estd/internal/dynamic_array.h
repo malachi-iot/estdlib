@@ -324,10 +324,36 @@ protected:
         unlock();
     }
 
+    // internal version of replace not conforming to standard
+    // (standard version also inserts or removes characters if requested,
+    //  this one ONLY replaces the entire buffer)
+    // TODO: change to assign
+    void assign(const value_type* buf, size_type len)
+    {
+        reserve(len);
+
+        helper.size(len);
+
+        value_type* raw = lock();
+
+        while(len--) *raw++ = *buf++;
+
+        unlock();
+    }
+
 public:
     void push_back(const value_type& value)
     {
         _append(&value, 1);
+    }
+
+    template <class ForeignAllocator, class ForeignHelper>
+    dynamic_array& operator=(const dynamic_array<ForeignAllocator, ForeignHelper>& copy_from)
+    {
+        reserve(copy_from.size());
+        copy_from.copy(lock(), capacity());
+        unlock();
+        return *this;
     }
 };
 

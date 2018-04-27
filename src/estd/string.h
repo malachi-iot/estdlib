@@ -40,11 +40,18 @@ template<
     typedef experimental::dynamic_array<Allocator> base_t;
     typedef basic_string<CharT, Traits, Allocator> this_t;
 
-protected:
-    CharT* fake_const_lock() const
+public:
+    typedef typename base_t::size_type size_type;
+
+public:
+    // FIX: First of all , don't like forcing const
+    // secondly, exposing these as public is not great - but eventually
+    // we might be forced to expose some form of lock/unlock as public
+    // currently only exposing as public to make it easier for compare() to work
+    CharT* fake_const_lock(size_type pos = 0, size_type count = 0) const
     {
         // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
-        return const_cast<this_t*>(this)->lock();
+        return const_cast<this_t*>(this)->lock(pos, count);
     }
 
     void fake_const_unlock() const
@@ -52,17 +59,23 @@ protected:
         return const_cast<this_t*>(this)->unlock();
     }
 
+protected:
     template <class THelperParam>
     basic_string(const THelperParam& p) : base_t(p) {}
 
 public:
     basic_string() {}
 
+    template <class ForeignAllocator>
+    basic_string(const basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    {
+        operator =(copy_from);
+    }
+
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef Allocator allocator_type;
 
-    typedef typename base_t::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
 
     size_type length() const { return base_t::size(); }
@@ -94,6 +107,20 @@ public:
     }
 
 
+    template <class TForeignAllocator>
+    basic_string& append(const basic_string<CharT, Traits, TForeignAllocator>& str)
+    {
+        size_type len = str.length();
+
+        const CharT* append_from = str.fake_const_lock();
+
+        base_t::_append(append_from, len);
+
+        str.fake_const_unlock();
+
+        return *this;
+    }
+
     basic_string& append(const value_type* s)
     {
         size_t len = strlen(s);
@@ -103,7 +130,7 @@ public:
         return *this;
     }
 
-    // NOTE: deviates const from spec due to lock necessity
+
     int compare( const CharT* s ) const
     {
         size_type raw_size = base_t::size();
@@ -124,6 +151,29 @@ public:
     }
 
 
+    template <class TForeignAlloc>
+    int compare(const basic_string<CharT, Traits, TForeignAlloc>& str) const
+    {
+        size_type raw_size = base_t::size();
+        size_type s_size = str.size();
+
+        if(raw_size < s_size) return -1;
+        if(raw_size > s_size) return 1;
+
+        // gets here if size matches
+        CharT* raw = fake_const_lock();
+        CharT* s = str.fake_const_lock();
+
+        int result = traits_type::compare(raw, s, raw_size);
+
+        fake_const_unlock();
+
+        str.fake_const_unlock();
+
+        return result;
+    }
+
+
     template <class TString>
     basic_string& operator += (TString s)
     {
@@ -139,7 +189,23 @@ public:
 
     const value_type front() const
     {
-        //value_type* raw = lock();
+        return fake_const_lock(0, 1);
+    }
+
+    template <class ForeignAllocator>
+    basic_string& operator=(const basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    {
+        base_t::reserve(copy_from.size());
+        base_t::helper.size(copy_from.size());
+        copy_from.copy(base_t::lock(), base_t::capacity());
+        base_t::unlock();
+        return *this;
+    }
+
+    basic_string& operator=(const CharT* s)
+    {
+        base_t::assign(s, strlen(s));
+        return *this;
     }
 };
 
@@ -362,8 +428,24 @@ class basic_string
                 CharT, Traits,
                 estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
 {
+    typedef estd::basic_string<
+                CharT, Traits,
+                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
+                base_t;
+public:
+    basic_string() {}
 
+    basic_string(const CharT* s)
+    {
+        base_t::operator =(s);
+    }
 };
+
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <size_t N>
+using string = basic_string<char, N>;
+#endif
 
 }
 
@@ -382,6 +464,7 @@ class basic_string
             base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
+    typedef typename base_t::size_type size_type;
 
 public:
     basic_string(const CharT* str_buffer) : base_t(str_buffer)
@@ -389,11 +472,66 @@ public:
 
     }
 
+    /*
     basic_string(CharT* str_buffer) : base_t(str_buffer)
+    {
+
+    } */
+
+    template <size_type IncomingN>
+    basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
+    {
+        static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+    }
+
+    template <class ForeignAllocator>
+    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from) : base_t(copy_from)
     {
 
     }
 };
+
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <size_t N = 0>
+using string = basic_string<char, N>;
+#endif
+
+
+}
+
+namespace layer3 {
+
+template<class CharT, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+class basic_string
+        : public estd::basic_string<
+                CharT, Traits,
+                estd::experimental::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+{
+    typedef estd::basic_string<
+            CharT, Traits,
+            estd::experimental::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+            base_t;
+
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::helper_type helper_type;
+    typedef typename base_t::size_type size_type;
+
+public:
+    template <size_type N>
+    basic_string(CharT (&buffer) [N]) :
+        base_t(typename allocator_type::InitParam(buffer, N))
+    {
+
+    }
+
+    basic_string(CharT* buffer, size_type buffer_size) :
+        base_t(typename allocator_type::InitParam(buffer, buffer_size)) {}
+};
+
+
+typedef basic_string<char> string;
+
 
 }
 
@@ -409,6 +547,13 @@ bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs, const CharT* rh
 {
     return lhs.compare(rhs) == 0;
 };
+
+template <class CharT, class Traits, class AllocLeft, class AllocRight>
+bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,
+                  const basic_string<CharT, Traits, AllocRight>& rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
 
 
 }

@@ -192,4 +192,56 @@ TEST_CASE("string tests")
 
         buf[val2.copy(buf, 128)] = 0;
     }
+    SECTION("Non-experimental layer3")
+    {
+        char buf[128];
+
+        layer3::basic_string<char> s(buf);
+
+        REQUIRE(s.size() == 0);
+
+        s += "hello";
+
+        REQUIRE(s.size() == 5);
+        REQUIRE(s == "hello");
+    }
+    SECTION("Non experimental conversion between layers")
+    {
+        char buf2[100];
+        char buf3[100];
+
+        layer1::basic_string<char, 100> s1;
+        layer2::basic_string<char, 100> s2(buf2);
+        layer3::basic_string<char> s3(buf3);
+
+        s1 = "Hello";
+
+        REQUIRE(s1 == "Hello");
+
+        s2 = s1;
+
+        REQUIRE(s2 == "Hello");
+        REQUIRE(s2 == s1);
+    }
+    SECTION("Aliases/typedefs for layers")
+    {
+        char buf2[100];
+        char buf3[100];
+
+        layer1::string<100> s1;
+        layer2::string<> s2(buf2);
+        layer3::string s3(buf3);
+
+        s1 = "Hello";
+
+        s2 = s1;
+
+        REQUIRE(s1 == "Hello");
+        REQUIRE(s2 == "Hello"); // Fails due to string<> def above, but shouldn't (should grow unboundedly)
+
+        s1 += s2;
+
+        // this works if we get by s2 == hello test
+        REQUIRE(s1 == "HelloHello");
+    }
 }
