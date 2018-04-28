@@ -75,14 +75,6 @@ unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
 #endif
 #endif
 
-}
-
-
-
-
-
-namespace experimental {
-
 
 template <class TAllocator>
 class memory_range_base
@@ -104,6 +96,14 @@ public:
         //pointer p =
     }
 };
+
+}
+
+
+
+
+
+namespace internal {
 
 
 

@@ -18,7 +18,7 @@ struct handle_with_offset
 
 
 template <class T, class Allocator = std::allocator<T>>
-class vector : public experimental::dynamic_array<Allocator>
+class vector : public internal::dynamic_array<Allocator>
 {
 public:
     typedef T value_type;
@@ -28,7 +28,7 @@ public:
     typedef const value_type& const_reference;
 
 private:
-    typedef experimental::dynamic_array<Allocator> base_t;
+    typedef internal::dynamic_array<Allocator> base_t;
     typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
