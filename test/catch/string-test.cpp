@@ -91,6 +91,7 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == "hello");
     }
+#ifdef UNUSED
     SECTION("layer 2 null terminated")
     {
         char buf[128];
@@ -137,6 +138,7 @@ TEST_CASE("string tests")
         REQUIRE(buf2[7] == 'u');
 
     }
+#endif
     SECTION("dynamic_array low level allocator test")
     {
         //estd::vector<uint8_t, test_t> d;
@@ -180,6 +182,7 @@ TEST_CASE("string tests")
 
         REQUIRE(strcmp(buf, "hello") == 0);
     }
+#ifdef UNUSED
     SECTION("layer2 -> layer3 promotion")
     {
         experimental::layer2::basic_string<char, 10> val = "hello";
@@ -192,6 +195,7 @@ TEST_CASE("string tests")
 
         buf[val2.copy(buf, 128)] = 0;
     }
+#endif
     SECTION("Non-experimental layer3")
     {
         char buf[128];

@@ -235,6 +235,7 @@ struct null_terminated_string_traits
     static size_t length(char* str) { return strlen(str); }
 };
 
+#ifdef UNUSED
 // TODO: consolidate with estd::string itself now that allocator is beefing up
 // still have to crack the nut of the '0-byte' vs '1-byte' empty structs, which
 // size_tracker_nullterm and size_tracker_default are attempting (but not yet
@@ -417,7 +418,7 @@ public:
     }
 };
 }
-
+#endif
 }
 
 
