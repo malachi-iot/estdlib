@@ -99,10 +99,10 @@ public:
         return allocate_ext(size);
     }
 
-    size_t size(handle_with_size h) const { return len; }
-
-    // returns basically infinite max_size if we're in unbounded mode
+    // FIX: returns actual maximum size of unsigned,not ideal
     size_t max_size() const { return len == 0 ? -1 : len; }
+
+    size_t size(handle_with_size h) const { return max_size(); }
 };
 
 

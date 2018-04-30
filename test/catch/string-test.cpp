@@ -264,4 +264,14 @@ TEST_CASE("string tests")
 
         REQUIRE(s == "hi3u");
     }
+    SECTION("String literal assignment")
+    {
+        // DOES work sort of, but many operations like .copy don't work right
+        // because it is too const'd up
+        const layer2::basic_string<const char, 0> s = "Hello World";
+        /*
+        estd::basic_string<
+                        char, std::char_traits<char>,
+                        estd::experimental::single_fixedbuf_allocator < char, 0, true, char* > > s2 = "hello"; */
+    }
 }

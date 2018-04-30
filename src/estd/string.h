@@ -195,7 +195,11 @@ public:
     {
         base_t::reserve(copy_from.size());
         base_t::helper.size(copy_from.size());
-        copy_from.copy(base_t::lock(), base_t::capacity());
+        // remember, capacity indicates the biggest size
+        // the this->buffer can be
+        size_type capacity = base_t::capacity();
+        // copy from copy_from into our own buffer
+        copy_from.copy(base_t::lock(), capacity);
         base_t::unlock();
         return *this;
     }
