@@ -372,7 +372,7 @@ public:
                       return value == compare_to;
                   }, first_only );
 #else
-        node_handle current = m_front;
+        node_handle current = base_t::m_front;
         node_handle previous = before_beginning_node();
 
         while(current != after_end_node())
@@ -389,7 +389,7 @@ public:
                 // If we match but there's no previous node
                 if(previous == node_traits_t::null_node())
                     // then instead of splicing, we are replacing the front node
-                    m_front = _next;
+                    base_t::m_front = _next;
                 else
                     set_next(previous, next(current));
 
