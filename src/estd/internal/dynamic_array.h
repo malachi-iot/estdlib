@@ -202,7 +202,7 @@ public:
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
-template <class TAllocator, class THelper = dynamic_array_helper<TAllocator>>
+template <class TAllocator, class THelper = dynamic_array_helper<TAllocator > >
 class dynamic_array
 {
 public:

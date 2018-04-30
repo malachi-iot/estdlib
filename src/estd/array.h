@@ -75,7 +75,9 @@ public:
 
     public:
         iterator(T* ptr) : ptr(ptr) {}
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         iterator(const iterator& copy_from) = default;
+#endif
 
         iterator& operator++() {++ptr;return *this; }
         iterator& operator--() {--ptr;return *this; }

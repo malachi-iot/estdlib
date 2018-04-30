@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platform.h"
+
 // TODO: Utilize std version of this, if available
 
 namespace estd {
@@ -8,7 +10,7 @@ namespace estd {
 template<class T>
 struct less
 {
-    constexpr bool operator()(const T &lhs, const T &rhs) const
+    CONSTEXPR bool operator()(const T& lhs, const T& rhs) const
     {
         return lhs < rhs;
     }
