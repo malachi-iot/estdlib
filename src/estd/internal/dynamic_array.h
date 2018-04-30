@@ -152,6 +152,12 @@ public:
         return allocator.lock(handle, pos, count);
     }
 
+    // constant-return-lock
+    const value_type& clock_experimental(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.clock_experimental(handle, pos, count);
+    }
+
     void unlock() { allocator.unlock(handle); }
 
     bool is_allocated() const
@@ -230,6 +236,12 @@ protected:
     {
         lock_counter++;
         return &helper.lock(pos, count);
+    }
+
+    const value_type* clock_experimental(size_type pos = 0, size_type count = 0)
+    {
+        lock_counter++;
+        return &helper.clock_experimental(pos, count);
     }
 
     void unlock()

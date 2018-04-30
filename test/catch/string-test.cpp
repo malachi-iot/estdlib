@@ -273,6 +273,20 @@ TEST_CASE("string tests")
         // DOES work sort of, but many operations like .copy don't work right
         // because it is too const'd up
         const layer2::basic_string<const char, 0> s = "Hello World";
+
+        // these are compiling, however I don't think the underlying const char* is being assigned properly
+        // FIX: specifically, it's being zero'd out due to dynamic_array_helper initialization
+        layer2::basic_string<char, 0, true, std::char_traits<char>, const char*> s2 = "Hello World";
+        layer2::const_string s3 = "Hello World, again";
+
+        char buf[128];
+
+        buf[s2.copy(buf, sizeof(buf))] = 0;
+
+        REQUIRE(strlen(buf) > 0);
+        REQUIRE(s2 == "Hello World");
+        REQUIRE(s3 == "Hello World, again");
+
         /*
         estd::basic_string<
                         char, std::char_traits<char>,

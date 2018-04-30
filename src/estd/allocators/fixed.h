@@ -37,6 +37,11 @@ public:
         return buffer[pos];
     }
 
+    const value_type& clock_experimental(handle_type h, int pos = 0, int count = 0)
+    {
+        return buffer[pos];
+    }
+
     void unlock(handle_type h) {}
 
     handle_with_offset offset(handle_type h, size_t pos)

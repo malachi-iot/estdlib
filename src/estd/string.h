@@ -48,10 +48,10 @@ public:
     // secondly, exposing these as public is not great - but eventually
     // we might be forced to expose some form of lock/unlock as public
     // currently only exposing as public to make it easier for compare() to work
-    CharT* fake_const_lock(size_type pos = 0, size_type count = 0) const
+    const CharT* fake_const_lock(size_type pos = 0, size_type count = 0) const
     {
         // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
-        return const_cast<this_t*>(this)->lock(pos, count);
+        return const_cast<this_t*>(this)->clock_experimental(pos, count);
     }
 
     void fake_const_unlock() const
@@ -82,7 +82,7 @@ public:
 
     size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
-        value_type* src = fake_const_lock();
+        const value_type* src = fake_const_lock();
 
         // TODO: since we aren't gonna throw an exception, determine what to do if
         // pos > size()
@@ -138,7 +138,7 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        CharT* raw = fake_const_lock();
+        const CharT* raw = fake_const_lock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
@@ -159,8 +159,8 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        CharT* raw = fake_const_lock();
-        CharT* s = str.fake_const_lock();
+        const CharT* raw = fake_const_lock();
+        const CharT* s = str.fake_const_lock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
@@ -462,15 +462,15 @@ using string = basic_string<char, N>;
 
 namespace layer2 {
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT> >
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>, class PCharT = CharT* >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* > >
+                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
 {
     typedef estd::basic_string<
             CharT, Traits,
-            estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* > >
+            estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
             base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
@@ -515,6 +515,8 @@ public:
 template <size_t N = 0>
 using string = basic_string<char, N>;
 #endif
+
+typedef basic_string<char, 0, true, std::char_traits<char>, const char*> const_string;
 
 
 }

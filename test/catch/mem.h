@@ -91,6 +91,8 @@ public:
 
     T& lock(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
 
+    const T& clock_experimental(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
+
     void unlock(handle_type) { }
 
     pointer allocate(size_t size)
