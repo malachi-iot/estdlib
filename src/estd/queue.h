@@ -115,6 +115,15 @@ public:
         return *m_front;
     }
 
+    const_reference back() const
+    {
+        return *m_back;
+    }
+
+#ifdef FEATURE_CPP_VARIADIC
+    // TODO: Make emplace functions
+#endif
+
 #ifdef FEATURE_CPP_MOVESEMANTIC
     bool push_back(const T&& value)
     {
@@ -144,6 +153,8 @@ public:
     typedef typename Container::const_reference const_reference;
     typedef typename Container::size_type size_type;
 
+    bool empty() const { return c.empty(); }
+
     size_type size() const { return c.size(); }
 
     bool pop() { return c.pop_front(); }
@@ -154,6 +165,12 @@ public:
     }
 
     const_reference front() const { return c.front(); }
+
+    const_reference back() const { return c.back(); }
+
+#ifdef FEATURE_CPP_VARIADIC
+    // TODO: Make emplace functions
+#endif
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     bool push(value_type&& value)
