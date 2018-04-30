@@ -213,7 +213,7 @@ typedef basic_string<char> string;
 namespace experimental {
 
 
-template <class CharT, class TCharTraits = std::char_traits<CharT>>
+template <class CharT, class TCharTraits = std::char_traits<CharT > >
 class string_traits
 {
     static bool is_null_terminated();
@@ -308,7 +308,7 @@ namespace layer2 {
 // traits or an explicit name
 // N defaults to 0, kind of ugly by C++ standards but the norm for C - strings have an unspecified
 // upper bound
-template <class CharT, size_t N = 0, class Traits = std::char_traits<CharT>>
+template <class CharT, size_t N = 0, class Traits = std::char_traits<CharT > >
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 protected:
@@ -368,7 +368,7 @@ namespace layer3 {
 // represents a null-terminated string with a particular specified size
 // TODO: Probably we want to distinguish this as null-terminated vs not null terminated either with
 // traits or an explicit name
-template <class CharT, class Traits = std::char_traits<CharT>>
+template <class CharT, class Traits = std::char_traits<CharT> >
 class basic_string : public basic_string_base<CharT, CharT*, Traits>
 {
 public:
@@ -420,7 +420,7 @@ public:
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT > >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
@@ -457,7 +457,7 @@ using string = basic_string<char, N>;
 
 namespace layer2 {
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT> >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
@@ -516,7 +516,7 @@ using string = basic_string<char, N>;
 
 namespace layer3 {
 
-template<class CharT, bool null_terminated = true, class Traits = std::char_traits<CharT>>
+template<class CharT, bool null_terminated = true, class Traits = std::char_traits<CharT> >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
