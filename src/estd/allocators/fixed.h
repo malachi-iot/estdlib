@@ -220,6 +220,21 @@ public:
     bool reallocate(size_type sz) { return sz <= capacity(); }
 
     bool is_allocated() const { return true; }
+
+    size_type size() const
+    {
+        // specialization required if we aren't null terminated (to track size variable)
+        static_assert(null_terminated, "Utilizing this size method requires null termination = true");
+
+        const T* s = &clock_experimental();
+
+        // FIX: use char_traits string length instead
+        size_type sz = strlen(s);
+
+        cunlock_experimental();
+
+        return sz;
+    }
 };
 
 // as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
@@ -306,18 +321,23 @@ public:
                 is_initialized(is_initialized) {}
     };
 
+
+    dynamic_array_helper(const InitParam& p) : allocator(p.b)
+    {
+        if(!p.is_initialized) size(0);
+    }
+
     dynamic_array_helper(const TBuffer& b) : allocator(b)
     {
-        // FIX: this won't work when we initialize to a string literal or otherwise
-        // existing buffer
+        // NOTE: Only should arrive here with non const* since specializations should be
+        // taking over now in those cases.  However, we'd still like the feature of not
+        // brute forcing initialization (there are cases in which a passed in RW buffer
+        // is already initialized)
         size(0);
     }
 
     dynamic_array_helper()
     {
-        // FIX: do a static assert of some kind to ensure TBuffer is actually
-        // a regular array here
-        // null-terminate
         size(0);
     }
 
@@ -354,7 +374,8 @@ public:
 };
 
 // attempt to specialize for const T* scenarios
-// so far does not seem to be picked up
+// for now, seems to be necessary in parallel with the following more-specialized version
+// debugger doesn't pick up construction, but size() is invoked
 template <class T, size_t len>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, const T*> >
         : public dynamic_array_fixedbuf_helper_base<T, len, true, const T*>
@@ -366,31 +387,18 @@ public:
     typedef typename base_t::allocator_traits allocator_traits;
 
     dynamic_array_helper(const T* buf) : base_t(buf) {}
-
-    size_type size() const
-    {
-        const T* s = &base_t::clock_experimental();
-
-        // FIX: use char_traits string length instead
-        size_type sz = strlen(s);
-
-        base_t::cunlock_experimental();
-
-        return sz;
-    }
 };
 
 
 // attempt to specialize for const T* scenarios
-// so far does not seem to be picked up
-template <size_t len>
-class dynamic_array_helper<single_fixedbuf_allocator<const char, len, true, const char*> >
-        : public dynamic_array_fixedbuf_helper_base<const char, len, true, const char*>
+template <class T, size_t len>
+class dynamic_array_helper<single_fixedbuf_allocator<const T, len, true, const T*> >
+        : public dynamic_array_fixedbuf_helper_base<const T, len, true, const T*>
 {
-    typedef dynamic_array_fixedbuf_helper_base<const char, len, true, const char*> base_t;
+    typedef dynamic_array_fixedbuf_helper_base<const T, len, true, const T*> base_t;
 
 public:
-    dynamic_array_helper(const char* buf) : base_t(buf) {}
+    dynamic_array_helper(const T* buf) : base_t(buf) {}
 };
 
 }

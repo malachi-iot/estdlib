@@ -293,7 +293,7 @@ public:
     dynamic_array() {}
 
     template <class THelperParam>
-    dynamic_array(const THelperParam& p) :
+    dynamic_array(THelperParam& p) :
             helper(p) {}
 
     allocator_type get_allocator() const
