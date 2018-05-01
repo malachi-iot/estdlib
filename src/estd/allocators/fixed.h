@@ -192,7 +192,7 @@ protected:
     dynamic_array_fixedbuf_helper_base(TParam p) : allocator(p) {}
 
 public:
-    static CONSTEXPR bool is_null_terminated() { return null_terminated; }
+    static CONSTEXPR bool uses_termination() { return null_terminated; }
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {

@@ -133,7 +133,7 @@ class dynamic_array_helper
     allocator_type allocator;
 
 public:
-    static CONSTEXPR bool is_null_terminated() { return false; }
+    static CONSTEXPR bool uses_termination() { return false; }
 
     size_type capacity() const { return allocator.size(handle); }
     size_type size() const { return m_size; }
@@ -366,7 +366,7 @@ protected:
         // TODO: optimize null-terminated flavor to not use memmove at all
         size_type prev_size = helper.size();
 
-        if(helper_type::is_null_terminated())
+        if(helper_type::uses_termination())
             // null terminated flavor merely includes null termination as part
             // of move
             prev_size++;
