@@ -224,8 +224,10 @@ public:
 
     size_type size() const
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
         // specialization required if we aren't null terminated (to track size variable)
         static_assert(null_terminated, "Utilizing this size method requires null termination = true");
+#endif
 
         const T* s = &clock_experimental();
 
