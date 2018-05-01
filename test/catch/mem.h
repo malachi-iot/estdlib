@@ -64,7 +64,7 @@ public:
             *loc = value;
         }
 
-        const operator T&()
+        operator T&()
         {
             // will autolock and unlock if necessary, returning only a const copy
             return *loc;
