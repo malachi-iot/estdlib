@@ -120,9 +120,9 @@ class dynamic_array_helper
     typedef typename allocator_type::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     // handle.size represents currently allocation portion
     handle_with_size handle;
@@ -152,7 +152,7 @@ public:
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
-        return allocator.lock(handle, pos, count);
+        return allocator_traits::lock(allocator, handle, pos, count);
     }
 
     // constant-return-lock
@@ -161,7 +161,10 @@ public:
         return allocator.clock_experimental(handle, pos, count);
     }
 
-    void unlock() { allocator.unlock(handle); }
+    void unlock()
+    {
+        allocator_traits::unlock(allocator, handle);
+    }
 
     bool is_allocated() const
     {
@@ -185,14 +188,14 @@ public:
     template <class T>
     dynamic_array_helper(T init) :
             allocator(init),
-            handle(allocator_type::invalid()),
+            handle(allocator_traits::invalid()),
             m_size(0)
     {
 
     }
 
     dynamic_array_helper() :
-            handle(allocator_type::invalid()),
+            handle(allocator_traits::invalid()),
             m_size(0)
     {
 
@@ -200,8 +203,8 @@ public:
 
     ~dynamic_array_helper()
     {
-        if(handle != allocator_type::invalid())
-            allocator.deallocate(handle);
+        if(handle != allocator_traits::invalid())
+            allocator.deallocate(handle, 1);
     }
 };
 
@@ -379,6 +382,14 @@ protected:
     }
 
 public:
+    void pop_back()
+    {
+        // TODO: put in warning if this doesn't work, remember
+        // documentation says 'undefined' behavior if empty
+        // so nothing to worry about too much
+        helper.size(helper.size() - 1);
+    }
+
     void push_back(const value_type& value)
     {
         _append(&value, 1);

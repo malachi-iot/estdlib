@@ -299,5 +299,9 @@ TEST_CASE("string tests")
         s.erase(1, 1);
 
         REQUIRE(s == "Hllo World");
+
+        s.pop_back();
+
+        REQUIRE(s == "Hllo Worl");
     }
 }

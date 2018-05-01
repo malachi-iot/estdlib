@@ -50,7 +50,7 @@ public:
         return buffer[pos];
     }
 
-    void deallocate(handle_with_size h)
+    void deallocate(handle_with_size h, size_type count)
     {
     }
 

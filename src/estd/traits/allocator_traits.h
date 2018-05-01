@@ -35,6 +35,8 @@ struct allocator_traits
     // empty counters
     typedef typename TAllocator::lock_counter           lock_counter;
 
+    static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
+
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
         return a.allocate(n);
@@ -46,9 +48,9 @@ struct allocator_traits
     }
 
 
-    static reference lock(allocator_type& a, handle_type h)
+    static reference lock(allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
     {
-        return a.lock(h);
+        return a.lock(h, pos, count);
     }
 
     static void unlock(allocator_type& a, handle_type h)
@@ -73,17 +75,5 @@ struct allocator_traits
 #endif
 };
 
-
-// semi-kludgey, a way to shoehorn in existing std::allocator using our extended
-// locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
-// existing handle_type, etc.
-template<class T>
-struct allocator_traits<::std::allocator<T>> :
-        public ::std::allocator_traits<::std::allocator<T>>
-{
-    typedef ::std::allocator_traits<::std::allocator<T>> base_t;
-
-    typedef typename base_t::pointer handle_type;
-};
 
 }

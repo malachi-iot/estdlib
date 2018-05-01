@@ -2,7 +2,8 @@
 
 #include "../../platform.h"
 #include <stdlib.h> // for size_t
-#include <memory> // for allocator_traits
+//#include <memory> // for allocator_traits
+#include "../traits/allocator_traits.h"
 
 namespace estd {
 
@@ -43,10 +44,13 @@ struct nothing_allocator
     typedef const void* const_void_pointer;
     typedef pointer handle_with_offset;
     typedef pointer handle_with_size;
+    typedef size_t size_type;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
-    reference lock(handle_type h) { return *h; }
+    reference lock(handle_type h,
+                   size_type pos,
+                   size_type count) { return *(h + pos); }
     void unlock(handle_type h) {}
 
     // Don't want this here, but needed so far for ~dynamic_array, since
@@ -67,5 +71,34 @@ struct nothing_allocator
         return 0;
     }
 };
+
+// semi-kludgey, a way to shoehorn in existing std::allocator using our extended
+// locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
+// existing handle_type, etc.
+template<class T>
+struct allocator_traits<::std::allocator<T>> :
+        public ::std::allocator_traits<::std::allocator<T>>
+{
+    typedef ::std::allocator_traits<::std::allocator<T>> base_t;
+
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::pointer handle_type;
+    typedef typename base_t::value_type value_type;
+    typedef typename base_t::size_type size_type;
+    typedef handle_type handle_with_offset;
+    typedef handle_type handle_with_size;
+
+    static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
+    typedef typename nothing_allocator<T>::lock_counter lock_counter;
+
+    value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)
+    {
+        return *(pos + count);
+    }
+
+    void unlock(allocator_type& a, handle_type h) {}
+};
+
 
 }
