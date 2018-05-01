@@ -15,12 +15,13 @@ set(SOURCE_FILES
         estd/internal/dynamic_array.h
         estd/iterators/list.h
         estd/list.h
-       estd/map.h
+        estd/map.h
         estd/memory.h
         estd/queue.h
         estd/string.h
         estd/traits/node_list.h
         estd/traits/allocator_traits.h
+        estd/type_traits.h
         estd/utility.h
         estd/vector.h
        )

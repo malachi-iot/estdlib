@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include "iterator.h"
-#include <type_traits>
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach
