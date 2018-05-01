@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include <estd/queue.h>
+#include <queue>
 
 using namespace estd;
 
@@ -53,8 +54,9 @@ TEST_CASE("queue-test")
             queue.pop();
         }
     }
-    SECTION("Priority queue")
+    SECTION("std Priority queue")
     {
-
+        // almost, but iterator needs a subtraction (-) operator
+        //std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
     }
 }

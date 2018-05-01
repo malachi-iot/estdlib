@@ -29,13 +29,14 @@ public:
 
 private:
     typedef internal::dynamic_array<Allocator> base_t;
-    typedef typename base_t::size_type size_type;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
 
     typedef allocator_traits<allocator_type> allocator_traits_t;
 
 public:
+    typedef typename base_t::size_type size_type;
+
     // NOTE: accessor may very well become interchangeable with iterator
     // used to be the most granular access to an array/vector element without
     // having to lock it
@@ -69,6 +70,14 @@ public:
         handle_with_offset current;
 
     public:
+        // All-or-nothing, though not supposed to be that way till C++17 but is sometimes
+        // before that (http://en.cppreference.com/w/cpp/iterator/iterator_traits)
+        typedef T value_type;
+        typedef int difference_type;
+        typedef T* pointer;
+        typedef T& reference;
+        typedef ::std::forward_iterator_tag iterator_category;
+
         iterator(const handle_with_offset& current) : current(current) {}
 
         iterator(const iterator& copy_from) : current(copy_from.current) {}
