@@ -240,6 +240,8 @@ public:
 // as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
 // and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
 // template <>
+// TODO: Reconcile with single_fixedbuf_runtimesize_allocator.  Looks like it should be, but can't focus in this
+// environment enough to be sure
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
         : public dynamic_array_fixedbuf_helper_base<T, len, false, TBuffer>
@@ -270,12 +272,14 @@ public:
 
 
 
-// applies generally to T[N]
+// applies generally to T[N], RW buffer but also to non-const T*
+// applies specifically to null-terminated
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
-        //: public dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer>
+        : public dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer>
 {
 protected:
+    typedef dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer> base_t;
     typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
@@ -283,20 +287,7 @@ protected:
     typedef typename allocator_type::handle_with_offset handle_with_offset;
     typedef T value_type;
 
-    // fixed length buffer in which a null terminated string is/shall be located
-    allocator_type allocator;
-
 public:
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return allocator.lock(true, pos, count);
-    }
-
-    const value_type& clock_experimental(size_type pos = 0, size_type count = 0)
-    {
-        return allocator.clock_experimental(true, pos, count);
-    }
-
     // +++ intermediate
     void size(size_type s)
     {
@@ -305,9 +296,12 @@ public:
             // FIX: issue some kind of warning
         }
 
-        lock(s) = 0;
-        unlock();
+        base_t::lock(s) = 0;
+        base_t::unlock();
     }
+
+    // needed because above overload hides underlying size()
+    size_type size() const { return base_t::size(); }
     // ---
 
 
@@ -322,12 +316,12 @@ public:
     };
 
 
-    dynamic_array_helper(const InitParam& p) : allocator(p.b)
+    dynamic_array_helper(const InitParam& p) : base_t(p.b)
     {
         if(!p.is_initialized) size(0);
     }
 
-    dynamic_array_helper(const TBuffer& b) : allocator(b)
+    dynamic_array_helper(const TBuffer& b) : base_t(b)
     {
         // NOTE: Only should arrive here with non const* since specializations should be
         // taking over now in those cases.  However, we'd still like the feature of not
@@ -340,37 +334,6 @@ public:
     {
         size(0);
     }
-
-
-    size_type capacity() const { return allocator.max_size(); }
-
-    size_type size() const
-    {
-        // FIX: Make this work with any value_type, not just char, since
-        // dynamic_array can be utilized not just with string
-        // FIX: Do away with this nasty const-forcing.  It's an artifact of our
-        // underlying nature of lock/unlock having side effects but necessary
-        // to get at what is normally expected to be an unchanging pointer location
-        allocator_type& nonconst_a = const_cast<allocator_type&>(allocator);
-        return ::strlen(&nonconst_a.lock(true));
-    }
-
-    // TODO: ensure sz doesn't exceed len
-    bool allocate(size_type sz) { return sz <= capacity(); }
-    bool reallocate(size_type sz) { return sz <= capacity(); }
-
-
-    void unlock() {}
-
-
-    allocator_type& get_allocator() const { return allocator; }
-
-    handle_with_offset offset(size_type pos)
-    {
-        return allocator.offset(true, pos);
-    }
-
-    bool is_allocated() const { return true; }
 };
 
 // attempt to specialize for const T* scenarios
@@ -390,7 +353,8 @@ public:
 };
 
 
-// attempt to specialize for const T* scenarios
+// specialize for const T* scenarios
+// would like to merge this with above one if possible
 template <class T, size_t len>
 class dynamic_array_helper<single_fixedbuf_allocator<const T, len, true, const T*> >
         : public dynamic_array_fixedbuf_helper_base<const T, len, true, const T*>
