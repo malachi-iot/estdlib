@@ -429,11 +429,11 @@ template<class CharT, size_t N, bool null_terminated = true, class Traits = std:
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
+                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated> >
 {
     typedef estd::basic_string<
                 CharT, Traits,
-                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated> >
+                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated> >
                 base_t;
 public:
     basic_string() {}
@@ -466,11 +466,11 @@ template<class CharT, size_t N, bool null_terminated = true, class Traits = std:
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
+                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
 {
     typedef estd::basic_string<
             CharT, Traits,
-            estd::experimental::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
+            estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
             base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
@@ -527,11 +527,11 @@ template<class CharT, bool null_terminated = true, class Traits = std::char_trai
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::experimental::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+                estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
 {
     typedef estd::basic_string<
             CharT, Traits,
-            estd::experimental::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+            estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
             base_t;
 
     typedef typename base_t::allocator_type allocator_type;

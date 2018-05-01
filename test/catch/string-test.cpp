@@ -6,6 +6,7 @@
 #include "mem.h"
 
 using namespace estd;
+//using namespace estd::experimental;
 
 namespace std
 {
@@ -142,7 +143,7 @@ TEST_CASE("string tests")
     SECTION("dynamic_array low level allocator test")
     {
         //estd::vector<uint8_t, test_t> d;
-        estd::vector<uint8_t, experimental::single_fixedbuf_allocator<uint8_t, 10>> d;
+        estd::vector<uint8_t, internal::single_fixedbuf_allocator<uint8_t, 10>> d;
 
         d.push_back(3);
 
@@ -155,7 +156,7 @@ TEST_CASE("string tests")
     }
     SECTION("single_fixedbuf_allocator")
     {
-        estd::basic_string<char, std::char_traits<char>, experimental::single_fixedbuf_allocator<char, 30>> s;
+        estd::basic_string<char, std::char_traits<char>, internal::single_fixedbuf_allocator<char, 30>> s;
         char buf[128];
 
         s += "hello";
@@ -166,7 +167,7 @@ TEST_CASE("string tests")
     }
     SECTION("single_nullterm_fixedbuf_allocator")
     {
-        estd::basic_string<char, std::char_traits<char>, experimental::single_fixedbuf_allocator<char, 30, true>> s;
+        estd::basic_string<char, std::char_traits<char>, internal::single_fixedbuf_allocator<char, 30, true>> s;
         int sz = sizeof(s);
         char buf[128];
 
@@ -274,8 +275,7 @@ TEST_CASE("string tests")
         // because it is too const'd up
         const layer2::basic_string<const char, 0> s = "Hello World";
 
-        // these are compiling, however I don't think the underlying const char* is being assigned properly
-        // FIX: specifically, it's being zero'd out due to dynamic_array_helper initialization
+        // specializations keep const char* from being 'initialized' with a leading null termination
         layer2::basic_string<char, 0, true, std::char_traits<char>, const char*> s2 = "Hello World";
         layer2::const_string s3 = "Hello World, again";
 

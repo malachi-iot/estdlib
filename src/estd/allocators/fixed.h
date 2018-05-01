@@ -5,7 +5,7 @@
 
 namespace estd {
 
-namespace experimental {
+namespace internal {
 
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
@@ -37,7 +37,7 @@ public:
         return buffer[pos];
     }
 
-    const value_type& clock_experimental(handle_type h, int pos = 0, int count = 0)
+    const value_type& clock_experimental(handle_type h, int pos = 0, int count = 0) const
     {
         return buffer[pos];
     }
@@ -175,13 +175,21 @@ template <class T, size_t len, bool null_terminated, class TBuffer>
 class dynamic_array_fixedbuf_helper_base
 {
     typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
+
+    allocator_type allocator;
+
+protected:
     typedef ::std::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::value_type value_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
-    allocator_type allocator;
+    dynamic_array_fixedbuf_helper_base() {}
+
+    template <class TParam>
+    dynamic_array_fixedbuf_helper_base(TParam p) : allocator(p) {}
+
 public:
 
     value_type& lock(size_type pos = 0, size_type count = 0)
@@ -189,7 +197,15 @@ public:
         return allocator.lock(true, pos, count);
     }
 
+    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
+    {
+        return allocator.clock_experimental(true, pos, count);
+    }
+
+
     void unlock() {}
+
+    void cunlock_experimental() const {}
 
     size_type capacity() const { return allocator.max_size(); }
 
@@ -239,6 +255,7 @@ public:
 
 
 
+// applies generally to T[N]
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
         //: public dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer>
@@ -258,6 +275,11 @@ public:
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
         return allocator.lock(true, pos, count);
+    }
+
+    const value_type& clock_experimental(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.clock_experimental(true, pos, count);
     }
 
     // +++ intermediate
@@ -329,6 +351,46 @@ public:
     }
 
     bool is_allocated() const { return true; }
+};
+
+// attempt to specialize for const T* scenarios
+// so far does not seem to be picked up
+template <class T, size_t len>
+class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, const T*> >
+        : public dynamic_array_fixedbuf_helper_base<T, len, true, const T*>
+{
+    typedef dynamic_array_fixedbuf_helper_base<T, len, true, const T*> base_t;
+
+public:
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::allocator_traits allocator_traits;
+
+    dynamic_array_helper(const T* buf) : base_t(buf) {}
+
+    size_type size() const
+    {
+        const T* s = &base_t::clock_experimental();
+
+        // FIX: use char_traits string length instead
+        size_type sz = strlen(s);
+
+        base_t::cunlock_experimental();
+
+        return sz;
+    }
+};
+
+
+// attempt to specialize for const T* scenarios
+// so far does not seem to be picked up
+template <size_t len>
+class dynamic_array_helper<single_fixedbuf_allocator<const char, len, true, const char*> >
+        : public dynamic_array_fixedbuf_helper_base<const char, len, true, const char*>
+{
+    typedef dynamic_array_fixedbuf_helper_base<const char, len, true, const char*> base_t;
+
+public:
+    dynamic_array_helper(const char* buf) : base_t(buf) {}
 };
 
 }
