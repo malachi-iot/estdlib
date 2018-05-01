@@ -1,6 +1,7 @@
 #pragma once
 
 #include "generic.h"
+#include "../traits/allocator_traits.h"
 #include <string.h> // for strlen
 
 namespace estd {
@@ -179,7 +180,7 @@ class dynamic_array_fixedbuf_helper_base
     allocator_type allocator;
 
 protected:
-    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::value_type value_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
@@ -248,7 +249,7 @@ class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
 {
 protected:
     typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
-    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::value_type value_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
@@ -281,7 +282,7 @@ class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
 protected:
     typedef dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer> base_t;
     typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
-    typedef ::std::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
