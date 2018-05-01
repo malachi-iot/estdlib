@@ -80,6 +80,13 @@ public:
 
     size_type length() const { return base_t::size(); }
 
+    basic_string& erase(size_type index = 0, size_type count = -1)
+    {
+        size_type to_remove_count = std::min(count, base_t::size() - index);
+
+        base_t::_erase(index, to_remove_count);
+    }
+
     size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
         const value_type* src = fake_const_lock();

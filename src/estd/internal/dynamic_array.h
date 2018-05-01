@@ -133,6 +133,8 @@ class dynamic_array_helper
     allocator_type allocator;
 
 public:
+    static CONSTEXPR bool is_null_terminated() { return false; }
+
     size_type capacity() const { return allocator.size(handle); }
     size_type size() const { return m_size; }
 
@@ -351,6 +353,27 @@ protected:
         value_type* raw = lock();
 
         while(len--) *raw++ = *buf++;
+
+        unlock();
+    }
+
+    // basically raw_erase and maps almost directly to string::erase with numeric index
+    // will need a bit of wrapping to interact with iterators
+    void _erase(size_type index, size_type count)
+    {
+        pointer raw = lock(index);
+
+        // TODO: optimize null-terminated flavor to not use memmove at all
+        size_type prev_size = helper.size();
+
+        if(helper_type::is_null_terminated())
+            // null terminated flavor merely includes null termination as part
+            // of move
+            prev_size++;
+        else
+            helper.size(prev_size - count);
+
+        memmove(raw, raw + count, prev_size - (index + count));
 
         unlock();
     }

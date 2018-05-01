@@ -292,4 +292,12 @@ TEST_CASE("string tests")
                         char, std::char_traits<char>,
                         estd::experimental::single_fixedbuf_allocator < char, 0, true, char* > > s2 = "hello"; */
     }
+    SECTION("Erase portion of string")
+    {
+        layer1::string<40> s = "Hello World";
+
+        s.erase(1, 1);
+
+        REQUIRE(s == "Hllo World");
+    }
 }
