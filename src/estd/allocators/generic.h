@@ -41,6 +41,8 @@ struct nothing_allocator
     typedef T* handle_type;
     typedef T* pointer;
     typedef const void* const_void_pointer;
+    typedef pointer handle_with_offset;
+    typedef pointer handle_with_size;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 

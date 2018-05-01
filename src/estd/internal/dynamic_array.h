@@ -116,11 +116,12 @@ class dynamic_array_helper
 {
     // default implementation is 'full fat' to handle all scenarios
     typedef TAllocator allocator_type;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
     typedef typename allocator_type::value_type value_type;
 
-    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_traits<TAllocator>::size_type size_type;
+    typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
     // handle.size represents currently allocation portion
@@ -213,17 +214,18 @@ class dynamic_array
 {
 public:
     typedef TAllocator allocator_type;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
     typedef THelper helper_type;
     typedef typename allocator_type::value_type value_type;
 
-    typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::pointer pointer;
-    typedef typename allocator_traits<TAllocator>::size_type size_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_traits::handle_type handle_type;
+    typedef typename allocator_traits::handle_with_size handle_with_size;
+    typedef typename allocator_traits::pointer pointer;
+    typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
 protected:
-    typename allocator_type::lock_counter lock_counter;
+    typename allocator_traits::lock_counter lock_counter;
 
     THelper helper;
 

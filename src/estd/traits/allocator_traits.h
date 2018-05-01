@@ -2,6 +2,8 @@
 
 #include "../../platform.h"
 #include <utility> // for std::forward and std::size_t
+#include <memory> // for std::allocator
+#include "../type_traits.h"
 
 namespace estd {
 
@@ -24,8 +26,14 @@ struct allocator_traits
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
     // non-standard, for handle based scenarios
-    typedef typename TAllocator::handle_type    handle_type;
+    typedef typename TAllocator::handle_type            handle_type;
+    typedef typename TAllocator::handle_with_size       handle_with_size;
+    typedef typename TAllocator::handle_with_offset     handle_with_offset;
     typedef typename allocator_type::const_void_pointer     const_void_pointer;
+
+    // non-standard, and phase this out in favor of 'helpers' to wrap up
+    // empty counters
+    typedef typename TAllocator::lock_counter           lock_counter;
 
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
@@ -63,6 +71,19 @@ struct allocator_traits
         new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
     }
 #endif
+};
+
+
+// semi-kludgey, a way to shoehorn in existing std::allocator using our extended
+// locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
+// existing handle_type, etc.
+template<class T>
+struct allocator_traits<::std::allocator<T>> :
+        public ::std::allocator_traits<::std::allocator<T>>
+{
+    typedef ::std::allocator_traits<::std::allocator<T>> base_t;
+
+    typedef typename base_t::pointer handle_type;
 };
 
 }

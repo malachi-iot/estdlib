@@ -77,4 +77,9 @@ TEST_CASE("vector tests")
         }
 
     }
+    SECTION("vector with actual default std::allocator")
+    {
+        // eventually will be phased out to use our estd::allocator always
+        //estd::vector<int> v;
+    }
 }

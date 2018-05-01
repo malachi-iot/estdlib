@@ -23,14 +23,14 @@ class vector : public internal::dynamic_array<Allocator>
 public:
     typedef T value_type;
     typedef Allocator allocator_type;
-    typedef std::size_t size_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
 private:
     typedef internal::dynamic_array<Allocator> base_t;
-    typedef typename allocator_type::handle_type handle_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::handle_with_offset handle_with_offset;
 
     typedef allocator_traits<allocator_type> allocator_traits_t;
 
