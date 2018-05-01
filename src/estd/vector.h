@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "memory.h"
 #include "internal/dynamic_array.h"
+#include "allocators/fixed.h"
 
 namespace estd {
 
@@ -170,5 +171,28 @@ public:
 #endif
 };
 
+
+namespace layer1 {
+
+template <class T, size_t N>
+class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N > >
+{
+};
+
+};
+
+
+namespace layer2 {
+
+template <class T, size_t N>
+class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > >
+{
+    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > > base_t;
+
+public:
+    vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+};
+
+}
 
 }

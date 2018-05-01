@@ -336,7 +336,7 @@ protected:
 
         helper.size(current_size + len);
 
-        value_type* raw = lock() + current_size;
+        value_type* raw = lock(current_size);
 
         while(len--) *raw++ = *buf++;
 

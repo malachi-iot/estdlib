@@ -77,6 +77,31 @@ TEST_CASE("vector tests")
         }
 
     }
+    SECTION("layer1 vector")
+    {
+        estd::layer1::vector<int, 10> v;
+
+        REQUIRE(v.size() == 0);
+
+        v.push_back(3);
+
+        REQUIRE(v.size() == 1);
+        REQUIRE(v[0] == 3);
+    }
+    SECTION("layer2 vector")
+    {
+        // Not quite ready, need to de-const the dynamic_array init chain
+        /*
+        int buf[10];
+        estd::layer2::vector<int, 10> v(buf);
+
+        REQUIRE(v.size() == 0);
+
+        v.push_back(3);
+
+        REQUIRE(v.size() == 1);
+        REQUIRE(v[0] == 3); */
+    }
     SECTION("vector with actual default std::allocator")
     {
         // eventually will be phased out to use our estd::allocator always

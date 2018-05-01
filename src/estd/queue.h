@@ -180,6 +180,14 @@ public:
 #endif
 };
 
+namespace layer1 {
+
+template <class T, size_t size>
+class queue : public estd::queue<T, layer1::deque<T, 10> >
+{
+};
+
+};
 
 template <
         class T,
