@@ -72,6 +72,30 @@ struct nothing_allocator
     }
 };
 
+
+// FIX: stand-in which has our additional locking/handle machanisms
+// eventually have a proper one of these living in memory.h
+template <class T>
+struct experimental_std_allocator : public ::std::allocator<T>
+{
+    typedef ::std::allocator<T> base_t;
+
+    typedef typename base_t::pointer handle_type;
+    typedef handle_type handle_with_size;
+    typedef handle_type handle_with_offset;
+    typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
+    typedef const void* const_void_pointer;
+
+    static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
+    static T& lock(handle_type h, size_t pos, size_t count) { return *h; }
+    void unlock(handle_type) {}
+};
+
+
+
+
+
 #if __cplusplus >= 201103L
 // semi-kludgey, a way to shoehorn in existing std::allocator using our extended
 // locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
