@@ -308,6 +308,16 @@ TEST_CASE("string tests")
     {
         layer1::string<40> s = "Hello World";
 
+        int i = 0;
+
+        // FIX: From the looks of things
+        // https://stackoverflow.com/questions/9438209/for-every-character-in-string
+        // we should be able to do char& c but our iterators demand *c;
+        for(auto c : s)
+        {
+            INFO("i = " << i);
+            REQUIRE(s[i++] == *c);
+        }
         // doesn't exist yet
     }
 }

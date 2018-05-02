@@ -460,7 +460,7 @@ public:
 
         bool operator ==(const value_type& compare_to) const
         {
-            const value_type& v = allocator_traits::clock_experimental(a, h.handle());
+            const value_type& v = allocator_traits::clock_experimental(a, h);
 
             bool result = v == compare_to;
 
