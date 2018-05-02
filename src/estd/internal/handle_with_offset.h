@@ -4,8 +4,18 @@
 
 namespace estd { namespace internal {
 
-// FIX: this would be better suited in a more memory-specific area
-// this represents a kind of pointer offset from an unlocked handle
+template <typename size_t>
+class handle_with_only_offset
+{
+    size_t m_offset;
+
+public:
+    handle_with_only_offset(size_t offset) : m_offset(offset) {}
+
+    size_t offset() const { return m_offset; }
+};
+
+
 template <class THandle, typename size_type = std::size_t>
 class handle_with_offset
 {

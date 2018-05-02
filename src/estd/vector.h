@@ -26,99 +26,11 @@ private:
 public:
     typedef typename base_t::size_type size_type;
     typedef typename base_t::accessor accessor;
-
-
-    class iterator
-    {
-    private:
-        accessor current;
-
-    public:
-        // All-or-nothing, though not supposed to be that way till C++17 but is sometimes
-        // before that (http://en.cppreference.com/w/cpp/iterator/iterator_traits)
-        typedef T value_type;
-        typedef int difference_type;
-        typedef T* pointer;
-        typedef T& reference;
-        typedef ::std::forward_iterator_tag iterator_category;
-
-        iterator(const accessor& current) : current(current) {}
-
-        iterator(const iterator& copy_from) : current(copy_from.current) {}
-
-        // prefix version
-        iterator& operator++()
-        {
-            current.h_exp().increment();
-            return *this;
-        }
-
-        // postfix version
-        iterator operator++(int)
-        {
-            iterator temp(*this);
-            operator++();
-            return temp;
-        }
-
-        bool operator==(const iterator& compare_to) const
-        {
-            return current.h_exp() == compare_to.current.h_exp();
-        }
-
-        bool operator!=(const iterator& compare_to) const
-        {
-            return !(operator ==)(compare_to);
-            //return current != compare_to.current;
-        }
-
-        value_type& lock() { return current.lock(); }
-        void unlock() { current.unlock(); }
-
-        T* operator*()
-        {
-            // TODO: consolidate with InputIterator behavior from iterators/list.h
-            return &lock();
-        }
-    };
-
-    typedef const iterator const_iterator;
+    typedef typename base_t::iterator iterator;
 
     allocator_type& get_allocator()
     {
         return base_t::get_allocator();
-    }
-
-    typename base_t::accessor operator[](size_type pos)
-    {
-        return base_t::operator [](pos);
-    }
-
-    // TODO: consolidate with dynamic_array
-    iterator begin()
-    {
-        //handle_with_offset offset = get_allocator().offset(base_t::handle, 0);
-        handle_with_offset offset = base_t::helper.offset(0);
-        accessor a(get_allocator(), offset);
-
-        return iterator(a);
-    }
-
-    iterator end()
-    {
-        //handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
-        handle_with_offset offset = base_t::helper.offset(base_t::size());
-        accessor a(get_allocator(), offset);
-
-        return iterator(a);
-    }
-
-    const_iterator end() const
-    {
-        //handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
-        handle_with_offset offset = base_t::helper.offset(base_t::size());
-
-        return iterator(offset);
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC

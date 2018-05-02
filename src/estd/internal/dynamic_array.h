@@ -419,7 +419,7 @@ public:
         }
 
     public:
-        accessor(allocator_type& a, handle_with_offset h) :
+        accessor(allocator_type& a, const handle_with_offset& h) :
             a(a),
             h(h) {}
 
@@ -469,6 +469,88 @@ public:
             return result;
         }
     };
+
+
+
+    class iterator
+    {
+    private:
+        accessor current;
+
+    public:
+        // All-or-nothing, though not supposed to be that way till C++17 but is sometimes
+        // before that (http://en.cppreference.com/w/cpp/iterator/iterator_traits)
+        typedef dynamic_array::value_type value_type;
+        typedef int difference_type;
+        typedef value_type* pointer;
+        typedef value_type& reference;
+        typedef ::std::forward_iterator_tag iterator_category;
+
+        iterator(allocator_type& allocator, const handle_with_offset& h ) :
+            current(allocator, h)
+        {}
+
+        iterator(const iterator& copy_from) : current(copy_from.current) {}
+
+        // prefix version
+        iterator& operator++()
+        {
+            current.h_exp().increment();
+            return *this;
+        }
+
+        // postfix version
+        iterator operator++(int)
+        {
+            iterator temp(*this);
+            operator++();
+            return temp;
+        }
+
+        bool operator==(const iterator& compare_to) const
+        {
+            return current.h_exp() == compare_to.current.h_exp();
+        }
+
+        bool operator!=(const iterator& compare_to) const
+        {
+            return !(operator ==)(compare_to);
+            //return current != compare_to.current;
+        }
+
+        value_type& lock() { return current.lock(); }
+        void unlock() { current.unlock(); }
+
+        value_type* operator*()
+        {
+            // TODO: consolidate with InputIterator behavior from iterators/list.h
+            return &lock();
+        }
+    };
+
+    typedef const iterator const_iterator;
+
+
+    iterator begin()
+    {
+        return iterator(get_allocator(), offset(0));
+    }
+
+    iterator end()
+    {
+        handle_with_offset o = offset(size());
+
+        return iterator(get_allocator(), o);
+    }
+
+
+    const_iterator end() const
+    {
+        handle_with_offset o = offset(size());
+
+        return iterator(get_allocator(), o);
+    }
+
 
     accessor operator[](size_type pos)
     {
