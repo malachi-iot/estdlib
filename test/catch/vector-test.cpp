@@ -73,7 +73,7 @@ TEST_CASE("vector tests")
         {
             counter++;
             INFO("Counter: " << counter);
-            REQUIRE(counter == *i2);
+            REQUIRE(counter == i2);
         }
 
     }
@@ -112,8 +112,12 @@ TEST_CASE("vector tests")
 
         estd::layer1::vector<complex, 10> v;
 
-        //std::find_if(v.begin(), v.end(), [](const complex& value) { return value.value == 3; });
+        v.push_back(complex { 3, "hello" });
 
+        auto it = std::find_if(v.begin(), v.end(), [](const complex& value) { return value.value == 3; });
+
+        REQUIRE((*it).value == 3);
+        REQUIRE((*it).s == "hello");
     }
     SECTION("vector with actual default std::allocator")
     {

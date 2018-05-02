@@ -411,6 +411,7 @@ public:
         // and handle_with_offset to reduce footprint
         allocator_type& a;
         handle_with_offset h;
+        //dynamic_array::lock_counter counter;
 
         void unlock() const
         {
@@ -486,11 +487,25 @@ public:
         typedef value_type& reference;
         typedef ::std::forward_iterator_tag iterator_category;
 
+        value_type& lock() { return current.lock(); }
+        void unlock() { current.unlock(); }
+
+
         iterator(allocator_type& allocator, const handle_with_offset& h ) :
             current(allocator, h)
         {}
 
         iterator(const iterator& copy_from) : current(copy_from.current) {}
+
+        ~iterator()
+        {
+            // FIX: not so great.  It might be passable, though not recommended,
+            // to unlock an alread unlocked value.  But it's less certain what
+            // happens when we only unlock once if many lock() calls have happened
+            // -- another reason to consolidate with iterators/list, because it
+            // attempts to deal with this a little bit with a lock counter
+            unlock();
+        }
 
         // prefix version
         iterator& operator++()
@@ -499,11 +514,26 @@ public:
             return *this;
         }
 
+
+        iterator& operator--()
+        {
+            current.h_exp().increment(-1);
+            return *this;
+        }
+
         // postfix version
         iterator operator++(int)
         {
             iterator temp(*this);
             operator++();
+            return temp;
+        }
+
+        // postfix version
+        iterator operator--(int)
+        {
+            iterator temp(*this);
+            operator--();
             return temp;
         }
 
@@ -518,13 +548,15 @@ public:
             //return current != compare_to.current;
         }
 
-        value_type& lock() { return current.lock(); }
-        void unlock() { current.unlock(); }
-
-        value_type* operator*()
+        value_type& operator*()
         {
             // TODO: consolidate with InputIterator behavior from iterators/list.h
-            return &lock();
+            return lock();
+        }
+
+        const value_type& operator*() const
+        {
+            return lock();
         }
     };
 
