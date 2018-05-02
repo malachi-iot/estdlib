@@ -72,14 +72,15 @@ struct nothing_allocator
     }
 };
 
+#if __cplusplus >= 201103L
 // semi-kludgey, a way to shoehorn in existing std::allocator using our extended
 // locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
 // existing handle_type, etc.
 template<class T>
-struct allocator_traits<::std::allocator<T>> :
-        public ::std::allocator_traits<::std::allocator<T>>
+struct allocator_traits< ::std::allocator<T> >
+        : public ::std::allocator_traits< ::std::allocator<T > >
 {
-    typedef ::std::allocator_traits<::std::allocator<T>> base_t;
+    typedef ::std::allocator_traits< ::std::allocator<T > > base_t;
 
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::pointer handle_type;
@@ -99,6 +100,7 @@ struct allocator_traits<::std::allocator<T>> :
 
     void unlock(allocator_type& a, handle_type h) {}
 };
+#endif
 
 
 }
