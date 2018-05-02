@@ -5,6 +5,7 @@ project(estd)
 set(SOURCE_FILES
        dummy.cpp 
        platform.h
+        estd/algorithm.h
         estd/allocators/fixed.h
         estd/allocators/generic.h
        estd/array.h
