@@ -88,7 +88,7 @@ struct experimental_std_allocator : public ::std::allocator<T>
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
-    static T& lock(handle_type h, size_t pos, size_t count) { return *h; }
+    static T& lock(handle_type h, size_t pos, size_t count) { return *(h + pos); }
     void unlock(handle_type) {}
 };
 
