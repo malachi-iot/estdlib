@@ -138,7 +138,7 @@ public:
     size_type capacity() const { return allocator.size(handle); }
     size_type size() const { return m_size; }
 
-    allocator_type& get_allocator() const { return allocator; }
+    allocator_type& get_allocator() { return allocator; }
 
     // +++ intermediate calls, phase these out eventually
     handle_with_size get_handle() { return handle; }
@@ -303,7 +303,7 @@ public:
     dynamic_array(THelperParam& p) :
             helper(p) {}
 
-    allocator_type get_allocator() const
+    allocator_type& get_allocator()
     {
         return helper.get_allocator();
     }
@@ -404,9 +404,75 @@ public:
         return *this;
     }
 
-    handle_with_offset operator[](size_type pos)
+    class accessor
     {
-        return offset(pos);
+        // TODO: one day, optimize similar to dynamic_array_helper
+        // with an accessor_helper which combines allocator_type
+        // and handle_with_offset to reduce footprint
+        allocator_type& a;
+        handle_with_offset h;
+
+        void unlock() const
+        {
+            // FIX: temporarily not unlocking anything since const lock/unlock still a pain
+            // and we aren't actually doing anything during unlock yet
+        }
+
+    public:
+        accessor(allocator_type& a, handle_with_offset h) :
+            a(a),
+            h(h) {}
+
+        const handle_with_offset& h_exp() const { return h; }
+
+        handle_with_offset& h_exp() { return h; }
+
+        value_type& lock()
+        {
+            return allocator_traits::lock(a, h);
+        }
+
+        void unlock()
+        {
+            allocator_traits::unlock(a, h.handle());
+        }
+
+        operator value_type()
+        {
+            // copies it - beware, some T we don't want to copy!
+            value_type retval = lock();
+
+            unlock();
+
+            return retval;
+        }
+
+        accessor& operator=(const value_type& assign_from)
+        {
+            value_type& value = lock();
+
+            value = assign_from;
+
+            unlock();
+
+            return *this;
+        }
+
+        bool operator ==(const value_type& compare_to) const
+        {
+            const value_type& v = allocator_traits::clock_experimental(a, h.handle());
+
+            bool result = v == compare_to;
+
+            unlock();
+
+            return result;
+        }
+    };
+
+    accessor operator[](size_type pos)
+    {
+        return accessor(get_allocator(), offset(pos));
     }
 
 };

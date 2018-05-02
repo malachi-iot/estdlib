@@ -4,6 +4,7 @@
 #include <stdlib.h> // for size_t
 //#include <memory> // for allocator_traits
 #include "../traits/allocator_traits.h"
+#include "../internal/handle_with_offset.h"
 
 namespace estd {
 
@@ -42,7 +43,7 @@ struct nothing_allocator
     typedef T* handle_type;
     typedef T* pointer;
     typedef const void* const_void_pointer;
-    typedef pointer handle_with_offset;
+    typedef internal::handle_with_offset_raw<pointer> handle_with_offset;
     typedef pointer handle_with_size;
     typedef size_t size_type;
 

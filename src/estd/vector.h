@@ -7,17 +7,6 @@
 
 namespace estd {
 
-// FIX: this would be better suited in a more memory-specific area
-// this represents a kind of pointer offset from an unlocked handle
-template <class THandle, typename size_type = size_t>
-struct handle_with_offset
-{
-    THandle handle;
-    size_type offset;
-};
-
-
-
 template <class T, class Allocator = std::allocator<T > >
 class vector : public internal::dynamic_array<Allocator>
 {
@@ -36,38 +25,13 @@ private:
 
 public:
     typedef typename base_t::size_type size_type;
+    typedef typename base_t::accessor accessor;
 
-    // NOTE: accessor may very well become interchangeable with iterator
-    // used to be the most granular access to an array/vector element without
-    // having to lock it
-    class accessor : public handle_with_offset
-    {
-        operator T()
-        {
-            // copies it - beware, some T we don't want to copy!
-            T retval = handle_with_offset::lock();
-
-            handle_with_offset::unlock();
-
-            return retval;
-        }
-
-        accessor& operator=(const T& assign_from)
-        {
-            T& value = handle_with_offset::lock();
-
-            value = assign_from;
-
-            handle_with_offset::unlock();
-
-            return *this;
-        }
-    };
 
     class iterator
     {
     private:
-        handle_with_offset current;
+        accessor current;
 
     public:
         // All-or-nothing, though not supposed to be that way till C++17 but is sometimes
@@ -78,14 +42,14 @@ public:
         typedef T& reference;
         typedef ::std::forward_iterator_tag iterator_category;
 
-        iterator(const handle_with_offset& current) : current(current) {}
+        iterator(const accessor& current) : current(current) {}
 
         iterator(const iterator& copy_from) : current(copy_from.current) {}
 
         // prefix version
         iterator& operator++()
         {
-            ++current;
+            current.h_exp().increment();
             return *this;
         }
 
@@ -99,12 +63,13 @@ public:
 
         bool operator==(const iterator& compare_to) const
         {
-            return current == compare_to.current;
+            return current.h_exp() == compare_to.current.h_exp();
         }
 
         bool operator!=(const iterator& compare_to) const
         {
-            return current != compare_to.current;
+            return !(operator ==)(compare_to);
+            //return current != compare_to.current;
         }
 
         value_type& lock() { return current.lock(); }
@@ -119,14 +84,14 @@ public:
 
     typedef const iterator const_iterator;
 
-    allocator_type get_allocator() const
+    allocator_type& get_allocator()
     {
         return base_t::get_allocator();
     }
 
-    handle_with_offset operator[](size_type pos)
+    typename base_t::accessor operator[](size_type pos)
     {
-        return base_t::offset(pos);
+        return base_t::operator [](pos);
     }
 
     // TODO: consolidate with dynamic_array
@@ -134,16 +99,18 @@ public:
     {
         //handle_with_offset offset = get_allocator().offset(base_t::handle, 0);
         handle_with_offset offset = base_t::helper.offset(0);
+        accessor a(get_allocator(), offset);
 
-        return iterator(offset);
+        return iterator(a);
     }
 
     iterator end()
     {
         //handle_with_offset offset = get_allocator().offset(base_t::handle, base_t::size());
         handle_with_offset offset = base_t::helper.offset(base_t::size());
+        accessor a(get_allocator(), offset);
 
-        return iterator(offset);
+        return iterator(a);
     }
 
     const_iterator end() const

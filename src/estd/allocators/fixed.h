@@ -2,6 +2,7 @@
 
 #include "generic.h"
 #include "../traits/allocator_traits.h"
+#include "../internal/handle_with_offset.h"
 #include <string.h> // for strlen
 
 namespace estd {
@@ -16,7 +17,8 @@ struct single_allocator_base
     typedef const void* const_void_pointer;
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
-    typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
+    //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
+    typedef handle_with_offset<handle_type> handle_with_offset;
     typedef T value_type;
     typedef T* pointer;
     typedef std::size_t size_type;
@@ -38,6 +40,11 @@ public:
         return buffer[pos];
     }
 
+    value_type& lock(const handle_with_offset& h, int pos = 0, int count = 0)
+    {
+        return buffer[h.offset() + pos];
+    }
+
     const value_type& clock_experimental(handle_type h, int pos = 0, int count = 0) const
     {
         return buffer[pos];
@@ -47,7 +54,7 @@ public:
 
     handle_with_offset offset(handle_type h, size_t pos)
     {
-        return buffer[pos];
+        return handle_with_offset(h, pos);
     }
 
     void deallocate(handle_with_size h, size_type count)
@@ -173,7 +180,7 @@ struct dynamic_array_helper;
 template <class T, size_t len, bool null_terminated, class TBuffer>
 class dynamic_array_fixedbuf_helper_base
 {
-    typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
+    typedef single_fixedbuf_allocator<T, len, null_terminated, TBuffer> allocator_type;
 
     allocator_type allocator;
 

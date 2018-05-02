@@ -191,7 +191,8 @@ public:
 
     basic_string& operator += (value_type c)
     {
-        push_back(c);
+        base_t::push_back(c);
+        return *this;
     }
 
 

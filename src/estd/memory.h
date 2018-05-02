@@ -23,8 +23,6 @@ struct Allocator
 
 
 
-
-
 template <class TPtr> struct pointer_traits;
 template <class T> struct pointer_traits<T*>;
 

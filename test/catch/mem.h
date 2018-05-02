@@ -22,13 +22,15 @@ public:
     typedef const void* const_void_pointer;
     typedef value_type* handle_type;
 
+    typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
+
     // primarily for subscript/array operations
-    class handle_with_offset
+    class handle_with_offset_old
     {
         pointer loc;
 
     public:
-        handle_with_offset(pointer loc) : loc(loc) {}
+        handle_with_offset_old(pointer loc) : loc(loc) {}
 
         T& lock() { return *loc; }
 
@@ -90,6 +92,11 @@ public:
     };
 
     T& lock(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
+
+    T& lock(handle_with_offset h, size_t pos = 0, size_t count = 0)
+    {
+        return *(h.handle() + pos);
+    }
 
     const T& clock_experimental(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
 

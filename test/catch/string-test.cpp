@@ -147,7 +147,7 @@ TEST_CASE("string tests")
 
         d.push_back(3);
 
-        auto& v = d[0];
+        uint8_t v = d[0];
         auto vv = (int)v;
 
         // flaky sometimes, likely due to underlying locking magic
