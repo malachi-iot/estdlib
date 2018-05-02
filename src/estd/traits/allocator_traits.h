@@ -36,6 +36,11 @@ struct allocator_traits
     typedef typename TAllocator::lock_counter           lock_counter;
 
     static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
+    static CONSTEXPR bool is_locking() { return allocator_type::is_locking(); }
+
+    // indicates whether the allocator_type is stateful (requiring an instance variable)
+    // or purely static
+    static CONSTEXPR bool is_stateful() { return true; }
 
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {

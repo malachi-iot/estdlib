@@ -48,6 +48,7 @@ struct nothing_allocator
     typedef size_t size_type;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
+    static CONSTEXPR bool is_locking() { return false; }
 
     reference lock(handle_type h,
                    size_type pos,
@@ -91,6 +92,8 @@ struct experimental_std_allocator : public ::std::allocator<T>
 
     static T& lock(handle_type h, size_t pos, size_t count) { return *(h + pos); }
     void unlock(handle_type) {}
+
+    static CONSTEXPR bool is_locking() { return false; }
 };
 
 
@@ -108,22 +111,24 @@ struct allocator_traits< ::std::allocator<T> >
     typedef ::std::allocator_traits< ::std::allocator<T > > base_t;
 
     typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::pointer pointer;
     typedef typename base_t::pointer handle_type;
     typedef typename base_t::value_type value_type;
     typedef typename base_t::size_type size_type;
-    typedef handle_type handle_with_offset;
+    //typedef handle_type handle_with_offset;
+    typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
     typedef handle_type handle_with_size;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 
-    value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)
+    static value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)
     {
-        return *(pos + count);
+        return *(h + pos);
     }
 
-    void unlock(allocator_type& a, handle_type h) {}
+    static void unlock(allocator_type& a, handle_type h) {}
 };
 #endif
 

@@ -169,7 +169,7 @@ public:
     bool is_allocated() const
     {
         handle_type h = handle;
-        return h != allocator_type::invalid();
+        return h != allocator_traits::invalid();
     }
 
     bool allocate(size_type capacity)

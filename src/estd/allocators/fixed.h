@@ -33,6 +33,7 @@ protected:
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }
+    static CONSTEXPR bool is_locking() { return false; }
 
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)
