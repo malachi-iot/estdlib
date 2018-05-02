@@ -304,4 +304,10 @@ TEST_CASE("string tests")
 
         REQUIRE(s == "Hllo Worl");
     }
+    SECTION("String iteration")
+    {
+        layer1::string<40> s = "Hello World";
+
+        // doesn't exist yet
+    }
 }

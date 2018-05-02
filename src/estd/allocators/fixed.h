@@ -71,8 +71,6 @@ struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
 
-    typedef T& handle_with_offset;
-
 public:
     single_fixedbuf_allocator() {}
 

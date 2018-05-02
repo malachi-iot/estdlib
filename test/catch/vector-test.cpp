@@ -102,6 +102,19 @@ TEST_CASE("vector tests")
         REQUIRE(v.size() == 1);
         REQUIRE(v[0] == 3); */
     }
+    SECTION("vector with semi-complex type/find")
+    {
+        struct complex
+        {
+            int value;
+            const char* s;
+        };
+
+        estd::layer1::vector<complex, 10> v;
+
+        //std::find_if(v.begin(), v.end(), [](const complex& value) { return value.value == 3; });
+
+    }
     SECTION("vector with actual default std::allocator")
     {
         // eventually will be phased out to use our estd::allocator always

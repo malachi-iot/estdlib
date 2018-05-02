@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "internal/dynamic_array.h"
 #include "allocators/fixed.h"
+#include <algorithm> // for std::min
 
 namespace estd {
 
@@ -85,6 +86,8 @@ public:
         size_type to_remove_count = std::min(count, base_t::size() - index);
 
         base_t::_erase(index, to_remove_count);
+
+        return *this;
     }
 
     size_type copy(value_type* dest, size_type count, size_type pos = 0) const
