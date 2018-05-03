@@ -63,10 +63,12 @@ struct test_node_handle2 : public test_node_handle
 uint8_t handle_count = 0;
 test_node_handle2 handles[5];
 
+#ifdef UNUSED
 template <template <class> class TAllocator>
 using node_traits_inlineref = estd::inlineref_node_traits<
         estd::experimental::forward_node_base,
         TAllocator >;
+#endif
 
 // just to help out typed_handle
 // eventually root allocators will shoulder more of the burden that node allocators

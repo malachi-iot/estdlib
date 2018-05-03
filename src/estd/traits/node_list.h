@@ -292,6 +292,7 @@ struct intrusive_node_traits_new_base :
 };
 
 
+#ifdef UNUSED
 // when linked-list node and tracked value are exactly
 // the same
 template <class TNode>
@@ -738,7 +739,7 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 #endif
 
 };
-
+#endif
 
 
 

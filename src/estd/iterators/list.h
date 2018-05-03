@@ -47,6 +47,7 @@ protected:
 
 public:
     InputIterator(node_handle_t node, const traits_t& traits) :
+        current(node),
         traits(traits)
     {}
 
@@ -130,12 +131,10 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
             this->unlock();
         }
 
-        //node_type& c = base_t::alloc.lock(this->current);
         node_type& c = base_t::lock_internal();
 
         this->current = base_t::traits.next(c);
 
-        //base_t::alloc.unlock(this->current);
         base_t::unlock_internal();
 
         return *this;
