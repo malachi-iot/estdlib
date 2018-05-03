@@ -6,7 +6,9 @@
 
 namespace estd {
 
-template<class T, class TNodeTraits = node_traits<T > >
+template<class T, class TNode = T,
+         class TAllocator = experimental_std_allocator<TNode>,
+         class TNodeTraits = node_traits<T, TAllocator > >
 class list
 {
 };

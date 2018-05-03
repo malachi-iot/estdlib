@@ -160,7 +160,9 @@ protected:
 // incoming templatized allocator calls.  One possibility is TNodeTrait can
 // present a 'default' allocator , though this might conflict with a default of
 // std::allocator<T> specialization, but that itself is deprecated for C++17
-template<class T, class TNodeTraits = node_traits<T > >
+template<class T, class TNode = T,
+         class TAllocator = experimental_std_allocator<TNode>,
+         class TNodeTraits = node_traits<T, TAllocator > >
 class forward_list : public internal::linkedlist_base<T, TNodeTraits>
 {
 public:

@@ -7,7 +7,13 @@ namespace estd {
 
 // TODO: Need to resolve descrepency here because actual TAllocator
 // should heed later incoming TValue as well
-template <class TNode, class TAllocator> struct node_traits;
+template <class TNode,
+          class TAllocator,
+          // TValueAllocator *should* actually be for TNode::value_type but code is in
+          // flux so not committing to that yet, and as long as it compiles, nothing_allocator
+          // should be harmless anyway
+          class TValueAllocator = nothing_allocator< TNode > >
+struct node_traits;
 
 namespace experimental {
 
@@ -54,6 +60,164 @@ class list;
 
 }
 
+
+// assumes TNode has a next() and next(node)
+template <class TNode, class TAllocator, class TValueAllocator>
+struct node_traits_new_base
+{
+    typedef TNode node_type;
+    typedef TAllocator allocator_type;
+    typedef typename allocator_type::handle_type handle_type;
+    typedef TValueAllocator value_allocator_type;
+
+    // TODO: assert value_allocator_type = value_type
+
+    handle_type next(node_type& node) const
+    {
+        return node.next();
+    }
+
+    void next(node_type &node, const handle_type& new_next)
+    {
+        node.next(new_next);
+    }
+};
+
+
+template <class TNode, class TAllocator, class TValueAllocator>
+struct stateful_allocator_node_traits_base
+        : public node_traits_new_base<TNode, TAllocator, TValueAllocator>
+{
+    typedef node_traits_new_base<TNode, TAllocator, TValueAllocator> base_t;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_type node_type;
+    typedef typename TNode::value_type value_type;
+
+protected:
+    // TODO: resolve 'empty' / stateless allocators
+    TAllocator node_allocator;
+    // NOTE: value_allocator should never be used for inlinevalue, just here
+    // for decoration
+    TValueAllocator value_allocator;
+
+    handle_type allocate_node()
+    {
+        return allocator_traits::allocate(node_allocator, 1);
+    }
+
+    node_type& lock_node(handle_type h)
+    {
+        return allocator_traits::lock(node_allocator, h);
+    }
+
+    void unlock_node(handle_type h)
+    {
+        allocator_traits::unlock(node_allocator, h);
+    }
+
+    void deallocate_node(handle_type h)
+    {
+        allocator_traits::deallocate(node_allocator, h);
+    }
+
+
+    void destruct_node(handle_type h)
+    {
+        // explicit destruction of our node
+        (&lock_node(h))->~node_type();
+        unlock_node(h);
+    }
+
+public:
+    // call destructor on and deallocate node
+    void destroy(handle_type node_handle)
+    {
+        destruct_node(node_handle);
+        deallocate_node(node_handle);
+    }
+};
+
+
+template <class TNode, class TAllocator, class TValueAllocator>
+struct stateless_allocator_node_traits_base
+        : public node_traits_new_base<TNode, TAllocator, TValueAllocator>
+{
+    typedef node_traits_new_base<TNode, TAllocator, TValueAllocator> base_t;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_type node_type;
+};
+
+// assumes TNode has a next() and next(node), as
+// well as a value_type typedef clue and a constructor which
+// takes value_type& for initialization.  Being inline, it's
+// likely we favor emplace if it's available to avoid copying
+template <class TNode, class TAllocator, class TValueAllocator>
+struct inlinevalue_node_traits_new_base :
+        public stateful_allocator_node_traits_base<TNode, TAllocator, TValueAllocator>
+{
+    typedef stateful_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
+    typedef typename TNode::value_type value_type;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_type node_type;
+    typedef typename base_t::allocator_traits allocator_traits;
+
+    // remember inlinevalue we specifically DO NOT use TValueAllocator
+
+    handle_type allocate(const value_type& value)
+    {
+        handle_type h = base_t::allocate_node();
+
+        node_type& n = base_t::lock_node(h);
+
+        new (&n) node_type(value);
+
+        base_t::unlock_node(h);
+
+        return h;
+    }
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class... TArgs>
+    handle_type allocate_emplace(TArgs...args)
+    {
+        handle_type h = base_t::allocate_node();
+
+        node_type& n = base_t::lock_node(h);
+
+        // TODO: use allocator_traits construct
+        new (&n) node_type(args...);
+
+        base_t::unlock_node(h);
+
+        return h;
+    }
+#endif
+};
+
+
+// assumes TNode has a next() and next(node)
+// also being intrusive, TNode must BE value_type;
+template <class TNode, class TAllocator, class TValueAllocator>
+struct intrusive_node_traits_new_base :
+        public stateless_allocator_node_traits_base<TNode, TAllocator, TValueAllocator>
+{
+    typedef stateless_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
+    typedef TNode value_type;
+
+    // neither TAllocator nor TValueAllocator is directly utilized in this context
+    // (intrusive nodes are externally allocated)
+    // however, TAllocator is used to at least get the handle/pointer types
+
+    // "allocate" a node to accomodate value type.  However, intrusive nodes ARE value_type,
+    // so this is a noop [zero allocation happens in these scenarios]
+    value_type& allocate(const value_type& value)
+    {
+        return value;
+    }
+};
 
 
 // when linked-list node and tracked value are exactly
@@ -504,11 +668,11 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 };
 
 
-// default node_traits is the no-alloc variety (since we are embedded oriented)
-//template <class TValue, template <class> class TAllocator>
-template <class TValue, class TAllocator = nothing_allocator<TValue > >
-struct node_traits : public intrusive_node_traits<TValue> {};
+template <class TNode>
+class node_traits<TNode, nothing_allocator<TNode>, nothing_allocator<TNode> >
+{
 
+};
 
 
 }
