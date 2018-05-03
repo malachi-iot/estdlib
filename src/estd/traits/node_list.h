@@ -66,8 +66,8 @@ template <class TNode, class TAllocator, class TValueAllocator>
 struct node_traits_new_base
 {
     typedef TNode node_type;
-    typedef TAllocator allocator_type;
-    typedef typename allocator_type::handle_type handle_type;
+    typedef TAllocator node_allocator_type;
+    typedef typename node_allocator_type::handle_type handle_type;
     typedef TValueAllocator value_allocator_type;
 
     // TODO: assert value_allocator_type = value_type
@@ -144,9 +144,11 @@ struct stateless_allocator_node_traits_base
         : public node_traits_new_base<TNode, TAllocator, TValueAllocator>
 {
     typedef node_traits_new_base<TNode, TAllocator, TValueAllocator> base_t;
-    typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::node_type node_type;
+
+protected:
+    typedef typename base_t::node_allocator_type allocator_type;
 };
 
 // assumes TNode has a next() and next(node), as
@@ -159,10 +161,17 @@ struct inlinevalue_node_traits_new_base :
 {
     typedef stateful_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
     typedef typename TNode::value_type value_type;
+
+protected:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::node_type node_type;
     typedef typename base_t::allocator_traits allocator_traits;
+
+public:
+    // Though value and node is combined at a low level,
+    // nv_ref_t 'ideally' represents const value_type& and in this case can
+    typedef const value_type& nv_ref_t;
 
     // remember inlinevalue we specifically DO NOT use TValueAllocator
 
@@ -206,6 +215,9 @@ struct intrusive_node_traits_new_base :
 {
     typedef stateless_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
     typedef TNode value_type;
+
+    // combined value and node, so nv_ref_t is TNode
+    typedef TNode nv_ref_t;
 
     // neither TAllocator nor TValueAllocator is directly utilized in this context
     // (intrusive nodes are externally allocated)
@@ -668,8 +680,17 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 };
 
 
-template <class TNode>
-class node_traits<TNode, nothing_allocator<TNode>, nothing_allocator<TNode> >
+
+
+// specializes on TNode == TValue by saying if:
+// a) TValueAllocator == nothing_allocator NODE
+// b) node_traits<TNode matching on node_traits<TValue
+// then we assume intrusive.  Feels kinda fragile
+template <class TNode, class TValue, class TAllocator>
+class node_traits<TValue, TAllocator, nothing_allocator<TNode> > :
+        public intrusive_node_traits_new_base<TNode,
+            nothing_allocator<TNode>,
+            nothing_allocator<TNode> >
 {
 
 };

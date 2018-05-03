@@ -124,18 +124,18 @@ public:
     typedef TNodeTraits node_traits_t;
     typedef ForwardIterator<value_type, node_traits_t> iterator;
     typedef const iterator   const_iterator;
-    typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
-    typedef typename node_allocator_t::allocator_t allocator_t;
-    typedef typename node_allocator_t::node_type node_type;
-    typedef typename node_allocator_t::node_pointer node_pointer;
+    typedef typename node_traits_t::node_allocator_type node_allocator_t;
+    typedef node_allocator_t allocator_t;
+    typedef typename node_traits_t::node_type node_type;
+    //typedef typename node_allocator_t::node_pointer node_pointer;
 
-    typedef typename node_allocator_t::nv_ref_t nv_ref_t;
+    typedef typename node_traits_t::nv_ref_t nv_ref_t;
     typedef nv_ref_t nv_reference;
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
 protected:
-    typedef typename node_allocator_t::node_handle node_handle;
+    typedef typename node_traits_t::handle_type node_handle;
 
     static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
 
@@ -162,29 +162,29 @@ protected:
 // std::allocator<T> specialization, but that itself is deprecated for C++17
 template<class T, class TNode = T,
          class TAllocator = experimental_std_allocator<TNode>,
-         class TNodeTraits = node_traits<T, TAllocator > >
+         class TNodeTraits = node_traits<T, TAllocator, nothing_allocator<T> > >
 class forward_list : public internal::linkedlist_base<T, TNodeTraits>
 {
 public:
+    typedef internal::linkedlist_base<T, TNodeTraits> base_t;
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
     typedef ForwardIterator<value_type, node_traits_t> iterator;
     typedef const iterator   const_iterator;
-    typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
-    typedef typename node_allocator_t::allocator_t allocator_t;
-    typedef typename node_allocator_t::node_type node_type;
-    typedef typename node_allocator_t::node_pointer node_pointer;
+    typedef typename base_t::node_allocator_t node_allocator_t;
+    //typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
+    typedef node_allocator_t allocator_t;
+    typedef typename base_t::node_type node_type;
 
-    typedef typename node_allocator_t::nv_ref_t nv_ref_t;
+    typedef typename base_t::nv_ref_t nv_ref_t;
     typedef nv_ref_t nv_reference;
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
 protected:
-    typedef internal::linkedlist_base<T, TNodeTraits> base_t;
 
-    typedef typename node_allocator_t::node_handle node_handle;
+    typedef typename base_t::node_handle node_handle;
     //typedef typename node_traits_t::node_handle node_handle;
 
     // FIX: kill these forward casts
