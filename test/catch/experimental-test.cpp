@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/array.h"
+#include "mem.h"
 
 struct TestA {};
 
@@ -29,5 +30,20 @@ TEST_CASE("experimental tests")
             { 2, 3, t}
         };
         //constexpr Test test1(1, 2, t);
+    }
+    SECTION("accessor")
+    {
+        _allocator<int> a;
+        int* val = a.allocate(1);
+
+        *val = 5;
+
+        estd::experimental::stateful_locking_accessor<_allocator<int>> acc(a, val);
+
+        int& val2 = acc;
+
+        REQUIRE(val2 == 5);
+
+        a.deallocate(val, 1);
     }
 }
