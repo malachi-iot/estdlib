@@ -9,8 +9,50 @@ namespace estd {
 // should heed later incoming TValue as well
 template <class TNode, class TAllocator> struct node_traits;
 
-// trait specifically for extracting value from a node
-template <class TNode, class TValue> struct node_value_traits_experimental;
+namespace experimental {
+
+
+// all this is idea capture in this experimental block
+
+// TODO: Need to resolve descrepency here because actual TAllocator
+// should heed later incoming TValue as well
+template <class TNode, class TAllocator, class TValueAllocator = nothing_allocator< typename TNode::value_type > >
+struct node_traits;
+
+template <class TValue, class TNodeBase = int>
+class ValueNode : public TNodeBase
+{
+
+};
+
+
+template <class TAllocator, class TValueAllocator>
+struct node_traits<ValueNode<typename TAllocator::value_type>, TAllocator, TValueAllocator >
+{
+
+};
+
+
+// idea capture for later, explicitly state what variety of node to use and
+// then we can do allocator/node_traits specialization on full TNode itself
+// (think internal::ValueNode<TValue> or similar).  We should be able to bring it
+// all back home to node_trait for all allocations etc. and now that we have
+// a *full* TNode, we'll have implicit access to TValue also
+//
+// Minor problem is that TNode next() decltype must match exactly with TAllocator handle_type.  Not a huge issue
+// but easy to get wrong
+// TNode = TValue means intrusive node
+template <class TValue,
+          class TNode = TValue,
+          //class TNode = ValueNode<TValue>,
+          class TAllocator = experimental_std_allocator<TNode>,
+          class TTraits = node_traits<TNode, TAllocator, nothing_allocator< TValue > >
+          >
+class list;
+
+
+
+}
 
 
 
