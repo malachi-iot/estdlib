@@ -39,72 +39,71 @@ struct dummy_node_alloc
 };
 
 
-// TODO: yank these inner nodes out of this class make them either freestanding
-// or living within another struct
-template <class TNodeBase>
-struct inline_node_alloc_base
+namespace internal {
+
+template <class TValue, class TNodeBase>
+struct RefNode : public TNodeBase
 {
-    template <class TValue>
-    struct RefNode : public TNodeBase
+    const TValue& value;
+
+    RefNode(const TValue& value) : value(value) {}
+};
+
+
+// ultimately to be used by 'emplace_front'
+template <class TValue, class TNodeBase>
+struct RefNodeManaged : public RefNode<TValue, TNodeBase>
+{
+    typedef RefNode<TValue, TNodeBase> base_t;
+
+    RefNodeManaged(const TValue& value) :
+            base_t(value)
+    {}
+
+    ~RefNodeManaged()
     {
-        const TValue& value;
-
-        RefNode(const TValue& value) : value(value) {}
-    };
-
-
-    // ultimately to be used by 'emplace_front'
-    template <class TValue>
-    struct RefNodeManaged : public RefNode<TValue>
-    {
-        typedef RefNode<TValue> base_t;
-
-        RefNodeManaged(const TValue& value) :
-                base_t(value)
-        {}
-
-        ~RefNodeManaged()
-        {
-            base_t::value.~TValue();
-        }
-    };
+        base_t::value.~TValue();
+    }
+};
 
 
 
 
-    template <class TValue>
-    struct ValueNode : public TNodeBase
-    {
-        const TValue value;
+template <class TValue, class TNodeBase>
+struct ValueNode : public TNodeBase
+{
+    const TValue value;
 
-        ValueNode(const TValue& value) : value(value) {}
+    ValueNode(const TValue& value) : value(value) {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-        ValueNode(TValue&& value) : value(value) {}
+    ValueNode(TValue&& value) : value(value) {}
 #endif
 
 
 #ifdef FEATURE_CPP_VARIADIC
-        template <class... TArgs>
-        ValueNode(TArgs&&... args) : value(args...) {}
+    template <class... TArgs>
+    ValueNode(TArgs&&... args) : value(args...) {}
 #endif
-    };
 };
+
+}
+
 
 // TNode only represents the basic next/reverse tracking portion of the node,
 // not the ref or value managed within
-template <class TNode, template <class> class TAllocator>
+template <class TAllocator>
 class smart_node_alloc
 {
 public:
-    typedef TAllocator<TNode> allocator_t;
+    typedef TAllocator allocator_t;
 
 protected:
     allocator_t a;
 
 public:
     typedef allocator_traits<allocator_t> traits_t;
-    typedef TNode node_type;
+    typedef typename traits_t::value_type node_type;
     typedef node_type* node_pointer;
     typedef typename traits_t::size_type size_type;
     typedef typename traits_t::handle_type node_handle;
@@ -137,12 +136,15 @@ template <class TNodeBase,
             template <class> class TValueAllocator = TNodeAllocator
             >
 class inlineref_node_alloc :
-        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TNodeAllocator>
+        public smart_node_alloc
+            <TNodeAllocator
+                <internal::RefNode<TValue, TNodeBase> >
+            >
 {
 public:
 
 private:
-    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template RefNode<TValue>, TNodeAllocator> base_t;
+    typedef smart_node_alloc<TNodeAllocator <internal::RefNode<TValue, TNodeBase> > > base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
 
@@ -240,9 +242,9 @@ public:
 
 template <class TNodeBase, class TValue, template <class> class TAllocator>
 class inlinevalue_node_alloc :
-        public smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template ValueNode<TValue>, TAllocator>
+        public smart_node_alloc<TAllocator < internal::ValueNode<TValue, TNodeBase > > >
 {
-    typedef smart_node_alloc<typename inline_node_alloc_base<TNodeBase>::template ValueNode<TValue>, TAllocator> base_t;
+    typedef smart_node_alloc<TAllocator < internal::ValueNode<TValue, TNodeBase > > > base_t;
     //typedef node_traits<TNode, TAllocator> node_traits_t;
     typedef typename base_t::traits_t traits_t;
 
@@ -373,7 +375,7 @@ struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
 #endif
 
     template <class TValue>
-    static const TValue& value_exp(typename inline_node_alloc_base<node_type_base>::template RefNode<TValue>& node)
+    static const TValue& value_exp(internal::RefNode<TValue, TNodeBase>& node)
     {
         return node.value;
     }
@@ -381,11 +383,11 @@ struct inlineref_node_traits : public node_traits_base<TNodeBase, TAllocator>
 
 
 
-template <class TNode, template <class> class TAllocator>
-struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
+template <class TNodeBase, template <class> class TAllocator>
+struct inlinevalue_node_traits : public node_traits_base<TNodeBase, TAllocator>
 {
-    typedef node_traits_base<TNode, TAllocator> base_t;
-    typedef TNode node_type_base;
+    typedef node_traits_base<TNodeBase, TAllocator> base_t;
+    typedef TNodeBase node_type_base;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <class TValue>
@@ -406,7 +408,7 @@ struct inlinevalue_node_traits : public node_traits_base<TNode, TAllocator>
 #endif
 
     template <class TValue>
-    static const TValue& value_exp(typename inline_node_alloc_base<node_type_base>::template ValueNode<TValue>& node)
+    static const TValue& value_exp(internal::ValueNode<TValue, TNodeBase>& node)
     {
         return node.value;
     }
