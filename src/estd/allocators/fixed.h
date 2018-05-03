@@ -22,6 +22,7 @@ struct single_allocator_base
     typedef T value_type;
     typedef T* pointer;
     typedef std::size_t size_type;
+    typedef estd::experimental::stateful_nonlocking_accessor<single_allocator_base> accessor;
 
 protected:
 

@@ -31,6 +31,8 @@ struct allocator_traits
     typedef typename TAllocator::handle_with_offset     handle_with_offset;
     typedef typename allocator_type::const_void_pointer     const_void_pointer;
 
+    //typedef typename allocator_type::accessor           accessor;
+
     // non-standard, and phase this out in favor of 'helpers' to wrap up
     // empty counters
     typedef typename TAllocator::lock_counter           lock_counter;

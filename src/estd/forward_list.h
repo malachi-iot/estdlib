@@ -233,6 +233,9 @@ public:
     forward_list(allocator_t* allocator = NULLPTR) :
         base_t(allocator) {}
 
+    // TODO: move towards 'accessor' pattern instead of direct references, not as
+    // critical as with dynamic_array however, since these references are not
+    // expected directly to move (the underlying node itself may, however)
     reference front()
     {
         reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);

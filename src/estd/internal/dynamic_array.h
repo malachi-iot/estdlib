@@ -229,6 +229,10 @@ public:
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
+    // TODO: utilize SFINAE if we can
+    // ala https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
+    //typedef typename allocator_type::accessor accessor_experimental;
+
 protected:
     typename allocator_traits::lock_counter lock_counter;
 
@@ -589,6 +593,24 @@ public:
         return accessor(get_allocator(), offset(pos));
     }
 
+    accessor front()
+    {
+        return accessor(get_allocator(), offset(0));
+    }
+
+    accessor back()
+    {
+        return accessor(get_allocator(), offset(size() - 1));
+    }
+
+    accessor at(size_type pos)
+    {
+        // TODO: place in error/bounds checking runtime ability within
+        // accessor itself.  perhaps wrap it all up in a FEATURE_ESTD_BOUNDSCHECK
+        // to compensate for lack of exceptions requiring additional
+        // data in accessor itself
+        return accessor(get_allocator(), offset(pos));
+    }
 };
 
 

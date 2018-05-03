@@ -23,6 +23,7 @@ public:
     typedef value_type* handle_type;
 
     typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
+    typedef T& accessor;
 
     // primarily for subscript/array operations
     class handle_with_offset_old

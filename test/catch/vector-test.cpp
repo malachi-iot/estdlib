@@ -126,4 +126,13 @@ TEST_CASE("vector tests")
 
         //v.push_back(3);
     }
+    SECTION("vector front/back")
+    {
+        estd::layer1::vector<int, 10> v;
+
+        v.push_back(5);
+
+        REQUIRE(v.front() == 5);
+        REQUIRE(v.back() == 5);
+    }
 }
