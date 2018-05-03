@@ -84,7 +84,7 @@ struct experimental_std_allocator : public ::std::allocator<T>
 
     typedef typename base_t::pointer handle_type;
     typedef handle_type handle_with_size;
-    typedef handle_type handle_with_offset;
+    typedef typename estd::internal::handle_with_offset_raw<handle_type> handle_with_offset;
     typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
     typedef const void* const_void_pointer;
 

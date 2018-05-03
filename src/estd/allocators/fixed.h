@@ -18,7 +18,7 @@ struct single_allocator_base
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
     //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
-    typedef handle_with_offset<handle_type> handle_with_offset;
+    typedef estd::internal::handle_with_offset<handle_type> handle_with_offset;
     typedef T value_type;
     typedef T* pointer;
     typedef std::size_t size_type;
