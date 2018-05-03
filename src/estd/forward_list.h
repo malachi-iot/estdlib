@@ -134,19 +134,18 @@ public:
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
+    typedef typename node_traits_t::node_handle node_handle;
 protected:
-    typedef typename node_traits_t::handle_type node_handle;
 
-    static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
+    static CONSTEXPR node_handle after_end_node() { return node_traits_t::eol(); }
 
-    node_allocator_t alloc;
-    allocator_t _alloc; // Temporary only until we divest alloc operations completely from node allocator
+    // for now assume stateful traits (contains allocators)
+    // optimize this out later
+    node_traits_t traits;
 
     node_handle m_front;
 
     linkedlist_base(allocator_t* a) :
-            alloc(a),
-    //_alloc(allocator),
             m_front(after_end_node())
 
     {}
@@ -187,26 +186,25 @@ protected:
     typedef typename base_t::node_handle node_handle;
     //typedef typename node_traits_t::node_handle node_handle;
 
-    // FIX: kill these forward casts
-    static CONSTEXPR node_handle after_end_node() { return (node_handle) node_traits_t::null_node(); }
-    static CONSTEXPR node_handle before_beginning_node() { return (node_handle) node_traits_t::null_node(); }
+    static CONSTEXPR node_handle after_end_node() { return base_t::after_end_node(); }
+    // FIX: before_beginning_node() needs work, not gonna really work like this
+    static CONSTEXPR node_handle before_beginning_node() { return after_end_node(); }
 
     node_type& alloc_lock(node_handle& to_lock)
     {
-        return allocator_traits_t::lock(base_t::_alloc, to_lock);
+        return base_t::traits.lock(to_lock);
     }
 
     void alloc_unlock(node_handle& to_unlock)
     {
-        allocator_traits_t::unlock(base_t::_alloc, to_unlock);
+        base_t::traits.unlock(to_unlock);
     }
 
     node_handle next(node_handle from)
     {
         node_type& f = alloc_lock(from);
 
-        // FIX: have to forward cast from node_handle_base to node_handle
-        node_handle n = (node_handle) node_traits_t::get_next(f);
+        node_handle n = base_t::traits.next(f);
 
         alloc_unlock(from);
 
@@ -218,7 +216,7 @@ protected:
     {
         node_type& node = alloc_lock(_node);
 
-        node_traits_t::set_next(node, next);
+        base_t::traits.next(node, next);
 
         alloc_unlock(_node);
     }
@@ -231,6 +229,11 @@ protected:
         base_t::m_front = new_front;
     }
 
+    void destroy(node_handle h)
+    {
+        base_t::traits.destroy(h);
+    }
+
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
         base_t(allocator) {}
@@ -240,7 +243,8 @@ public:
     // expected directly to move (the underlying node itself may, however)
     reference front()
     {
-        reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
+        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
+        reference front_value = alloc_lock(base_t::m_front);
 
         alloc_unlock(base_t::m_front);
 
@@ -258,36 +262,37 @@ public:
 
         base_t::m_front = next(base_t::m_front);
 
-        base_t::alloc.dealloc(old);
+        base_t::traits.deallocate(old);
+        //base_t::alloc.dealloc(old);
     }
 
     void push_front(nv_reference value)
     {
-        set_front(base_t::alloc.alloc(value));
+        set_front(base_t::traits.allocate(value));
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push_front(value_type&& value)
     {
-        set_front(base_t::alloc.alloc_move(std::forward<value_type>(value)));
+        set_front(base_t::traits.alloc_move(std::forward<value_type>(value)));
     }
 #endif
 
 
-    iterator begin() { return iterator(base_t::m_front, base_t::alloc); }
-    const_iterator begin() const { return iterator(base_t::m_front, base_t::alloc); }
-    const_iterator end() const { return iterator(NULLPTR, base_t::alloc); }
+    iterator begin() { return iterator(base_t::m_front, base_t::traits); }
+    const_iterator begin() const { return iterator(base_t::m_front, base_t::traits); }
+    const_iterator end() const { return iterator(after_end_node(), base_t::traits); }
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
         node_handle node_to_insert_after = pos.node();
         node_handle old_next_node = next(node_to_insert_after);
-        node_handle node_pointing_to_value = base_t::alloc.alloc(value);
+        node_handle node_pointing_to_value = base_t::traits.allocate(value);
 
         set_next(node_to_insert_after, node_pointing_to_value);
         set_next(node_pointing_to_value, old_next_node);
 
-        return iterator(node_pointing_to_value, base_t::alloc);
+        return iterator(node_pointing_to_value, base_t::traits);
     }
 
     iterator erase_after(const_iterator pos)
@@ -298,7 +303,7 @@ public:
 
         set_next(node_to_erase_after, node_following_erased);
 
-        return iterator(node_following_erased, base_t::alloc);
+        return iterator(node_following_erased, base_t::traits);
     }
 
 #ifdef FEATURE_CPP_VARIADIC

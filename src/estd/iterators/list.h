@@ -8,22 +8,24 @@ struct InputIterator
 {
     typedef TNodeTraits traits_t;
     typedef TValue value_type;
-    typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
+    //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
+    typedef typename traits_t::node_allocator_type node_allocator_t;
     //typedef typename TNodeTraits::node_handle node_handle_t;
     typedef InputIterator<TValue, TNodeTraits> iterator;
     typedef const iterator const_iterator;
 
 protected:
-    typedef typename node_allocator_t::node_handle node_handle_t;
+    //typedef typename node_allocator_t::node_handle node_handle_t;
+    typedef typename traits_t::node_handle node_handle_t;
 
     node_handle_t current;
 
 
     //typedef typename traits_t::node_allocator_t node_alloc_t;
-    typedef typename node_allocator_t::node_type node_type;
-    typedef typename node_allocator_t::node_pointer node_pointer;
-    typedef typename node_allocator_t::nv_ref_t nv_reference;
-    typedef typename node_allocator_t::allocator_t allocator_t;
+    typedef typename traits_t::node_type node_type;
+    typedef node_type* node_pointer;
+    typedef typename traits_t::nv_ref_t nv_reference;
+    typedef node_allocator_t allocator_t;
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
@@ -31,41 +33,37 @@ protected:
     // to noops
     typename allocator_t::lock_counter lock_counter;
 
-    node_allocator_t alloc;
-    // temporary until we decouple from node_allocator_t
-    allocator_t _alloc;
+    traits_t traits;
 
     node_type& lock_internal()
     {
-        return allocator_traits_t::lock(_alloc, current);
+        return traits.lock(current);
     }
 
     void unlock_internal()
     {
-        allocator_traits_t::unlock(_alloc, current);
+        traits.unlock(current);
     }
 
 public:
-    InputIterator(node_handle_t node, const node_allocator_t& alloc) :
-        current(node),
-        alloc(alloc)
-        //_alloc(_alloc)
+    InputIterator(node_handle_t node, const traits_t& traits) :
+        traits(traits)
     {}
 
     //~InputIterator() {}
 
-    static nv_reference lock(allocator_t& a, node_handle_t& handle_to_lock)
+    static nv_reference lock(traits_t& a, node_handle_t& handle_to_lock)
     {
-        node_type& p = allocator_traits_t::lock(a, handle_to_lock);
-        return traits_t::template value_exp<value_type>(p);
+        node_type& p = a.lock(handle_to_lock);
+        return traits_t::value(p);
     }
 
     // non standard handle-based mem helpers
-    nv_reference lock() { return lock(_alloc, current); }
+    nv_reference lock() { return lock(traits, current); }
 
     void unlock()
     {
-        allocator_traits_t::unlock(_alloc, current);
+        traits.unlock(current);
     }
 
 
@@ -114,8 +112,8 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
     {
     } */
 
-    ForwardIterator(node_handle_t node, const node_alloc_t& alloc) :
-            base_t(node, alloc)
+    ForwardIterator(node_handle_t node, const traits_t& t) :
+            base_t(node, t)
     {
     }
 
@@ -135,8 +133,7 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
         //node_type& c = base_t::alloc.lock(this->current);
         node_type& c = base_t::lock_internal();
 
-        // FIX: static cast from node_handle_base to node_handle
-        this->current = (node_handle_t) traits_t::get_next(c);
+        this->current = base_t::traits.next(c);
 
         //base_t::alloc.unlock(this->current);
         base_t::unlock_internal();

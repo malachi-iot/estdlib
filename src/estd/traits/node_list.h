@@ -69,8 +69,11 @@ struct node_traits_new_base
     typedef TAllocator node_allocator_type;
     typedef typename node_allocator_type::handle_type handle_type;
     typedef TValueAllocator value_allocator_type;
+    typedef typename value_allocator_type::value_type value_type;
 
     // TODO: assert value_allocator_type = value_type
+
+    static handle_type CONSTEXPR eol() { return node_allocator_type::invalid(); }
 
     handle_type next(node_type& node) const
     {
@@ -81,9 +84,19 @@ struct node_traits_new_base
     {
         node.next(new_next);
     }
+
+    // helper call.  May not be the way *you* acquire the tracked value for this node, but
+    // used frequently internally
+    static value_type& value(node_type& n)
+    {
+        return n.value();
+    }
 };
 
 
+// FIX: I think this is kind of a no no, traits are supposed to be stateless I think
+// so probably turn this into 'list_helper" or similar like dynamic_array, though
+// I don't like *that* name either
 template <class TNode, class TAllocator, class TValueAllocator>
 struct stateful_allocator_node_traits_base
         : public node_traits_new_base<TNode, TAllocator, TValueAllocator>
@@ -93,6 +106,7 @@ struct stateful_allocator_node_traits_base
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::node_type node_type;
     typedef typename TNode::value_type value_type;
+    typedef handle_type node_handle;
 
 protected:
     // TODO: resolve 'empty' / stateless allocators
@@ -118,7 +132,7 @@ protected:
 
     void deallocate_node(handle_type h)
     {
-        allocator_traits::deallocate(node_allocator, h);
+        allocator_traits::deallocate(node_allocator, h, 1);
     }
 
 
@@ -136,6 +150,8 @@ public:
         destruct_node(node_handle);
         deallocate_node(node_handle);
     }
+
+    TAllocator& get_node_allocate() { return node_allocator; }
 };
 
 
@@ -149,6 +165,8 @@ struct stateless_allocator_node_traits_base
 
 protected:
     typedef typename base_t::node_allocator_type allocator_type;
+
+    allocator_type get_node_allocate() { return allocator_type(); }
 };
 
 // assumes TNode has a next() and next(node), as
@@ -204,6 +222,14 @@ public:
         return h;
     }
 #endif
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    handle_type allocate_move(value_type&& v)
+    {
+        // FIX: Just temporary - we'll need a proper move operation
+        return allocate(v);
+    }
+#endif
 };
 
 
@@ -215,9 +241,14 @@ struct intrusive_node_traits_new_base :
 {
     typedef stateless_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
     typedef TNode value_type;
+    typedef value_type node_type;
+
+    // brute force node_handle as value_type* here because we do no allocations at all, so
+    // we want NULLPTR to be a possible value to detect eol
+    typedef value_type* node_handle;
 
     // combined value and node, so nv_ref_t is TNode
-    typedef TNode nv_ref_t;
+    typedef TNode& nv_ref_t;
 
     // neither TAllocator nor TValueAllocator is directly utilized in this context
     // (intrusive nodes are externally allocated)
@@ -225,10 +256,39 @@ struct intrusive_node_traits_new_base :
 
     // "allocate" a node to accomodate value type.  However, intrusive nodes ARE value_type,
     // so this is a noop [zero allocation happens in these scenarios]
-    value_type& allocate(const value_type& value)
+    node_handle allocate(value_type& value)
     {
-        return value;
+        return &value;
     }
+
+    value_type& lock(node_handle value)
+    {
+        return *value;
+    }
+
+    void unlock(node_handle& value) {}
+
+
+    void deallocate(node_handle& h) {}
+
+    // again, TNode == TValue here
+    static nv_ref_t value(node_type& n)
+    {
+        return n;
+    }
+
+    node_handle next(node_type& node) const
+    {
+        // Mostly safe to forward cast from intrusive node, typical type of cast operation
+        // for using linked list libs
+        return static_cast<node_handle>(node.next());
+    }
+
+    void next(node_type &node, const node_handle& new_next)
+    {
+        node.next(new_next);
+    }
+
 };
 
 

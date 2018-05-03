@@ -250,6 +250,7 @@ TEST_CASE("linkedlist")
         REQUIRE((*i++).val == 0);
         REQUIRE((*i++).val == 2);
     }
+#ifdef UNUSED
     SECTION("Forward list: dynamic node allocation, tracking value refs")
     {
         estd::forward_list<test_value, node_traits_inlineref<_allocator > > list;
@@ -268,6 +269,7 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
+#endif
     SECTION("Forward list: remove")
     {
         estd::forward_list<test_node> list;
@@ -345,6 +347,7 @@ TEST_CASE("linkedlist")
         list.push_front(node1);
         //list.emplace_front(4);
     }
+#ifdef UNUSED
     SECTION("Forward list: dynamic node allocation, emplacement")
     {
         estd::forward_list<long, node_traits_inlineref<_allocator > > list;
@@ -381,6 +384,7 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
+#endif
     SECTION("double list")
     {
         estd::list<long> list;
