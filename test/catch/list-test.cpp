@@ -374,10 +374,12 @@ TEST_CASE("linkedlist")
         //estd::forward_list<long, estd::inlinevalue_node_traits<estd::experimental::forward_node_base, _allocator > > list;
         typedef estd::experimental::ValueNode< long, estd::experimental::forward_node_base > node_t;
         typedef estd::experimental_std_allocator<node_t> allocator_t;
-        typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, allocator_t > node_traits_t;
-        estd::forward_list<long, node_t, std::allocator<node_t>, node_traits_t > list;
+        typedef estd::nothing_allocator<long> value_allocator_t;
+        typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, value_allocator_t > node_traits_t;
+        //estd::forward_list<long, node_t, allocator_t, node_traits_t > list;
 
-        // bring this back once other errors are resolved
+        estd::forward_list<long, node_t> list;
+
         list.emplace_front(4);
 
         list.push_front(3);

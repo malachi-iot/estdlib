@@ -8,11 +8,11 @@ namespace estd {
 // TODO: Need to resolve descrepency here because actual TAllocator
 // should heed later incoming TValue as well
 template <class TNode,
-          class TAllocator,
+          class TNodeAllocator,
           // TValueAllocator *should* actually be for TNode::value_type but code is in
           // flux so not committing to that yet, and as long as it compiles, nothing_allocator
           // should be harmless anyway
-          class TValueAllocator = nothing_allocator< TNode > >
+          class TValueAllocator >
 struct node_traits;
 
 namespace experimental {
@@ -803,8 +803,8 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 // a) TValueAllocator == nothing_allocator NODE
 // b) node_traits<TNode matching on node_traits<TValue
 // then we assume intrusive.  Feels kinda fragile
-template <class TNode, class TValue, class TAllocator>
-class node_traits<TValue, TAllocator, nothing_allocator<TNode> > :
+template <class TNode, class TValue, class TNodeAllocator>
+class node_traits<TValue, TNodeAllocator, nothing_allocator<TNode> > :
         public intrusive_node_traits_new_base<TNode,
             nothing_allocator<TNode>,
             nothing_allocator<TNode> >

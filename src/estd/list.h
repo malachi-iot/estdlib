@@ -8,7 +8,7 @@ namespace estd {
 
 template<class T, class TNode = T,
          class TAllocator = experimental_std_allocator<TNode>,
-         class TNodeTraits = node_traits<T, TAllocator > >
+         class TNodeTraits = node_traits<TNode, TAllocator, nothing_allocator<T> > >
 class list
 {
 };

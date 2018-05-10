@@ -104,12 +104,14 @@ public:
 
 
 // ugly one to try to get inline value working
-template <class TValue, class TAllocator>
-class node_traits<experimental::ValueNode<TValue, experimental::forward_node_base>, TAllocator,
-        nothing_allocator<experimental::ValueNode<TValue, experimental::forward_node_base>> > :
-        public inlinevalue_node_traits_new_base<experimental::ValueNode<TValue, experimental::forward_node_base>,
-            TAllocator,
-            nothing_allocator<experimental::ValueNode<TValue, experimental::forward_node_base>> >
+template <class TValue, class TNodeAllocator>
+class node_traits<experimental::ValueNode<TValue, experimental::forward_node_base>,
+        TNodeAllocator,
+        nothing_allocator<TValue> > :
+        public inlinevalue_node_traits_new_base<
+            experimental::ValueNode<TValue, experimental::forward_node_base>,
+            TNodeAllocator,
+            nothing_allocator<TValue> >
 {
 
 };
@@ -173,8 +175,8 @@ protected:
 // present a 'default' allocator , though this might conflict with a default of
 // std::allocator<T> specialization, but that itself is deprecated for C++17
 template<class T, class TNode = T,
-         class TAllocator = experimental_std_allocator<TNode>,
-         class TNodeTraits = node_traits<T, TAllocator, nothing_allocator<T> > >
+         class TNodeAllocator = experimental_std_allocator<TNode>,
+         class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
 class forward_list : public internal::linkedlist_base<T, TNodeTraits>
 {
 public:
