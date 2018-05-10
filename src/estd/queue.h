@@ -261,9 +261,9 @@ public:
 #ifdef FEATURE_CPP_VARIADIC
     // emplaces at the back, as per spec
     template <class ...TArgs>
-    reference emplace(TArgs...args)
+    reference emplace(TArgs&&... args)
     {
-        return c.emplace_back(args...);
+        return c.emplace_back(std::forward<TArgs>(args)...);
     }
 #endif
 
