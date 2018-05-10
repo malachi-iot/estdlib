@@ -28,7 +28,25 @@ struct node_traits;
 template <class TValue, class TNodeBase = int>
 class ValueNode : public TNodeBase
 {
+protected:
+    TValue m_value;
 
+public:
+    typedef TValue value_type;
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    ValueNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
+#endif
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class ...TArgs>
+    ValueNode(TArgs...args) : m_value(args...)
+    {
+
+    }
+#endif
+
+    value_type& value() { return m_value; }
 };
 
 
@@ -62,25 +80,28 @@ class list;
 
 
 // assumes TNode has a next() and next(node)
-template <class TNode, class TAllocator, class TValueAllocator>
+template <class TNode, class TNodeAllocator, class TValueAllocator>
 struct node_traits_new_base
 {
     typedef TNode node_type;
-    typedef TAllocator node_allocator_type;
-    typedef typename node_allocator_type::handle_type handle_type;
+    typedef TNodeAllocator node_allocator_type;
+    typedef typename node_allocator_type::handle_type node_handle;
     typedef TValueAllocator value_allocator_type;
     typedef typename value_allocator_type::value_type value_type;
 
     // TODO: assert value_allocator_type = value_type
 
-    static handle_type CONSTEXPR eol() { return node_allocator_type::invalid(); }
+    static node_handle CONSTEXPR eol() { return node_allocator_type::invalid(); }
 
-    handle_type next(node_type& node) const
+    node_handle next(node_type& node) const
     {
-        return node.next();
+        // NOTE: I don't like doing a cast here, but it is pretty standard stuff
+        // for linked lists.  Note that this *should* work properly even with true
+        // handle-based lists
+        return static_cast<node_handle>(node.next());
     }
 
-    void next(node_type &node, const handle_type& new_next)
+    void next(node_type &node, const node_handle& new_next)
     {
         node.next(new_next);
     }
@@ -103,10 +124,9 @@ struct stateful_allocator_node_traits_base
 {
     typedef node_traits_new_base<TNode, TAllocator, TValueAllocator> base_t;
     typedef estd::allocator_traits<TAllocator> allocator_traits;
-    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_handle node_handle;
     typedef typename base_t::node_type node_type;
     typedef typename TNode::value_type value_type;
-    typedef handle_type node_handle;
 
 protected:
     // TODO: resolve 'empty' / stateless allocators
@@ -115,28 +135,28 @@ protected:
     // for decoration
     TValueAllocator value_allocator;
 
-    handle_type allocate_node()
+    node_handle allocate_node()
     {
         return allocator_traits::allocate(node_allocator, 1);
     }
 
-    node_type& lock_node(handle_type h)
+    node_type& lock_node(node_handle h)
     {
         return allocator_traits::lock(node_allocator, h);
     }
 
-    void unlock_node(handle_type h)
+    void unlock_node(node_handle h)
     {
         allocator_traits::unlock(node_allocator, h);
     }
 
-    void deallocate_node(handle_type h)
+    void deallocate_node(node_handle h)
     {
         allocator_traits::deallocate(node_allocator, h, 1);
     }
 
 
-    void destruct_node(handle_type h)
+    void destruct_node(node_handle h)
     {
         // explicit destruction of our node
         (&lock_node(h))->~node_type();
@@ -145,7 +165,7 @@ protected:
 
 public:
     // call destructor on and deallocate node
-    void destroy(handle_type node_handle)
+    void destroy(node_handle node_handle)
     {
         destruct_node(node_handle);
         deallocate_node(node_handle);
@@ -160,7 +180,7 @@ struct stateless_allocator_node_traits_base
         : public node_traits_new_base<TNode, TAllocator, TValueAllocator>
 {
     typedef node_traits_new_base<TNode, TAllocator, TValueAllocator> base_t;
-    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_handle node_handle;
     typedef typename base_t::node_type node_type;
 
 protected:
@@ -179,23 +199,40 @@ struct inlinevalue_node_traits_new_base :
 {
     typedef stateful_allocator_node_traits_base<TNode, TAllocator, TValueAllocator> base_t;
     typedef typename TNode::value_type value_type;
-
-protected:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::node_allocator_type node_allocator_type;
+    typedef typename base_t::node_handle node_handle;
     typedef typename base_t::node_type node_type;
     typedef typename base_t::allocator_traits allocator_traits;
 
-public:
     // Though value and node is combined at a low level,
     // nv_ref_t 'ideally' represents const value_type& and in this case can
     typedef const value_type& nv_ref_t;
 
+    static CONSTEXPR bool can_emplace()
+    {
+#ifdef FEATURE_CPP_VARIADIC
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    node_type& lock(node_handle& h)
+    {
+        return base_t::lock_node(h);
+    }
+
+
+    void unlock(node_handle& h)
+    {
+        base_t::unlock_node(h);
+    }
+
     // remember inlinevalue we specifically DO NOT use TValueAllocator
 
-    handle_type allocate(const value_type& value)
+    node_handle allocate(const value_type& value)
     {
-        handle_type h = base_t::allocate_node();
+        node_handle h = base_t::allocate_node();
 
         node_type& n = base_t::lock_node(h);
 
@@ -206,11 +243,16 @@ public:
         return h;
     }
 
+    void deallocate(node_handle& h)
+    {
+        base_t::deallocate_node(h);
+    }
+
 #ifdef FEATURE_CPP_VARIADIC
     template <class... TArgs>
-    handle_type allocate_emplace(TArgs...args)
+    node_handle alloc_emplace(TArgs...args)
     {
-        handle_type h = base_t::allocate_node();
+        node_handle h = base_t::allocate_node();
 
         node_type& n = base_t::lock_node(h);
 
@@ -224,12 +266,26 @@ public:
 #endif
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    handle_type allocate_move(value_type&& v)
+    node_handle alloc_move(value_type&& v)
     {
         // FIX: Just temporary - we'll need a proper move operation
-        return allocate(v);
+        //return allocate(v);
+        node_handle h = base_t::allocate_node();
+
+        node_type& n = base_t::lock_node(h);
+
+        new (&n) node_type(std::forward<value_type>(v));
+
+        base_t::unlock_node(h);
+
+        return h;
     }
 #endif
+
+    static nv_ref_t value(node_type& n)
+    {
+        return n.value();
+    }
 };
 
 

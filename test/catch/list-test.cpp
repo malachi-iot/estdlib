@@ -368,11 +368,18 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
+#endif
     SECTION("Forward list: dynamic node allocation, inline value")
     {
-        estd::forward_list<long, estd::inlinevalue_node_traits<estd::experimental::forward_node_base, _allocator > > list;
+        //estd::forward_list<long, estd::inlinevalue_node_traits<estd::experimental::forward_node_base, _allocator > > list;
+        typedef estd::experimental::ValueNode< long, estd::experimental::forward_node_base > node_t;
+        typedef estd::experimental_std_allocator<node_t> allocator_t;
+        typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, allocator_t > node_traits_t;
+        estd::forward_list<long, node_t, std::allocator<node_t>, node_traits_t > list;
 
+        // bring this back once other errors are resolved
         list.emplace_front(4);
+
         list.push_front(3);
 
         auto i = list.begin();
@@ -386,7 +393,6 @@ TEST_CASE("linkedlist")
 
         REQUIRE(list.empty());
     }
-#endif
     SECTION("double list")
     {
         estd::list<long> list;

@@ -55,8 +55,8 @@ public:
 
     static nv_reference lock(traits_t& a, node_handle_t& handle_to_lock)
     {
-        node_type& p = a.lock(handle_to_lock);
-        return traits_t::value(p);
+        node_type& n = a.lock(handle_to_lock);
+        return traits_t::value(n);
     }
 
     // non standard handle-based mem helpers

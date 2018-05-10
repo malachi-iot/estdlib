@@ -103,6 +103,19 @@ public:
 }
 
 
+// ugly one to try to get inline value working
+template <class TValue, class TAllocator>
+class node_traits<experimental::ValueNode<TValue, experimental::forward_node_base>, TAllocator,
+        nothing_allocator<experimental::ValueNode<TValue, experimental::forward_node_base>> > :
+        public inlinevalue_node_traits_new_base<experimental::ValueNode<TValue, experimental::forward_node_base>,
+            TAllocator,
+            nothing_allocator<experimental::ValueNode<TValue, experimental::forward_node_base>> >
+{
+
+};
+
+
+
 /*
 template <class TNode, class TValue, class TAllocator>
 struct node_value_traits_experimental<
@@ -320,15 +333,16 @@ public:
     template <class... TArgs>
     node_handle emplace_front( TArgs&&... args )
     {
-        static_assert(node_allocator_t::can_emplace(), "This allocator cannot emplace");
+        static_assert(node_traits_t::can_emplace(), "This node allocator cannot emplace");
 
-        node_handle h = base_t::alloc.alloc_emplace(args...);
+        node_handle h = base_t::traits.alloc_emplace(args...);
 
         set_front(h);
 
         // deviates from std::forward_list in that that returns
         // a reference, but we return a handle which will need
         // a lock()
+        // TODO: Use some form of accessor here instead, more useful than a raw handle
         return h;
     }
 #endif
