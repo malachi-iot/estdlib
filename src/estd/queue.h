@@ -23,6 +23,9 @@ class deque
 
     array_t m_array;
 
+    // TODO: Make special iterator for dequeue which does the rollover/rollunder
+    // and checks that you only move back and forth within one 'session' of
+    // elements
     typedef typename array_t::iterator array_iterator;
 
     // front aka head aka 'leftmost' part of array,
@@ -35,10 +38,44 @@ class deque
     // because I don't want to waste a slot
     bool m_empty;
 
+    // called when i is incremented, evaluates if i reaches rollover point
+    // and if so points it back at the beginning
     void evaluate_rollover(array_iterator* i)
     {
         if(*i == m_array.end())
             *i = m_array.begin();
+    }
+
+    // called when i is decremented, opposite of rollover check
+    // returns true when a rollover is detected.  Returns whether
+    // we rolled over to help with decrement (again, artifact
+    // of no cbegin)
+    bool evaluate_rollunder(array_iterator* i)
+    {
+        if(*i == m_array.begin())
+        {
+            *i = m_array.end();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    // have to do these increment/decrements out here because array iterator itself
+    // wouldn't handle rollovers/rollunders
+    void decrement(array_iterator* i)
+    {
+        // doing i-- after because we don't have a serviceable cbegin just yet
+        if(!evaluate_rollunder(i))
+            (*i)--;
+    }
+
+    // handle rollover and empty-flag set for iterator
+    void increment(array_iterator* i, bool empty = false)
+    {
+        (*i)++;
+        evaluate_rollover(i);
+        m_empty = empty;
     }
 
     // FIX: Something is wrong, m_front
@@ -58,7 +95,9 @@ public:
         m_back(m_array.begin()),
         m_empty(true) {}
 
+    typedef array_iterator iterator; // I think we should use this one all the way around, not sure why I have an explicit 'array_iterator'
     typedef T value_type;
+    typedef value_type& reference;
     typedef const value_type& const_reference;
     typedef size_t size_type;
 
@@ -110,18 +149,60 @@ public:
         return true;
     }
 
+    reference front()
+    {
+        return *m_front;
+    }
+
     const_reference front() const
     {
         return *m_front;
     }
 
+    reference back()
+    {
+        iterator i = m_back;
+
+        decrement(&i);
+
+        return *i;
+    }
+
     const_reference back() const
     {
-        return *m_back;
+        iterator i = m_back;
+
+        decrement(&i);
+
+        return *i;
     }
 
 #ifdef FEATURE_CPP_VARIADIC
-    // TODO: Make emplace functions
+    // Compiles but untested
+    template <class ...TArgs>
+    reference emplace_front(TArgs...args)
+    {
+        value_type& retval = *m_front;
+
+        new (&retval) value_type(args...);
+
+        increment(&m_front);
+
+        return retval;
+    }
+
+    // Compiles but untested
+    template <class ...TArgs>
+    reference emplace_back(TArgs...args)
+    {
+        value_type& retval = *m_back;
+
+        new (&retval) value_type(args...);
+
+        increment(&m_back);
+
+        return retval;
+    }
 #endif
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
@@ -143,6 +224,7 @@ public:
 }
 
 // http://en.cppreference.com/w/cpp/container/queue
+// we might do just as well using std::queue here, it's mainly the containers which do all the magic
 template <class T, class Container>
 class queue
 {
@@ -151,7 +233,9 @@ class queue
 public:
     typedef typename Container::value_type value_type;
     typedef typename Container::const_reference const_reference;
+    typedef typename Container::reference reference;
     typedef typename Container::size_type size_type;
+    typedef Container container_type;
 
     bool empty() const { return c.empty(); }
 
@@ -164,12 +248,21 @@ public:
         return c.push_back(value);
     }
 
+    reference front() { return c.front(); }
+
     const_reference front() const { return c.front(); }
+
+    reference back() { return c.back(); }
 
     const_reference back() const { return c.back(); }
 
 #ifdef FEATURE_CPP_VARIADIC
-    // TODO: Make emplace functions
+    // emplaces at the back, as per spec
+    template <class ...TArgs>
+    reference emplace(TArgs...args)
+    {
+        return c.emplace_back(args...);
+    }
 #endif
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
@@ -183,7 +276,7 @@ public:
 namespace layer1 {
 
 template <class T, size_t size>
-class queue : public estd::queue<T, layer1::deque<T, 10> >
+class queue : public estd::queue<T, layer1::deque<T, size> >
 {
 };
 
