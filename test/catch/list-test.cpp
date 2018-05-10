@@ -350,7 +350,7 @@ TEST_CASE("linkedlist")
         //list.emplace_front(4);
     }
 #ifdef UNUSED
-    SECTION("Forward list: dynamic node allocation, emplacement")
+    SECTION("Forward list: dynamic node allocation, ref value")
     {
         estd::forward_list<long, node_traits_inlineref<_allocator > > list;
 

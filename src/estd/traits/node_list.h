@@ -5,8 +5,8 @@
 
 namespace estd {
 
-// TODO: Need to resolve descrepency here because actual TAllocator
-// should heed later incoming TValue as well
+// TODO: Utilize rebind and switch this to just one allocator.  First, do some proof of concept
+// rebind testing in playground.gcc
 template <class TNode,
           class TNodeAllocator,
           // TValueAllocator *should* actually be for TNode::value_type but code is in
@@ -17,13 +17,24 @@ struct node_traits;
 
 namespace experimental {
 
+template <class TValue, class TNodeBase = int>
+class RefNode : public TNodeBase
+{
+protected:
+    TValue& m_value;
 
-// all this is idea capture in this experimental block
+public:
+    typedef TValue value_type;
 
-// TODO: Need to resolve descrepency here because actual TAllocator
-// should heed later incoming TValue as well
-template <class TNode, class TAllocator, class TValueAllocator = nothing_allocator< typename TNode::value_type > >
-struct node_traits;
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    RefNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
+#endif
+
+    RefNode(const value_type& value) : m_value(value) {}
+
+    value_type& value() { return m_value; }
+};
+
 
 template <class TValue, class TNodeBase = int>
 class ValueNode : public TNodeBase
@@ -33,6 +44,8 @@ protected:
 
 public:
     typedef TValue value_type;
+
+    ValueNode(const value_type& value) : m_value(value) {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     ValueNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
@@ -47,13 +60,6 @@ public:
 #endif
 
     value_type& value() { return m_value; }
-};
-
-
-template <class TAllocator, class TValueAllocator>
-struct node_traits<ValueNode<typename TAllocator::value_type>, TAllocator, TValueAllocator >
-{
-
 };
 
 
@@ -116,7 +122,7 @@ struct node_traits_new_base
 
 
 // FIX: I think this is kind of a no no, traits are supposed to be stateless I think
-// so probably turn this into 'list_helper" or similar like dynamic_array, though
+// so probably rename this chain to 'list_helper" or similar like dynamic_array, though
 // I don't like *that* name either
 template <class TNode, class TAllocator, class TValueAllocator>
 struct stateful_allocator_node_traits_base
@@ -281,11 +287,6 @@ struct inlinevalue_node_traits_new_base :
         return h;
     }
 #endif
-
-    static nv_ref_t value(node_type& n)
-    {
-        return n.value();
-    }
 };
 
 
