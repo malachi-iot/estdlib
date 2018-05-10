@@ -95,6 +95,11 @@ public:
         m_back(m_array.begin()),
         m_empty(true) {}
 
+    ~deque()
+    {
+        // TODO: destruct all remaining items
+    }
+
     typedef array_iterator iterator; // I think we should use this one all the way around, not sure why I have an explicit 'array_iterator'
     typedef T value_type;
     typedef value_type& reference;
@@ -140,6 +145,8 @@ public:
 
     bool pop_front()
     {
+        front().~value_type();
+
         m_front++;
 
         evaluate_rollover(&m_front);

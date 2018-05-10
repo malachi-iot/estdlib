@@ -307,6 +307,9 @@ public:
     dynamic_array(THelperParam& p) :
             helper(p) {}
 
+    // TODO: iterate through and destruct elements
+    ~dynamic_array() {}
+
     allocator_type& get_allocator()
     {
         return helper.get_allocator();
@@ -388,10 +391,17 @@ protected:
 public:
     void pop_back()
     {
+        // decrement the end of the array
+        size_type end = helper.size() - 1;
+
+        // lock down element at that position and run the destructor
+        helper.lock(end).~value_type();
+        helper.unlock();
+
         // TODO: put in warning if this doesn't work, remember
         // documentation says 'undefined' behavior if empty
         // so nothing to worry about too much
-        helper.size(helper.size() - 1);
+        helper.size(end);
     }
 
     void push_back(const value_type& value)
