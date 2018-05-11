@@ -35,4 +35,20 @@ struct is_same : false_type {};
 template<class T>
 struct is_same<T, T> : true_type {};
 
+// lifted from http://en.cppreference.com/w/cpp/types/enable_if
+template<bool B, class T = void>
+struct enable_if {};
+
+template<class T>
+struct enable_if<true, T> { typedef T type; };
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< bool B, class T = void >
+using enable_if_t = typename enable_if<B,T>::type;
+#else
+// UNTESTED
+template< bool B, class T = void >
+class enable_if_t : public enable_if<B, T>::type {};
+#endif
+
 }
