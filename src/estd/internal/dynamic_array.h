@@ -2,6 +2,11 @@
 
 #include "../memory.h"
 
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+#include <initializer_list>
+#include <algorithm>
+#endif
+
 namespace estd {
 
 namespace experimental {
@@ -306,6 +311,17 @@ public:
     template <class THelperParam>
     dynamic_array(THelperParam& p) :
             helper(p) {}
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    dynamic_array(std::initializer_list<value_type> initlist)
+    {
+        pointer p = lock();
+
+        std::copy(initlist.begin(), initlist.end(), p);
+
+        unlock();
+    }
+#endif
 
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}

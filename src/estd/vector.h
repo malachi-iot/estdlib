@@ -24,6 +24,16 @@ private:
     typedef allocator_traits<allocator_type> allocator_traits_t;
 
 public:
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+    vector() = default;
+#else
+    vector() {}
+#endif
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    vector(std::initializer_list<value_type> initlist) : base_t(initlist) {}
+#endif
+
     typedef typename base_t::size_type size_type;
     typedef typename base_t::accessor accessor;
     typedef typename base_t::iterator iterator;
@@ -65,6 +75,16 @@ namespace layer1 {
 template <class T, size_t N>
 class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N > >
 {
+    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N > > base_t;
+
+public:
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+    vector() = default;
+#endif
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    vector(std::initializer_list<T> initlist) : base_t(initlist) {}
+#endif
 };
 
 };
@@ -78,7 +98,15 @@ class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<
     typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > > base_t;
 
 public:
-    vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+    //vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+    vector() = default;
+#endif
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    vector(std::initializer_list<T> initlist) : base_t(initlist) {}
+#endif
 };
 
 }
