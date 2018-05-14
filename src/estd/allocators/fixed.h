@@ -34,7 +34,10 @@ protected:
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }
-    static CONSTEXPR bool is_locking() { return false; }
+
+    // technically we ARE locking since we have to convert the dummy 'bool' handle
+    // to a pointer
+    static CONSTEXPR bool is_locking() { return true; }
 
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)

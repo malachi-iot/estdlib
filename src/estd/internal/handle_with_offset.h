@@ -85,6 +85,8 @@ private:
 protected:
     handle_with_offset h;
 
+    typedef allocator_type& allocator_ref;
+
 public:
     accessor_stateful_base(allocator_type& a, const handle_with_offset& h) :
         a(a),
@@ -107,10 +109,16 @@ public:
 protected:
     handle_with_offset h;
 
+    typedef allocator_type allocator_ref;
+
 public:
     accessor_stateless_base(const handle_with_offset& h) : h(h) {}
 
+#ifdef FEATURE_CPP_MOVE_SEMANTIC
+    allocator_type&& get_allocator() const { return allocator_type(); }
+#else
     allocator_type get_allocator() const { return allocator_type(); }
+#endif
 };
 
 template <class TAccessorBase>
@@ -124,6 +132,8 @@ public:
     typedef typename base_t::allocator_traits allocator_traits;
 
 protected:
+    typedef typename base_t::allocator_ref allocator_ref;
+
     void unlock() const
     {
         // FIX: temporarily not unlocking anything since const lock/unlock still a pain
@@ -155,18 +165,24 @@ public:
 
     value_type& lock()
     {
-        return allocator_traits::lock(base_t::get_allocator(), base_t::h);
+        allocator_ref a = base_t::get_allocator();
+
+        return allocator_traits::lock(a, base_t::h);
     }
 
     void unlock()
     {
-        allocator_traits::unlock(base_t::get_allocator(), base_t::h.handle());
+        allocator_ref a = base_t::get_allocator();
+
+        allocator_traits::unlock(a, base_t::h.handle());
     }
 
 
     const value_type& clock_experimental() const
     {
-        return allocator_traits::clock_experimental(base_t::get_allocator(), base_t::h);
+        allocator_ref a = base_t::get_allocator();
+
+        return allocator_traits::clock_experimental(a, base_t::h);
     }
 
     operator value_type()
@@ -216,9 +232,13 @@ class accessor_stateless : public accessor_shared<accessor_stateless_base<TAlloc
 {
     typedef accessor_shared<accessor_stateless_base<TAllocator> > base_t;
     typedef typename base_t::value_type value_type;
+    typedef typename base_t::handle_with_offset handle_with_offset;
 
 public:
-    accessor_stateless(const typename base_t::handle_with_offset& h) :
+    accessor_stateless(const handle_with_offset& h) :
+        base_t(h) {}
+
+    accessor_stateless(const TAllocator& a, const handle_with_offset& h) :
         base_t(h) {}
 
     accessor_stateless& operator=(const value_type& assign_from)

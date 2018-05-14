@@ -445,7 +445,11 @@ public:
     //typedef estd::internal::accessor<TAllocator> accessor;
 
     // TODO: make accessor do this comparison in a self contained way
-    typedef typename std::conditional<allocator_traits::is_stateful(),
+    // allocator itself only needs to be stateful if it needs to do handle locking
+    // if not, then we assume it's pointer based and thusly can access the item
+    // without an allocator pointer, stateful or otherwise
+    typedef typename std::conditional<
+                allocator_traits::is_stateful() && allocator_traits::is_locking(),
                 accessor<allocator_type>,
                 accessor_stateless<allocator_type> >::type
                 accessor;
