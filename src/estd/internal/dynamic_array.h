@@ -239,7 +239,9 @@ public:
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
+#ifdef FEATURE_ESTD_LOCK_COUNTER
     typename allocator_traits::lock_counter lock_counter;
+#endif
 
     THelper helper;
 
@@ -250,19 +252,25 @@ protected:
 
     value_type* lock(size_type pos = 0, size_type count = 0)
     {
+#ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter++;
+#endif
         return &helper.lock(pos, count);
     }
 
     const value_type* clock_experimental(size_type pos = 0, size_type count = 0)
     {
+#ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter++;
+#endif
         return &helper.clock_experimental(pos, count);
     }
 
     void unlock()
     {
+#ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter--;
+#endif
         helper.unlock();
     }
 
@@ -434,74 +442,13 @@ public:
         return *this;
     }
 
-    class accessor
-    {
-        // TODO: one day, optimize similar to dynamic_array_helper
-        // with an accessor_helper which combines allocator_type
-        // and handle_with_offset to reduce footprint
-        allocator_type& a;
-        handle_with_offset h;
-        //dynamic_array::lock_counter counter;
+    //typedef estd::internal::accessor<TAllocator> accessor;
 
-        void unlock() const
-        {
-            // FIX: temporarily not unlocking anything since const lock/unlock still a pain
-            // and we aren't actually doing anything during unlock yet
-        }
-
-    public:
-        accessor(allocator_type& a, const handle_with_offset& h) :
-            a(a),
-            h(h) {}
-
-        const handle_with_offset& h_exp() const { return h; }
-
-        handle_with_offset& h_exp() { return h; }
-
-        value_type& lock()
-        {
-            return allocator_traits::lock(a, h);
-        }
-
-        void unlock()
-        {
-            allocator_traits::unlock(a, h.handle());
-        }
-
-        operator value_type()
-        {
-            // copies it - beware, some T we don't want to copy!
-            value_type retval = lock();
-
-            unlock();
-
-            return retval;
-        }
-
-        accessor& operator=(const value_type& assign_from)
-        {
-            value_type& value = lock();
-
-            value = assign_from;
-
-            unlock();
-
-            return *this;
-        }
-
-        bool operator ==(const value_type& compare_to) const
-        {
-            const value_type& v = allocator_traits::clock_experimental(a, h);
-
-            bool result = v == compare_to;
-
-            unlock();
-
-            return result;
-        }
-    };
-
-
+    // TODO: make accessor do this comparison in a self contained way
+    typedef typename std::conditional<allocator_traits::is_stateful(),
+                accessor<allocator_type>,
+                accessor_stateless<allocator_type> >::type
+                accessor;
 
     class iterator
     {
@@ -523,7 +470,9 @@ public:
 
         iterator(allocator_type& allocator, const handle_with_offset& h ) :
             current(allocator, h)
-        {}
+        {
+
+        }
 
         iterator(const iterator& copy_from) : current(copy_from.current) {}
 

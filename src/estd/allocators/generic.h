@@ -94,6 +94,12 @@ struct experimental_std_allocator : public ::std::allocator<T>
     void unlock(handle_type) {}
 
     static CONSTEXPR bool is_locking() { return false; }
+
+    template <class TNew>
+    experimental_std_allocator<TNew> rebind_experimental()
+    {
+        return experimental_std_allocator<TNew>();
+    }
 };
 
 
@@ -120,6 +126,8 @@ struct allocator_traits< ::std::allocator<T> >
     typedef handle_type handle_with_size;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
+    static CONSTEXPR bool is_stateful() { return false; }
 
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 

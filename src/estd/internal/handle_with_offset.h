@@ -68,6 +68,166 @@ public:
     }
 };
 
+
+
+template <class TAllocator>
+class accessor_stateful_base
+{
+public:
+    typedef TAllocator allocator_type;
+    typedef allocator_traits<TAllocator> allocator_traits;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+private:
+    allocator_type& a;
+
+protected:
+    handle_with_offset h;
+
+public:
+    accessor_stateful_base(allocator_type& a, const handle_with_offset& h) :
+        a(a),
+        h(h) {}
+
+    allocator_type& get_allocator() const { return a; }
+};
+
+
+
+template <class TAllocator>
+class accessor_stateless_base
+{
+public:
+    typedef TAllocator allocator_type;
+    typedef allocator_traits<TAllocator> allocator_traits;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+protected:
+    handle_with_offset h;
+
+public:
+    accessor_stateless_base(const handle_with_offset& h) : h(h) {}
+
+    allocator_type get_allocator() const { return allocator_type(); }
+};
+
+template <class TAccessorBase>
+class accessor_shared : public TAccessorBase
+{
+public:
+    typedef TAccessorBase base_t;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::value_type value_type;
+    typedef typename base_t::handle_with_offset handle_with_offset;
+    typedef typename base_t::allocator_traits allocator_traits;
+
+protected:
+    void unlock() const
+    {
+        // FIX: temporarily not unlocking anything since const lock/unlock still a pain
+        // and we aren't actually doing anything during unlock yet
+    }
+
+    template <class TAccessor>
+    TAccessor& assign(const value_type& assign_from)
+    {
+        value_type& value = lock();
+
+        value = assign_from;
+
+        unlock();
+
+        return * (TAccessor*) this;
+    }
+
+public:
+    accessor_shared(allocator_type& a, const handle_with_offset& h) :
+        base_t(a, h) {}
+
+    accessor_shared(const handle_with_offset& h) :
+        base_t(h) {}
+
+    const handle_with_offset& h_exp() const { return base_t::h; }
+
+    handle_with_offset& h_exp() { return base_t::h; }
+
+    value_type& lock()
+    {
+        return allocator_traits::lock(base_t::get_allocator(), base_t::h);
+    }
+
+    void unlock()
+    {
+        allocator_traits::unlock(base_t::get_allocator(), base_t::h.handle());
+    }
+
+
+    const value_type& clock_experimental() const
+    {
+        return allocator_traits::clock_experimental(base_t::get_allocator(), base_t::h);
+    }
+
+    operator value_type()
+    {
+        // copies it - beware, some T we don't want to copy!
+        value_type retval = lock();
+
+        unlock();
+
+        return retval;
+    }
+
+
+    bool operator ==(const value_type& compare_to) const
+    {
+        const value_type& v = clock_experimental();
+
+        bool result = v == compare_to;
+
+        unlock();
+
+        return result;
+    }
+};
+
+
+template <class TAllocator>
+class accessor : public accessor_shared<accessor_stateful_base<TAllocator> >
+{
+    typedef accessor_shared<accessor_stateful_base<TAllocator> > base_t;
+    typedef accessor this_t;
+    typedef typename base_t::value_type value_type;
+
+public:
+    accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
+        base_t(a, h) {}
+
+    accessor& operator=(const value_type& assign_from)
+    {
+        return base_t::template assign<accessor>(assign_from);
+    }
+};
+
+
+template <class TAllocator>
+class accessor_stateless : public accessor_shared<accessor_stateless_base<TAllocator> >
+{
+    typedef accessor_shared<accessor_stateless_base<TAllocator> > base_t;
+    typedef typename base_t::value_type value_type;
+
+public:
+    accessor_stateless(const typename base_t::handle_with_offset& h) :
+        base_t(h) {}
+
+    accessor_stateless& operator=(const value_type& assign_from)
+    {
+        return base_t::template assign<accessor_stateless>(assign_from);
+    }
+};
+
+
 }
 
 namespace experimental {

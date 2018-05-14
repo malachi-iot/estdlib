@@ -20,4 +20,12 @@ TEST_CASE("memory.h tests")
         //auto s = sizeof(empty);
 #endif
     }
+    SECTION("rebind")
+    {
+        estd::experimental_std_allocator<int> a;
+
+        float* f = a.rebind_experimental<float>().allocate(10);
+
+        a.rebind_experimental<float>().deallocate(f, 10);
+    }
 }
