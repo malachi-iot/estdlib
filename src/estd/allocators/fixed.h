@@ -15,13 +15,15 @@ template <class T, class TBuffer>
 struct single_allocator_base
 {
     typedef const void* const_void_pointer;
-    typedef bool handle_type; // really I want it an empty struct
+    // really I want it an empty struct.  Bool is somewhat convenient though since we can
+    // represent an invalid handle too
+    typedef bool handle_type;
+    typedef std::size_t size_type;
     typedef handle_type handle_with_size;
     //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
-    typedef estd::internal::handle_with_offset<handle_type> handle_with_offset;
+    typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
     typedef T value_type;
     typedef T* pointer;
-    typedef std::size_t size_type;
     typedef estd::experimental::stateful_nonlocking_accessor<single_allocator_base> accessor;
 
 protected:

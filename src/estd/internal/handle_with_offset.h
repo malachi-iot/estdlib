@@ -4,15 +4,38 @@
 
 namespace estd { namespace internal {
 
-template<typename size_t>
+template<class TDummyHandle, typename size_t = std::size_t>
 class handle_with_only_offset
 {
     size_t m_offset;
 
 public:
+    typedef size_t size_type;
+
     handle_with_only_offset(size_t offset) : m_offset(offset) {}
 
+    handle_with_only_offset(TDummyHandle h, size_t offset) :
+            m_offset(offset) {}
+
     size_t offset() const { return m_offset; }
+
+    TDummyHandle handle()
+    {
+        TDummyHandle h;
+
+        return h;
+    }
+
+    bool operator==(const handle_with_only_offset& compare_to) const
+    {
+        return offset() == compare_to.offset();
+    }
+
+    // TODO: Make allocator version which does bounds checking
+    void increment(size_type count = 1)
+    {
+        m_offset += count;
+    }
 };
 
 
@@ -112,7 +135,12 @@ protected:
     typedef allocator_type allocator_ref;
 
 public:
-    accessor_stateless_base(const handle_with_offset& h) : h(h) {}
+    accessor_stateless_base(const handle_with_offset& h) : h(h)
+    {
+#ifdef FEATURE_CPP_STATICASSERT
+        static_assert(sizeof(allocator_type) <= 1, "Stateless allocator must be <= 1 bytes in size");
+#endif
+    }
 
 #ifdef FEATURE_CPP_MOVE_SEMANTIC
     allocator_type&& get_allocator() const { return allocator_type(); }

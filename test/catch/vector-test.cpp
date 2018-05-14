@@ -80,6 +80,17 @@ TEST_CASE("vector tests")
     SECTION("layer1 vector")
     {
         estd::layer1::vector<int, 10> v;
+        typedef estd::layer1::vector<int, 10>::accessor accessor_type;
+
+        int accessor_size = sizeof(accessor_type);
+
+        // should be relatively small, comprised of an offset and
+        // a reference to underlying fixed allocator.  As an
+        // optimization, we should be able to fold that down into
+        // the stateless pointer-only variety under these scenarios where
+        // locking is just a formality to turn a fake handle into
+        // a pointer
+        REQUIRE(accessor_size <= sizeof(void*)*2);
 
         REQUIRE(v.size() == 0);
 
@@ -87,6 +98,10 @@ TEST_CASE("vector tests")
 
         REQUIRE(v.size() == 1);
         REQUIRE(v[0] == 3);
+
+        accessor_type a = v[0];
+
+        REQUIRE(a == 3);
     }
     SECTION("layer2 vector")
     {
