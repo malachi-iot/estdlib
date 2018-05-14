@@ -160,7 +160,10 @@ public:
 
     size_type size(handle_with_size h) const { return m_buffer_size; }
 
-    size_type max_size() const { return m_buffer_size; }
+    size_type max_size() const
+    {
+        return m_buffer_size - (null_terminated ? 1 : 0);
+    }
 
     handle_with_size allocate_ext(size_t size)
     {
@@ -257,6 +260,141 @@ public:
         return sz;
     }
 };
+
+template <class T, bool null_terminated>
+class dynamic_array_fixedbuf_runtimesize_helper_base
+{
+    typedef single_fixedbuf_runtimesize_allocator<T, null_terminated> allocator_type;
+
+    allocator_type allocator;
+
+protected:
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_traits::value_type value_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    dynamic_array_fixedbuf_runtimesize_helper_base() {}
+
+    template <class TParam>
+    dynamic_array_fixedbuf_runtimesize_helper_base(TParam p) : allocator(p) {}
+
+public:
+    static CONSTEXPR bool uses_termination() { return null_terminated; }
+
+    value_type& lock(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.lock(true, pos, count);
+    }
+
+    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
+    {
+        return allocator.clock_experimental(true, pos, count);
+    }
+
+    const size_type max_size() const { return allocator.max_size(); }
+
+
+    void unlock() {}
+
+    void cunlock_experimental() const {}
+
+    size_type capacity() const { return allocator.max_size(); }
+
+    allocator_type& get_allocator() { return allocator; }
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(true, pos);
+    }
+
+    bool allocate(size_type sz) { return sz <= capacity(); }
+    bool reallocate(size_type sz) { return sz <= capacity(); }
+
+    bool is_allocated() const { return true; }
+
+};
+
+
+template <class T, bool null_terminated>
+class dynamic_array_fixedbuf_runtimesize_helper;
+
+template <class T>
+class dynamic_array_fixedbuf_runtimesize_helper<T, true> :
+        public dynamic_array_fixedbuf_runtimesize_helper_base<T, true>
+{
+protected:
+    typedef dynamic_array_fixedbuf_runtimesize_helper_base<T, true> base_t;
+    typedef typename base_t::size_type size_type;
+
+    template <class TParam>
+    dynamic_array_fixedbuf_runtimesize_helper(TParam p) : base_t(p) {}
+
+public:
+    size_type size() const
+    {
+        /*
+#ifdef FEATURE_CPP_STATIC_ASSERT
+        // specialization required if we aren't null terminated (to track size variable)
+        static_assert(null_terminated, "Utilizing this size method requires null termination = true");
+#endif */
+
+        const T* s = &base_t::clock_experimental();
+
+        // FIX: use char_traits string length instead
+        size_type sz = strlen(s);
+
+        base_t::cunlock_experimental();
+
+        return sz;
+    }
+
+    // +++ temporary
+    void size(size_type len)
+    {
+        T* s = &base_t::lock();
+
+        s[len] = 0;
+
+        base_t::unlock();
+    }
+    // ---
+};
+
+// non-null terminated variety
+template <class T>
+class dynamic_array_fixedbuf_runtimesize_helper<T, false> :
+    public dynamic_array_fixedbuf_runtimesize_helper_base<T, false>
+{
+    typedef dynamic_array_fixedbuf_runtimesize_helper_base<T, false> base_t;
+
+public:
+    typedef typename base_t::size_type size_type;
+
+protected:
+    size_type m_size;
+
+    template <class TParam>
+    dynamic_array_fixedbuf_runtimesize_helper(TParam p) :
+        base_t(p),
+        m_size(0)
+    {}
+
+public:
+    size_type size() const
+    {
+        return m_size;
+    }
+
+    // +++ temporary
+    void size(size_type len)
+    {
+        m_size = len;
+    }
+    // ---
+};
+
 
 // as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
 // and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
@@ -385,6 +523,20 @@ class dynamic_array_helper<single_fixedbuf_allocator<const T, len, true, const T
 public:
     dynamic_array_helper(const T* buf) : base_t(buf) {}
 };
+
+
+// runtime (layer3-ish) version
+template <class T, bool null_terminated>
+class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
+        public dynamic_array_fixedbuf_runtimesize_helper<T, null_terminated>
+{
+    typedef dynamic_array_fixedbuf_runtimesize_helper<T, null_terminated> base_t;
+
+public:
+    template <class TInitParam>
+    dynamic_array_helper(const TInitParam& p) : base_t(p) {}
+};
+
 
 }
 

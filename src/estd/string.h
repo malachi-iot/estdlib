@@ -567,6 +567,11 @@ public:
         base_t::operator =(copy_from);
         return *this;
     }
+
+    size_type max_size() const
+    {
+        return base_t::helper.max_size();
+    }
 };
 
 

@@ -117,11 +117,12 @@ TEST_CASE("string tests")
 
         //experimental::layer2::string<> str3 = str;
     }
+#endif
     SECTION("layer 3 null terminated")
     {
         char buf[128];
         char buf2[128] = "val";
-        experimental::layer3::basic_string<char> str(buf2);
+        layer3::basic_string<char> str(buf2);
 
         str.copy(buf, 128);
 
@@ -139,7 +140,6 @@ TEST_CASE("string tests")
         REQUIRE(buf2[7] == 'u');
 
     }
-#endif
     SECTION("dynamic_array low level allocator test")
     {
         //estd::vector<uint8_t, test_t> d;
@@ -197,11 +197,26 @@ TEST_CASE("string tests")
         buf[val2.copy(buf, 128)] = 0;
     }
 #endif
-    SECTION("Non-experimental layer3")
+    SECTION("layer3 null terminated")
     {
         char buf[128];
 
+        buf[0] = 0;
+
         layer3::basic_string<char> s(buf);
+
+        REQUIRE(s.size() == 0);
+
+        s += "hello";
+
+        REQUIRE(s.size() == 5);
+        REQUIRE(s == "hello");
+    }
+    SECTION("layer3 length-specified (not null terminated)")
+    {
+        char buf[128];
+
+        layer3::basic_string<char, false> s(buf);
 
         REQUIRE(s.size() == 0);
 
