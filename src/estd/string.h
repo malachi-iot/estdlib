@@ -127,17 +127,10 @@ public:
     }
 
 
-    template <class TForeignAllocator>
-    basic_string& append(const basic_string<CharT, Traits, TForeignAllocator>& str)
+    template <class TForeignChar, class TForeignTraits, class TForeignAllocator>
+    basic_string& append(const basic_string<TForeignChar, TForeignTraits, TForeignAllocator>& str)
     {
-        size_type len = str.length();
-
-        const CharT* append_from = str.fake_const_lock();
-
-        base_t::_append(append_from, len);
-
-        str.fake_const_unlock();
-
+        base_t::append(str);
         return *this;
     }
 
@@ -254,190 +247,7 @@ struct null_terminated_string_traits
     static size_t length(char* str) { return strlen(str); }
 };
 
-#ifdef UNUSED
-// TODO: consolidate with estd::string itself now that allocator is beefing up
-// still have to crack the nut of the '0-byte' vs '1-byte' empty structs, which
-// size_tracker_nullterm and size_tracker_default are attempting (but not yet
-// succeeding) to do
-template <class CharT, class TBuffer,
-          class Traits = std::char_traits<CharT>,
-          class StringTraits = null_terminated_string_traits>
-class basic_string_base
-{
-protected:
-    TBuffer buffer;
-    typedef StringTraits straits_t;
 
-public:
-    // temporarily allowing const char* to char* since basic_string_base is going away anyway
-    template <class TBufferParam>
-    basic_string_base(TBufferParam in) : buffer((char*)in) {}
-
-    typedef CharT value_type;
-    typedef size_t size_type;
-
-    // n is the 'at most' specifier. -1 means no upper bound
-    // assumes null termination
-    basic_string_base& append(const value_type* s, int n = -1)
-    {
-        if(straits_t::is_null_terminated())
-        {
-            if(n == -1)
-                strcat(buffer, s);
-            else
-                strncat(buffer, s, n);
-        }
-
-        return *this;
-    }
-
-    template <class TString>
-    basic_string_base& operator += (TString s)
-    {
-        return append(s);
-    }
-
-
-    bool operator==(const basic_string_base& compare_to) const
-    {
-        return strcmp(buffer, compare_to.buffer) == 0;
-    }
-
-
-    bool operator!=(const basic_string_base& compare_to) const
-    {
-        return strcmp(buffer, compare_to.buffer) != 0;
-    }
-
-
-    bool operator>(const basic_string_base& compare_to) const
-    {
-        return strcmp(buffer, compare_to.buffer) > 0;
-    }
-
-    // FIX
-    const TBuffer& raw() const { return buffer; }
-};
-
-
-
-
-namespace layer2 {
-
-// represents a null-terminated string with a constexpr-size.  Should be nearly identical to
-// a layer3 variety with a non-constexpr-size
-// experimental because even though this is quite possible, combining it with regular basic_string
-// is both desired but complicated
-// TODO: Probably we want to distinguish this as null-terminated vs not null terminated either with
-// traits or an explicit name
-// N defaults to 0, kind of ugly by C++ standards but the norm for C - strings have an unspecified
-// upper bound
-template <class CharT, size_t N = 0, class Traits = std::char_traits<CharT > >
-class basic_string : public basic_string_base<CharT, CharT*, Traits>
-{
-protected:
-    typedef basic_string_base<CharT, CharT*, Traits> base_t;
-
-public:
-    typedef CharT value_type;
-    typedef size_t size_type;
-
-    basic_string(const CharT* buffer) : base_t(buffer) {}
-
-    //basic_string(const basic_string& copy_from) : base_t(copy_from.buffer) {}
-
-#ifdef FEATURE_CPP_STATIC_ASSERT
-    basic_string(const base_t& copy_from) : base_t(copy_from.buffer)
-    {
-        static_assert(N == 0, "May only initialize when length is unspecified");
-    }
-#endif
-
-
-    size_type size() const
-    {
-        return strlen(base_t::buffer);
-    }
-
-    size_type length() const { return size(); }
-
-    size_type max_size() const { return N - 1; }
-
-    size_type copy(value_type* dest, size_type count, size_type pos = 0)
-    {
-        // TODO: Do bounds checking etc.
-        strncpy(dest, base_t::buffer + pos, count);
-        return count;
-    }
-
-    // "lossy" conversion to make basic_string<CharT> more
-    // passable analgous to classic C char* strings
-    operator basic_string<CharT, 0, Traits>() const
-    {
-        return basic_string<CharT, 0, Traits>(base_t::buffer);
-    }
-};
-
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template <size_t N = 0>
-using string = basic_string<char, N>;
-#endif
-
-
-}
-
-
-namespace layer3 {
-
-// represents a null-terminated string with a particular specified size
-// TODO: Probably we want to distinguish this as null-terminated vs not null terminated either with
-// traits or an explicit name
-template <class CharT, class Traits = std::char_traits<CharT> >
-class basic_string : public basic_string_base<CharT, CharT*, Traits>
-{
-public:
-    typedef size_t size_type;
-
-protected:
-    size_type m_length;
-    typedef basic_string_base<CharT, CharT*> base_t;
-
-public:
-    typedef CharT value_type;
-
-    template <size_t N>
-    basic_string(const layer2::basic_string<CharT, N>& copy_from)
-        : base_t(copy_from.raw()), m_length(copy_from.max_size())
-    {
-
-    }
-
-    template <size_t N>
-    basic_string(CharT (&buffer) [N]) :
-        base_t(buffer), m_length(N) {}
-
-    basic_string(CharT* buffer, size_type length) :
-        base_t(buffer), m_length(length)
-    {}
-
-    size_type size() const
-    {
-        return strlen(base_t::buffer);
-    }
-
-    size_type length() const { return size(); }
-
-    size_type max_size() const { return m_length - 1; }
-
-    size_type copy(value_type* dest, size_type count, size_type pos = 0)
-    {
-        // TODO: Do bounds checking etc.
-        strncpy(dest, base_t::buffer + pos, count);
-        return count;
-    }
-};
-}
-#endif
 }
 
 
@@ -564,6 +374,13 @@ class basic_string
 
 public:
     template <size_type N>
+    basic_string(const CharT (&buffer) [N], bool source_null_terminated = true) :
+        base_t(typename allocator_type::InitParam(buffer, N))
+    {
+        base_t::helper.size(N - (source_null_terminated ? 1 : 0));
+    }
+
+    template <size_type N>
     basic_string(size_type initial_size, CharT (&buffer) [N]) :
         base_t(typename allocator_type::InitParam(buffer, N))
     {
@@ -652,6 +469,21 @@ template <class CharT, class Traits, class Allocator>
 inline std::basic_ostream<CharT, Traits>&
     operator<<(std::basic_ostream<CharT, Traits>& os,
                const estd::basic_string<CharT, Traits, Allocator>& str)
+{
+    // TODO: Do query for null terminated vs non null terminated so that
+    // this might be more efficient
+    os.write(str.fake_const_lock(), str.size());
+
+    str.fake_const_unlock();
+
+    return os;
+}
+
+
+template <class CharT, class Traits, class Allocator>
+inline std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& os,
+               const estd::basic_string<const CharT, Traits, Allocator>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient

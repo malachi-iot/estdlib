@@ -352,4 +352,17 @@ TEST_CASE("string tests")
         // to deduce the size from strlen in this case
         REQUIRE(s2 == "Hello, World");
     }
+    SECTION("layer3 const compare")
+    {
+        layer3::basic_string<const char, false> s("test");
+
+        REQUIRE(s.length() == 4);
+
+        // because we've denoted basic_string as not null terminated.  But, because it's const,
+        // we'll never get to use that extra byte
+        REQUIRE(s.capacity() == 5);
+        REQUIRE(s.max_size() == 5);
+
+        REQUIRE(s == "test");
+    }
 }

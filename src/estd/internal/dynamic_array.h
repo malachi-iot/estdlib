@@ -478,6 +478,21 @@ public:
         }
     }
 
+    template <class TForeignAllocator, class TDAHelper>
+    dynamic_array& append(const dynamic_array<TForeignAllocator, TDAHelper>& str)
+    {
+        size_type len = str.size();
+
+        const typename TForeignAllocator::value_type* append_from = str.fake_const_lock();
+
+        _append(append_from, len);
+
+        str.fake_const_unlock();
+
+        return *this;
+    }
+
+
     void pop_back()
     {
         // decrement the end of the array
