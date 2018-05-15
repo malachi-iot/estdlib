@@ -41,6 +41,14 @@ std::basic_ostream<TChar, TCharTraits>& operator <<( std::basic_ostream<TChar, T
 {
     return ::operator <<(os, value);
 }
+
+
+template <class TChar, class TCharTraits, class TAllocator>
+std::ostream& operator <<( std::ostream& os,
+                           estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+{
+    return ::operator <<(os, value);
+}
 #endif
 }
 
@@ -356,6 +364,7 @@ TEST_CASE("string tests")
     {
         layer3::basic_string<const char, false> s("test");
 
+        INFO("Evaluating" << s);
         REQUIRE(s.length() == 4);
 
         // because we've denoted basic_string as not null terminated.  But, because it's const,

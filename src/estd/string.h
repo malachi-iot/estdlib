@@ -481,9 +481,9 @@ inline std::basic_ostream<CharT, Traits>&
 
 
 template <class CharT, class Traits, class Allocator>
-inline std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& os,
-               const estd::basic_string<const CharT, Traits, Allocator>& str)
+inline std::ostream&
+    operator<<(std::ostream& os,
+               const estd::basic_string<CharT, Traits, Allocator>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
