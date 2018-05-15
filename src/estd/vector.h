@@ -37,36 +37,6 @@ public:
     typedef typename base_t::size_type size_type;
     typedef typename base_t::accessor accessor;
     typedef typename base_t::iterator iterator;
-
-    allocator_type& get_allocator()
-    {
-        return base_t::get_allocator();
-    }
-
-#ifdef FEATURE_CPP_MOVESEMANTIC
-    // NOTE: because pos requires a non-const lock, we can't do traditional
-    // const_iterator here
-    iterator insert(iterator pos, const_reference value)
-    {
-        T* a = base_t::lock();
-
-        T& pos_item = pos.lock();
-
-        // all very raw array dependent
-        base_t::raw_insert(a, &pos_item, &value);
-
-        pos.unlock();
-
-        base_t::unlock();
-
-        return pos;
-    }
-#else
-    iterator insert(iterator pos, const T& value)
-    {
-
-    }
-#endif
 };
 
 

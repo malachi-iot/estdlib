@@ -7,6 +7,10 @@
 #include <algorithm>
 #endif
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+#include <utility> // for std::forward
+#endif
+
 namespace estd {
 
 namespace experimental {
@@ -222,6 +226,7 @@ public:
 template <class TAllocator, class THelper = dynamic_array_helper<TAllocator > >
 class dynamic_array
 {
+    typedef dynamic_array this_t;
 public:
     typedef TAllocator allocator_type;
     typedef estd::allocator_traits<TAllocator> allocator_traits;
@@ -231,8 +236,12 @@ public:
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
+    //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
+
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
 
     // TODO: utilize SFINAE if we can
     // ala https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
@@ -274,6 +283,7 @@ protected:
         helper.unlock();
     }
 
+
     // internal method for auto increasing capacity based on pre-set amount
     void ensure_additional_capacity(size_type increase_by)
     {
@@ -292,6 +302,28 @@ protected:
 #endif
         }
     }
+
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void raw_insert(value_type* a, value_type* to_insert_pos, value_type&& to_insert_value)
+    {
+        // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
+        // so later consider doing the insert operation at that level)
+        ensure_additional_capacity(1);
+
+        helper.size(helper.size() + 1);
+
+        // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
+        size_type raw_typed_pos = to_insert_pos - a;
+        size_type remaining = size() - raw_typed_pos;
+
+        // FIX: This is causing a memory allocation issue, probably a buffer overrun
+        // but not sure why
+        memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+
+        *to_insert_pos = to_insert_value;
+    }
+#endif
 
 
     void raw_insert(value_type* a, value_type* to_insert_pos, const value_type* to_insert_value)
@@ -337,6 +369,21 @@ public:
     allocator_type& get_allocator()
     {
         return helper.get_allocator();
+    }
+
+    // FIX: First of all , don't like forcing const
+    // secondly, exposing these as public is not great - but eventually
+    // we might be forced to expose some form of lock/unlock as public
+    // currently only exposing as public to make it easier for compare() to work
+    const value_type* fake_const_lock(size_type pos = 0, size_type count = 0) const
+    {
+        // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
+        return const_cast<this_t*>(this)->clock_experimental(pos, count);
+    }
+
+    void fake_const_unlock() const
+    {
+        return const_cast<this_t*>(this)->unlock();
     }
 
     size_type size() const { return helper.size(); }
@@ -415,9 +462,20 @@ protected:
 public:
     bool empty() const
     {
-        // TODO: Optimize this with a specialized helper.empty()
-        // so that we don't always count up to strlen() every time
-        return helper.size() == 0;
+        if(helper_type::uses_termination())
+        {
+            const value_type* v = fake_const_lock(0, 1);
+
+            bool is_terminator = *v == 0;
+
+            fake_const_unlock();
+
+            return is_terminator;
+        }
+        else
+        {
+            return helper.size() == 0;
+        }
     }
 
     void pop_back()
@@ -602,6 +660,42 @@ public:
     {
         return helper.max_size();
     }
+
+    // NOTE: because pos requires a non-const lock, we can't do traditional
+    // const_iterator here
+    iterator insert(iterator pos, const_reference value)
+    {
+        pointer a = lock();
+
+        reference pos_item = pos.lock();
+
+        // all very raw array dependent
+        raw_insert(a, &pos_item, &value);
+
+        pos.unlock();
+
+        unlock();
+
+        return pos;
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    iterator insert(iterator pos, value_type&& value)
+    {
+        pointer a = lock();
+
+        reference pos_item = pos.lock();
+
+        // all very raw array dependent
+        raw_insert(a, &pos_item, std::forward<value_type>(value));
+
+        pos.unlock();
+
+        unlock();
+
+        return pos;
+    }
+#endif
 };
 
 

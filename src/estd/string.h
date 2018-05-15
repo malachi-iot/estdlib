@@ -71,22 +71,6 @@ template<
 public:
     typedef typename base_t::size_type size_type;
 
-public:
-    // FIX: First of all , don't like forcing const
-    // secondly, exposing these as public is not great - but eventually
-    // we might be forced to expose some form of lock/unlock as public
-    // currently only exposing as public to make it easier for compare() to work
-    const CharT* fake_const_lock(size_type pos = 0, size_type count = 0) const
-    {
-        // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
-        return const_cast<this_t*>(this)->clock_experimental(pos, count);
-    }
-
-    void fake_const_unlock() const
-    {
-        return const_cast<this_t*>(this)->unlock();
-    }
-
 protected:
     template <class THelperParam>
     basic_string(const THelperParam& p) : base_t(p) {}
@@ -119,7 +103,7 @@ public:
 
     size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
-        const value_type* src = fake_const_lock();
+        const value_type* src = base_t::fake_const_lock();
 
         // TODO: since we aren't gonna throw an exception, determine what to do if
         // pos > size()
@@ -129,7 +113,7 @@ public:
 
         memcpy(dest, src + pos, count);
 
-        fake_const_unlock();
+        base_t::fake_const_unlock();
 
         return count;
     }
@@ -175,11 +159,11 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        const CharT* raw = fake_const_lock();
+        const CharT* raw = base_t::fake_const_lock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
-        fake_const_unlock();
+        base_t::fake_const_unlock();
 
         return result;
 
@@ -196,12 +180,12 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        const CharT* raw = fake_const_lock();
+        const CharT* raw = base_t::fake_const_lock();
         const CharT* s = str.fake_const_lock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
-        fake_const_unlock();
+        base_t::fake_const_unlock();
 
         str.fake_const_unlock();
 
@@ -222,11 +206,6 @@ public:
         return *this;
     }
 
-
-    const value_type front() const
-    {
-        return fake_const_lock(0, 1);
-    }
 
     template <class ForeignAllocator>
     basic_string& operator=(const basic_string<CharT, Traits, ForeignAllocator>& copy_from)

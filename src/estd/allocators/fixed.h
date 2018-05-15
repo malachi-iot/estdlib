@@ -167,7 +167,8 @@ public:
     // null_teriminated flag in the allocator is merely a trait
     size_type max_size() const
     {
-        return m_buffer_size - (null_terminated ? 1 : 0);
+        return m_buffer_size;
+        //return m_buffer_size - (null_terminated ? 1 : 0);
     }
 
     handle_with_size allocate_ext(size_t size)
@@ -247,7 +248,10 @@ public:
 
     static CONSTEXPR bool uses_termination() { return null_terminated; }
 
-    const size_type max_size() const { return allocator.max_size(); }
+    const size_type max_size() const
+    {
+        return allocator.max_size() - (null_terminated ? 1 : 0);
+    }
 
     bool is_allocated() const { return true; }
 };
@@ -269,7 +273,6 @@ struct dynamic_array_fixedbuf_helper_termination_specialization_base<true, TAllo
 
     template <class TParam>
     dynamic_array_fixedbuf_helper_termination_specialization_base(TParam p) : base_t(p) {}
-
 
     size_type size() const
     {
