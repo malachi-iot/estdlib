@@ -163,6 +163,8 @@ public:
 
     size_type size(handle_with_size h) const { return m_buffer_size; }
 
+    // FIX: This does *NOT* belong here, only a helper should do this
+    // null_teriminated flag in the allocator is merely a trait
     size_type max_size() const
     {
         return m_buffer_size - (null_terminated ? 1 : 0);
@@ -195,12 +197,65 @@ public:
 template <class TAllocator>
 struct dynamic_array_helper;
 
-template <class T, size_t len, bool null_terminated, class TBuffer>
-class dynamic_array_fixedbuf_helper_base
+
+template <class TAllocator>
+class dynamic_array_fixedbuf_helper_base_base
 {
-    typedef single_fixedbuf_allocator<T, len, null_terminated, TBuffer> allocator_type;
+protected:
+    typedef TAllocator allocator_type;
 
     allocator_type allocator;
+
+    dynamic_array_fixedbuf_helper_base_base() {}
+
+    template <class TParam>
+    dynamic_array_fixedbuf_helper_base_base(TParam p) : allocator(p) {}
+
+public:
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::size_type size_type;
+    typedef typename allocator_traits::value_type value_type;
+    typedef typename allocator_type::handle_with_size handle_with_size;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    value_type& lock(size_type pos = 0, size_type count = 0)
+    {
+        return allocator.lock(true, pos, count);
+    }
+
+    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
+    {
+        return allocator.clock_experimental(true, pos, count);
+    }
+
+
+    void unlock() {}
+
+    void cunlock_experimental() const {}
+
+    size_type capacity() const { return allocator.max_size(); }
+
+    allocator_type& get_allocator() { return allocator; }
+
+    handle_with_offset offset(size_type pos)
+    {
+        return allocator.offset(true, pos);
+    }
+
+    bool allocate(size_type sz) { return sz <= capacity(); }
+    bool reallocate(size_type sz) { return sz <= capacity(); }
+
+    bool is_allocated() const { return true; }
+};
+
+
+
+template <class T, size_t len, bool null_terminated, class TBuffer>
+class dynamic_array_fixedbuf_helper_base :
+        public dynamic_array_fixedbuf_helper_base_base<single_fixedbuf_allocator<T, len, null_terminated, TBuffer> >
+{
+    typedef dynamic_array_fixedbuf_helper_base_base<single_fixedbuf_allocator<T, len, null_terminated, TBuffer> > base_t;
+    typedef typename base_t::allocator_type allocator_type;
 
 protected:
     typedef estd::allocator_traits<allocator_type> allocator_traits;
@@ -212,41 +267,14 @@ protected:
     dynamic_array_fixedbuf_helper_base() {}
 
     template <class TParam>
-    dynamic_array_fixedbuf_helper_base(TParam p) : allocator(p) {}
+    dynamic_array_fixedbuf_helper_base(TParam p) : base_t(p) {}
 
 public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
 
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return allocator.lock(true, pos, count);
-    }
-
-    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
-    {
-        return allocator.clock_experimental(true, pos, count);
-    }
+    size_type max_size() const { return base_t::allocator.max_size(); }
 
 
-    void unlock() {}
-
-    void cunlock_experimental() const {}
-
-    size_type capacity() const { return allocator.max_size(); }
-
-    size_type max_size() const { return allocator.max_size(); }
-
-    allocator_type& get_allocator() { return allocator; }
-
-    handle_with_offset offset(size_type pos)
-    {
-        return allocator.offset(true, pos);
-    }
-
-    bool allocate(size_type sz) { return sz <= capacity(); }
-    bool reallocate(size_type sz) { return sz <= capacity(); }
-
-    bool is_allocated() const { return true; }
 
     size_type size() const
     {
@@ -255,23 +283,24 @@ public:
         static_assert(null_terminated, "Utilizing this size method requires null termination = true");
 #endif
 
-        const T* s = &clock_experimental();
+        const T* s = &base_t::clock_experimental();
 
         // FIX: use char_traits string length instead
         size_type sz = strlen(s);
 
-        cunlock_experimental();
+        base_t::cunlock_experimental();
 
         return sz;
     }
 };
 
-template <class T, bool null_terminated>
-class dynamic_array_fixedbuf_runtimesize_helper_base
-{
-    typedef single_fixedbuf_runtimesize_allocator<T, null_terminated> allocator_type;
 
-    allocator_type allocator;
+template <class T, bool null_terminated>
+class dynamic_array_fixedbuf_runtimesize_helper_base :
+        public dynamic_array_fixedbuf_helper_base_base<single_fixedbuf_runtimesize_allocator<T, null_terminated> >
+{
+    typedef dynamic_array_fixedbuf_helper_base_base<single_fixedbuf_runtimesize_allocator<T, null_terminated> > base_t;
+    typedef typename base_t::allocator_type allocator_type;
 
 protected:
     typedef estd::allocator_traits<allocator_type> allocator_traits;
@@ -283,42 +312,12 @@ protected:
     dynamic_array_fixedbuf_runtimesize_helper_base() {}
 
     template <class TParam>
-    dynamic_array_fixedbuf_runtimesize_helper_base(TParam p) : allocator(p) {}
+    dynamic_array_fixedbuf_runtimesize_helper_base(TParam p) : base_t(p) {}
 
 public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
 
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return allocator.lock(true, pos, count);
-    }
-
-    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
-    {
-        return allocator.clock_experimental(true, pos, count);
-    }
-
-    const size_type max_size() const { return allocator.max_size(); }
-
-
-    void unlock() {}
-
-    void cunlock_experimental() const {}
-
-    size_type capacity() const { return allocator.max_size(); }
-
-    allocator_type& get_allocator() { return allocator; }
-
-    handle_with_offset offset(size_type pos)
-    {
-        return allocator.offset(true, pos);
-    }
-
-    bool allocate(size_type sz) { return sz <= capacity(); }
-    bool reallocate(size_type sz) { return sz <= capacity(); }
-
-    bool is_allocated() const { return true; }
-
+    const size_type max_size() const { return base_t::allocator.max_size(); }
 };
 
 
