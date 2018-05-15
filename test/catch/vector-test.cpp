@@ -15,6 +15,8 @@ TEST_CASE("vector tests")
 
         v.reserve(20);
 
+        REQUIRE(v.empty());
+
         auto test = v[3];
         auto& test2 = test.lock();
 
@@ -31,6 +33,7 @@ TEST_CASE("vector tests")
         REQUIRE(v.size() == 1);
         REQUIRE(v.capacity() > 5);
         REQUIRE(v[0].lock() == 5);
+        REQUIRE(!v.empty());
     }
     SECTION("Vector iterator")
     {

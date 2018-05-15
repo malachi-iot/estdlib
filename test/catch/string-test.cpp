@@ -10,6 +10,7 @@ using namespace estd;
 
 namespace std
 {
+#ifdef UNUSED
 
 template <class TChar, class TCharTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
@@ -32,9 +33,15 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 
     return os;
 }
+#else
 
+template <class TChar, class TCharTraits, class TAllocator>
+std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+{
+    return ::operator <<(os, value);
 }
-
+#endif
+}
 
 
 #include <catch.hpp>

@@ -413,6 +413,13 @@ protected:
     }
 
 public:
+    bool empty() const
+    {
+        // TODO: Optimize this with a specialized helper.empty()
+        // so that we don't always count up to strlen() every time
+        return helper.size() == 0;
+    }
+
     void pop_back()
     {
         // decrement the end of the array
