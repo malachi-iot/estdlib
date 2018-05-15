@@ -480,10 +480,14 @@ inline std::basic_ostream<CharT, Traits>&
 }
 
 
+// FIX: Temporarily using this, but really managing interaction between two sets
+// of traits is a better way to go, ala:
+// template <class CharT, class Traits, class Allocator,
+//  class OStreamTraits = std::char_traits<remove_const<Traits::char_type>>>
 template <class CharT, class Traits, class Allocator>
 inline std::ostream&
     operator<<(std::ostream& os,
-               const estd::basic_string<CharT, Traits, Allocator>& str)
+               const estd::basic_string<const CharT, Traits, Allocator>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
