@@ -98,7 +98,7 @@ class accessor_stateful_base
 {
 public:
     typedef TAllocator allocator_type;
-    typedef allocator_traits<TAllocator> allocator_traits;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
@@ -125,7 +125,7 @@ class accessor_stateless_base
 {
 public:
     typedef TAllocator allocator_type;
-    typedef allocator_traits<TAllocator> allocator_traits;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 

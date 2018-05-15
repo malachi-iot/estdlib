@@ -450,8 +450,8 @@ public:
     // without an allocator pointer, stateful or otherwise
     typedef typename std::conditional<
                 allocator_traits::is_stateful() && allocator_traits::is_locking(),
-                accessor<allocator_type>,
-                accessor_stateless<allocator_type> >::type
+                estd::internal::accessor<allocator_type>,
+                estd::internal::accessor_stateless<allocator_type> >::type
                 accessor;
 
     class iterator
