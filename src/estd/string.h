@@ -518,7 +518,8 @@ class basic_string
 public:
     basic_string(const CharT* str_buffer) : base_t(str_buffer)
     {
-
+        // TODO: optimize this explicit strlen out
+        //base_t::assign(str_buffer, strlen(str_buffer));
     }
 
     /*
@@ -596,11 +597,6 @@ public:
     {
         base_t::operator =(copy_from);
         return *this;
-    }
-
-    size_type max_size() const
-    {
-        return base_t::helper.max_size();
     }
 };
 

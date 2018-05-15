@@ -234,6 +234,8 @@ public:
 
     size_type capacity() const { return allocator.max_size(); }
 
+    size_type max_size() const { return allocator.max_size(); }
+
     allocator_type& get_allocator() { return allocator; }
 
     handle_with_offset offset(size_type pos)

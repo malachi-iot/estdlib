@@ -597,6 +597,11 @@ public:
         // data in accessor itself
         return accessor(get_allocator(), offset(pos));
     }
+
+    size_type max_size() const
+    {
+        return helper.max_size();
+    }
 };
 
 

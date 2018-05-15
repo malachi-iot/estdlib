@@ -99,11 +99,14 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == "hello");
     }
+    // deactivated because string construction for layer2 is still a bit funky
+    // and depends on dynamic_array_helper.  dynamic_array_helper code needs a
+    // cleanup, so do that first, then fix this
 #ifdef UNUSED
     SECTION("layer 2 null terminated")
     {
         char buf[128];
-        experimental::layer2::basic_string<char, 4> str("val");
+        layer2::basic_string<char, 4> str("val");
 
         str.copy(buf, 128);
 
@@ -116,7 +119,7 @@ TEST_CASE("string tests")
         // only viable in C++11 right now, due to N == 0 behavior
         // probably should make a distinct base class 'unbounded' basic_string
         // but I kind of like the conveinience of N == 0 behavior
-        experimental::layer2::basic_string<char> str2 = str;
+        layer2::basic_string<char, 0> str2 = str;
 
         REQUIRE(str2.size() == 3);
         REQUIRE(str == str2);
@@ -190,6 +193,7 @@ TEST_CASE("string tests")
 
         REQUIRE(strcmp(buf, "hello") == 0);
     }
+    // see 'layer 2 null terminated' section for comments
 #ifdef UNUSED
     SECTION("layer2 -> layer3 promotion")
     {
