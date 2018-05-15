@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: consider utilizing
+// http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
+// http://en.cppreference.com/w/cpp/experimental
 #if __cplusplus >= 201103L
 #define FEATURE_CPP_ALIASTEMPLATE
 #define FEATURE_CPP_CONSTEXPR
@@ -30,4 +33,11 @@
 #define OVERRIDE
 #define CONSTEXPR const
 #define NULLPTR NULL
+#endif
+
+// TODO: Identify a better way to identify presence of C++ iostreams
+#if __ADSPBLACKFIN__ || defined(__unix__) || defined(_MSC_VER) || (defined (__APPLE__) && defined (__MACH__))
+#ifndef FEATURE_ESTD_IOSTREAM       // this one will eventually be our estd::ostream
+#define FEATURE_ESTD_IOSTREAM_NATIVE
+#endif
 #endif

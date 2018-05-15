@@ -5,6 +5,10 @@
 #include "allocators/fixed.h"
 #include <algorithm> // for std::min
 
+#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+#include <ostream>
+#endif
+
 namespace estd {
 
 /*
@@ -25,6 +29,24 @@ template<> struct char_traits<const char>
     typedef char nonconst_char_type;
 }; */
 
+// prototype
+template<
+    class CharT,
+    class Traits,
+    class Allocator
+> class basic_string;
+
+}
+
+#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+template <class CharT, class Traits, class Allocator>
+std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& os,
+               const estd::basic_string<CharT, Traits, Allocator>& str);
+#endif
+
+namespace estd {
+
 // TODO: Determine how to organize different string implementations
 // a) wrapper around standard C null terminated variety
 // b) wrapper around pascal-style length tracking variety (which we'll also combine with dynamic allocation)
@@ -40,6 +62,11 @@ template<
 {
     typedef internal::dynamic_array<Allocator> base_t;
     typedef basic_string<CharT, Traits, Allocator> this_t;
+
+#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+    friend std::basic_ostream<CharT, Traits>&  ::operator<<(std::basic_ostream<CharT, Traits>& os,
+                      const estd::basic_string<CharT, Traits, Allocator>& str);
+#endif
 
 public:
     typedef typename base_t::size_type size_type;
@@ -606,3 +633,20 @@ bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,
 
 
 }
+
+#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+template <class CharT, class Traits, class Allocator>
+inline std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& os,
+               const estd::basic_string<CharT, Traits, Allocator>& str)
+{
+    // TODO: Do query for null terminated vs non null terminated so that
+    // this might be more efficient
+    os.write(str.fake_const_lock(), str.size());
+
+    str.fake_const_unlock();
+
+    return os;
+}
+#endif
+
