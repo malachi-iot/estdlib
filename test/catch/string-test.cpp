@@ -36,7 +36,8 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 #else
 
 template <class TChar, class TCharTraits, class TAllocator>
-std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+std::basic_ostream<TChar, TCharTraits>& operator <<( std::basic_ostream<TChar, TCharTraits>& os,
+                                                     estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
 {
     return ::operator <<(os, value);
 }
@@ -115,18 +116,13 @@ TEST_CASE("string tests")
         REQUIRE(str.size() == 3);
         REQUIRE(str.max_size() == 3);
 
-#ifdef UNUSED
-        // only viable in C++11 right now, due to N == 0 behavior
-        // probably should make a distinct base class 'unbounded' basic_string
-        // but I kind of like the conveinience of N == 0 behavior
-        layer2::basic_string<char, 0> str2 = str;
+        layer2::basic_string<const char, 0> str2 = str;
 
         REQUIRE(str2.size() == 3);
         REQUIRE(str == str2);
         REQUIRE(str == "val");
 
         //experimental::layer2::string<> str3 = str;
-#endif
     }
     SECTION("layer 3 null terminated")
     {
@@ -194,20 +190,27 @@ TEST_CASE("string tests")
         REQUIRE(strcmp(buf, "hello") == 0);
     }
     // see 'layer 2 null terminated' section for comments
-#ifdef UNUSED
     SECTION("layer2 -> layer3 promotion")
     {
-        experimental::layer2::basic_string<char, 10> val = "hello";
-        experimental::layer3::basic_string<char> val2 = val;
+        layer2::basic_string<const char, 10> val = "hello";
+        layer3::basic_string<const char> val2 = val;
+        layer1::string<128> val3;
 
         int sz1 = sizeof(val);
         int sz2 = sizeof(val2);
 
+        REQUIRE(sz1 == sizeof(char*));
+        REQUIRE(sz2 == sizeof(char*) + sizeof(size_t));
+
         char buf[128];
 
         buf[val2.copy(buf, 128)] = 0;
+
+        val3 = val;
+
+        REQUIRE(val3 == "hello");
+        REQUIRE(val3 == buf);
     }
-#endif
     SECTION("layer3 null terminated")
     {
         char buf[128];
@@ -299,8 +302,7 @@ TEST_CASE("string tests")
         // because it is too const'd up
         const layer2::basic_string<const char, 0> s = "Hello World";
 
-        // specializations keep const char* from being 'initialized' with a leading null termination
-        layer2::basic_string<char, 0, true, std::char_traits<char>, const char*> s2 = "Hello World";
+        layer2::basic_string<const char, 0> s2 = "Hello World";
         layer2::const_string s3 = "Hello World, again";
 
         char buf[128];
@@ -339,5 +341,15 @@ TEST_CASE("string tests")
             INFO("i = " << i);
             REQUIRE(s[i++] == c);
         }
+    }
+    SECTION("layer3 copy constructor")
+    {
+        layer2::basic_string<const char, 0> s = "Hello, World";
+        layer3::basic_string<const char> s2 = s;
+
+        // works, though underlying buffer_size is max-value
+        // cause of N=0 above.  Tolerable, but I'd prefer it
+        // to deduce the size from strlen in this case
+        REQUIRE(s2 == "Hello, World");
     }
 }

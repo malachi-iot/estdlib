@@ -208,8 +208,9 @@ public:
     }
 
 
-    template <class ForeignAllocator>
-    basic_string& operator=(const basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    // using foreignchar and foreigntraits primarily to interact with const char
+    template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
+    basic_string& operator=(const basic_string<ForeignCharT, ForeignTraitsT, ForeignAllocator>& copy_from)
     {
         base_t::reserve(copy_from.size());
         base_t::helper.size(copy_from.size());
@@ -461,8 +462,9 @@ public:
         base_t::operator =(s);
     }
 
-    template <class ForeignAllocator>
-    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    // using ForeignCharT and ForeignTraits because incoming string might use const char
+    template <class ForeignCharT, class ForeignTraits, class ForeignAllocator>
+    basic_string& operator=(const estd::basic_string<ForeignCharT, ForeignTraits, ForeignAllocator>& copy_from)
     {
         base_t::operator =(copy_from);
         return *this;
@@ -514,13 +516,14 @@ public:
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
     }
 
-    /*
-     * Something seems to go wrong with allocator initialization on this one
     template <class ForeignAllocator>
-    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from) : base_t(copy_from)
+    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from)
+        // FIX: very bad -- don't leave things locked!
+        // only doing this because we often pass around layer1, layer2, layer3 strings who
+        // don't care about lock/unlock
+        : base_t(copy_from.fake_const_lock())
     {
-
-    } */
+    }
 
     template <class ForeignAllocator>
     basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
@@ -532,11 +535,11 @@ public:
 
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template <size_t N = 0>
-using string = basic_string<char, N>;
+template <size_t N = 0, bool null_terminated = true>
+using string = basic_string<char, N, null_terminated>;
 #endif
 
-typedef basic_string<char, 0, true, std::char_traits<char>, const char*> const_string;
+typedef basic_string<const char, 0> const_string;
 
 
 }
@@ -557,6 +560,7 @@ class basic_string
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
     typedef typename base_t::size_type size_type;
+    typedef typename allocator_type::InitParam init_t;
 
 public:
     template <size_type N>
@@ -571,6 +575,31 @@ public:
     {
         base_t::helper.size(initial_size);
     }
+
+    template <class ForeignAllocator>
+    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from)
+        // FIX: very bad -- don't leave things locked!
+        // only doing this because we often pass around layer1, layer2, layer3 strings who
+        // don't care about lock/unlock
+        : base_t(init_t(copy_from.fake_const_lock(), copy_from.max_size()))
+    {
+#ifdef FEATURE_CPP_STATIC_ASSERT
+        static_assert(helper_type::uses_termination(), "Only supports null terminated at this time");
+#endif
+
+        // can't do following right now since compiler still tries to compile null
+        // terminated flavor for this, which will fail when using const char
+        /*
+        // If null terminated, don't set size as
+        // a) it's already set in the incoming buffer
+        // b) we'd be modifying original buffer - though in theory just rewriting
+        //    0 back onto the existing 0
+        if(!helper_type::uses_termination())
+        {
+            base_t::helper.size(copy_from.size());
+        } */
+    }
+
 
     template <class ForeignAllocator>
     basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
@@ -592,13 +621,21 @@ template <class CharT, class Traits, class Alloc>
 bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc>& rhs)
 {
     return rhs.compare(lhs) == 0;
-};
+}
 
 template <class CharT, class Traits, class Alloc>
 bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
 {
     return lhs.compare(rhs) == 0;
-};
+}
+
+// NOTE: Not sure why we need this particular one
+template <class CharT, class Traits, class Alloc>
+bool operator ==( const basic_string<const CharT, Traits, Alloc>& lhs, const CharT* rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
 
 template <class CharT, class Traits, class AllocLeft, class AllocRight>
 bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,

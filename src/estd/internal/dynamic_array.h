@@ -349,7 +349,7 @@ public:
     dynamic_array() {}
 
     template <class THelperParam>
-    dynamic_array(THelperParam& p) :
+    dynamic_array(const THelperParam& p) :
             helper(p) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
