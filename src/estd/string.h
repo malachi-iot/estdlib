@@ -101,7 +101,8 @@ public:
         return *this;
     }
 
-    size_type copy(value_type* dest, size_type count, size_type pos = 0) const
+    size_type copy(typename estd::remove_const<value_type>::type* dest,
+                   size_type count, size_type pos = 0) const
     {
         const value_type* src = base_t::fake_const_lock();
 

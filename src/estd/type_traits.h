@@ -51,4 +51,21 @@ template< bool B, class T = void >
 class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
+
+template<class T> struct is_const          : std::false_type {};
+template<class T> struct is_const<const T> : std::true_type {};
+
+
+template< class T > struct remove_const          { typedef T type; };
+template< class T > struct remove_const<const T> { typedef T type; };
+
+template< class T > struct remove_volatile             { typedef T type; };
+template< class T > struct remove_volatile<volatile T> { typedef T type; };
+
+template< class T >
+struct remove_cv {
+    typedef typename estd::remove_volatile<typename std::remove_const<T>::type>::type type;
+};
+
+
 }
