@@ -11,14 +11,14 @@ namespace internal {
 
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
-template <class T, class TBuffer>
+template <class T, class TBuffer, typename TSize = std::size_t>
 struct single_allocator_base
 {
     typedef const void* const_void_pointer;
     // really I want it an empty struct.  Bool is somewhat convenient though since we can
     // represent an invalid handle too
     typedef bool handle_type;
-    typedef std::size_t size_type;
+    typedef TSize size_type;
     typedef handle_type handle_with_size;
     //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
@@ -30,6 +30,7 @@ protected:
 
     TBuffer buffer;
 
+    // for inline buffers, we want the option of leaving it untouched
     single_allocator_base() {}
 
     single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
@@ -40,6 +41,8 @@ public:
     // technically we ARE locking since we have to convert the dummy 'bool' handle
     // to a pointer
     static CONSTEXPR bool is_locking() { return true; }
+
+    static CONSTEXPR bool is_stateful() { return true; }
 
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)
@@ -133,8 +136,8 @@ public:
 // runtime (but otherwise constant) size()
 // runtime (but otherwise constant) buffer*
 // as before, null_terminated is merely a clue/trait for consumer class
-template <class T, bool null_terminated = false>
-class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*>
+template <class T, bool null_terminated = false, class TSize = std::size_t>
+class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, size_t>
 {
 public:
     typedef single_allocator_base<T, T*> base_t;

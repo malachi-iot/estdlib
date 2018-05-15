@@ -122,7 +122,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
         char buf2[128] = "val";
-        layer3::basic_string<char> str(buf2);
+        layer3::basic_string<char> str(3, buf2);
 
         str.copy(buf, 128);
 
@@ -201,9 +201,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
 
-        buf[0] = 0;
-
-        layer3::basic_string<char> s(buf);
+        layer3::basic_string<char> s(0, buf);
 
         REQUIRE(s.size() == 0);
 
@@ -216,7 +214,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
 
-        layer3::basic_string<char, false> s(buf);
+        layer3::basic_string<char, false> s(0, buf);
 
         REQUIRE(s.size() == 0);
 
@@ -254,7 +252,7 @@ TEST_CASE("string tests")
         s1 = "Hello";
 
         layer2::string<> s2(buf2);
-        layer3::string s3(buf3);
+        layer3::string s3(0, buf3);
 
         s2 = s1;
 

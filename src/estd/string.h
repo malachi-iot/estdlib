@@ -471,6 +471,7 @@ using string = basic_string<char, N>;
 }
 
 
+// TODO: refactor layer2 & layer3 to utilize a handle and not a CharT*
 namespace layer2 {
 
 template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>, class PCharT = CharT* >
@@ -551,15 +552,17 @@ class basic_string
 
 public:
     template <size_type N>
-    basic_string(CharT (&buffer) [N]) :
+    basic_string(size_type initial_size, CharT (&buffer) [N]) :
         base_t(typename allocator_type::InitParam(buffer, N))
     {
-
+        base_t::helper.size(initial_size);
     }
 
-    basic_string(CharT* buffer, size_type buffer_size) :
-        base_t(typename allocator_type::InitParam(buffer, buffer_size)) {}
-
+    basic_string(size_type initial_size, CharT* buffer, size_type buffer_size) :
+        base_t(typename allocator_type::InitParam(buffer, buffer_size))
+    {
+        base_t::helper.size(initial_size);
+    }
 
     template <class ForeignAllocator>
     basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
@@ -575,6 +578,7 @@ public:
 };
 
 
+// defaults to null-terminated variety
 typedef basic_string<char> string;
 
 
