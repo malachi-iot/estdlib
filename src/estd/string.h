@@ -466,6 +466,9 @@ bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,
 
 }
 
+
+#include "internal/to_string.h"
+
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 template <class CharT, class Traits, class Allocator>
 inline std::basic_ostream<CharT, Traits>&

@@ -15,6 +15,7 @@ set(SOURCE_FILES
         estd/iterator.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/to_string.h
         estd/iterators/list.h
         estd/list.h
         estd/map.h

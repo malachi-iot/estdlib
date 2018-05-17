@@ -374,4 +374,16 @@ TEST_CASE("string tests")
 
         REQUIRE(s == "test");
     }
+    SECTION("to_string int")
+    {
+        char buf[128];
+        layer2::string<> s(buf);
+
+        REQUIRE(s.size() == 0);
+
+        s += "The value is ";
+        s += to_string(123);
+
+        REQUIRE(s == "The value is 123");
+    }
 }

@@ -259,6 +259,9 @@ protected:
         return helper.offset(pos);
     }
 
+public:
+    // Always try to avoid explicit locking and unlocking ... but sometimes
+    // you gotta do it, so these are public
     value_type* lock(size_type pos = 0, size_type count = 0)
     {
 #ifdef FEATURE_ESTD_LOCK_COUNTER
@@ -267,20 +270,21 @@ protected:
         return &helper.lock(pos, count);
     }
 
-    const value_type* clock_experimental(size_type pos = 0, size_type count = 0)
-    {
-#ifdef FEATURE_ESTD_LOCK_COUNTER
-        lock_counter++;
-#endif
-        return &helper.clock_experimental(pos, count);
-    }
-
     void unlock()
     {
 #ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter--;
 #endif
         helper.unlock();
+    }
+
+protected:
+    const value_type* clock_experimental(size_type pos = 0, size_type count = 0)
+    {
+#ifdef FEATURE_ESTD_LOCK_COUNTER
+        lock_counter++;
+#endif
+        return &helper.clock_experimental(pos, count);
     }
 
 
