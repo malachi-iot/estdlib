@@ -64,8 +64,10 @@ template<
     typedef basic_string<CharT, Traits, Allocator> this_t;
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-    friend std::basic_ostream<CharT, Traits>&  ::operator<<(std::basic_ostream<CharT, Traits>& os,
-                      const estd::basic_string<CharT, Traits, Allocator>& str);
+    template <class TChar2, class TTraits2>
+    friend std::basic_ostream<TChar2, TTraits2>&  ::operator<<(
+            std::basic_ostream<TChar2, TTraits2>& os,
+            const estd::basic_string<CharT, Traits, Allocator>& str);
 #endif
 
 public:
