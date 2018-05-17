@@ -184,14 +184,14 @@ public:
         return *i;
     }
 
-#ifdef FEATURE_CPP_VARIADIC
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     // Compiles but untested
     template <class ...TArgs>
-    reference emplace_front(TArgs...args)
+    reference emplace_front(TArgs&&...args)
     {
         value_type& retval = *m_front;
 
-        new (&retval) value_type(args...);
+        new (&retval) value_type(std::forward<TArgs>(args)...);
 
         increment(&m_front);
 
@@ -200,11 +200,11 @@ public:
 
     // Compiles but untested
     template <class ...TArgs>
-    reference emplace_back(TArgs...args)
+    reference emplace_back(TArgs&&...args)
     {
         value_type& retval = *m_back;
 
-        new (&retval) value_type(args...);
+        new (&retval) value_type(std::forward<TArgs>(args)...);
 
         increment(&m_back);
 
