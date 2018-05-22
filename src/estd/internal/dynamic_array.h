@@ -363,6 +363,8 @@ public:
 
         std::copy(initlist.begin(), initlist.end(), p);
 
+        helper.size(initlist.size());
+
         unlock();
     }
 #endif

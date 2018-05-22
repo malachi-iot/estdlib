@@ -182,4 +182,25 @@ TEST_CASE("vector tests")
             REQUIRE(v.begin() == begin);
         }
     }
+    SECTION("std::make_heap interaction")
+    {
+        // recreating what is seen
+        // http://en.cppreference.com/w/cpp/algorithm/make_heap
+        layer1::vector<int, 10> v { 3, 1, 4, 1, 5, 9 };
+
+        REQUIRE(v.size() == 6);
+
+        typedef layer1::vector<int, 10>::iterator iterator;
+
+        std::make_heap(v.begin(), v.end());
+
+        iterator it = v.begin();
+
+        REQUIRE(*it++ == 9);
+        REQUIRE(*it++ == 5);
+        REQUIRE(*it++ == 4);
+        REQUIRE(*it++ == 1);
+        REQUIRE(*it++ == 1);
+        REQUIRE(*it++ == 3);
+    }
 }
