@@ -151,6 +151,16 @@ struct ForwardIterator : public TBase
         operator++();
         return temp;
     }
+
+    // untested
+    ForwardIterator operator +(int summand)
+    {
+        ForwardIterator temp(*this);
+
+        while(summand--) ++temp();
+
+        return temp;
+    }
 };
 
 
@@ -189,6 +199,30 @@ public:
         ReverseIterator temp(*this);
         operator --();
         return temp;
+    }
+
+    // untested
+    ReverseIterator operator -(int subtrahend)
+    {
+        ReverseIterator temp(*this);
+
+        while(subtrahend--) --temp();
+
+        return temp;
+    }
+
+    // untested
+    int operator -(ReverseIterator subtrahend)
+    {
+        int counter = 0;
+
+        while(subtrahend != *this)
+        {
+            counter++;
+            ++subtrahend;
+        }
+
+        return counter;
     }
 };
 
