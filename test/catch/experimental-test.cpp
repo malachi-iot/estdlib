@@ -46,4 +46,21 @@ TEST_CASE("experimental tests")
 
         a.deallocate(val, 1);
     }
+    SECTION("bitness size_t deducer")
+    {
+        SECTION("8-bit")
+        {
+            typedef estd::internal::deduce_fixed_size_t<10> deducer_t;
+            REQUIRE(sizeof(deducer_t::size_type) == 1);
+        }
+        {
+            typedef estd::internal::deduce_fixed_size_t<100> deducer_t;
+            REQUIRE(sizeof(deducer_t::size_type) == 1);
+        }
+        SECTION("16-bit")
+        {
+            typedef estd::internal::deduce_fixed_size_t<1000> deducer_t;
+            REQUIRE(sizeof(deducer_t::size_type) == 2);
+        }
+    }
 }

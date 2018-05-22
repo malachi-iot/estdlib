@@ -85,7 +85,11 @@ public:
 // null_terminated flag mainly serves as a trait/clue to specializations
 // len can == 0 in which case we're in unbounded mode
 template <class T, size_t len, bool null_terminated = false, class TBuffer = T[len]>
-struct single_fixedbuf_allocator : public single_allocator_base<T, TBuffer>
+struct single_fixedbuf_allocator : public
+        single_allocator_base<
+                T,
+                TBuffer> //,
+                //internal::deduce_fixed_size_t<len>::size_type>
 {
     typedef single_allocator_base<T, TBuffer> base_t;
 
