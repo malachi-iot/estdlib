@@ -16,6 +16,15 @@ struct less
     }
 };
 
+template <class T>
+struct greater
+{
+    CONSTEXPR bool operator()(const T& lhs, const T& rhs) const
+    {
+        return lhs > rhs;
+    }
+};
+
 /*
 #else
 template< class T = void >

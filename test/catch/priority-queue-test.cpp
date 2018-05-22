@@ -57,4 +57,18 @@ TEST_CASE("priority-queue-test")
 
         REQUIRE(pq.top() == 7);
     }
+    SECTION("priority queue, reverse sort")
+    {
+        estd::layer1::priority_queue<int, 10, estd::greater<int> > pq;
+
+        pq.push(5);
+        pq.push(3);
+        pq.push(8);
+
+        REQUIRE(pq.top() == 3);
+
+        pq.pop();
+
+        REQUIRE(pq.top() == 5);
+    }
 }
