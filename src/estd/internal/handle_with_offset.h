@@ -4,20 +4,60 @@
 
 namespace estd { namespace internal {
 
-template<class TDummyHandle, typename size_t = std::size_t>
-class handle_with_only_offset
+// beware this will permit different handles themselves to do math operations
+// on each other.  Obviously undefined, but it seems no more dangerous than
+// stock standard iterator math
+template <typename size_t>
+class handle_with_offset_base
 {
+protected:
     size_t m_offset;
+
+    handle_with_offset_base(size_t m_offset) :
+            m_offset(m_offset) {}
 
 public:
     typedef size_t size_type;
 
-    handle_with_only_offset(size_t offset) : m_offset(offset) {}
+    // TODO: Make allocator version which does bounds checking
+    // TODO: phase out increment if we can in favor of += operator
+    void increment(size_type count = 1)
+    {
+        m_offset += count;
+    }
+
+    inline handle_with_offset_base& operator+=(size_type summand)
+    {
+        m_offset += summand;
+        return *this;
+    }
+
+    inline handle_with_offset_base& operator-=(size_type subtrahend)
+    {
+        m_offset -= subtrahend;
+        return *this;
+    }
+
+    ptrdiff_t operator-(const handle_with_offset_base& subtrahend) const
+    {
+        return m_offset - subtrahend.m_offset;
+    }
+};
+
+template<class TDummyHandle, typename size_t = std::size_t>
+class handle_with_only_offset :
+        public handle_with_offset_base<size_t>
+{
+    typedef handle_with_offset_base<size_t> base_t;
+
+public:
+    handle_with_only_offset(size_t offset) :
+            base_t(offset) {}
 
     handle_with_only_offset(TDummyHandle h, size_t offset) :
-            m_offset(offset) {}
+            base_t(offset) {}
 
-    size_t offset() const { return m_offset; }
+    size_t offset() const { return base_t::m_offset; }
 
     TDummyHandle handle()
     {
@@ -31,38 +71,29 @@ public:
         return offset() == compare_to.offset();
     }
 
-    // TODO: Make allocator version which does bounds checking
-    void increment(size_type count = 1)
-    {
-        m_offset += count;
-    }
 };
 
 
 template<class THandle, typename size_type = std::size_t>
-class handle_with_offset
+class handle_with_offset :
+        public handle_with_offset_base<size_type>
 {
+    typedef handle_with_offset_base<size_type> base_t;
+
     THandle m_handle;
-    size_type m_offset;
 
 public:
     handle_with_offset(THandle h, size_type offset) :
             m_handle(h),
-            m_offset(offset) {}
+            base_t(offset) {}
 
-    std::ptrdiff_t offset() const { return m_offset; }
+    std::ptrdiff_t offset() const { return base_t::m_offset; }
 
     THandle handle() const { return m_handle; }
 
     bool operator==(const handle_with_offset& compare_to) const
     {
         return m_handle == compare_to.m_handle && offset() == compare_to.offset();
-    }
-
-    // TODO: Make allocator version which does bounds checking
-    void increment(size_type count = 1)
-    {
-        m_offset += count;
     }
 };
 

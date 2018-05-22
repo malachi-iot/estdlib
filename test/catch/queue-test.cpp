@@ -80,6 +80,14 @@ TEST_CASE("queue-test")
     SECTION("std Priority queue")
     {
         // almost, but iterator needs a subtraction (-) operator
-        //std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
+        std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
+
+        pq.push(5);
+        pq.push(3);
+        pq.push(8);
+
+        REQUIRE(!pq.empty());
+
+        //REQUIRE(pq.top() == 3);
     }
 }

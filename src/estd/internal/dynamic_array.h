@@ -604,6 +604,29 @@ public:
             return temp;
         }
 
+        ptrdiff_t operator-(const iterator& subtrahend) const
+        {
+            return current.h_exp() - subtrahend.current.h_exp();
+        }
+
+        inline iterator operator+(ptrdiff_t offset)
+        {
+            iterator it(*this);
+
+            it.current.h_exp() += offset;
+
+            return it;
+        }
+
+        inline iterator operator-(ptrdiff_t offset)
+        {
+            iterator it(*this);
+
+            it.current.h_exp() -= offset;
+
+            return it;
+        }
+
         bool operator==(const iterator& compare_to) const
         {
             return current.h_exp() == compare_to.current.h_exp();
