@@ -256,14 +256,14 @@ struct inlinevalue_node_traits_new_base :
 
 #ifdef FEATURE_CPP_VARIADIC
     template <class... TArgs>
-    node_handle alloc_emplace(TArgs...args)
+    node_handle alloc_emplace(TArgs&&...args)
     {
         node_handle h = base_t::allocate_node();
 
         node_type& n = base_t::lock_node(h);
 
         // TODO: use allocator_traits construct
-        new (&n) node_type(args...);
+        new (&n) node_type(std::forward<TArgs>(args)...);
 
         base_t::unlock_node(h);
 
@@ -339,6 +339,13 @@ struct intrusive_node_traits_new_base :
         // Mostly safe to forward cast from intrusive node, typical type of cast operation
         // for using linked list libs
         return static_cast<node_handle>(node.next());
+    }
+
+    node_handle prev(node_type& node) const
+    {
+        // Mostly safe to forward cast from intrusive node, typical type of cast operation
+        // for using linked list libs
+        return static_cast<node_handle>(node.prev());
     }
 
     void next(node_type &node, const node_handle& new_next)

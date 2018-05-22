@@ -95,11 +95,15 @@ public:
     node_handle_t node() const { return current; }
 };
 
-template <class TValue, class TNodeTraits>
-struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
+
+namespace internal { namespace list {
+
+// TODO: Rename or put into namespace to isolate this specifically for NODE iteration
+template <class TValue, class TNodeTraits, class TBase = InputIterator<TValue, TNodeTraits> >
+struct ForwardIterator : public TBase
 {
     typedef TNodeTraits traits_t;
-    typedef InputIterator<TValue, TNodeTraits> base_t;
+    typedef TBase base_t;
     typedef typename base_t::node_type   node_type;
     typedef typename base_t::value_type  value_type;
     typedef typename base_t::node_pointer node_pointer;
@@ -149,5 +153,65 @@ struct ForwardIterator : public InputIterator<TValue, TNodeTraits>
     }
 };
 
+
+// TODO: Rename or put into namespace to isolate this specifically for NODE iteration
+template <class TValue, class TNodeTraits, class TBase>
+struct ReverseIterator : public TBase
+{
+    typedef TBase base_t;
+    typedef TNodeTraits traits_t;
+    typedef typename base_t::node_type   node_type;
+    typedef typename base_t::value_type  value_type;
+    typedef typename base_t::node_pointer node_pointer;
+    typedef typename base_t::node_handle_t node_handle_t;
+    typedef typename base_t::node_allocator_t node_alloc_t;
+    typedef ReverseIterator<TValue, TNodeTraits, TBase> iterator;
+
+public:
+    ReverseIterator(node_handle_t node, const traits_t& t) :
+            base_t(node, t)
+    {
+    }
+
+    ReverseIterator operator--()
+    {
+        node_type& c = base_t::lock_internal();
+
+        this->current = base_t::traits.prev(c);
+
+        base_t::unlock_internal();
+
+        return *this;
+    }
+
+    ReverseIterator operator--(int)
+    {
+        ReverseIterator temp(*this);
+        operator --();
+        return temp;
+    }
+};
+
+
+template <class TValue, class TNodeTraits, class TBase = InputIterator<TValue, TNodeTraits> >
+struct BidirectionalIterator :
+        public ReverseIterator<
+            TValue,
+            TNodeTraits,
+            ForwardIterator<TValue, TNodeTraits, TBase> >
+{
+    typedef ReverseIterator<TValue, TNodeTraits, ForwardIterator<TValue, TNodeTraits> > base_t;
+    typedef TNodeTraits traits_t;
+    typedef typename base_t::node_type   node_type;
+    typedef typename base_t::value_type  value_type;
+    typedef typename base_t::node_pointer node_pointer;
+    typedef typename base_t::node_handle_t node_handle_t;
+    typedef typename base_t::node_allocator_t node_alloc_t;
+
+    BidirectionalIterator(node_handle_t node, const traits_t& t) :
+        base_t(node, t) {}
+};
+
+}}
 
 }

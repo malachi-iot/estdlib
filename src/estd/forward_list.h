@@ -2,7 +2,8 @@
 
 #include "../platform.h"
 #include "memory.h"
-#include "traits/node_list.h"
+#include "traits/list_node.h"
+#include "internal/list_node.h"
 #include "iterators/list.h"
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
@@ -10,97 +11,6 @@
 #endif
 
 namespace estd {
-
-namespace experimental {
-
-// Make list and forward list conform to, but not necessarily depend on, these
-// signatures (C++ concepts would be nice here)
-// TODO: fixup these names and move them out of experimental.  Remember, although
-// all our node_traits and friends expect these signatures, you could roll your
-// own node traits and use different signatures along the way
-
-// TNode might be a handle instead of a direct pointer.  Perhaps our own kind of
-// "fancy pointer"
-template <class TNode>
-class forward_node_base_base
-{
-protected:
-
-    TNode m_next;
-
-    forward_node_base_base(TNode initial_value) : m_next(initial_value) {}
-
-public:
-    typedef TNode node_t;
-
-    node_t next() const { return m_next; }
-
-    void next(node_t set_to) { m_next = set_to; }
-};
-
-class forward_node_base : public forward_node_base_base<forward_node_base*>
-{
-protected:
-    typedef forward_node_base_base<forward_node_base*> base_t;
-
-public:
-    forward_node_base() : base_t(NULLPTR) {}
-};
-
-class reverse_node_base
-{
-    reverse_node_base* m_prev;
-
-public:
-    reverse_node_base() : m_prev(NULLPTR) {}
-
-    reverse_node_base* prev() const { return m_prev; }
-
-    void prev(reverse_node_base* set_to) { m_prev = set_to; }
-};
-
-
-class double_node_base :
-        public forward_node_base,
-        public reverse_node_base
-{};
-
-template<class T>
-class forward_node :
-        public forward_node_base {
-    T m_value;
-
-public:
-    T& value() { return m_value; }
-
-    const T& value() const { return m_value; }
-
-    forward_node<T> *next() const {
-        return (forward_node<T> *) forward_node_base::next();
-    }
-
-    void next(forward_node<T> *set_to) {
-        forward_node_base::next(set_to);
-    }
-
-    bool operator==(const forward_node& compare_to) const
-    {
-        return m_value == compare_to.value();
-    }
-};
-
-template<class T>
-class double_node :
-        public forward_node_base,
-        public reverse_node_base {
-    T m_value;
-
-public:
-    T &value() { return m_value; }
-};
-
-
-}
 
 
 // ugly one to try to get inline value working
@@ -117,20 +27,9 @@ class node_traits<experimental::ValueNode<TValue, experimental::forward_node_bas
 };
 
 
-
-/*
-template <class TNode, class TValue, class TAllocator>
-struct node_value_traits_experimental<
-        typename smart_node_alloc<TNode, TAllocator>::template RefNode<TValue>, TValue>
-{
-
-    //const TValue& value()
-};
-*/
-
 namespace internal
 {
-template<class T, class TNodeTraits, class TIterator = ForwardIterator<T, TNodeTraits> >
+template<class T, class TNodeTraits, class TIterator>
 class linkedlist_base
 {
 public:
@@ -187,6 +86,17 @@ protected:
         return n;
     }
 
+    node_handle prev(node_handle from)
+    {
+        node_type& f = alloc_lock(from);
+
+        node_handle n = traits.prev(f);
+
+        alloc_unlock(from);
+
+        return n;
+    }
+
 public:
     bool empty() const { return m_front == after_end_node(); }
 
@@ -218,14 +128,14 @@ public:
 template<class T, class TNode = T,
          class TNodeAllocator = experimental_std_allocator<TNode>,
          class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
-class forward_list : public internal::linkedlist_base<T, TNodeTraits>
+class forward_list : public internal::linkedlist_base<T, TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> >
 {
 public:
-    typedef internal::linkedlist_base<T, TNodeTraits> base_t;
+    typedef internal::linkedlist_base<T, TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> > base_t;
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
-    typedef ForwardIterator<value_type, node_traits_t> iterator;
+    typedef typename base_t::iterator iterator;
     typedef const iterator   const_iterator;
     typedef typename base_t::node_allocator_t node_allocator_t;
     //typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;

@@ -15,6 +15,7 @@ set(SOURCE_FILES
         estd/iterator.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/list_node.h
         estd/internal/priority_queue.h
         estd/internal/to_string.h
         estd/iterators/list.h
@@ -23,7 +24,7 @@ set(SOURCE_FILES
         estd/memory.h
         estd/queue.h
         estd/string.h
-        estd/traits/node_list.h
+        estd/traits/list_node.h
         estd/traits/allocator_traits.h
         estd/type_traits.h
         estd/utility.h
