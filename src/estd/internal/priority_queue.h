@@ -30,11 +30,14 @@ class priority_queue
 protected:
     Container c;
 
+    Compare get_compare() { return Compare(); }
+
 public:
     typedef Container container_type;
     typedef typename Container::value_type value_type;
     typedef typename Container::size_type size_type;
     typedef typename container_type::accessor accessor;
+    typedef Compare value_compare;
 
     bool empty() const { return c.empty(); }
 
@@ -48,14 +51,14 @@ public:
     void push(const value_type& value)
     {
         c.push_back(value);
-        std::push_heap(c.begin(), c.end(), Compare());
+        std::push_heap(c.begin(), c.end(), get_compare());
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push(value_type&& value)
     {
         c.push_back(std::forward<value_type>(value));
-        std::push_heap(c.begin(), c.end(), Compare());
+        std::push_heap(c.begin(), c.end(), get_compare());
     }
 
     priority_queue& operator =(priority_queue&& move_from)
@@ -73,7 +76,7 @@ public:
 
     void pop()
     {
-        std::pop_heap(c.begin(), c.end(), Compare());
+        std::pop_heap(c.begin(), c.end(), get_compare());
         c.pop_back();
     }
 

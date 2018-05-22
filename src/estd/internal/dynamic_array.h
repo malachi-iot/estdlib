@@ -668,6 +668,17 @@ public:
     typedef const iterator const_iterator;
 
 
+    // untested and unoptimized
+    iterator erase(const_iterator pos)
+    {
+        size_type index = pos - begin();
+        _erase(index, 1);
+        // chances are iterator is a copy of incoming pos,
+        // but we'll do this anyway
+        return iterator(get_allocator(), offset(index));
+    }
+
+
     iterator begin()
     {
         return iterator(get_allocator(), offset(0));
