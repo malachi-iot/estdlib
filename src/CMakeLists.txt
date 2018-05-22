@@ -17,6 +17,7 @@ set(SOURCE_FILES
         estd/internal/handle_with_offset.h
         estd/internal/list_node.h
         estd/internal/priority_queue.h
+        estd/internal/reverse_list.h
         estd/internal/to_string.h
         estd/iterators/list.h
         estd/list.h

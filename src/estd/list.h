@@ -3,6 +3,7 @@
 #include "iterators/list.h"
 #include "traits/list_node.h"
 #include "forward_list.h"
+#include "internal/reverse_list.h"
 
 namespace estd {
 
@@ -11,9 +12,19 @@ namespace estd {
 template<class T, class TNode = T,
          class TAllocator = experimental_std_allocator<TNode>,
          class TNodeTraits = node_traits<TNode, TAllocator, nothing_allocator<T> > >
-class list : public internal::linkedlist_base<T, TNodeTraits, internal::list::BidirectionalIterator<T, TNodeTraits> >
+class list :
+        public internal::reverse_list<
+            internal::linkedlist_base<
+                T,
+                TNodeTraits,
+                internal::list::BidirectionalIterator<T, TNodeTraits> > >
 {
-    typedef internal::linkedlist_base<T, TNodeTraits, internal::list::BidirectionalIterator<T, TNodeTraits> > base_t;
+    typedef internal::reverse_list<
+                internal::linkedlist_base<
+                    T,
+                    TNodeTraits,
+                    internal::list::BidirectionalIterator<T, TNodeTraits> > > base_t;
+
     typedef typename base_t::allocator_t allocator_t;
     typedef typename base_t::value_type value_type;
     typedef value_type& reference;
@@ -22,24 +33,7 @@ class list : public internal::linkedlist_base<T, TNodeTraits, internal::list::Bi
     typedef typename base_t::iterator iterator;
     typedef typename base_t::const_iterator const_iterator;
     typedef typename base_t::node_type node_type;
-
-    node_handle m_back;
-
-    void set_back(node_handle new_back)
-    {
-        set_prev(new_back, m_back);
-
-        m_back = new_back;
-    }
-
-    void set_prev(node_handle _node, node_handle prev)
-    {
-        node_type& node = base_t::alloc_lock(_node);
-
-        base_t::traits.prev(node, prev);
-
-        base_t::alloc_unlock(_node);
-    }
+    typedef typename base_t::nv_reference nv_reference;
 
     // FIX: gonna need something better than this
     static CONSTEXPR node_handle before_beginning_node() { return base_t::after_end_node(); }
@@ -51,14 +45,14 @@ class list : public internal::linkedlist_base<T, TNodeTraits, internal::list::Bi
 
         // if we do have a back node, be sure to
         // point it at the incoming new back node
-        if(m_back != base_t::after_end_node())
-            base_t::set_next(m_back, new_back);
+        if(base_t::m_back != base_t::after_end_node())
+            base_t::set_next(base_t::m_back, new_back);
 
         // if we had no front node yet, now we do
         if(base_t::m_front == before_beginning_node())
             base_t::m_front = new_back;
 
-        set_back(new_back);
+        base_t::set_back(new_back);
     }
 
     void push_front(node_handle new_front)
@@ -69,11 +63,11 @@ class list : public internal::linkedlist_base<T, TNodeTraits, internal::list::Bi
         if(base_t::m_front != before_beginning_node())
             // m_front will only have an invalid ptr for prev, so we
             // can easily overwrite that
-            set_prev(base_t::m_front, new_front);
+            base_t::set_prev(base_t::m_front, new_front);
 
         // if we have no back node yet, now we do
-        if(m_back == base_t::after_end_node())
-            m_back = new_front;
+        if(base_t::m_back == base_t::after_end_node())
+            base_t::m_back = new_front;
 
         base_t::set_front(new_front);
     }
@@ -81,21 +75,9 @@ class list : public internal::linkedlist_base<T, TNodeTraits, internal::list::Bi
 public:
     list(allocator_t* allocator = NULLPTR) : base_t(allocator) {}
 
-    reference back()
-    {
-        reference back_value = base_t::alloc_lock(m_back);
-
-        base_t::alloc_unlock(m_back);
-
-        return back_value;
-    }
-
-
     void push_front(const T& value)
     {
-        node_handle new_front = base_t::traits.allocate(value);
-
-        push_front(new_front);
+        push_front(base_t::traits.allocate(value));
     }
 
 
@@ -111,6 +93,11 @@ public:
         node_handle new_front = base_t::traits.alloc_move(std::forward<T>(value));
 
         push_front(new_front);
+    }
+
+    void push_back(T&& value)
+    {
+        push_back(base_t::traits.alloc_move(std::forward<T>(value)));
     }
 #endif
 
@@ -145,9 +132,9 @@ public:
         // update next pointer of node before 'pos' node to now point to new node
         base_t::set_next(node_to_insert_after, new_node);
         // update prev pointer of new node to point to node just preceding 'pos'
-        set_prev(new_node, node_to_insert_after);
+        base_t::set_prev(new_node, node_to_insert_after);
         // update prev pointer of old 'pos' node to now pointer to new node
-        set_prev(node_to_insert_on, new_node);
+        base_t::set_prev(node_to_insert_on, new_node);
 
         return iterator(new_node, base_t::traits);
     }
