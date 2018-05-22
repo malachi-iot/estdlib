@@ -24,7 +24,9 @@ new buffers.
 layer4 is reserved but expected to be layer2 + virtual functions or some kind of
 indicator of dynamic memory dependency
 
-# std library implementations
+Many embedded libraries eschew dynamic allocation (ish) behaviors. estdlib takes a slightly different approach.  Static-only allocations *are fully supported and encouraged* but it isn't your only option.  See wiki for more detail
+
+# std-like library implementations
 
 ## Allocators
 
@@ -34,6 +36,10 @@ available.  This fosters smooth interaction with virtualized (handle-based)
 memory, memory pools and other highly specialized allocation scenarios.
 
 ## Arrays
+
+### estd::array
+
+Since std::array itself is actually not dynamically allocated, this one is pretty much 1:1 with the standard one.
 
 ## Lists
 
@@ -47,16 +53,27 @@ Singly-linked list adapted to handle node allocation in very specific ways.  It 
 
 It's presently being considered to map 1, 2 and 3 to layer1, layer2 and layer3 forward_lists, respectively
 
+### estd::list
+
+Doubly-linked list having the same capabilities as forward_list with its node allocation.
+
 ## Queues
 
 Circular queues are particularly useful in embedded environments, and as such layer1::deque provides exactly that.  A layer2 and layer3 variant are planned.
 
+### estd::priority_queue
+
+In theory std::priority_queue should work out of the box with the estd containers.
+However, it mysteriously does not so estd::priority_queue does work, though not
+as powerful as std::priority_queue.
+
 ## Vectors
 
-Vector is implemented quite similarly to standard library, but utilizes extra features of our allocator approach.  Eventually vectors shall be able to operate in at least
-layer1-layer3 modes
+Vector is implemented quite similarly to standard library, but utilizes extra features of our allocator approach.  Right now layer1 vectors work well.  Eventually vectors shall be able to operate in at least layer1-layer3 modes
 
 ## Maps
+
+Planned
 
 ## Strings
 
@@ -76,6 +93,12 @@ Utilizes a pointer to track its underlying buffer and a compile time constant
 to designate maximum buffer size.  Additionally, this designation may be 0
 in which case the string is unbounded, just like a classic C string.  Has
 the same memory footprint as a pointer.
+
+### estd::layer2::const_string
+
+Since layer2::basic_string maps so well to a classic C string, we have a const_string
+to assist in interacting with string literals.  As one may expect, its const nature
+limits many of its activities but still a useful construct.
 
 ### estd::layer3::basic_string
 
