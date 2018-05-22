@@ -79,15 +79,20 @@ TEST_CASE("queue-test")
     }
     SECTION("std Priority queue")
     {
-        // almost, but iterator needs a subtraction (-) operator
         std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
 
+        // compiles but doesn't quite work yet.  Our handle_with_offset goodies probably
+        // need some debugging.  Unfortunately, debugger acting strangely and no ambient
+        // variable inspection is working, making debugging prohibitively difficult here
         pq.push(5);
         pq.push(3);
         pq.push(8);
 
         REQUIRE(!pq.empty());
 
-        //REQUIRE(pq.top() == 3);
+        const int& val = pq.top();
+        //REQUIRE(val == 3); // crashes, due (probably) to a NULL exception
+        //pq.pop();
+        //REQUIRE(pq.top() == 5);
     }
 }

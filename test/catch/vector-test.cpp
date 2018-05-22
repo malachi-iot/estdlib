@@ -153,16 +153,33 @@ TEST_CASE("vector tests")
         REQUIRE(v.front() == 5);
         REQUIRE(v.back() == 5);
     }
-    SECTION("iterator subtraction")
+    SECTION("iterator math")
     {
         // In eventual support of using std::priority_queue
         estd::layer1::vector<int, 10> v;
+        typedef estd::layer1::vector<int, 10>::iterator iterator;
 
         v.push_back(1);
         v.push_back(2);
 
-        int diff = v.end() - v.begin();
+        SECTION("subtraction")
+        {
 
-        REQUIRE(diff == 2);
+            int diff = v.end() - v.begin();
+
+            REQUIRE(diff == 2);
+        }
+        SECTION("addition")
+        {
+            iterator end = v.begin() + 2;
+
+            REQUIRE(v.end() == end);
+        }
+        SECTION("subtraction again")
+        {
+            iterator begin = v.end() - 2;
+
+            REQUIRE(v.begin() == begin);
+        }
     }
 }

@@ -154,7 +154,7 @@ public:
     void size(size_type s) { m_size = s; }
     // ---
 
-    handle_with_offset offset(size_type pos)
+    handle_with_offset offset(size_type pos) const
     {
         return allocator.offset(handle, pos);
     }
@@ -254,7 +254,7 @@ protected:
 
     THelper helper;
 
-    handle_with_offset offset(size_type  pos)
+    handle_with_offset offset(size_type  pos) const
     {
         return helper.offset(pos);
     }
@@ -370,9 +370,13 @@ public:
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}
 
-    allocator_type& get_allocator()
+    allocator_type& get_allocator() const
     {
-        return helper.get_allocator();
+        // FIX: Hate this, but since we have stateful allocators flying around everywhere, even
+        // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
+        // const call (important because we need to conform to const for front, back, etc)
+        // because we need locking, side affects are to be expected
+        return const_cast<helper_type&>(helper).get_allocator();
     }
 
     // FIX: First of all , don't like forcing const
@@ -679,7 +683,7 @@ public:
         return accessor(get_allocator(), offset(pos));
     }
 
-    accessor front()
+    accessor front() const
     {
         return accessor(get_allocator(), offset(0));
     }

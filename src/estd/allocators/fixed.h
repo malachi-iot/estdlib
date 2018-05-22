@@ -67,7 +67,7 @@ public:
 
     void unlock(handle_type h) {}
 
-    handle_with_offset offset(handle_type h, size_t pos)
+    handle_with_offset offset(handle_type h, size_t pos) const
     {
         return handle_with_offset(h, pos);
     }
@@ -238,7 +238,7 @@ public:
 
     allocator_type& get_allocator() { return allocator; }
 
-    handle_with_offset offset(size_type pos)
+    handle_with_offset offset(size_type pos) const
     {
         return allocator.offset(true, pos);
     }
