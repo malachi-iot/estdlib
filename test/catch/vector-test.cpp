@@ -79,6 +79,14 @@ TEST_CASE("vector tests")
             REQUIRE(counter == i2);
         }
 
+        SECTION("erasing")
+        {
+            v.erase(v.begin() + 1);
+
+            REQUIRE(v.size() == 3);
+            REQUIRE(v[0] == 1);
+            REQUIRE(v[1] == 3);
+        }
     }
     SECTION("layer1 vector")
     {

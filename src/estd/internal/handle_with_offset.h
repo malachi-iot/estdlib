@@ -120,6 +120,17 @@ public:
     {
         m_pointer += count;
     }
+
+    inline handle_with_offset_raw& operator +=(size_t summand)
+    {
+        m_pointer += summand;
+        return *this;
+    }
+
+    inline std::ptrdiff_t operator -(const handle_with_offset_raw& subtrahend) const
+    {
+        return m_pointer - subtrahend.m_pointer;
+    }
 };
 
 
