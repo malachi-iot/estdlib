@@ -16,13 +16,15 @@ class priority_queue_helper;
 
 }
 
-// We need our own version of priority queue due to our stateful allocators
-// NOTE: maybe not, but sure seemed that way - seemed like std::priority_queue
-// was freaking out and not able to allocate as expected
+// std::priority_queue
+// was freaking out and not able to allocate as expected.  On further insepction,
+// std::priorty_queue does maintain a discrete 'Container c', so not sure what the
+// problem is
 template <
         class T,
         class Container = vector<T>,
-        class Compare = less<typename Container::value_type> >
+        class Compare = less<typename Container::value_type>,
+        class THelper = internal::priority_queue_helper<Container, Compare> >
 class priority_queue
 {
 protected:
@@ -49,6 +51,14 @@ public:
         std::push_heap(c.begin(), c.end(), Compare());
     }
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void push(value_type&& value)
+    {
+        c.push_back(std::forward<value_type>(value));
+        std::push_heap(c.begin(), c.end(), Compare());
+    }
+#endif
+
 
     void pop()
     {
@@ -57,7 +67,7 @@ public:
     }
 
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#if defined(FEATURE_CPP_MOVESEMANTIC) && defined(FEATURE_CPP_VARIADIC)
     template <class ...TArgs>
     accessor emplace(TArgs&&...args)
     {
@@ -80,5 +90,17 @@ public:
 
 }
 
+
+namespace layer2 {
+
+template <class T, size_t len, class Compare = less<T> >
+class priority_queue :
+        public estd::priority_queue<T, layer2::vector<T, len>, Compare >
+{
+public:
+
+};
+
+}
 
 }

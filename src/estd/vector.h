@@ -70,10 +70,6 @@ class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<
 public:
     //vector(T* underlying_buffer) : base_t(underlying_buffer) {}
 
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-    vector() = default;
-#endif
-
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}
 #endif
