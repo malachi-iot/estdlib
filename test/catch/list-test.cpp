@@ -414,10 +414,21 @@ TEST_CASE("linkedlist")
 
         auto i = list.begin();
 
+        size_t i_size = sizeof(i);
+
         REQUIRE(*i++ == 3);
         REQUIRE(*i++ == 4);
         REQUIRE(*i++ == 5);
         REQUIRE(*i++ == 6);
         REQUIRE(i == list.end());
+
+        i = list.begin();
+
+        i += 2;
+
+        REQUIRE(*i == 5);
+        REQUIRE(*list.begin() + 3 == 6);
+        REQUIRE(*i - 2 == 3);
+        REQUIRE((i -= 2) == list.begin());
     }
 }

@@ -33,6 +33,7 @@ protected:
     // to noops
     typename allocator_t::lock_counter lock_counter;
 
+    // FIX: Pretty sure we want this to be a reference, not a value
     traits_t traits;
 
     node_type& lock_internal()
@@ -152,14 +153,19 @@ struct ForwardIterator : public TBase
         return temp;
     }
 
-    // untested
-    ForwardIterator operator +(int summand)
+
+    ForwardIterator& operator +=(int summand)
+    {
+        while(summand--) operator ++();
+        return *this;
+    }
+
+
+    ForwardIterator operator +(int summand) const
     {
         ForwardIterator temp(*this);
 
-        while(summand--) ++temp();
-
-        return temp;
+        return temp += summand;
     }
 };
 
@@ -202,13 +208,18 @@ public:
     }
 
     // untested
-    ReverseIterator operator -(int subtrahend)
+    ReverseIterator& operator -=(int subtrahend)
+    {
+        while(subtrahend--) operator --();
+        return *this;
+    }
+
+    // untested
+    ReverseIterator operator -(int subtrahend) const
     {
         ReverseIterator temp(*this);
 
-        while(subtrahend--) --temp();
-
-        return temp;
+        return temp - subtrahend;
     }
 
     // untested
