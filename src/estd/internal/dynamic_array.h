@@ -521,6 +521,26 @@ public:
         _append(&value, 1);
     }
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void push_back(value_type&& value)
+    {
+        // TODO: combine this with _append since it's mostly overlapping code
+        ensure_additional_capacity(1);
+
+        // Doing this before memcpy for null-terminated
+        // scenarios
+        size_type current_size = size();
+
+        helper.size(current_size + 1);
+
+        value_type* raw = lock(current_size);
+
+        new (raw) value_type(std::forward<value_type>(value));
+
+        unlock();
+    }
+#endif
+
     template <class ForeignAllocator, class ForeignHelper>
     dynamic_array& operator=(const dynamic_array<ForeignAllocator, ForeignHelper>& copy_from)
     {
