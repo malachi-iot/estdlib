@@ -57,8 +57,19 @@ public:
         c.push_back(std::forward<value_type>(value));
         std::push_heap(c.begin(), c.end(), Compare());
     }
+
+    priority_queue& operator =(priority_queue&& move_from)
+    {
+        c = std::move(move_from.c);
+        return *this;
+    }
 #endif
 
+    priority_queue& operator =(const priority_queue& copy_from)
+    {
+        c = copy_from.c;
+        return *this;
+    }
 
     void pop()
     {

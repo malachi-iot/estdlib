@@ -4,6 +4,7 @@
 #include "array.h"
 #include "vector.h"
 #include "functional.h"
+#include "internal/priority_queue.h"
 
 // deviates from C++ standard queue in that a bool is returned to indicate
 // if push/pop succeeds
