@@ -77,27 +77,4 @@ TEST_CASE("queue-test")
         REQUIRE(queue.back().val1 == 4);
         REQUIRE(queue.pop());
     }
-    SECTION("std Priority queue")
-    {
-        std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
-
-        // compiles but doesn't quite work yet.  Our handle_with_offset goodies probably
-        // need some debugging.  Unfortunately, debugger acting strangely and no ambient
-        // variable inspection is working, making debugging prohibitively difficult here
-        pq.push(5);
-        pq.push(3);
-        pq.push(8);
-
-        REQUIRE(!pq.empty());
-
-        REQUIRE(pq.size() == 3);
-
-        const int& val = pq.top();
-        const int* _val = &val;
-
-        REQUIRE(_val == NULLPTR);
-        //REQUIRE(val == 3); // crashes, due (probably) to a NULL exception
-        //pq.pop();
-        //REQUIRE(pq.top() == 5);
-    }
 }

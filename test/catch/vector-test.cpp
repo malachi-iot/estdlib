@@ -85,6 +85,10 @@ TEST_CASE("vector tests")
         estd::layer1::vector<int, 10> v;
         typedef estd::layer1::vector<int, 10>::accessor accessor_type;
 
+        int size_type_size = sizeof(accessor_type::handle_with_offset::size_type);
+
+        REQUIRE(size_type_size == 1); // not actually used much in this context (but maybe could be?)
+
         int accessor_size = sizeof(accessor_type);
 
         // should be relatively small, comprised of an offset and

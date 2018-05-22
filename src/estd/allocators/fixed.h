@@ -11,7 +11,7 @@ namespace internal {
 
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
-template <class T, class TBuffer, typename TSize = std::size_t>
+template <class T, class TBuffer, typename TSize>
 struct single_allocator_base
 {
     typedef const void* const_void_pointer;
@@ -84,14 +84,13 @@ public:
 // tracks how much of the allocator has been allocated
 // null_terminated flag mainly serves as a trait/clue to specializations
 // len can == 0 in which case we're in unbounded mode
-template <class T, size_t len, bool null_terminated = false, class TBuffer = T[len]>
+template <
+        class T, size_t len, bool null_terminated = false, class TBuffer = T[len],
+        class TSize = typename internal::deduce_fixed_size_t<len>::size_type>
 struct single_fixedbuf_allocator : public
-        single_allocator_base<
-                T,
-                TBuffer> //,
-                //internal::deduce_fixed_size_t<len>::size_type>
+        single_allocator_base<T, TBuffer, TSize>
 {
-    typedef single_allocator_base<T, TBuffer> base_t;
+    typedef single_allocator_base<T, TBuffer, TSize> base_t;
 
     typedef T value_type;
     typedef bool handle_type; // really I want it an empty struct
@@ -141,10 +140,10 @@ public:
 // runtime (but otherwise constant) buffer*
 // as before, null_terminated is merely a clue/trait for consumer class
 template <class T, bool null_terminated = false, class TSize = std::size_t>
-class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, size_t>
+class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, TSize>
 {
 public:
-    typedef single_allocator_base<T, T*> base_t;
+    typedef single_allocator_base<T, T*, TSize> base_t;
     typedef typename base_t::size_type size_type;
     typedef typename base_t::handle_type handle_type;
     typedef handle_type handle_with_size;

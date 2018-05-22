@@ -289,26 +289,6 @@ class queue : public estd::queue<T, layer1::deque<T, size> >
 {
 };
 
-};
+}
 
-template <
-        class T,
-        class Container = vector<T>,
-        class Compare = less<typename Container::value_type> >
-class priority_queue
-{
-protected:
-    Container c;
-
-public:
-    typedef Container container_type;
-    typedef typename Container::value_type value_type;
-    typedef typename Container::size_type size_type;
-
-    bool empty() const { return c.empty(); }
-
-    size_type size() const { return c.size(); }
-};
-
-
-};
+}

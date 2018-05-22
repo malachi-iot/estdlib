@@ -15,6 +15,7 @@ set(SOURCE_FILES
         estd/iterator.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/priority_queue.h
         estd/internal/to_string.h
         estd/iterators/list.h
         estd/list.h
@@ -27,7 +28,7 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-       )
+        )
 
 add_library(estd_lib ${SOURCE_FILES})
 
