@@ -215,4 +215,35 @@ TEST_CASE("vector tests")
 
         REQUIRE(v.size() == 1);
     }
+    SECTION("std::move testing")
+    {
+        struct Item
+        {
+            int val;
+
+            Item() : val(0) {}
+
+            Item(Item&& move_from) :
+                val(move_from.val)
+            {
+                move_from.val = -1;
+            }
+        };
+
+        layer1::vector<Item, 10> v;
+
+        Item i, i2;
+
+        v.push_back(std::forward<Item>(i));
+
+        i2.val = 5;
+
+        v.insert(v.end(), std::forward<Item>(i2));
+
+        auto it = v.begin();
+
+        REQUIRE((*it++).val == 0);
+        REQUIRE((*it++).val == 5);
+        REQUIRE(it == v.end());
+    }
 }

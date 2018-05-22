@@ -311,11 +311,7 @@ protected:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void raw_insert(value_type* a, value_type* to_insert_pos, value_type&& to_insert_value)
     {
-        // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
-        // so later consider doing the insert operation at that level)
-        ensure_additional_capacity(1);
-
-        helper.size(helper.size() + 1);
+        grow(1);
 
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
         size_type raw_typed_pos = to_insert_pos - a;
@@ -325,7 +321,7 @@ protected:
         // but not sure why
         memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
-        *to_insert_pos = to_insert_value;
+        new (to_insert_pos) value_type(std::forward<value_type>(to_insert_value));
     }
 #endif
 
@@ -414,15 +410,25 @@ public:
     }
 
 protected:
-    void _append(const value_type* buf, size_type len)
+    // returns size before growth
+    // internal call
+    size_type grow(int by_amount)
     {
-        ensure_additional_capacity(len);
+        ensure_additional_capacity(by_amount);
 
         // Doing this before memcpy for null-terminated
         // scenarios
         size_type current_size = size();
 
-        helper.size(current_size + len);
+        helper.size(current_size + by_amount);
+
+        return current_size;
+    }
+
+
+    void _append(const value_type* buf, size_type len)
+    {
+        size_type current_size = grow(len);
 
         value_type* raw = lock(current_size);
 
@@ -468,22 +474,6 @@ protected:
 
         unlock();
     }
-
-    // returns size before growth
-    // internal call
-    size_type grow(int by_amount)
-    {
-        ensure_additional_capacity(by_amount);
-
-        // Doing this before memcpy for null-terminated
-        // scenarios
-        size_type current_size = size();
-
-        helper.size(current_size + by_amount);
-
-        return current_size;
-    }
-
 
 public:
     bool empty() const
@@ -710,7 +700,7 @@ public:
     }
 
 
-    accessor operator[](size_type pos)
+    accessor operator[](size_type pos) const
     {
         return accessor(get_allocator(), offset(pos));
     }
@@ -720,12 +710,12 @@ public:
         return accessor(get_allocator(), offset(0));
     }
 
-    accessor back()
+    accessor back() const
     {
         return accessor(get_allocator(), offset(size() - 1));
     }
 
-    accessor at(size_type pos)
+    accessor at(size_type pos) const
     {
         // TODO: place in error/bounds checking runtime ability within
         // accessor itself.  perhaps wrap it all up in a FEATURE_ESTD_BOUNDSCHECK
@@ -744,7 +734,7 @@ public:
 
         value_type* raw = lock(current_size);
 
-        allocator_traits::construct(get_allocator(), raw, args...);
+        allocator_traits::construct(get_allocator(), raw, std::forward<TArgs>(args)...);
 
         unlock();
 
