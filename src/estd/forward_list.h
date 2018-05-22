@@ -130,14 +130,14 @@ struct node_value_traits_experimental<
 
 namespace internal
 {
-template<class T, class TNodeTraits>
+template<class T, class TNodeTraits, class TIterator = ForwardIterator<T, TNodeTraits> >
 class linkedlist_base
 {
 public:
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
-    typedef ForwardIterator<value_type, node_traits_t> iterator;
+    typedef TIterator iterator;
     typedef const iterator   const_iterator;
     typedef typename node_traits_t::node_allocator_type node_allocator_t;
     typedef node_allocator_t allocator_t;
@@ -164,6 +164,47 @@ protected:
             m_front(after_end_node())
 
     {}
+
+    node_type& alloc_lock(node_handle& to_lock)
+    {
+        return traits.lock(to_lock);
+    }
+
+    void alloc_unlock(node_handle& to_unlock)
+    {
+        traits.unlock(to_unlock);
+    }
+
+
+    node_handle next(node_handle from)
+    {
+        node_type& f = alloc_lock(from);
+
+        node_handle n = traits.next(f);
+
+        alloc_unlock(from);
+
+        return n;
+    }
+
+public:
+    bool empty() const { return m_front == after_end_node(); }
+
+    // TODO: move towards 'accessor' pattern instead of direct references, not as
+    // critical as with dynamic_array however, since these references are not
+    // expected directly to move (the underlying node itself may, however)
+    reference front()
+    {
+        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
+        reference front_value = alloc_lock(m_front);
+
+        alloc_unlock(m_front);
+
+        return front_value;
+    }
+
+    iterator begin() { return iterator(m_front, traits); }
+    const_iterator begin() const { return iterator(m_front, traits); }
 };
 
 }
@@ -207,23 +248,17 @@ protected:
 
     node_type& alloc_lock(node_handle& to_lock)
     {
-        return base_t::traits.lock(to_lock);
+        return base_t::alloc_lock(to_lock);
     }
 
     void alloc_unlock(node_handle& to_unlock)
     {
-        base_t::traits.unlock(to_unlock);
+        base_t::alloc_unlock(to_unlock);
     }
 
     node_handle next(node_handle from)
     {
-        node_type& f = alloc_lock(from);
-
-        node_handle n = base_t::traits.next(f);
-
-        alloc_unlock(from);
-
-        return n;
+        return base_t::next(from);
     }
 
 
@@ -253,21 +288,6 @@ public:
     forward_list(allocator_t* allocator = NULLPTR) :
         base_t(allocator) {}
 
-    // TODO: move towards 'accessor' pattern instead of direct references, not as
-    // critical as with dynamic_array however, since these references are not
-    // expected directly to move (the underlying node itself may, however)
-    reference front()
-    {
-        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
-        reference front_value = alloc_lock(base_t::m_front);
-
-        alloc_unlock(base_t::m_front);
-
-        return front_value;
-    }
-
-    bool empty() const { return base_t::m_front == after_end_node(); }
-
     void pop_front()
     {
 #ifdef DEBUG
@@ -294,8 +314,6 @@ public:
 #endif
 
 
-    iterator begin() { return iterator(base_t::m_front, base_t::traits); }
-    const_iterator begin() const { return iterator(base_t::m_front, base_t::traits); }
     const_iterator end() const { return iterator(after_end_node(), base_t::traits); }
 
     iterator insert_after(const_iterator pos, nv_reference value)
