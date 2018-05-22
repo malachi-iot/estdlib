@@ -13,7 +13,10 @@ TEST_CASE("priority-queue-test")
     SECTION("std Priority queue")
     {
         // Doesn't work because of no stateful allocator awareness
-        std::priority_queue<int, estd::layer1::vector<int, 20> > pq;
+        typedef estd::layer1::vector<int, 20> backing_t;
+        backing_t backing;
+        // should work as constructor parameters but cant figure it out yet (std::less<int>, backing);
+        std::priority_queue<int, backing_t > pq;
 
         // compiles but doesn't quite work yet.  Our handle_with_offset goodies probably
         // need some debugging.  Unfortunately, debugger acting strangely and no ambient
@@ -47,5 +50,9 @@ TEST_CASE("priority-queue-test")
         pq.pop();
 
         REQUIRE(pq.top() == 5);
+
+        pq.emplace(7);
+
+        REQUIRE(pq.top() == 7);
     }
 }

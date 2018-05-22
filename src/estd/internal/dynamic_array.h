@@ -469,6 +469,22 @@ protected:
         unlock();
     }
 
+    // returns size before growth
+    // internal call
+    size_type grow(int by_amount)
+    {
+        ensure_additional_capacity(by_amount);
+
+        // Doing this before memcpy for null-terminated
+        // scenarios
+        size_type current_size = size();
+
+        helper.size(current_size + by_amount);
+
+        return current_size;
+    }
+
+
 public:
     bool empty() const
     {
@@ -527,13 +543,7 @@ public:
     void push_back(value_type&& value)
     {
         // TODO: combine this with _append since it's mostly overlapping code
-        ensure_additional_capacity(1);
-
-        // Doing this before memcpy for null-terminated
-        // scenarios
-        size_type current_size = size();
-
-        helper.size(current_size + 1);
+        size_type current_size = grow(1);
 
         value_type* raw = lock(current_size);
 
@@ -723,6 +733,24 @@ public:
         // data in accessor itself
         return accessor(get_allocator(), offset(pos));
     }
+
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class ...TArgs>
+    accessor emplace_back(TArgs&&...args)
+    {
+        // TODO: combine this with _append since it's mostly overlapping code
+        size_type current_size = grow(1);
+
+        value_type* raw = lock(current_size);
+
+        allocator_traits::construct(get_allocator(), raw, args...);
+
+        unlock();
+
+        return back();
+    }
+#endif
 
     size_type max_size() const
     {

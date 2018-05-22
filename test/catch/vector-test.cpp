@@ -207,4 +207,12 @@ TEST_CASE("vector tests")
         REQUIRE(*it++ == 1);
         REQUIRE(*it++ == 3);
     }
+    SECTION("Emplace at back")
+    {
+        layer1::vector<int, 10> v;
+
+        v.emplace_back(5);
+
+        REQUIRE(v.size() == 1);
+    }
 }
