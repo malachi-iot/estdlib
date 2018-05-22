@@ -12,6 +12,7 @@ TEST_CASE("priority-queue-test")
 {
     SECTION("std Priority queue")
     {
+#ifdef UNUSED
         // Doesn't work because of no stateful allocator awareness
         typedef estd::layer1::vector<int, 20> backing_t;
         backing_t backing;
@@ -36,6 +37,7 @@ TEST_CASE("priority-queue-test")
         //REQUIRE(val == 3); // crashes, due (probably) to a NULL exception
         //pq.pop();
         //REQUIRE(pq.top() == 5);
+#endif
     }
     SECTION("estd priority queue layer 1")
     {

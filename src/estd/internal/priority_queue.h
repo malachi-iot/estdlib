@@ -73,6 +73,7 @@ public:
     {
         c.emplace_back(std::forward<TArgs>(args)...);
         std::push_heap(c.begin(), c.end(), Compare());
+        return c.back();
     }
 #endif
 };

@@ -146,7 +146,18 @@ public:
         a(a),
         h(h) {}
 
+    accessor_stateful_base(const accessor_stateful_base& copy_from) :
+        a(copy_from.a),
+        h(copy_from.h) {}
+
     allocator_type& get_allocator() const { return a; }
+
+    accessor_stateful_base& operator =(const accessor_stateful_base& copy_from)
+    {
+        // FIX: kinda cheezy, but macOS needed an explicit copy operator here
+        new (this) accessor_stateful_base(copy_from);
+        return *this;
+    }
 };
 
 
@@ -279,6 +290,9 @@ public:
     accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
         base_t(a, h) {}
 
+    accessor(const accessor& copy_from) :
+        base_t(copy_from.get_allocator(), copy_from.h) {}
+
     accessor& operator=(const value_type& assign_from)
     {
         return base_t::template assign<accessor>(assign_from);
@@ -299,6 +313,9 @@ public:
 
     accessor_stateless(const TAllocator& a, const handle_with_offset& h) :
         base_t(h) {}
+
+    accessor_stateless(const accessor_stateless& copy_from) :
+        base_t(copy_from.h) {}
 
     accessor_stateless& operator=(const value_type& assign_from)
     {
