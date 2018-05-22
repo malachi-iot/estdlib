@@ -90,7 +90,12 @@ TEST_CASE("queue-test")
 
         REQUIRE(!pq.empty());
 
+        REQUIRE(pq.size() == 3);
+
         const int& val = pq.top();
+        const int* _val = &val;
+
+        REQUIRE(_val == NULLPTR);
         //REQUIRE(val == 3); // crashes, due (probably) to a NULL exception
         //pq.pop();
         //REQUIRE(pq.top() == 5);
