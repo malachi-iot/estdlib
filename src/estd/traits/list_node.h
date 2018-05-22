@@ -47,19 +47,23 @@ public:
 
     ValueNode(const value_type& value) : m_value(value) {}
 
+    // it's basically gaurunteed that movesemantic comes with variadic feature, but
+    // the code was already written to switch out
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    ValueNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
-#endif
-
 #ifdef FEATURE_CPP_VARIADIC
     template <class ...TArgs>
-    ValueNode(TArgs...args) : m_value(args...)
+    ValueNode(TArgs&&...args) : m_value(std::forward<TArgs>(args)...)
     {
 
     }
+#else
+    ValueNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
+#endif
 #endif
 
     value_type& value() { return m_value; }
+
+    const value_type& value() const { return m_value; }
 };
 
 
@@ -107,9 +111,19 @@ struct node_traits_new_base
         return static_cast<node_handle>(node.next());
     }
 
+    node_handle prev(node_type& node) const
+    {
+        return static_cast<node_handle>(node.prev());
+    }
+
     void next(node_type &node, const node_handle& new_next)
     {
         node.next(new_next);
+    }
+
+    void prev(node_type &node, const node_handle& new_prev)
+    {
+        node.prev(new_prev);
     }
 
     // helper call.  May not be the way *you* acquire the tracked value for this node, but
@@ -236,6 +250,7 @@ struct inlinevalue_node_traits_new_base :
 
     // remember inlinevalue we specifically DO NOT use TValueAllocator
 
+    // standard copy version
     node_handle allocate(const value_type& value)
     {
         node_handle h = base_t::allocate_node();
@@ -274,12 +289,12 @@ struct inlinevalue_node_traits_new_base :
 #ifdef FEATURE_CPP_MOVESEMANTIC
     node_handle alloc_move(value_type&& v)
     {
-        // FIX: Just temporary - we'll need a proper move operation
-        //return allocate(v);
         node_handle h = base_t::allocate_node();
 
         node_type& n = base_t::lock_node(h);
 
+        // expects constructor to pass through the moved value
+        // (in other words, node_type has a value_type&& constructor)
         new (&n) node_type(std::forward<value_type>(v));
 
         base_t::unlock_node(h);

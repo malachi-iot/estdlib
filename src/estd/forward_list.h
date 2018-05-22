@@ -97,6 +97,24 @@ protected:
         return n;
     }
 
+    void set_next(node_handle _node, node_handle next)
+    {
+        node_type& node = alloc_lock(_node);
+
+        traits.next(node, next);
+
+        alloc_unlock(_node);
+    }
+
+
+    void set_front(node_handle new_front)
+    {
+        set_next(new_front, m_front);
+
+        m_front = new_front;
+    }
+
+
 public:
     bool empty() const { return m_front == after_end_node(); }
 
@@ -115,6 +133,7 @@ public:
 
     iterator begin() { return iterator(m_front, traits); }
     const_iterator begin() const { return iterator(m_front, traits); }
+    const_iterator end() const { return iterator(after_end_node(), traits); }
 };
 
 }
@@ -171,22 +190,9 @@ protected:
         return base_t::next(from);
     }
 
-
     void set_next(node_handle _node, node_handle next)
     {
-        node_type& node = alloc_lock(_node);
-
-        base_t::traits.next(node, next);
-
-        alloc_unlock(_node);
-    }
-
-
-    void set_front(node_handle new_front)
-    {
-        set_next(new_front, base_t::m_front);
-
-        base_t::m_front = new_front;
+        base_t::set_next(_node, next);
     }
 
     void destroy(node_handle h)
@@ -213,18 +219,16 @@ public:
 
     void push_front(nv_reference value)
     {
-        set_front(base_t::traits.allocate(value));
+        base_t::set_front(base_t::traits.allocate(value));
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push_front(value_type&& value)
     {
-        set_front(base_t::traits.alloc_move(std::forward<value_type>(value)));
+        base_t::set_front(base_t::traits.alloc_move(std::forward<value_type>(value)));
     }
 #endif
 
-
-    const_iterator end() const { return iterator(after_end_node(), base_t::traits); }
 
     iterator insert_after(const_iterator pos, nv_reference value)
     {
@@ -265,9 +269,9 @@ public:
     {
         static_assert(node_traits_t::can_emplace(), "This node allocator cannot emplace");
 
-        node_handle h = base_t::traits.alloc_emplace(args...);
+        node_handle h = base_t::traits.alloc_emplace(std::forward<TArgs>(args)...);
 
-        set_front(h);
+        base_t::set_front(h);
 
         // deviates from std::forward_list in that that returns
         // a reference, but we return a handle which will need

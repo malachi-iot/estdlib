@@ -397,6 +397,24 @@ TEST_CASE("linkedlist")
     }
     SECTION("double list")
     {
-        estd::list<long> list;
+        typedef estd::experimental::ValueNode< long, estd::experimental::double_node_base > node_t;
+        typedef estd::experimental_std_allocator<node_t> allocator_t;
+        typedef estd::nothing_allocator<long> value_allocator_t;
+        typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, value_allocator_t > node_traits_t;
+        estd::list<long, node_t, allocator_t, node_traits_t> list;
+
+        auto i2 = list.insert(list.begin(), 5);
+        list.push_front(3);
+        list.insert(i2, 4);
+        //list.insert(list.end(), 6); // this is a bit complicated, so doesn't work yet
+        //list.push_back(6); // not quite working right yet
+
+        auto i = list.begin();
+
+        REQUIRE(*i++ == 3);
+        REQUIRE(*i++ == 4);
+        REQUIRE(*i++ == 5);
+        //REQUIRE(*i++ == 6);
+        REQUIRE(i == list.end());
     }
 }
