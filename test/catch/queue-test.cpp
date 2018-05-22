@@ -16,6 +16,13 @@ struct Dummy
     Dummy(int val1, const char* val2) :
         val1(val1), value2(val2)
         {}
+
+    Dummy(Dummy&& move_from) :
+        val1(move_from.val1),
+        value2(move_from.value2)
+    {
+
+    }
 };
 
 TEST_CASE("queue-test")
@@ -69,12 +76,44 @@ TEST_CASE("queue-test")
     }
     SECTION("Emplacement tests")
     {
-        queue<int, layer1::deque<Dummy, 4 > > queue;
+        queue<Dummy, layer1::deque<Dummy, 4 > > queue;
 
         queue.emplace(4, "hi there");
 
         REQUIRE(queue.size() == 1);
         REQUIRE(queue.back().val1 == 4);
         REQUIRE(queue.pop());
+    }
+    SECTION("Move tests")
+    {
+        queue<Dummy, layer1::deque<Dummy, 4 > > q;
+
+        Dummy value1;
+
+        value1.val1 = 7;
+        value1.value2 = "hi there 1";
+
+        q.push(std::forward<Dummy>(value1));
+
+        value1.val1 = 8;
+
+        q.push(std::forward<Dummy>(value1));
+
+        REQUIRE(q.front().val1 == 7);
+        q.pop();
+        REQUIRE(q.front().val1 == 8);
+
+        value1.val1 = 9;
+
+        q.push(std::forward<Dummy>(value1));
+
+        value1.val1 = 10;
+
+        q.push(std::forward<Dummy>(value1));
+
+        q.pop();
+        REQUIRE(q.front().val1 == 9);
+        q.pop();
+        REQUIRE(q.size() == 1);
     }
 }
