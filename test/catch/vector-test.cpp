@@ -245,5 +245,10 @@ TEST_CASE("vector tests")
         REQUIRE((*it++).val == 0);
         REQUIRE((*it++).val == 5);
         REQUIRE(it == v.end());
+
+        SECTION("empty() call testing")
+        {
+            REQUIRE(!v.empty());
+        }
     }
 }

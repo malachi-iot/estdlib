@@ -277,6 +277,17 @@ struct dynamic_array_fixedbuf_helper_termination_specialization_base<true, TAllo
     template <class TParam>
     dynamic_array_fixedbuf_helper_termination_specialization_base(TParam p) : base_t(p) {}
 
+    bool empty() const
+    {
+        const value_type* v = &base_t::clock_experimental(0, 1);
+
+        bool is_terminator = *v == 0;
+
+        base_t::cunlock_experimental();
+
+        return is_terminator;
+    }
+
     size_type size() const
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
@@ -333,6 +344,11 @@ protected:
     {}
 
 public:
+
+    bool empty() const
+    {
+        return m_size == 0;
+    }
 
     size_type size() const
     {

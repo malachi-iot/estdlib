@@ -215,6 +215,8 @@ public:
         if(handle != allocator_traits::invalid())
             allocator.deallocate(handle, 1);
     }
+
+    bool empty() const { return m_size == 0; }
 };
 
 
@@ -478,20 +480,7 @@ protected:
 public:
     bool empty() const
     {
-        if(helper_type::uses_termination())
-        {
-            const value_type* v = fake_const_lock(0, 1);
-
-            bool is_terminator = *v == 0;
-
-            fake_const_unlock();
-
-            return is_terminator;
-        }
-        else
-        {
-            return helper.size() == 0;
-        }
+        return helper.empty();
     }
 
     template <class TForeignAllocator, class TDAHelper>
