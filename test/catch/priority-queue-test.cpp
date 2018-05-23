@@ -4,9 +4,20 @@
 
 #include <catch.hpp>
 
+#include "platform.h"
+#include "test-data.h"
+
+using namespace estd::test;
+
+inline bool operator <(const Dummy& lhs, const Dummy& rhs)
+{
+    return lhs.val1 < rhs.val1;
+}
+
 #include <estd/queue.h>
 #include <queue>
-#include <estd/internal/priority_queue.h>
+
+
 
 TEST_CASE("priority-queue-test")
 {
@@ -70,5 +81,34 @@ TEST_CASE("priority-queue-test")
         pq.pop();
 
         REQUIRE(pq.top() == 5);
+    }
+    SECTION("priorty queue, emplacement")
+    {
+        estd::layer1::priority_queue<Dummy, 10> pq;
+
+        Dummy d7(7, "val7");
+
+        pq.push(Dummy(5, "val5"));
+        pq.push(Dummy(9, "val9"));
+        pq.push(Dummy(3, "val3"));
+        pq.push(d7);
+        pq.emplace(4, "val4");
+        pq.emplace(8, "val8");
+
+        d7.val1 = 6;
+        pq.emplace(d7); // remember this effectively is an efficient 'push'
+
+        REQUIRE(pq.top().lock().val1 == 9);
+        pq.pop();;
+        REQUIRE(pq.top().lock().val1 == 8);
+        pq.pop();;
+        REQUIRE(pq.top().lock().val1 == 7);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 6);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 5);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 4);
+        pq.pop();
     }
 }

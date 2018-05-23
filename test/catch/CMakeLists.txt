@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     memory-test.cpp
     queue-test.cpp
     string-test.cpp
+    test-data.h
         vector-test.cpp
         priority-queue-test.cpp)
 
