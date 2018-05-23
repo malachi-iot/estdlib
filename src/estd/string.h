@@ -460,16 +460,9 @@ bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc>& rh
     return rhs.compare(lhs) == 0;
 }
 
-template <class CharT, class Traits, class Alloc>
-bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs, const CharT* rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
-
-// NOTE: Not sure why we need this particular one
-template <class CharT, class Traits, class Alloc>
-bool operator ==( const basic_string<const CharT, Traits, Alloc>& lhs, const CharT* rhs)
+template <class Traits, class Alloc>
+bool operator ==( const basic_string<typename Traits::char_type, Traits, Alloc>& lhs,
+                  const typename Traits::char_type* rhs)
 {
     return lhs.compare(rhs) == 0;
 }
