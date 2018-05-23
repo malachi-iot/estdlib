@@ -475,19 +475,11 @@ bool operator ==( const basic_string<const CharT, Traits, Alloc>& lhs, const Cha
 }
 
 
-template <class CharT, class Traits, class AllocLeft, class AllocRight>
-bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,
-                  const basic_string<CharT, Traits, AllocRight>& rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
-
-template <class CharTLeft, class TraitsLeft,
-          class CharTRight, class TraitsRight,
+template <class TraitsLeft,
+          class TraitsRight,
           class AllocLeft, class AllocRight>
-bool operator ==( const basic_string<CharTLeft, TraitsLeft, AllocLeft>& lhs,
-                  const basic_string<CharTRight, TraitsRight, AllocRight>& rhs)
+bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft, AllocLeft>& lhs,
+                  const basic_string<typename TraitsRight::char_type, TraitsRight, AllocRight>& rhs)
 {
     return lhs.compare(rhs) == 0;
 }
