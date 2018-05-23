@@ -166,8 +166,8 @@ public:
     }
 
 
-    template <class TForeignAlloc>
-    int compare(const basic_string<CharT, Traits, TForeignAlloc>& str) const
+    template <class TForeignChar, class TForeignTraits, class TForeignAlloc>
+    int compare(const basic_string<TForeignChar, TForeignTraits, TForeignAlloc>& str) const
     {
         size_type raw_size = base_t::size();
         size_type s_size = str.size();
@@ -371,6 +371,8 @@ class basic_string
 
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
+
+protected:
     typedef typename base_t::size_type size_type;
     typedef typename allocator_type::InitParam init_t;
 
@@ -432,6 +434,22 @@ public:
 // defaults to null-terminated variety
 typedef basic_string<char> string;
 
+// Non-NULL-terminated const strings use layer3
+// NULL-terminated const strings use layer2
+class const_string : public basic_string<const char, false>
+{
+    typedef basic_string<const char, false> base_t;
+    typedef typename base_t::size_type size_type;
+
+public:
+    const_string(const char* s, size_type len) :
+        base_t(len, s, len) {}
+
+    template <size_type N>
+    const_string(const char (&buffer) [N], bool source_null_terminated = true) :
+        base_t(buffer, source_null_terminated) {}
+};
+
 
 }
 
@@ -448,6 +466,7 @@ bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs, const CharT* rh
     return lhs.compare(rhs) == 0;
 }
 
+
 // NOTE: Not sure why we need this particular one
 template <class CharT, class Traits, class Alloc>
 bool operator ==( const basic_string<const CharT, Traits, Alloc>& lhs, const CharT* rhs)
@@ -459,6 +478,16 @@ bool operator ==( const basic_string<const CharT, Traits, Alloc>& lhs, const Cha
 template <class CharT, class Traits, class AllocLeft, class AllocRight>
 bool operator ==( const basic_string<CharT, Traits, AllocLeft>& lhs,
                   const basic_string<CharT, Traits, AllocRight>& rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
+
+template <class CharTLeft, class TraitsLeft,
+          class CharTRight, class TraitsRight,
+          class AllocLeft, class AllocRight>
+bool operator ==( const basic_string<CharTLeft, TraitsLeft, AllocLeft>& lhs,
+                  const basic_string<CharTRight, TraitsRight, AllocRight>& rhs)
 {
     return lhs.compare(rhs) == 0;
 }

@@ -362,7 +362,7 @@ TEST_CASE("string tests")
     }
     SECTION("layer3 const compare")
     {
-        layer3::basic_string<const char, false> s("test");
+        layer3::const_string s("test");
 
         INFO("Evaluating" << s);
         REQUIRE(s.length() == 4);
@@ -373,6 +373,13 @@ TEST_CASE("string tests")
         REQUIRE(s.max_size() == 5);
 
         REQUIRE(s == "test");
+
+        SECTION("compare against layer1")
+        {
+            layer1::string<20> s2 = "test";
+
+            REQUIRE(s == s2);
+        }
     }
     SECTION("to_string int")
     {
