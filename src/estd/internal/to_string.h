@@ -4,6 +4,10 @@
 // just using it for tooltip help
 #include "estd/string.h"
 
+// not doing #include <stdio.h> because all its putc/putchar macros get things
+// confused
+extern "C" int sprintf ( char * str, const char * format, ... );
+
 namespace estd {
 
 // TODO: wait until the util.embedded length-helpers (and toString helpers) are around to really build this out a lot
