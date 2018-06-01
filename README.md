@@ -104,3 +104,9 @@ limits many of its activities but still a useful construct.
 
 Utilizes both a pointer and an instance variable to track buffer and size.
 This variable is expected to remain constant after instantiation.
+
+### estd::layer3::const_string
+
+Similar to layer3::basic_string but based on a const char* for that extra
+safety.  Remember, stock std::string doesn't do this because it never points
+at memory other than its own malleable set
