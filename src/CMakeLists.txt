@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(estd)
 
 set(SOURCE_FILES
-       dummy.cpp 
+        dummy.cpp
        platform.h
         estd/algorithm.h
         estd/allocators/fixed.h

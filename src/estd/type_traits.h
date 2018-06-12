@@ -62,6 +62,13 @@ template< class T > struct remove_const<const T> { typedef T type; };
 template< class T > struct remove_volatile             { typedef T type; };
 template< class T > struct remove_volatile<volatile T> { typedef T type; };
 
+
+template< class T > struct remove_reference      { typedef T type; };
+template< class T > struct remove_reference<T&>  { typedef T type; };
+#ifdef FEATURE_CPP_MOVESEMANTIC
+template< class T > struct remove_reference<T&&> { typedef T type; };
+#endif
+
 template< class T >
 struct remove_cv {
     typedef typename estd::remove_volatile<typename std::remove_const<T>::type>::type type;

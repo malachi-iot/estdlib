@@ -25,6 +25,15 @@
 #define CONSTEXPR constexpr
 #define NULLPTR nullptr
 
+// C++14 onward features go here
+#if __cplusplus >= 201402L
+#define FEATURE_CPP_DEDUCE_RETURN
+#define FEATURE_CPP_GENERIC_LAMBDA
+// NOTE: This feature seems to exist unofficially in a lot of of pre c++14 implementations
+// https://en.cppreference.com/w/cpp/language/integer_literal
+#define FEATURE_CPP_BINARY_LITERAL
+#endif
+
 // C++17 onward features go here
 #if __cplusplus >= 201703L
 #endif
