@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../platform.h"
 #include <utility> // for std::forward and std::size_t
 #include <memory> // for std::allocator
 #include "../type_traits.h"

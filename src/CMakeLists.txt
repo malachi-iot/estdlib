@@ -4,7 +4,6 @@ project(estd)
 
 set(SOURCE_FILES
         dummy.cpp
-       platform.h
         estd/algorithm.h
         estd/allocators/fixed.h
         estd/allocators/generic.h
@@ -16,6 +15,7 @@ set(SOURCE_FILES
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/list_node.h
+        estd/internal/platform.h
         estd/internal/priority_queue.h
         estd/internal/reverse_list.h
         estd/internal/to_string.h

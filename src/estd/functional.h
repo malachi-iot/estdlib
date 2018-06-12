@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platform.h"
+#include "internal/platform.h"
 
 // TODO: Utilize std version of this, if available
 

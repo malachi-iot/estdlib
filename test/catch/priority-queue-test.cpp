@@ -4,7 +4,7 @@
 
 #include <catch.hpp>
 
-#include "platform.h"
+#include "estd/internal/platform.h"
 #include "test-data.h"
 
 using namespace estd::test;

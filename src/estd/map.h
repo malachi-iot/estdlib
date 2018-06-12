@@ -4,7 +4,6 @@
 #include "functional.h"
 #include "array.h"
 #include "vector.h"
-#include "../platform.h"
 
 // so far not liking this mapping of map
 // prefer the mc-memory-lib approach

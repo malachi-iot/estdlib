@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../platform.h"
 #include "array.h"
 #include "vector.h"
 #include "functional.h"

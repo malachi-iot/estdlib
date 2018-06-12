@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../platform.h"
+#include "internal/platform.h"
 
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {

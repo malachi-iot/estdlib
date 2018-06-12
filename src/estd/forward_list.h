@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../platform.h"
+#include "internal/platform.h"
 #include "memory.h"
 #include "traits/list_node.h"
 #include "internal/list_node.h"
