@@ -171,16 +171,12 @@ public:
     }
 
 
-    // using foreignchar and foreigntraits primarily to interact with const char
-    template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
-    basic_string& operator=(const basic_string<
-                                ForeignCharT,
-                                typename ForeignTraitsT::char_traits,
-                                ForeignAllocator,
-                                ForeignTraitsT>& copy_from)
+    template <class THelper>
+    basic_string& operator=(const internal::dynamic_array<
+                                typename THelper::allocator_type,
+                                THelper>& copy_from)
     {
         base_t::operator =(copy_from);
-
         return *this;
     }
 
@@ -210,10 +206,10 @@ public:
     }
 
 
-    template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
-    bool starts_with(const
-                     basic_string<
-                        ForeignCharT, typename ForeignTraitsT::char_traits, ForeignAllocator, ForeignTraitsT>& compare_to)
+    template <class THelper>
+    bool starts_with(const internal::dynamic_array<
+                                typename THelper::allocator_type,
+                                THelper>& compare_to)
     {
         return base_t::starts_with(compare_to);
     }

@@ -18,6 +18,7 @@ set(SOURCE_FILES
         estd/internal/platform.h
         estd/internal/priority_queue.h
         estd/internal/reverse_list.h
+        estd/internal/runtime_array.h
         estd/internal/to_string.h
         estd/iterators/list.h
         estd/list.h

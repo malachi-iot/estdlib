@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../memory.h"
+#include "runtime_array.h"
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
 #include <initializer_list>
@@ -226,7 +227,7 @@ public:
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
 template <class TAllocator, class THelper = dynamic_array_helper<TAllocator > >
-class dynamic_array
+class dynamic_array : public runtime_array<THelper>
 {
     typedef dynamic_array this_t;
 public:
@@ -500,6 +501,31 @@ protected:
 
         unlock();
     }
+
+
+    /* a bit of a wrinkle, string uses traits_type to compare here but we do not
+    template <class TForeignHelper>
+    int compare(const dynamic_array<typename ForeignHelper::allocator_type, ForeignHelper>& compare_to) const
+    {
+        size_type raw_size = size();
+        size_type s_size = compare_to.size();
+
+        if(raw_size < s_size) return -1;
+        if(raw_size > s_size) return 1;
+
+        // gets here if size matches
+        const CharT* raw = fake_const_lock();
+        const CharT* s = compare_to.fake_const_lock();
+
+        int result = traits_type::compare(raw, s, raw_size);
+
+        fake_const_unlock();
+
+        str.fake_const_unlock();
+
+        return result;
+    } */
+
 
 
     template <class ForeignHelper>
