@@ -25,6 +25,7 @@ set(SOURCE_FILES
         estd/memory.h
         estd/queue.h
         estd/string.h
+        estd/string_view.h
         estd/traits/list_node.h
         estd/traits/allocator_traits.h
         estd/traits/string.h

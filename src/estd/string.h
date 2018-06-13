@@ -39,14 +39,14 @@ namespace estd {
 // fixed allocators
 template<
     class CharT,
-    class Traits = std::char_traits<CharT>,
+    class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
     class Allocator = std::allocator<CharT>,
     class StringTraits = experimental::string_traits<Traits>
 > class basic_string :
         public internal::dynamic_array<Allocator>
 {
     typedef internal::dynamic_array<Allocator> base_t;
-    typedef basic_string<CharT, Traits, Allocator> this_t;
+    typedef basic_string<CharT, Traits, Allocator, StringTraits> this_t;
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
     template <class TChar2, class TTraits2>
@@ -191,7 +191,11 @@ public:
 
     // using foreignchar and foreigntraits primarily to interact with const char
     template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
-    basic_string& operator=(const basic_string<ForeignCharT, ForeignTraitsT, ForeignAllocator>& copy_from)
+    basic_string& operator=(const basic_string<
+                                ForeignCharT,
+                                typename ForeignTraitsT::char_traits,
+                                ForeignAllocator,
+                                ForeignTraitsT>& copy_from)
     {
         base_t::reserve(copy_from.size());
         base_t::helper.size(copy_from.size());
@@ -282,7 +286,11 @@ public:
 
     // using ForeignCharT and ForeignTraits because incoming string might use const char
     template <class ForeignCharT, class ForeignTraits, class ForeignAllocator>
-    basic_string& operator=(const estd::basic_string<ForeignCharT, ForeignTraits, ForeignAllocator>& copy_from)
+    basic_string& operator=(const estd::basic_string<
+                            ForeignCharT,
+                            typename ForeignTraits::char_traits,
+                            ForeignAllocator,
+                            ForeignTraits>& copy_from)
     {
         base_t::operator =(copy_from);
         return *this;
@@ -304,15 +312,20 @@ class string : public basic_string<char, N> { };
 // TODO: refactor layer2 & layer3 to utilize a handle and not a CharT*
 namespace layer2 {
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT>, class PCharT = CharT* >
+template<class CharT, size_t N, bool null_terminated = true,
+         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class StringTraits = experimental::string_traits<Traits, int16_t, estd::is_const<CharT>::value> >
 class basic_string
         : public estd::basic_string<
-                CharT, Traits,
-                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
+                CharT,
+                Traits,
+                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* >,
+                StringTraits >
 {
     typedef estd::basic_string<
             CharT, Traits,
-            estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, PCharT > >
+            estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* >,
+            StringTraits >
             base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::helper_type helper_type;
@@ -337,8 +350,8 @@ public:
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
     }
 
-    template <class ForeignAllocator>
-    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from)
+    template <class ForeignAllocator, class ForeignTraits>
+    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits> & copy_from)
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
@@ -346,8 +359,8 @@ public:
     {
     }
 
-    template <class ForeignAllocator>
-    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    template <class ForeignAllocator, class ForeignTraits>
+    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits>& copy_from)
     {
         base_t::operator =(copy_from);
         return *this;
@@ -367,7 +380,8 @@ typedef basic_string<const char, 0> const_string;
 
 namespace layer3 {
 
-template<class CharT, bool null_terminated = true, class Traits = std::char_traits<CharT> >
+template<class CharT, bool null_terminated = true,
+         class Traits = std::char_traits<typename estd::remove_const<CharT>::type > >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
@@ -413,8 +427,8 @@ public:
         base_t::helper.size(initial_size);
     }
 
-    template <class ForeignAllocator>
-    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator> & copy_from)
+    template <class ForeignAllocator, class ForeignTraits>
+    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits> & copy_from)
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
@@ -438,8 +452,8 @@ public:
     }
 
 
-    template <class ForeignAllocator>
-    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator>& copy_from)
+    template <class ForeignAllocator, class ForeignTraits>
+    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits>& copy_from)
     {
         base_t::operator =(copy_from);
         return *this;
@@ -478,67 +492,7 @@ public:
 
 
 
-// NOTE: Needs optimization, because layer3::basic_string technically is set up
-// to track both max size and current length (since it's innately read-write)
-// whereas basic_string_view has only current length
-template <class CharT, class Traits = std::char_traits<CharT>,
-          class StringTraits = experimental::sized_string_traits<Traits, size_t, true> >
-class basic_string_view :
-        public basic_string<
-            const CharT,
-            Traits,
-            internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
-            StringTraits>
-{
-    typedef basic_string<const CharT, Traits,
-        internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
-        StringTraits> base_t;
 
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename allocator_type::InitParam init_param_t;
-
-public:
-    // As per spec, a no-constructor basic_string_view creates a null/null
-    // scenario
-    basic_string_view() : base_t(init_param_t(NULLPTR, 0)) {}
-
-    basic_string_view(const CharT* s, size_type count) :
-        base_t(init_param_t(s, count))
-    {
-
-    }
-
-    // C-style null terminated string
-    basic_string_view(const CharT* s) :
-        base_t(init_param_t(s, strlen(s)))
-    {
-
-    }
-
-
-    basic_string_view(const basic_string_view& other)
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-        = default;
-#else
-        : base_t((base_t&)other)
-    {
-    }
-#endif
-
-
-    void remove_suffix(size_type n)
-    {
-        // FIX: Not right - reallocate does nothing in this context
-        // basic_string_view length/size hangs off max_capacity
-        // of fixed allocator
-        base_t::helper.reallocate(base_t::capacity() - n);
-        //base_t::helper.size(base_t::helper.size() - n);
-    }
-};
-
-
-typedef basic_string_view<char> string_view;
 
 
 template <class CharT, class Traits, class Alloc>
