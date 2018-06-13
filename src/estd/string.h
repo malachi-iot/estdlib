@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "internal/dynamic_array.h"
 #include "allocators/fixed.h"
+#include "traits/string.h"
 #include <algorithm> // for std::min
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
@@ -11,38 +12,21 @@
 
 namespace estd {
 
-/*
-template<class CharT> struct char_traits;
-
-template<> struct char_traits<char>
-{
-    typedef char char_type;
-    typedef int int_type;
-    typedef char nonconst_char_type;
-};
-
-
-template<> struct char_traits<const char>
-{
-    typedef const char char_type;
-    typedef int int_type;
-    typedef char nonconst_char_type;
-}; */
-
 // prototype
 template<
     class CharT,
     class Traits,
-    class Allocator
+    class Allocator,
+    class StringTraits
 > class basic_string;
 
 }
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-template <class CharT, class Traits, class Allocator>
+template <class CharT, class Traits, class Allocator, class StringTraits>
 std::basic_ostream<CharT, Traits>&
     operator<<(std::basic_ostream<CharT, Traits>& os,
-               const estd::basic_string<CharT, Traits, Allocator>& str);
+               const estd::basic_string<CharT, Traits, Allocator, StringTraits>& str);
 #endif
 
 namespace estd {
@@ -56,7 +40,8 @@ namespace estd {
 template<
     class CharT,
     class Traits = std::char_traits<CharT>,
-    class Allocator = std::allocator<CharT>
+    class Allocator = std::allocator<CharT>,
+    class StringTraits = experimental::string_traits<Traits>
 > class basic_string :
         public internal::dynamic_array<Allocator>
 {
@@ -89,6 +74,7 @@ public:
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef Allocator allocator_type;
+    typedef StringTraits string_traits_type;
 
     typedef typename allocator_type::handle_type handle_type;
 
@@ -167,7 +153,7 @@ public:
 
 
     template <class TForeignChar, class TForeignTraits, class TForeignAlloc>
-    int compare(const basic_string<TForeignChar, TForeignTraits, TForeignAlloc>& str) const
+    int compare(const basic_string<TForeignChar, typename TForeignTraits::char_traits, TForeignAlloc, TForeignTraits>& str) const
     {
         size_type raw_size = base_t::size();
         size_type s_size = str.size();
@@ -245,7 +231,9 @@ public:
 
 
     template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
-    bool starts_with(const basic_string<ForeignCharT, ForeignTraitsT, ForeignAllocator>& compare_to)
+    bool starts_with(const
+                     basic_string<
+                        ForeignCharT, typename ForeignTraitsT::char_traits, ForeignAllocator, ForeignTraitsT>& compare_to)
     {
         const value_type* s = base_t::fake_const_lock();
         const value_type* t = compare_to.fake_const_lock();
@@ -269,30 +257,6 @@ public:
 
 typedef basic_string<char> string;
 
-
-namespace experimental {
-
-
-template <class CharT, class TCharTraits = std::char_traits<CharT > >
-class string_traits
-{
-    static bool is_null_terminated();
-
-    static bool is_null_terimnation(const CharT& value);
-};
-
-
-struct null_terminated_string_traits
-{
-    static bool is_null_terminated() { return true; }
-
-    static bool is_null_termination(const char& value) { return value == 0; }
-
-    static size_t length(char* str) { return strlen(str); }
-};
-
-
-}
 
 
 namespace layer1 {
@@ -517,13 +481,18 @@ public:
 // NOTE: Needs optimization, because layer3::basic_string technically is set up
 // to track both max size and current length (since it's innately read-write)
 // whereas basic_string_view has only current length
-template <class CharT, class Traits = std::char_traits<CharT> >
+template <class CharT, class Traits = std::char_traits<CharT>,
+          class StringTraits = experimental::sized_string_traits<Traits, size_t, true> >
 class basic_string_view :
-        public basic_string<const CharT, Traits,
-            internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t> >
+        public basic_string<
+            const CharT,
+            Traits,
+            internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
+            StringTraits>
 {
     typedef basic_string<const CharT, Traits,
-        internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t> > base_t;
+        internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
+        StringTraits> base_t;
 
     typedef typename base_t::size_type size_type;
     typedef typename base_t::allocator_type allocator_type;
@@ -596,8 +565,8 @@ bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft,
     return lhs.compare(rhs) == 0;
 } */
 
-template <class CharT, class Traits, class Alloc>
-bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs,
+template <class CharT, class StringTraits, class Alloc>
+bool operator ==( const basic_string<CharT, typename StringTraits::char_traits, Alloc, StringTraits>& lhs,
                   typename estd::add_const<CharT>::type* rhs)
 {
     return lhs.compare(rhs) == 0;
@@ -610,11 +579,11 @@ bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs,
 // trust them - where do they specialize to?
 template <class TCharLeft,
           class TCharRight,
-          class TraitsLeft,
-          class TraitsRight,
+          class StringTraitsLeft,
+          class StringTraitsRight,
           class AllocLeft, class AllocRight>
-bool operator ==( const basic_string<TCharLeft, TraitsLeft, AllocLeft>& lhs,
-                  const basic_string<TCharRight, TraitsRight, AllocRight>& rhs)
+bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_traits, AllocLeft, StringTraitsLeft>& lhs,
+                  const basic_string<TCharRight, typename StringTraitsRight::char_traits, AllocRight, StringTraitsRight>& rhs)
 {
     return lhs.compare(rhs) == 0;
 }

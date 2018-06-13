@@ -27,6 +27,7 @@ set(SOURCE_FILES
         estd/string.h
         estd/traits/list_node.h
         estd/traits/allocator_traits.h
+        estd/traits/string.h
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
