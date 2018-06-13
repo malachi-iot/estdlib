@@ -465,9 +465,12 @@ public:
     }
 };
 
+
 // attempt to specialize for const T* scenarios
 // for now, seems to be necessary in parallel with the following more-specialized version
 // debugger doesn't pick up construction, but size() is invoked
+// runtime size information is stored as both size() for current size in helper,
+// and max_size/capacity stored in allocator
 template <class T, size_t len>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, const T*> >
         : public dynamic_array_fixedbuf_helper_base<T, len, true, const T*>
@@ -492,6 +495,30 @@ class dynamic_array_helper<single_fixedbuf_allocator<const T, len, true, const T
 
 public:
     dynamic_array_helper(const T* buf) : base_t(buf) {}
+};
+
+
+// for basic_string_view and const_string
+// runtime size information is stored in allocator itself, not helper
+template <class T>
+class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+        : public dynamic_array_fixedbuf_helper_base_base<false,
+                single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+{
+    typedef dynamic_array_fixedbuf_helper_base_base<false,
+        single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::size_type size_type;
+
+public:
+    dynamic_array_helper(const typename allocator_type::InitParam& p) : base_t(p) {}
+
+    dynamic_array_helper(const dynamic_array_helper& copy_from) :
+        base_t(copy_from.allocator)
+    {
+    }
+
+    size_type size() const { return base_t::capacity(); }
 };
 
 

@@ -347,6 +347,15 @@ protected:
         *to_insert_pos = *to_insert_value;
     }
 
+    dynamic_array(const dynamic_array& copy_from)
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+        = default;
+#else
+        : helper(copy_from.helper)
+    {
+    }
+#endif
+
 public:
     dynamic_array() {}
 

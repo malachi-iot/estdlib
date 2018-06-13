@@ -12,16 +12,9 @@ class vector : public internal::dynamic_array<Allocator>
 {
 public:
     typedef T value_type;
-    typedef Allocator allocator_type;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
 
 private:
     typedef internal::dynamic_array<Allocator> base_t;
-    typedef typename base_t::handle_type handle_type;
-    typedef typename base_t::handle_with_offset handle_with_offset;
-
-    typedef allocator_traits<allocator_type> allocator_traits_t;
 
 public:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
@@ -33,10 +26,6 @@ public:
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<value_type> initlist) : base_t(initlist) {}
 #endif
-
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::accessor accessor;
-    typedef typename base_t::iterator iterator;
 };
 
 

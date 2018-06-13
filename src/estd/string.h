@@ -223,10 +223,52 @@ public:
         base_t::assign(s, strlen(s));
         return *this;
     }
+
+    // compare to a C-style string
+    bool starts_with(const CharT* compare_to) const
+    {
+        const value_type* s = base_t::fake_const_lock();
+
+        size_type source_max = length();
+
+        while(source_max-- && *compare_to != 0)
+            if(*s++ != *compare_to++)
+            {
+                base_t::fake_const_unlock();
+                return false;
+            }
+
+        base_t::fake_const_unlock();
+        // if compare_to is longer than we are, then it's also a fail
+        return source_max != -1;
+    }
+
+
+    template <class ForeignCharT, class ForeignTraitsT, class ForeignAllocator>
+    bool starts_with(const basic_string<ForeignCharT, ForeignTraitsT, ForeignAllocator>& compare_to)
+    {
+        const value_type* s = base_t::fake_const_lock();
+        const value_type* t = compare_to.fake_const_lock();
+
+        size_type source_max = length();
+        size_type target_max = compare_to.length();
+
+        while(source_max-- && target_max--)
+            if(*s++ != *t++)
+            {
+                base_t::fake_const_unlock();
+                return false;
+            }
+
+        base_t::fake_const_unlock();
+        // if compare_to is longer than we are, then it's also a fail
+        return source_max != -1;
+    }
 };
 
 
 typedef basic_string<char> string;
+
 
 namespace experimental {
 
@@ -379,6 +421,13 @@ protected:
     typedef typename base_t::size_type size_type;
     typedef typename allocator_type::InitParam init_t;
 
+    // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial
+    // buffer size
+    basic_string(CharT* buffer, size_type buffer_size) :
+        base_t(typename allocator_type::InitParam(buffer, buffer_size))
+    {
+    }
+
 public:
     template <size_type N>
     basic_string(const CharT (&buffer) [N], bool source_null_terminated = true) :
@@ -439,6 +488,7 @@ typedef basic_string<char> string;
 
 // Non-NULL-terminated const strings use layer3
 // NULL-terminated const strings use layer2
+// TODO: Remake this into basic_string_view
 class const_string : public basic_string<const char, false>
 {
     typedef basic_string<const char, false> base_t;
@@ -446,15 +496,80 @@ class const_string : public basic_string<const char, false>
 
 public:
     const_string(const char* s, size_type len) :
-        base_t(len, s, len) {}
+        base_t(s, len) {}
+
 
     template <size_type N>
     const_string(const char (&buffer) [N], bool source_null_terminated = true) :
-        base_t(buffer, source_null_terminated) {}
+        base_t(buffer, source_null_terminated ? strlen(buffer) : N) {}
+
+/*
+    template <size_type N>
+    const_string(const char (&buffer) [N], bool source_null_terminated = true) :
+        base_t(buffer, source_null_terminated) {} */
 };
 
 
 }
+
+
+
+// NOTE: Needs optimization, because layer3::basic_string technically is set up
+// to track both max size and current length (since it's innately read-write)
+// whereas basic_string_view has only current length
+template <class CharT, class Traits = std::char_traits<CharT> >
+class basic_string_view :
+        public basic_string<const CharT, Traits,
+            internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t> >
+{
+    typedef basic_string<const CharT, Traits,
+        internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t> > base_t;
+
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::InitParam init_param_t;
+
+public:
+    // As per spec, a no-constructor basic_string_view creates a null/null
+    // scenario
+    basic_string_view() : base_t(init_param_t(NULLPTR, 0)) {}
+
+    basic_string_view(const CharT* s, size_type count) :
+        base_t(init_param_t(s, count))
+    {
+
+    }
+
+    // C-style null terminated string
+    basic_string_view(const CharT* s) :
+        base_t(init_param_t(s, strlen(s)))
+    {
+
+    }
+
+
+    basic_string_view(const basic_string_view& other)
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+        = default;
+#else
+        : base_t((base_t&)other)
+    {
+    }
+#endif
+
+
+    void remove_suffix(size_type n)
+    {
+        // FIX: Not right - reallocate does nothing in this context
+        // basic_string_view length/size hangs off max_capacity
+        // of fixed allocator
+        base_t::helper.reallocate(base_t::capacity() - n);
+        //base_t::helper.size(base_t::helper.size() - n);
+    }
+};
+
+
+typedef basic_string_view<char> string_view;
 
 
 template <class CharT, class Traits, class Alloc>
@@ -463,6 +578,7 @@ bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc>& rh
     return rhs.compare(lhs) == 0;
 }
 
+/*
 template <class Traits, class Alloc>
 bool operator ==( const basic_string<typename Traits::char_type, Traits, Alloc>& lhs,
                   const typename Traits::char_type* rhs)
@@ -478,8 +594,30 @@ bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft,
                   const basic_string<typename TraitsRight::char_type, TraitsRight, AllocRight>& rhs)
 {
     return lhs.compare(rhs) == 0;
+} */
+
+template <class CharT, class Traits, class Alloc>
+bool operator ==( const basic_string<CharT, Traits, Alloc>& lhs,
+                  typename estd::add_const<CharT>::type* rhs)
+{
+    return lhs.compare(rhs) == 0;
 }
 
+
+
+// have to do this because of our special const char stuff
+// initial tests doing std::char_traits<const char> seem to work, but I don't
+// trust them - where do they specialize to?
+template <class TCharLeft,
+          class TCharRight,
+          class TraitsLeft,
+          class TraitsRight,
+          class AllocLeft, class AllocRight>
+bool operator ==( const basic_string<TCharLeft, TraitsLeft, AllocLeft>& lhs,
+                  const basic_string<TCharRight, TraitsRight, AllocRight>& rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
 
 }
 

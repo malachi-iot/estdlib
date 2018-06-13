@@ -369,8 +369,8 @@ TEST_CASE("string tests")
 
         // because we've denoted basic_string as not null terminated.  But, because it's const,
         // we'll never get to use that extra byte
-        REQUIRE(s.capacity() == 5);
-        REQUIRE(s.max_size() == 5);
+        REQUIRE(s.capacity() == 4);
+        REQUIRE(s.max_size() == 4);
 
         REQUIRE(s == "test");
 
@@ -392,5 +392,31 @@ TEST_CASE("string tests")
         s += to_string(123);
 
         REQUIRE(s == "The value is 123");
+    }
+    SECTION("starts_with")
+    {
+        layer3::const_string s("test");
+
+        REQUIRE(s.starts_with("te"));
+        REQUIRE(!s.starts_with("st"));
+    }
+    SECTION("string_view")
+    {
+        string_view sv("test", 4);
+        string_view sv2 = sv;
+        string_view sv3 = "test3";
+
+        int s = sizeof(sv);
+
+        REQUIRE(sv3.starts_with(sv));
+        REQUIRE(sv2 == sv);
+        REQUIRE(sv2.compare(sv) == 0);
+        REQUIRE(sv2 == "test");
+
+        // FIX: Does not work yet - need to make helper/allocator shrink
+        // the end of the buffer which is not something allocator normally
+        // does (remember, we're treating allocator max_size as string_view
+        // size, so a regular reallocation is a bit of an unknown)
+        sv3.remove_suffix(2);
     }
 }

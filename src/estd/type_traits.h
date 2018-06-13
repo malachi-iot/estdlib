@@ -75,4 +75,16 @@ struct remove_cv {
 };
 
 
+template< class T >
+struct add_cv { typedef const volatile T type; };
+
+template< class T> struct add_const { typedef const T type; };
+
+template< class T> struct add_volatile { typedef volatile T type; };
+
+#ifdef FEATURE_CPP_ALIASTEMPLATEX
+template< class T >
+using add_const_t    = typename add_const<T>::type;
+#endif
+
 }
