@@ -7,21 +7,21 @@
 
 namespace estd {
 
-// TODO: break all this out into a reverse_list and use the TBase trick
-// to sidestep virtual base class
+namespace internal {
+
+// TODO: naming list_base because there's a namespace already called estd::internal::list.
+// Would like to resolve that and change this back to 'list' again
 template<class T, class TNode = T,
          class TAllocator = experimental_std_allocator<TNode>,
          class TNodeTraits = node_traits<TNode, TAllocator, nothing_allocator<T> > >
-class list :
+class list_base :
         public internal::reverse_list<
             internal::linkedlist_base<
-                T,
                 TNodeTraits,
                 internal::list::BidirectionalIterator<T, TNodeTraits> > >
 {
     typedef internal::reverse_list<
                 internal::linkedlist_base<
-                    T,
                     TNodeTraits,
                     internal::list::BidirectionalIterator<T, TNodeTraits> > > base_t;
 
@@ -73,7 +73,7 @@ class list :
     }
 
 public:
-    list(allocator_t* allocator = NULLPTR) : base_t(allocator) {}
+    list_base(allocator_t* allocator = NULLPTR) : base_t(allocator) {}
 
     void push_front(const T& value)
     {
@@ -139,5 +139,11 @@ public:
         return iterator(new_node, base_t::traits);
     }
 };
+
+}
+
+// Inspired by ETL
+template <class T>
+class intrusive_list : public internal::list_base<T> { };
 
 }

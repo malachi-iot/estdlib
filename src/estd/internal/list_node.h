@@ -94,11 +94,11 @@ public:
 
 namespace internal
 {
-template<class T, class TNodeTraits, class TIterator>
+template<class TNodeTraits, class TIterator>
 class linkedlist_base
 {
 public:
-    typedef T value_type;
+    typedef typename TNodeTraits::value_type value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
     typedef TIterator iterator;

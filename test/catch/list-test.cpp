@@ -138,7 +138,7 @@ TEST_CASE("linkedlist")
 {
     SECTION("forward-list")
     {
-        estd::forward_list<test_node> list;
+        estd::intrustive_forward_list<test_node> list;
         test_node node_a;
 
         list.push_front(node_a);
@@ -147,14 +147,14 @@ TEST_CASE("linkedlist")
     }
     SECTION("forward-list 2")
     {
-        estd::forward_list<int> list;
+        estd::intrustive_forward_list<int> list;
         int val = 5;
 
         //list.push_front(val);
     }
     SECTION("forward-list 3")
     {
-        estd::forward_list<test_node> list;
+        estd::intrustive_forward_list<test_node> list;
         test_node nodes[3];
 
         nodes[0].val = 0;
@@ -180,7 +180,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("forward_list insert_after")
     {
-        estd::forward_list<test_node> list;
+        estd::intrustive_forward_list<test_node> list;
         test_node nodes[3];
         test_node last_node;
 
@@ -210,7 +210,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list custom node")
     {
-        estd::forward_list<test_node_handle, explicit_handle_node_traits> list;
+        estd::internal::forward_list<test_node_handle, explicit_handle_node_traits> list;
         test_node_handle item1;
 
         item1.val = 7;
@@ -232,7 +232,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list erase_after")
     {
-        estd::forward_list<test_node> list;
+        estd::intrustive_forward_list<test_node> list;
         test_node nodes[3];
 
         nodes[0].val = 0;
@@ -274,7 +274,7 @@ TEST_CASE("linkedlist")
 #endif
     SECTION("Forward list: remove")
     {
-        estd::forward_list<test_node> list;
+        estd::intrustive_forward_list<test_node> list;
         test_node nodes[3];
 
         nodes[0].val = 0;
@@ -294,7 +294,7 @@ TEST_CASE("linkedlist")
     }
     SECTION("Forward list: remove #2")
     {
-        estd::forward_list<estd::experimental::forward_node<int>> list;
+        estd::intrustive_forward_list<estd::experimental::forward_node<int>> list;
         estd::experimental::forward_node<int> nodes[3];
 
         nodes[0].value() = 0;
@@ -317,7 +317,7 @@ TEST_CASE("linkedlist")
     SECTION("Forward list: remove_if")
     {
         typedef estd::experimental::forward_node<int> node_t;
-        estd::forward_list<node_t> list;
+        estd::intrustive_forward_list<node_t> list;
         node_t nodes[3];
 
         nodes[0].value() = 0;
@@ -340,7 +340,7 @@ TEST_CASE("linkedlist")
     SECTION("Ensure alloc_front failure for intrusive-style list")
     {
         typedef estd::experimental::forward_node<int> node_t;
-        estd::forward_list<node_t> list;
+        estd::intrustive_forward_list<node_t> list;
 
         node_t node1;
 
@@ -378,7 +378,7 @@ TEST_CASE("linkedlist")
         typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, value_allocator_t > node_traits_t;
         //estd::forward_list<long, node_t, allocator_t, node_traits_t > list;
 
-        estd::forward_list<long, node_t> list;
+        estd::internal::forward_list<long, node_t> list;
 
         list.emplace_front(4);
 
@@ -401,7 +401,7 @@ TEST_CASE("linkedlist")
         typedef estd::experimental_std_allocator<node_t> allocator_t;
         typedef estd::nothing_allocator<long> value_allocator_t;
         typedef estd::inlinevalue_node_traits_new_base< node_t, allocator_t, value_allocator_t > node_traits_t;
-        estd::list<long, node_t, allocator_t, node_traits_t> list;
+        estd::internal::list_base<long, node_t, allocator_t, node_traits_t> list;
 
         auto i2 = list.insert(list.begin(), 5);
         list.push_front(3);

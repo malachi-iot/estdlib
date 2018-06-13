@@ -26,6 +26,13 @@ class node_traits<experimental::ValueNode<TValue, experimental::forward_node_bas
 
 };
 
+// putting root forward_list inside internal namespace for now, because it's so
+// fluid in its allocation capabilities that it's a bit confusing to leave it
+// as regular estd::forward_list - the crux of the problem being what implicit
+// behavior do we want estd::forward_list to have?  I was defaulting it to intrusive,
+// but that's the least-compatible option with std::forward_list
+namespace internal {
+
 
 // TODO: Due to the requisite deviation for Allocator to take a <T>,
 // consider adding Allocator (<T>) to forward list and yanking all allocator
@@ -34,17 +41,17 @@ class node_traits<experimental::ValueNode<TValue, experimental::forward_node_bas
 // present a 'default' allocator , though this might conflict with a default of
 // std::allocator<T> specialization, but that itself is deprecated for C++17
 template<class T, class TNode = T,
-         class TNodeAllocator = experimental_std_allocator<TNode>,
-         class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
-class forward_list : public internal::linkedlist_base<T, TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> >
+        class TNodeAllocator = experimental_std_allocator<TNode>,
+        class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
+class forward_list : public linkedlist_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> >
 {
 public:
-    typedef internal::linkedlist_base<T, TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> > base_t;
+    typedef internal::linkedlist_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits> > base_t;
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;
     typedef typename base_t::iterator iterator;
-    typedef const iterator   const_iterator;
+    typedef const iterator const_iterator;
     typedef typename base_t::node_allocator_t node_allocator_t;
     //typedef typename node_traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef node_allocator_t allocator_t;
@@ -61,6 +68,7 @@ protected:
     //typedef typename node_traits_t::node_handle node_handle;
 
     static CONSTEXPR node_handle after_end_node() { return base_t::after_end_node(); }
+
     // FIX: before_beginning_node() needs work, not gonna really work like this
     static CONSTEXPR node_handle before_beginning_node() { return after_end_node(); }
 
@@ -91,7 +99,7 @@ protected:
 
 public:
     forward_list(allocator_t* allocator = NULLPTR) :
-        base_t(allocator) {}
+            base_t(allocator) {}
 
     void pop_front()
     {
@@ -112,10 +120,12 @@ public:
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
+
     void push_front(value_type&& value)
     {
         base_t::set_front(base_t::traits.alloc_move(std::forward<value_type>(value)));
     }
+
 #endif
 
 
@@ -153,8 +163,8 @@ public:
     // 'semi-intrusive' where really it is intrusive but in reverse, forward_list allocates
     //                  both the node and value_type together as part of the node.  In effect
     //                  keeps copies of items placed into array
-    template <class... TArgs>
-    node_handle emplace_front( TArgs&&... args )
+    template<class... TArgs>
+    node_handle emplace_front(TArgs&& ... args)
     {
         static_assert(node_traits_t::can_emplace(), "This node allocator cannot emplace");
 
@@ -168,18 +178,19 @@ public:
         // TODO: Use some form of accessor here instead, more useful than a raw handle
         return h;
     }
+
 #endif
 
 
     // deviates from std C++ in that this optionally shall remove the first item found
     // in the list, rather than all items matching
-    template <class UnaryPredicate>
+    template<class UnaryPredicate>
     void remove_if(UnaryPredicate p, bool first_only = false)
     {
         node_handle current = base_t::m_front;
         node_handle previous = before_beginning_node();
 
-        while(current != after_end_node())
+        while (current != after_end_node())
         {
             node_handle _next = next(current);
             node_type& current_locked = alloc_lock(current);
@@ -188,16 +199,16 @@ public:
 
             alloc_unlock(current);
 
-            if(matched)
+            if (matched)
             {
                 // If we match but there's no previous node
-                if(previous == before_beginning_node())
+                if (previous == before_beginning_node())
                     // then instead of splicing, we are replacing the front node
                     base_t::m_front = _next;
                 else
                     set_next(previous, _next);
 
-                if(first_only) return;
+                if (first_only) return;
             }
 
             previous = current;
@@ -214,10 +225,9 @@ public:
     void remove(nv_reference value, bool first_only = false)
     {
 #ifdef FEATURE_CPP_LAMBDA
-        remove_if([&value](nv_reference compare_to)
-                  {
-                      return value == compare_to;
-                  }, first_only );
+        remove_if([&value](nv_reference compare_to) {
+            return value == compare_to;
+        }, first_only);
 #else
         node_handle current = base_t::m_front;
         node_handle previous = before_beginning_node();
@@ -249,6 +259,12 @@ public:
 #endif
     }
 };
+
+}
+
+// Inspired by ETL library
+template <class T>
+class intrustive_forward_list : public internal::forward_list<T>  { };
 
 #ifdef UNUSED
 // yanked directly in from util.embedded
