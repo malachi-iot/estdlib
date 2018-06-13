@@ -6,7 +6,11 @@
 
 // not doing #include <stdio.h> because all its putc/putchar macros get things
 // confused
+#if defined(__GNU_LIBRARY__)
+extern "C" int sprintf ( char * str, const char * format, ... ) __THROWNL;
+#else
 extern "C" int sprintf ( char * str, const char * format, ... );
+#endif
 
 namespace estd {
 

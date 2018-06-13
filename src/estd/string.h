@@ -287,6 +287,9 @@ public:
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template <size_t N>
 using string = basic_string<char, N>;
+#else
+template <size_t N>
+class string : public basic_string<char, N> { };
 #endif
 
 }

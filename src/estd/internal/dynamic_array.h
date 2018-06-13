@@ -547,11 +547,16 @@ public:
     // allocator itself only needs to be stateful if it needs to do handle locking
     // if not, then we assume it's pointer based and thusly can access the item
     // without an allocator pointer, stateful or otherwise
+#ifdef FEATURE_CPP_CONSTEXPR
     typedef typename std::conditional<
                 allocator_traits::is_stateful() && allocator_traits::is_locking(),
                 estd::internal::accessor<allocator_type>,
                 estd::internal::accessor_stateless<allocator_type> >::type
                 accessor;
+#else
+    // pre C++11 tricky to optimize this way
+    typedef estd::internal::accessor<allocator_type> accessor;
+#endif
 
     class iterator
     {
