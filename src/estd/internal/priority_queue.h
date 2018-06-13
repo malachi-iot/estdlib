@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "estd/vector.h"
-#include "estd/functional.h"
+#include "../vector.h"
+#include "../functional.h"
 
 namespace estd {
 
@@ -57,7 +57,7 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push(value_type&& value)
     {
-        c.push_back(std::forward<value_type>(value));
+        c.push_back(std::move(value));
         std::push_heap(c.begin(), c.end(), get_compare());
     }
 

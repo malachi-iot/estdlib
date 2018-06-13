@@ -27,7 +27,7 @@ public:
     typedef TValue value_type;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    RefNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
+    RefNode(value_type&& value) : m_value(std::move(value)) {}
 #endif
 
     RefNode(const value_type& value) : m_value(value) {}
@@ -57,7 +57,7 @@ public:
 
     }
 #else
-    ValueNode(value_type&& value) : m_value(std::forward<value_type>(value)) {}
+    ValueNode(value_type&& value) : m_value(std::move(value)) {}
 #endif
 #endif
 
@@ -295,7 +295,7 @@ struct inlinevalue_node_traits_new_base :
 
         // expects constructor to pass through the moved value
         // (in other words, node_type has a value_type&& constructor)
-        new (&n) node_type(std::forward<value_type>(v));
+        new (&n) node_type(std::move(v));
 
         base_t::unlock_node(h);
 

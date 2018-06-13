@@ -217,7 +217,7 @@ public:
     {
         value_type& back = *m_back++;
 
-        new (&back) value_type(std::forward<value_type>(value));
+        new (&back) value_type(std::move(value));
 
         evaluate_rollover(&m_back);
         m_empty = false;
@@ -277,7 +277,7 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     bool push(value_type&& value)
     {
-        return c.push_back(std::forward<value_type>(value));
+        return c.push_back(std::move(value));
     }
 #endif
 };

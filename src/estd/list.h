@@ -90,14 +90,14 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push_front(T&& value)
     {
-        node_handle new_front = base_t::traits.alloc_move(std::forward<T>(value));
+        node_handle new_front = base_t::traits.alloc_move(std::move(value));
 
         push_front(new_front);
     }
 
     void push_back(T&& value)
     {
-        push_back(base_t::traits.alloc_move(std::forward<T>(value)));
+        push_back(base_t::traits.alloc_move(std::move(value)));
     }
 #endif
 

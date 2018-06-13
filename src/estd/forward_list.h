@@ -123,7 +123,7 @@ public:
 
     void push_front(value_type&& value)
     {
-        base_t::set_front(base_t::traits.alloc_move(std::forward<value_type>(value)));
+        base_t::set_front(base_t::traits.alloc_move(std::move(value)));
     }
 
 #endif

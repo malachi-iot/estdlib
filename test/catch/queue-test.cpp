@@ -76,11 +76,11 @@ TEST_CASE("queue-test")
         value1.val1 = 7;
         value1.value2 = "hi there 1";
 
-        q.push(std::forward<Dummy>(value1));
+        q.push(std::move(value1));
 
         value1.val1 = 8;
 
-        q.push(std::forward<Dummy>(value1));
+        q.push(std::move(value1));
 
         REQUIRE(q.front().val1 == 7);
         q.pop();
@@ -88,11 +88,11 @@ TEST_CASE("queue-test")
 
         value1.val1 = 9;
 
-        q.push(std::forward<Dummy>(value1));
+        q.push(std::move(value1));
 
         value1.val1 = 10;
 
-        q.push(std::forward<Dummy>(value1));
+        q.push(std::move(value1));
 
         q.pop();
         REQUIRE(q.front().val1 == 9);

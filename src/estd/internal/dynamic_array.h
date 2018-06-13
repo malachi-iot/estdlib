@@ -323,7 +323,7 @@ protected:
         // but not sure why
         memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
-        new (to_insert_pos) value_type(std::forward<value_type>(to_insert_value));
+        new (to_insert_pos) value_type(std::move(to_insert_value));
     }
 #endif
 
@@ -526,7 +526,7 @@ public:
 
         value_type* raw = lock(current_size);
 
-        new (raw) value_type(std::forward<value_type>(value));
+        new (raw) value_type(std::move(value));
 
         unlock();
     }
@@ -778,7 +778,7 @@ public:
         reference pos_item = pos.lock();
 
         // all very raw array dependent
-        raw_insert(a, &pos_item, std::forward<value_type>(value));
+        raw_insert(a, &pos_item, std::move(value));
 
         pos.unlock();
 

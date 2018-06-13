@@ -242,11 +242,11 @@ TEST_CASE("vector tests")
 
         Item i, i2;
 
-        v.push_back(std::forward<Item>(i));
+        v.push_back(std::move(i));
 
         i2.val = 5;
 
-        v.insert(v.end(), std::forward<Item>(i2));
+        v.insert(v.end(), std::move(i2));
 
         auto it = v.begin();
 
