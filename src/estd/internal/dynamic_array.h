@@ -310,6 +310,23 @@ protected:
     }
 
 
+    // internal method for reassigning size, ensuring capacity is available
+    void ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
+    {
+        size_type cap = capacity();
+
+        if(new_size > cap)
+        {
+            // TODO: Do an assert here, or return true/false to indicate success
+            reserve(new_size + pad);
+        }
+
+        helper.size(new_size);
+
+        if(shrink) shrink_to_fit();
+    }
+
+
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void raw_insert(value_type* a, value_type* to_insert_pos, value_type&& to_insert_value)
     {
@@ -454,9 +471,7 @@ protected:
     // TODO: change to assign
     void assign(const value_type* buf, size_type len)
     {
-        reserve(len);
-
-        helper.size(len);
+        ensure_total_size(len);
 
         value_type* raw = lock();
 
@@ -486,7 +501,51 @@ protected:
         unlock();
     }
 
+
+    template <class ForeignHelper>
+    bool starts_with(const dynamic_array<typename ForeignHelper::allocator_type, ForeignHelper>& compare_to) const
+    {
+        const value_type* s = fake_const_lock();
+        const value_type* t = compare_to.fake_const_lock();
+
+        size_type source_max = size();
+        size_type target_max = compare_to.size();
+
+        while(source_max-- && target_max--)
+            if(*s++ != *t++)
+            {
+                fake_const_unlock();
+                return false;
+            }
+
+        fake_const_unlock();
+        // if compare_to is longer than we are, then it's also a fail
+        return source_max != -1;
+    }
+
+
 public:
+    // copy (into dest)
+    // officially only for basic_string, but lives happily here in dynamic_array
+    size_type copy(typename estd::remove_const<value_type>::type* dest,
+                   size_type count, size_type pos = 0) const
+    {
+        const value_type* src = fake_const_lock();
+
+        // TODO: since we aren't gonna throw an exception, determine what to do if
+        // pos > size()
+
+        if(pos + count > size())
+            count = size() - pos;
+
+        memcpy(dest, src + pos, count * sizeof(value_type));
+
+        fake_const_unlock();
+
+        return count;
+    }
+
+
     bool empty() const
     {
         return helper.empty();
@@ -541,10 +600,10 @@ public:
     }
 #endif
 
-    template <class ForeignAllocator, class ForeignHelper>
-    dynamic_array& operator=(const dynamic_array<ForeignAllocator, ForeignHelper>& copy_from)
+    template <class ForeignHelper>
+    dynamic_array& operator=(const dynamic_array<typename ForeignHelper::allocator_type, ForeignHelper>& copy_from)
     {
-        reserve(copy_from.size());
+        ensure_total_size(copy_from.size());
         copy_from.copy(lock(), capacity());
         unlock();
         return *this;
@@ -796,6 +855,11 @@ public:
         return pos;
     }
 #endif
+
+    void shrink_to_fit()
+    {
+        reserve(size());
+    }
 };
 
 

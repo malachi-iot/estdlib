@@ -371,6 +371,8 @@ class dynamic_array_fixedbuf_helper_base :
         public dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated, single_fixedbuf_allocator<T, len, null_terminated, TBuffer> >
 {
     typedef dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated, single_fixedbuf_allocator<T, len, null_terminated, TBuffer> > base_t;
+
+public:
     typedef typename base_t::allocator_type allocator_type;
 
 protected:
@@ -402,12 +404,16 @@ class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
 {
 protected:
     typedef dynamic_array_fixedbuf_helper_base<T, len, false, TBuffer> base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    /*
     typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
     typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::value_type value_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_type::handle_with_offset handle_with_offset; */
 
 public:
     dynamic_array_helper(allocator_type* = NULLPTR) {}
@@ -425,15 +431,15 @@ class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
 {
 protected:
     typedef dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer> base_t;
+    /*
     typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
     typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_type::handle_with_size handle_with_size;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
-    typedef T value_type;
+    typedef T value_type; */
 
 public:
-
     struct InitParam
     {
         const TBuffer& b;
@@ -507,10 +513,11 @@ class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false,
 {
     typedef dynamic_array_fixedbuf_helper_base_base<false,
         single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
+
+public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
 
-public:
     dynamic_array_helper(const typename allocator_type::InitParam& p) : base_t(p) {}
 
     dynamic_array_helper(const dynamic_array_helper& copy_from) :

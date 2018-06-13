@@ -89,24 +89,6 @@ public:
         return *this;
     }
 
-    size_type copy(typename estd::remove_const<value_type>::type* dest,
-                   size_type count, size_type pos = 0) const
-    {
-        const value_type* src = base_t::fake_const_lock();
-
-        // TODO: since we aren't gonna throw an exception, determine what to do if
-        // pos > size()
-
-        if(pos + count > length())
-            count = length() - pos;
-
-        memcpy(dest, src + pos, count);
-
-        base_t::fake_const_unlock();
-
-        return count;
-    }
-
     basic_string& append(size_type count, value_type c)
     {
         while(count--) base_t::push_back(c);
@@ -197,14 +179,8 @@ public:
                                 ForeignAllocator,
                                 ForeignTraitsT>& copy_from)
     {
-        base_t::reserve(copy_from.size());
-        base_t::helper.size(copy_from.size());
-        // remember, capacity indicates the biggest size
-        // the this->buffer can be
-        size_type capacity = base_t::capacity();
-        // copy from copy_from into our own buffer
-        copy_from.copy(base_t::lock(), capacity);
-        base_t::unlock();
+        base_t::operator =(copy_from);
+
         return *this;
     }
 
@@ -239,22 +215,7 @@ public:
                      basic_string<
                         ForeignCharT, typename ForeignTraitsT::char_traits, ForeignAllocator, ForeignTraitsT>& compare_to)
     {
-        const value_type* s = base_t::fake_const_lock();
-        const value_type* t = compare_to.fake_const_lock();
-
-        size_type source_max = length();
-        size_type target_max = compare_to.length();
-
-        while(source_max-- && target_max--)
-            if(*s++ != *t++)
-            {
-                base_t::fake_const_unlock();
-                return false;
-            }
-
-        base_t::fake_const_unlock();
-        // if compare_to is longer than we are, then it's also a fail
-        return source_max != -1;
+        return base_t::starts_with(compare_to);
     }
 };
 
