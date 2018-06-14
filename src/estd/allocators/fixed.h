@@ -44,6 +44,8 @@ public:
 
     static CONSTEXPR bool is_stateful() { return true; }
 
+    static CONSTEXPR bool is_singular() { return true; }
+
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)
     {
@@ -95,6 +97,7 @@ struct single_fixedbuf_allocator : public
     typedef T value_type;
     typedef bool handle_type; // really I want it an empty struct
     typedef handle_type handle_with_size;
+    typedef typename base_t::size_type size_type;
 
 public:
     single_fixedbuf_allocator() {}
@@ -103,6 +106,11 @@ public:
     // up as map_base during debug session
     single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
 
+
+    handle_type reallocate(handle_type, size_type size)
+    {
+        return size <= len;
+    }
 
     handle_with_size allocate_ext(size_t size)
     {
