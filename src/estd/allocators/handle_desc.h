@@ -92,12 +92,22 @@ class handle_descriptor_base;
 template <class TAllocator>
 class handle_descriptor_base<TAllocator, true>
 {
+    typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::size_type size_type;
+
 protected:
     void handle(bool) {}
 
-public:
-    typedef bool handle_type;
+    value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
+    {
+        return a.lock(true, pos, len);
+    }
 
+    void unlock(allocator_type& a) { a.unlock(true); }
+
+public:
     bool handle() const { return true; }
 };
 
@@ -105,7 +115,10 @@ public:
 template <class TAllocator>
 struct handle_descriptor_base<TAllocator, false>
 {
-    typedef typename remove_reference<TAllocator>::type::handle_type handle_type;
+    typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::size_type size_type;
 
 private:
     handle_type m_handle;
@@ -115,43 +128,48 @@ protected:
 
     handle_descriptor_base(const handle_type& h) : m_handle(h) {}
 
+    value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
+    {
+        return a.lock(m_handle, pos, len);
+    }
+
+    void unlock(allocator_type& a) { a.unlock(m_handle); }
+
 public:
     bool handle() const { return m_handle; }
 };
 
-
-
-}
 
 // base_base manages stateful+singular, but doesn't yet touch has_size
 // singular allocators have a simplified handle model, basically true = successful/good handle
 // false = bad/unallocated handle - we assume always good handle for this descriptor, so no
 // handle is actually tracked
 template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_base_base :
-        public impl::allocator_descriptor_base<TAllocator, is_stateful>,
-        public impl::handle_descriptor_base<TAllocator, is_singular>
+class allocator_and_handle_descriptor_base :
+        public allocator_descriptor_base<TAllocator, is_stateful>,
+        public handle_descriptor_base<TAllocator, is_singular>
 {
-    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> this_t;
-    typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
-    typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
+    typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> this_t;
+    typedef allocator_descriptor_base<TAllocator, is_stateful> base_t;
+    typedef handle_descriptor_base<TAllocator, is_singular> handle_base_t;
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
-    typedef allocator_traits<allocator_type> allocator_traits;
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
 
 public:
+    // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
     template <class TAllocatorParameter>
-    handle_descriptor_base_base(TAllocatorParameter& p) :
-        base_t(p) {}
+    allocator_and_handle_descriptor_base(TAllocatorParameter& p) :
+            base_t(p) {}
 
-    handle_descriptor_base_base() {}
+    allocator_and_handle_descriptor_base() {}
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
-        return base_t::get_allocator().lock(handle_base_t::handle(), pos, count);
+        return handle_base_t::lock(base_t::get_allocator(), pos, count);
     }
 
     // a necessary evil - since most STL-type operations reasonably are const'd for things
@@ -162,7 +180,7 @@ public:
         return const_cast<this_t*>(this)->lock();
     }
 
-    void unlock() { base_t::get_allocator().unlock(handle_base_t::handle()); }
+    void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
 
     void cunlock() const { const_cast<this_t*>(this)->unlock(); }
 
@@ -175,12 +193,16 @@ public:
 
 
 
+
+}
+
+
 // With explicit size knowledge
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
-        public handle_descriptor_base_base<TAllocator, is_stateful, is_singular>
+        public impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
 {
-    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> base_t;
+    typedef impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -232,9 +254,9 @@ class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
 // and current allocated size.  Useful for allocators in a permanent const-mode
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_parity :
-        handle_descriptor_base_base<TAllocator, is_stateful, is_singular>
+        impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
 {
-    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> base_t;
+    typedef impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
 
 public:
     typedef typename base_t::size_type size_type;
