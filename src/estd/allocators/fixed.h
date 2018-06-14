@@ -4,6 +4,7 @@
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
 #include <string.h> // for strlen
+#include "../allocators/handle_desc.h"
 
 namespace estd {
 
@@ -400,7 +401,7 @@ public:
 
 
 
-
+#ifdef UNUSED
 // as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
 // and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
 // template <>
@@ -426,11 +427,12 @@ public:
 public:
     dynamic_array_helper(allocator_type* = NULLPTR) {}
 };
+#endif
 
 
+#define NEW_DYNAMIC_ARRAY_HELPER
 
-
-
+#ifndef NEW_DYNAMIC_ARRAY_HELPER
 // applies generally to T[N], RW buffer but also to non-const T*
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer>
@@ -478,7 +480,114 @@ public:
         base_t::size(0);
     }
 };
+#else
 
+// intermediate class as we transition to handle_descriptor.  Eventually phase this out
+template <class TAllocator>
+class handle_descriptor_helper : public handle_descriptor<TAllocator>
+{
+    typedef handle_descriptor<TAllocator> base_t;
+
+public:
+    handle_descriptor_helper() {}
+
+    template <class TAllocatorParameter>
+    handle_descriptor_helper(TAllocatorParameter& p) : base_t(p) {}
+
+
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    // I hate clock/cunlock, but necessary evil.  Standins for old code when
+    // it was still experimental
+    value_type& clock_experimental(size_type pos, size_type n) const
+    {
+        return base_t::clock(pos, n);
+    }
+
+    void cunlock_experimental() const { base_t::cunlock(); }
+
+
+
+
+    // Helper for old dynamic_array code.  New one I'm thinking caller
+    // can shoulder this burden
+    handle_with_offset offset(size_type pos) const
+    {
+        return base_t::get_allocator().offset(base_t::handle(), pos);
+    }
+
+    // +++
+    // these I'd also like in handle_descriptor, however currently handle_descriptor
+    // (gently) requires handle already be allocated, so these are akward in there
+    bool is_allocated() const
+    {
+        return base_t::allocator_traits::invalid() != base_t::handle();
+    }
+
+    bool allocate(size_type n)
+    {
+        base_t::handle(base_t::get_allocator().allocate(n));
+        return is_allocated();
+    }
+    // ---
+};
+
+
+// applies generally to T[N], RW buffer but also to non-const T*
+// applies specifically to null-terminated
+template <class T, size_t len, class TBuffer>
+class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
+        : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
+{
+    typedef handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer> > base_t;
+
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::handle_type handle_type;
+
+    static CONSTEXPR bool uses_termination() { return true; }
+
+
+    // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
+    // 'used' size within that allocation.  For this variety, we are null terminated
+    size_type size() const
+    {
+        if(!base_t::is_allocated()) return 0;
+
+        size_type l = strlen(&base_t::clock());
+        base_t::cunlock();
+        return l;
+    }
+
+    // null terminated variety
+    void size(size_type pos)
+    {
+        base_t::lock(pos, 1) = 0;
+        base_t::unlock();
+    }
+
+    // repurposing/renaming of what size meant before (ALLOCATED) vs now
+    // (USED within ALLOCATED)
+    size_type capacity() const { return base_t::size(); }
+
+    dynamic_array_helper(TBuffer b) : base_t(b)
+    {
+        size(0);
+    }
+
+    dynamic_array_helper()
+    {
+        size(0);
+    }
+};
+
+#endif
 
 // attempt to specialize for const T* scenarios
 // for now, seems to be necessary in parallel with the following more-specialized version

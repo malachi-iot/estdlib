@@ -52,6 +52,11 @@ class allocator_descriptor_base<TAllocator, true>
     TAllocator allocator;
 
 protected:
+    // NOTE: variadic would be nice, but obviously not always available
+    template <class TAllocatorParameter>
+    allocator_descriptor_base(TAllocatorParameter& p) :
+        allocator(p) {}
+
     allocator_descriptor_base(TAllocator& a) : allocator(a) {}
 
     // Not unusual for a stateful allocator to default construct itself just
@@ -60,8 +65,15 @@ protected:
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_type::handle_type handle_type;
 
+    // Would be nice if we could const this, but for stateful allocators that's not reasonable
     allocator_type& get_allocator() { return allocator; }
+
+    const allocator_type& get_allocator() const { return allocator; }
+
+protected:
 };
 
 
@@ -70,7 +82,7 @@ struct allocator_descriptor_base<TAllocator, false>
 {
     typedef TAllocator allocator_type;
 
-    allocator_type& get_allocator() { return TAllocator(); }
+    allocator_type get_allocator() const { return TAllocator(); }
 };
 
 // singular technically doesn't track a handle
@@ -117,9 +129,10 @@ public:
 // handle is actually tracked
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
-        impl::allocator_descriptor_base<TAllocator, is_stateful>,
-        impl::handle_descriptor_base<TAllocator, is_singular>
+        public impl::allocator_descriptor_base<TAllocator, is_stateful>,
+        public impl::handle_descriptor_base<TAllocator, is_singular>
 {
+    typedef handle_descriptor_base<TAllocator, is_stateful, false, is_singular> this_t;
     typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
     typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
 
@@ -132,7 +145,15 @@ public:
 private:
     size_type m_size;
 
+protected:
+    void size(size_type n) { m_size = n; }
+
 public:
+    template <class TAllocatorParameter>
+    handle_descriptor_base(TAllocatorParameter& p) :
+        base_t(p),
+        m_size(0) {}
+
     handle_descriptor_base(allocator_type& allocator, size_type initial_size = 0) :
         base_t(allocator),
         m_size(initial_size) {}
@@ -147,13 +168,24 @@ public:
         return base_t::get_allocator().lock(handle_base_t::handle(), pos, count);
     }
 
+    // a necessary evil - since most STL-type operations reasonably are const'd for things
+    // like 'size' etc, but underlying mechanisms which they call (this one in particular)
+    // are not const when it comes to locking/stateful operations
+    value_type& clock(size_type pos = 0, size_type count = 0) const
+    {
+        return const_cast<this_t*>(this)->lock();
+    }
+
     void unlock() { base_t::get_allocator().unlock(handle_base_t::handle()); }
 
-    void reallocate(size_type size)
+    void cunlock() const { const_cast<this_t*>(this)->unlock(); }
+
+    bool reallocate(size_type size)
     {
         // TODO: Figure out what to do if reallocation fails here
         handle_base_t::handle(base_t::get_allocator().reallocate(true, size));
         m_size = size;
+        return handle_base_t::handle() != allocator_traits::invalid();
     }
 
     bool get_handle() const { return true; }
@@ -173,6 +205,8 @@ class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
 };
 
 
+// NOTE: Pretty sure this isn't < C++11 friendly, so be sure to do explicit specializations
+// for particular TAllocator varieties - will have to work out TAllocator& for those as well
 template <class TAllocator,
           class TTraits = allocator_traits<typename remove_reference<TAllocator>::type>>
 class handle_descriptor :
@@ -192,6 +226,9 @@ public:
     handle_descriptor() {}
 
     handle_descriptor(TAllocator& a) : base_t(a) {}
+
+    template <class TAllocatorParameter>
+    handle_descriptor(TAllocatorParameter& p) : base_t(p) {}
 };
 
 
