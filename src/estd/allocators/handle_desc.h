@@ -2,6 +2,7 @@
 
 #include "../type_traits.h"
 #include "../traits/allocator_traits.h"
+#include <cassert>
 
 namespace estd { namespace internal {
 
@@ -56,8 +57,6 @@ protected:
     template <class TAllocatorParameter>
     allocator_descriptor_base(TAllocatorParameter& p) :
         allocator(p) {}
-
-    allocator_descriptor_base(TAllocator& a) : allocator(a) {}
 
     // Not unusual for a stateful allocator to default construct itself just
     // how we want it
@@ -124,15 +123,16 @@ public:
 
 }
 
+// base_base manages stateful+singular, but doesn't yet touch has_size
 // singular allocators have a simplified handle model, basically true = successful/good handle
 // false = bad/unallocated handle - we assume always good handle for this descriptor, so no
 // handle is actually tracked
 template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
+class handle_descriptor_base_base :
         public impl::allocator_descriptor_base<TAllocator, is_stateful>,
         public impl::handle_descriptor_base<TAllocator, is_singular>
 {
-    typedef handle_descriptor_base<TAllocator, is_stateful, false, is_singular> this_t;
+    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> this_t;
     typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
     typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
 
@@ -142,26 +142,12 @@ public:
     typedef typename allocator_type::size_type size_type;
     typedef allocator_traits<allocator_type> allocator_traits;
 
-private:
-    size_type m_size;
-
-protected:
-    void size(size_type n) { m_size = n; }
-
 public:
     template <class TAllocatorParameter>
-    handle_descriptor_base(TAllocatorParameter& p) :
-        base_t(p),
-        m_size(0) {}
+    handle_descriptor_base_base(TAllocatorParameter& p) :
+        base_t(p) {}
 
-    handle_descriptor_base(allocator_type& allocator, size_type initial_size = 0) :
-        base_t(allocator),
-        m_size(initial_size) {}
-
-    handle_descriptor_base(size_type initial_size = 0) :
-        m_size(initial_size) {}
-
-    size_type size() const { return m_size; }
+    handle_descriptor_base_base() {}
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
@@ -182,15 +168,52 @@ public:
 
     bool reallocate(size_type size)
     {
-        // TODO: Figure out what to do if reallocation fails here
         handle_base_t::handle(base_t::get_allocator().reallocate(true, size));
-        m_size = size;
         return handle_base_t::handle() != allocator_traits::invalid();
     }
-
-    bool get_handle() const { return true; }
 };
 
+
+
+// With explicit size knowledge
+template <class TAllocator, bool is_stateful, bool is_singular>
+class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
+        public handle_descriptor_base_base<TAllocator, is_stateful, is_singular>
+{
+    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::allocator_traits allocator_traits;
+
+private:
+    size_type m_size;
+
+protected:
+    void size(size_type n) { m_size = n; }
+
+    handle_descriptor_base() {}
+
+    template <class TAllocatorParameter>
+    handle_descriptor_base(TAllocatorParameter& p) :
+        base_t(p) {}
+
+    handle_descriptor_base(allocator_type& allocator, size_type initial_size = 0) :
+        base_t(allocator),
+        m_size(initial_size)
+    {}
+
+
+public:
+    size_type size() const { return m_size; }
+
+    bool reallocate(size_type size)
+    {
+        m_size = size;
+        return base_t::reallocate(size);
+    }
+};
 
 
 // WITH implicit size knowledge (standard allocator model)
@@ -202,6 +225,27 @@ class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
 {
     typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
     typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
+};
+
+
+// Special-case handle descriptor who has a 1:1 parity with maximum
+// and current allocated size.  Useful for allocators in a permanent const-mode
+template <class TAllocator, bool is_stateful, bool is_singular>
+class handle_descriptor_parity :
+        handle_descriptor_base_base<TAllocator, is_stateful, is_singular>
+{
+    typedef handle_descriptor_base_base<TAllocator, is_stateful, is_singular> base_t;
+
+public:
+    typedef typename base_t::size_type size_type;
+
+    size_type size() const { return base_t::get_allocator().max_size(); }
+
+    bool reallocate(size_type size)
+    {
+        // Cannot issue a reallocate for this type of allocator
+        assert(false);
+    }
 };
 
 
