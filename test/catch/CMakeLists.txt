@@ -11,6 +11,7 @@ add_subdirectory(${ESTDLIB_DIR} estdlib)
 include_directories(${ESTDLIB_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
+    allocator-test.cpp
     array-test.cpp
     experimental-test.cpp
     list-test.cpp
@@ -19,7 +20,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     queue-test.cpp
     string-test.cpp
     test-data.h
-        vector-test.cpp
+    vector-test.cpp
         priority-queue-test.cpp)
 
 target_link_libraries(${PROJECT_NAME} estd_lib)

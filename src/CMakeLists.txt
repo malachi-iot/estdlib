@@ -7,6 +7,7 @@ set(SOURCE_FILES
         estd/algorithm.h
         estd/allocators/fixed.h
         estd/allocators/generic.h
+        estd/allocators/handle_desc.h
        estd/array.h
         estd/forward_list.h
         estd/functional.h
