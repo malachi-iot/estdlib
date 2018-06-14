@@ -155,5 +155,7 @@ public:
     {
         return handle_with_offset(h + size);
     }
+
+    static CONSTEXPR bool is_stateful() { return false; }
 };
 

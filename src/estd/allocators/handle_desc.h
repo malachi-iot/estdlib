@@ -45,10 +45,18 @@ template <class TAllocator, bool is_stateful>
 class allocator_descriptor_base;
 
 
+// TAllocator could be a ref here
 template <class TAllocator>
 class allocator_descriptor_base<TAllocator, true>
 {
     TAllocator allocator;
+
+protected:
+    allocator_descriptor_base(TAllocator& a) : allocator(a) {}
+
+    // Not unusual for a stateful allocator to default construct itself just
+    // how we want it
+    allocator_descriptor_base() {}
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
@@ -66,6 +74,7 @@ struct allocator_descriptor_base<TAllocator, false>
 };
 
 // singular technically doesn't track a handle
+// TODO: refactor to utilize value_evaporator (get_allocator, too)
 template <class TAllocator, bool is_singular>
 class handle_descriptor_base;
 
@@ -73,25 +82,46 @@ template <class TAllocator>
 class handle_descriptor_base<TAllocator, true>
 {
 protected:
-    void set_handle(bool) {}
+    void handle(bool) {}
 
 public:
-    bool get_handle() const { return true; }
+    typedef bool handle_type;
+
+    bool handle() const { return true; }
+};
+
+
+template <class TAllocator>
+struct handle_descriptor_base<TAllocator, false>
+{
+    typedef typename remove_reference<TAllocator>::type::handle_type handle_type;
+
+private:
+    handle_type m_handle;
+
+protected:
+    void handle(const handle_type& h) { m_handle = h; }
+
+    handle_descriptor_base(const handle_type& h) : m_handle(h) {}
+
+public:
+    bool handle() const { return m_handle; }
 };
 
 
 
 }
 
-// singular without implicit size knowledge
 // singular allocators have a simplified handle model, basically true = successful/good handle
 // false = bad/unallocated handle - we assume always good handle for this descriptor, so no
 // handle is actually tracked
-template <class TAllocator, bool is_stateful>
-class handle_descriptor_base<TAllocator, is_stateful, false, true> :
-        impl::allocator_descriptor_base<TAllocator, is_stateful>
+template <class TAllocator, bool is_stateful, bool is_singular>
+class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
+        impl::allocator_descriptor_base<TAllocator, is_stateful>,
+        impl::handle_descriptor_base<TAllocator, is_singular>
 {
-    typedef impl::allocator_descriptor_base<TAllocator, true> base_t;
+    typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
+    typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
@@ -103,21 +133,26 @@ private:
     size_type m_size;
 
 public:
-    handle_descriptor_base(size_type initial_size = 0) : m_size(initial_size) {}
+    handle_descriptor_base(allocator_type& allocator, size_type initial_size = 0) :
+        base_t(allocator),
+        m_size(initial_size) {}
+
+    handle_descriptor_base(size_type initial_size = 0) :
+        m_size(initial_size) {}
 
     size_type size() const { return m_size; }
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
-        return base_t::get_allocator().lock(true, pos, count);
+        return base_t::get_allocator().lock(handle_base_t::handle(), pos, count);
     }
 
-    void unlock() { base_t::get_allocator().unlock(); }
+    void unlock() { base_t::get_allocator().unlock(handle_base_t::handle()); }
 
     void reallocate(size_type size)
     {
         // TODO: Figure out what to do if reallocation fails here
-        base_t::get_allocator().reallocate(true, size);
+        handle_base_t::handle(base_t::get_allocator().reallocate(true, size));
         m_size = size;
     }
 
@@ -126,20 +161,15 @@ public:
 
 
 
-// non-singular without implicit size knowledge (standard allocator model)
-template <class TAllocator, bool is_stateless>
-class handle_descriptor_base<TAllocator, is_stateless, false, false> :
-        impl::allocator_descriptor_base<TAllocator, is_stateless>
+// WITH implicit size knowledge (standard allocator model)
+// TBD
+template <class TAllocator, bool is_stateful, bool is_singular>
+class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
+        impl::allocator_descriptor_base<TAllocator, is_stateful>,
+        impl::handle_descriptor_base<TAllocator, is_singular>
 {
-
-};
-
-
-// singluar *with* implicit size knowledge
-template <class TAllocator, bool is_stateless>
-class handle_descriptor_base<TAllocator, is_stateless, true, true>
-{
-
+    typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
+    typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
 };
 
 
@@ -148,11 +178,20 @@ template <class TAllocator,
 class handle_descriptor :
         public handle_descriptor_base<
             TAllocator,
-            TAllocator::is_stateful(),
+            TTraits::is_stateful(),
             false,
-            TAllocator::is_singular() >
+            TTraits::is_singular() >
 {
+    typedef handle_descriptor_base<
+            TAllocator,
+            TTraits::is_stateful(),
+            false,
+            TTraits::is_singular() > base_t;
 
+public:
+    handle_descriptor() {}
+
+    handle_descriptor(TAllocator& a) : base_t(a) {}
 };
 
 

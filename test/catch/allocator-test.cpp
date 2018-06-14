@@ -16,10 +16,26 @@ TEST_CASE("allocator tests")
     {
         typedef single_fixedbuf_allocator<int, 10> allocator_t;
 
-        handle_descriptor<allocator_t> d;
+        SECTION("inline")
+        {
+            handle_descriptor<allocator_t> d;
 
-        int size = d.size();
-        d.reallocate(5);
-        int* val_array = &d.lock();
+            int szof = sizeof(d);
+
+            int size = d.size();
+            d.reallocate(5);
+            int* val_array = &d.lock();
+        }
+        SECTION("referenced")
+        {
+            allocator_t allocator;
+            handle_descriptor<allocator_t&> d(allocator);
+
+            int szof = sizeof(d);
+
+            int size = d.size();
+            d.reallocate(5);
+            int* val_array = &d.lock();
+        }
     }
 }

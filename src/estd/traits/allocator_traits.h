@@ -41,7 +41,11 @@ struct allocator_traits
 
     // indicates whether the allocator_type is stateful (requiring an instance variable)
     // or purely static
-    static CONSTEXPR bool is_stateful() { return true; }
+    static CONSTEXPR bool is_stateful() { return TAllocator::is_stateful(); }
+
+    // indicates whether the allocator_type is stateful (requiring an instance variable)
+    // or purely static
+    static CONSTEXPR bool is_singular() { return TAllocator::is_singular(); }
 
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
