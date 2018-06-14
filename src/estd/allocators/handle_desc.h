@@ -93,11 +93,14 @@ template <class TAllocator>
 class handle_descriptor_base<TAllocator, true>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
-    typedef typename allocator_type::handle_type handle_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
 
 protected:
+    handle_descriptor_base(bool) {}
+    
+    typedef typename allocator_type::handle_type handle_type;
+
     void handle(bool) {}
 
     value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
@@ -157,15 +160,19 @@ public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
+    typedef typename handle_base_t::handle_type handle_type;
     typedef estd::allocator_traits<allocator_type> allocator_traits;
 
 public:
     // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
     template <class TAllocatorParameter>
-    allocator_and_handle_descriptor_base(TAllocatorParameter& p) :
-            base_t(p) {}
+    allocator_and_handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
+            base_t(p),
+            handle_base_t(h)
+    {}
 
-    allocator_and_handle_descriptor_base() {}
+    allocator_and_handle_descriptor_base(const handle_type& h) :
+        handle_base_t(h) {}
 
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
@@ -208,6 +215,7 @@ public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
     typedef typename base_t::allocator_traits allocator_traits;
+    typedef typename base_t::handle_type handle_type;
 
 private:
     size_type m_size;
@@ -215,14 +223,15 @@ private:
 protected:
     void size(size_type n) { m_size = n; }
 
-    handle_descriptor_base() {}
+    handle_descriptor_base(const handle_type& h) :
+            base_t(h) {}
 
     template <class TAllocatorParameter>
-    handle_descriptor_base(TAllocatorParameter& p) :
-        base_t(p) {}
+    handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
+        base_t(p, h) {}
 
-    handle_descriptor_base(allocator_type& allocator, size_type initial_size = 0) :
-        base_t(allocator),
+    handle_descriptor_base(allocator_type& allocator, const handle_type& h, size_type initial_size = 0) :
+        base_t(allocator, h),
         m_size(initial_size)
     {}
 
@@ -289,12 +298,12 @@ class handle_descriptor :
             TTraits::is_singular() > base_t;
 
 public:
-    handle_descriptor() {}
+    handle_descriptor() : base_t(TTraits::invalid()) {}
 
-    handle_descriptor(TAllocator& a) : base_t(a) {}
+    handle_descriptor(TAllocator& a) : base_t(a, TTraits::invalid()) {}
 
     template <class TAllocatorParameter>
-    handle_descriptor(TAllocatorParameter& p) : base_t(p) {}
+    handle_descriptor(TAllocatorParameter& p) : base_t(p, TTraits::invalid()) {}
 };
 
 
