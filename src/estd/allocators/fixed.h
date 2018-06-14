@@ -589,6 +589,7 @@ public:
 
 #endif
 
+#ifdef UNUSED
 // attempt to specialize for const T* scenarios
 // for now, seems to be necessary in parallel with the following more-specialized version
 // debugger doesn't pick up construction, but size() is invoked
@@ -606,6 +607,7 @@ public:
 
     dynamic_array_helper(const T* buf) : base_t(buf) {}
 };
+#endif
 
 
 // specialize for const T* scenarios
@@ -623,6 +625,9 @@ public:
 
 // for basic_string_view and const_string
 // runtime size information is stored in allocator itself, not helper
+// (not null terminated, since it's runtime-const fixed size)
+//#ifndef NEW_DYNAMIC_ARRAY_HELPER
+#ifndef UNUSED
 template <class T>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
         : public dynamic_array_fixedbuf_helper_base_base<false,
@@ -644,6 +649,41 @@ public:
 
     size_type size() const { return base_t::capacity(); }
 };
+#else
+// FIX: Not quite right yet, because it resolves to a handle_descriptor which tracks
+// a size but in this case we want a fallthrough which utilizes allocator size itself
+template <class T>
+class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+        : public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+{
+    typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::size_type size_type;
+
+    struct InitParam
+    {
+        T* buffer;
+        size_type size;
+
+        InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
+    };
+
+    dynamic_array_helper(const typename allocator_type::InitParam& p) :
+        base_t(p) {}
+
+    dynamic_array_helper(const dynamic_array_helper& copy_from) :
+        base_t(copy_from.get_allocator())
+    {
+    }
+
+    size_type capacity() const { return base_t::size(); }
+
+    size_type max_size() const { return base_t::get_allocator().max_size(); }
+};
+
+#endif
 
 
 // runtime (layer3-ish) version

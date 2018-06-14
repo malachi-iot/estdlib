@@ -54,7 +54,7 @@ public:
         // FIX: Not right - reallocate does nothing in this context
         // basic_string_view length/size hangs off max_capacity
         // of fixed allocator
-        base_t::helper.reallocate(base_t::capacity() - n);
+        //base_t::helper.reallocate(base_t::capacity() - n);
         //base_t::helper.size(base_t::helper.size() - n);
     }
 };
