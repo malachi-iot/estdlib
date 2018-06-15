@@ -222,198 +222,6 @@ public:
 template <class TAllocator>
 struct dynamic_array_helper;
 
-
-template <bool null_terminated, class TAllocator>
-class dynamic_array_fixedbuf_helper_base_base
-{
-protected:
-    typedef TAllocator allocator_type;
-
-    allocator_type allocator;
-
-    dynamic_array_fixedbuf_helper_base_base() {}
-
-    template <class TParam>
-    dynamic_array_fixedbuf_helper_base_base(TParam p) : allocator(p) {}
-
-public:
-    typedef estd::allocator_traits<allocator_type> allocator_traits;
-    typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_traits::value_type value_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return allocator.lock(true, pos, count);
-    }
-
-    const value_type& clock_experimental(size_type pos = 0, size_type count = 0) const
-    {
-        return allocator.clock_experimental(true, pos, count);
-    }
-
-
-    void unlock() {}
-
-    void cunlock_experimental() const {}
-
-    size_type capacity() const { return allocator.max_size(); }
-
-    allocator_type& get_allocator() { return allocator; }
-
-    handle_with_offset offset(size_type pos) const
-    {
-        return allocator.offset(true, pos);
-    }
-
-    bool allocate(size_type sz) { return sz <= capacity(); }
-    bool reallocate(size_type sz) { return sz <= capacity(); }
-
-    static CONSTEXPR bool uses_termination() { return null_terminated; }
-
-    const size_type max_size() const
-    {
-        return allocator.max_size() - (null_terminated ? 1 : 0);
-    }
-
-    bool is_allocated() const { return true; }
-};
-
-
-template <bool null_terminated, class TAllocator>
-struct dynamic_array_fixedbuf_helper_termination_specialization_base;
-
-// null terminated
-template <class TAllocator>
-struct dynamic_array_fixedbuf_helper_termination_specialization_base<true, TAllocator> :
-        dynamic_array_fixedbuf_helper_base_base<true, TAllocator>
-{
-    typedef dynamic_array_fixedbuf_helper_base_base<true, TAllocator> base_t;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::value_type value_type;
-
-    dynamic_array_fixedbuf_helper_termination_specialization_base() {}
-
-    template <class TParam>
-    dynamic_array_fixedbuf_helper_termination_specialization_base(TParam p) : base_t(p) {}
-
-    bool empty() const
-    {
-        const value_type* v = &base_t::clock_experimental(0, 1);
-
-        bool is_terminator = *v == 0;
-
-        base_t::cunlock_experimental();
-
-        return is_terminator;
-    }
-
-    size_type size() const
-    {
-#ifdef FEATURE_CPP_STATIC_ASSERT
-        // specialization required if we aren't null terminated (to track size variable)
-        //static_assert(null_terminated, "Utilizing this size method requires null termination = true");
-#endif
-
-        const value_type* s = &base_t::clock_experimental();
-
-        // FIX: use char_traits string length instead
-        size_type sz = strlen(s);
-
-        base_t::cunlock_experimental();
-
-        return sz;
-    }
-
-    // +++ temporary
-    // semi-brute forces size by stuffing a null terminator at the specified spot
-    void size(size_type len)
-    {
-        if(len > base_t::capacity())
-        {
-            // FIX: issue some kind of warning
-        }
-
-        base_t::lock(len, 1) = 0;
-        base_t::unlock();
-    }
-    // ---
-};
-
-
-// explicitly sized
-template <class TAllocator>
-struct dynamic_array_fixedbuf_helper_termination_specialization_base<false, TAllocator> :
-        dynamic_array_fixedbuf_helper_base_base<false, TAllocator>
-{
-    typedef dynamic_array_fixedbuf_helper_base_base<false, TAllocator> base_t;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::value_type value_type;
-
-protected:
-    size_type m_size;
-
-    dynamic_array_fixedbuf_helper_termination_specialization_base() :
-        m_size(0)
-    {}
-
-    template <class TParam>
-    dynamic_array_fixedbuf_helper_termination_specialization_base(TParam p) :
-        base_t(p),
-        m_size(0)
-    {}
-
-public:
-
-    bool empty() const
-    {
-        return m_size == 0;
-    }
-
-    size_type size() const
-    {
-        return m_size;
-    }
-
-    // +++ temporary
-    void size(size_type len)
-    {
-        m_size = len;
-    }
-    // ---
-};
-
-
-
-
-template <class T, size_t len, bool null_terminated, class TBuffer>
-class dynamic_array_fixedbuf_helper_base :
-        public dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated, single_fixedbuf_allocator<T, len, null_terminated, TBuffer> >
-{
-    typedef dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated, single_fixedbuf_allocator<T, len, null_terminated, TBuffer> > base_t;
-
-public:
-    typedef typename base_t::allocator_type allocator_type;
-
-protected:
-    typedef estd::allocator_traits<allocator_type> allocator_traits;
-    typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_traits::value_type value_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-
-    dynamic_array_fixedbuf_helper_base() {}
-
-    template <class TParam>
-    dynamic_array_fixedbuf_helper_base(TParam p) : base_t(p) {}
-
-public:
-};
-
-
-
-// +++
 // TODO: Fixup name
 template <class TAllocator, bool null_terminated>
 struct length_helper;
@@ -511,89 +319,9 @@ public:
 
 // ---
 
-#ifdef UNUSED
-// as per https://stackoverflow.com/questions/4189945/templated-class-specialization-where-template-argument-is-a-template
-// and https://stackoverflow.com/questions/49283587/templated-class-specialization-where-template-argument-is-templated-difference
-// template <>
-// TODO: Reconcile with single_fixedbuf_runtimesize_allocator.  Looks like it should be, but can't focus in this
-// environment enough to be sure
-template <class T, size_t len, class TBuffer>
-class dynamic_array_helper<single_fixedbuf_allocator<T, len, false, TBuffer> >
-        : public dynamic_array_fixedbuf_helper_base<T, len, false, TBuffer>
-{
-protected:
-    typedef dynamic_array_fixedbuf_helper_base<T, len, false, TBuffer> base_t;
-
-public:
-    typedef typename base_t::allocator_type allocator_type;
-    /*
-    typedef single_fixedbuf_allocator<T, len, false, TBuffer> allocator_type;
-    typedef estd::allocator_traits<allocator_type> allocator_traits;
-    typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_traits::value_type value_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::handle_with_offset handle_with_offset; */
-
-public:
-    dynamic_array_helper(allocator_type* = NULLPTR) {}
-};
-#endif
-
-
-#define NEW_DYNAMIC_ARRAY_HELPER
-
-#ifndef NEW_DYNAMIC_ARRAY_HELPER
-// applies generally to T[N], RW buffer but also to non-const T*
-// applies specifically to null-terminated
-template <class T, size_t len, class TBuffer>
-class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
-        : public dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer>
-{
-protected:
-    typedef dynamic_array_fixedbuf_helper_base<T, len, true, TBuffer> base_t;
-    /*
-    typedef single_fixedbuf_allocator<T, len, true, TBuffer> allocator_type;
-    typedef estd::allocator_traits<allocator_type> allocator_traits;
-    typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_type::handle_with_size handle_with_size;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-    typedef T value_type; */
-
-public:
-    struct InitParam
-    {
-        const TBuffer& b;
-        bool is_initialized;
-
-        InitParam(const TBuffer& b, bool is_initialized = false) :
-                b(b),
-                is_initialized(is_initialized) {}
-    };
-
-
-    dynamic_array_helper(const InitParam& p) : base_t(p.b)
-    {
-        if(!p.is_initialized) base_t::size(0);
-    }
-
-    dynamic_array_helper(const TBuffer& b) : base_t(b)
-    {
-        // NOTE: Only should arrive here with non const* since specializations should be
-        // taking over now in those cases.  However, we'd still like the feature of not
-        // brute forcing initialization (there are cases in which a passed in RW buffer
-        // is already initialized)
-        base_t::size(0);
-    }
-
-    dynamic_array_helper()
-    {
-        base_t::size(0);
-    }
-};
-#else
 
 // intermediate class as we transition to handle_descriptor.  Eventually phase this out
-template <class TAllocator>
+template <class TAllocator, bool null_terminated>
 class handle_descriptor_helper : public handle_descriptor<TAllocator>
 {
     typedef handle_descriptor<TAllocator> base_t;
@@ -605,10 +333,18 @@ public:
     handle_descriptor_helper(TAllocatorParameter& p) : base_t(p) {}
 
 
+    static CONSTEXPR bool uses_termination() { return null_terminated; }
+
     typedef typename base_t::allocator_type allocator_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
+
+    size_type max_size() const
+    {
+        return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
+    }
+
 
     // I hate clock/cunlock, but necessary evil.  Standins for old code when
     // it was still experimental
@@ -620,6 +356,9 @@ public:
     void cunlock_experimental() const { base_t::cunlock(); }
 
 
+    // repurposing/renaming of what size meant before (ALLOCATED) vs now
+    // (USED within ALLOCATED)
+    size_type capacity() const { return base_t::size(); }
 
 
     // Helper for old dynamic_array code.  New one I'm thinking caller
@@ -650,10 +389,10 @@ public:
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
-        : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >,
+        : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true >,
                 length_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true>
 {
-    typedef handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer> > base_t;
+    typedef handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true > base_t;
     typedef length_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true> length_helper_t;
 
 
@@ -663,9 +402,6 @@ public:
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
 
-    static CONSTEXPR bool uses_termination() { return true; }
-
-
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
     // 'used' size within that allocation.  For this variety, we are null terminated
     size_type size() const
@@ -673,29 +409,25 @@ public:
         if(!base_t::is_allocated()) return 0;
 
         return length_helper_t::size(base_t::get_allocator(), base_t::handle());
-
-        /*
-        size_type l = strlen(&base_t::clock());
-        base_t::cunlock();
-        return l; */
     }
 
     // null terminated variety
     void size(size_type n)
     {
         length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
-        /*
-        base_t::lock(pos, 1) = 0;
-        base_t::unlock(); */
     }
 
-    // repurposing/renaming of what size meant before (ALLOCATED) vs now
-    // (USED within ALLOCATED)
-    size_type capacity() const { return base_t::size(); }
-
-    dynamic_array_helper(TBuffer b) : base_t(b)
+    // FIX: Iron out exactly where we really assign size(0) - sometimes we
+    // want to pre-initialize our buffer so size(0) is not an always thing
+    dynamic_array_helper(TBuffer& b) : base_t(b)
     {
         size(0);
+    }
+
+    dynamic_array_helper(const TBuffer& b) : base_t(b)
+    {
+        // FIX: This only works for NULL-terminated scenarios
+        // we still need to assign a length of 0 for explicit lenght scenarios
     }
 
     dynamic_array_helper()
@@ -706,77 +438,15 @@ public:
 
 
 
-#endif
-
-#ifdef UNUSED
-// attempt to specialize for const T* scenarios
-// for now, seems to be necessary in parallel with the following more-specialized version
-// debugger doesn't pick up construction, but size() is invoked
-// runtime size information is stored as both size() for current size in helper,
-// and max_size/capacity stored in allocator
-template <class T, size_t len>
-class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, const T*> >
-        : public dynamic_array_fixedbuf_helper_base<T, len, true, const T*>
-{
-    typedef dynamic_array_fixedbuf_helper_base<T, len, true, const T*> base_t;
-
-public:
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::allocator_traits allocator_traits;
-
-    dynamic_array_helper(const T* buf) : base_t(buf) {}
-};
-#endif
-
-
-// specialize for const T* scenarios
-// would like to merge this with above one if possible
-template <class T, size_t len>
-class dynamic_array_helper<single_fixedbuf_allocator<const T, len, true, const T*> >
-        : public dynamic_array_fixedbuf_helper_base<const T, len, true, const T*>
-{
-    typedef dynamic_array_fixedbuf_helper_base<const T, len, true, const T*> base_t;
-
-public:
-    dynamic_array_helper(const T* buf) : base_t(buf) {}
-};
 
 
 // for basic_string_view and const_string
 // runtime size information is stored in allocator itself, not helper
 // (not null terminated, since it's runtime-const fixed size)
-#ifndef NEW_DYNAMIC_ARRAY_HELPER
-//#ifndef UNUSED
 template <class T>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
-        : public dynamic_array_fixedbuf_helper_base_base<false,
-                single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
-{
-    typedef dynamic_array_fixedbuf_helper_base_base<false,
-        single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
-
-public:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::size_type size_type;
-
-    dynamic_array_helper(const typename allocator_type::InitParam& p) : base_t(p) {}
-
-    dynamic_array_helper(const dynamic_array_helper& copy_from) :
-        base_t(copy_from.allocator)
-    {
-    }
-
-    size_type size() const { return base_t::capacity(); }
-};
-#else
-// FIX: Not quite right yet, because it resolves to a handle_descriptor which tracks
-// a size but in this case we want a fallthrough which utilizes allocator size itself
-template <class T>
-class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
-        //: public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
         : public handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true>
 {
-    //typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
     typedef handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true> base_t;
 
 public:
@@ -784,15 +454,14 @@ public:
     typedef typename base_t::size_type size_type;
     typedef typename base_t::value_type value_type;
 
-    struct InitParam
-    {
-        T* buffer;
-        size_type size;
+    // repurposing/renaming of what size meant before (ALLOCATED) vs now
+    // (USED within ALLOCATED)
+    size_type capacity() const { return base_t::size(); }
 
-        InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
-    };
+    size_type max_size() const { return capacity(); }
 
-    dynamic_array_helper(const typename allocator_type::InitParam& p) :
+    template <class TParam>
+    dynamic_array_helper(const TParam& p) :
         base_t(p) {}
 
     dynamic_array_helper(const dynamic_array_helper& copy_from) :
@@ -800,41 +469,21 @@ public:
     {
     }
 
-    size_type capacity() const { return base_t::size(); }
-
-    size_type max_size() const { return base_t::get_allocator().max_size(); }
-
     value_type& clock_experimental(size_type pos = 0, size_type len = 0)
     {
         return base_t::clock(pos, len);
     }
 };
 
-#endif
 
 
 // runtime (layer3-ish) version
-#ifndef NEW_DYNAMIC_ARRAY_HELPER
-//#ifndef UNUSED
 template <class T, bool null_terminated>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
-        public dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated,
-            single_fixedbuf_runtimesize_allocator<T, null_terminated> >
-{
-    typedef dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated,
-        single_fixedbuf_runtimesize_allocator<T, null_terminated> > base_t;
-
-public:
-    template <class TInitParam>
-    dynamic_array_helper(const TInitParam& p) : base_t(p) {}
-};
-#else
-template <class T, bool null_terminated>
-class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
-        public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> >,
+        public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >,
                 length_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >
 {
-    typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > base_t;
+    typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > base_t;
     typedef length_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > length_helper_t;
     typedef typename base_t::size_type size_type;
 
@@ -842,17 +491,6 @@ public:
     template <class TInitParam>
     dynamic_array_helper(const TInitParam& p) : base_t(p) {}
 
-    static CONSTEXPR bool uses_termination() { return null_terminated; }
-
-    size_type capacity() const { return base_t::size(); }
-
-    size_type max_size() const
-    {
-        return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
-    }
-
-    // TODO: Have to migrate in old dynamic_array size helper which specializes for either null
-    // terminated or regular
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
     // 'used' size within that allocation.  For this variety, we are null terminated
     size_type size() const
@@ -862,14 +500,11 @@ public:
         return length_helper_t::size(base_t::get_allocator(), base_t::handle());
     }
 
-    // null terminated variety
     void size(size_type n)
     {
         length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
     }
-
 };
-#endif
 
 }
 
