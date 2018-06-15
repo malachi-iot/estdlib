@@ -43,7 +43,7 @@ template<
     class Allocator = std::allocator<CharT>,
     class StringTraits = experimental::string_traits<Traits>
 > class basic_string :
-        public internal::dynamic_array<Allocator>
+        public internal::dynamic_array<Allocator, internal::dynamic_array_helper<Allocator> >
 {
     typedef internal::dynamic_array<Allocator> base_t;
     typedef basic_string<CharT, Traits, Allocator, StringTraits> this_t;
@@ -98,7 +98,7 @@ public:
 
 
     template <class TForeignChar, class TForeignTraits, class TForeignAllocator>
-    basic_string& append(const basic_string<TForeignChar, TForeignTraits, TForeignAllocator>& str)
+    basic_string& append(const basic_string<TForeignChar, typename TForeignTraits::char_traits, TForeignAllocator, TForeignTraits>& str)
     {
         base_t::append(str);
         return *this;
@@ -223,15 +223,21 @@ typedef basic_string<char> string;
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT > >
+template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT >,
+        class StringTraits = typename estd::conditional<null_terminated,
+                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type
+                >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated> >
+                estd::internal::single_fixedbuf_allocator <CharT, N, null_terminated>,
+                StringTraits>
 {
     typedef estd::basic_string<
                 CharT, Traits,
-                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated> >
+                estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated>,
+                StringTraits>
                 base_t;
 public:
     basic_string() {}
@@ -271,7 +277,9 @@ namespace layer2 {
 
 template<class CharT, size_t N, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
-         class StringTraits = experimental::string_traits<Traits, int16_t, estd::is_const<CharT>::value> >
+         class StringTraits = typename estd::conditional<null_terminated,
+                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type >
 class basic_string
         : public estd::basic_string<
                 CharT,
@@ -346,15 +354,20 @@ typedef basic_string<const char, 0> const_string;
 namespace layer3 {
 
 template<class CharT, bool null_terminated = true,
-         class Traits = std::char_traits<typename estd::remove_const<CharT>::type > >
+         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class StringTraits = typename estd::conditional<null_terminated,
+                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type>
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
-                estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+                estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated >,
+                StringTraits>
 {
     typedef estd::basic_string<
             CharT, Traits,
-            estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated > >
+            estd::internal::single_fixedbuf_runtimesize_allocator < CharT, null_terminated >,
+            StringTraits>
             base_t;
 
     typedef typename base_t::allocator_type allocator_type;
@@ -516,7 +529,7 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 template <class CharT, class Traits, class Allocator>
 inline std::basic_ostream<CharT, Traits>&
     operator<<(std::basic_ostream<CharT, Traits>& os,
-               const estd::basic_string<CharT, Traits, Allocator>& str)
+               const estd::basic_string<CharT, typename Traits::char_traits, Allocator, Traits>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
@@ -535,7 +548,7 @@ inline std::basic_ostream<CharT, Traits>&
 template <class CharT, class Traits, class Allocator>
 inline std::ostream&
     operator<<(std::ostream& os,
-               const estd::basic_string<const CharT, Traits, Allocator>& str)
+               const estd::basic_string<const CharT, typename Traits::char_traits, Allocator, Traits>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient

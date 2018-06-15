@@ -36,17 +36,18 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 }
 #else
 
-template <class TChar, class TCharTraits, class TAllocator>
-std::basic_ostream<TChar, TCharTraits>& operator <<( std::basic_ostream<TChar, TCharTraits>& os,
-                                                     estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+template <class TChar, class TStringTraits, class TAllocator>
+std::basic_ostream<TChar, typename TStringTraits::char_traits>& operator <<(
+        std::basic_ostream<TChar, typename TStringTraits::char_traits>& os,
+        estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits> const& value)
 {
     return ::operator <<(os, value);
 }
 
 
-template <class TChar, class TCharTraits, class TAllocator>
+template <class TChar, class TStringTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os,
-                           estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
+                           estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits> const& value)
 {
     return ::operator <<(os, value);
 }

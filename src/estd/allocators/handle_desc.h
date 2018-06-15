@@ -249,8 +249,7 @@ public:
 };
 
 
-// WITH implicit size knowledge (standard allocator model)
-// TBD
+// With implicit size knowledge (standard allocator model)
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
         public impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
@@ -268,8 +267,6 @@ public:
     handle_descriptor_base(TAllocatorParameter& a, const handle_type& h)
             : base_t(a, h) {}
 
-    // FIX: Hacking in a huge number for now so that we can supported unbounded
-    // (layer2) strings
     size_type size() const { return base_t::get_allocator().size(base_t::handle()); }
 };
 
@@ -285,8 +282,6 @@ class handle_descriptor_parity :
 public:
     typedef typename base_t::size_type size_type;
     typedef typename base_t::allocator_type allocator_type;
-    // FIX: Clean this up
-    typedef typename allocator_type::InitParam InitParam;
 
     // FIX: Harcoded to singular type
     // FIX: Need better name than 'T'
@@ -306,7 +301,7 @@ public:
 // NOTE: Pretty sure this isn't < C++11 friendly, so be sure to do explicit specializations
 // for particular TAllocator varieties - will have to work out TAllocator& for those as well
 template <class TAllocator,
-          class TTraits = allocator_traits<typename remove_reference<TAllocator>::type>>
+          class TTraits = allocator_traits<typename remove_reference<TAllocator>::type> >
 class handle_descriptor :
         public handle_descriptor_base<
             TAllocator,
@@ -322,8 +317,6 @@ class handle_descriptor :
 
 public:
     handle_descriptor() : base_t(TTraits::invalid()) {}
-
-    handle_descriptor(TAllocator& a) : base_t(a, TTraits::invalid()) {}
 
     template <class TAllocatorParameter>
     handle_descriptor(TAllocatorParameter& p) : base_t(p, TTraits::invalid()) {}
