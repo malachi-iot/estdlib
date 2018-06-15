@@ -81,7 +81,9 @@ struct allocator_descriptor_base<TAllocator, false>
 {
     typedef TAllocator allocator_type;
 
-    allocator_type get_allocator() const { return TAllocator(); }
+    // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
+    // would be an invalid reference
+    allocator_type& get_allocator() const { return TAllocator(); }
 };
 
 // singular technically doesn't track a handle
@@ -98,7 +100,7 @@ class handle_descriptor_base<TAllocator, true>
 
 protected:
     handle_descriptor_base(bool) {}
-    
+
     typedef typename allocator_type::handle_type handle_type;
 
     void handle(bool) {}
@@ -263,12 +265,20 @@ class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
 // and current allocated size.  Useful for allocators in a permanent const-mode
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_parity :
-        impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
+        public impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
 {
     typedef impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
 
 public:
     typedef typename base_t::size_type size_type;
+    typedef typename base_t::allocator_type allocator_type;
+    // FIX: Clean this up
+    typedef typename allocator_type::InitParam InitParam;
+
+    // FIX: Harcoded to singular type
+    // FIX: Need better name than 'T'
+    template <class T>
+    handle_descriptor_parity(const T& p) : base_t(p, true) {}
 
     size_type size() const { return base_t::get_allocator().max_size(); }
 

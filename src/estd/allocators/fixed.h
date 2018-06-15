@@ -626,8 +626,8 @@ public:
 // for basic_string_view and const_string
 // runtime size information is stored in allocator itself, not helper
 // (not null terminated, since it's runtime-const fixed size)
-//#ifndef NEW_DYNAMIC_ARRAY_HELPER
-#ifndef UNUSED
+#ifndef NEW_DYNAMIC_ARRAY_HELPER
+//#ifndef UNUSED
 template <class T>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
         : public dynamic_array_fixedbuf_helper_base_base<false,
@@ -654,13 +654,16 @@ public:
 // a size but in this case we want a fallthrough which utilizes allocator size itself
 template <class T>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
-        : public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+        //: public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+        : public handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true>
 {
-    typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
+    //typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> > base_t;
+    typedef handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
+    typedef typename base_t::value_type value_type;
 
     struct InitParam
     {
@@ -681,12 +684,19 @@ public:
     size_type capacity() const { return base_t::size(); }
 
     size_type max_size() const { return base_t::get_allocator().max_size(); }
+
+    value_type& clock_experimental(size_type pos = 0, size_type len = 0)
+    {
+        return base_t::clock(pos, len);
+    }
 };
 
 #endif
 
 
 // runtime (layer3-ish) version
+//#ifndef NEW_DYNAMIC_ARRAY_HELPER
+#ifndef UNUSED
 template <class T, bool null_terminated>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
         public dynamic_array_fixedbuf_helper_termination_specialization_base<null_terminated,
@@ -699,7 +709,21 @@ public:
     template <class TInitParam>
     dynamic_array_helper(const TInitParam& p) : base_t(p) {}
 };
+#else
+template <class T, bool null_terminated>
+class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
+        public handle_descriptor<single_fixedbuf_runtimesize_allocator<T, null_terminated> >
+{
+    typedef handle_descriptor<single_fixedbuf_runtimesize_allocator<T, null_terminated> > base_t;
 
+public:
+    template <class TInitParam>
+    dynamic_array_helper(const TInitParam& p) : base_t(p) {}
+
+    // TODO: Have to migrate in old dynamic_array size helper which specializes for either null
+    // terminated or regular
+};
+#endif
 
 }
 
