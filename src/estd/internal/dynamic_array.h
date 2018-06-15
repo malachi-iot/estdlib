@@ -166,9 +166,9 @@ public:
     }
 
     // constant-return-lock
-    const value_type& clock_experimental(size_type pos = 0, size_type count = 0)
+    const value_type& clock(size_type pos = 0, size_type count = 0)
     {
-        return allocator.clock_experimental(handle, pos, count);
+        return allocator.clock(handle, pos, count);
     }
 
     void unlock()
@@ -287,7 +287,7 @@ protected:
 #ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter++;
 #endif
-        return &helper.clock_experimental(pos, count);
+        return &helper.clock(pos, count);
     }
 
 

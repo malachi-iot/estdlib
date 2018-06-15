@@ -71,14 +71,14 @@ struct allocator_traits
         return a.lock(h, pos, count);
     }
 
-    static const value_type& clock_experimental(const allocator_type& a, handle_type h, size_type pos = 0)
+    static const value_type& clock(const allocator_type& a, handle_type h, size_type pos = 0)
     {
-        return a.clock_experimental(h, pos);
+        return a.clock(h, pos);
     }
 
-    static const value_type& clock_experimental(const allocator_type& a, const handle_with_offset& h, size_type pos = 0)
+    static const value_type& clock(const allocator_type& a, const handle_with_offset& h, size_type pos = 0)
     {
-        return a.clock_experimental(h, pos);
+        return a.clock(h, pos);
     }
 
     static void unlock(allocator_type& a, handle_type h)

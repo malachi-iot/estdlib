@@ -263,7 +263,7 @@ public:
     {
         allocator_ref a = base_t::get_allocator();
 
-        return allocator_traits::clock_experimental(a, base_t::h);
+        return allocator_traits::clock(a, base_t::h);
     }
 
     operator value_type()

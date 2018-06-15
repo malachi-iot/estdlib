@@ -60,19 +60,19 @@ public:
         return buffer[h.offset() + pos];
     }
 
-    const value_type& clock_experimental(handle_type h, int pos = 0, int count = 0) const
+    const value_type& clock(handle_type h, int pos = 0, int count = 0) const
     {
         return buffer[pos];
     }
 
-    const value_type& clock_experimental(const handle_with_offset& h, int pos = 0, int count = 0) const
+    const value_type& clock(const handle_with_offset& h, int pos = 0, int count = 0) const
     {
         return buffer[h.offset() + pos];
     }
 
     void unlock(handle_type h) {}
 
-    void cunlock_experimental(handle_type h) const {}
+    void cunlock(handle_type h) const {}
 
     handle_with_offset offset(handle_type h, size_t pos) const
     {
@@ -237,11 +237,11 @@ struct length_helper<TAllocator, true>
 
     bool empty(const allocator_type& a, const handle_type& h) const
     {
-        const value_type* v = &a.clock_experimental(h, 0, 1);
+        const value_type* v = &a.clock(h, 0, 1);
 
         bool is_terminator = *v == 0;
 
-        a.cunlock_experimental(h);
+        a.cunlock(h);
 
         return is_terminator;
     }
@@ -253,12 +253,12 @@ struct length_helper<TAllocator, true>
         //static_assert(null_terminated, "Utilizing this size method requires null termination = true");
 #endif
 
-        const value_type* s = &a.clock_experimental(h);
+        const value_type* s = &a.clock(h);
 
         // FIX: use char_traits string length instead
         size_type sz = strlen(s);
 
-        a.cunlock_experimental(h);
+        a.cunlock(h);
 
         return sz;
     }
@@ -344,16 +344,6 @@ public:
     {
         return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
     }
-
-
-    // I hate clock/cunlock, but necessary evil.  Standins for old code when
-    // it was still experimental
-    value_type& clock_experimental(size_type pos, size_type n) const
-    {
-        return base_t::clock(pos, n);
-    }
-
-    void cunlock_experimental() const { base_t::cunlock(); }
 
 
     // repurposing/renaming of what size meant before (ALLOCATED) vs now
@@ -467,11 +457,6 @@ public:
     dynamic_array_helper(const dynamic_array_helper& copy_from) :
         base_t(copy_from.get_allocator())
     {
-    }
-
-    value_type& clock_experimental(size_type pos = 0, size_type len = 0)
-    {
-        return base_t::clock(pos, len);
     }
 };
 
