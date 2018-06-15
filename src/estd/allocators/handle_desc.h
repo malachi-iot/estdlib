@@ -253,11 +253,24 @@ public:
 // TBD
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
-        impl::allocator_descriptor_base<TAllocator, is_stateful>,
-        impl::handle_descriptor_base<TAllocator, is_singular>
+        public impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
 {
-    typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
-    typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
+    typedef impl::allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename base_t::handle_type handle_type;
+
+    handle_descriptor_base(const handle_type& h) : base_t(h) {}
+
+    template <class TAllocatorParameter>
+    handle_descriptor_base(TAllocatorParameter& a, const handle_type& h)
+            : base_t(a, h) {}
+
+    // FIX: Hacking in a huge number for now so that we can supported unbounded
+    // (layer2) strings
+    size_type size() const { return base_t::get_allocator().size(base_t::handle()); }
 };
 
 
@@ -298,13 +311,13 @@ class handle_descriptor :
         public handle_descriptor_base<
             TAllocator,
             TTraits::is_stateful(),
-            false,
+            TTraits::has_size(),
             TTraits::is_singular() >
 {
     typedef handle_descriptor_base<
             TAllocator,
             TTraits::is_stateful(),
-            false,
+            TTraits::has_size(),
             TTraits::is_singular() > base_t;
 
 public:

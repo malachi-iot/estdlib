@@ -96,8 +96,8 @@ TEST_CASE("string tests")
     }
     SECTION("layer 2 (non-experimental) null terimnated")
     {
-        char buf[128];
-        layer2::basic_string<char, 20> s(buf);
+        char buf[128] = ""; // as per spec, this actually
+        layer2::basic_string<char, 20> s(buf, 0);
         //layer2::basic_string<const char, 20> s2 = "hi";
 
         int sz = sizeof(s);
@@ -252,7 +252,7 @@ TEST_CASE("string tests")
         char buf3[100];
 
         layer1::basic_string<char, 100> s1;
-        layer2::basic_string<char, 100> s2(buf2);
+        layer2::basic_string<char, 100> s2(buf2, 0);
 
         s1 = "Hello";
 
@@ -274,7 +274,7 @@ TEST_CASE("string tests")
         // Filters down into map_base somehow... ??
         s1 = "Hello";
 
-        layer2::string<> s2(buf2);
+        layer2::string<> s2(buf2, 0);
         layer3::string s3(0, buf3);
 
         s2 = s1;
@@ -385,7 +385,7 @@ TEST_CASE("string tests")
     SECTION("to_string int")
     {
         char buf[128];
-        layer2::string<> s(buf);
+        layer2::string<> s(buf, 0);
 
         REQUIRE(s.size() == 0);
 

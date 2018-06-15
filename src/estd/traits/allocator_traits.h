@@ -47,6 +47,9 @@ struct allocator_traits
     // or purely static
     static CONSTEXPR bool is_singular() { return TAllocator::is_singular(); }
 
+    // indicates whether handles innately can be queried for their size
+    static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
+
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
         return a.allocate(n);

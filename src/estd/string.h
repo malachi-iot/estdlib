@@ -289,7 +289,12 @@ class basic_string
     typedef typename base_t::size_type size_type;
 
 public:
-    basic_string(const CharT* str_buffer) : base_t(str_buffer)
+    // n = -1 means treat str_buffer as pre-initialized and null-terminated
+    // n >= 0 means copy n characters from str_buffer, ignoring any null termination
+    //        0 is a useful value as it will auto set underlying string to 0
+    // NOTE: Above not active yet
+    // This particular constructor is good for string literals, but any const char* probably is fine
+    basic_string(const CharT* str_buffer, int n = -1) : base_t(str_buffer)
     {
         // TODO: optimize this explicit strlen out
         //base_t::assign(str_buffer, strlen(str_buffer));
@@ -301,10 +306,13 @@ public:
 
     } */
 
+    // See 'n' documentation above
     template <size_type IncomingN>
-    basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
+    basic_string(CharT (&buffer) [IncomingN], int n = -1) : base_t(&buffer[0])
     {
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+
+        if(n >= 0) base_t::helper.size(n);
     }
 
     template <class ForeignAllocator, class ForeignTraits>

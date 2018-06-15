@@ -23,7 +23,7 @@ TEST_CASE("allocator tests")
             int szof = sizeof(d);
 
             int size = d.size();
-            d.reallocate(5);
+            //d.reallocate(5);
             int* val_array = &d.lock();
         }
         SECTION("referenced")
@@ -34,7 +34,7 @@ TEST_CASE("allocator tests")
             int szof = sizeof(d);
 
             int size = d.size();
-            d.reallocate(5);
+            //d.reallocate(5);
             int* val_array = &d.lock();
         }
     }
