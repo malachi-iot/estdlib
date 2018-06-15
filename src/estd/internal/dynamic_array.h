@@ -259,6 +259,7 @@ protected:
 
     handle_with_offset offset(size_type  pos) const
     {
+        //return helper.get_allocator().offset(helper.handle(), pos);
         return helper.offset(pos);
     }
 

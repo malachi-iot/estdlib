@@ -322,9 +322,12 @@ public:
 
 // intermediate class as we transition to handle_descriptor.  Eventually phase this out
 template <class TAllocator, bool null_terminated>
-class handle_descriptor_helper : public handle_descriptor<TAllocator>
+class handle_descriptor_helper :
+        public handle_descriptor<TAllocator>,
+        length_helper<TAllocator, null_terminated>
 {
     typedef handle_descriptor<TAllocator> base_t;
+    typedef length_helper<TAllocator, null_terminated> length_helper_t;
 
 public:
     handle_descriptor_helper() {}
@@ -372,6 +375,20 @@ public:
         return is_allocated();
     }
     // ---
+
+    // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
+    // 'used' size within that allocation.  For this variety, we are null terminated
+    size_type size() const
+    {
+        if(!is_allocated()) return 0;
+
+        return length_helper_t::size(base_t::get_allocator(), base_t::handle());
+    }
+
+    void size(size_type n)
+    {
+        length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
+    }
 };
 
 
@@ -379,12 +396,9 @@ public:
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer>
 class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
-        : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true >,
-                length_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true>
+        : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true >
 {
     typedef handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true > base_t;
-    typedef length_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true> length_helper_t;
-
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -392,26 +406,11 @@ public:
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::handle_type handle_type;
 
-    // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
-    // 'used' size within that allocation.  For this variety, we are null terminated
-    size_type size() const
-    {
-        if(!base_t::is_allocated()) return 0;
-
-        return length_helper_t::size(base_t::get_allocator(), base_t::handle());
-    }
-
-    // null terminated variety
-    void size(size_type n)
-    {
-        length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
-    }
-
     // FIX: Iron out exactly where we really assign size(0) - sometimes we
     // want to pre-initialize our buffer so size(0) is not an always thing
     dynamic_array_helper(TBuffer& b) : base_t(b)
     {
-        size(0);
+        base_t::size(0);
     }
 
     dynamic_array_helper(const TBuffer& b) : base_t(b)
@@ -422,7 +421,7 @@ public:
 
     dynamic_array_helper()
     {
-        size(0);
+        base_t::size(0);
     }
 };
 
@@ -465,30 +464,14 @@ public:
 // runtime (layer3-ish) version
 template <class T, bool null_terminated>
 class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
-        public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >,
-                length_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >
+        public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >
 {
     typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > base_t;
-    typedef length_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > length_helper_t;
     typedef typename base_t::size_type size_type;
 
 public:
     template <class TInitParam>
     dynamic_array_helper(const TInitParam& p) : base_t(p) {}
-
-    // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
-    // 'used' size within that allocation.  For this variety, we are null terminated
-    size_type size() const
-    {
-        if(!base_t::is_allocated()) return 0;
-
-        return length_helper_t::size(base_t::get_allocator(), base_t::handle());
-    }
-
-    void size(size_type n)
-    {
-        length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
-    }
 };
 
 }
