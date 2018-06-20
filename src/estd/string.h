@@ -320,7 +320,7 @@ public:
     {
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
 
-        if(n >= 0) base_t::helper.size(n);
+        if(n >= 0) base_t::helper().size(n);
     }
 
     template <class ForeignAllocator, class ForeignTraits>
@@ -396,13 +396,13 @@ public:
     basic_string(size_type initial_size, CharT (&buffer) [N]) :
         base_t(typename allocator_type::InitParam(buffer, N))
     {
-        base_t::helper.size(initial_size);
+        base_t::helper().size(initial_size);
     }
 
     basic_string(size_type initial_size, CharT* buffer, size_type buffer_size) :
         base_t(typename allocator_type::InitParam(buffer, buffer_size))
     {
-        base_t::helper.size(initial_size);
+        base_t::helper().size(initial_size);
     }
 
     template <class ForeignAllocator, class ForeignTraits>

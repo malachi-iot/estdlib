@@ -124,6 +124,7 @@ namespace internal {
 template <class TAllocator>
 class dynamic_array_helper
 {
+public:
     // default implementation is 'full fat' to handle all scenarios
     typedef TAllocator allocator_type;
     typedef estd::allocator_traits<TAllocator> allocator_traits;
@@ -134,6 +135,7 @@ class dynamic_array_helper
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
+private:
     // handle.size represents currently allocation portion
     handle_with_size handle;
     // remember, size represents 'user/app' portion.
@@ -227,9 +229,11 @@ public:
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
 template <class TAllocator, class THelper = dynamic_array_helper<TAllocator > >
-class dynamic_array : public runtime_array<THelper>
+class dynamic_array : public allocated_array<THelper>
 {
     typedef dynamic_array this_t;
+    typedef allocated_array<THelper> base_t;
+
 public:
     typedef TAllocator allocator_type;
     typedef estd::allocator_traits<TAllocator> allocator_traits;
@@ -246,21 +250,25 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
+    typedef typename base_t::iterator iterator;
+    typedef typename base_t::accessor accessor;
+
     // TODO: utilize SFINAE if we can
     // ala https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
+    helper_type& helper() { return base_t::m_helper; }
+
+    const helper_type& helper() const { return base_t::m_helper; }
+
 #ifdef FEATURE_ESTD_LOCK_COUNTER
     typename allocator_traits::lock_counter lock_counter;
 #endif
 
-    THelper helper;
-
     handle_with_offset offset(size_type  pos) const
     {
-        //return helper.get_allocator().offset(helper.handle(), pos);
-        return helper.offset(pos);
+        return base_t::offset(pos);
     }
 
 public:
@@ -271,7 +279,7 @@ public:
 #ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter++;
 #endif
-        return &helper.lock(pos, count);
+        return &helper().lock(pos, count);
     }
 
     void unlock()
@@ -279,7 +287,7 @@ public:
 #ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter--;
 #endif
-        helper.unlock();
+        helper().unlock();
     }
 
 protected:
@@ -288,7 +296,7 @@ protected:
 #ifdef FEATURE_ESTD_LOCK_COUNTER
         lock_counter++;
 #endif
-        return &helper.clock(pos, count);
+        return &helper().clock(pos, count);
     }
 
 
@@ -323,7 +331,7 @@ protected:
             reserve(new_size + pad);
         }
 
-        helper.size(new_size);
+        helper().size(new_size);
 
         if(shrink) shrink_to_fit();
     }
@@ -353,7 +361,7 @@ protected:
         // so later consider doing the insert operation at that level)
         ensure_additional_capacity(1);
 
-        helper.size(helper.size() + 1);
+        helper().size(helper().size() + 1);
 
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
         size_type raw_typed_pos = to_insert_pos - a;
@@ -366,21 +374,19 @@ protected:
         *to_insert_pos = *to_insert_value;
     }
 
-    dynamic_array(const dynamic_array& copy_from)
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-        = default;
-#else
-        : helper(copy_from.helper)
+    dynamic_array(const dynamic_array& copy_from) :
+        // FIX: Kinda ugly, we do this to force going thru base class'
+        // copy constructor rather than the THelperParam flavor
+        base_t(static_cast<const base_t&>(copy_from))
     {
     }
-#endif
 
 public:
     dynamic_array() {}
 
     template <class THelperParam>
     dynamic_array(const THelperParam& p) :
-            helper(p) {}
+            base_t(p) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     dynamic_array(std::initializer_list<value_type> initlist)
@@ -389,7 +395,7 @@ public:
 
         std::copy(initlist.begin(), initlist.end(), p);
 
-        helper.size(initlist.size());
+        helper().size(initlist.size());
 
         unlock();
     }
@@ -397,15 +403,6 @@ public:
 
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}
-
-    allocator_type& get_allocator() const
-    {
-        // FIX: Hate this, but since we have stateful allocators flying around everywhere, even
-        // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
-        // const call (important because we need to conform to const for front, back, etc)
-        // because we need locking, side affects are to be expected
-        return const_cast<helper_type&>(helper).get_allocator();
-    }
 
     // FIX: First of all , don't like forcing const
     // secondly, exposing these as public is not great - but eventually
@@ -422,21 +419,21 @@ public:
         return const_cast<this_t*>(this)->unlock();
     }
 
-    size_type size() const { return helper.size(); }
+    size_type size() const { return helper().size(); }
 
     size_type capacity() const
     {
-        return helper.capacity();
+        return helper().capacity();
     }
 
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
     bool reserve( size_type new_cap )
     {
-        if(!helper.is_allocated())
-            return helper.allocate(new_cap);
+        if(!helper().is_allocated())
+            return helper().allocate(new_cap);
         else
-            return helper.reallocate(new_cap);
+            return helper().reallocate(new_cap);
     }
 
 protected:
@@ -450,7 +447,7 @@ protected:
         // scenarios
         size_type current_size = size();
 
-        helper.size(current_size + by_amount);
+        helper().size(current_size + by_amount);
 
         return current_size;
     }
@@ -489,14 +486,14 @@ protected:
         pointer raw = lock(index);
 
         // TODO: optimize null-terminated flavor to not use memmove at all
-        size_type prev_size = helper.size();
+        size_type prev_size = helper().size();
 
         if(helper_type::uses_termination())
             // null terminated flavor merely includes null termination as part
             // of move
             prev_size++;
         else
-            helper.size(prev_size - count);
+            helper().size(prev_size - count);
 
         memmove(raw, raw + count, prev_size - (index + count));
 
@@ -575,7 +572,7 @@ public:
 
     bool empty() const
     {
-        return helper.empty();
+        return helper().empty();
     }
 
     template <class TForeignAllocator, class TDAHelper>
@@ -596,16 +593,16 @@ public:
     void pop_back()
     {
         // decrement the end of the array
-        size_type end = helper.size() - 1;
+        size_type end = helper().size() - 1;
 
         // lock down element at that position and run the destructor
-        helper.lock(end).~value_type();
-        helper.unlock();
+        helper().lock(end).~value_type();
+        helper().unlock();
 
         // TODO: put in warning if this doesn't work, remember
         // documentation says 'undefined' behavior if empty
         // so nothing to worry about too much
-        helper.size(end);
+        helper().size(end);
     }
 
     void push_back(const value_type& value)
@@ -638,132 +635,9 @@ public:
 
     //typedef estd::internal::accessor<TAllocator> accessor;
 
-    // TODO: make accessor do this comparison in a self contained way
-    // allocator itself only needs to be stateful if it needs to do handle locking
-    // if not, then we assume it's pointer based and thusly can access the item
-    // without an allocator pointer, stateful or otherwise
-#ifdef FEATURE_CPP_CONSTEXPR
-    typedef typename std::conditional<
-                allocator_traits::is_stateful() && allocator_traits::is_locking(),
-                estd::internal::accessor<allocator_type>,
-                estd::internal::accessor_stateless<allocator_type> >::type
-                accessor;
-#else
-    // pre C++11 tricky to optimize this way
-    typedef estd::internal::accessor<allocator_type> accessor;
-#endif
-
-    class iterator
-    {
-    private:
-        accessor current;
-
-    public:
-        // All-or-nothing, though not supposed to be that way till C++17 but is sometimes
-        // before that (http://en.cppreference.com/w/cpp/iterator/iterator_traits)
-        typedef dynamic_array::value_type value_type;
-        typedef int difference_type;
-        typedef value_type* pointer;
-        typedef value_type& reference;
-        typedef ::std::forward_iterator_tag iterator_category;
-
-        value_type& lock() { return current.lock(); }
-        void unlock() { current.unlock(); }
 
 
-        iterator(allocator_type& allocator, const handle_with_offset& h ) :
-            current(allocator, h)
-        {
 
-        }
-
-        iterator(const iterator& copy_from) : current(copy_from.current) {}
-
-        ~iterator()
-        {
-            // FIX: not so great.  It might be passable, though not recommended,
-            // to unlock an alread unlocked value.  But it's less certain what
-            // happens when we only unlock once if many lock() calls have happened
-            // -- another reason to consolidate with iterators/list, because it
-            // attempts to deal with this a little bit with a lock counter
-            unlock();
-        }
-
-        // prefix version
-        iterator& operator++()
-        {
-            current.h_exp().increment();
-            return *this;
-        }
-
-
-        iterator& operator--()
-        {
-            current.h_exp().increment(-1);
-            return *this;
-        }
-
-        // postfix version
-        iterator operator++(int)
-        {
-            iterator temp(*this);
-            operator++();
-            return temp;
-        }
-
-        // postfix version
-        iterator operator--(int)
-        {
-            iterator temp(*this);
-            operator--();
-            return temp;
-        }
-
-        ptrdiff_t operator-(const iterator& subtrahend) const
-        {
-            return current.h_exp() - subtrahend.current.h_exp();
-        }
-
-        inline iterator operator+(ptrdiff_t offset)
-        {
-            iterator it(*this);
-
-            it.current.h_exp() += offset;
-
-            return it;
-        }
-
-        inline iterator operator-(ptrdiff_t offset)
-        {
-            iterator it(*this);
-
-            it.current.h_exp() -= offset;
-
-            return it;
-        }
-
-        bool operator==(const iterator& compare_to) const
-        {
-            return current.h_exp() == compare_to.current.h_exp();
-        }
-
-        bool operator!=(const iterator& compare_to) const
-        {
-            return !(operator ==)(compare_to);
-            //return current != compare_to.current;
-        }
-
-        value_type& operator*()
-        {
-            // TODO: consolidate with InputIterator behavior from iterators/list.h
-            return lock();
-        }
-
-        const value_type& operator*() const
-        {
-            return lock();
-        }
-    };
 
     typedef const iterator const_iterator;
 
@@ -771,58 +645,14 @@ public:
     // untested and unoptimized
     iterator erase(const_iterator pos)
     {
-        size_type index = pos - begin();
+        size_type index = pos - base_t::begin();
         _erase(index, 1);
         // chances are iterator is a copy of incoming pos,
         // but we'll do this anyway
-        return iterator(get_allocator(), offset(index));
+        return iterator(base_t::get_allocator(), offset(index));
     }
 
 
-    iterator begin()
-    {
-        return iterator(get_allocator(), offset(0));
-    }
-
-    iterator end()
-    {
-        handle_with_offset o = offset(size());
-
-        return iterator(get_allocator(), o);
-    }
-
-
-    const_iterator end() const
-    {
-        handle_with_offset o = offset(size());
-
-        return iterator(get_allocator(), o);
-    }
-
-
-    accessor operator[](size_type pos) const
-    {
-        return accessor(get_allocator(), offset(pos));
-    }
-
-    accessor front() const
-    {
-        return accessor(get_allocator(), offset(0));
-    }
-
-    accessor back() const
-    {
-        return accessor(get_allocator(), offset(size() - 1));
-    }
-
-    accessor at(size_type pos) const
-    {
-        // TODO: place in error/bounds checking runtime ability within
-        // accessor itself.  perhaps wrap it all up in a FEATURE_ESTD_BOUNDSCHECK
-        // to compensate for lack of exceptions requiring additional
-        // data in accessor itself
-        return accessor(get_allocator(), offset(pos));
-    }
 
 
 #ifdef FEATURE_CPP_VARIADIC
@@ -834,18 +664,13 @@ public:
 
         value_type* raw = lock(current_size);
 
-        allocator_traits::construct(get_allocator(), raw, std::forward<TArgs>(args)...);
+        allocator_traits::construct(base_t::get_allocator(), raw, std::forward<TArgs>(args)...);
 
         unlock();
 
-        return back();
+        return base_t::back();
     }
 #endif
-
-    size_type max_size() const
-    {
-        return helper.max_size();
-    }
 
     // NOTE: because pos requires a non-const lock, we can't do traditional
     // const_iterator here
