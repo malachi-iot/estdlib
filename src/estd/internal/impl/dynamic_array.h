@@ -1,6 +1,7 @@
 #pragma once
 
 #include "allocated_array.h"
+#include "../../allocators/handle_desc.h"
 
 namespace estd { namespace internal { namespace impl {
 
@@ -9,7 +10,8 @@ namespace estd { namespace internal { namespace impl {
 template <class TAllocator>
 struct dynamic_array;
 
-// TODO: Fixup name
+// TODO: Fixup name.  Specializer to reveal size of either
+// an explicitly-sized or null-terminated entity
 template <class TAllocator, bool null_terminated>
 struct length_helper;
 
@@ -110,10 +112,10 @@ public:
 // intermediate class as we transition to handle_descriptor.  Eventually phase this out
 template <class TAllocator, bool null_terminated>
 class handle_descriptor_helper :
-        public handle_descriptor<TAllocator>,
+        public estd::handle_descriptor<TAllocator>,
         length_helper<TAllocator, null_terminated>
 {
-    typedef handle_descriptor<TAllocator> base_t;
+    typedef estd::handle_descriptor<TAllocator> base_t;
     typedef length_helper<TAllocator, null_terminated> length_helper_t;
 
 public:
