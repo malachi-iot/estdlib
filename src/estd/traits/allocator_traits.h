@@ -86,6 +86,11 @@ struct allocator_traits
         a.unlock(h);
     }
 
+    static void cunlock(const allocator_type& a, handle_type h)
+    {
+        a.cunlock(h);
+    }
+
     static size_type max_size(const allocator_type& a)
     {
         // note that a.max_size is no longer required (though spec

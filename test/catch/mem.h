@@ -111,6 +111,8 @@ public:
 
     void unlock(handle_type) { }
 
+    void cunlock(handle_type) const {}
+
     pointer allocate(size_t size)
     {
         return (pointer) malloc(size * sizeof(T));

@@ -23,9 +23,37 @@ public:
     typedef typename allocator_traits::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
+    typedef typename allocator_type::value_type value_type;
+
 protected:
 
     THelper m_helper;
+
+public:
+
+    // Always try to avoid explicit locking and unlocking ... but sometimes
+    // you gotta do it, so these are public
+    value_type* lock(size_type pos = 0, size_type count = 0)
+    {
+        return &m_helper.lock(pos, count);
+    }
+
+    void unlock()
+    {
+        m_helper.unlock();
+    }
+
+    const value_type* clock(size_type pos = 0, size_type count = 0) const
+    {
+        return &m_helper.clock(pos, count);
+    }
+
+    void cunlock() const
+    {
+        m_helper.cunlock();
+    }
+
+protected:
 
     allocated_array(const allocated_array& copy_from)
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
@@ -36,10 +64,58 @@ protected:
     }
 #endif
 
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    allocated_array(std::initializer_list<value_type> initlist)
+    {
+        pointer p = lock();
+
+        std::copy(initlist.begin(), initlist.end(), p);
+
+        m_helper.size(initlist.size());
+
+        unlock();
+    }
+#endif
+
     handle_with_offset offset(size_type  pos) const
     {
         //return helper.get_allocator().offset(helper.handle(), pos);
         return m_helper.offset(pos);
+    }
+
+    // internal version of replace not conforming to standard
+    // (standard version also inserts or removes characters if requested,
+    //  this one ONLY replaces the entire buffer)
+    // TODO: change to assign
+    void assign(const value_type* buf, size_type len)
+    {
+        value_type* raw = &m_helper.lock();
+
+        while(len--) *raw++ = *buf++;
+
+        m_helper.unlock();
+    }
+
+
+    template <class ForeignHelper>
+    bool starts_with(const allocated_array<ForeignHelper>& compare_to) const
+    {
+        const value_type* s = clock();
+        const value_type* t = compare_to.clock();
+
+        size_type source_max = size();
+        size_type target_max = compare_to.size();
+
+        while(source_max-- && target_max--)
+            if(*s++ != *t++)
+            {
+                cunlock();
+                return false;
+            }
+
+        cunlock();
+        // if compare_to is longer than we are, then it's also a fail
+        return source_max != -1;
     }
 
 public:
@@ -244,6 +320,31 @@ public:
     size_type max_size() const
     {
         return m_helper.max_size();
+    }
+
+    bool empty() const
+    {
+        return m_helper.empty();
+    }
+
+    // copy (into dest)
+    // officially only for basic_string, but lives happily here in allocated_array
+    size_type copy(typename estd::remove_const<value_type>::type* dest,
+                   size_type count, size_type pos = 0) const
+    {
+        const value_type* src = clock();
+
+        // TODO: since we aren't gonna throw an exception, determine what to do if
+        // pos > size()
+
+        if(pos + count > size())
+            count = size() - pos;
+
+        memcpy(dest, src + pos, count * sizeof(value_type));
+
+        cunlock();
+
+        return count;
     }
 };
 

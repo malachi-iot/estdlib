@@ -178,6 +178,11 @@ public:
         allocator_traits::unlock(allocator, handle);
     }
 
+    void cunlock() const
+    {
+        allocator_traits::cunlock(allocator, handle);
+    }
+
     bool is_allocated() const
     {
         handle_type h = handle;
@@ -236,15 +241,15 @@ class dynamic_array : public allocated_array<THelper>
 
 public:
     typedef TAllocator allocator_type;
-    typedef estd::allocator_traits<TAllocator> allocator_traits;
+    typedef typename base_t::allocator_traits allocator_traits;
     typedef THelper helper_type;
-    typedef typename allocator_type::value_type value_type;
+    typedef typename base_t::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
-    typedef typename allocator_traits::size_type size_type;
+    typedef typename base_t::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef value_type& reference;
@@ -262,39 +267,16 @@ protected:
 
     const helper_type& helper() const { return base_t::m_helper; }
 
-#ifdef FEATURE_ESTD_LOCK_COUNTER
-    typename allocator_traits::lock_counter lock_counter;
-#endif
-
 public:
-    // Always try to avoid explicit locking and unlocking ... but sometimes
-    // you gotta do it, so these are public
+    // redeclared just for conveineince
     value_type* lock(size_type pos = 0, size_type count = 0)
     {
-#ifdef FEATURE_ESTD_LOCK_COUNTER
-        lock_counter++;
-#endif
-        return &helper().lock(pos, count);
+        return base_t::lock(pos, count);
     }
 
-    void unlock()
-    {
-#ifdef FEATURE_ESTD_LOCK_COUNTER
-        lock_counter--;
-#endif
-        helper().unlock();
-    }
+    void unlock() { return base_t::unlock(); }
 
 protected:
-    const value_type* clock_experimental(size_type pos = 0, size_type count = 0)
-    {
-#ifdef FEATURE_ESTD_LOCK_COUNTER
-        lock_counter++;
-#endif
-        return &helper().clock(pos, count);
-    }
-
-
     // internal method for auto increasing capacity based on pre-set amount
     void ensure_additional_capacity(size_type increase_by)
     {
@@ -329,6 +311,18 @@ protected:
         helper().size(new_size);
 
         if(shrink) shrink_to_fit();
+    }
+
+
+    // internal version of replace not conforming to standard
+    // (standard version also inserts or removes characters if requested,
+    //  this one ONLY replaces the entire buffer)
+    // TODO: change to assign
+    void assign(const value_type* buf, size_type len)
+    {
+        ensure_total_size(len);
+
+        base_t::assign(buf, len);
     }
 
 
@@ -385,34 +379,11 @@ public:
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     dynamic_array(std::initializer_list<value_type> initlist)
-    {
-        pointer p = lock();
-
-        std::copy(initlist.begin(), initlist.end(), p);
-
-        helper().size(initlist.size());
-
-        unlock();
-    }
+        : base_t(initlist) {}
 #endif
 
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}
-
-    // FIX: First of all , don't like forcing const
-    // secondly, exposing these as public is not great - but eventually
-    // we might be forced to expose some form of lock/unlock as public
-    // currently only exposing as public to make it easier for compare() to work
-    const value_type* fake_const_lock(size_type pos = 0, size_type count = 0) const
-    {
-        // Ugly, and would use decltype if I wasn't concerned with pre C++11 compat
-        return const_cast<this_t*>(this)->clock_experimental(pos, count);
-    }
-
-    void fake_const_unlock() const
-    {
-        return const_cast<this_t*>(this)->unlock();
-    }
 
     size_type size() const { return base_t::size(); }
 
@@ -453,21 +424,6 @@ protected:
         size_type current_size = grow(len);
 
         value_type* raw = lock(current_size);
-
-        while(len--) *raw++ = *buf++;
-
-        unlock();
-    }
-
-    // internal version of replace not conforming to standard
-    // (standard version also inserts or removes characters if requested,
-    //  this one ONLY replaces the entire buffer)
-    // TODO: change to assign
-    void assign(const value_type* buf, size_type len)
-    {
-        ensure_total_size(len);
-
-        value_type* raw = lock();
 
         while(len--) *raw++ = *buf++;
 
@@ -521,65 +477,18 @@ protected:
 
 
 
-    template <class ForeignHelper>
-    bool starts_with(const dynamic_array<typename ForeignHelper::allocator_type, ForeignHelper>& compare_to) const
-    {
-        const value_type* s = fake_const_lock();
-        const value_type* t = compare_to.fake_const_lock();
-
-        size_type source_max = size();
-        size_type target_max = compare_to.size();
-
-        while(source_max-- && target_max--)
-            if(*s++ != *t++)
-            {
-                fake_const_unlock();
-                return false;
-            }
-
-        fake_const_unlock();
-        // if compare_to is longer than we are, then it's also a fail
-        return source_max != -1;
-    }
-
 
 public:
-    // copy (into dest)
-    // officially only for basic_string, but lives happily here in dynamic_array
-    size_type copy(typename estd::remove_const<value_type>::type* dest,
-                   size_type count, size_type pos = 0) const
-    {
-        const value_type* src = fake_const_lock();
-
-        // TODO: since we aren't gonna throw an exception, determine what to do if
-        // pos > size()
-
-        if(pos + count > size())
-            count = size() - pos;
-
-        memcpy(dest, src + pos, count * sizeof(value_type));
-
-        fake_const_unlock();
-
-        return count;
-    }
-
-
-    bool empty() const
-    {
-        return helper().empty();
-    }
-
     template <class TForeignAllocator, class TDAHelper>
     dynamic_array& append(const dynamic_array<TForeignAllocator, TDAHelper>& str)
     {
         size_type len = str.size();
 
-        const typename TForeignAllocator::value_type* append_from = str.fake_const_lock();
+        const typename TForeignAllocator::value_type* append_from = str.clock();
 
         _append(append_from, len);
 
-        str.fake_const_unlock();
+        str.cunlock();
 
         return *this;
     }
@@ -627,11 +536,6 @@ public:
         unlock();
         return *this;
     }
-
-    //typedef estd::internal::accessor<TAllocator> accessor;
-
-
-
 
 
     typedef const iterator const_iterator;

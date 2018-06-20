@@ -123,11 +123,11 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        const CharT* raw = base_t::fake_const_lock();
+        const CharT* raw = base_t::clock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
-        base_t::fake_const_unlock();
+        base_t::cunlock();
 
         return result;
 
@@ -144,14 +144,14 @@ public:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        const CharT* raw = base_t::fake_const_lock();
-        const CharT* s = str.fake_const_lock();
+        const CharT* raw = base_t::clock();
+        const CharT* s = str.clock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
-        base_t::fake_const_unlock();
+        base_t::cunlock();
 
-        str.fake_const_unlock();
+        str.cunlock();
 
         return result;
     }
@@ -189,18 +189,18 @@ public:
     // compare to a C-style string
     bool starts_with(const CharT* compare_to) const
     {
-        const value_type* s = base_t::fake_const_lock();
+        const value_type* s = base_t::clock();
 
         size_type source_max = length();
 
         while(source_max-- && *compare_to != 0)
             if(*s++ != *compare_to++)
             {
-                base_t::fake_const_unlock();
+                base_t::cunlock();
                 return false;
             }
 
-        base_t::fake_const_unlock();
+        base_t::cunlock();
         // if compare_to is longer than we are, then it's also a fail
         return source_max != -1;
     }
@@ -328,7 +328,7 @@ public:
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
-        : base_t(copy_from.fake_const_lock())
+        : base_t(copy_from.clock())
     {
     }
 
@@ -410,7 +410,7 @@ public:
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
-        : base_t(init_t(copy_from.fake_const_lock(), copy_from.max_size()))
+        : base_t(init_t(copy_from.clock(), copy_from.max_size()))
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(helper_type::uses_termination(), "Only supports null terminated at this time");
@@ -535,7 +535,7 @@ inline std::basic_ostream<CharT, Traits>&
     // this might be more efficient
     os.write(str.fake_const_lock(), str.size());
 
-    str.fake_const_unlock();
+    str.cunlock();
 
     return os;
 }
@@ -552,9 +552,9 @@ inline std::ostream&
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
-    os.write(str.fake_const_lock(), str.size());
+    os.write(str.clock(), str.size());
 
-    str.fake_const_unlock();
+    str.cunlock();
 
     return os;
 }
