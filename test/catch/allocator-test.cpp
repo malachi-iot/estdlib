@@ -26,6 +26,8 @@ TEST_CASE("allocator tests")
             //d.reallocate(5);
             int* val_array = &d.lock();
         }
+        // Our unit tests always have CONSTEXPR set, but sometimes I manually disable it to test for < C++11 compatibility
+#ifdef FEATURE_CPP_CONSTEXPR
         SECTION("referenced")
         {
             allocator_t allocator;
@@ -37,5 +39,6 @@ TEST_CASE("allocator tests")
             //d.reallocate(5);
             int* val_array = &d.lock();
         }
+#endif
     }
 }

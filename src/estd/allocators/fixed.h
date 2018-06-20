@@ -223,22 +223,53 @@ public:
 }
 
 #ifndef FEATURE_CPP_CONSTEXPR
-template <class T, int N, class TSize, class TTraits>
-struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>, TTraits >
+template <class T, size_t N, bool null_terminated, class TBuffer, class TSize, class TTraits>
+struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>, TTraits >
         : internal::handle_descriptor_base<
-                internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>,
+                internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
                 true,
                 false,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
-            internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>,
+            internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
             true,
             false,
             true> base_t;
 
     handle_descriptor() : base_t(true) {}
+
+    template <class TAllocatorParam>
+    handle_descriptor(const TAllocatorParam& p) : base_t(p, true) {}
+
+    /*
+    // Without this, above cascades down to the handle_type version of the constructor
+    handle_descriptor(const TBuffer& b) : base_t(b) {} */
+};
+
+
+template <class T, bool null_terminated, class TSize, class TTraits>
+struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>, TTraits >
+        : internal::handle_descriptor_base<
+                internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
+                true,
+                false,
+                true>
+
+{
+    typedef internal::handle_descriptor_base<
+            internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
+            true,
+            false,
+            true> base_t;
+
+    handle_descriptor() : base_t(true) {}
+
+    template <class TAllocatorParam>
+    handle_descriptor(const TAllocatorParam& p) :
+//            base_t(p, typename TTraits::invalid_handle()) {}
+            base_t(p, true) {}
 };
 #endif
 

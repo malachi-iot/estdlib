@@ -50,6 +50,8 @@ struct allocator_traits
     // indicates whether handles innately can be queried for their size
     static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
 
+    static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
+
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {
         return a.allocate(n);

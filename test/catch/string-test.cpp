@@ -95,7 +95,7 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == "hello");
     }
-    SECTION("layer 2 (non-experimental) null terimnated")
+    SECTION("layer 2 (non-experimental) null terminated")
     {
         char buf[128] = ""; // as per spec, this actually
         layer2::basic_string<char, 20> s(buf, 0);
