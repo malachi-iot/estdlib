@@ -99,7 +99,10 @@ public:
         return *(h.handle() + pos);
     }
 
-    const T& clock(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
+    const T& clock(handle_type h, size_t pos = 0, size_t count = 0) const
+    {
+        return *(h + pos);
+    }
 
     const T& clock(const handle_with_offset& h, size_t pos = 0, size_t count = 0) const
     {

@@ -15,7 +15,7 @@ class allocated_array
 public:
     typedef THelper helper_type;
     typedef typename helper_type::allocator_type allocator_type;
-    typedef estd::allocator_traits<allocator_type> allocator_traits;
+    typedef typename helper_type::allocator_traits allocator_traits;
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;

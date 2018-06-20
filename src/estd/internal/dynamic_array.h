@@ -168,7 +168,7 @@ public:
     }
 
     // constant-return-lock
-    const value_type& clock(size_type pos = 0, size_type count = 0)
+    const value_type& clock(size_type pos = 0, size_type count = 0) const
     {
         return allocator.clock(handle, pos, count);
     }
@@ -265,11 +265,6 @@ protected:
 #ifdef FEATURE_ESTD_LOCK_COUNTER
     typename allocator_traits::lock_counter lock_counter;
 #endif
-
-    handle_with_offset offset(size_type  pos) const
-    {
-        return base_t::offset(pos);
-    }
 
 public:
     // Always try to avoid explicit locking and unlocking ... but sometimes
@@ -419,7 +414,7 @@ public:
         return const_cast<this_t*>(this)->unlock();
     }
 
-    size_type size() const { return helper().size(); }
+    size_type size() const { return base_t::size(); }
 
     size_type capacity() const
     {
@@ -649,7 +644,7 @@ public:
         _erase(index, 1);
         // chances are iterator is a copy of incoming pos,
         // but we'll do this anyway
-        return iterator(base_t::get_allocator(), offset(index));
+        return iterator(base_t::get_allocator(), base_t::offset(index));
     }
 
 
