@@ -130,6 +130,8 @@ public:
     // allocator itself only needs to be stateful if it needs to do handle locking
     // if not, then we assume it's pointer based and thusly can access the item
     // without an allocator pointer, stateful or otherwise
+    // TODO: Move this accessor typedef out to helper, who can lean slightly less on
+    // constexpr to get the job done
 #ifdef FEATURE_CPP_CONSTEXPR
     typedef typename std::conditional<
                 allocator_traits::is_stateful() && allocator_traits::is_locking(),

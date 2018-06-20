@@ -12,6 +12,8 @@ namespace internal {
 
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
+// also this is a stateful allocator, by nature of TBuffer taking up some space
+// if one wishes to be stateless, a different (base) class should be used
 template <class T, class TBuffer, typename TSize>
 struct single_allocator_base
 {
