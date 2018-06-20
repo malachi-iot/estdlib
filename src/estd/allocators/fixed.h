@@ -345,6 +345,7 @@ public:
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
+    // account for null-termination during a max_size request
     size_type max_size() const
     {
         return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
@@ -363,26 +364,11 @@ public:
         return base_t::get_allocator().offset(base_t::handle(), pos);
     }
 
-    // +++
-    // these I'd also like in handle_descriptor, however currently handle_descriptor
-    // (gently) requires handle already be allocated, so these are akward in there
-    bool is_allocated() const
-    {
-        return base_t::allocator_traits::invalid() != base_t::handle();
-    }
-
-    bool allocate(size_type n)
-    {
-        base_t::handle(base_t::get_allocator().allocate(n));
-        return is_allocated();
-    }
-    // ---
-
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
     // 'used' size within that allocation.  For this variety, we are null terminated
     size_type size() const
     {
-        if(!is_allocated()) return 0;
+        if(!base_t::is_allocated()) return 0;
 
         return length_helper_t::size(base_t::get_allocator(), base_t::handle());
     }

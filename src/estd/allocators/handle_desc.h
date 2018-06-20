@@ -176,6 +176,12 @@ public:
     allocator_and_handle_descriptor_base(const handle_type& h) :
         handle_base_t(h) {}
 
+
+    // Indicates whether this handle can be invalid or not.
+    // FALSE = invalid is possible (typical dynamic allocation behavior)
+    // TRUE = invalid is impossible (fixed/singular behavior)
+    static bool CONSTEXPR is_always_allocated() { return is_singular; }
+
     value_type& lock(size_type pos = 0, size_type count = 0)
     {
         return handle_base_t::lock(base_t::get_allocator(), pos, count);
@@ -197,6 +203,22 @@ public:
     {
         handle_base_t::handle(base_t::get_allocator().reallocate(true, size));
         return handle_base_t::handle() != allocator_traits::invalid();
+    }
+
+    bool is_allocated() const
+    {
+        return allocator_traits::invalid() != handle_base_t::handle();
+    }
+
+    bool allocate(size_type n)
+    {
+        handle_base_t::handle(base_t::get_allocator().allocate(n));
+        return is_allocated();
+    }
+
+    void free()
+    {
+        base_t::get_allocator().free(handle_base_t::handle());
     }
 };
 
@@ -320,6 +342,10 @@ public:
 
     template <class TAllocatorParameter>
     handle_descriptor(TAllocatorParameter& p) : base_t(p, TTraits::invalid()) {}
+
+    typedef typename base_t::allocator_traits allocator_traits;
+    typedef typename base_t::size_type size_type;
+
 };
 
 
