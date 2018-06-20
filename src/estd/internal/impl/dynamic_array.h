@@ -7,7 +7,7 @@ namespace estd { namespace internal { namespace impl {
 
 // See reference implementation in dynamic_array.h
 template <class TAllocator>
-struct dynamic_array_helper;
+struct dynamic_array;
 
 // TODO: Fixup name
 template <class TAllocator, bool null_terminated>
@@ -168,7 +168,7 @@ public:
 // applies generally to T[N], RW buffer but also to non-const T*
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer>
-class dynamic_array_helper<single_fixedbuf_allocator<T, len, true, TBuffer> >
+class dynamic_array<single_fixedbuf_allocator<T, len, true, TBuffer> >
         : public handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true >
 {
     typedef handle_descriptor_helper<single_fixedbuf_allocator<T, len, true, TBuffer>, true > base_t;
@@ -181,18 +181,18 @@ public:
 
     // FIX: Iron out exactly where we really assign size(0) - sometimes we
     // want to pre-initialize our buffer so size(0) is not an always thing
-    dynamic_array_helper(TBuffer& b) : base_t(b)
+    dynamic_array(TBuffer& b) : base_t(b)
     {
         base_t::size(0);
     }
 
-    dynamic_array_helper(const TBuffer& b) : base_t(b)
+    dynamic_array(const TBuffer& b) : base_t(b)
     {
         // FIX: This only works for NULL-terminated scenarios
         // we still need to assign a length of 0 for explicit lenght scenarios
     }
 
-    dynamic_array_helper()
+    dynamic_array()
     {
         base_t::size(0);
     }
@@ -206,7 +206,7 @@ public:
 // runtime size information is stored in allocator itself, not helper
 // (not null terminated, since it's runtime-const fixed size)
 template <class T>
-class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
+class dynamic_array<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
         : public handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true>
 {
     typedef handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true> base_t;
@@ -223,10 +223,10 @@ public:
     size_type max_size() const { return capacity(); }
 
     template <class TParam>
-    dynamic_array_helper(const TParam& p) :
+    dynamic_array(const TParam& p) :
         base_t(p) {}
 
-    dynamic_array_helper(const dynamic_array_helper& copy_from) :
+    dynamic_array(const dynamic_array& copy_from) :
         base_t(copy_from.get_allocator())
     {
     }
@@ -236,7 +236,7 @@ public:
 
 // runtime (layer3-ish) version
 template <class T, bool null_terminated>
-class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
+class dynamic_array<single_fixedbuf_runtimesize_allocator<T, null_terminated> > :
         public handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >
 {
     typedef handle_descriptor_helper<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > base_t;
@@ -244,7 +244,7 @@ class dynamic_array_helper<single_fixedbuf_runtimesize_allocator<T, null_termina
 
 public:
     template <class TInitParam>
-    dynamic_array_helper(const TInitParam& p) : base_t(p) {}
+    dynamic_array(const TInitParam& p) : base_t(p) {}
 };
 
 
@@ -252,7 +252,7 @@ public:
 // track a singular allocation within an allocator.  Revision of above size_tracker_nullterm
 // and size_tracker_default
 template <class TAllocator>
-class dynamic_array_helper
+class dynamic_array
 {
 public:
     // default implementation is 'full fat' to handle all scenarios
@@ -333,7 +333,7 @@ public:
     }
 
     template <class T>
-    dynamic_array_helper(T init) :
+    dynamic_array(T init) :
             allocator(init),
             handle(allocator_traits::invalid()),
             m_size(0)
@@ -341,14 +341,14 @@ public:
 
     }
 
-    dynamic_array_helper() :
+    dynamic_array() :
             handle(allocator_traits::invalid()),
             m_size(0)
     {
 
     }
 
-    ~dynamic_array_helper()
+    ~dynamic_array()
     {
         if(handle != allocator_traits::invalid())
             allocator.deallocate(handle, 1);
