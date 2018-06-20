@@ -2,6 +2,7 @@
 
 #include "../memory.h"
 #include "runtime_array.h"
+#include "impl/dynamic_array.h"
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
 #include <initializer_list>
@@ -116,124 +117,12 @@ public:
 namespace internal {
 
 
-
-
-// TODO: come up with better name, specialization like traits except stateful to
-// track a singular allocation within an allocator.  Revision of above size_tracker_nullterm
-// and size_tracker_default
-template <class TAllocator>
-class dynamic_array_helper
-{
-public:
-    // default implementation is 'full fat' to handle all scenarios
-    typedef TAllocator allocator_type;
-    typedef estd::allocator_traits<TAllocator> allocator_traits;
-    typedef typename allocator_type::value_type value_type;
-
-    typedef typename allocator_traits::handle_type handle_type;
-    typedef typename allocator_traits::handle_with_size handle_with_size;
-    typedef typename allocator_traits::size_type size_type;
-    typedef typename allocator_traits::handle_with_offset handle_with_offset;
-
-private:
-    // handle.size represents currently allocation portion
-    handle_with_size handle;
-    // remember, size represents 'user/app' portion.
-    size_type m_size;
-    // don't fiddle with ref juggling here - if that's absolutely necessary use
-    // the RefAllocator helper
-    allocator_type allocator;
-
-public:
-    static CONSTEXPR bool uses_termination() { return false; }
-
-    size_type capacity() const { return allocator.size(handle); }
-    size_type size() const { return m_size; }
-
-    allocator_type& get_allocator() { return allocator; }
-
-    // +++ intermediate calls, phase these out eventually
-    handle_with_size get_handle() { return handle; }
-    void size(size_type s) { m_size = s; }
-    // ---
-
-    handle_with_offset offset(size_type pos) const
-    {
-        return allocator.offset(handle, pos);
-    }
-
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return allocator_traits::lock(allocator, handle, pos, count);
-    }
-
-    // constant-return-lock
-    const value_type& clock(size_type pos = 0, size_type count = 0) const
-    {
-        return allocator.clock(handle, pos, count);
-    }
-
-    void unlock()
-    {
-        allocator_traits::unlock(allocator, handle);
-    }
-
-    void cunlock() const
-    {
-        allocator_traits::cunlock(allocator, handle);
-    }
-
-    bool is_allocated() const
-    {
-        handle_type h = handle;
-        return h != allocator_traits::invalid();
-    }
-
-    bool allocate(size_type capacity)
-    {
-        handle = allocator.allocate_ext(capacity);
-        return is_allocated();
-    }
-
-
-    bool reallocate(size_type capacity)
-    {
-        handle = allocator.reallocate_ext(handle, capacity);
-        return is_allocated();
-    }
-
-    template <class T>
-    dynamic_array_helper(T init) :
-            allocator(init),
-            handle(allocator_traits::invalid()),
-            m_size(0)
-    {
-
-    }
-
-    dynamic_array_helper() :
-            handle(allocator_traits::invalid()),
-            m_size(0)
-    {
-
-    }
-
-    ~dynamic_array_helper()
-    {
-        if(handle != allocator_traits::invalid())
-            allocator.deallocate(handle, 1);
-    }
-
-    bool empty() const { return m_size == 0; }
-};
-
-
 // non standard base class for managing expanding/contracting arrays
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
-template <class TAllocator, class THelper = dynamic_array_helper<TAllocator > >
+template <class TAllocator, class THelper = impl::dynamic_array_helper<TAllocator > >
 class dynamic_array : public allocated_array<THelper>
 {
     typedef dynamic_array this_t;

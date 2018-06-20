@@ -2,6 +2,7 @@
 
 #include "../type_traits.h"
 #include "../traits/allocator_traits.h"
+#include "../internal/impl/handle_desc.h"
 #include <cassert>
 
 namespace estd { namespace internal {
