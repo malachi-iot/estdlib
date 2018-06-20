@@ -29,7 +29,7 @@ class handle_descriptor_base;
 // false = bad/unallocated handle - we assume always good handle for this descriptor, so no
 // handle is actually tracked
 template <class TAllocator, bool is_stateful, bool is_singular,
-          class TTraits = estd::allocator_traits<TAllocator>>
+          class TTraits = estd::allocator_traits<TAllocator> >
 class allocator_and_handle_descriptor_base :
         public impl::allocator_descriptor_base<TAllocator, is_stateful>,
         public impl::handle_descriptor_base<TAllocator, is_singular>
@@ -198,6 +198,7 @@ public:
 
 }
 
+#ifdef FEATURE_CPP_CONSTEXPR
 // NOTE: Pretty sure this isn't < C++11 friendly, so be sure to do explicit specializations
 // for particular TAllocator varieties - will have to work out TAllocator& for those as well
 template <class TAllocator,
@@ -225,6 +226,10 @@ public:
     typedef typename base_t::size_type size_type;
 
 };
-
+#else
+template <class TAllocator,
+        class TTraits = allocator_traits<typename remove_reference<TAllocator>::type> >
+class handle_descriptor;
+#endif
 
 }

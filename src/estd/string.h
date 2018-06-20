@@ -1,8 +1,8 @@
 #pragma once
 
 #include "memory.h"
-#include "internal/dynamic_array.h"
 #include "allocators/fixed.h"
+#include "internal/dynamic_array.h"
 #include "traits/string.h"
 #include <algorithm> // for std::min
 

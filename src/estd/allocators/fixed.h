@@ -222,4 +222,25 @@ public:
 
 }
 
+#ifndef FEATURE_CPP_CONSTEXPR
+template <class T, int N, class TSize, class TTraits>
+struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>, TTraits >
+        : internal::handle_descriptor_base<
+                internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>,
+                true,
+                false,
+                true>
+
+{
+    typedef internal::handle_descriptor_base<
+            internal::single_fixedbuf_allocator<T, N, true, T[N], TSize>,
+            true,
+            false,
+            true> base_t;
+
+    handle_descriptor() : base_t(true) {}
+};
+#endif
+
+
 }
