@@ -52,17 +52,19 @@ public:
     const allocator_type& get_allocator() const { return allocator; }
 
 protected:
+    typedef allocator_type& allocator_ref;
 };
 
 
 template <class TAllocator>
 struct allocator_descriptor<TAllocator, false>
 {
-    typedef TAllocator allocator_type;
+    typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef allocator_type allocator_ref;
 
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference
-    allocator_type& get_allocator() const { return TAllocator(); }
+    allocator_type get_allocator() const { return allocator_type(); }
 };
 
 // singular technically doesn't track a handle

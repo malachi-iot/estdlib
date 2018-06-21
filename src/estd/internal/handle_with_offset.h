@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef> // for size_t
+#include "impl/handle_desc.h"
 
 namespace estd { namespace internal {
 
@@ -135,85 +136,24 @@ public:
 
 
 
-template <class TAllocator>
-class accessor_stateful_base
+template <
+        class TAllocator, bool is_stateful,
+        class TTraits = estd::allocator_traits<TAllocator> >
+class accessor_shared : public impl::allocator_descriptor<TAllocator&, is_stateful>
 {
 public:
-    typedef TAllocator allocator_type;
-    typedef estd::allocator_traits<TAllocator> allocator_traits;
-    typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-
-private:
-    allocator_type& a;
-
-protected:
-    handle_with_offset h;
-
-    typedef allocator_type& allocator_ref;
-
-public:
-    accessor_stateful_base(allocator_type& a, const handle_with_offset& h) :
-        a(a),
-        h(h) {}
-
-    accessor_stateful_base(const accessor_stateful_base& copy_from) :
-        a(copy_from.a),
-        h(copy_from.h) {}
-
-    allocator_type& get_allocator() const { return a; }
-
-    accessor_stateful_base& operator =(const accessor_stateful_base& copy_from)
-    {
-        // FIX: kinda cheezy, but macOS needed an explicit copy operator here
-        new (this) accessor_stateful_base(copy_from);
-        return *this;
-    }
-};
-
-
-
-template <class TAllocator>
-class accessor_stateless_base
-{
-public:
-    typedef TAllocator allocator_type;
-    typedef estd::allocator_traits<TAllocator> allocator_traits;
-    typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-
-protected:
-    handle_with_offset h;
-
-    typedef allocator_type allocator_ref;
-
-public:
-    accessor_stateless_base(const handle_with_offset& h) : h(h)
-    {
-#ifdef FEATURE_CPP_STATICASSERT
-        static_assert(sizeof(allocator_type) <= 1, "Stateless allocator must be <= 1 bytes in size");
-#endif
-    }
-
-#ifdef FEATURE_CPP_MOVE_SEMANTIC
-    allocator_type&& get_allocator() const { return allocator_type(); }
-#else
-    allocator_type get_allocator() const { return allocator_type(); }
-#endif
-};
-
-template <class TAccessorBase>
-class accessor_shared : public TAccessorBase
-{
-public:
-    typedef TAccessorBase base_t;
+    typedef impl::allocator_descriptor<TAllocator&, is_stateful> base_t;
     typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::value_type value_type;
-    typedef typename base_t::handle_with_offset handle_with_offset;
-    typedef typename base_t::allocator_traits allocator_traits;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    //typedef typename base_t::allocator_traits allocator_traits;
+    typedef TTraits allocator_traits;
 
 protected:
+    // Used because for stateless, this is actually NOT a ref
     typedef typename base_t::allocator_ref allocator_ref;
+
+    handle_with_offset h;
 
     template <class TAccessor>
     TAccessor& assign(const value_type& assign_from)
@@ -228,41 +168,45 @@ protected:
     }
 
 public:
+    accessor_shared(const accessor_shared& copy_from) :
+        // FIX: Repair this const-dropping trick
+        base_t((allocator_ref)copy_from.get_allocator()),
+        h(copy_from.h) {}
+
     accessor_shared(allocator_type& a, const handle_with_offset& h) :
-        base_t(a, h) {}
+        base_t(a),
+        h(h) {}
 
     accessor_shared(const handle_with_offset& h) :
-        base_t(h) {}
+        h(h) {}
 
-    const handle_with_offset& h_exp() const { return base_t::h; }
+    const handle_with_offset& h_exp() const { return h; }
 
-    handle_with_offset& h_exp() { return base_t::h; }
+    handle_with_offset& h_exp() { return h; }
 
     value_type& lock()
     {
         allocator_ref a = base_t::get_allocator();
 
-        return allocator_traits::lock(a, base_t::h);
+        return allocator_traits::lock(a, h);
     }
 
     void unlock()
     {
         allocator_ref a = base_t::get_allocator();
 
-        allocator_traits::unlock(a, base_t::h.handle());
+        allocator_traits::unlock(a, h.handle());
     }
 
 
     const value_type& clock() const
     {
-        allocator_ref a = base_t::get_allocator();
-
-        return allocator_traits::clock(a, base_t::h);
+        return allocator_traits::clock(base_t::get_allocator(), h);
     }
 
     const void cunlock() const
     {
-        base_t::get_allocator().cunlock(base_t::h.handle());
+        base_t::get_allocator().cunlock(h.handle());
     }
 
     operator value_type()
@@ -308,9 +252,10 @@ public:
 
 
 template <class TAllocator>
-class accessor : public accessor_shared<accessor_stateful_base<TAllocator> >
+class accessor : public accessor_shared<TAllocator, true >
 {
-    typedef accessor_shared<accessor_stateful_base<TAllocator> > base_t;
+    typedef accessor_shared<TAllocator, true > base_t;
+    typedef typename base_t::allocator_type allocator_type;
     typedef accessor this_t;
     typedef typename base_t::value_type value_type;
 
@@ -318,8 +263,10 @@ public:
     accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
         base_t(a, h) {}
 
-    accessor(const accessor& copy_from) :
-        base_t(copy_from.get_allocator(), copy_from.h) {}
+    // NOTE: Making this non-const because get_allocator() needs to be non const
+    // as this accessor can peer in and change stuff (legitimate non-const locking)
+    accessor(const accessor& copy_from) : base_t(copy_from)
+    {}
 
     accessor& operator=(const value_type& assign_from)
     {
@@ -329,9 +276,9 @@ public:
 
 
 template <class TAllocator>
-class accessor_stateless : public accessor_shared<accessor_stateless_base<TAllocator> >
+class accessor_stateless : public accessor_shared<TAllocator, false>
 {
-    typedef accessor_shared<accessor_stateless_base<TAllocator> > base_t;
+    typedef accessor_shared<TAllocator, false> base_t;
     typedef typename base_t::value_type value_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
 
