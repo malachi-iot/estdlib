@@ -22,24 +22,24 @@ protected:
 // https://en.cppreference.com/w/cpp/language/ebo we can have specialized base classes which are empty
 // and don't hurt our sizing
 template <class TAllocator, bool is_stateful>
-class allocator_descriptor_base;
+class allocator_descriptor;
 
 
 // TAllocator could be a ref here
 template <class TAllocator>
-class allocator_descriptor_base<TAllocator, true>
+class allocator_descriptor<TAllocator, true>
 {
     TAllocator allocator;
 
 protected:
     // NOTE: variadic would be nice, but obviously not always available
     template <class TAllocatorParameter>
-    allocator_descriptor_base(TAllocatorParameter& p) :
+    allocator_descriptor(TAllocatorParameter& p) :
         allocator(p) {}
 
     // Not unusual for a stateful allocator to default construct itself just
     // how we want it
-    allocator_descriptor_base() {}
+    allocator_descriptor() {}
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
@@ -56,7 +56,7 @@ protected:
 
 
 template <class TAllocator>
-struct allocator_descriptor_base<TAllocator, false>
+struct allocator_descriptor<TAllocator, false>
 {
     typedef TAllocator allocator_type;
 
@@ -68,17 +68,17 @@ struct allocator_descriptor_base<TAllocator, false>
 // singular technically doesn't track a handle
 // TODO: refactor to utilize value_evaporator (get_allocator, too)
 template <class TAllocator, bool is_singular>
-class handle_descriptor_base;
+class handle_descriptor;
 
 template <class TAllocator>
-class handle_descriptor_base<TAllocator, true>
+class handle_descriptor<TAllocator, true>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
 
 protected:
-    handle_descriptor_base(bool) {}
+    handle_descriptor(bool) {}
 
     typedef typename allocator_type::handle_type handle_type;
 
@@ -97,7 +97,7 @@ public:
 
 
 template <class TAllocator>
-struct handle_descriptor_base<TAllocator, false>
+struct handle_descriptor<TAllocator, false>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::handle_type handle_type;
@@ -110,7 +110,7 @@ private:
 protected:
     void handle(const handle_type& h) { m_handle = h; }
 
-    handle_descriptor_base(const handle_type& h) : m_handle(h) {}
+    handle_descriptor(const handle_type& h) : m_handle(h) {}
 
     value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
     {

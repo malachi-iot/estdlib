@@ -30,13 +30,13 @@ class handle_descriptor_base;
 // handle is actually tracked
 template <class TAllocator, bool is_stateful, bool is_singular,
           class TTraits = estd::allocator_traits<TAllocator> >
-class allocator_and_handle_descriptor_base :
-        public impl::allocator_descriptor_base<TAllocator, is_stateful>,
-        public impl::handle_descriptor_base<TAllocator, is_singular>
+class allocator_and_handle_descriptor :
+        public impl::allocator_descriptor<TAllocator, is_stateful>,
+        public impl::handle_descriptor<TAllocator, is_singular>
 {
-    typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> this_t;
-    typedef impl::allocator_descriptor_base<TAllocator, is_stateful> base_t;
-    typedef impl::handle_descriptor_base<TAllocator, is_singular> handle_base_t;
+    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> this_t;
+    typedef impl::allocator_descriptor<TAllocator, is_stateful> base_t;
+    typedef impl::handle_descriptor<TAllocator, is_singular> handle_base_t;
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
@@ -48,12 +48,12 @@ public:
 public:
     // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
     template <class TAllocatorParameter>
-    allocator_and_handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
+    allocator_and_handle_descriptor(TAllocatorParameter& p, const handle_type& h) :
             base_t(p),
             handle_base_t(h)
     {}
 
-    allocator_and_handle_descriptor_base(const handle_type& h) :
+    allocator_and_handle_descriptor(const handle_type& h) :
         handle_base_t(h) {}
 
 
@@ -107,9 +107,9 @@ public:
 // With explicit size knowledge
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
-        public allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
+        public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
-    typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
+    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -151,9 +151,9 @@ public:
 // size of our tracked handle
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
-        public allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
+        public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
-    typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
+    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -167,25 +167,6 @@ public:
             : base_t(a, h) {}
 
     size_type size() const { return base_t::get_allocator().size(base_t::handle()); }
-};
-
-
-// special-case handle_descriptor which makes no attempt to track size either way
-// useful when external consuming party has its own way to determine handle size
-template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_external :
-        public allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
-{
-    typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
-
-public:
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::allocator_type allocator_type;
-
-    // FIX: Harcoded to singular type
-    // FIX: Need better name than 'T'
-    template <class T>
-    handle_descriptor_external(const T& p) : base_t(p, true) {}
 };
 
 
