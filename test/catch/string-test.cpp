@@ -148,6 +148,8 @@ TEST_CASE("string tests")
         REQUIRE(str.size() == 3);
         REQUIRE(str.max_size() == 127);
 
+        // FIX: For C++98 compat, we still have to associate the 'parity' version of things
+        // and since we don't, there's a redundant max-sizing in here of 0
         str += ":hi2u";
 
         REQUIRE(str.size() == 8);
