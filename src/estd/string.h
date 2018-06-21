@@ -247,6 +247,16 @@ public:
         base_t::operator =(s);
     }
 
+    template <class TForeignAllocator, class TForeignTraits>
+    basic_string(const estd::basic_string<
+            CharT,
+            typename TForeignTraits::char_traits,
+            TForeignAllocator,
+            TForeignTraits>& copy_from)
+    {
+        base_t::operator=(copy_from);
+    };
+
     // using ForeignCharT and ForeignTraits because incoming string might use const char
     template <class ForeignCharT, class ForeignTraits, class ForeignAllocator>
     basic_string& operator=(const estd::basic_string<
@@ -324,7 +334,7 @@ public:
     }
 
     template <class ForeignAllocator, class ForeignTraits>
-    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits> & copy_from)
+    basic_string(const estd::basic_string<CharT, typename ForeignTraits::char_traits, ForeignAllocator, ForeignTraits> & copy_from)
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
@@ -379,28 +389,34 @@ protected:
 
     // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial
     // buffer size
-    basic_string(CharT* buffer, size_type buffer_size) :
-        base_t(typename allocator_type::InitParam(buffer, buffer_size))
+    basic_string(CharT* buffer, size_type buffer_size, bool) :
+        base_t(init_t(buffer, buffer_size))
     {
     }
 
 public:
+    /*
     template <size_type N>
     basic_string(const CharT (&buffer) [N], bool source_null_terminated = true) :
         base_t(typename allocator_type::InitParam(buffer, N))
     {
         base_t::helper.size(N - (source_null_terminated ? 1 : 0));
-    }
+    } */
 
     template <size_type N>
-    basic_string(size_type initial_size, CharT (&buffer) [N]) :
-        base_t(typename allocator_type::InitParam(buffer, N))
+    basic_string(CharT (&buffer) [N], size_type initial_size = -1) :
+        base_t(init_t(buffer, N))
     {
+        if(initial_size == -1)
+            initial_size = strlen(buffer);
+
+        // TODO: Enable for a string-mode version
+        //base_t::ensure_total_size(initial_size);
         base_t::helper().size(initial_size);
     }
 
-    basic_string(size_type initial_size, CharT* buffer, size_type buffer_size) :
-        base_t(typename allocator_type::InitParam(buffer, buffer_size))
+    basic_string(CharT* buffer, size_type initial_size, size_type buffer_size) :
+        base_t(init_t(buffer, buffer_size))
     {
         base_t::helper().size(initial_size);
     }
@@ -452,12 +468,12 @@ class const_string : public basic_string<const char, false>
 
 public:
     const_string(const char* s, size_type len) :
-        base_t(s, len) {}
+        base_t(s, len, true) {}
 
 
     template <size_type N>
     const_string(const char (&buffer) [N], bool source_null_terminated = true) :
-        base_t(buffer, source_null_terminated ? strlen(buffer) : N) {}
+        base_t(buffer, source_null_terminated ? strlen(buffer) : N, true) {}
 
 /*
     template <size_type N>

@@ -138,7 +138,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
         char buf2[128] = "val";
-        layer3::basic_string<char> str(3, buf2);
+        layer3::basic_string<char> str(buf2, 3);
 
         str.copy(buf, 128);
 
@@ -227,7 +227,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
 
-        layer3::basic_string<char> s(0, buf);
+        layer3::basic_string<char> s(buf, 0);
 
         REQUIRE(s.size() == 0);
 
@@ -240,7 +240,7 @@ TEST_CASE("string tests")
     {
         char buf[128];
 
-        layer3::basic_string<char, false> s(0, buf);
+        layer3::basic_string<char, false> s(buf, 0);
 
         REQUIRE(s.size() == 0);
 
@@ -248,6 +248,14 @@ TEST_CASE("string tests")
 
         REQUIRE(s.size() == 5);
         REQUIRE(s == "hello");
+
+        layer3::basic_string<char, false> s2(buf);
+
+        REQUIRE(s == s2);
+
+        layer1::string<20> s3(s2);
+
+        REQUIRE(s3 == s);
     }
     SECTION("Non experimental conversion between layers")
     {
@@ -278,7 +286,7 @@ TEST_CASE("string tests")
         s1 = "Hello";
 
         layer2::string<> s2(buf2, 0);
-        layer3::string s3(0, buf3);
+        layer3::string s3(buf3, 0);
 
         s2 = s1;
 
