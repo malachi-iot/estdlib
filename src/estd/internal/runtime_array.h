@@ -9,13 +9,13 @@ namespace estd { namespace internal {
 // base class for any 'allocated' array, even ones using a fixed allocator
 // which pushes the boundaries of what allocated even really means
 // importantly, this allocated_array doesn't provide for growing/shrinking the array
-template <class THelper>
+template <class TImpl>
 class allocated_array
 {
 public:
-    typedef THelper helper_type;
-    typedef typename helper_type::allocator_type allocator_type;
-    typedef typename helper_type::allocator_traits allocator_traits;
+    typedef TImpl impl_type;
+    typedef typename impl_type::allocator_type allocator_type;
+    typedef typename impl_type::allocator_traits allocator_traits;
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
@@ -27,7 +27,7 @@ public:
 
 protected:
 
-    THelper m_helper;
+    TImpl m_helper;
 
 public:
 
@@ -97,8 +97,8 @@ protected:
     }
 
 
-    template <class ForeignHelper>
-    bool starts_with(const allocated_array<ForeignHelper>& compare_to) const
+    template <class TForeignImpl>
+    bool starts_with(const allocated_array<TForeignImpl>& compare_to) const
     {
         const value_type* s = clock();
         const value_type* t = compare_to.clock();
@@ -110,10 +110,12 @@ protected:
             if(*s++ != *t++)
             {
                 cunlock();
+                compare_to.cunlock();
                 return false;
             }
 
         cunlock();
+        compare_to.cunlock();
         // if compare_to is longer than we are, then it's also a fail
         return source_max != -1;
     }
@@ -271,7 +273,7 @@ public:
         // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
         // const call (important because we need to conform to const for front, back, etc)
         // because we need locking, side affects are to be expected
-        return const_cast<helper_type&>(m_helper).get_allocator();
+        return const_cast<impl_type&>(m_helper).get_allocator();
     }
 
     iterator begin()

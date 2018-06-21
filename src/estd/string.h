@@ -303,7 +303,7 @@ class basic_string
             StringTraits >
             base_t;
     typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::helper_type helper_type;
+    typedef typename base_t::impl_type helper_type;
     typedef typename base_t::size_type size_type;
 
 public:
@@ -330,7 +330,7 @@ public:
     {
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
 
-        if(n >= 0) base_t::helper().size(n);
+        if(n >= 0) base_t::impl().size(n);
     }
 
     template <class ForeignAllocator, class ForeignTraits>
@@ -381,7 +381,7 @@ class basic_string
             base_t;
 
     typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::helper_type helper_type;
+    typedef typename base_t::impl_type helper_type;
 
 protected:
     typedef typename base_t::size_type size_type;
@@ -412,13 +412,13 @@ public:
 
         // TODO: Enable for a string-mode version
         //base_t::ensure_total_size(initial_size);
-        base_t::helper().size(initial_size);
+        base_t::impl().size(initial_size);
     }
 
     basic_string(CharT* buffer, size_type initial_size, size_type buffer_size) :
         base_t(init_t(buffer, buffer_size))
     {
-        base_t::helper().size(initial_size);
+        base_t::impl().size(initial_size);
     }
 
     template <class ForeignAllocator, class ForeignTraits>
@@ -439,7 +439,7 @@ public:
         // a) it's already set in the incoming buffer
         // b) we'd be modifying original buffer - though in theory just rewriting
         //    0 back onto the existing 0
-        if(!helper_type::uses_termination())
+        if(!impl_type::uses_termination())
         {
             base_t::helper.size(copy_from.size());
         } */

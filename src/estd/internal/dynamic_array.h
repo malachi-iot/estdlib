@@ -122,16 +122,16 @@ namespace internal {
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
-template <class TAllocator, class THelper = impl::dynamic_array<TAllocator > >
-class dynamic_array : public allocated_array<THelper>
+template <class TAllocator, class TImpl = impl::dynamic_array<TAllocator > >
+class dynamic_array : public allocated_array<TImpl>
 {
     typedef dynamic_array this_t;
-    typedef allocated_array<THelper> base_t;
+    typedef allocated_array<TImpl> base_t;
 
 public:
     typedef TAllocator allocator_type;
     typedef typename base_t::allocator_traits allocator_traits;
-    typedef THelper helper_type;
+    typedef typename base_t::impl_type impl_type;
     typedef typename base_t::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
@@ -152,9 +152,9 @@ public:
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
-    helper_type& helper() { return base_t::m_helper; }
+    impl_type& impl() { return base_t::m_helper; }
 
-    const helper_type& helper() const { return base_t::m_helper; }
+    const impl_type& impl() const { return base_t::m_helper; }
 
 public:
     // redeclared just for conveineince
@@ -197,7 +197,7 @@ protected:
             reserve(new_size + pad);
         }
 
-        helper().size(new_size);
+        impl().size(new_size);
 
         if(shrink) shrink_to_fit();
     }
@@ -239,7 +239,7 @@ protected:
         // so later consider doing the insert operation at that level)
         ensure_additional_capacity(1);
 
-        helper().size(helper().size() + 1);
+        impl().size(impl().size() + 1);
 
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
         size_type raw_typed_pos = to_insert_pos - a;
@@ -252,12 +252,17 @@ protected:
         *to_insert_pos = *to_insert_value;
     }
 
+    template <class TForeignImpl>
+    dynamic_array(const allocated_array<TForeignImpl>& copy_from) :
+            base_t(copy_from) {}
+
+    /*
     dynamic_array(const dynamic_array& copy_from) :
         // FIX: Kinda ugly, we do this to force going thru base class'
         // copy constructor rather than the THelperParam flavor
         base_t(static_cast<const base_t&>(copy_from))
     {
-    }
+    } */
 
 public:
     dynamic_array() {}
@@ -276,19 +281,16 @@ public:
 
     size_type size() const { return base_t::size(); }
 
-    size_type capacity() const
-    {
-        return helper().capacity();
-    }
+    size_type capacity() const { return impl().capacity(); }
 
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
     bool reserve( size_type new_cap )
     {
-        if(!helper().is_allocated())
-            return helper().allocate(new_cap);
+        if(!impl().is_allocated())
+            return impl().allocate(new_cap);
         else
-            return helper().reallocate(new_cap);
+            return impl().reallocate(new_cap);
     }
 
 protected:
@@ -302,7 +304,7 @@ protected:
         // scenarios
         size_type current_size = size();
 
-        helper().size(current_size + by_amount);
+        impl().size(current_size + by_amount);
 
         return current_size;
     }
@@ -326,14 +328,14 @@ protected:
         pointer raw = lock(index);
 
         // TODO: optimize null-terminated flavor to not use memmove at all
-        size_type prev_size = helper().size();
+        size_type prev_size = impl().size();
 
-        if(helper_type::uses_termination())
+        if(impl_type::uses_termination())
             // null terminated flavor merely includes null termination as part
             // of move
             prev_size++;
         else
-            helper().size(prev_size - count);
+            impl().size(prev_size - count);
 
         memmove(raw, raw + count, prev_size - (index + count));
 
@@ -368,16 +370,16 @@ protected:
 
 
 public:
-    template <class TForeignAllocator, class TDAHelper>
-    dynamic_array& append(const dynamic_array<TForeignAllocator, TDAHelper>& str)
+    template <class TForeignImpl>
+    dynamic_array& append(const allocated_array<TForeignImpl>& source)
     {
-        size_type len = str.size();
+        size_type len = source.size();
 
-        const typename TForeignAllocator::value_type* append_from = str.clock();
+        const typename TForeignImpl::value_type* append_from = source.clock();
 
         _append(append_from, len);
 
-        str.cunlock();
+        source.cunlock();
 
         return *this;
     }
@@ -386,16 +388,16 @@ public:
     void pop_back()
     {
         // decrement the end of the array
-        size_type end = helper().size() - 1;
+        size_type end = impl().size() - 1;
 
         // lock down element at that position and run the destructor
-        helper().lock(end).~value_type();
-        helper().unlock();
+        impl().lock(end).~value_type();
+        impl().unlock();
 
         // TODO: put in warning if this doesn't work, remember
         // documentation says 'undefined' behavior if empty
         // so nothing to worry about too much
-        helper().size(end);
+        impl().size(end);
     }
 
     void push_back(const value_type& value)
@@ -417,8 +419,8 @@ public:
     }
 #endif
 
-    template <class ForeignHelper>
-    dynamic_array& operator=(const dynamic_array<typename ForeignHelper::allocator_type, ForeignHelper>& copy_from)
+    template <class TForeignImpl>
+    dynamic_array& operator=(const allocated_array<TForeignImpl>& copy_from)
     {
         ensure_total_size(copy_from.size());
         copy_from.copy(lock(), capacity());
