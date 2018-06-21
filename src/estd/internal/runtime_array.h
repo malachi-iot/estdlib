@@ -27,7 +27,7 @@ public:
 
 protected:
 
-    TImpl m_helper;
+    TImpl m_impl;
 
 public:
 
@@ -35,22 +35,22 @@ public:
     // you gotta do it, so these are public
     value_type* lock(size_type pos = 0, size_type count = 0)
     {
-        return &m_helper.lock(pos, count);
+        return &m_impl.lock(pos, count);
     }
 
     void unlock()
     {
-        m_helper.unlock();
+        m_impl.unlock();
     }
 
     const value_type* clock(size_type pos = 0, size_type count = 0) const
     {
-        return &m_helper.clock(pos, count);
+        return &m_impl.clock(pos, count);
     }
 
     void cunlock() const
     {
-        m_helper.cunlock();
+        m_impl.cunlock();
     }
 
 protected:
@@ -71,7 +71,7 @@ protected:
 
         std::copy(initlist.begin(), initlist.end(), p);
 
-        m_helper.size(initlist.size());
+        m_impl.size(initlist.size());
 
         unlock();
     }
@@ -80,7 +80,7 @@ protected:
     handle_with_offset offset(size_type  pos) const
     {
         //return helper.get_allocator().offset(helper.handle(), pos);
-        return m_helper.offset(pos);
+        return m_impl.offset(pos);
     }
 
     // internal version of replace not conforming to standard
@@ -89,11 +89,11 @@ protected:
     // TODO: change to assign
     void assign(const value_type* buf, size_type len)
     {
-        value_type* raw = &m_helper.lock();
+        value_type* raw = lock();
 
         while(len--) *raw++ = *buf++;
 
-        m_helper.unlock();
+        unlock();
     }
 
 
@@ -125,7 +125,7 @@ public:
 
     template <class THelperParam>
     allocated_array(const THelperParam& p) :
-            m_helper(p) {}
+            m_impl(p) {}
 
 
     // TODO: make accessor do this comparison in a self contained way
@@ -260,12 +260,7 @@ public:
 
     typedef const iterator const_iterator;
 
-    size_type size() const { return m_helper.size(); }
-
-    size_type capacity() const
-    {
-        return m_helper.capacity();
-    }
+    size_type size() const { return m_impl.size(); }
 
     allocator_type& get_allocator() const
     {
@@ -273,7 +268,7 @@ public:
         // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
         // const call (important because we need to conform to const for front, back, etc)
         // because we need locking, side affects are to be expected
-        return const_cast<impl_type&>(m_helper).get_allocator();
+        return const_cast<impl_type&>(m_impl).get_allocator();
     }
 
     iterator begin()
@@ -323,12 +318,12 @@ public:
 
     size_type max_size() const
     {
-        return m_helper.max_size();
+        return m_impl.max_size();
     }
 
     bool empty() const
     {
-        return m_helper.empty();
+        return m_impl.empty();
     }
 
     // copy (into dest)

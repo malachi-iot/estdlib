@@ -152,9 +152,9 @@ public:
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
-    impl_type& impl() { return base_t::m_helper; }
+    impl_type& impl() { return base_t::m_impl; }
 
-    const impl_type& impl() const { return base_t::m_helper; }
+    const impl_type& impl() const { return base_t::m_impl; }
 
 public:
     // redeclared just for conveineince

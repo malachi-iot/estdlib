@@ -13,11 +13,11 @@ struct dynamic_array;
 // TODO: Fixup name.  Specializer to reveal size of either
 // an explicitly-sized or null-terminated entity
 template <class TAllocator, bool null_terminated>
-struct length_helper;
+struct dynamic_array_length;
 
 // null terminated
 template <class TAllocator>
-struct length_helper<TAllocator, true>
+struct dynamic_array_length<TAllocator, true>
 {
     typedef TAllocator allocator_type;
     typedef typename allocator_type::size_type size_type;
@@ -71,7 +71,7 @@ struct length_helper<TAllocator, true>
 
 // explicitly sized
 template <class TAllocator>
-struct length_helper<TAllocator, false>
+struct dynamic_array_length<TAllocator, false>
 {
     typedef TAllocator allocator_type;
     typedef typename allocator_type::size_type size_type;
@@ -81,7 +81,7 @@ struct length_helper<TAllocator, false>
 protected:
     size_type m_size;
 
-    length_helper() :
+    dynamic_array_length() :
             m_size(0)
     {}
 
@@ -113,10 +113,10 @@ public:
 template <class TAllocator, bool null_terminated>
 class dynamic_array_base :
         public estd::handle_descriptor<TAllocator>,
-        length_helper<TAllocator, null_terminated>
+        dynamic_array_length<TAllocator, null_terminated>
 {
     typedef estd::handle_descriptor<TAllocator> base_t;
-    typedef length_helper<TAllocator, null_terminated> length_helper_t;
+    typedef dynamic_array_length<TAllocator, null_terminated> length_helper_t;
 
 public:
     dynamic_array_base() {}
