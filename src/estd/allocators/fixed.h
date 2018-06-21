@@ -122,11 +122,6 @@ public:
     single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
 
 
-    handle_type reallocate(handle_type, size_type size)
-    {
-        return size <= len;
-    }
-
     handle_with_size allocate_ext(size_t size)
     {
         // we can't be sure if alloc fails or succeeds with unspecified length (when TBuffer = *)

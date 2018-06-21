@@ -209,20 +209,18 @@ public:
 // (not null terminated, since it's runtime-const fixed size)
 template <class T>
 class dynamic_array<single_fixedbuf_runtimesize_allocator<const T, false, size_t> >
-        : public handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true>
+        : public handle_descriptor_external<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true>
 {
-    typedef handle_descriptor_parity<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true> base_t;
+    typedef handle_descriptor_external<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, true, true> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
     typedef typename base_t::value_type value_type;
 
-    // repurposing/renaming of what size meant before (ALLOCATED) vs now
-    // (USED within ALLOCATED)
-    size_type capacity() const { return base_t::size(); }
-
-    size_type max_size() const { return capacity(); }
+    size_type max_size() const { return base_t::get_allocator().max_size(); }
+    size_type capacity() const { return max_size(); }
+    size_type size() const { return max_size(); }
 
     template <class TParam>
     dynamic_array(const TParam& p) :

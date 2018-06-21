@@ -147,7 +147,8 @@ public:
 };
 
 
-// With implicit size knowledge (standard allocator model)
+// With implicit size knowledge - allocator can be queried for
+// size of our tracked handle
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
         public allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
@@ -169,10 +170,10 @@ public:
 };
 
 
-// Special-case handle descriptor who has a 1:1 parity with maximum
-// and current allocated size.  Useful for allocators in a permanent const-mode
+// special-case handle_descriptor which makes no attempt to track size either way
+// useful when external consuming party has its own way to determine handle size
 template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_parity :
+class handle_descriptor_external :
         public allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular>
 {
     typedef allocator_and_handle_descriptor_base<TAllocator, is_stateful, is_singular> base_t;
@@ -184,15 +185,7 @@ public:
     // FIX: Harcoded to singular type
     // FIX: Need better name than 'T'
     template <class T>
-    handle_descriptor_parity(const T& p) : base_t(p, true) {}
-
-    size_type size() const { return base_t::get_allocator().max_size(); }
-
-    bool reallocate(size_type size)
-    {
-        // Cannot issue a reallocate for this type of allocator
-        assert(false);
-    }
+    handle_descriptor_external(const T& p) : base_t(p, true) {}
 };
 
 
