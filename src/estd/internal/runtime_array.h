@@ -238,14 +238,15 @@ public:
 
         bool operator>(const iterator& compare) const
         {
-            return current > compare.current;
+            return current.h_exp() > compare.current.h_exp();
         }
 
 
+        /*
         bool operator<(const iterator& compare) const
         {
             return current < compare.current;
-        }
+        } */
 
 
         // NOTE: Descrepency between doing a pointer-ish compare and a value compare
@@ -270,6 +271,15 @@ public:
         {
             return lock();
         }
+
+
+        /* Not ready for primetime, causes unit test crashes
+        iterator& operator=(const iterator& copy_from)
+        {
+            //current = copy_from.current;
+            new (&current) accessor(copy_from.current);
+            return *this;
+        } */
     };
 
     typedef const iterator const_iterator;

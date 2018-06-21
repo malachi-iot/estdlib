@@ -43,6 +43,11 @@ public:
     {
         return m_offset - subtrahend.m_offset;
     }
+
+    bool operator >(const handle_with_offset_base& compare_to) const
+    {
+        return m_offset > compare_to.m_offset;
+    }
 };
 
 template<class TDummyHandle, typename size_t = std::size_t>
