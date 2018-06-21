@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "../traits/allocator_traits.h"
+#include "../internal/handle_with_offset.h"
 
 namespace estd { namespace internal {
 

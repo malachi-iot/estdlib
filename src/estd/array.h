@@ -2,12 +2,17 @@
 
 #include <stdlib.h>
 #include "iterator.h"
+#include "internal/runtime_array.h"
+#include "allocators/fixed.h"
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach
 // but we value add with layer2, layer3, etc.
 
 namespace estd {
+
+#define FEATURE_ESTD_LEGACY_ARRAY
+#ifdef FEATURE_ESTD_LEGACY_ARRAY
 
 namespace experimental {
 
@@ -305,5 +310,16 @@ public:
 };
 
 }
+#else
 
+// FIX: Need Impl, not allocator itself for allocated_array
+template <class T, size_t N>
+class array : public
+        internal::allocated_array<internal::single_fixedbuf_allocator<T, N, false> >
+{
+    typedef internal::allocated_array<internal::single_fixedbuf_allocator<T, N, false> > base_t;
+public:
+};
+
+#endif
 }
