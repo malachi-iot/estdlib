@@ -6,7 +6,7 @@
 namespace estd { namespace internal { namespace impl {
 
 
-// See reference implementation in dynamic_array.h
+// See reference implementation near the bottom
 template <class TAllocator>
 struct dynamic_array;
 

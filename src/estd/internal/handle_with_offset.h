@@ -59,7 +59,7 @@ public:
 
     size_t offset() const { return base_t::m_offset; }
 
-    TDummyHandle handle()
+    TDummyHandle handle() const
     {
         TDummyHandle h;
 
@@ -215,12 +215,6 @@ public:
 protected:
     typedef typename base_t::allocator_ref allocator_ref;
 
-    void unlock() const
-    {
-        // FIX: temporarily not unlocking anything since const lock/unlock still a pain
-        // and we aren't actually doing anything during unlock yet
-    }
-
     template <class TAccessor>
     TAccessor& assign(const value_type& assign_from)
     {
@@ -259,11 +253,16 @@ public:
     }
 
 
-    const value_type& clock_experimental() const
+    const value_type& clock() const
     {
         allocator_ref a = base_t::get_allocator();
 
         return allocator_traits::clock(a, base_t::h);
+    }
+
+    const void cunlock() const
+    {
+        base_t::get_allocator().cunlock(base_t::h.handle());
     }
 
     operator value_type()
@@ -276,14 +275,32 @@ public:
         return retval;
     }
 
+    operator value_type() const
+    {
+        // copies it - beware, some T we don't want to copy!
+        value_type retval = clock();
+
+        cunlock();
+
+        return retval;
+    }
+
+
+    bool operator >(const value_type& compare_to) const
+    {
+        bool greater_than = clock() > compare_to;
+        cunlock();
+        return greater_than;
+    }
+
 
     bool operator ==(const value_type& compare_to) const
     {
-        const value_type& v = clock_experimental();
+        const value_type& v = clock();
 
         bool result = v == compare_to;
 
-        unlock();
+        cunlock();
 
         return result;
     }

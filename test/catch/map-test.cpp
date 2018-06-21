@@ -14,6 +14,7 @@ TEST_CASE("map-test")
         typedef layer1::map<int, int, 4> map_t;
         estd::array<map_t::value_type, 4> buf;
 
+#ifdef FEATURE_ESTD_LEGACY_ARRAY
         buf[0].first = 0;
         buf[1].first = 0;
         buf[2].first = 0;
@@ -24,6 +25,7 @@ TEST_CASE("map-test")
         const int* result = map[3];
 
         REQUIRE(result == NULLPTR);
+#endif
     }
     SECTION("layer 1 map init list")
     {

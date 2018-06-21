@@ -236,6 +236,19 @@ public:
             return it;
         }
 
+        bool operator>(const iterator& compare) const
+        {
+            return current > compare.current;
+        }
+
+
+        bool operator<(const iterator& compare) const
+        {
+            return current < compare.current;
+        }
+
+
+        // NOTE: Descrepency between doing a pointer-ish compare and a value compare
         bool operator==(const iterator& compare_to) const
         {
             return current.h_exp() == compare_to.current.h_exp();

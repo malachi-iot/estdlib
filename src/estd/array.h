@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "iterator.h"
 #include "internal/runtime_array.h"
+#include "internal/impl/allocated_array.h"
 #include "allocators/fixed.h"
 
 // TODO: utilize portions of std array here, if we can
@@ -313,13 +314,71 @@ public:
 #else
 
 // FIX: Need Impl, not allocator itself for allocated_array
-template <class T, size_t N>
-class array : public
-        internal::allocated_array<internal::single_fixedbuf_allocator<T, N, false> >
+template <
+        class T, size_t N,
+        class TImpl = internal::impl::allocated_array<internal::single_fixedbuf_allocator<T, N, false> > >
+class array : public internal::allocated_array<TImpl>
 {
-    typedef internal::allocated_array<internal::single_fixedbuf_allocator<T, N, false> > base_t;
+    typedef internal::allocated_array<TImpl> base_t;
+
 public:
+
+    typedef typename base_t::value_type value_type;
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    typedef ::std::initializer_list<value_type> initializer_list;
+
+    array(initializer_list init)
+    {
+        std::copy(init.begin(), init.end(), base_t::lock());
+
+        base_t::unlock();
+    }
+#endif
+
+    array() {}
 };
+
+namespace layer2 {
+
+template <
+        class T, size_t N,
+        class TImpl = internal::impl::allocated_array<internal::single_fixedbuf_allocator<T, N, false, T*> > >
+class array : public internal::allocated_array<TImpl>
+{
+    typedef internal::allocated_array<TImpl> base_t;
+public:
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+#endif
+
+    array(T* src) : base_t(src) {}
+};
+
+}
+
+namespace layer3 {
+
+template <
+        class T,
+        class TImpl = internal::impl::allocated_array<internal::single_fixedbuf_runtimesize_allocator<T, false> > >
+class array : public internal::allocated_array<TImpl>
+{
+    typedef internal::allocated_array<TImpl> base_t;
+    typedef typename base_t::impl_type impl_type;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::InitParam init_t;
+
+public:
+
+    template <size_t N>
+    array(T (&array) [N]) : base_t(init_t(array, N))
+    {
+    }
+};
+
+}
+
 
 #endif
 }
