@@ -228,24 +228,20 @@ struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, null_terminat
         : internal::handle_descriptor_base<
                 internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
                 true,
-                false,
+                true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
             internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
             true,
-            false,
+            true,
             true> base_t;
 
     handle_descriptor() : base_t(true) {}
 
     template <class TAllocatorParam>
     handle_descriptor(const TAllocatorParam& p) : base_t(p, true) {}
-
-    /*
-    // Without this, above cascades down to the handle_type version of the constructor
-    handle_descriptor(const TBuffer& b) : base_t(b) {} */
 };
 
 
@@ -254,14 +250,14 @@ struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, null
         : internal::handle_descriptor_base<
                 internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
                 true,
-                false,
+                true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
             internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
             true,
-            false,
+            true,
             true> base_t;
 
     handle_descriptor() : base_t(true) {}
