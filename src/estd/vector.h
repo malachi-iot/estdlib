@@ -8,13 +8,13 @@
 namespace estd {
 
 template <class T, class Allocator = std::allocator<T > >
-class vector : public internal::dynamic_array<Allocator>
+class vector : public internal::dynamic_array<internal::impl::dynamic_array<Allocator, void > >
 {
 public:
     typedef T value_type;
 
 private:
-    typedef internal::dynamic_array<Allocator> base_t;
+    typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, void > > base_t;
 
 protected:
     template <class TImplParam>

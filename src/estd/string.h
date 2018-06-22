@@ -36,10 +36,9 @@ template<
     class Allocator = std::allocator<CharT>,
     class StringPolicy = experimental::string_policy<Traits>
 > class basic_string :
-        public internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, StringPolicy> >
+        public internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> >
 {
-    typedef internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, StringPolicy> > base_t;
-    typedef basic_string<CharT, Traits, Allocator, StringPolicy> this_t;
+    typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> > base_t;
 
 public:
     typedef typename base_t::size_type size_type;
@@ -51,11 +50,9 @@ protected:
 public:
     basic_string() {}
 
-    template <class ForeignAllocator>
-    basic_string(const basic_string<CharT, Traits, ForeignAllocator>& copy_from)
-    {
-        operator =(copy_from);
-    }
+    template <class TImpl>
+    basic_string(const internal::allocated_array<TImpl>& copy_from) :
+        base_t(copy_from) {}
 
     typedef CharT value_type;
     typedef Traits traits_type;
@@ -191,6 +188,8 @@ public:
 
 
 
+    // Keeping this as I expect to eventually need a string/char traits aware
+    // version of the character-by-character comparison
     template <class TImpl>
     bool starts_with(const internal::allocated_array<TImpl>& compare_to) const
     {
