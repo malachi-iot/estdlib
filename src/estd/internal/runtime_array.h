@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
+#include <algorithm>
 
 namespace estd { namespace internal {
 
@@ -367,6 +368,27 @@ public:
         cunlock();
 
         return count;
+    }
+
+    template <class TForeignImpl>
+    bool operator ==(const allocated_array<TForeignImpl>& compare_to) const
+    {
+        size_type raw_size = size();
+        size_type s_size = compare_to.size();
+
+        if(raw_size < s_size) return -1;
+        if(raw_size > s_size) return 1;
+
+        // gets here if size matches
+        const value_type* raw = clock();
+        const value_type* s = compare_to.clock();
+
+        bool result = std::equal(raw, raw + raw_size, s);
+
+        cunlock();
+        compare_to.cunlock();
+
+        return result;
     }
 };
 

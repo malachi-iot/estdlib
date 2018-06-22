@@ -187,7 +187,7 @@ protected:
 
 
     // internal method for reassigning size, ensuring capacity is available
-    void ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
+    bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
     {
         size_type cap = capacity();
 
@@ -200,6 +200,8 @@ protected:
         impl().size(new_size);
 
         if(shrink) shrink_to_fit();
+
+        return true;
     }
 
 
@@ -282,6 +284,11 @@ public:
     size_type size() const { return base_t::size(); }
 
     size_type capacity() const { return impl().capacity(); }
+
+    bool resize(size_type count)
+    {
+        return ensure_total_size(count);
+    }
 
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
