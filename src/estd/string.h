@@ -171,10 +171,8 @@ public:
     }
 
 
-    template <class THelper>
-    basic_string& operator=(const internal::dynamic_array<
-                                typename THelper::allocator_type,
-                                THelper>& copy_from)
+    template <class TForeignImpl>
+    basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)
     {
         base_t::operator =(copy_from);
         return *this;

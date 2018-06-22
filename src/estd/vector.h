@@ -16,6 +16,10 @@ public:
 private:
     typedef internal::dynamic_array<Allocator> base_t;
 
+protected:
+    template <class TImplParam>
+    vector(const TImplParam& p) : base_t(p) {}
+
 public:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
     vector() = default;
@@ -57,7 +61,34 @@ class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<
     typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > > base_t;
 
 public:
-    //vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+    vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    vector(std::initializer_list<T> initlist) : base_t(initlist) {}
+#endif
+};
+
+}
+
+
+namespace layer3 {
+
+template <class T>
+class vector : public estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T, false> >
+{
+    typedef estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T, false> > base_t;
+    typedef typename base_t::impl_type impl_type;
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::InitParam init_t;
+    typedef typename allocator_type::size_type size_type;
+
+public:
+    vector(T* underlying_buffer, size_type n) :
+            base_t(init_t(underlying_buffer, n)) {}
+
+    template <size_type N>
+    vector(T (&buffer)[N]) :
+            base_t(init_t(buffer, N)) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}

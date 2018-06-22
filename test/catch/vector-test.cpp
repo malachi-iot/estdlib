@@ -120,17 +120,33 @@ TEST_CASE("vector tests")
     }
     SECTION("layer2 vector")
     {
-        // Not quite ready, need to de-const the dynamic_array init chain
-        /*
         int buf[10];
         estd::layer2::vector<int, 10> v(buf);
 
+        // FIX: it's tracking explicit handle right now, but shouldn't -
+        // specialization should have eliminated that.  Wait until we've
+        // cleaned out null_termination from allocators to fix this
+        //REQUIRE(sizeof(v) == sizeof(int*) + sizeof(size_t));
         REQUIRE(v.size() == 0);
 
         v.push_back(3);
 
         REQUIRE(v.size() == 1);
-        REQUIRE(v[0] == 3); */
+        REQUIRE(v[0] == 3);
+    }
+    SECTION("layer3 vector")
+    {
+        int buf[10];
+        estd::layer3::vector<int> v(buf);
+
+        REQUIRE(sizeof(v) == sizeof(int*) + sizeof(size_t) + sizeof(size_t));
+        REQUIRE(v.size() == 0);
+
+        v.push_back(3);
+
+        REQUIRE(v.size() == 1);
+        REQUIRE(v.capacity() == 10);
+        REQUIRE(v[0] == 3);
     }
     SECTION("vector with semi-complex type/find")
     {
