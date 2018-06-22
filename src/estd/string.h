@@ -204,10 +204,9 @@ public:
     }
 
 
-    template <class THelper>
-    bool starts_with(const internal::dynamic_array<
-                                typename THelper::allocator_type,
-                                THelper>& compare_to)
+
+    template <class TImpl>
+    bool starts_with(const internal::allocated_array<TImpl>& compare_to) const
     {
         return base_t::starts_with(compare_to);
     }
