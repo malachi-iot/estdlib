@@ -6,6 +6,8 @@
 #include "traits/string.h"
 #include <algorithm> // for std::min
 
+#include <estd/exp/buffer.h>
+
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>
 #endif
@@ -442,7 +444,10 @@ typedef basic_string<char> string;
 
 // Non-NULL-terminated const strings use layer3
 // NULL-terminated const strings use layer2
-// TODO: Remake this into basic_string_view
+// NOTE: Remake this into basic_string_view.  Though the basic_string_view has an additional variable (potentially)
+//       for tracking the truncations
+// If the above does not happen, then consider promoting/typedefing this const_string to the regular
+// estd:: namespace too
 class const_string : public basic_string<const char, false>
 {
     typedef basic_string<const char, false> base_t;
@@ -457,10 +462,12 @@ public:
     const_string(const char (&buffer) [N], bool source_null_terminated = true) :
         base_t(buffer, source_null_terminated ? strlen(buffer) : N, true) {}
 
-/*
-    template <size_type N>
-    const_string(const char (&buffer) [N], bool source_null_terminated = true) :
-        base_t(buffer, source_null_terminated) {} */
+    // convenience method since std::vector and std::string itself are reported to convert
+    // uneventfully between unsigned char and char
+    // note it's a little bit bad because of the distant possibility of a
+    // byte != unsigned char != uint8_t
+    const_string(const estd::experimental::const_buffer& cast_from) :
+        base_t(reinterpret_cast<const char*>(cast_from.data()), cast_from.size(), true) {}
 };
 
 
