@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../internal/platform.h"
+#include "../internal/impl/dynamic_array.h"
 
 namespace estd {
 
@@ -61,5 +62,63 @@ struct sized_string_traits  : public string_policy<TCharTraits, TSize, constant>
 
 }
 
+// TODO: Consider moving this out into an impl/string.h
+namespace internal { namespace impl {
+
+// applies generally to T[N], RW buffer but also to non-const T*
+// applies specifically to null-terminated
+template <class T, size_t len, class TBuffer, class TCharTraits, bool is_const>
+class dynamic_array<
+        single_fixedbuf_allocator<T, len, true, TBuffer>,
+        experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> >
+        : public dynamic_array_base<single_fixedbuf_allocator<T, len, true, TBuffer>, true >
+{
+    typedef dynamic_array_base<single_fixedbuf_allocator<T, len, true, TBuffer>, true > base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::handle_type handle_type;
+
+    // FIX: Iron out exactly where we really assign size(0) - sometimes we
+    // want to pre-initialize our buffer so size(0) is not an always thing
+    dynamic_array(TBuffer& b) : base_t(b)
+    {
+        base_t::size(0);
+    }
+
+    dynamic_array(const TBuffer& b) : base_t(b)
+    {
+        // FIX: This only works for NULL-terminated scenarios
+        // we still need to assign a length of 0 for explicit lenght scenarios
+    }
+
+    dynamic_array()
+    {
+        base_t::size(0);
+    }
+};
+
+
+// runtime (layer3-ish) version
+// null terminated
+template <class T, class TCharTraits, bool is_const>
+class dynamic_array<
+        single_fixedbuf_runtimesize_allocator<T, true>,
+        experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> > :
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, true>, true >
+{
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, true>, true > base_t;
+    typedef typename base_t::size_type size_type;
+
+public:
+    template <class TInitParam>
+    dynamic_array(const TInitParam& p) : base_t(p) {}
+};
+
+
+
+}}
 
 }

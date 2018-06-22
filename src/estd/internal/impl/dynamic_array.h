@@ -166,7 +166,7 @@ public:
     }
 };
 
-
+/*
 // applies generally to T[N], RW buffer but also to non-const T*
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer, class TPolicy>
@@ -198,7 +198,7 @@ public:
     {
         base_t::size(0);
     }
-};
+}; */
 
 
 
@@ -251,12 +251,13 @@ public:
 
 
 
-// runtime (layer3-ish) version
-template <class T, bool null_terminated, class TPolicy>
-class dynamic_array<single_fixedbuf_runtimesize_allocator<T, null_terminated>, TPolicy> :
-        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated >
+// runtime (layer3-ish) version, no policy (void) -
+// hard wired to no null termination
+template <class T>
+class dynamic_array<single_fixedbuf_runtimesize_allocator<T, false>, void> :
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, false>, false >
 {
-    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, null_terminated>, null_terminated > base_t;
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, false>, false > base_t;
     typedef typename base_t::size_type size_type;
 
 public:

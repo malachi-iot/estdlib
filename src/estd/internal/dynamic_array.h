@@ -122,7 +122,7 @@ namespace internal {
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
 // size_tracker_* are very experimental
-template <class TAllocator, class TImpl = impl::dynamic_array<TAllocator, int > >
+template <class TAllocator, class TImpl = impl::dynamic_array<TAllocator, void > >
 class dynamic_array : public allocated_array<TImpl>
 {
     typedef dynamic_array this_t;

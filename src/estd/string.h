@@ -36,9 +36,9 @@ template<
     class Allocator = std::allocator<CharT>,
     class StringPolicy = experimental::string_policy<Traits>
 > class basic_string :
-        public internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, int> >
+        public internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, StringPolicy> >
 {
-    typedef internal::dynamic_array<Allocator> base_t;
+    typedef internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, StringPolicy> > base_t;
     typedef basic_string<CharT, Traits, Allocator, StringPolicy> this_t;
 
 public:
