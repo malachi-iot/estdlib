@@ -22,13 +22,6 @@ template<
 
 }
 
-#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-template <class CharT, class Traits, class Allocator, class StringTraits>
-std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& os,
-               const estd::basic_string<CharT, Traits, Allocator, StringTraits>& str);
-#endif
-
 namespace estd {
 
 // TODO: Determine how to organize different string implementations
@@ -47,13 +40,6 @@ template<
 {
     typedef internal::dynamic_array<Allocator> base_t;
     typedef basic_string<CharT, Traits, Allocator, StringTraits> this_t;
-
-#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-    template <class TChar2, class TTraits2>
-    friend std::basic_ostream<TChar2, TTraits2>&  ::operator<<(
-            std::basic_ostream<TChar2, TTraits2>& os,
-            const estd::basic_string<CharT, Traits, Allocator>& str);
-#endif
 
 public:
     typedef typename base_t::size_type size_type;
@@ -539,25 +525,25 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 #include "internal/to_string.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-template <class CharT, class Traits, class Allocator>
-inline std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& os,
-               const estd::basic_string<CharT, typename Traits::char_traits, Allocator, Traits>& str)
+
+//A bit finicky so that we can remove const (via Traits::char_type)
+template <class Allocator, class StringTraits,
+          class Traits = typename StringTraits::char_traits,
+          class CharT>
+inline std::basic_ostream<typename Traits::char_type, Traits>&
+    operator<<(std::basic_ostream<typename Traits::char_type, Traits>& os,
+               const estd::basic_string<CharT, Traits, Allocator, StringTraits>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
-    os.write(str.fake_const_lock(), str.size());
+    os.write(str.clock(), str.size());
 
     str.cunlock();
 
     return os;
 }
 
-
-// FIX: Temporarily using this, but really managing interaction between two sets
-// of traits is a better way to go, ala:
-// template <class CharT, class Traits, class Allocator,
-//  class OStreamTraits = std::char_traits<remove_const<Traits::char_type>>>
+/*
 template <class CharT, class Traits, class Allocator>
 inline std::ostream&
     operator<<(std::ostream& os,
@@ -570,6 +556,6 @@ inline std::ostream&
     str.cunlock();
 
     return os;
-}
+} */
 #endif
 

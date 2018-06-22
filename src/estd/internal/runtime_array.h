@@ -273,13 +273,12 @@ public:
         }
 
 
-        /* Not ready for primetime, causes unit test crashes
         iterator& operator=(const iterator& copy_from)
         {
             //current = copy_from.current;
             new (&current) accessor(copy_from.current);
             return *this;
-        } */
+        }
     };
 
     typedef const iterator const_iterator;

@@ -36,18 +36,19 @@ std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTrai
 }
 #else
 
-template <class TChar, class TStringTraits, class TAllocator>
-std::basic_ostream<TChar, typename TStringTraits::char_traits>& operator <<(
-        std::basic_ostream<TChar, typename TStringTraits::char_traits>& os,
-        estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits> const& value)
+/*
+template <class TChar, class Traits, class TAllocator, class TStringTraits>
+std::basic_ostream<TChar, Traits>& operator <<(
+        std::basic_ostream<TChar, Traits>& os,
+        const estd::basic_string<TChar, Traits, TAllocator, TStringTraits>& value)
 {
     return ::operator <<(os, value);
 }
-
+*/
 
 template <class TChar, class TStringTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os,
-                           estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits> const& value)
+                           const estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits>& value)
 {
     return ::operator <<(os, value);
 }
@@ -240,6 +241,8 @@ TEST_CASE("string tests")
     {
         char buf[128];
 
+        memset(buf, 0, sizeof(buf));
+
         layer3::basic_string<char, false> s(buf, 0);
 
         REQUIRE(s.size() == 0);
@@ -249,6 +252,8 @@ TEST_CASE("string tests")
         REQUIRE(s.size() == 5);
         REQUIRE(s == "hello");
 
+        // since buf was zeroed out beforehand, we can treat it
+        // as a C-style string
         layer3::basic_string<char, false> s2(buf);
 
         REQUIRE(s == s2);
