@@ -94,7 +94,7 @@ public:
     {
         size_t len = strlen(s);
 
-        base_t::_append(s, len);
+        base_t::append(s, len);
 
         return *this;
     }

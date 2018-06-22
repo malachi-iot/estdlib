@@ -300,6 +300,19 @@ public:
             return impl().reallocate(new_cap);
     }
 
+    template <class InputIt>
+    void assign(InputIt first, InputIt last)
+    {
+        value_type* d = lock();
+
+        ensure_total_size(last - first, 0, true);
+
+        while(first != last)
+            *d++ = *first++;
+
+        unlock();
+    }
+
 protected:
     // returns size before growth
     // internal call
@@ -317,7 +330,10 @@ protected:
     }
 
 
-    void _append(const value_type* buf, size_type len)
+    // somewhat non standard, but considered a real API in estd
+    // in theory this might go a little faster than the iterator
+    // version
+    dynamic_array& append(const value_type* buf, size_type len)
     {
         size_type current_size = grow(len);
 
@@ -326,6 +342,8 @@ protected:
         while(len--) *raw++ = *buf++;
 
         unlock();
+
+        return *this;
     }
 
     // basically raw_erase and maps almost directly to string::erase with numeric index
@@ -384,7 +402,7 @@ public:
 
         const typename TForeignImpl::value_type* append_from = source.clock();
 
-        _append(append_from, len);
+        append(append_from, len);
 
         source.cunlock();
 
@@ -409,7 +427,7 @@ public:
 
     void push_back(const value_type& value)
     {
-        _append(&value, 1);
+        append(&value, 1);
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC

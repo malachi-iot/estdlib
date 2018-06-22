@@ -36,6 +36,12 @@ protected:
     array_base() {}
 
 public:
+    // Normally we deter attempts to directly acquire data, but arrays really do
+    // represent hard data (even later when we utilize allocated_array as its
+    // base class) so go ahead and expose this
+    T* data() { return m_array; }
+
+    const T* data() const { return m_array; }
 
     // FIX: perhaps array_base is overengineered and we can merely use
     // array
