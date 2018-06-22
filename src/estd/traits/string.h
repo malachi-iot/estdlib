@@ -29,7 +29,7 @@ namespace experimental {
 // explicit constant specified here because char_traits by convention doesn't
 // specify const
 template <class TSize, bool constant>
-struct buffer_traits
+struct buffer_policy
 {
     typedef TSize size_type;
 
@@ -37,14 +37,14 @@ struct buffer_traits
 };
 
 template <class TCharTraits, class TSize = int16_t, bool constant = false >
-struct string_traits : buffer_traits<TSize, constant>
+struct string_policy : buffer_policy<TSize, constant>
 {
     typedef TCharTraits char_traits;
 };
 
 
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
-struct null_terminated_string_traits : public string_traits<TCharTraits, TSize, constant>
+struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, constant>
 {
     static CONSTEXPR bool is_null_terminated() { return true; }
 
@@ -53,7 +53,7 @@ struct null_terminated_string_traits : public string_traits<TCharTraits, TSize, 
 
 
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
-struct sized_string_traits  : public string_traits<TCharTraits, TSize, constant>
+struct sized_string_traits  : public string_policy<TCharTraits, TSize, constant>
 {
     static CONSTEXPR bool is_null_terminated() { return false; }
 };

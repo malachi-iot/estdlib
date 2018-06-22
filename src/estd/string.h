@@ -34,12 +34,12 @@ template<
     class CharT,
     class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
     class Allocator = std::allocator<CharT>,
-    class StringTraits = experimental::string_traits<Traits>
+    class StringPolicy = experimental::string_policy<Traits>
 > class basic_string :
-        public internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator> >
+        public internal::dynamic_array<Allocator, internal::impl::dynamic_array<Allocator, int> >
 {
     typedef internal::dynamic_array<Allocator> base_t;
-    typedef basic_string<CharT, Traits, Allocator, StringTraits> this_t;
+    typedef basic_string<CharT, Traits, Allocator, StringPolicy> this_t;
 
 public:
     typedef typename base_t::size_type size_type;
@@ -60,7 +60,7 @@ public:
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef Allocator allocator_type;
-    typedef StringTraits string_traits_type;
+    typedef StringPolicy string_traits_type;
 
     typedef typename allocator_type::handle_type handle_type;
 
@@ -207,20 +207,20 @@ namespace layer1 {
 
 
 template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT >,
-        class StringTraits = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+        class StringPolicy = typename estd::conditional<null_terminated,
+                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type
                 >
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
                 estd::internal::single_fixedbuf_allocator <CharT, N, null_terminated>,
-                StringTraits>
+                StringPolicy>
 {
     typedef estd::basic_string<
                 CharT, Traits,
                 estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated>,
-                StringTraits>
+                StringPolicy>
                 base_t;
 public:
     basic_string() {}
@@ -270,20 +270,20 @@ namespace layer2 {
 
 template<class CharT, size_t N, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
-         class StringTraits = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+         class StringPolicy = typename estd::conditional<null_terminated,
+                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type >
 class basic_string
         : public estd::basic_string<
                 CharT,
                 Traits,
                 estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* >,
-                StringTraits >
+                StringPolicy >
 {
     typedef estd::basic_string<
             CharT, Traits,
             estd::internal::single_fixedbuf_allocator < CharT, N, null_terminated, CharT* >,
-            StringTraits >
+            StringPolicy >
             base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::impl_type helper_type;
@@ -349,7 +349,7 @@ namespace layer3 {
 template<class CharT, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
          class StringTraits = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_traits<Traits, int16_t, estd::is_const<CharT>::value>,
+                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type>
 class basic_string
         : public estd::basic_string<
