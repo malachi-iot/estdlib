@@ -11,41 +11,8 @@ using namespace estd;
 
 namespace std
 {
-#ifdef UNUSED
-
-template <class TChar, class TCharTraits, class TAllocator>
-std::ostream& operator <<( std::ostream& os, estd::basic_string<TChar, TCharTraits, TAllocator> const& value)
-{
-    int len = value.size();
-    /*
-    TChar* s = value.lock();
-    // because we can't be sure of null termination without doing more checks
-
-    while(len--) os << *s++;
-
-    value.unlock(); */
-
-    char buf[256];
-    char* s = buf;
-
-    value.copy(buf, sizeof(buf));
-
-    while(len--) os << *s++;
-
-    return os;
-}
-#else
-
-/*
-template <class TChar, class Traits, class TAllocator, class TStringTraits>
-std::basic_ostream<TChar, Traits>& operator <<(
-        std::basic_ostream<TChar, Traits>& os,
-        const estd::basic_string<TChar, Traits, TAllocator, TStringTraits>& value)
-{
-    return ::operator <<(os, value);
-}
-*/
-
+// Somehow clang has slightly different expectations during catch << resolution
+#if defined(__clang__)
 template <class TChar, class TStringTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os,
                            const estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits>& value)
@@ -58,6 +25,8 @@ std::ostream& operator <<( std::ostream& os,
 
 #include <catch.hpp>
 
+constexpr const char* test_str = "hello";
+
 
 TEST_CASE("string tests")
 {
@@ -65,7 +34,9 @@ TEST_CASE("string tests")
     {
         basic_string<char, std::char_traits<char>, _allocator<char>> test;
 
-        test += "hello";
+        test += test_str;
+
+        REQUIRE(test == test_str);
     }
     SECTION("A")
     {
@@ -74,7 +45,7 @@ TEST_CASE("string tests")
 
         char buf[128];
 
-        val += "hello";
+        val += test_str;
 
         val.copy(buf, 128);
 
@@ -91,10 +62,10 @@ TEST_CASE("string tests")
 
         REQUIRE(s.length() == 0);
 
-        s += "hello";
+        s += test_str;
 
         REQUIRE(s.length() == 5);
-        REQUIRE(s == "hello");
+        REQUIRE(s == test_str);
     }
     SECTION("layer 2 (non-experimental) null terminated")
     {
@@ -106,10 +77,10 @@ TEST_CASE("string tests")
 
         REQUIRE(s.length() == 0);
 
-        s += "hello";
+        s += test_str;
 
         REQUIRE(s.length() == 5);
-        REQUIRE(s == "hello");
+        REQUIRE(s == test_str);
     }
     // deactivated because string construction for layer2 is still a bit funky
     // and depends on dynamic_array_helper.  dynamic_array_helper code needs a
@@ -178,11 +149,11 @@ TEST_CASE("string tests")
         estd::basic_string<char, std::char_traits<char>, internal::single_fixedbuf_allocator<char, 30>> s;
         char buf[128];
 
-        s += "hello";
+        s += test_str;
 
         buf[s.copy(buf, 128)] = 0;
 
-        REQUIRE(strcmp(buf, "hello") == 0);
+        REQUIRE(strcmp(buf, test_str) == 0);
     }
     SECTION("single_nullterm_fixedbuf_allocator")
     {
@@ -197,20 +168,20 @@ TEST_CASE("string tests")
 
         REQUIRE(s.size() == 0);
 
-        s += "hello";
+        s += test_str;
 
-        REQUIRE(s == "hello");
+        REQUIRE(s == test_str);
 
         REQUIRE(s.size() == 5);
 
         buf[s.copy(buf, 128)] = 0;
 
-        REQUIRE(strcmp(buf, "hello") == 0);
+        REQUIRE(strcmp(buf, test_str) == 0);
     }
     // see 'layer 2 null terminated' section for comments
     SECTION("layer2 -> layer3 promotion")
     {
-        layer2::basic_string<const char, 10> val = "hello";
+        layer2::basic_string<const char, 10> val = test_str;
         layer3::basic_string<const char> val2 = val;
         layer1::string<128> val3;
 
@@ -226,7 +197,7 @@ TEST_CASE("string tests")
 
         val3 = val;
 
-        REQUIRE(val3 == "hello");
+        REQUIRE(val3 == test_str);
         REQUIRE(val3 == buf);
     }
     SECTION("layer3 null terminated")
@@ -237,10 +208,10 @@ TEST_CASE("string tests")
 
         REQUIRE(s.size() == 0);
 
-        s += "hello";
+        s += test_str;
 
         REQUIRE(s.size() == 5);
-        REQUIRE(s == "hello");
+        REQUIRE(s == test_str);
     }
     SECTION("layer3 length-specified (not null terminated)")
     {
@@ -252,10 +223,10 @@ TEST_CASE("string tests")
 
         REQUIRE(s.size() == 0);
 
-        s += "hello";
+        s += test_str;
 
         REQUIRE(s.size() == 5);
-        REQUIRE(s == "hello");
+        REQUIRE(s == test_str);
 
         // since buf was zeroed out beforehand, we can treat it
         // as a C-style string
