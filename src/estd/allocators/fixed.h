@@ -102,7 +102,7 @@ public:
 // null_terminated flag mainly serves as a trait/clue to specializations
 // len can == 0 in which case we're in unbounded mode
 template <
-        class T, size_t len, bool null_terminated = false, class TBuffer = T[len],
+        class T, size_t len, class TBuffer = T[len],
         class TSize = typename internal::deduce_fixed_size_t<len>::size_type>
 struct single_fixedbuf_allocator : public
         single_allocator_base<T, TBuffer, TSize>
@@ -157,7 +157,7 @@ public:
 // runtime (but otherwise constant) size()
 // runtime (but otherwise constant) buffer*
 // as before, null_terminated is merely a clue/trait for consumer class
-template <class T, bool null_terminated = false, class TSize = std::size_t>
+template <class T, class TSize = std::size_t>
 class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, TSize>
 {
 public:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../allocators/fixed.h"
 #include "../internal/platform.h"
 #include "../internal/impl/dynamic_array.h"
 
@@ -69,11 +70,11 @@ namespace internal { namespace impl {
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer, class TCharTraits, bool is_const>
 class dynamic_array<
-        single_fixedbuf_allocator<T, len, true, TBuffer>,
+        single_fixedbuf_allocator<T, len, TBuffer>,
         experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> >
-        : public dynamic_array_base<single_fixedbuf_allocator<T, len, true, TBuffer>, true >
+        : public dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true >
 {
-    typedef dynamic_array_base<single_fixedbuf_allocator<T, len, true, TBuffer>, true > base_t;
+    typedef dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true > base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -105,17 +106,67 @@ public:
 // null terminated
 template <class T, class TCharTraits, bool is_const>
 class dynamic_array<
-        single_fixedbuf_runtimesize_allocator<T, true>,
+        single_fixedbuf_runtimesize_allocator<T>,
         experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> > :
-        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, true>, true >
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true >
 {
-    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, true>, true > base_t;
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true > base_t;
     typedef typename base_t::size_type size_type;
 
 public:
     template <class TInitParam>
     dynamic_array(const TInitParam& p) : base_t(p) {}
 };
+
+
+
+// for basic_string_view and const_string
+// runtime size information is stored in allocator itself, not helper
+// (not null terminated, since it's runtime-const fixed size)
+// we bypass dynamic array base because it has two modes:
+// - null terminated, where size is computed
+// - not null terminated, where size is explicitly tracked
+// however, this is a 3rd case where
+// - size is 1:1 with max_size() allocated
+// we could have pretended we were null-terminated to specialize out size variable, but that's
+// misleading and confusing
+template <class T, class TCharTraits, bool is_const>
+class dynamic_array<
+        single_fixedbuf_runtimesize_allocator<const T, size_t>,
+        experimental::sized_string_traits<TCharTraits, int16_t, is_const> >
+        : public estd::internal::handle_descriptor_base<
+            single_fixedbuf_runtimesize_allocator<const T, size_t>,
+            true, true, true>
+{
+    // handle_descriptor_base:
+    //  is_singular = true
+    //  has_size = true (single fixed buf max_size == size)
+    //  is_stateful = true (generally we have a local char* ... though someday we might do a global version)
+    typedef estd::internal::handle_descriptor_base<
+        single_fixedbuf_runtimesize_allocator<const T, size_t>,
+        true, true, true> base_t;
+
+public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::value_type value_type;
+
+    // never null terminated, so don't bother subtracting off of sizes
+
+    size_type max_size() const { return base_t::get_allocator().max_size(); }
+    size_type capacity() const { return base_t::size(); }
+
+    // since we're singular, always pass in 'true' for handle
+    template <class TParam>
+    dynamic_array(const TParam& p) :
+        base_t(p, true) {}
+
+    dynamic_array(const dynamic_array& copy_from) :
+        base_t(copy_from.get_allocator(), true)
+    {
+    }
+};
+
 
 
 

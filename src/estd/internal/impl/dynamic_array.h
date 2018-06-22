@@ -1,6 +1,7 @@
 #pragma once
 
 #include "allocated_array.h"
+#include "../../allocators/fixed.h"
 #include "../../allocators/handle_desc.h"
 
 namespace estd { namespace internal { namespace impl {
@@ -204,60 +205,14 @@ public:
 
 
 
-// for basic_string_view and const_string
-// runtime size information is stored in allocator itself, not helper
-// (not null terminated, since it's runtime-const fixed size)
-// we bypass dynamic array base because it has two modes:
-// - null terminated, where size is computed
-// - not null terminated, where size is explicitly tracked
-// however, this is a 3rd case where
-// - size is 1:1 with max_size() allocated
-// we could have pretended we were null-terminated to specialize out size variable, but that's
-// misleading and confusing
-template <class T, class TPolicy>
-class dynamic_array<single_fixedbuf_runtimesize_allocator<const T, false, size_t>, TPolicy>
-        : public estd::internal::handle_descriptor_base<
-            single_fixedbuf_runtimesize_allocator<const T, false, size_t>,
-            true, true, true>
-{
-    // handle_descriptor_base:
-    //  is_singular = true
-    //  has_size = true (single fixed buf max_size == size)
-    //  is_stateful = true (generally we have a local char* ... though someday we might do a global version)
-    typedef estd::internal::handle_descriptor_base<
-        single_fixedbuf_runtimesize_allocator<const T, false, size_t>,
-        true, true, true> base_t;
-
-public:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::value_type value_type;
-
-    // never null terminated, so don't bother subtracting off of sizes
-
-    size_type max_size() const { return base_t::get_allocator().max_size(); }
-    size_type capacity() const { return base_t::size(); }
-
-    // since we're singular, always pass in 'true' for handle
-    template <class TParam>
-    dynamic_array(const TParam& p) :
-        base_t(p, true) {}
-
-    dynamic_array(const dynamic_array& copy_from) :
-        base_t(copy_from.get_allocator(), true)
-    {
-    }
-};
-
-
 
 // runtime (layer3-ish) version, no policy (void) -
 // hard wired to no null termination
 template <class T>
-class dynamic_array<single_fixedbuf_runtimesize_allocator<T, false>, void> :
-        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, false>, false >
+class dynamic_array<single_fixedbuf_runtimesize_allocator<T>, void> :
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false >
 {
-    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T, false>, false > base_t;
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false > base_t;
     typedef typename base_t::size_type size_type;
 
 public:

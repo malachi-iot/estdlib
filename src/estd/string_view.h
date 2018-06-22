@@ -9,11 +9,11 @@ class basic_string_view :
         public basic_string<
             const CharT,
             Traits,
-            internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
+            internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
             StringTraits>
 {
     typedef basic_string<const CharT, Traits,
-        internal::single_fixedbuf_runtimesize_allocator<const CharT, false, size_t>,
+        internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
         StringTraits> base_t;
 
     typedef typename base_t::size_type size_type;

@@ -186,7 +186,12 @@ TEST_CASE("string tests")
     }
     SECTION("single_nullterm_fixedbuf_allocator")
     {
-        estd::basic_string<char, std::char_traits<char>, internal::single_fixedbuf_allocator<char, 30, true>> s;
+        estd::basic_string<
+                char,
+                std::char_traits<char>,
+                internal::single_fixedbuf_allocator<char, 30>,
+                experimental::null_terminated_string_policy<std::char_traits<char> >
+                > s;
         int sz = sizeof(s);
         char buf[128];
 

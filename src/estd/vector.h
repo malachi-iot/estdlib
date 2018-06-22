@@ -56,9 +56,9 @@ public:
 namespace layer2 {
 
 template <class T, size_t N>
-class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > >
+class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > >
 {
-    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, false, T* > > base_t;
+    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > > base_t;
 
 public:
     vector(T* underlying_buffer) : base_t(underlying_buffer) {}
@@ -74,9 +74,9 @@ public:
 namespace layer3 {
 
 template <class T>
-class vector : public estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T, false> >
+class vector : public estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T> >
 {
-    typedef estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T, false> > base_t;
+    typedef estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T> > base_t;
     typedef typename base_t::impl_type impl_type;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename allocator_type::InitParam init_t;
