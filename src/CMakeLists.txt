@@ -8,11 +8,15 @@ set(SOURCE_FILES
         estd/allocators/fixed.h
         estd/allocators/generic.h
         estd/allocators/handle_desc.h
-       estd/array.h
+        estd/array.h
+
+        estd/exp/buffer.h
+
         estd/forward_list.h
         estd/functional.h
         estd/initializer_list.h
         estd/iterator.h
+
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/list_node.h
@@ -24,6 +28,7 @@ set(SOURCE_FILES
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
+
         estd/iterators/list.h
         estd/list.h
         estd/map.h

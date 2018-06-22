@@ -166,9 +166,6 @@ template<
 {
     typedef experimental::array_base<T, T[N]> base_t;
 
-private:
-    T* m_array() { return base_t::m_array; }
-
 public:
     typedef size_t size_type;
     typedef T value_type;
@@ -180,8 +177,8 @@ public:
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
-    iterator end() { return iterator(&m_array()[N]); }
-    const_iterator end() const { return iterator((T* const)&m_array()[N]); }
+    iterator end() { return iterator(base_t::m_array + N); }
+    const_iterator end() const { return iterator(base_t::m_array + N); }
 
     CONSTEXPR size_type size() const { return N; }
 
@@ -285,7 +282,7 @@ template<
 {
     typedef experimental::array_base<T, T*, size_t> base_t;
 
-private:
+protected:
     size_t m_size;
 
 public:
