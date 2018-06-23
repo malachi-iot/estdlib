@@ -5,6 +5,7 @@
 #include "internal/runtime_array.h"
 #include "internal/impl/allocated_array.h"
 #include "allocators/fixed.h"
+#include <iterator>
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach
@@ -85,6 +86,15 @@ public:
         typedef int ptrdiff_t;
 
     public:
+        // As per https://en.cppreference.com/w/cpp/iterator/iterator_traits it's important for
+        // an iterator to define these.  GCC (but not clang) seems to demand a separate iterator_traits
+        // in C++11 always.  Putting these typedefs in is an experiment to see
+        typedef int difference_type;
+        typedef T value_type;
+        typedef T* pointer;
+        typedef T& reference;
+        typedef std::random_access_iterator_tag iterator_tag;
+
         iterator(T* ptr) : ptr(ptr) {}
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         iterator(const iterator& copy_from) = default;
