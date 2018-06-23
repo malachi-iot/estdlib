@@ -54,4 +54,46 @@ public:
 
 }
 
+#ifdef FEATURE_CPP_VARIADIC
+namespace layer0 {
+
+    /*
+template <class TObserver, TObserver& o, TObserver&..._>
+class subject;
+
+template <class TObserver, TObserver& observer>
+class subject
+{
+public:
+    template <class TNotification>
+    static void notify(const TNotification& n)
+    {
+        observer.on_notify(n);
+    }
+};
+
+template <class TObserver, TObserver& observer, TObserver&...observers >
+class subject
+{
+    typedef subject<TObserver, observers...> base_t;
+
+    template <class TNotification>
+    static void _notify(const TNotification& n)
+    {
+        base_t::_notify(n);
+
+        observer.on_notify(n);
+    }
+
+public:
+    template <class TNotification>
+    static void notify(const TNotification& n)
+    {
+        _notify<TNotification>(n);
+    }
+};
+ */
+}
+#endif
+
 }}
