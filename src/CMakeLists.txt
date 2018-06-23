@@ -11,6 +11,7 @@ set(SOURCE_FILES
         estd/array.h
 
         estd/exp/buffer.h
+        estd/exp/observer.h
 
         estd/forward_list.h
         estd/functional.h
