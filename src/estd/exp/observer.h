@@ -98,22 +98,6 @@ void test_notify(const TNotification& n, TObserver& observer, TObservers&...obse
 template <class ...>
 class subject2;
 
-/*
-template <class TObserver>
-class subject2<TObserver>
-{
-protected:
-    TObserver last;
-public:
-    subject2(TObserver observer) : last(observer) {}
-
-    template <class TNotifier>
-    void notify(const TNotifier& n)
-    {
-        last.on_notify(n);
-    }
-};
-*/
 
 template <>
 class subject2<>
@@ -134,7 +118,7 @@ class subject2<TObserver&, TObservers...> : public subject2<TObservers...>
 protected:
     TObserver& observer;
 public:
-    subject2(TObserver& observer, TObservers&&...observers) :
+    constexpr subject2(TObserver& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
             observer(observer)
     {}
@@ -157,7 +141,7 @@ class subject2<TObserver&&, TObservers...> : public subject2<TObservers...>
 protected:
     TObserver observer;
 public:
-    subject2(TObserver&& observer, TObservers&&...observers) :
+    constexpr subject2(TObserver&& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
             observer(std::move(observer))
     {}
@@ -171,26 +155,20 @@ public:
     }
 };
 
-/*
-template <class ...TObservers>
-subject2<TObservers...> make_subject(TObservers&&...observers)
-{
-    return subject2<TObservers...>(std::forward<TObservers>(observers)...);
-} */
 
-template <class TObserver, class ...TObservers>
-subject2<TObserver&&, TObservers...> make_subject(TObserver&& value, TObservers&&...observers)
+template <class ...TObservers>
+subject2<TObservers&&...> make_subject(TObservers&&...observers)
 {
-    return subject2<TObserver&&, TObservers...>(
-            std::forward<TObserver>(value),
+    return subject2<TObservers&&...>(
             std::forward<TObservers>(observers)...);
 }
 
 
 template <class ...TObservers>
-constexpr subject2<TObservers...> make_subject_const(TObservers...observers)
+constexpr subject2<TObservers&&...> make_subject_const(TObservers&&...observers)
 {
-    return subject2<TObservers...>(observers...);
+    return subject2<TObservers&&...>(
+            std::forward<TObservers>(observers)...);
 }
 
     /*

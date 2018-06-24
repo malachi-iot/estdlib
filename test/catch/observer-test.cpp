@@ -95,12 +95,13 @@ TEST_CASE("observer tests")
         }
         SECTION("constexpr subject2")
         {
-            /*
-            auto s = layer0::make_subject_const(stateful_observer_0, stateful_observer_1, stateful_observer_2);
+            constexpr auto s = layer0::make_subject_const(stateful_observer_0, stateful_observer_1, stateful_observer_2);
 
+            // still 24; guess this makes sense, can't constexpr-optimize away instance variables
             int sz = sizeof(s);
 
-            s.notify(5); */
+            //s.notify(5);
+            REQUIRE(sz > 0);
         }
     }
 }
