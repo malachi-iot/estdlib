@@ -47,6 +47,11 @@ TEST_CASE("observer tests")
 
         s::notify(3);
 
+        layer0::test_notify(3, stateful_observer_1, stateful_observer_2);
+
+        // probably the best we're gonna do is something like a tuple, which still has a potential memory footprint
+        // but for layer0-ish/constant scenarios perhaps more practical than a layer1::vector
+
         /*
         s::notify(3); */
     }

@@ -77,11 +77,18 @@ public:
 };
 
 
-template <void*...observers>
-class subject2
+template <class TNotification, class TObserver>
+void test_notify(const TNotification& n, TObserver& observer)
 {
+    observer.on_notify(n);
+}
 
-};
+template <class TNotification, class TObserver, class ...TObservers>
+void test_notify(const TNotification& n, TObserver& observer, TObservers&...observers)
+{
+    observer.on_notify(n);
+    test_notify(n, observers...);
+}
 
 
 
