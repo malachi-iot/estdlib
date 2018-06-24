@@ -115,37 +115,15 @@ public:
 };
 */
 
-template <class TObserver>
-class subject2<TObserver&>
+template <>
+class subject2<>
 {
-protected:
-    TObserver& last;
 public:
-    subject2(TObserver& observer) : last(observer) {}
-
     template <class TNotifier>
     void notify(const TNotifier& n)
     {
-        last.on_notify(n);
     }
 };
-
-
-template <class TObserver>
-class subject2<TObserver&&>
-{
-protected:
-    TObserver last;
-public:
-    subject2(TObserver&& observer) : last(std::move(observer)) {}
-
-    template <class TNotifier>
-    void notify(const TNotifier& n)
-    {
-        last.on_notify(n);
-    }
-};
-
 
 
 template <class TObserver, class ...TObservers>
@@ -156,8 +134,8 @@ class subject2<TObserver&, TObservers...> : public subject2<TObservers...>
 protected:
     TObserver& observer;
 public:
-    subject2(TObserver& observer, TObservers&...observers) :
-            base_t(observers...),
+    subject2(TObserver& observer, TObservers&&...observers) :
+            base_t(std::forward<TObservers>(observers)...),
             observer(observer)
     {}
 
@@ -193,11 +171,19 @@ public:
     }
 };
 
-
+/*
 template <class ...TObservers>
 subject2<TObservers...> make_subject(TObservers&&...observers)
 {
     return subject2<TObservers...>(std::forward<TObservers>(observers)...);
+} */
+
+template <class TObserver, class ...TObservers>
+subject2<TObserver&&, TObservers...> make_subject(TObserver&& value, TObservers&&...observers)
+{
+    return subject2<TObserver&&, TObservers...>(
+            std::forward<TObserver>(value),
+            std::forward<TObservers>(observers)...);
 }
 
 

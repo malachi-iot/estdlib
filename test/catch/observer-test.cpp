@@ -84,6 +84,7 @@ TEST_CASE("observer tests")
         SECTION("subject2")
         {
             auto s = layer0::make_subject(
+                    StatefulObserver(),
                     stateful_observer_0,
                     stateful_observer_1,
                     stateful_observer_2);
