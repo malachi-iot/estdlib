@@ -14,7 +14,9 @@ public:
     }
 };
 
-class StatefulObserver
+class FakeBase {};
+
+class StatefulObserver : public FakeBase
 {
 public:
     void on_notify(int val)
@@ -23,7 +25,7 @@ public:
     }
 };
 
-StatefulObserver stateful_observer_1;
+StatefulObserver stateful_observer_1, stateful_observer_2;
 
 
 TEST_CASE("observer tests")
@@ -37,9 +39,15 @@ TEST_CASE("observer tests")
     }
     SECTION("layer0")
     {
-        /*
-        typedef layer0::subject<StatefulObserver, stateful_observer_1> s;
+        // FIX: Very unideal because really this still demands a virtual observer, even though it's all wrapped
+        // up with template calls
+        typedef layer0::subject<StatefulObserver,
+                stateful_observer_1,
+                stateful_observer_2> s;
 
+        s::notify(3);
+
+        /*
         s::notify(3); */
     }
 }
