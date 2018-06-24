@@ -8,6 +8,23 @@ using namespace estd::experimental::internal;
 
 static int expected;
 
+struct event_1
+{
+    int data;
+};
+
+
+struct event_2
+{
+    int data;
+};
+
+
+struct event_3
+{
+    int data;
+};
+
 class StatelessObserver
 {
 public:
@@ -27,6 +44,17 @@ public:
     void on_notify(int val)
     {
         REQUIRE(val == expected);
+    }
+
+
+    void on_notify(event_1 e)
+    {
+        REQUIRE(e.data == expected);
+    }
+
+    void on_notify(event_2 e)
+    {
+        REQUIRE(e.data == expected);
     }
 };
 
@@ -102,6 +130,23 @@ TEST_CASE("observer tests")
 
             //s.notify(5);
             REQUIRE(sz > 0);
+        }
+        SECTION("event overloading")
+        {
+            auto s = layer0::make_subject(stateful_observer_1, stateful_observer_2);
+
+            s.notify(event_1 { 5 });
+
+            expected = 3;
+
+            s.notify(event_2 { 3 });
+        }
+        SECTION("void event")
+        {
+            void_subject s;
+
+            // resolves to noop, just in here to make sure it compiles really
+            s.notify(event_1 { 5 });
         }
     }
 }

@@ -104,9 +104,7 @@ class subject2<>
 {
 public:
     template <class TNotifier>
-    void notify(const TNotifier& n)
-    {
-    }
+    void notify(const TNotifier& n) const {}
 };
 
 
@@ -209,5 +207,11 @@ public:
  */
 }
 #endif
+
+struct void_subject
+{
+    template <class TNotifier>
+    void notify(const TNotifier&) {}
+};
 
 }}
