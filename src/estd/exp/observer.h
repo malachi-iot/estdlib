@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../internal/platform.h"
+#include <type_traits>
+#include <functional>
 
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 
@@ -96,6 +98,7 @@ void test_notify(const TNotification& n, TObserver& observer, TObservers&...obse
 template <class ...>
 class subject2;
 
+/*
 template <class TObserver>
 class subject2<TObserver>
 {
@@ -110,8 +113,47 @@ public:
         last.on_notify(n);
     }
 };
+*/
+
+template <class TObserver>
+class subject2<TObserver&>
+{
+protected:
+    TObserver& last;
+public:
+    subject2(TObserver& observer) : last(observer) {}
+
+    template <class TNotifier>
+    void notify(const TNotifier& n)
+    {
+        last.on_notify(n);
+    }
+};
 
 
+template <class TObserver, class ...TObservers>
+class subject2<TObserver&, TObservers...> : public subject2<TObservers...>
+{
+    typedef subject2<TObservers...> base_t;
+
+protected:
+    TObserver& observer;
+public:
+    subject2(TObserver& observer, TObservers&...observers) :
+            base_t(observers...),
+            observer(observer)
+    {}
+
+    template <class TNotifier>
+    void notify(const TNotifier& n)
+    {
+        observer.on_notify(n);
+
+        base_t::notify(n);
+    }
+};
+
+/*
 template <class TObserver, class ...TObservers>
 class subject2<TObserver, TObservers...> : public subject2<TObservers...>
 {
@@ -133,12 +175,12 @@ public:
         base_t::notify(n);
     }
 };
-
+*/
 
 template <class ...TObservers>
-subject2<TObservers...> make_subject(TObservers...observers)
+subject2<TObservers...> make_subject(TObservers&&...observers)
 {
-    return subject2<TObservers...>(observers...);
+    return subject2<TObservers...>(std::forward<TObservers>(observers)...);
 }
 
 
