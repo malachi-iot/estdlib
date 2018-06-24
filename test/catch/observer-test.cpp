@@ -83,7 +83,10 @@ TEST_CASE("observer tests")
         s::notify(3); */
         SECTION("subject2")
         {
-            auto s = layer0::make_subject(stateful_observer_0, stateful_observer_1, stateful_observer_2);
+            auto s = layer0::make_subject(
+                    stateful_observer_0,
+                    stateful_observer_1,
+                    stateful_observer_2);
 
             int sz = sizeof(s);
 

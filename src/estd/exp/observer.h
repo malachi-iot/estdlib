@@ -171,17 +171,16 @@ public:
 };
 
 
-/*
 template <class TObserver, class ...TObservers>
-class subject2<TObserver, TObservers...> : public subject2<TObservers...>
+class subject2<TObserver&&, TObservers...> : public subject2<TObservers...>
 {
     typedef subject2<TObservers...> base_t;
 
 protected:
     TObserver observer;
 public:
-    subject2(TObserver&& observer, TObservers...observers) :
-            base_t(observers...),
+    subject2(TObserver&& observer, TObservers&&...observers) :
+            base_t(std::forward<TObservers>(observers)...),
             observer(std::move(observer))
     {}
 
@@ -192,7 +191,7 @@ public:
 
         base_t::notify(n);
     }
-}; */
+};
 
 
 template <class ...TObservers>
