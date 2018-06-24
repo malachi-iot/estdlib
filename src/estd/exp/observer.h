@@ -142,6 +142,12 @@ subject2<TObservers...> make_subject(TObservers...observers)
 }
 
 
+template <class ...TObservers>
+constexpr subject2<TObservers...> make_subject_const(TObservers...observers)
+{
+    return subject2<TObservers...>(observers...);
+}
+
     /*
 template <class TObserver, TObserver& o, TObserver&..._>
 class subject;
