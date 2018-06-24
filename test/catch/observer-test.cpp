@@ -1,4 +1,5 @@
 #include <estd/exp/observer.h>
+#include <tuple>
 
 #include <catch.hpp>
 
@@ -19,6 +20,17 @@ class FakeBase {};
 class StatefulObserver : public FakeBase
 {
 public:
+    int id;
+
+    void on_notify(int val)
+    {
+
+    }
+};
+
+
+struct OtherStatefulObserver
+{
     void on_notify(int val)
     {
 
@@ -26,10 +38,16 @@ public:
 };
 
 StatefulObserver stateful_observer_1, stateful_observer_2;
+OtherStatefulObserver stateful_observer_0;
+
+constexpr auto z = std::make_tuple(1, 2);
 
 
 TEST_CASE("observer tests")
 {
+    stateful_observer_1.id = 1;
+    stateful_observer_2.id = 2;
+
     SECTION("stateless")
     {
         stateless_subject<StatelessObserver> ss;
@@ -54,5 +72,11 @@ TEST_CASE("observer tests")
 
         /*
         s::notify(3); */
+        SECTION("subject2")
+        {
+            auto s = layer0::make_subject(stateful_observer_0, stateful_observer_1, stateful_observer_2);
+
+            s.notify(5);
+        }
     }
 }
