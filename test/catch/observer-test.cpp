@@ -1,4 +1,6 @@
 #include <estd/exp/observer.h>
+#include <estd/vector.h>
+
 #include <tuple>
 
 #include <catch.hpp>
@@ -34,6 +36,12 @@ public:
     }
 };
 
+class IObserver
+{
+public:
+    virtual void on_notify(event_1 n) = 0;
+};
+
 class FakeBase {};
 
 class StatefulObserver : public FakeBase
@@ -52,7 +60,7 @@ public:
         REQUIRE(e.data == expected);
     }
 
-    void on_notify(event_2 e)
+    void on_notify(const event_2& e)
     {
         REQUIRE(e.data == expected);
     }
@@ -123,7 +131,8 @@ TEST_CASE("observer tests")
         }
         SECTION("constexpr subject2")
         {
-            constexpr auto s = layer0::make_subject_const(stateful_observer_0, stateful_observer_1, stateful_observer_2);
+            constexpr auto s = layer0::make_subject_const(stateful_observer_0, stateful_observer_1,
+                                                          stateful_observer_2);
 
             // still 24; guess this makes sense, can't constexpr-optimize away instance variables
             int sz = sizeof(s);
@@ -135,18 +144,25 @@ TEST_CASE("observer tests")
         {
             auto s = layer0::make_subject(stateful_observer_1, stateful_observer_2);
 
-            s.notify(event_1 { 5 });
+            s.notify(event_1{5});
 
             expected = 3;
 
-            s.notify(event_2 { 3 });
+            s.notify(event_2{3});
         }
         SECTION("void event")
         {
             void_subject s;
 
             // resolves to noop, just in here to make sure it compiles really
-            s.notify(event_1 { 5 });
+            s.notify(event_1{5});
         }
+    }
+    SECTION("container_subject")
+    {
+        //container_subject<estd::layer1::vector<std::reference_wrapper<IObserver>, 10> > c;
+        container_subject<estd::layer1::vector<IObserver*, 10> > c;
+
+        c.notify(event_1 { 3 });
     }
 }

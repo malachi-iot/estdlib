@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <functional>
 
+#include "../type_traits.h"
+
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 
 namespace estd { namespace experimental {
@@ -27,14 +29,13 @@ class stateless_subject
 
 
 
-template <class TObserver>
-class stateless_subject<TObserver>
+template <>
+class stateless_subject<>
 {
 public:
     template <class TNotification>
     static void notify(const TNotification& n)
     {
-        TObserver::on_notify(n);
     }
 };
 
@@ -52,6 +53,35 @@ public:
     }
 };
 #endif
+
+// since this doesn't take both TObserver and TAllocator, for now consider this an internal
+// class
+// remember observer_type in this context must implement virtual on_notify calls
+// this particuar class most strongly resembles the ETL subject/observer implementation
+template <class TContainer>
+class container_subject
+{
+    typedef typename estd::remove_reference<TContainer>::type container_type;
+
+    typedef typename container_type::value_type observer_type;
+    typedef typename container_type::iterator iterator;
+    typedef typename container_type::const_iterator const_iterator;
+
+    container_type c;
+
+public:
+    template <class TNotification>
+    void notify(const TNotification& n)
+    {
+        iterator i = c.begin();
+
+        // FIX: because reference_wrapper doesn't yet work with estd::vector, demanding
+        // pointer version of things
+        for(;i != c.cend(); i++)
+            (*i)->on_notify(n);
+    }
+};
+
 
 
 }
@@ -168,6 +198,7 @@ constexpr subject2<TObservers&&...> make_subject_const(TObservers&&...observers)
     return subject2<TObservers&&...>(
             std::forward<TObservers>(observers)...);
 }
+
 
     /*
 template <class TObserver, TObserver& o, TObserver&..._>

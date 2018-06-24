@@ -308,11 +308,16 @@ public:
     }
 
 
-    const_iterator end() const
+    const_iterator cend() const
     {
         handle_with_offset o = offset(size());
 
         return iterator(get_allocator(), o);
+    }
+
+    const_iterator end() const
+    {
+        return cend();
     }
 
     accessor at(size_type pos) const
