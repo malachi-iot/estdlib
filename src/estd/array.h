@@ -76,6 +76,7 @@ public:
     }
 
 
+#ifdef FEATURE_ESTD_LEGACY_ARRAY_ITERATOR
     // https://stackoverflow.com/questions/3582608/how-to-correctly-implement-custom-iterators-and-const-iterators
     // I've read we're no longer supposed to use std::iterator.  I'm just gonna cobble together something usable then
     // for now
@@ -159,10 +160,19 @@ public:
         const T& operator*() const  { return *ptr; }
     };
 
+#else
+    typedef T* iterator;
+#endif
+
     typedef const iterator const_iterator;
 
+#ifdef FEATURE_ESTD_LEGACY_ARRAY_ITERATOR
     iterator begin() { return iterator(m_array); }
     const_iterator begin() const { return iterator((T* const)m_array); }
+#else
+    T* begin() { return &m_array[0]; }
+    const T* begin() const { return &m_array[0]; }
+#endif
 };
 
 
@@ -174,7 +184,7 @@ template<
     typename size_t = std::size_t
 > struct array : public experimental::array_base<T, T[N], size_t>
 {
-    typedef experimental::array_base<T, T[N]> base_t;
+    typedef experimental::array_base<T, T[N], size_t> base_t;
 
 public:
     typedef size_t size_type;
@@ -187,8 +197,13 @@ public:
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
+#ifdef FEATURE_ESTD_LEGACY_ARRAY_ITERATOR
     iterator end() { return iterator(base_t::m_array + N); }
     const_iterator end() const { return iterator(base_t::m_array + N); }
+#else
+    T* end() { return &base_t::m_array[N]; }
+    const T* end() const { return &base_t::m_array[N]; }
+#endif
 
     CONSTEXPR size_type size() const { return N; }
 
