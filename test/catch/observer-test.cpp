@@ -75,6 +75,15 @@ struct OtherStatefulObserver
     }
 };
 
+
+template <class TSubject>
+class WithSubject
+{
+    TSubject subject;
+
+public:
+};
+
 StatefulObserver stateful_observer_1, stateful_observer_2;
 OtherStatefulObserver stateful_observer_0;
 
@@ -156,6 +165,21 @@ TEST_CASE("observer tests")
 
             // resolves to noop, just in here to make sure it compiles really
             s.notify(event_1{5});
+        }
+        SECTION("no-constructor version of subject2")
+        {
+            //auto s1 = layer0::make_subject(stateful_observer_1);
+            layer0::subject2<StatefulObserver> s;
+
+            s.notify(5);
+        }
+        SECTION("simple proxy test")
+        {
+            layer0::subject2<StatefulObserver> s;
+            observer_proxy<decltype(s), int> p;
+            auto s2 = layer0::make_subject(p, stateful_observer_1);
+
+            s2.notify(5);
         }
     }
     SECTION("container_subject")

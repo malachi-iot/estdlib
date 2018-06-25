@@ -52,6 +52,8 @@ public:
         TObserver::on_notify(n);
     }
 };
+
+
 #endif
 
 // since this doesn't take both TObserver and TAllocator, for now consider this an internal
@@ -162,7 +164,7 @@ public:
 
 
 template <class TObserver, class ...TObservers>
-class subject2<TObserver&&, TObservers...> : public subject2<TObservers...>
+class subject2<TObserver, TObservers...> : public subject2<TObservers...>
 {
     typedef subject2<TObservers...> base_t;
 
@@ -172,6 +174,11 @@ public:
     constexpr subject2(TObserver&& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
             observer(std::move(observer))
+    {}
+
+    // for implicit-constructed version
+    constexpr subject2(TObservers&&...observers) :
+            base_t(std::forward<TObservers>(observers)...)
     {}
 
     template <class TNotifier>
@@ -237,7 +244,57 @@ public:
 };
  */
 }
+
+template <class ...>
+class observer_abstract;
+
+template <>
+class observer_abstract<>
+{
+public:
+};
+
+template <class TNotification, class ...TNotifications>
+class observer_abstract<TNotification, TNotifications...> :
+        public observer_abstract<TNotifications...>
+{
+public:
+    virtual void on_notify(const TNotification&) = 0;
+};
+
+
+// accepts incoming notifications and spits them back out to another
+// subject.  Note this one is virtual-method specific
+template <class TSubject, class ...>
+class observer_proxy;
+
+template <class TSubject>
+class observer_proxy<TSubject>
+{
+protected:
+    TSubject subject;
+
+public:
+};
+
+template <class TSubject, class TNotification, class ...TNotifications>
+class observer_proxy<TSubject, TNotification, TNotifications...> :
+        public observer_abstract<TNotification, TNotifications...>,
+        public observer_proxy<TSubject, TNotifications...>
+{
+    typedef observer_proxy<TSubject, TNotifications...> base_t;
+
+public:
+    virtual void on_notify(const TNotification& n) override
+    {
+        base_t::subject.notify(n);
+    }
+};
+
+
 #endif
+
+
 
 struct void_subject
 {
