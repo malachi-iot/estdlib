@@ -40,6 +40,7 @@ class mutable_buffer : public estd::layer2::array<uint8_t, size>
     typedef estd::layer2::array<uint8_t, size> base_t;
 
 public:
+#ifdef FEATURE_CPP_DEFAULT_TARGS
     // NOTE: 90% sure this isn't gonna work < c++11
     template <class TPtr = uint8_t*, typename =
               typename estd::enable_if<!estd::is_array<TPtr>::value>::type >
@@ -48,6 +49,9 @@ public:
     // NOTE: sorta works, but uint8_t* data constructor always wins if this fails
     template <size_t N, typename = typename std::enable_if<N >= size>::type>
     mutable_buffer(uint8_t (&data) [N]) : base_t(data) {}
+#else
+    mutable_buffer(uint8_t* data) : base_t(data) {}
+#endif
 };
 
 }

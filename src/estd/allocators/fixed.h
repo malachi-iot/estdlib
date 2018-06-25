@@ -218,17 +218,17 @@ public:
 }
 
 #ifndef FEATURE_CPP_CONSTEXPR
-template <class T, size_t N, bool null_terminated, class TBuffer, class TSize, class TTraits>
-struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>, TTraits >
+template <class T, size_t N, class TBuffer, class TSize, class TTraits>
+struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>, TTraits >
         : internal::handle_descriptor_base<
-                internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
+                internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
                 true,
                 true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
-            internal::single_fixedbuf_allocator<T, N, null_terminated, TBuffer, TSize>,
+            internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
             true,
             true,
             true> base_t;
@@ -240,17 +240,17 @@ struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, null_terminat
 };
 
 
-template <class T, bool null_terminated, class TSize, class TTraits>
-struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>, TTraits >
+template <class T, class TSize, class TTraits>
+struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, TSize>, TTraits >
         : internal::handle_descriptor_base<
-                internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
+                internal::single_fixedbuf_runtimesize_allocator<T, TSize>,
                 true,
                 true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
-            internal::single_fixedbuf_runtimesize_allocator<T, null_terminated, TSize>,
+            internal::single_fixedbuf_runtimesize_allocator<T, TSize>,
             true,
             true,
             true> base_t;

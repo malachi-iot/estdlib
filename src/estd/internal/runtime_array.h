@@ -61,7 +61,7 @@ protected:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         = default;
 #else
-        : m_helper(copy_from.helper)
+        : m_impl(copy_from.m_impl)
     {
     }
 #endif
