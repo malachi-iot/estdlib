@@ -55,13 +55,19 @@ public:
 
 namespace layer2 {
 
+// Relies on an underlying T* but is expected to always have a specific constant size
 template <class T, size_t N>
 class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > >
 {
     typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > > base_t;
+    typedef typename base_t::size_type size_type;
 
 public:
-    vector(T* underlying_buffer) : base_t(underlying_buffer) {}
+    vector(T* underlying_buffer, size_type initial_size = 0) :
+            base_t(underlying_buffer)
+    {
+        base_t::impl().size(initial_size);
+    }
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}

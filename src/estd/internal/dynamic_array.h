@@ -195,7 +195,7 @@ protected:
         if(new_size > cap)
         {
             // TODO: Do an assert here, or return true/false to indicate success
-            reserve(new_size + pad);
+            if(!reserve(new_size + pad)) return false;
         }
 
         impl().size(new_size);
