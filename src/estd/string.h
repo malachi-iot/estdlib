@@ -6,7 +6,7 @@
 #include "traits/string.h"
 #include <algorithm> // for std::min
 
-#include <estd/exp/buffer.h>
+#include "exp/buffer.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>
@@ -451,7 +451,7 @@ typedef basic_string<char> string;
 class const_string : public basic_string<const char, false>
 {
     typedef basic_string<const char, false> base_t;
-    typedef typename base_t::size_type size_type;
+    typedef base_t::size_type size_type;
 
 public:
     const_string(const char* s, size_type len) :
@@ -478,8 +478,8 @@ public:
 
 
 
-template <class CharT, class Traits, class Alloc>
-bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc>& rhs)
+template <class CharT, class Traits, class Alloc, class TStringTraits>
+bool operator ==( const CharT* lhs, const basic_string<CharT, Traits, Alloc, TStringTraits>& rhs)
 {
     return rhs.compare(lhs) == 0;
 }
@@ -534,7 +534,7 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Allocator, class StringTraits,
-          class Traits = typename StringTraits::char_traits,
+          class Traits,
           class CharT>
 inline std::basic_ostream<typename Traits::char_type, Traits>&
     operator<<(std::basic_ostream<typename Traits::char_type, Traits>& os,
