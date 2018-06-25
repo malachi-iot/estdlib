@@ -238,13 +238,13 @@ public:
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
 private:
+    // don't fiddle with ref juggling here - if that's absolutely necessary use
+    // the RefAllocator helper
+    allocator_type allocator;
     // handle.size represents currently allocation portion
     handle_with_size handle;
     // remember, size represents 'user/app' portion.
     size_type m_size;
-    // don't fiddle with ref juggling here - if that's absolutely necessary use
-    // the RefAllocator helper
-    allocator_type allocator;
 
 public:
     static CONSTEXPR bool uses_termination() { return false; }
