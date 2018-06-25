@@ -245,6 +245,11 @@ public:
  */
 }
 
+// https://stackoverflow.com/questions/22968182/is-it-possible-to-typedef-a-parameter-pack
+// however doesnt work out for our mostly-not-parameter-pack approach
+template<typename... Args>
+struct pack { };
+
 template <class ...>
 class observer_abstract;
 
@@ -254,12 +259,47 @@ class observer_abstract<>
 public:
 };
 
-template <class TNotification, class ...TNotifications>
-class observer_abstract<TNotification, TNotifications...> :
-        public observer_abstract<TNotifications...>
+// making discrete sets instead of using parameter pack/variadic because
+// C++ makes a new virtual table per class, and that chews up some valuable memory space
+template <class TNotification>
+class observer_abstract<TNotification>
 {
 public:
+    using args = pack<TNotification>;
+
+    typedef TNotification notification_1_type;
+
     virtual void on_notify(const TNotification&) = 0;
+};
+
+
+template <class TNotification1, class TNotification2>
+class observer_abstract<TNotification1, TNotification2>
+{
+public:
+    using args = pack<TNotification1, TNotification2>;
+
+    typedef TNotification1 notification_1_type;
+    typedef TNotification2 notification_2_type;
+
+    virtual void on_notify(const TNotification1&) = 0;
+    virtual void on_notify(const TNotification2&) = 0;
+};
+
+
+template <class TNotification1, class TNotification2, class TNotification3>
+class observer_abstract<TNotification1, TNotification2, TNotification3>
+{
+public:
+    using args = pack<TNotification1, TNotification2, TNotification3>;
+
+    typedef TNotification1 notification_1_type;
+    typedef TNotification2 notification_2_type;
+    typedef TNotification3 notification_3_type;
+
+    virtual void on_notify(const TNotification1&) = 0;
+    virtual void on_notify(const TNotification2&) = 0;
+    virtual void on_notify(const TNotification3&) = 0;
 };
 
 
@@ -275,21 +315,81 @@ protected:
     TSubject subject;
 
 public:
+    observer_proxy(TSubject& s) : subject(s) {}
+
+    observer_proxy(TSubject&& s) : subject(std::move(s)) {}
+
+    observer_proxy() {}
 };
 
-template <class TSubject, class TNotification, class ...TNotifications>
-class observer_proxy<TSubject, TNotification, TNotifications...> :
-        public observer_abstract<TNotification, TNotifications...>,
-        public observer_proxy<TSubject, TNotifications...>
+template <class TSubject, class TNotification>
+class observer_proxy<TSubject, TNotification> :
+        public observer_abstract<TNotification>,
+        public observer_proxy<TSubject>
 {
-    typedef observer_proxy<TSubject, TNotifications...> base_t;
+    typedef observer_proxy<TSubject> base_t;
 
 public:
+    observer_proxy(TSubject& s) : base_t(s) {}
+
+    observer_proxy(TSubject&& s) : base_t(std::move(s)) {}
+
+    observer_proxy() {}
+
     virtual void on_notify(const TNotification& n) override
     {
         base_t::subject.notify(n);
     }
 };
+
+
+
+template <class TSubject, class TNotification1, class TNotification2>
+class observer_proxy<TSubject, TNotification1, TNotification2> :
+        public observer_abstract<TNotification1, TNotification2>,
+        public observer_proxy<TSubject>
+{
+    typedef observer_proxy<TSubject> base_t;
+
+public:
+    observer_proxy(TSubject& s) : base_t(s) {}
+
+    observer_proxy(TSubject&& s) : base_t(std::move(s)) {}
+
+    observer_proxy() {}
+
+    virtual void on_notify(const TNotification1& n) override
+    {
+        base_t::subject.notify(n);
+    }
+
+    virtual void on_notify(const TNotification2& n) override
+    {
+        base_t::subject.notify(n);
+    }
+};
+
+// pretty lame how explicit these are
+template <class TSubject, class observer_abstract >
+observer_proxy<TSubject, typename observer_abstract::notification_1_type> make_proxy()
+{
+    observer_proxy<TSubject, typename observer_abstract::notification_1_type> p;
+
+    return p;
+}
+
+
+template <class TSubject, class observer_abstract >
+observer_proxy<TSubject,
+    typename observer_abstract::notification_1_type,
+    typename observer_abstract::notification_2_type> make_proxy_2()
+{
+    observer_proxy<TSubject,
+            typename observer_abstract::notification_1_type,
+            typename observer_abstract::notification_2_type> p;
+
+    return p;
+}
 
 
 #endif

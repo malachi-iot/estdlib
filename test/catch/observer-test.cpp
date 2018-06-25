@@ -176,10 +176,21 @@ TEST_CASE("observer tests")
         SECTION("simple proxy test")
         {
             layer0::subject2<StatefulObserver> s;
-            observer_proxy<decltype(s), int> p;
+            observer_proxy<decltype(s), int> p(std::move(s));
             auto s2 = layer0::make_subject(p, stateful_observer_1);
 
+            int sz = sizeof(s2);
+
+            REQUIRE(sz > 0);
+
             s2.notify(5);
+        }
+        SECTION("make proxy test")
+        {
+            auto p = make_proxy_2<layer0::subject2<StatefulObserver>, observer_abstract<int, event_1> >();
+            auto s = layer0::make_subject(p, stateful_observer_1);
+
+            s.notify(5);
         }
     }
     SECTION("container_subject")
