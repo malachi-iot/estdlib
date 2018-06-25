@@ -209,7 +209,7 @@ public:
         return allocator_traits::clock(base_t::get_allocator(), h);
     }
 
-    const void cunlock() const
+    void cunlock() const
     {
         base_t::get_allocator().cunlock(h.handle());
     }
