@@ -13,6 +13,7 @@ include_directories(${ESTDLIB_DIR})
 add_executable(${PROJECT_NAME} "main.cpp"
     allocator-test.cpp
     array-test.cpp
+    buffer-test.cpp
     experimental-test.cpp
     list-test.cpp
     map-test.cpp
