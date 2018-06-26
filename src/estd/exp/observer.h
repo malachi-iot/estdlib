@@ -91,48 +91,14 @@ public:
 #ifdef FEATURE_CPP_VARIADIC
 namespace layer0 {
 
-template <class TObserver, TObserver&...observers>
-class subject
-{
-    template <class TNotify, TObserver& o, TObserver&..._observers>
-    static void notify(const TNotify& n)
-    {
-        o.on_notify(n);
-        if(sizeof...(_observers) > 0)
-            notify<TNotify, _observers...>(n);
-    }
-
-public:
-    template <class TNotify>
-    static void notify(const TNotify& n)
-    {
-        notify<TNotify, observers...>(n);
-    }
-};
-
-
-template <class TNotification, class TObserver>
-void test_notify(const TNotification& n, TObserver& observer)
-{
-    observer.on_notify(n);
-}
-
-template <class TNotification, class TObserver, class ...TObservers>
-void test_notify(const TNotification& n, TObserver& observer, TObservers&...observers)
-{
-    observer.on_notify(n);
-    test_notify(n, observers...);
-}
-
-
 // benefit over a std::vector style approach in that we don't need virtual functions
 
 template <class ...>
-class subject2;
+class subject;
 
 
 template <>
-class subject2<>
+class subject<>
 {
 public:
     template <class TNotifier>
@@ -141,14 +107,14 @@ public:
 
 
 template <class TObserver, class ...TObservers>
-class subject2<TObserver&, TObservers...> : public subject2<TObservers...>
+class subject<TObserver&, TObservers...> : public subject<TObservers...>
 {
-    typedef subject2<TObservers...> base_t;
+    typedef subject<TObservers...> base_t;
 
 protected:
     TObserver& observer;
 public:
-    constexpr subject2(TObserver& observer, TObservers&&...observers) :
+    constexpr subject(TObserver& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
             observer(observer)
     {}
@@ -164,20 +130,20 @@ public:
 
 
 template <class TObserver, class ...TObservers>
-class subject2<TObserver, TObservers...> : public subject2<TObservers...>
+class subject<TObserver, TObservers...> : public subject<TObservers...>
 {
-    typedef subject2<TObservers...> base_t;
+    typedef subject<TObservers...> base_t;
 
 protected:
     TObserver observer;
 public:
-    constexpr subject2(TObserver&& observer, TObservers&&...observers) :
+    constexpr subject(TObserver&& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
             observer(std::move(observer))
     {}
 
     // for implicit-constructed version
-    constexpr subject2(TObservers&&...observers) :
+    constexpr subject(TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...)
     {}
 
@@ -192,17 +158,17 @@ public:
 
 
 template <class ...TObservers>
-subject2<TObservers&&...> make_subject(TObservers&&...observers)
+subject<TObservers&&...> make_subject(TObservers&&...observers)
 {
-    return subject2<TObservers&&...>(
+    return subject<TObservers&&...>(
             std::forward<TObservers>(observers)...);
 }
 
 
 template <class ...TObservers>
-constexpr subject2<TObservers&&...> make_subject_const(TObservers&&...observers)
+constexpr subject<TObservers&&...> make_subject_const(TObservers&&...observers)
 {
-    return subject2<TObservers&&...>(
+    return subject<TObservers&&...>(
             std::forward<TObservers>(observers)...);
 }
 

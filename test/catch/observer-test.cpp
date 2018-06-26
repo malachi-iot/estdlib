@@ -109,16 +109,6 @@ TEST_CASE("observer tests")
     }
     SECTION("layer0")
     {
-        // FIX: Very unideal because really this still demands a virtual observer, even though it's all wrapped
-        // up with template calls
-        typedef layer0::subject<StatefulObserver,
-                stateful_observer_1,
-                stateful_observer_2> s;
-
-        s::notify(3);
-
-        layer0::test_notify(3, stateful_observer_1, stateful_observer_2);
-
         // probably the best we're gonna do is something like a tuple, which still has a potential memory footprint
         // but for layer0-ish/constant scenarios perhaps more practical than a layer1::vector
 
@@ -126,7 +116,7 @@ TEST_CASE("observer tests")
 
         /*
         s::notify(3); */
-        SECTION("subject2")
+        SECTION("subject")
         {
             auto s = layer0::make_subject(
                     StatefulObserver(),
@@ -138,7 +128,7 @@ TEST_CASE("observer tests")
 
             s.notify(5);
         }
-        SECTION("constexpr subject2")
+        SECTION("constexpr subject")
         {
             constexpr auto s = layer0::make_subject_const(stateful_observer_0, stateful_observer_1,
                                                           stateful_observer_2);
@@ -166,16 +156,16 @@ TEST_CASE("observer tests")
             // resolves to noop, just in here to make sure it compiles really
             s.notify(event_1{5});
         }
-        SECTION("no-constructor version of subject2")
+        SECTION("no-constructor version of subject")
         {
             //auto s1 = layer0::make_subject(stateful_observer_1);
-            layer0::subject2<StatefulObserver> s;
+            layer0::subject<StatefulObserver> s;
 
             s.notify(5);
         }
         SECTION("simple proxy test")
         {
-            layer0::subject2<StatefulObserver> s;
+            layer0::subject<StatefulObserver> s;
             observer_proxy<decltype(s), int> p(std::move(s));
             auto s2 = layer0::make_subject(p, stateful_observer_1);
 
@@ -187,7 +177,7 @@ TEST_CASE("observer tests")
         }
         SECTION("make proxy test")
         {
-            auto p = make_proxy_2<layer0::subject2<StatefulObserver>, observer_abstract<int, event_1> >();
+            auto p = make_proxy_2<layer0::subject<StatefulObserver>, observer_abstract<int, event_1> >();
             auto s = layer0::make_subject(p, stateful_observer_1);
 
             s.notify(5);
