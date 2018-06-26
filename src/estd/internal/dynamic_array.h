@@ -168,9 +168,10 @@ public:
 
 protected:
     // internal method for auto increasing capacity based on pre-set amount
-    void ensure_additional_capacity(size_type increase_by)
+    bool ensure_additional_capacity(size_type increase_by)
     {
         size_type cap = capacity();
+        bool success = true;
 
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
@@ -178,12 +179,14 @@ protected:
         if(size() + increase_by >= cap)
         {
             // increase by as near to 32 bytes as is practical
-            bool success = reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
+            success = reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
 
 #ifdef DEBUG
             // TODO: Do a debug log print here to notify of allocation failure
 #endif
         }
+
+        return success;
     }
 
 

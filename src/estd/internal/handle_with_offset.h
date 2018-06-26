@@ -44,14 +44,30 @@ public:
         return m_offset - subtrahend.m_offset;
     }
 
+    // NOTE: be mindful that these comparisons presume either:
+    // a) a matching handle, if one exists
+    // b) a non-matching handle whose non-matching nature doesn't matter, if one exists
+    // c) no handle at all (dummy handle, like fixed allocator)
+    // if none of these are the case, be sure to overload these operators
+    // in inherited classes
     bool operator >(const handle_with_offset_base& compare_to) const
     {
         return m_offset > compare_to.m_offset;
     }
+
+    bool operator==(const handle_with_offset_base& compare_to) const
+    {
+        return m_offset == compare_to.m_offset;
+    }
 };
 
-template<class TDummyHandle, typename size_t = std::size_t>
-class handle_with_only_offset :
+// typically this will only be bool for THandle, but feel free
+// to specialize for other conditions if you need to
+template<class THandle, typename size_t = std::size_t>
+class handle_with_only_offset;
+
+template<typename size_t>
+class handle_with_only_offset<bool, size_t> :
         public handle_with_offset_base<size_t>
 {
     typedef handle_with_offset_base<size_t> base_t;
@@ -60,23 +76,16 @@ public:
     handle_with_only_offset(size_t offset) :
             base_t(offset) {}
 
-    handle_with_only_offset(TDummyHandle h, size_t offset) :
+    // TODO: Assert that incoming h == true
+    handle_with_only_offset(bool h, size_t offset) :
             base_t(offset) {}
 
     size_t offset() const { return base_t::m_offset; }
 
-    TDummyHandle handle() const
+    bool handle() const
     {
-        TDummyHandle h;
-
-        return h;
+        return true;
     }
-
-    bool operator==(const handle_with_only_offset& compare_to) const
-    {
-        return offset() == compare_to.offset();
-    }
-
 };
 
 
