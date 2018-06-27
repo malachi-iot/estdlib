@@ -215,6 +215,9 @@ class subject<>
 public:
     template <class TNotifier>
     void notify(const TNotifier& n) const {}
+
+    template <class TNotifier, class TContext>
+    void notify(const TNotifier &, TContext) const {}
 };
 
 
@@ -238,6 +241,15 @@ public:
         internal::notify_helper(observer, n, true);
 
         base_t::notify(n);
+    }
+
+
+    template <class TNotifier, class TContext>
+    void notify(const TNotifier &n, TContext context)
+    {
+        internal::notify_helper(observer, n, context, true);
+
+        base_t::notify(n, context);
     }
 };
 
@@ -266,6 +278,14 @@ public:
         internal::notify_helper(observer, n, true);
 
         base_t::notify(n);
+    }
+
+    template <class TNotifier, class TContext>
+    void notify(const TNotifier &n, TContext context)
+    {
+        internal::notify_helper(observer, n, context, true);
+
+        base_t::notify(n, context);
     }
 };
 
