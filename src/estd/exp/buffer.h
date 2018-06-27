@@ -3,7 +3,9 @@
 #include "../array.h"
 #include "../type_traits.h"
 
-namespace estd { namespace experimental {
+namespace estd {
+
+namespace experimental {
 
 // kind of a reinterpretation of boost::mutable_buffer
 // void* idea is great, but nearly all my use cases which aren't served by estd::array or estd::vector
@@ -93,4 +95,9 @@ typedef buffer<const uint8_t> const_buffer;
 typedef layer3::mutable_buffer mutable_buffer;
 typedef layer3::const_buffer const_buffer;
 
-}}
+}
+
+// this one in particular is getting some use and performing well
+typedef experimental::const_buffer const_buffer;
+
+}

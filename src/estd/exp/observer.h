@@ -16,7 +16,9 @@ namespace estd { namespace experimental {
 
 namespace internal {
 
-#ifdef FEATURE_CPP_DECLVAL
+// FEATURE_ESTD_EXPLICIT_OBSERVER is helpful for enforcing < c++11 compliance or for
+// troubleshooting lost notifications (due to improper overloading of on_notify)
+#if defined(FEATURE_CPP_DECLVAL) && !defined(FEATURE_ESTD_EXPLICIT_OBSERVER)
 // https://stackoverflow.com/questions/23987925/using-sfinae-to-select-function-based-on-whether-a-particular-overload-of-a-func
 // Used so that on_notify calls are optional
 // fallback one for when we just can't match the on_notify
