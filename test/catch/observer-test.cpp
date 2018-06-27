@@ -197,6 +197,12 @@ TEST_CASE("observer tests")
             // should resolve to NOOP
             s.notify(event_3 { 5 });
         }
+        SECTION("optional context test")
+        {
+            auto s = layer0::make_subject(stateful_observer_1, stateful_observer_2);
+
+            s.notify(5, 0);
+        }
 #endif
     }
     SECTION("container_subject")
