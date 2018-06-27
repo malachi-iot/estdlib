@@ -182,6 +182,15 @@ TEST_CASE("observer tests")
 
             s.notify(5);
         }
+#ifdef FEATURE_CPP_DECLTYPE
+        SECTION("optional notify test")
+        {
+            auto s = layer0::make_subject(stateful_observer_1, stateful_observer_2);
+
+            // should resolve to NOOP
+            s.notify(event_3 { 5 });
+        }
+#endif
     }
     SECTION("container_subject")
     {

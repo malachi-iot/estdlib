@@ -6,11 +6,68 @@
 
 #include "../type_traits.h"
 
+#ifdef FEATURE_CPP_DECLTYPE
+#include <type_traits>
+#endif
+
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 
 namespace estd { namespace experimental {
 
 namespace internal {
+
+#ifdef FEATURE_CPP_DECLVAL
+// https://stackoverflow.com/questions/23987925/using-sfinae-to-select-function-based-on-whether-a-particular-overload-of-a-func
+// Used so that on_notify calls are optional
+// fallback one for when we just can't match the on_notify
+template <class TObserver, class TNotifier>
+static auto notify_helper(TObserver& observer, const TNotifier& n, int) -> bool
+{
+    return true;
+}
+
+// bool gives this one precedence, since we call with (n, true)
+template <class TObserver, class TNotifier>
+static auto notify_helper(TObserver& observer, const TNotifier& n, bool)
+    -> decltype(std::declval<TObserver>().on_notify(n), void(), bool{})
+{
+    observer.on_notify(n);
+
+    return true;
+}
+
+// stateless ones.  Probably we could use above ones but this way we can avoid
+// inline construction of an entity altogether
+// fallback one for when we just can't match the on_notify
+template <class TObserver, class TNotifier>
+static auto notify_helper(const TNotifier& n, int) -> bool
+{
+    return true;
+}
+
+// bool gives this one precedence, since we call with (n, true)
+template <class TObserver, class TNotifier>
+static auto notify_helper(const TNotifier& n, bool)
+    -> decltype(TObserver::on_notify(n), void(), bool{})
+{
+    TObserver::on_notify(n);
+
+    return true;
+}
+#else
+template <class TObserver, class TNotifier>
+static void notify_helper(TObserver& observer, const TNotifier& n, bool)
+{
+    observer.on_notify(n);
+}
+
+template <class TObserver, class TNotifier>
+static void notify_helper(const TNotifier& n, bool)
+{
+    TObserver::on_notify(n);
+}
+#endif
+
 
 template <class TContainer>
 class subject
@@ -49,7 +106,7 @@ public:
     static void notify(const TNotification& n)
     {
         base_t::notify(n);
-        TObserver::on_notify(n);
+        internal::notify_helper<TObserver, TNotification>(n, true);
     }
 };
 
@@ -119,10 +176,11 @@ public:
             observer(observer)
     {}
 
+
     template <class TNotifier>
-    void notify(const TNotifier& n)
+    void notify(const TNotifier &n)
     {
-        observer.on_notify(n);
+        internal::notify_helper(observer, n, true);
 
         base_t::notify(n);
     }
@@ -148,9 +206,9 @@ public:
     {}
 
     template <class TNotifier>
-    void notify(const TNotifier& n)
+    void notify(const TNotifier &n)
     {
-        observer.on_notify(n);
+        internal::notify_helper(observer, n, true);
 
         base_t::notify(n);
     }
