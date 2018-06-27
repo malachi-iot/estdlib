@@ -28,6 +28,14 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, int) -> bool
     return true;
 }
 
+
+// fallback for invocation with context where no on_notify is present
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext, int) -> bool
+{
+    return true;
+}
+
 // bool gives this one precedence, since we call with (n, true)
 template <class TObserver, class TNotifier>
 static auto notify_helper(TObserver& observer, const TNotifier& n, bool)
@@ -62,6 +70,13 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, TContext cont
 // fallback one for when we just can't match the on_notify
 template <class TObserver, class TNotifier>
 static auto notify_helper(const TNotifier& n, int) -> bool
+{
+    return true;
+}
+
+// fallback for invocation with context where no on_notify is present
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(const TNotifier& n, TContext, int) -> bool
 {
     return true;
 }
