@@ -38,6 +38,16 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, bool)
     return true;
 }
 
+// bool gives this one precedence, since we call with (n, true)
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext context, bool)
+    -> decltype(std::declval<TObserver>().on_notify(n, context), void(), bool{})
+{
+    observer.on_notify(n, context);
+
+    return true;
+}
+
 // stateless ones.  Probably we could use above ones but this way we can avoid
 // inline construction of an entity altogether
 // fallback one for when we just can't match the on_notify
@@ -53,6 +63,27 @@ static auto notify_helper(const TNotifier& n, bool)
     -> decltype(TObserver::on_notify(n), void(), bool{})
 {
     TObserver::on_notify(n);
+
+    return true;
+}
+
+
+// bool gives this one precedence, since we call with (n, true)
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(const TNotifier& n, TContext context, bool)
+    -> decltype(TObserver::on_notify(n), void(), bool{})
+{
+    TObserver::on_notify(n);
+
+    return true;
+}
+
+// bool gives this one precedence, since we call with (n, true)
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(const TNotifier& n, TContext context, bool)
+    -> decltype(TObserver::on_notify(n, context), void(), bool{})
+{
+    TObserver::on_notify(n, context);
 
     return true;
 }
@@ -93,8 +124,14 @@ class stateless_subject<>
 {
 public:
     template <class TNotification>
-    static void notify(const TNotification& n)
+    static void notify(const TNotification&)
     {
+    }
+
+    template <class TNotification, class TContext>
+    static void notify(const TNotification&, TContext context)
+    {
+
     }
 };
 
@@ -109,6 +146,13 @@ public:
     {
         base_t::notify(n);
         internal::notify_helper<TObserver, TNotification>(n, true);
+    }
+
+    template <class TNotification, class TContext>
+    static void notify(const TNotification& n, TContext context)
+    {
+        base_t::notify(n, context);
+        internal::notify_helper<TObserver, TNotification>(n, context, true);
     }
 };
 

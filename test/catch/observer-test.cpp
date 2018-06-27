@@ -34,6 +34,11 @@ public:
     {
         REQUIRE(val == expected);
     }
+
+    static void on_notify(event_1 val, const int& context)
+    {
+
+    }
 };
 
 class IObserver
@@ -106,6 +111,8 @@ TEST_CASE("observer tests")
         stateless_subject<StatelessObserver> ss;
 
         ss.notify(3);
+        ss.notify(3, 0);
+        ss.notify(event_1 {}, 0);
     }
     SECTION("layer0")
     {
