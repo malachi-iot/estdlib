@@ -38,6 +38,15 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, bool)
     return true;
 }
 
+template <class TObserver, class TNotifier, class TContext>
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext context, bool)
+    -> decltype(std::declval<TObserver>().on_notify(n), void(), bool{})
+{
+    observer.on_notify(n);
+
+    return true;
+}
+
 // bool gives this one precedence, since we call with (n, true)
 template <class TObserver, class TNotifier, class TContext>
 static auto notify_helper(TObserver& observer, const TNotifier& n, TContext context, bool)
