@@ -155,9 +155,11 @@ TEST_CASE("observer tests")
                     OtherStatefulObserver());
 
             int sz = sizeof(s);
-            int sz2 = sizeof(decltype(s));
 
-            REQUIRE(sz2 > 0);
+            // NOTE: Does not account for alignment issues so brittle test
+            REQUIRE(sz >= sizeof(StatefulObserver) +
+                    sizeof(OtherStatefulObserver) +
+                    sizeof(StatefulObserver*));
 
             s.notify(5);
         }
