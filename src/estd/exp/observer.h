@@ -168,15 +168,15 @@ public:
     template <class TNotification>
     static void notify(const TNotification& n)
     {
-        base_t::notify(n);
         internal::notify_helper<TObserver, TNotification>(n, true);
+        base_t::notify(n);
     }
 
     template <class TNotification, class TContext>
     static void notify(const TNotification& n, TContext& context)
     {
-        base_t::notify(n, context);
         internal::notify_helper<TObserver, TNotification>(n, context, true);
+        base_t::notify(n, context);
     }
 };
 

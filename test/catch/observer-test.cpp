@@ -220,6 +220,15 @@ TEST_CASE("observer tests")
         }
 #endif
     }
+    SECTION("Lots of stateless")
+    {
+        stateless_subject<
+                StatelessObserver,
+                StatelessObserver,
+                StatelessObserver> ss;
+
+        ss.notify(3);
+    }
     SECTION("container_subject")
     {
         //container_subject<estd::layer1::vector<std::reference_wrapper<IObserver>, 10> > c;
