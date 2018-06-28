@@ -54,6 +54,10 @@ class StatefulObserver : public FakeBase
 public:
     int id;
 
+    StatefulObserver() {}
+
+    StatefulObserver(int id) : id(id) {}
+
     void on_notify(int val)
     {
         REQUIRE(val == expected);
@@ -81,6 +85,16 @@ public:
 
 struct OtherStatefulObserver
 {
+    char buf[10];
+
+    OtherStatefulObserver()
+    {
+        buf[0] = 1;
+        buf[1] = 2;
+        buf[2] = 3;
+        buf[3] = 4;
+    }
+
     void on_notify(int val)
     {
         REQUIRE(val == expected);
@@ -134,12 +148,16 @@ TEST_CASE("observer tests")
         SECTION("subject")
         {
             auto s = layer0::make_subject(
-                    StatefulObserver(),
-                    stateful_observer_0,
-                    stateful_observer_1,
-                    stateful_observer_2);
+                    StatefulObserver(0x77),
+                    //stateful_observer_0,
+                    //stateful_observer_1,
+                    stateful_observer_2,
+                    OtherStatefulObserver());
 
             int sz = sizeof(s);
+            int sz2 = sizeof(decltype(s));
+
+            REQUIRE(sz2 > 0);
 
             s.notify(5);
         }

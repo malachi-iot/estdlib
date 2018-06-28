@@ -4,6 +4,8 @@ project("estdlib-unit-tests")
 
 set(CMAKE_CXX_STANDARD 11)
 
+add_definitions(-DUNIT_TESTING)
+
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include)
 set(ESTDLIB_DIR ../../src)
 

@@ -275,7 +275,9 @@ class subject<TObserver, TObservers...> : public subject<TObservers...>
     typedef subject<TObservers...> base_t;
 
 protected:
-    TObserver observer;
+    typedef typename std::remove_reference<TObserver>::type observer_t;
+
+    observer_t observer;
 public:
     constexpr subject(TObserver&& observer, TObservers&&...observers) :
             base_t(std::forward<TObservers>(observers)...),
@@ -290,6 +292,10 @@ public:
     template <class TNotifier>
     void notify(const TNotifier &n)
     {
+#ifdef UNIT_TESTING
+        int sz = sizeof(TObserver);
+#endif
+
         internal::notify_helper(observer, n, true);
 
         base_t::notify(n);
