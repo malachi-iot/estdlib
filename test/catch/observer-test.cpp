@@ -59,6 +59,13 @@ public:
         REQUIRE(val == expected);
     }
 
+    static void on_notify(event_3 e, event_3& context)
+    {
+        REQUIRE(e.data == expected);
+
+        context.data = 77;
+    }
+
 
     void on_notify(event_1 e)
     {
@@ -109,10 +116,11 @@ TEST_CASE("observer tests")
     SECTION("stateless")
     {
         stateless_subject<StatelessObserver> ss;
+        int context = 0;
 
         ss.notify(3);
-        ss.notify(3, 0);
-        ss.notify(event_1 {}, 0);
+        ss.notify(3, context);
+        ss.notify(event_1 {}, context);
     }
     SECTION("layer0")
     {
@@ -200,8 +208,15 @@ TEST_CASE("observer tests")
         SECTION("optional context test")
         {
             auto s = layer0::make_subject(stateful_observer_1, stateful_observer_2);
+            // for now, context can't be an rvalue
+            int context = 0;
 
-            s.notify(5, 0);
+            s.notify(5, context);
+
+            event_3 fake_context { 7 };
+            s.notify(event_3 { 5 }, fake_context);
+
+            REQUIRE(fake_context.data == 77);
         }
 #endif
     }

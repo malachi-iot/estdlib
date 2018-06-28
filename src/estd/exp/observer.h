@@ -31,7 +31,7 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, int) -> bool
 
 // fallback for invocation with context where no on_notify is present
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(TObserver& observer, const TNotifier& n, TContext, int) -> bool
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext&, int) -> bool
 {
     return true;
 }
@@ -47,7 +47,7 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, bool)
 }
 
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(TObserver& observer, const TNotifier& n, TContext context, bool)
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext& context, bool)
     -> decltype(std::declval<TObserver>().on_notify(n), void(), bool{})
 {
     observer.on_notify(n);
@@ -57,7 +57,7 @@ static auto notify_helper(TObserver& observer, const TNotifier& n, TContext cont
 
 // bool gives this one precedence, since we call with (n, true)
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(TObserver& observer, const TNotifier& n, TContext context, bool)
+static auto notify_helper(TObserver& observer, const TNotifier& n, TContext& context, bool)
     -> decltype(std::declval<TObserver>().on_notify(n, context), void(), bool{})
 {
     observer.on_notify(n, context);
@@ -76,7 +76,7 @@ static auto notify_helper(const TNotifier& n, int) -> bool
 
 // fallback for invocation with context where no on_notify is present
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(const TNotifier& n, TContext, int) -> bool
+static auto notify_helper(const TNotifier& n, TContext&, int) -> bool
 {
     return true;
 }
@@ -94,7 +94,7 @@ static auto notify_helper(const TNotifier& n, bool)
 
 // bool gives this one precedence, since we call with (n, true)
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(const TNotifier& n, TContext context, bool)
+static auto notify_helper(const TNotifier& n, TContext& context, bool)
     -> decltype(TObserver::on_notify(n), void(), bool{})
 {
     TObserver::on_notify(n);
@@ -104,7 +104,7 @@ static auto notify_helper(const TNotifier& n, TContext context, bool)
 
 // bool gives this one precedence, since we call with (n, true)
 template <class TObserver, class TNotifier, class TContext>
-static auto notify_helper(const TNotifier& n, TContext context, bool)
+static auto notify_helper(const TNotifier& n, TContext& context, bool)
     -> decltype(TObserver::on_notify(n, context), void(), bool{})
 {
     TObserver::on_notify(n, context);
@@ -153,7 +153,7 @@ public:
     }
 
     template <class TNotification, class TContext>
-    static void notify(const TNotification&, TContext context)
+    static void notify(const TNotification&, TContext&)
     {
 
     }
@@ -173,7 +173,7 @@ public:
     }
 
     template <class TNotification, class TContext>
-    static void notify(const TNotification& n, TContext context)
+    static void notify(const TNotification& n, TContext& context)
     {
         base_t::notify(n, context);
         internal::notify_helper<TObserver, TNotification>(n, context, true);
@@ -232,7 +232,7 @@ public:
     void notify(const TNotifier& n) const {}
 
     template <class TNotifier, class TContext>
-    void notify(const TNotifier &, TContext) const {}
+    void notify(const TNotifier &, TContext&) const {}
 };
 
 
@@ -260,7 +260,7 @@ public:
 
 
     template <class TNotifier, class TContext>
-    void notify(const TNotifier &n, TContext context)
+    void notify(const TNotifier &n, TContext& context)
     {
         internal::notify_helper(observer, n, context, true);
 
@@ -296,7 +296,7 @@ public:
     }
 
     template <class TNotifier, class TContext>
-    void notify(const TNotifier &n, TContext context)
+    void notify(const TNotifier &n, TContext& context)
     {
         internal::notify_helper(observer, n, context, true);
 
