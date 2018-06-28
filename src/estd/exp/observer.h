@@ -514,6 +514,9 @@ struct void_subject
 {
     template <class TNotifier>
     void notify(const TNotifier&) {}
+
+    template <class TNotifier, class TContext>
+    void notify(const TNotifier&, TContext&) {}
 };
 
 }}
