@@ -64,11 +64,13 @@ namespace layer3 {
 template <class T, class TSize = size_t>
 class buffer : public estd::layer3::array<T, size_t>
 {
+protected:
     typedef estd::layer3::array<T, size_t> base_t;
+
+public:
     typedef typename base_t::size_type size_type;
     typedef typename base_t::value_type value_type;
 
-public:
     // This is a low level call, but buffers are low level creatures
     // gently discouraged during mutable_buffer,
     // strongly discouraged during const_buffer,
@@ -82,7 +84,7 @@ public:
     buffer(value_type (&data) [N]) : base_t(data, N) {}
 
     // most definitely a 'shallow clone'
-    buffer(const buffer& clone_from) :
+    buffer(const base_t& clone_from) :
             base_t(clone_from.data(), clone_from.size()) {}
 };
 
