@@ -6,7 +6,7 @@
 #include "traits/string.h"
 #include <algorithm> // for std::min
 
-#include "internal/buffer.h"
+#include "span.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>

@@ -1,4 +1,4 @@
-#include <estd/internal/buffer.h>
+#include <estd/span.h>
 
 #include "test-data.h"
 
@@ -27,15 +27,23 @@ TEST_CASE("buffers")
     }
     SECTION("A")
     {
-        layer3::mutable_buffer b(estd::test::octet_data);
+        estd::mutable_buffer b(estd::test::octet_data);
 
         REQUIRE(sizeof(b) == sizeof(uint8_t*) + sizeof(size_t));
     }
     SECTION("mutable_buffer")
     {
         uint8_t buf[128];
-        layer3::mutable_buffer mb(buf);
+        estd::mutable_buffer mb(buf);
 
         REQUIRE(mb.size() == 128);
+    }
+    SECTION("span")
+    {
+        uint8_t buf[128];
+        estd::span<uint8_t> s(buf);
+
+        REQUIRE(s.size() == sizeof(buf));
+        REQUIRE(s.data() == &buf[0]);
     }
 }

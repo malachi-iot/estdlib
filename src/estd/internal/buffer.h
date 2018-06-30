@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../array.h"
-#include "../span.h"
 #include "../type_traits.h"
 
 namespace estd {
@@ -61,24 +60,34 @@ public:
 
 namespace layer3 {
 
+// TODO: once we lean array itself on allocated_array, beef up constructors here
+template <class T, class TSize = size_t>
+class buffer : public estd::layer3::array<T, size_t>
+{
+    typedef estd::layer3::array<T, size_t> base_t;
+    typedef typename base_t::size_type size_type;
+    typedef typename base_t::value_type value_type;
 
-typedef span<uint8_t> mutable_buffer;
-typedef span<const uint8_t> const_buffer;
+public:
+    // This is a low level call, but buffers are low level creatures
+    // gently discouraged during mutable_buffer,
+    // strongly discouraged during const_buffer,
+    // but not necessarily wrong to use it
+    void resize(size_type n) { base_t::m_size = n; }
 
+    buffer(value_type* data, size_type size) :
+            base_t(data, size) {}
+
+    template <size_t N>
+    buffer(value_type (&data) [N]) : base_t(data, N) {}
+
+    // most definitely a 'shallow clone'
+    buffer(const buffer& clone_from) :
+            base_t(clone_from.data(), clone_from.size()) {}
+};
 
 }
 
-/*
-// default implementations are of the layer3 variety (buf* & size member field)
-typedef layer3::mutable_buffer mutable_buffer;
-typedef layer3::const_buffer const_buffer; */
-
 }
-
-// this one in particular is getting some use and performing well
-// TODO: Move this out into span
-typedef internal::layer3::const_buffer const_buffer;
-typedef internal::layer3::mutable_buffer mutable_buffer;
-
 
 }

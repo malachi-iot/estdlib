@@ -1,14 +1,22 @@
 #pragma once
 
-#include "array.h"
+#include "internal/buffer.h"
 
 namespace estd {
 
-// TODO: once we lean array itself on allocated_array, beef up constructors here
+// this one in particular is getting some use and performing well
+// TODO: Move this out into span
+typedef internal::layer3::buffer<const uint8_t> const_buffer;
+typedef internal::layer3::buffer<uint8_t> mutable_buffer;
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <class T>
+using span = estd::internal::layer3::buffer<T, size_t>;
+#else
 template <class T, class TSize = size_t>
-class span : public estd::layer3::array<T, size_t>
+class span : public estd::internal::layer3::buffer<T, size_t>
 {
-    typedef estd::layer3::array<T, size_t> base_t;
+    typedef estd::internal::layer3::buffer<T, size_t> base_t;
     typedef typename base_t::size_type size_type;
     typedef typename base_t::value_type value_type;
 
@@ -27,8 +35,9 @@ public:
 
     // most definitely a 'shallow clone'
     span(const span& clone_from) :
-            base_t(clone_from.data(), clone_from.size()) {}
+            base_t(clone_from) {}
 };
+#endif
 
 
 }
