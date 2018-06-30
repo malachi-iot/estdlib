@@ -10,7 +10,6 @@ set(SOURCE_FILES
         estd/allocators/handle_desc.h
         estd/array.h
 
-        estd/exp/buffer.h
         estd/exp/observer.h
 
         estd/forward_list.h
@@ -18,6 +17,7 @@ set(SOURCE_FILES
         estd/initializer_list.h
         estd/iterator.h
 
+        estd/internal/buffer.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/list_node.h

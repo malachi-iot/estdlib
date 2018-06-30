@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/array.h"
-#include "estd/exp/buffer.h"
+//#include "estd/exp/buffer.h"
 #include "mem.h"
 
 struct TestA {};
@@ -63,12 +63,5 @@ TEST_CASE("experimental tests")
             typedef estd::internal::deduce_fixed_size_t<1000> deducer_t;
             REQUIRE(sizeof(deducer_t::size_type) == 2);
         }
-    }
-    SECTION("mutable_buffer")
-    {
-        uint8_t buf[128];
-        estd::experimental::mutable_buffer mb(buf);
-
-        REQUIRE(mb.size() == 128);
     }
 }

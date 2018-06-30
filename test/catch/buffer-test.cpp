@@ -1,10 +1,10 @@
-#include <estd/exp/buffer.h>
+#include <estd/internal/buffer.h>
 
 #include "test-data.h"
 
 #include <catch.hpp>
 
-using namespace estd::experimental;
+using namespace estd::internal;
 
 TEST_CASE("buffers")
 {
@@ -27,8 +27,15 @@ TEST_CASE("buffers")
     }
     SECTION("A")
     {
-        mutable_buffer b(estd::test::octet_data);
+        layer3::mutable_buffer b(estd::test::octet_data);
 
         REQUIRE(sizeof(b) == sizeof(uint8_t*) + sizeof(size_t));
+    }
+    SECTION("mutable_buffer")
+    {
+        uint8_t buf[128];
+        layer3::mutable_buffer mb(buf);
+
+        REQUIRE(mb.size() == 128);
     }
 }

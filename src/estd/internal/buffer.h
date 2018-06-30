@@ -6,7 +6,7 @@
 
 namespace estd {
 
-namespace experimental {
+namespace internal {
 
 // kind of a reinterpretation of boost::mutable_buffer
 // void* idea is great, but nearly all my use cases which aren't served by estd::array or estd::vector
@@ -68,13 +68,17 @@ typedef span<const uint8_t> const_buffer;
 
 }
 
+/*
 // default implementations are of the layer3 variety (buf* & size member field)
 typedef layer3::mutable_buffer mutable_buffer;
-typedef layer3::const_buffer const_buffer;
+typedef layer3::const_buffer const_buffer; */
 
 }
 
 // this one in particular is getting some use and performing well
-typedef experimental::const_buffer const_buffer;
+// TODO: Move this out into span
+typedef internal::layer3::const_buffer const_buffer;
+typedef internal::layer3::mutable_buffer mutable_buffer;
+
 
 }
