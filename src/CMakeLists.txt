@@ -35,6 +35,7 @@ set(SOURCE_FILES
         estd/map.h
         estd/memory.h
         estd/queue.h
+        estd/span.h
         estd/string.h
         estd/string_view.h
         estd/traits/list_node.h

@@ -60,6 +60,7 @@ public:
 
 namespace layer3 {
 
+// move & rename this to span , but keep the const_buffer since it's so darned convenient
 template <class T, class TSize = size_t>
 class buffer : public estd::layer3::array<T, size_t>
 {
