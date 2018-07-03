@@ -48,6 +48,12 @@ public:
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}
 #endif
+
+    // Because layer1 is *always* a simple fixed buffer, enable data() call here
+    // Also, for that same reason, lock/clock are no-ops, so we can call them without
+    // a corresponding free operation
+    T* data() { return base_t::lock(); }
+    const T* data() const { return base_t::clock(); }
 };
 
 };
@@ -72,6 +78,10 @@ public:
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}
 #endif
+
+    // Because layer2 is *always* a simple pointer, enable data() call here
+    T* data() { return base_t::lock(); }
+    const T* data() const { return base_t::clock(); }
 };
 
 }
@@ -99,6 +109,10 @@ public:
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}
 #endif
+
+    // Because layer3 is *always* a simple pointer, enable data() call here
+    T* data() { return base_t::lock(); }
+    const T* data() const { return base_t::clock(); }
 };
 
 }

@@ -167,6 +167,9 @@ public:
 
     typedef const iterator const_iterator;
 
+    reference front() { return m_array[0]; }
+    const_reference front() const { return  m_array[0]; }
+
 #ifdef FEATURE_ESTD_LEGACY_ARRAY_ITERATOR
     iterator begin() { return iterator(m_array); }
     const_iterator begin() const { return iterator((T* const)m_array); }
@@ -332,6 +335,9 @@ public:
     typedef const iterator const_iterator;
 
     size_type size() const { return m_size; }
+
+    reference back() { return base_t::m_array[size() - 1]; }
+    const_reference back() const { return base_t::m_array[size() - 1]; }
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
