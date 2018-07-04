@@ -16,6 +16,7 @@
 #define FEATURE_CPP_INITIALIZER_LIST
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #define FEATURE_CPP_DEFAULT_TARGS   // default template arguments for a function template
+#define FEATURE_CPP_ENUM_CLASS
 
 #if defined(__STDC_LIB_EXT1__)
 // see http://en.cppreference.com/w/c/string/byte/strncpy

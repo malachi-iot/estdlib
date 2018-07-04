@@ -91,6 +91,22 @@ struct is_array<T[]> : true_type {};
 template<class T, std::size_t N>
 struct is_array<T[N]> : true_type {};
 
+#ifdef FEATURE_CPP_ENUM_CLASS
+// Obviously a simplistic implementation, but it's a start
+enum class endian
+{
+#ifdef _WIN32
+    little = 0,
+    big    = 1,
+    native = little
+#else
+    little = __ORDER_LITTLE_ENDIAN__,
+    big    = __ORDER_BIG_ENDIAN__,
+    native = __BYTE_ORDER__
+#endif
+};
+#endif
+
 #ifdef FEATURE_CPP_ALIASTEMPLATEX
 template< class T >
 using add_const_t    = typename add_const<T>::type;
