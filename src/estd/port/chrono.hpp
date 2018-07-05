@@ -43,11 +43,11 @@ ToDuration duration_cast(const duration<Rep, Period>& d)
 
 
 template< class Rep1, class Period1, class Rep2, class Period2 >
-typename std::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs )
 {
-    return typename std::common_type<
+    return typename estd::common_type<
             duration<Rep1,Period1>,
             duration<Rep2,Period2>>::type(lhs.count() - rhs.count());
 }
@@ -100,14 +100,14 @@ CONSTEXPR typename estd::common_type<D1,D2>::type
 
 
 template< class Clock, class Dur1, class Dur2 >
-constexpr bool operator>( const time_point<Clock,Dur1>& lhs,
+CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs )
 {
     return lhs.time_since_epoch() > rhs.time_since_epoch();
 }
 
 template< class Clock, class Dur1, class Dur2 >
-constexpr bool operator>=( const time_point<Clock,Dur1>& lhs,
+CONSTEXPR bool operator>=( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs )
 {
     return lhs.time_since_epoch() >= rhs.time_since_epoch();

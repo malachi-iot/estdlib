@@ -1,5 +1,7 @@
 #pragma once
 
+#include "type_traits.h"
+
 // TODO: Utilize stock-standard std version of this if it's available
 
 namespace estd {
@@ -17,5 +19,9 @@ template<
 
     //pair(T1& first, T2& second) : first(first), second(second) {}
 };
+
+/*
+template<class T>
+typename estd::add_rvalue_reference<T>::type declval() */
 
 }

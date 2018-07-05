@@ -3,6 +3,7 @@
 #include "internal/platform.h"
 
 // mainly to fill in gaps where pre-C++03 is used
+// FIX: Need to bring in is_function also
 namespace estd {
 
 template<class T, T v>
@@ -82,6 +83,32 @@ template< class T> struct add_const { typedef const T type; };
 
 template< class T> struct add_volatile { typedef volatile T type; };
 
+namespace detail {
+template< class T, bool is_function_type = false >
+struct add_pointer {
+    using type = typename std::remove_reference<T>::type*;
+};
+ 
+template< class T >
+struct add_pointer<T, true> {
+    using type = T;
+};
+ 
+template< class T, class... Args >
+struct add_pointer<T(Args...), true> {
+    using type = T(*)(Args...);
+};
+ 
+template< class T, class... Args >
+struct add_pointer<T(Args..., ...), true> {
+    using type = T(*)(Args..., ...);
+};
+ 
+} // namespace detail
+ 
+template< class T >
+struct add_pointer : detail::add_pointer<T, std::is_function<T>::value> {};
+
 template<class T>
 struct is_array : false_type {};
 
@@ -90,6 +117,15 @@ struct is_array<T[]> : true_type {};
 
 template<class T, std::size_t N>
 struct is_array<T[N]> : true_type {};
+
+template<class T>
+struct remove_extent { typedef T type; };
+ 
+template<class T>
+struct remove_extent<T[]> { typedef T type; };
+ 
+template<class T, std::size_t N>
+struct remove_extent<T[N]> { typedef T type; };
 
 #ifdef FEATURE_CPP_ENUM_CLASS
 // Obviously a simplistic implementation, but it's a start
@@ -115,15 +151,15 @@ using add_const_t    = typename add_const<T>::type;
 template< class T >
 struct decay {
 private:
-    typedef typename std::remove_reference<T>::type U;
+    typedef typename estd::remove_reference<T>::type U;
 public:
-    typedef typename std::conditional<
-        std::is_array<U>::value,
-        typename std::remove_extent<U>::type*,
-        typename std::conditional<
+    typedef typename estd::conditional<
+        estd::is_array<U>::value,
+        typename estd::remove_extent<U>::type*,
+        typename estd::conditional<
             std::is_function<U>::value,
-            typename std::add_pointer<U>::type,
-            typename std::remove_cv<U>::type
+            typename estd::add_pointer<U>::type,
+            typename estd::remove_cv<U>::type
         >::type
     >::type type;
 };

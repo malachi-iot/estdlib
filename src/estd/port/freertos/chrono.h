@@ -1,6 +1,13 @@
 #pragma once
 
+extern "C" {
+
 #include <FreeRTOS.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+}
+
 #include "../chrono.h"
 
 namespace estd {
@@ -22,12 +29,12 @@ struct steady_clock
 {
     typedef estd::internal::miilli_rep rep;
     typedef internal::system_period period;
-    typedef time_point<steady_clock> time_point;
-    typedef duration<rep, period> duration;
+    typedef estd::chrono::duration<rep, period> duration;
+    typedef estd::chrono::time_point<steady_clock> time_point;
 
     static CONSTEXPR bool is_steady = true;
 
-    time_point now()
+    static time_point now()
     {
         return time_point(duration(xTaskGetTickCount()));
     }

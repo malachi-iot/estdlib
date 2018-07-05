@@ -55,7 +55,7 @@ ToDuration duration_cast(const duration<Rep, Period>& d);
 
 
 template< class Rep1, class Period1, class Rep2, class Period2 >
-typename std::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs );
 
