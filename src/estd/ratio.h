@@ -15,4 +15,13 @@ public:
     static CONSTEXPR std::intmax_t den() { return Denom; }
 };
 
+typedef ratio<1,1000000000> nano;
+typedef ratio<1,1000000> micro;
+typedef ratio<1,1000> milli;
+typedef ratio<1, 10> deci;
+typedef ratio<1000, 1> kilo;
+typedef ratio<1000000, 1> mega;
+typedef ratio<1000000000, 1> giga;
+
+
 }
