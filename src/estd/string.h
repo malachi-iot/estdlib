@@ -58,7 +58,7 @@ public:
 
     typedef CharT value_type;
     typedef Traits traits_type;
-    typedef Allocator allocator_type;
+    typedef typename base_t::allocator_type allocator_type;
     typedef StringPolicy string_traits_type;
 
     typedef typename allocator_type::handle_type handle_type;
