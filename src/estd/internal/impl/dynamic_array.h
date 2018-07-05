@@ -20,7 +20,7 @@ struct dynamic_array_length;
 template <class TAllocator>
 struct dynamic_array_length<TAllocator, true>
 {
-    typedef TAllocator allocator_type;
+    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::handle_type handle_type;

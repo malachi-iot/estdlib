@@ -11,7 +11,7 @@ template <class TAllocator>
 struct allocated_array : estd::handle_descriptor<TAllocator>
 {
     typedef estd::handle_descriptor<TAllocator> base_t;
-    typedef TAllocator allocator_type;
+    typedef typename base_t::allocator_type allocator_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
 
     typedef typename base_t::size_type size_type;
