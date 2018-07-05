@@ -9,6 +9,7 @@ set(SOURCE_FILES
         estd/allocators/generic.h
         estd/allocators/handle_desc.h
         estd/array.h
+        estd/chrono.h
 
         estd/exp/observer.h
 
@@ -34,7 +35,12 @@ set(SOURCE_FILES
         estd/list.h
         estd/map.h
         estd/memory.h
+
+        estd/port/chrono.h
+        estd/port/freertos/chrono.h
+
         estd/queue.h
+        estd/ratio.h
         estd/span.h
         estd/string.h
         estd/string_view.h
