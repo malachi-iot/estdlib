@@ -83,6 +83,7 @@ template< class T> struct add_const { typedef const T type; };
 
 template< class T> struct add_volatile { typedef volatile T type; };
 
+#if defined(FEATURE_CPP_ALIASTEMPLATE)
 namespace detail {
 template< class T, bool is_function_type = false >
 struct add_pointer {
@@ -93,7 +94,8 @@ template< class T >
 struct add_pointer<T, true> {
     using type = T;
 };
- 
+
+#if defined(FEATURE_CPP_VARIADIC)
 template< class T, class... Args >
 struct add_pointer<T(Args...), true> {
     using type = T(*)(Args...);
@@ -103,11 +105,13 @@ template< class T, class... Args >
 struct add_pointer<T(Args..., ...), true> {
     using type = T(*)(Args..., ...);
 };
+#endif
  
 } // namespace detail
  
 template< class T >
 struct add_pointer : detail::add_pointer<T, std::is_function<T>::value> {};
+#endif
 
 template<class T>
 struct is_array : false_type {};
@@ -148,6 +152,9 @@ template< class T >
 using add_const_t    = typename add_const<T>::type;
 #endif
 
+// FIX: Have to do this because we didn't bring in our own is_function
+// however this cascade of non-constexpr may make it moot
+#if __cplusplus >= 201103L
 template< class T >
 struct decay {
 private:
@@ -163,6 +170,7 @@ public:
         >::type
     >::type type;
 };
+#endif
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template< class... >
