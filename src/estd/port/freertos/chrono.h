@@ -16,6 +16,24 @@ typedef ratio<1, configTICK_RATE_HZ> system_period;
 
 }
 
-struct steady_clock;
+namespace chrono {
+
+struct steady_clock
+{
+    typedef estd::internal::miilli_rep rep;
+    typedef internal::system_period period;
+    typedef time_point<steady_clock> time_point;
+    typedef duration<rep, period> duration;
+
+    static CONSTEXPR bool is_steady = true;
+
+    time_point now()
+    {
+        return time_point(duration(xTaskGetTickCount()));
+    }
+};
+
+
+}
 
 }

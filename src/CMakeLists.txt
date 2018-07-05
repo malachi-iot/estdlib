@@ -19,6 +19,7 @@ set(SOURCE_FILES
         estd/iterator.h
 
         estd/internal/buffer.h
+        estd/internal/common_type.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/list_node.h

@@ -30,6 +30,7 @@ struct ratio_divide;
 
 namespace internal {
 
+// https://stackoverflow.com/questions/43846187/using-template-metaprogramming-in-c-find-the-gcd-of-two-integers
 template<std::intmax_t a, std::intmax_t b> struct gcd
 {
     static constexpr std::intmax_t value = gcd<b, a % b>::value;

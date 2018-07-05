@@ -112,4 +112,33 @@ template< class T >
 using add_const_t    = typename add_const<T>::type;
 #endif
 
+template< class T >
+struct decay {
+private:
+    typedef typename std::remove_reference<T>::type U;
+public:
+    typedef typename std::conditional<
+        std::is_array<U>::value,
+        typename std::remove_extent<U>::type*,
+        typename std::conditional<
+            std::is_function<U>::value,
+            typename std::add_pointer<U>::type,
+            typename std::remove_cv<U>::type
+        >::type
+    >::type type;
+};
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class... >
+using void_t = void;
+
+template< class T >
+using decay_t = typename decay<T>::type;
+#else
+#endif
+
 }
+
+#if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
+#include "internal/common_type.h"
+#endif

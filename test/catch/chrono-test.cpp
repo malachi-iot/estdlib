@@ -1,6 +1,23 @@
 #include <catch.hpp>
 
+// TODO: Once we get POSIX mode for this, include in estd/chrono.h directly
 #include <estd/port/chrono.h>
+
+class fake_clock
+{
+public:
+    int ticks;
+
+    typedef estd::internal::miilli_rep rep;
+    typedef estd::ratio<1, 15> period; // each 'fake' tick is 1/15 of a second
+    typedef estd::chrono::duration<rep, period> duration;
+    typedef estd::chrono::time_point<fake_clock> time_point;
+
+    time_point now()
+    {
+        return time_point(duration(ticks));
+    }
+};
 
 TEST_CASE("chrono tests")
 {
@@ -46,5 +63,31 @@ TEST_CASE("chrono tests")
             REQUIRE(num == 4);
             REQUIRE(den == 1);
         }
+    }
+    SECTION("fake_clock tests")
+    {
+        fake_clock clock;
+
+        clock.ticks = 0;
+
+        auto first = clock.now();
+
+        clock.ticks += 30; // 2 seconds for this fake_clock
+
+        auto second = clock.now();
+
+        // first and second are 'time_points' (absolute time) and in the native fake_clock
+        // tick format.  the subtraction converts to a duration (relative time) and then
+        // duration_cast converts to milliseconds.  count() merely accesses the underlying
+        // resulting millisecond count
+        auto count = estd::chrono::duration_cast<estd::chrono::milliseconds>(second - first).count();
+
+        REQUIRE(count == 2000);
+
+        clock.ticks += 5; // = 1/3 of a second
+
+        count = estd::chrono::duration_cast<estd::chrono::milliseconds>(clock.now() - second).count();
+
+        REQUIRE(count == 333);
     }
 }
