@@ -74,7 +74,7 @@ struct dynamic_array_length<TAllocator, true>
 template <class TAllocator>
 struct dynamic_array_length<TAllocator, false>
 {
-    typedef TAllocator allocator_type;
+    typedef typename std::remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::handle_type handle_type;
@@ -228,8 +228,8 @@ class dynamic_array
 {
 public:
     // default implementation is 'full fat' to handle all scenarios
-    typedef TAllocator allocator_type;
-    typedef estd::allocator_traits<TAllocator> allocator_traits;
+    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_type::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
@@ -240,7 +240,7 @@ public:
 private:
     // don't fiddle with ref juggling here - if that's absolutely necessary use
     // the RefAllocator helper
-    allocator_type allocator;
+    TAllocator allocator;
     // handle.size represents currently allocation portion
     handle_with_size handle;
     // remember, size represents 'user/app' portion.
