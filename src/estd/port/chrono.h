@@ -1,5 +1,8 @@
 #pragma once
 
+// While developing, leave this on
+#define FEATURE_ESTD_CHRONO
+
 #include "../ratio.h"
 
 namespace estd {
@@ -14,8 +17,14 @@ typedef uint32_t micro_rep;
 typedef uint32_t miilli_rep;
 typedef uint16_t seconds_rep;
 typedef uint16_t minutes_rep;
+typedef uint16_t hours_rep;
+typedef uint8_t days_rep;
+typedef uint8_t years_rep;
+
 
 }
+
+#ifdef FEATURE_ESTD_CHRONO
 
 namespace chrono {
 
@@ -75,14 +84,39 @@ template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs);
 
-typedef duration<internal::nano_rep, nano> nanoseconds;
-typedef duration<internal::micro_rep, micro> microseconds;
-typedef duration<internal::miilli_rep, milli> milliseconds;
-typedef duration<internal::seconds_rep> seconds;
-typedef duration<internal::minutes_rep, ratio<60>> minutes;
-typedef duration<internal::minutes_rep, ratio<3600>> hours;
-typedef duration<internal::minutes_rep, ratio<3600 * 24>> days;
 
+#endif // FEATURE_ESTD_CHRONO
+
+}
+
+namespace internal {
+
+// Use this to turn on incomplete estd::chrono support namespace
+// there's a lot that goes into a healthy, functioning chrono namespace
+// so we default to using std::chrono
+#ifdef FEATURE_ESTD_CHRONO
+namespace estd_ratio = estd;
+namespace estd_chrono = estd::chrono;
+#else
+namespace estd_ratio = std;
+namespace estd_chrono = std::chrono;
+#endif
+
+}
+
+namespace chrono {
+
+// These lower-precision ones are available even during non-FEATURE_ESTD_CHRONO
+typedef internal::estd_chrono::duration<internal::nano_rep, nano> nanoseconds;
+typedef internal::estd_chrono::duration<internal::micro_rep, micro> microseconds;
+typedef internal::estd_chrono::duration<internal::miilli_rep, milli> milliseconds;
+typedef internal::estd_chrono::duration<internal::seconds_rep> seconds;
+typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60>> minutes;
+typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600>> hours;
+typedef internal::estd_chrono::duration<internal::days_rep, ratio<3600 * 24>> days;
+
+
+#ifdef FEATURE_ESTD_CHRONO
 
 template<
     class Clock,
@@ -120,3 +154,5 @@ constexpr bool operator>=( const time_point<Clock,Dur1>& lhs,
 }
 
 #include "chrono.hpp"
+
+#endif // FEATURE_ESTD_CHRONO

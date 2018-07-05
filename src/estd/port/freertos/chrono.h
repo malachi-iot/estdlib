@@ -19,7 +19,7 @@ namespace estd {
 // constant representing the number of seconds from one tick to the next."
 namespace internal {
 
-typedef ratio<1, configTICK_RATE_HZ> system_period;
+typedef estd_ratio::ratio<1, configTICK_RATE_HZ> system_period;
 
 }
 
@@ -29,8 +29,8 @@ struct steady_clock
 {
     typedef estd::internal::miilli_rep rep;
     typedef internal::system_period period;
-    typedef estd::chrono::duration<rep, period> duration;
-    typedef estd::chrono::time_point<steady_clock> time_point;
+    typedef internal::estd_chrono::duration<rep, period> duration;
+    typedef internal::estd_chrono::time_point<steady_clock> time_point;
 
     static CONSTEXPR bool is_steady = true;
 
