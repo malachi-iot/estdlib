@@ -21,6 +21,7 @@ public:
     typedef value_type* pointer;
     typedef const void* const_void_pointer;
     typedef value_type* handle_type;
+    typedef size_t size_type;
 
     typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
     typedef T& accessor;

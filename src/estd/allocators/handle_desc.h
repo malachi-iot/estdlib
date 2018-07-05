@@ -24,7 +24,8 @@ class handle_descriptor_base;
 
 
 
-// base_base manages stateful+singular, but doesn't yet touch has_size
+// common base class
+// size managed by classes derived from this one
 // singular allocators have a simplified handle model, basically true = successful/good handle
 // false = bad/unallocated handle - we assume always good handle for this descriptor, so no
 // handle is actually tracked
@@ -32,7 +33,8 @@ template <class TAllocator, bool is_stateful, bool is_singular,
           class TTraits = estd::allocator_traits<TAllocator> >
 class allocator_and_handle_descriptor :
         public impl::allocator_descriptor<TAllocator, is_stateful>,
-        public impl::handle_descriptor<TAllocator, is_singular>
+        public impl::handle_descriptor<TAllocator, is_singular>,
+        public impl::contiguous_descriptor<TAllocator, true> // hard-wired to contiguous, for now
 {
     typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> this_t;
     typedef impl::allocator_descriptor<TAllocator, is_stateful> base_t;

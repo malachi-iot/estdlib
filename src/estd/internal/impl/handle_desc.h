@@ -19,6 +19,46 @@ class value_evaporator<TValue, false, default_value>
 protected:
 };
 
+
+// contains no members, just specialized copy helpers
+template <class TAllocator, bool is_contiguous>
+class contiguous_descriptor;
+
+
+// experimental, unused, untested, but simple and useful enough I think it will graduate quickly
+// no bounds checks are performed, as this is expected to be done by querying largest contiguous chunk size
+template <class TAllocator>
+struct contiguous_descriptor<TAllocator, true>
+{
+    typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::value_type value_type;
+
+    // copy outside buffer into this handle-based memory
+    static void copy_into(allocator_type& a, handle_type h, const value_type* source, size_type pos, size_type len)
+    {
+        value_type* dest = allocator_traits::lock(a, h, pos, len);
+
+        while(len--) *dest++ = *source++;
+
+        allocator_traits::unlock(a, h);
+    }
+
+
+    // copy this handle-based memory to outside buffer
+    static void copy_from(const allocator_type& a, handle_type h, value_type* dest, size_type pos, size_type len)
+    {
+        const value_type* source = allocator_traits::clock(a, h, pos, len);
+
+        while(len--) *dest++ = *source++;
+
+        allocator_traits::cunlock(a, h);
+    }
+};
+
 // https://en.cppreference.com/w/cpp/language/ebo we can have specialized base classes which are empty
 // and don't hurt our sizing
 template <class TAllocator, bool is_stateful>
@@ -45,6 +85,8 @@ public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::handle_with_offset handle_with_offset;
     typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::value_type value_type;
 
     // Would be nice if we could const this, but for stateful allocators that's not reasonable
     allocator_type& get_allocator() { return allocator; }
@@ -61,6 +103,8 @@ struct allocator_descriptor<TAllocator, false>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef allocator_type allocator_ref;
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::value_type value_type;
 
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference
