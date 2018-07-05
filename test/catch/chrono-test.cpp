@@ -89,5 +89,9 @@ TEST_CASE("chrono tests")
         count = estd::chrono::duration_cast<estd::chrono::milliseconds>(clock.now() - second).count();
 
         REQUIRE(count == 333);
+
+        // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
+        // which in turns needs greatest common divider for the two ratios
+        //bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
     }
 }
