@@ -130,6 +130,10 @@ struct allocator_traits< ::std::allocator<T> >
 
     static CONSTEXPR bool is_locking() { return false; }
 
+    static CONSTEXPR bool has_size() { return false; }
+
+    static CONSTEXPR bool is_singular() { return false; }
+
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 
     static value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)

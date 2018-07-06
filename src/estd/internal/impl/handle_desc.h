@@ -32,8 +32,8 @@ struct contiguous_descriptor<TAllocator, true>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
-    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_traits::handle_with_offset handle_with_offset;
+    typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
 
@@ -102,14 +102,20 @@ template <class TAllocator>
 struct allocator_descriptor<TAllocator, false>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef allocator_type allocator_ref;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_traits::handle_type handle_type;
 
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference
-    allocator_type get_allocator() const { return allocator_type(); }
+    allocator_type& get_allocator() const
+    {
+        allocator_type* _fake = NULLPTR;
+        return *_fake;
+        //return allocator_type();
+    }
 
 protected:
 
@@ -150,7 +156,8 @@ template <class TAllocator>
 struct handle_descriptor<TAllocator, false>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
-    typedef typename allocator_type::handle_type handle_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+    typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
 

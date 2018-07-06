@@ -74,10 +74,14 @@ struct dynamic_array_length<TAllocator, true>
 template <class TAllocator>
 struct dynamic_array_length<TAllocator, false>
 {
+private:
     typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+
+public:
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::handle_type handle_type;
+    typedef typename allocator_traits::handle_type handle_type;
 
 protected:
     size_type m_size;
@@ -129,9 +133,13 @@ public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
 
     typedef typename base_t::allocator_type allocator_type;
+    // NOTE: Necessary to do allocator_traits here to disambiguate all the ones from
+    // multiple inheritance above (though I think that should have worked, unless
+    // they are resolving to different types... i.e. one is a TAllocator&)
+    typedef typename base_t::allocator_traits allocator_traits;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
-    typedef typename allocator_type::handle_with_offset handle_with_offset;
+    typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     // account for null-termination during a max_size request
     size_type max_size() const
@@ -164,6 +172,11 @@ public:
     void size(size_type n)
     {
         length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
+    }
+
+    bool empty() const
+    {
+        return length_helper_t::empty(base_t::get_allocator(), base_t::handle());
     }
 };
 
@@ -221,7 +234,8 @@ public:
 };
 
 
-// Not ready for primetime yet, getting there
+// Not ready for primetime yet, getting there.  Finally compiles,
+// but unit tests don't run (hard crash)
 //#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
@@ -233,6 +247,9 @@ struct dynamic_array : public
     typedef typename base_t::allocator_type allocator_type;
 
     dynamic_array(allocator_type& alloc) : base_t(alloc) {}
+
+    template <class TAllocatorParam>
+    dynamic_array(const TAllocatorParam& p) : base_t(p) {}
 
     dynamic_array() {}
 };
