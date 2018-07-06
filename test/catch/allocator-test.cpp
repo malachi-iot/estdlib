@@ -45,7 +45,7 @@ TEST_CASE("allocator tests")
     {
         int buf[100];
 
-        SECTION("layer2")
+        SECTION("layer2 ref")
         {
             typedef estd::layer2::allocator<int, 100 > allocator_type;
             allocator_type a(buf);
@@ -54,7 +54,7 @@ TEST_CASE("allocator tests")
 
             REQUIRE(sz < 32);
         }
-        SECTION("layer3")
+        SECTION("layer3 ref")
         {
             typedef estd::layer3::allocator<int> allocator_type;
             allocator_type a(buf);
@@ -62,6 +62,57 @@ TEST_CASE("allocator tests")
             int sz = sizeof(v);
 
             REQUIRE(sz < 32);
+        }
+    }
+    SECTION("handle_descriptor")
+    {
+        int buf[100];
+
+        SECTION("layer1")
+        {
+            typedef estd::layer1::allocator<int, 100 > allocator_type;
+            estd::handle_descriptor<allocator_type> h;
+
+            int sz = sizeof(h);
+            int sz2 = h.size();
+
+            REQUIRE(sz == 400);
+            REQUIRE(sz2 == 100);
+        }
+        SECTION("layer1 ref")
+        {
+            typedef estd::layer1::allocator<int, 100 > allocator_type;
+            allocator_type a;
+            estd::handle_descriptor<allocator_type&> h(a);
+
+            int sz = sizeof(h);
+            int sz2 = h.size();
+
+            REQUIRE(sz == sizeof(int*));
+            REQUIRE(sz2 == 100);
+        }
+        SECTION("layer2")
+        {
+            typedef estd::layer2::allocator<int, 100 > allocator_type;
+            estd::handle_descriptor<allocator_type> h(buf);
+
+            int sz = sizeof(h);
+            int sz2 = h.size();
+
+            REQUIRE(sz == sizeof(int*));
+            REQUIRE(sz2 == 100);
+        }
+        SECTION("layer2 ref")
+        {
+            typedef estd::layer2::allocator<int, 100 > allocator_type;
+            allocator_type a(buf);
+            estd::handle_descriptor<allocator_type&> h(a);
+
+            int sz = sizeof(h);
+            int sz2 = h.size();
+
+            REQUIRE(sz == sizeof(int*));
+            REQUIRE(sz2 == 100);
         }
     }
 }
