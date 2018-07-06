@@ -142,11 +142,14 @@ protected:
     void size(size_type n) { m_size = n; }
 
     handle_descriptor_base(const handle_type& h) :
-            base_t(h) {}
+            base_t(h),
+            m_size(0) {}
 
     template <class TAllocatorParameter>
     handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
-        base_t(p, h) {}
+        base_t(p, h),
+        m_size(0)
+    {}
 
     handle_descriptor_base(allocator_type& allocator, const handle_type& h, size_type initial_size = 0) :
         base_t(allocator, h),
@@ -156,6 +159,12 @@ protected:
 
 public:
     size_type size() const { return m_size; }
+
+    bool allocate(size_type size)
+    {
+        m_size = size;
+        return base_t::allocate(size);
+    }
 
     bool reallocate(size_type size)
     {

@@ -234,8 +234,8 @@ public:
 };
 
 
-// Not ready for primetime yet, getting there.  Finally compiles,
-// but unit tests don't run (hard crash)
+// Passes unit tests, needs just a bit more inspection and
+// should be good to go
 //#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
