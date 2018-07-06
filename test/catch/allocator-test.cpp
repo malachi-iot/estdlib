@@ -41,4 +41,10 @@ TEST_CASE("allocator tests")
         }
 #endif
     }
+    SECTION("Unusual referenced allocator")
+    {
+        typedef estd::internal::single_fixedbuf_allocator<int, 10 > allocator_type;
+        allocator_type a;
+        estd::vector<int, allocator_type& > v(a);
+    }
 }

@@ -56,6 +56,8 @@ public:
     }
 
 protected:
+    explicit allocated_array(allocator_type& alloc) :
+        m_impl(alloc) {}
 
     allocated_array(const allocated_array& copy_from)
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF

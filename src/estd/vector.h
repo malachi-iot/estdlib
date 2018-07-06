@@ -21,6 +21,8 @@ protected:
     vector(const TImplParam& p) : base_t(p) {}
 
 public:
+    explicit vector(Allocator& alloc) : base_t(alloc) {}
+
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
     vector() = default;
 #else

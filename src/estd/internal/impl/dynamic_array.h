@@ -304,6 +304,14 @@ public:
         return is_allocated();
     }
 
+    explicit dynamic_array(allocator_type& alloc) :
+        allocator(alloc),
+        handle(allocator_traits::invalid()),
+        m_size(0)
+    {
+
+    }
+
     template <class T>
     dynamic_array(T init) :
             allocator(init),

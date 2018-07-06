@@ -273,6 +273,8 @@ protected:
 public:
     dynamic_array() {}
 
+    explicit dynamic_array(allocator_type& t) : base_t(t) {}
+
     template <class THelperParam>
     dynamic_array(const THelperParam& p) :
             base_t(p) {}
