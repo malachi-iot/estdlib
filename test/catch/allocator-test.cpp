@@ -43,8 +43,23 @@ TEST_CASE("allocator tests")
     }
     SECTION("Unusual referenced allocator")
     {
-        typedef estd::internal::single_fixedbuf_allocator<int, 10 > allocator_type;
-        allocator_type a;
-        estd::vector<int, allocator_type& > v(a);
+        int buf[100];
+
+        SECTION("layer2")
+        {
+            typedef estd::layer2::allocator<int, 100 > allocator_type;
+            allocator_type a(buf);
+            estd::vector<int, allocator_type& > v(a);
+
+            REQUIRE(sizeof(v) < 32);
+        }
+        SECTION("layer3")
+        {
+            typedef estd::layer3::allocator<int> allocator_type;
+            allocator_type a(buf);
+            estd::vector<int, allocator_type& > v(a);
+
+            REQUIRE(sizeof(v) < 32);
+        }
     }
 }

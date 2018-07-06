@@ -167,7 +167,16 @@ public:
     typedef handle_type handle_with_size;
 
 private:
+    // TODO: Consider consolidating with the handle_descriptor crew
     size_type m_buffer_size;
+
+protected:
+    explicit single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
+        base_t(buffer),
+        m_buffer_size(size)
+    {
+
+    }
 
 public:
     struct InitParam
@@ -212,6 +221,57 @@ public:
         // NOTE: assuming incoming handle_type is valid
 
         return allocate_ext(size);
+    }
+};
+
+}
+
+namespace layer1 {
+
+template <class T, size_t len>
+struct allocator : internal::single_fixedbuf_allocator<T, len>
+{
+
+};
+
+}
+
+namespace layer2 {
+
+template <class T, size_t len>
+struct allocator : internal::single_fixedbuf_allocator<T, len, T*>
+{
+    typedef internal::single_fixedbuf_allocator<T, len, T*> base_t;
+
+    allocator(T* buf) : base_t(buf) {}
+
+    // TODO: Need to do that SFINAE trick to force this to invoke
+    template <size_t N>
+    allocator(T (&array) [N]) : base_t(array, N)
+    {
+
+    }
+};
+
+}
+
+namespace layer3 {
+
+template <class T, class TSize = std::size_t>
+struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
+{
+    typedef internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    allocator(std::initializer_list<T> initlist) : base_t(initlist)
+    {
+    }
+#endif
+
+    template <TSize N>
+    allocator(T (&array) [N]) : base_t(array, N)
+    {
+
     }
 };
 
