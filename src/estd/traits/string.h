@@ -136,7 +136,7 @@ class dynamic_array<
         experimental::sized_string_traits<TCharTraits, int16_t, is_const> >
         : public estd::internal::handle_descriptor_base<
             single_fixedbuf_runtimesize_allocator<const T, size_t>,
-            true, true, true>
+            true, true, true, true>
 {
     // handle_descriptor_base:
     //  is_singular = true
@@ -144,7 +144,7 @@ class dynamic_array<
     //  is_stateful = true (generally we have a local char* ... though someday we might do a global version)
     typedef estd::internal::handle_descriptor_base<
         single_fixedbuf_runtimesize_allocator<const T, size_t>,
-        true, true, true> base_t;
+        true, true, true, true> base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;

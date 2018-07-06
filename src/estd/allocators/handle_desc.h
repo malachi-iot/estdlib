@@ -18,7 +18,13 @@ namespace estd { namespace internal {
 // is_stateful = is this a stateful (instance) allocator or a global (singleton-style) allocator
 // has_size = does this allocator track size of the allocated item
 // is_singular = standard allocator behavior is to be able to allocate multiple items.  a singular allocator can only allocate one item
-template <class TAllocator, bool is_stateful, bool has_size, bool is_singular>
+// is_contiguous = true = normal behavior, false = alternative allocator behavior where locks
+//                 don't always provide entire range
+template <class TAllocator,
+          bool is_stateful,
+          bool has_size,
+          bool is_singular,
+          bool is_contiguous>
 class handle_descriptor_base;
 
 
@@ -118,7 +124,7 @@ public:
 
 // With explicit size knowledge
 template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_base<TAllocator, is_stateful, false, is_singular> :
+class handle_descriptor_base<TAllocator, is_stateful, false, is_singular, true> :
         public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
     typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
@@ -162,7 +168,7 @@ public:
 // With implicit size knowledge - allocator can be queried for
 // size of our tracked handle
 template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_base<TAllocator, is_stateful, true, is_singular> :
+class handle_descriptor_base<TAllocator, is_stateful, true, is_singular, true> :
         public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
     typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
@@ -194,13 +200,15 @@ class handle_descriptor :
             TAllocator,
             TTraits::is_stateful(),
             TTraits::has_size(),
-            TTraits::is_singular() >
+            TTraits::is_singular(),
+            true>
 {
     typedef internal::handle_descriptor_base<
             TAllocator,
             TTraits::is_stateful(),
             TTraits::has_size(),
-            TTraits::is_singular() > base_t;
+            TTraits::is_singular(),
+            true> base_t;
 
 public:
     handle_descriptor() : base_t(TTraits::invalid()) {}

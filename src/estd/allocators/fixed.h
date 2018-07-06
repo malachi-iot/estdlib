@@ -284,11 +284,13 @@ struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSiz
                 internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
                 true,
                 true,
+                true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
             internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
+            true,
             true,
             true,
             true> base_t;
@@ -306,11 +308,13 @@ struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, TSiz
                 internal::single_fixedbuf_runtimesize_allocator<T, TSize>,
                 true,
                 true,
+                true,
                 true>
 
 {
     typedef internal::handle_descriptor_base<
             internal::single_fixedbuf_runtimesize_allocator<T, TSize>,
+            true,
             true,
             true,
             true> base_t;

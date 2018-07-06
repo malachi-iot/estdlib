@@ -4,7 +4,7 @@
 
 namespace estd {
 
-#ifndef FEATURE_CPP_ALIASTEMPLATE
+#ifdef FEATURE_CPP_ALIASTEMPLATE
 template <class T>
 using span = estd::internal::layer3::buffer<T, size_t>;
 #else

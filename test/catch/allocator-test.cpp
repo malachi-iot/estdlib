@@ -10,6 +10,18 @@
 using namespace estd;
 using namespace estd::internal;
 
+template <class TAllocator>
+class test_specialization;
+
+template <class T, int N>
+struct test_specialization<layer1::allocator<T, N> > :
+        handle_descriptor_base<layer1::allocator<T, N>,
+        true, true, true, true>
+{
+
+};
+
+
 TEST_CASE("allocator tests")
 {
     SECTION("fixed allocator handle descriptor")
@@ -113,6 +125,32 @@ TEST_CASE("allocator tests")
 
             REQUIRE(sz == sizeof(int*));
             REQUIRE(sz2 == 100);
+        }
+    }
+    SECTION("impl::dynamic_array_base testing")
+    {
+        typedef estd::layer1::allocator<int, 100 > allocator_type;
+        estd::internal::impl::dynamic_array_base<allocator_type, false> dai;
+
+        int capacity = dai.capacity();
+
+        REQUIRE(capacity == 100);
+
+        SECTION("test_specialization")
+        {
+            //test_specialization<allocator_type> t;
+        }
+    }
+    SECTION("impl::dynamic_array testing")
+    {
+        SECTION("layer1")
+        {
+            typedef estd::layer1::allocator<int, 100 > allocator_type;
+            estd::internal::impl::dynamic_array<allocator_type, void> dai;
+
+            int capacity = dai.capacity();
+
+            REQUIRE(capacity == 100);
         }
     }
 }
