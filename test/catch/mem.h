@@ -163,5 +163,9 @@ public:
     }
 
     static CONSTEXPR bool is_stateful() { return false; }
+
+    static CONSTEXPR bool is_singular() { return false; }
+
+    static CONSTEXPR bool has_size() { return false; }
 };
 

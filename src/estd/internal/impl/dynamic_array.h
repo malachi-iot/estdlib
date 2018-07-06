@@ -221,8 +221,22 @@ public:
 };
 
 
+// Not ready for primetime yet, getting there
 //#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+template <class TAllocator, class TPolicy>
+struct dynamic_array : public
+        dynamic_array_base<typename std::remove_reference<TAllocator>::type, false>
+{
+    typedef dynamic_array_base<typename std::remove_reference<TAllocator>::type, false> base_t;
+    typedef typename base_t::allocator_type allocator_type;
+
+    dynamic_array(allocator_type& alloc) : base_t(alloc) {}
+
+    dynamic_array() {}
+};
+#else
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback
 // TODO: #ifdef this out in some kind of strict mode
 template <class TAllocator, class TPolicy>

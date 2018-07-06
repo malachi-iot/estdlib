@@ -10,8 +10,6 @@ template <class TAllocator>
 struct allocator_traits;
 
 
-
-
 // NOTE: May very well be better off using inbuilt version and perhaps extending it with
 // our own lock mechanism
 // NOTE: I erroneously made our burgeouning custom allocators not-value_type aware

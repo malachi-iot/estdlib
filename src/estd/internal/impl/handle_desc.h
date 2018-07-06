@@ -105,10 +105,14 @@ struct allocator_descriptor<TAllocator, false>
     typedef allocator_type allocator_ref;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::handle_type handle_type;
 
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference
     allocator_type get_allocator() const { return allocator_type(); }
+
+protected:
+
 };
 
 // singular technically doesn't track a handle
@@ -166,7 +170,7 @@ protected:
     void unlock(allocator_type& a) { a.unlock(m_handle); }
 
 public:
-    bool handle() const { return m_handle; }
+    handle_type handle() const { return m_handle; }
 };
 
 

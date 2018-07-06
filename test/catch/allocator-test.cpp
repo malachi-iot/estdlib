@@ -18,7 +18,12 @@ struct test_specialization<layer1::allocator<T, N> > :
         handle_descriptor_base<layer1::allocator<T, N>,
         true, true, true, true>
 {
+    typedef handle_descriptor_base<layer1::allocator<T, N>,
+    true, true, true, true> base;
 
+    test_specialization() :
+        base(base::allocator_traits::invalid())
+    {}
 };
 
 
@@ -138,7 +143,11 @@ TEST_CASE("allocator tests")
 
         SECTION("test_specialization")
         {
-            //test_specialization<allocator_type> t;
+            test_specialization<allocator_type> t;
+
+            int sz = t.size();
+
+            REQUIRE(sz == 100);
         }
     }
     SECTION("impl::dynamic_array testing")
