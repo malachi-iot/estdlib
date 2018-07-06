@@ -221,6 +221,8 @@ public:
 };
 
 
+//#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback
 // TODO: #ifdef this out in some kind of strict mode
 template <class TAllocator, class TPolicy>
@@ -336,6 +338,6 @@ public:
 
     bool empty() const { return m_size == 0; }
 };
-
+#endif
 
 }}}

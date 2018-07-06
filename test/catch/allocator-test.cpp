@@ -50,16 +50,18 @@ TEST_CASE("allocator tests")
             typedef estd::layer2::allocator<int, 100 > allocator_type;
             allocator_type a(buf);
             estd::vector<int, allocator_type& > v(a);
+            int sz = sizeof(v);
 
-            REQUIRE(sizeof(v) < 32);
+            REQUIRE(sz < 32);
         }
         SECTION("layer3")
         {
             typedef estd::layer3::allocator<int> allocator_type;
             allocator_type a(buf);
             estd::vector<int, allocator_type& > v(a);
+            int sz = sizeof(v);
 
-            REQUIRE(sizeof(v) < 32);
+            REQUIRE(sz < 32);
         }
     }
 }
