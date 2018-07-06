@@ -39,6 +39,7 @@ class allocator_and_handle_descriptor :
     typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> this_t;
     typedef impl::allocator_descriptor<TAllocator, is_stateful> base_t;
     typedef impl::handle_descriptor<TAllocator, is_singular> handle_base_t;
+    typedef impl::contiguous_descriptor<TAllocator, true> contiguous_base;
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
@@ -80,6 +81,15 @@ public:
     void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
 
     void cunlock() const { const_cast<this_t*>(this)->unlock(); }
+
+
+    void copy_into(const value_type* source, size_type pos, size_type len)
+    {
+        contiguous_base::copy_into(
+                base_t::get_allocator(),
+                handle_base_t::handle(),
+                source, pos, len);
+    }
 
     bool reallocate(size_type size)
     {

@@ -91,11 +91,7 @@ protected:
     // TODO: change to assign
     void assign(const value_type* buf, size_type len)
     {
-        value_type* raw = lock();
-
-        while(len--) *raw++ = *buf++;
-
-        unlock();
+        m_impl.copy_into(buf, 0, len);
     }
 
 
@@ -367,6 +363,8 @@ public:
 
         if(pos + count > size())
             count = size() - pos;
+
+        // TODO: Do the m_impl.copy_from here
 
         memcpy(dest, src + pos, count * sizeof(value_type));
 

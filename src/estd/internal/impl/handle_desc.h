@@ -40,7 +40,7 @@ struct contiguous_descriptor<TAllocator, true>
     // copy outside buffer into this handle-based memory
     static void copy_into(allocator_type& a, handle_type h, const value_type* source, size_type pos, size_type len)
     {
-        value_type* dest = allocator_traits::lock(a, h, pos, len);
+        value_type* dest = &allocator_traits::lock(a, h, pos, len);
 
         while(len--) *dest++ = *source++;
 
@@ -51,7 +51,7 @@ struct contiguous_descriptor<TAllocator, true>
     // copy this handle-based memory to outside buffer
     static void copy_from(const allocator_type& a, handle_type h, value_type* dest, size_type pos, size_type len)
     {
-        const value_type* source = allocator_traits::clock(a, h, pos, len);
+        const value_type* source = &allocator_traits::clock(a, h, pos, len);
 
         while(len--) *dest++ = *source++;
 
