@@ -67,7 +67,11 @@ public:
 
     basic_string& erase(size_type index = 0, size_type count = -1)
     {
-        size_type to_remove_count = std::min(count, base_t::size() - index);
+        size_type size_minus_index = base_t::size() - index;
+        // NOTE: A bit tricky, if we don't use helper size_minus_index, template
+        // resolution fails, presumably because the math operation implicitly
+        // creates an int
+        size_type to_remove_count = std::min(count, size_minus_index);
 
         base_t::_erase(index, to_remove_count);
 

@@ -19,7 +19,8 @@ struct allocator_traits
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
     typedef typename TAllocator::pointer        pointer;
-    typedef std::size_t                         size_type;
+    //typedef std::size_t                         size_type;
+    typedef typename TAllocator::size_type      size_type;
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
     // non-standard, for handle based scenarios
