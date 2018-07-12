@@ -124,12 +124,6 @@ class dynamic_array_base :
     typedef dynamic_array_length<TAllocator, null_terminated> length_helper_t;
 
 public:
-    dynamic_array_base() {}
-
-    template <class TAllocatorParameter>
-    dynamic_array_base(TAllocatorParameter& p) : base_t(p) {}
-
-
     static CONSTEXPR bool uses_termination() { return null_terminated; }
 
     typedef typename base_t::allocator_type allocator_type;
@@ -178,6 +172,24 @@ public:
     {
         return length_helper_t::empty(base_t::get_allocator(), base_t::handle());
     }
+
+    dynamic_array_base()
+    {
+        // FIX: A little sloppy, brute forcing to 0 here because null-terminated
+        // specialization doesn't have all the data it needs to do this
+        // Sloppy also because for explicitly sized scenario, it already initialies to 0
+        size(0);
+    }
+
+    template <class TAllocatorParameter>
+    dynamic_array_base(TAllocatorParameter& p) : base_t(p)
+    {
+        // FIX: More sloppy, it's possible TAllocatorParameter has the sizing data in it
+        // so we do NOT do size here
+        //size(0);
+    }
+
+
 };
 
 /*
@@ -235,15 +247,30 @@ public:
 
 
 // Passes unit tests, needs just a bit more inspection and
-// should be good to go
+// should be good to go - after we un-hard-wire the null termination, that is
 //#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+// experimental feature, has_typedef (lifted from PGGCC-13)
+template <typename>
+struct has_typedef { typedef void type; };
+
+template<typename T, typename = void>
+struct is_nulltag_present : estd::false_type {};
+
+template<typename T>
+struct is_nulltag_present<T, typename has_typedef<typename T::is_null_terminated_exp_tag>::type> : estd::true_type {};
+
+// FIX: Hard wired to null terminated !
 template <class TAllocator, class TPolicy>
 struct dynamic_array : public
-        dynamic_array_base<typename std::remove_reference<TAllocator>::type, false>
+        dynamic_array_base<
+            typename std::remove_reference<TAllocator>::type,
+            is_nulltag_present<TPolicy>::value>
 {
-    typedef dynamic_array_base<typename std::remove_reference<TAllocator>::type, false> base_t;
+    typedef dynamic_array_base<
+        typename std::remove_reference<TAllocator>::type,
+        is_nulltag_present<TPolicy>::value> base_t;
     typedef typename base_t::allocator_type allocator_type;
 
     dynamic_array(allocator_type& alloc) : base_t(alloc) {}

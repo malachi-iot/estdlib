@@ -57,10 +57,14 @@ TEST_CASE("string tests")
     }
     SECTION("layer 1 null terminated")
     {
+        // FIX: Does not appear to properly initialize
+        // underlying buffer with a leading null-termination
+        // but just happens to accidentally work
         layer1::basic_string<char, 20> s;
         int sz = sizeof(s);
+        int len = s.length();
 
-        REQUIRE(s.length() == 0);
+        REQUIRE(len == 0);
 
         s += test_str;
 

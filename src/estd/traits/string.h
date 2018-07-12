@@ -48,6 +48,7 @@ struct string_policy : buffer_policy<TSize, constant>
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
 struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, constant>
 {
+    typedef void is_null_terminated_exp_tag;
     static CONSTEXPR bool is_null_terminated() { return true; }
 
     static CONSTEXPR bool is_null_termination(const char& value) { return value == 0; }

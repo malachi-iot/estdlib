@@ -219,12 +219,20 @@ template<class CharT, size_t N, bool null_terminated = true, class Traits = std:
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+                estd::layer1::allocator<CharT, N>,
+#else
                 estd::internal::single_fixedbuf_allocator <CharT, N>,
+#endif
                 StringPolicy>
 {
     typedef estd::basic_string<
                 CharT, Traits,
-                estd::internal::single_fixedbuf_allocator < CharT, N>,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+                estd::layer1::allocator<CharT, N>,
+#else
+                estd::internal::single_fixedbuf_allocator <CharT, N>,
+#endif
                 StringPolicy>
                 base_t;
 public:
