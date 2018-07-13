@@ -67,6 +67,8 @@ struct sized_string_traits  : public string_policy<TCharTraits, TSize, constant>
 // TODO: Consider moving this out into an impl/string.h
 namespace internal { namespace impl {
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+
 // applies generally to T[N], RW buffer but also to non-const T*
 // applies specifically to null-terminated
 template <class T, size_t len, class TBuffer, class TCharTraits, bool is_const>
@@ -101,6 +103,7 @@ public:
         base_t::size(0);
     }
 };
+#endif
 
 
 // runtime (layer3-ish) version
@@ -167,7 +170,6 @@ public:
     {
     }
 };
-
 
 
 

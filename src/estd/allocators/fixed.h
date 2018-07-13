@@ -273,6 +273,9 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
     {
 
     }
+
+    template <class TAllocatorParam>
+    allocator(const TAllocatorParam& p) : base_t(p) {}
 };
 
 }

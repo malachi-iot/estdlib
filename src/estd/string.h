@@ -375,12 +375,22 @@ template<class CharT, bool null_terminated = true,
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
+// FIX: Not ready yet, because layer3::allocator constructor and class InitParam doesn't fully
+// initialize underlying allocator
+#ifdef _FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+                estd::layer3::allocator<CharT>,
+#else
                 estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
+#endif
                 StringTraits>
 {
     typedef estd::basic_string<
             CharT, Traits,
+#ifdef _FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+            estd::layer3::allocator<CharT>,
+#else
             estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
+#endif
             StringTraits>
             base_t;
 
