@@ -290,12 +290,20 @@ class basic_string
         : public estd::basic_string<
                 CharT,
                 Traits,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+                estd::layer2::allocator<CharT, N>,
+#else
                 estd::internal::single_fixedbuf_allocator < CharT, N, CharT* >,
+#endif
                 StringPolicy >
 {
     typedef estd::basic_string<
             CharT, Traits,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+            estd::layer2::allocator<CharT, N>,
+#else
             estd::internal::single_fixedbuf_allocator < CharT, N, CharT* >,
+#endif
             StringPolicy >
             base_t;
     typedef typename base_t::allocator_type allocator_type;

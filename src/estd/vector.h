@@ -38,9 +38,21 @@ public:
 namespace layer1 {
 
 template <class T, size_t N>
-class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N > >
+class vector : public estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer1::allocator<T, N>
+#else
+        estd::internal::single_fixedbuf_allocator<T, N >
+#endif
+        >
 {
-    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N > > base_t;
+    typedef estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer1::allocator<T, N>
+#else
+        estd::internal::single_fixedbuf_allocator<T, N >
+#endif
+    > base_t;
 
 public:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
@@ -65,9 +77,21 @@ namespace layer2 {
 
 // Relies on an underlying T* but is expected to always have a specific constant size
 template <class T, size_t N>
-class vector : public estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > >
+class vector : public estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer2::allocator<T, N>
+#else
+        estd::internal::single_fixedbuf_allocator<T, N, T* >
+#endif
+        >
 {
-    typedef estd::vector<T, estd::internal::single_fixedbuf_allocator<T, N, T* > > base_t;
+    typedef estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer2::allocator<T, N>
+#else
+        estd::internal::single_fixedbuf_allocator<T, N, T* >
+#endif
+    > base_t;
     typedef typename base_t::size_type size_type;
 
 public:
