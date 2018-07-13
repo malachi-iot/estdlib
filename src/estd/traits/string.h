@@ -75,9 +75,9 @@ template <class T, size_t len, class TBuffer, class TCharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_allocator<T, len, TBuffer>,
         experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> >
-        : public dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true >
+        : public dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true, false >
 {
-    typedef dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true > base_t;
+    typedef dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true, false > base_t;
 
 public:
     typedef typename base_t::allocator_type allocator_type;
@@ -112,9 +112,9 @@ template <class T, class TCharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_runtimesize_allocator<T>,
         experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> > :
-        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true >
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true, false >
 {
-    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true > base_t;
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true, false > base_t;
     typedef typename base_t::size_type size_type;
 
 public:

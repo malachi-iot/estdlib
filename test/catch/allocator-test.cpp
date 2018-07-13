@@ -135,7 +135,7 @@ TEST_CASE("allocator tests")
     SECTION("impl::dynamic_array_base testing")
     {
         typedef estd::layer1::allocator<int, 100 > allocator_type;
-        estd::internal::impl::dynamic_array_base<allocator_type, false> dai;
+        estd::internal::impl::dynamic_array_base<allocator_type, false, false> dai;
 
         int capacity = dai.capacity();
 

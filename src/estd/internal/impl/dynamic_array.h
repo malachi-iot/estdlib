@@ -114,8 +114,14 @@ public:
 // ---
 
 
-// intermediate class as we transition to handle_descriptor.  Eventually phase this out
-template <class TAllocator, bool null_terminated>
+// intermediate class as we transition to handle_descriptor.  Its primary purpose now
+// is to present sizing/capacity operations to consumer.
+// null_terminated flag takes on no meaning when size_equals_capacity is true
+//
+// size_equals_capacity flag is just that, means the dynamic_array::size() is more or less a constant
+// fed by wherever capacity() comes from.  capacity() will vary on whether allocator itself tracks
+// allocated size or not (underlying size() call)
+template <class TAllocator, bool null_terminated, bool size_equals_capacity>
 class dynamic_array_base :
         public estd::handle_descriptor<TAllocator>,
         dynamic_array_length<TAllocator, null_terminated>
@@ -233,11 +239,12 @@ public:
 
 // runtime (layer3-ish) version, no policy (void) -
 // hard wired to no null termination
+// currently *also* hard wired to size != capacity, but we'll likely want that to change for const_string
 template <class T>
 class dynamic_array<single_fixedbuf_runtimesize_allocator<T>, void> :
-        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false >
+        public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false, false >
 {
-    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false > base_t;
+    typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, false, false > base_t;
     typedef typename base_t::size_type size_type;
 
 public:
@@ -266,11 +273,13 @@ template <class TAllocator, class TPolicy>
 struct dynamic_array : public
         dynamic_array_base<
             typename std::remove_reference<TAllocator>::type,
-            is_nulltag_present<TPolicy>::value>
+            is_nulltag_present<TPolicy>::value,
+            false>
 {
     typedef dynamic_array_base<
         typename std::remove_reference<TAllocator>::type,
-        is_nulltag_present<TPolicy>::value> base_t;
+        is_nulltag_present<TPolicy>::value,
+        false> base_t;
     typedef typename base_t::allocator_type allocator_type;
 
     dynamic_array(allocator_type& alloc) : base_t(alloc) {}
