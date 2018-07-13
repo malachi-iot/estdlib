@@ -10,13 +10,22 @@ class value_evaporator;
 template <class TValue, TValue default_value>
 class value_evaporator<TValue, true, default_value>
 {
+public:
+    TValue value() const { return default_value; }
 
+    static CONSTEXPR bool is_evaporated() { return true; }
 };
 
 template <class TValue, TValue default_value>
 class value_evaporator<TValue, false, default_value>
 {
 protected:
+    TValue m_value;
+
+public:
+    TValue value() const { return m_value; }
+
+    static CONSTEXPR bool is_evaporated() { return false; }
 };
 
 
