@@ -13,13 +13,14 @@ struct dynamic_array;
 
 // TODO: Fixup name.  Specializer to reveal size of either
 // an explicitly-sized or null-terminated entity
-template <class TAllocator, bool null_terminated>
+template <class TAllocator, bool null_terminated, bool size_equals_capacity>
 struct dynamic_array_length;
 
 // null terminated
 template <class TAllocator>
-struct dynamic_array_length<TAllocator, true>
+struct dynamic_array_length<TAllocator, true, false>
 {
+    typedef estd::handle_descriptor<TAllocator> handle_descriptor;
     typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
@@ -33,6 +34,14 @@ struct dynamic_array_length<TAllocator, true>
 
         a.cunlock(h);
 
+        return is_terminator;
+    }
+
+
+    bool empty(const handle_descriptor& hd) const
+    {
+        bool is_terminator = hd.clock(0, 1) == 0;
+        hd.cunlock();
         return is_terminator;
     }
 
@@ -53,6 +62,17 @@ struct dynamic_array_length<TAllocator, true>
         return sz;
     }
 
+    size_type size(const handle_descriptor& hd) const
+    {
+        const value_type* s = &hd.clock();
+
+        size_type sz = strlen(s);
+
+        hd.cunlock();
+
+        return sz;
+    }
+
     // +++ temporary
     // semi-brute forces size by stuffing a null terminator at the specified spot
     void size(TAllocator& a, const handle_type& h, size_type len)
@@ -66,17 +86,30 @@ struct dynamic_array_length<TAllocator, true>
         a.lock(h, len, 1) = 0;
         a.unlock(h);
     }
+
+    void size(handle_descriptor& hd, size_type len)
+    {
+        /*
+        if(len > base_t::capacity())
+        {
+            // FIX: issue some kind of warning
+        } */
+
+        hd.lock(len,1) = 0;
+        hd.unlock();
+    }
     // ---
 };
 
 
 // explicitly sized
 template <class TAllocator>
-struct dynamic_array_length<TAllocator, false>
+struct dynamic_array_length<TAllocator, false, false>
 {
 private:
     typedef typename std::remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::handle_descriptor<TAllocator> handle_descriptor;
 
 public:
     typedef typename allocator_type::size_type size_type;
@@ -93,6 +126,11 @@ protected:
 
 public:
 
+    bool empty(const handle_descriptor& hd) const
+    {
+        return m_size == 0;
+    }
+
     bool empty(const allocator_type& a, const handle_type& h) const
     {
         return m_size == 0;
@@ -103,8 +141,19 @@ public:
         return m_size;
     }
 
+    size_type size(const handle_descriptor& hd) const
+    {
+        return m_size;
+    }
+
+
     // +++ temporary
     void size(TAllocator& a, const handle_type& h, size_type len)
+    {
+        m_size = len;
+    }
+
+    void size(handle_descriptor& hd, size_type len)
     {
         m_size = len;
     }
@@ -112,6 +161,32 @@ public:
 };
 
 // ---
+
+// non-sized, this specialization is for when dynamic_array size is
+// always the same as capacity() (which is represented by handle_descriptor::size())
+// NOTE: Not yet used or tested
+template <class TAllocator, bool null_terminated>
+struct dynamic_array_length<TAllocator, null_terminated, true>
+{
+private:
+    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::handle_descriptor<TAllocator> handle_descriptor;
+
+public:
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::value_type value_type;
+
+    bool empty(const handle_descriptor& hd) const
+    {
+        return hd.size() > 0;
+    }
+
+    size_type size(const handle_descriptor& hd) const
+    {
+        return hd.size();
+    }
+};
 
 
 // intermediate class as we transition to handle_descriptor.  Its primary purpose now
@@ -124,10 +199,10 @@ public:
 template <class TAllocator, bool null_terminated, bool size_equals_capacity>
 class dynamic_array_base :
         public estd::handle_descriptor<TAllocator>,
-        dynamic_array_length<TAllocator, null_terminated>
+        dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
 {
     typedef estd::handle_descriptor<TAllocator> base_t;
-    typedef dynamic_array_length<TAllocator, null_terminated> length_helper_t;
+    typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
 
 public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
@@ -166,17 +241,20 @@ public:
     {
         if(!base_t::is_allocated()) return 0;
 
-        return length_helper_t::size(base_t::get_allocator(), base_t::handle());
+        return length_helper_t::size(*this);
+        //return length_helper_t::size(base_t::get_allocator(), base_t::handle());
     }
 
     void size(size_type n)
     {
-        length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
+        length_helper_t::size(*this, n);
+        //length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
     }
 
     bool empty() const
     {
-        return length_helper_t::empty(base_t::get_allocator(), base_t::handle());
+        return length_helper_t::empty(*this);
+        //return length_helper_t::empty(base_t::get_allocator(), base_t::handle());
     }
 
     dynamic_array_base()
