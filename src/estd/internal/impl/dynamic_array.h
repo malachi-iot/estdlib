@@ -107,7 +107,7 @@ template <class TAllocator>
 struct dynamic_array_length<TAllocator, false, false>
 {
 private:
-    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef estd::handle_descriptor<TAllocator> handle_descriptor;
 
@@ -172,7 +172,7 @@ template <class TAllocator>
 struct dynamic_array_length<TAllocator, true, true>
 {
 private:
-    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef estd::handle_descriptor<TAllocator> handle_descriptor;
 
@@ -220,7 +220,7 @@ template <class TAllocator>
 struct dynamic_array_length<TAllocator, false, true>
 {
 private:
-    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef estd::handle_descriptor<TAllocator> handle_descriptor;
 
@@ -384,7 +384,7 @@ public:
 
 // Passes unit tests, needs just a bit more inspection and
 // should be good to go - after we un-hard-wire the null termination, that is
-//#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+#define FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 // experimental feature, has_typedef (lifted from PGGCC-13)
@@ -407,12 +407,12 @@ struct is_consttag_present<T, typename has_typedef<typename T::is_constant_tag_e
 template <class TAllocator, class TPolicy>
 struct dynamic_array : public
         dynamic_array_base<
-            typename std::remove_reference<TAllocator>::type,
+            typename estd::remove_reference<TAllocator>::type,
             is_nulltag_present<TPolicy>::value,
             is_consttag_present<TPolicy>::value>
 {
     typedef dynamic_array_base<
-        typename std::remove_reference<TAllocator>::type,
+        typename estd::remove_reference<TAllocator>::type,
         is_nulltag_present<TPolicy>::value,
         is_consttag_present<TPolicy>::value> base_t;
     typedef typename base_t::allocator_type allocator_type;

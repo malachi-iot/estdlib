@@ -3,6 +3,7 @@
 #include <utility> // for std::forward and std::size_t
 #include <memory> // for std::allocator
 #include "../type_traits.h"
+#include <stdint.h> // for uint8_t and friends
 
 namespace estd {
 

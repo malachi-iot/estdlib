@@ -13,7 +13,7 @@ using namespace estd::internal;
 template <class TAllocator>
 class test_specialization;
 
-template <class T, int N>
+template <class T, size_t N>
 struct test_specialization<layer1::allocator<T, N> > :
         handle_descriptor_base<layer1::allocator<T, N>,
         true, true, true, true>

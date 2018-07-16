@@ -280,6 +280,9 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 
 }
 
+// FIX: Very nasty explicit specializations for handle_descriptor on various canned fixed allocators
+//      plan to revise this using either typedef-tags or CONSTEXPR bool (not bool functions) so that
+//      we can unify c++11 and pre-c++11 approach
 #ifndef FEATURE_CPP_CONSTEXPR
 template <class T, size_t N, class TBuffer, class TSize, class TTraits>
 struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>, TTraits >
@@ -305,6 +308,30 @@ struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSiz
 };
 
 
+template <class T, size_t N, class TTraits>
+struct handle_descriptor<layer1::allocator<T, N>, TTraits >
+        : internal::handle_descriptor_base<
+                layer1::allocator<T, N>,
+                true,
+                true,
+                true,
+                true>
+
+{
+    typedef internal::handle_descriptor_base<
+            layer1::allocator<T, N>,
+            true,
+            true,
+            true,
+            true> base_t;
+
+    handle_descriptor() : base_t(true) {}
+
+    template <class TAllocatorParam>
+    handle_descriptor(const TAllocatorParam& p) : base_t(p, true) {}
+};
+
+
 template <class T, class TSize, class TTraits>
 struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, TSize>, TTraits >
         : internal::handle_descriptor_base<
@@ -317,6 +344,31 @@ struct handle_descriptor<internal::single_fixedbuf_runtimesize_allocator<T, TSiz
 {
     typedef internal::handle_descriptor_base<
             internal::single_fixedbuf_runtimesize_allocator<T, TSize>,
+            true,
+            true,
+            true,
+            true> base_t;
+
+    handle_descriptor() : base_t(true) {}
+
+    template <class TAllocatorParam>
+    handle_descriptor(const TAllocatorParam& p) :
+//            base_t(p, typename TTraits::invalid_handle()) {}
+            base_t(p, true) {}
+};
+
+template <class T, class TSize, class TTraits>
+struct handle_descriptor<layer3::allocator<T, TSize>, TTraits >
+        : internal::handle_descriptor_base<
+                layer3::allocator<T, TSize>,
+                true,
+                true,
+                true,
+                true>
+
+{
+    typedef internal::handle_descriptor_base<
+            layer3::allocator<T, TSize>,
             true,
             true,
             true,
