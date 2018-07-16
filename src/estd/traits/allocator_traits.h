@@ -7,6 +7,45 @@
 
 namespace estd {
 
+namespace internal {
+
+// experimental feature, has_typedef (lifted from PGGCC-13)
+template<typename>
+struct has_typedef
+{
+    typedef void type;
+};
+
+}
+
+namespace experimental {
+
+// since < c++11 can't do static constexpr bool functions, we need an alternate
+// way to build up specializations based on attribute_traits.  Also has benefit
+// of not requiring every allocator to implement true/false on this entire feature
+// spread.  Not yet tested or in use as of this writing
+
+template<typename T, typename = void>
+struct has_stateful_tag : estd::false_type {};
+
+template<typename T>
+struct has_stateful_tag<T, typename estd::internal::has_typedef<typename T::is_stateful_tag_exp>::type> : estd::true_type {};
+
+template<typename T, typename = void>
+struct has_singular_tag : estd::false_type {};
+
+template<typename T>
+struct has_singular_tag<T, typename estd::internal::has_typedef<typename T::is_singular_tag_exp>::type> : estd::true_type {};
+
+template<typename T, typename = void>
+struct has_size_tag : estd::false_type {};
+
+template<typename T>
+struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag_exp>::type> : estd::true_type {};
+
+
+}
+
 template <class TAllocator>
 struct allocator_traits;
 
@@ -43,12 +82,18 @@ struct allocator_traits
     // or purely static
     static CONSTEXPR bool is_stateful() { return TAllocator::is_stateful(); }
 
+    static CONSTEXPR bool is_stateful_exp = experimental::has_stateful_tag<allocator_type>::value;
+
     // indicates whether the allocator_type is stateful (requiring an instance variable)
     // or purely static
     static CONSTEXPR bool is_singular() { return TAllocator::is_singular(); }
 
+    static CONSTEXPR bool is_singular_exp = experimental::has_singular_tag<allocator_type>::value;
+
     // indicates whether handles innately can be queried for their size
     static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
+
+    static CONSTEXPR bool has_size_exp = experimental::has_size_tag<allocator_type>::value;
 
     static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
 
