@@ -28,10 +28,17 @@ template<> struct char_traits<const char>
 namespace experimental {
 
 
+template <bool constant>
+struct is_const_tag_exp_base {};
+
+template <>
+struct is_const_tag_exp_base<true> { typedef void is_constant_tag_exp; };
+
+
 // explicit constant specified here because char_traits by convention doesn't
 // specify const
 template <class TSize, bool constant>
-struct buffer_policy
+struct buffer_policy : is_const_tag_exp_base<constant>
 {
     typedef TSize size_type;
 

@@ -377,7 +377,7 @@ class basic_string
                 CharT, Traits,
 // FIX: Not ready yet, because layer3::allocator constructor and class InitParam doesn't fully
 // initialize underlying allocator
-#ifdef _FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
                 estd::layer3::allocator<CharT>,
 #else
                 estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
@@ -386,7 +386,7 @@ class basic_string
 {
     typedef estd::basic_string<
             CharT, Traits,
-#ifdef _FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
             estd::layer3::allocator<CharT>,
 #else
             estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,

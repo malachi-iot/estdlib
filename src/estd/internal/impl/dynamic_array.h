@@ -164,9 +164,60 @@ public:
 
 // non-sized, this specialization is for when dynamic_array size is
 // always the same as capacity() (which is represented by handle_descriptor::size())
+// NOTE: This is null-terminated variety, which does extra evaluation of underlying
+//       data compared to our fixed-length buffer size.  May end up being identical to
+//       existing null-terminated dynamic_array_length handler
 // NOTE: Not yet used or tested
-template <class TAllocator, bool null_terminated>
-struct dynamic_array_length<TAllocator, null_terminated, true>
+template <class TAllocator>
+struct dynamic_array_length<TAllocator, true, true>
+{
+private:
+    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
+    typedef estd::handle_descriptor<TAllocator> handle_descriptor;
+
+public:
+    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_type::value_type value_type;
+
+    bool empty(const handle_descriptor& hd) const
+    {
+        // FIX: still resolving what size resolves to be for layer2 unbounded null terminated
+        // strings
+        bool empty = hd.clock(0) != 0;
+
+        hd.cunlock();
+
+        return empty;
+        //return hd.size() > 0;
+    }
+
+    size_type size(const handle_descriptor& hd) const
+    {
+        const value_type* s = &hd.clock();
+        const size_type max_size = hd.size();
+
+        size_type sz = strlen(s);
+
+        hd.cunlock();
+
+        if(max_size != 0 && sz >= max_size)
+        {
+            // TODO: null terminated should always be less than allocated size, so this
+            // indicates a runtime-discovered error
+        }
+
+        return sz;
+        //return hd.size();
+    }
+};
+
+
+// non-sized, this specialization is for when dynamic_array size is
+// always the same as capacity() (which is represented by handle_descriptor::size())
+// NOTE: Not yet used or tested
+template <class TAllocator>
+struct dynamic_array_length<TAllocator, false, true>
 {
 private:
     typedef typename std::remove_reference<TAllocator>::type allocator_type;
@@ -346,18 +397,24 @@ struct is_nulltag_present : estd::false_type {};
 template<typename T>
 struct is_nulltag_present<T, typename has_typedef<typename T::is_null_terminated_exp_tag>::type> : estd::true_type {};
 
+template<typename T, typename = void>
+struct is_consttag_present : estd::false_type {};
+
+template<typename T>
+struct is_consttag_present<T, typename has_typedef<typename T::is_constant_tag_exp>::type> : estd::true_type {};
+
 // FIX: Hard wired to null terminated !
 template <class TAllocator, class TPolicy>
 struct dynamic_array : public
         dynamic_array_base<
             typename std::remove_reference<TAllocator>::type,
             is_nulltag_present<TPolicy>::value,
-            false>
+            is_consttag_present<TPolicy>::value>
 {
     typedef dynamic_array_base<
         typename std::remove_reference<TAllocator>::type,
         is_nulltag_present<TPolicy>::value,
-        false> base_t;
+        is_consttag_present<TPolicy>::value> base_t;
     typedef typename base_t::allocator_type allocator_type;
 
     dynamic_array(allocator_type& alloc) : base_t(alloc) {}
