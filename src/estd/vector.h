@@ -116,9 +116,22 @@ public:
 namespace layer3 {
 
 template <class T>
-class vector : public estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T> >
+class vector : public estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer3::allocator<T>
+#else
+        estd::internal::single_fixedbuf_runtimesize_allocator<T>
+#endif
+        >
+
 {
-    typedef estd::vector<T, estd::internal::single_fixedbuf_runtimesize_allocator<T> > base_t;
+    typedef estd::vector<T,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        estd::layer3::allocator<T>
+#else
+        estd::internal::single_fixedbuf_runtimesize_allocator<T>
+#endif
+        > base_t;
     typedef typename base_t::impl_type impl_type;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename allocator_type::InitParam init_t;
