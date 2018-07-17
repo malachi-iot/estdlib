@@ -4,7 +4,11 @@
 #include "allocators/fixed.h"
 #include "internal/dynamic_array.h"
 #include "traits/string.h"
+#ifdef FEATURE_STD_ALGORITHM
 #include <algorithm> // for std::min
+#else
+#include "algorithm.h"
+#endif
 
 #include "span.h"
 

@@ -116,9 +116,13 @@ struct add_pointer<T(Args..., ...), true> {
 #endif
  
 } // namespace detail
- 
+
+// Have to disable this since so far our own std::is_function doesn't work
+#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
 struct add_pointer : detail::add_pointer<T, std::is_function<T>::value> {};
+#endif
+
 #endif
 
 template<class T>

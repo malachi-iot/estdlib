@@ -5,7 +5,6 @@
 #include "internal/runtime_array.h"
 #include "internal/impl/allocated_array.h"
 #include "allocators/fixed.h"
-#include <iterator>
 
 // TODO: utilize portions of std array here, if we can
 // Note that std::array maps directly to our layer1 approach

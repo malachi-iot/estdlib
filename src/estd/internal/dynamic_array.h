@@ -5,12 +5,15 @@
 #include "impl/dynamic_array.h"
 
 #include "../initializer_list.h"
-#ifdef FEATURE_CPP_INITIALIZER_LIST
+#ifdef FEATURE_STD_ALGORITHM
+// TODO: Document why we need to pull this in
 #include <algorithm>
 #endif
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef FEATURE_STD_UTILITY
 #include <utility> // for std::forward
+#else
+#include "../utility.h"
 #endif
 
 namespace estd {
