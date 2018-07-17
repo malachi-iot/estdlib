@@ -4,8 +4,8 @@
 #include "runtime_array.h"
 #include "impl/dynamic_array.h"
 
+#include "../initializer_list.h"
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-#include <initializer_list>
 #include <algorithm>
 #endif
 
