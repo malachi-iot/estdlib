@@ -3,9 +3,7 @@
 #include "platform.h"
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
-#ifdef FEATURE_STD_ALGORITHM
-#include <algorithm>
-#endif
+#include "../algorithm.h"
 
 namespace estd { namespace internal {
 
@@ -390,7 +388,7 @@ public:
         const value_type* raw = clock();
         const value_type* s = compare_to.clock();
 
-        bool result = std::equal(raw, raw + raw_size, s);
+        bool result = estd::equal(raw, raw + raw_size, s);
 
         cunlock();
         compare_to.cunlock();

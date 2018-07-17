@@ -4,12 +4,7 @@
 #include "allocators/fixed.h"
 #include "internal/dynamic_array.h"
 #include "traits/string.h"
-#ifdef FEATURE_STD_ALGORITHM
-#include <algorithm> // for std::min
-#else
 #include "algorithm.h"
-#endif
-
 #include "span.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
@@ -75,7 +70,7 @@ public:
         // NOTE: A bit tricky, if we don't use helper size_minus_index, template
         // resolution fails, presumably because the math operation implicitly
         // creates an int
-        size_type to_remove_count = std::min(count, size_minus_index);
+        size_type to_remove_count = estd::min(count, size_minus_index);
 
         base_t::_erase(index, to_remove_count);
 
