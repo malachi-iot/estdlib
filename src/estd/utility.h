@@ -2,8 +2,6 @@
 
 #include "type_traits.h"
 
-// TODO: Utilize stock-standard std version of this if it's available
-
 namespace estd {
 
 template<
@@ -26,10 +24,14 @@ typename estd::add_rvalue_reference<T>::type declval() */
 
 }
 
+#if defined(FEATURE_STD_UTILITY)
+// Utilize stock-standard std version of this if it's available
+#include <utility>
+#else
 // Normally we try to avoid direct substituting std namespace, but in circumstances
 // where std namespace is completely absent,
 // oft-used conventions need to be spliced in
-#if !defined(FEATURE_STD_UTILITY)
+
 namespace std {
 
 // more or less copy/pasted from GNU reference
@@ -45,8 +47,6 @@ constexpr _Tp&&
 forward(typename estd::remove_reference<_Tp>::type& __t) noexcept
 { return static_cast<_Tp&&>(__t); }
 
-}
-
 
 /**
    *  @brief  Forward an rvalue.
@@ -58,7 +58,7 @@ template<typename _Tp>
 constexpr _Tp&&
 forward(typename estd::remove_reference<_Tp>::type&& __t) noexcept
 {
-    static_assert(!std::is_lvalue_reference<_Tp>::value, "template argument"
+    static_assert(!estd::is_lvalue_reference<_Tp>::value, "template argument"
         " substituting _Tp is an lvalue reference type");
     return static_cast<_Tp&&>(__t);
 }
@@ -69,8 +69,29 @@ forward(typename estd::remove_reference<_Tp>::type&& __t) noexcept
    *  @return The parameter cast to an rvalue-reference to allow moving it.
   */
   template<typename _Tp>
-    constexpr typename std::remove_reference<_Tp>::type&&
+    constexpr typename estd::remove_reference<_Tp>::type&&
     move(_Tp&& __t) noexcept
-    { return static_cast<typename std::remove_reference<_Tp>::type&&>(__t); }
+    { return static_cast<typename estd::remove_reference<_Tp>::type&&>(__t); }
 
+
+// more or less copy/pasted from GNU reference
+
+ /**
+   *  @brief  Utility to simplify expressions used in unevaluated operands
+   *  @ingroup utilities
+   */
+
+template<typename _Tp, typename _Up = _Tp&&>
+    _Up
+    __declval(int);
+
+template<typename _Tp>
+    _Tp
+    __declval(long);
+
+template<typename _Tp>
+    auto declval() noexcept -> decltype(__declval<_Tp>(0));
+
+
+}
 #endif

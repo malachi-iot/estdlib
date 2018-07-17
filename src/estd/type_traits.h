@@ -2,6 +2,8 @@
 
 #include "internal/platform.h"
 
+#include "cstddef.h"
+
 #ifdef FEATURE_STD_TYPE_TRAITS
 #include <type_traits> // for std::is_function
 #endif
@@ -64,6 +66,13 @@ class enable_if_t : public enable_if<B, T>::type {};
 template<class T> struct is_const          : false_type {};
 template<class T> struct is_const<const T> : true_type {};
 
+template<class T> struct is_lvalue_reference     : false_type {};
+template<class T> struct is_lvalue_reference<T&> : true_type {};
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+template <class T> struct is_rvalue_reference      : false_type {};
+template <class T> struct is_rvalue_reference<T&&> : true_type {};
+#endif
 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
@@ -166,7 +175,7 @@ using add_const_t    = typename add_const<T>::type;
 
 // FIX: Have to do this because we didn't bring in our own is_function
 // however this cascade of non-constexpr may make it moot
-#if __cplusplus >= 201103L
+#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
 struct decay {
 private:
@@ -188,40 +197,17 @@ public:
 template< class... >
 using void_t = void;
 
+
+#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
 using decay_t = typename decay<T>::type;
+#endif
+
 #else
 #endif
 
 }
 
-// Normally we try to avoid direct substituting std namespace, but in circumstances
-// where std namespace is completely absent,
-// oft-used conventions need to be spliced in
-#if !defined(FEATURE_STD_UTILITY)
-namespace std {
-
-// more or less copy/pasted from GNU reference
-
- /**
-   *  @brief  Utility to simplify expressions used in unevaluated operands
-   *  @ingroup utilities
-   */
-
-template<typename _Tp, typename _Up = _Tp&&>
-    _Up
-    __declval(int);
-
-template<typename _Tp>
-    _Tp
-    __declval(long);
-
-template<typename _Tp>
-    auto declval() noexcept -> decltype(__declval<_Tp>(0));
-
-}
-#endif
-
-#if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
+#if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE) && defined(FEATURE_STD_TYPE_TRAITS)
 #include "internal/common_type.h"
 #endif
