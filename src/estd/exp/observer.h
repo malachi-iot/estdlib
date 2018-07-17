@@ -1,14 +1,7 @@
 #pragma once
 
 #include "../internal/platform.h"
-#include <type_traits>
-#include <functional>
-
-#include "../type_traits.h"
-
-#ifdef FEATURE_CPP_DECLTYPE
-#include <type_traits>
-#endif
+#include "../utility.h" // for declval + type_traits
 
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 
@@ -18,7 +11,7 @@ namespace internal {
 
 // FEATURE_ESTD_EXPLICIT_OBSERVER is helpful for enforcing < c++11 compliance or for
 // troubleshooting lost notifications (due to improper overloading of on_notify)
-#if defined(FEATURE_CPP_DECLVAL) && !defined(FEATURE_ESTD_EXPLICIT_OBSERVER)
+#if defined(FEATURE_CPP_DECLTYPE) && !defined(FEATURE_ESTD_EXPLICIT_OBSERVER)
 // https://stackoverflow.com/questions/23987925/using-sfinae-to-select-function-based-on-whether-a-particular-overload-of-a-func
 // Used so that on_notify calls are optional
 // fallback one for when we just can't match the on_notify

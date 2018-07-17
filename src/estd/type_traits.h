@@ -4,16 +4,7 @@
 
 #include "cstddef.h"
 
-#ifdef FEATURE_STD_TYPE_TRAITS
-#include <type_traits> // for std::is_function
-#endif
-
-#ifdef FEATURE_CPP_VARIADIC
-#include "internal/is_function.h"
-#endif
-
 // mainly to fill in gaps where pre-C++03 is used
-// FIX: Need to bring in is_function also
 namespace estd {
 
 template<class T, T v>
@@ -31,6 +22,10 @@ struct integral_constant {
 
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
+
+#ifdef FEATURE_CPP_VARIADIC
+#include "internal/is_function.h"
+#endif
 
 // lifted from http://en.cppreference.com/w/cpp/types/conditional
 template<bool B, class T, class F>
@@ -126,11 +121,8 @@ struct add_pointer<T(Args..., ...), true> {
  
 } // namespace detail
 
-// Have to disable this since so far our own std::is_function doesn't work
-#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
-struct add_pointer : detail::add_pointer<T, std::is_function<T>::value> {};
-#endif
+struct add_pointer : detail::add_pointer<T, estd::is_function<T>::value> {};
 
 #endif
 
@@ -168,14 +160,11 @@ enum class endian
 };
 #endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATEX
+#ifdef FEATURE_CPP_ALIASTEMPLATE
 template< class T >
 using add_const_t    = typename add_const<T>::type;
 #endif
 
-// FIX: Have to do this because we didn't bring in our own is_function
-// however this cascade of non-constexpr may make it moot
-#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
 struct decay {
 private:
@@ -185,29 +174,24 @@ public:
         estd::is_array<U>::value,
         typename estd::remove_extent<U>::type*,
         typename estd::conditional<
-            std::is_function<U>::value,
+            estd::is_function<U>::value,
             typename estd::add_pointer<U>::type,
             typename estd::remove_cv<U>::type
         >::type
     >::type type;
 };
-#endif
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template< class... >
 using void_t = void;
 
 
-#ifdef FEATURE_STD_TYPE_TRAITS
 template< class T >
 using decay_t = typename decay<T>::type;
 #endif
 
-#else
-#endif
-
 }
 
-#if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE) && defined(FEATURE_STD_TYPE_TRAITS)
+#if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
 #include "internal/common_type.h"
 #endif
