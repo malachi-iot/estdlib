@@ -2,6 +2,14 @@
 
 #include "internal/platform.h"
 
+#ifdef FEATURE_STD_TYPE_TRAITS
+#include <type_traits> // for std::is_function
+#endif
+
+#ifdef FEATURE_CPP_VARIADIC
+#include "internal/is_function.h"
+#endif
+
 // mainly to fill in gaps where pre-C++03 is used
 // FIX: Need to bring in is_function also
 namespace estd {
@@ -87,7 +95,7 @@ template< class T> struct add_volatile { typedef volatile T type; };
 namespace detail {
 template< class T, bool is_function_type = false >
 struct add_pointer {
-    using type = typename std::remove_reference<T>::type*;
+    using type = typename estd::remove_reference<T>::type*;
 };
  
 template< class T >

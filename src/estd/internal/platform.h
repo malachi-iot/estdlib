@@ -55,10 +55,11 @@
 
 // some platforms have c++11 but don't have STL headers.  Explicitly state when we *do*
 // have them
-#if !defined(ARDUINO) && __cplusplus > 201103L
+#if !defined(ARDUINO) && __cplusplus >= 201103L
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
 #define FEATURE_STD_CASSERT
 #define FEATURE_STD_INITIALIZER_LIST
+#define FEATURE_STD_TYPE_TRAITS
 #define FEATURE_STD_UTILITY
 #endif
