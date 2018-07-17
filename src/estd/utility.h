@@ -27,7 +27,7 @@ typename estd::add_rvalue_reference<T>::type declval() */
 #if defined(FEATURE_STD_UTILITY)
 // Utilize stock-standard std version of this if it's available
 #include <utility>
-#else
+#elif defined(FEATURE_CPP_MOVESEMANTIC) && defined(FEATURE_CPP_DECLTYPE)
 // Normally we try to avoid direct substituting std namespace, but in circumstances
 // where std namespace is completely absent,
 // oft-used conventions need to be spliced in
