@@ -1,13 +1,12 @@
 #pragma once
 
 #include "../type_traits.h"
-#ifdef FEATURE_STD_UTILITY
-#include <utility>
-#include <memory> // for std::allocator
-#else
 #include "../utility.h"
+#ifdef FEATURE_STD_MEMORY
+#include <memory> // for std::allocator
 #endif
 #include <stdint.h> // for uint8_t and friends
+#include "../internal/deduce_fixed_size.h"
 
 namespace estd {
 
@@ -28,6 +27,13 @@ namespace experimental {
 // way to build up specializations based on attribute_traits.  Also has benefit
 // of not requiring every allocator to implement true/false on this entire feature
 // spread.  Not yet tested or in use as of this writing
+
+template<typename T, typename = void>
+struct has_locking_tag : estd::false_type {};
+
+template<typename T>
+struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag_exp>::type> : estd::true_type {};
+
 
 template<typename T, typename = void>
 struct has_stateful_tag : estd::false_type {};
@@ -159,34 +165,5 @@ struct allocator_traits
 #endif
 };
 
-namespace internal {
-
-// lifted from https://stackoverflow.com/questions/9510514/integer-range-based-template-specialisation
-template<bool> struct Range;
-
-template<size_t val, typename = Range<true> >
-class deduce_fixed_size_t
-{};
-
-template<size_t val>
-struct deduce_fixed_size_t<val, Range<(0 <= val && val <= 255)> >
-{
-    typedef uint8_t size_type;
-};
-
-template<size_t val>
-struct deduce_fixed_size_t<val, Range<(255 < val && val <= 0xFFFF)> >
-{
-    typedef uint16_t size_type;
-};
-
-template<size_t val>
-struct deduce_fixed_size_t<val, Range<(0xFFFF < val && val <= 0xFFFFFFFF)> >
-{
-    typedef uint32_t size_type;
-};
-
-
-}
 
 }

@@ -54,7 +54,7 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-        )
+        estd/internal/deduce_fixed_size.h)
 
 add_library(estd_lib ${SOURCE_FILES})
 
