@@ -183,6 +183,33 @@ using decay_t = typename decay<T>::type;
 
 }
 
+// Normally we try to avoid direct substituting std namespace, but in circumstances
+// where std namespace is completely absent,
+// oft-used conventions need to be spliced in
+#if !defined(FEATURE_STD_UTILITY)
+namespace std {
+
+// more or less copy/pasted from GNU reference
+
+ /**
+   *  @brief  Utility to simplify expressions used in unevaluated operands
+   *  @ingroup utilities
+   */
+
+template<typename _Tp, typename _Up = _Tp&&>
+    _Up
+    __declval(int);
+
+template<typename _Tp>
+    _Tp
+    __declval(long);
+
+template<typename _Tp>
+    auto declval() noexcept -> decltype(__declval<_Tp>(0));
+
+}
+#endif
+
 #if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
 #include "internal/common_type.h"
 #endif

@@ -3,7 +3,9 @@
 #include "platform.h"
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
+#ifdef FEATURE_STD_ALGORITHM
 #include <algorithm>
+#endif
 
 namespace estd { namespace internal {
 

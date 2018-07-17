@@ -1,6 +1,11 @@
 #pragma once
 
+#include "platform.h"
+#ifdef FEATURE_STD_CSTDDEF
 #include <cstddef> // for size_t
+#else
+#include <stddef.h>
+#endif
 #include "impl/handle_desc.h"
 
 namespace estd { namespace internal {

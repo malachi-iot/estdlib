@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../internal/impl/handle_desc.h"
+#ifdef FEATURE_STD_CSTDDEF
 #include <cassert>
+#endif
 
 namespace estd { namespace internal {
 

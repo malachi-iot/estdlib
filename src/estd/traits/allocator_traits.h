@@ -1,8 +1,12 @@
 #pragma once
 
-#include <utility> // for std::forward and std::size_t
-#include <memory> // for std::allocator
 #include "../type_traits.h"
+#ifdef FEATURE_STD_UTILITY
+#include <utility>
+#include <memory> // for std::allocator
+#else
+#include "../utility.h"
+#endif
 #include <stdint.h> // for uint8_t and friends
 
 namespace estd {

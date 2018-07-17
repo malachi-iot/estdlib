@@ -1,0 +1,19 @@
+{
+    "name": "estdlib",
+    "keywords": "std, STL",
+    "description": "embedded-specific flavor of C++ std library",
+    "repository":
+    {
+        "type": "git",
+        "url": "https://github.com/malachi-iot/estdlib.git"
+    },
+    "authors":
+    [
+      {
+        "name": "Malachi Burke",
+        "maintainer": true
+      }
+    ],
+    "version": "0.1.0",
+    "platforms": "*"
+}
