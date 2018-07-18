@@ -31,8 +31,18 @@ TEST_CASE("allocator tests")
 {
     SECTION("fixed allocator handle descriptor")
     {
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        typedef layer1::allocator<int, 10> allocator_t;
+#else
         typedef single_fixedbuf_allocator<int, 10> allocator_t;
+#endif
 
+        REQUIRE(sizeof(allocator_t) == sizeof(int) * 10);
+
+        // at first glance, it may seem odd to have an inline/value
+        // instead of a reference for handle_descriptor.  However, this
+        // is typical of how std containers track their allocators, and
+        // fitting as an underpinning of our allocated_array
         SECTION("inline")
         {
             handle_descriptor<allocator_t> d;
@@ -40,6 +50,9 @@ TEST_CASE("allocator tests")
             int szof = sizeof(d);
 
             int size = d.size();
+
+            REQUIRE(szof == size * sizeof(int));
+
             //d.reallocate(5);
             int* val_array = &d.lock();
         }

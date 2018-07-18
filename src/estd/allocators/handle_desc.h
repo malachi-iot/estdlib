@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../internal/impl/handle_desc.h"
-#ifdef FEATURE_STD_CSTDDEF
+#ifdef FEATURE_STD_CASSERT
 #include <cassert>
 #endif
 

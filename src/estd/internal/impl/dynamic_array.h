@@ -249,14 +249,17 @@ public:
 // allocated size or not (underlying size() call)
 template <class TAllocator, bool null_terminated, bool size_equals_capacity>
 class dynamic_array_base :
-        public estd::handle_descriptor<TAllocator>,
+        public estd::internal::impl::allocated_array<TAllocator>,
         dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
 {
-    typedef estd::handle_descriptor<TAllocator> base_t;
+    typedef estd::internal::impl::allocated_array<TAllocator> base_t;
     typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
 
 public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
+
+    // this works better with < c++11
+    static CONSTEXPR bool uses_termination_exp = null_terminated;
 
     typedef typename base_t::allocator_type allocator_type;
     // NOTE: Necessary to do allocator_traits here to disambiguate all the ones from
@@ -265,7 +268,7 @@ public:
     typedef typename base_t::allocator_traits allocator_traits;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
-    typedef typename allocator_traits::handle_with_offset handle_with_offset;
+    //typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     // account for null-termination during a max_size request
     size_type max_size() const
@@ -278,13 +281,13 @@ public:
     // (USED within ALLOCATED)
     size_type capacity() const { return base_t::size(); }
 
-
+    /*
     // Helper for old dynamic_array code.  New one I'm thinking caller
     // can shoulder this burden
     handle_with_offset offset(size_type pos) const
     {
         return base_t::get_allocator().offset(base_t::handle(), pos);
-    }
+    } */
 
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
     // 'used' size within that allocation.  For this variety, we are null terminated
