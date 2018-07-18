@@ -134,6 +134,11 @@ struct allocator_traits< ::std::allocator<T> >
 
     static CONSTEXPR bool is_singular() { return false; }
 
+    // SFINAE = eventually we can phase out this entire specialization for std::allocator
+    static CONSTEXPR bool is_stateful_exp = false;
+    static CONSTEXPR bool has_size_exp = false;
+    static CONSTEXPR bool is_singular_exp = false;
+
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 
     static value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)

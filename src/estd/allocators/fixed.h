@@ -51,6 +51,9 @@ public:
 
     static CONSTEXPR bool has_size() { return true; }
 
+    typedef void has_size_tag_exp;
+    typedef void is_singular_tag_exp;
+    typedef void is_stateful_tag_exp;
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)
     {

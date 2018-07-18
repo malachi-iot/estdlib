@@ -1,5 +1,8 @@
 #pragma once
 
+// FIX: eventually do this as <estd/opts.h> so users can override it
+#include "opts.h"
+
 // TODO: consider utilizing
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
 // http://en.cppreference.com/w/cpp/experimental

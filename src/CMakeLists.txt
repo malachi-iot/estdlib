@@ -24,6 +24,7 @@ set(SOURCE_FILES
         estd/internal/handle_with_offset.h
         estd/internal/is_function.h
         estd/internal/list_node.h
+        estd/internal/opts.h
         estd/internal/platform.h
         estd/internal/priority_queue.h
         estd/internal/reverse_list.h

@@ -201,6 +201,36 @@ public:
 
 }
 
+// Mainly done to be pre c++11 friendly, but could eventually be a cleaner architecutre also
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+template <class TAllocator,
+           class TTraits = allocator_traits<typename remove_reference<TAllocator>::type> >
+class handle_descriptor :
+         public internal::handle_descriptor_base<
+             TAllocator,
+             TTraits::is_stateful_exp,
+             TTraits::has_size_exp,
+             TTraits::is_singular_exp,
+             true>
+{
+     typedef internal::handle_descriptor_base<
+             TAllocator,
+             TTraits::is_stateful_exp,
+             TTraits::has_size_exp,
+             TTraits::is_singular_exp,
+             true> base_t;
+
+public:
+     handle_descriptor() : base_t(TTraits::invalid()) {}
+
+     template <class TAllocatorParameter>
+     handle_descriptor(TAllocatorParameter& p) : base_t(p, TTraits::invalid()) {}
+
+     typedef typename base_t::allocator_traits allocator_traits;
+     typedef typename base_t::size_type size_type;
+
+};
+#else
 #ifdef FEATURE_CPP_CONSTEXPR
 // NOTE: Pretty sure this isn't < C++11 friendly, so be sure to do explicit specializations
 // for particular TAllocator varieties - will have to work out TAllocator& for those as well
@@ -237,4 +267,5 @@ template <class TAllocator,
 class handle_descriptor;
 #endif
 
+#endif
 }
