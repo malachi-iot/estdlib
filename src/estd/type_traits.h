@@ -165,6 +165,8 @@ template< class T >
 using add_const_t    = typename add_const<T>::type;
 #endif
 
+// because is_function requires variadic
+#ifdef FEATURE_CPP_VARIADIC
 template< class T >
 struct decay {
 private:
@@ -180,6 +182,7 @@ public:
         >::type
     >::type type;
 };
+#endif
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template< class... >

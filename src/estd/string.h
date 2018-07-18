@@ -271,7 +271,17 @@ template <size_t N>
 using string = basic_string<char, N>;
 #else
 template <size_t N>
-class string : public basic_string<char, N> { };
+class string : public basic_string<char, N>
+{
+    typedef basic_string<char, N> base_t;
+
+public:
+    string() {}
+
+    string(const char* s) : base_t(s)
+    {
+    }
+};
 #endif
 
 }

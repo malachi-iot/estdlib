@@ -6,6 +6,8 @@ using namespace std;
 
 int main()
 {
-    cout << "Hello World!" << endl;
+    estd::layer1::string<20> test_str = "hi2u";
+
+    cout << "Hello World: " << test_str << endl;
     return 0;
 }

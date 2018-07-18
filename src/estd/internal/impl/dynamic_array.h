@@ -365,7 +365,7 @@ public:
 
 
 
-
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 // runtime (layer3-ish) version, no policy (void) -
 // hard wired to no null termination
 // currently *also* hard wired to size != capacity, but we'll likely want that to change for const_string
@@ -380,6 +380,7 @@ public:
     template <class TInitParam>
     dynamic_array(const TInitParam& p) : base_t(p) {}
 };
+#endif
 
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
@@ -428,7 +429,7 @@ class dynamic_array
 {
 public:
     // default implementation is 'full fat' to handle all scenarios
-    typedef typename std::remove_reference<TAllocator>::type allocator_type;
+    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
     typedef estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_type::value_type value_type;
 

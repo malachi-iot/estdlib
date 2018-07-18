@@ -90,8 +90,10 @@ public:
 
     handle_type reallocate(handle_type h, size_t len)
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
         // Not supported operation
         assert(false);
+#endif
 
         return h;
     }
@@ -286,7 +288,7 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 // FIX: Very nasty explicit specializations for handle_descriptor on various canned fixed allocators
 //      plan to revise this using either typedef-tags or CONSTEXPR bool (not bool functions) so that
 //      we can unify c++11 and pre-c++11 approach
-#ifndef FEATURE_CPP_CONSTEXPR
+#if !defined(FEATURE_CPP_CONSTEXPR) && !defined(FEATURE_ESTD_STRICT_DYNAMIC_ARRAY)
 template <class T, size_t N, class TBuffer, class TSize, class TTraits>
 struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>, TTraits >
         : internal::handle_descriptor_base<

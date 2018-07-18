@@ -110,7 +110,6 @@ public:
         base_t::size(0);
     }
 };
-#endif
 
 
 // runtime (layer3-ish) version
@@ -177,6 +176,7 @@ public:
     {
     }
 };
+#endif
 
 
 
