@@ -135,8 +135,12 @@ public:
     // TODO: Move this accessor typedef out to helper, who can lean slightly less on
     // constexpr to get the job done
 #ifdef FEATURE_CPP_CONSTEXPR
-    typedef typename std::conditional<
+    typedef typename estd::conditional<
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
                 allocator_traits::is_stateful() && allocator_traits::is_locking(),
+#else
+                allocator_traits::is_stateful_exp && allocator_traits::is_locking_exp,
+#endif
                 estd::internal::accessor<allocator_type>,
                 estd::internal::accessor_stateless<allocator_type> >::type
                 accessor;

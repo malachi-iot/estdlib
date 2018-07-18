@@ -51,6 +51,7 @@ public:
 
     static CONSTEXPR bool has_size() { return true; }
 
+    typedef void is_locking_tag_exp;
     typedef void has_size_tag_exp;
     typedef void is_singular_tag_exp;
     typedef void is_stateful_tag_exp;

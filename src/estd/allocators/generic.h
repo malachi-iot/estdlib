@@ -126,6 +126,7 @@ struct allocator_traits< ::std::allocator<T> >
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_stateful() { return false; }
 
     static CONSTEXPR bool is_locking() { return false; }
@@ -133,11 +134,13 @@ struct allocator_traits< ::std::allocator<T> >
     static CONSTEXPR bool has_size() { return false; }
 
     static CONSTEXPR bool is_singular() { return false; }
+#endif
 
     // SFINAE = eventually we can phase out this entire specialization for std::allocator
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool has_size_exp = false;
     static CONSTEXPR bool is_singular_exp = false;
+    static CONSTEXPR bool is_locking_exp = false;
 
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 

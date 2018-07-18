@@ -54,6 +54,26 @@ template<typename T>
 struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag_exp>::type> : estd::true_type {};
 
 
+// FIX: eventually use something a bit like our Range<bool> trick in the fixed_size_t finder
+template <class TAllocator, bool is_locking>
+struct locking_allocator_traits;
+
+// interact with actual underlying locking allocator
+template <class TAllocator>
+struct locking_allocator_traits<TAllocator, true>
+{
+
+};
+
+
+// shim for no locking activities
+template <class TAllocator>
+struct locking_allocator_traits<TAllocator, false>
+{
+
+};
+
+
 }
 
 template <class TAllocator>
@@ -65,6 +85,10 @@ struct allocator_traits;
 // NOTE: I erroneously made our burgeouning custom allocators not-value_type aware
 template <class TAllocator>
 struct allocator_traits
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        :
+        experimental::locking_allocator_traits<TAllocator, experimental::has_locking_tag<TAllocator>::value >
+#endif
 {
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
@@ -86,22 +110,27 @@ struct allocator_traits
     typedef typename TAllocator::lock_counter           lock_counter;
 
     static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
+
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return allocator_type::is_locking(); }
 
     // indicates whether the allocator_type is stateful (requiring an instance variable)
     // or purely static
     static CONSTEXPR bool is_stateful() { return TAllocator::is_stateful(); }
 
-    static CONSTEXPR bool is_stateful_exp = experimental::has_stateful_tag<allocator_type>::value;
-
     // indicates whether the allocator_type is stateful (requiring an instance variable)
     // or purely static
     static CONSTEXPR bool is_singular() { return TAllocator::is_singular(); }
 
-    static CONSTEXPR bool is_singular_exp = experimental::has_singular_tag<allocator_type>::value;
-
     // indicates whether handles innately can be queried for their size
     static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
+#endif
+
+    static CONSTEXPR bool is_locking_exp = experimental::has_locking_tag<allocator_type>::value;
+
+    static CONSTEXPR bool is_stateful_exp = experimental::has_stateful_tag<allocator_type>::value;
+
+    static CONSTEXPR bool is_singular_exp = experimental::has_singular_tag<allocator_type>::value;
 
     static CONSTEXPR bool has_size_exp = experimental::has_size_tag<allocator_type>::value;
 
