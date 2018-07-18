@@ -4,7 +4,7 @@ namespace estd {
 
 template <class CharT,
           class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
-          class StringTraits = experimental::sized_string_traits<Traits, int16_t, true> >
+          class StringTraits = experimental::sized_string_policy<Traits, int16_t, true> >
 class basic_string_view :
         public basic_string<
             const CharT,

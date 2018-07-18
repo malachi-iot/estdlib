@@ -39,6 +39,8 @@ set(SOURCE_FILES
         estd/map.h
         estd/memory.h
 
+        estd/policy/string.h
+
         estd/port/chrono.h
         estd/port/chrono.hpp
         estd/port/freertos/chrono.h

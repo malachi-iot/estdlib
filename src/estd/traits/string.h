@@ -6,6 +6,8 @@
 
 namespace estd {
 
+// TODO: Gonna need stand-in std::char_traits for Arduino,
+//       -or- commit completely to our very own estd::char_traits
 /*
 template<class CharT> struct char_traits;
 
@@ -56,16 +58,23 @@ template <class TCharTraits, class TSize = int16_t, bool constant = false>
 struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, constant>
 {
     typedef void is_null_terminated_exp_tag;
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_null_terminated() { return true; }
+#endif
 
     static CONSTEXPR bool is_null_termination(const char& value) { return value == 0; }
 };
 
 
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
-struct sized_string_traits  : public string_policy<TCharTraits, TSize, constant>
+struct sized_string_policy  : public string_policy<TCharTraits, TSize, constant>
 {
+    // NOTE: As of this writing, this tag is not used
+    typedef void is_explicitly_sized_tag_exp;
+
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_null_terminated() { return false; }
+#endif
 };
 
 
@@ -143,7 +152,7 @@ public:
 template <class T, class TCharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_runtimesize_allocator<const T, size_t>,
-        experimental::sized_string_traits<TCharTraits, int16_t, is_const> >
+        experimental::sized_string_policy<TCharTraits, int16_t, is_const> >
         : public estd::internal::handle_descriptor_base<
             single_fixedbuf_runtimesize_allocator<const T, size_t>,
             true, true, true, true>

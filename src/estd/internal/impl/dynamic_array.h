@@ -215,7 +215,6 @@ public:
 
 // non-sized, this specialization is for when dynamic_array size is
 // always the same as capacity() (which is represented by handle_descriptor::size())
-// NOTE: Not yet used or tested
 template <class TAllocator>
 struct dynamic_array_length<TAllocator, false, true>
 {
@@ -273,7 +272,8 @@ public:
     // account for null-termination during a max_size request
     size_type max_size() const
     {
-        return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
+        return base_t::max_size() - (null_terminated ? 1 : 0);
+        //return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
     }
 
 

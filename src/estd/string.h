@@ -4,6 +4,7 @@
 #include "allocators/fixed.h"
 #include "internal/dynamic_array.h"
 #include "traits/string.h"
+#include "policy/string.h"
 #include "algorithm.h"
 #include "span.h"
 
@@ -14,6 +15,7 @@
 namespace estd {
 
 // prototype
+// FIX: Probably can remove this, since we don't specialize on core basic_string itself
 template<
     class CharT,
     class Traits,
@@ -35,7 +37,7 @@ template<
     class CharT,
     class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
     class Allocator = std::allocator<CharT>,
-    class StringPolicy = experimental::string_policy<Traits>
+    class StringPolicy = experimental::sized_string_policy<Traits>
 > class basic_string :
         public internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> >
 {
@@ -213,7 +215,7 @@ namespace layer1 {
 template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT >,
         class StringPolicy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type
+                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type
                 >
 class basic_string
         : public estd::basic_string<
@@ -294,7 +296,7 @@ template<class CharT, size_t N, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
          class StringPolicy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type >
+                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
 class basic_string
         : public estd::basic_string<
                 CharT,
@@ -380,7 +382,7 @@ template<class CharT, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
          class StringTraits = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_traits<Traits, int16_t, estd::is_const<CharT>::value> >::type>
+                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,

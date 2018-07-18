@@ -289,6 +289,7 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 // FIX: Very nasty explicit specializations for handle_descriptor on various canned fixed allocators
 //      plan to revise this using either typedef-tags or CONSTEXPR bool (not bool functions) so that
 //      we can unify c++11 and pre-c++11 approach
+// when FEATURE_ESTD_STRICT_DYNAMIC_ARRAY is in play, these are not necessary
 #if !defined(FEATURE_CPP_CONSTEXPR) && !defined(FEATURE_ESTD_STRICT_DYNAMIC_ARRAY)
 template <class T, size_t N, class TBuffer, class TSize, class TTraits>
 struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>, TTraits >
