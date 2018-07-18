@@ -4,17 +4,28 @@ namespace estd {
 
 template <class CharT,
           class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
-          class StringTraits = experimental::sized_string_policy<Traits, int16_t, true> >
+          // NOTE: Because this is marked as a 'const' string policy, resize-ish operations
+          // are not as available (thus affecting remove_suffix).  Might be prudent to make
+          // a special 'view' policy which is mostly const, but permits changes to size/pointer
+          class Policy = experimental::sized_string_policy<Traits, int16_t, true> >
 class basic_string_view :
         public basic_string<
             const CharT,
             Traits,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+            layer3::allocator<const CharT, size_t>,
+#else
             internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
-            StringTraits>
+#endif
+            Policy>
 {
     typedef basic_string<const CharT, Traits,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        layer3::allocator<const CharT, size_t>,
+#else
         internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
-        StringTraits> base_t;
+#endif
+        Policy> base_t;
 
     typedef typename base_t::size_type size_type;
     typedef typename base_t::allocator_type allocator_type;
