@@ -73,6 +73,7 @@ struct nothing_allocator
     }
 };
 
+#ifdef FEATURE_STD_MEMORY
 
 // FIX: stand-in which has our additional locking/handle machanisms
 // eventually have a proper one of these living in memory.h
@@ -153,5 +154,6 @@ struct allocator_traits< ::std::allocator<T> >
 };
 #endif
 
+#endif
 
 }

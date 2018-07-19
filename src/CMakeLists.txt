@@ -51,6 +51,7 @@ set(SOURCE_FILES
         estd/span.h
         estd/string.h
         estd/string_view.h
+        estd/traits/char_traits.h
         estd/traits/list_node.h
         estd/traits/allocator_traits.h
         estd/traits/string.h

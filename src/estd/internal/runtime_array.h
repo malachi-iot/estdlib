@@ -4,6 +4,8 @@
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
 #include "../algorithm.h"
+#include "../initializer_list.h"
+#include "../iterator.h"
 
 namespace estd { namespace internal {
 
@@ -73,7 +75,7 @@ protected:
     {
         pointer p = lock();
 
-        std::copy(initlist.begin(), initlist.end(), p);
+        estd::copy(initlist.begin(), initlist.end(), p);
 
         m_impl.size(initlist.size());
 

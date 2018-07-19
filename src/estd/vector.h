@@ -7,7 +7,11 @@
 
 namespace estd {
 
-template <class T, class Allocator = std::allocator<T > >
+template <class T, class Allocator
+#ifdef FEATURE_STD_MEMORY
+          = std::allocator<T >
+#endif
+          >
 class vector : public internal::dynamic_array<internal::impl::dynamic_array<Allocator, void > >
 {
 public:

@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "allocators/fixed.h"
 #include "internal/dynamic_array.h"
+#include "traits/char_traits.h"
 #include "traits/string.h"
 #include "policy/string.h"
 #include "algorithm.h"

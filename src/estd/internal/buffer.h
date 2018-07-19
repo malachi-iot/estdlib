@@ -49,7 +49,7 @@ public:
     mutable_buffer(TPtr data) : base_t(data) {}
 
     // NOTE: sorta works, but uint8_t* data constructor always wins if this fails
-    template <size_t N, typename = typename std::enable_if<N >= size>::type>
+    template <size_t N, typename = typename estd::enable_if<N >= size>::type>
     mutable_buffer(uint8_t (&data) [N]) : base_t(data) {}
 #else
     mutable_buffer(uint8_t* data) : base_t(data) {}

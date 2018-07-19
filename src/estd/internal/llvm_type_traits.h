@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 // just for tooltips/really type_traits in fact includes llvm_type_traits
 #include "../type_traits.h"
@@ -116,11 +116,12 @@ typedef
     __type_list<signed int,
     __type_list<signed long,
     __type_list<signed long long,
-#ifndef _LIBCPP_HAS_NO_INT128
+#ifdef FEATURE_CPP_INT128
     __type_list<__int128_t,
 #endif
     __nat
-#ifndef _LIBCPP_HAS_NO_INT128
+// old flag was !_LIBCPP_HAS_NO_INT128
+#ifdef FEATURE_CPP_INT128
     >
 #endif
     > > > > > __signed_types;
@@ -166,7 +167,7 @@ template <>          struct __libcpp_is_integral<long>               : public tr
 template <>          struct __libcpp_is_integral<unsigned long>      : public true_type {};
 template <>          struct __libcpp_is_integral<long long>          : public true_type {};
 template <>          struct __libcpp_is_integral<unsigned long long> : public true_type {};
-#ifndef _LIBCPP_HAS_NO_INT128
+#ifdef FEATURE_CPP_INT128
 template <>          struct __libcpp_is_integral<__int128_t>         : public true_type {};
 template <>          struct __libcpp_is_integral<__uint128_t>        : public true_type {};
 #endif

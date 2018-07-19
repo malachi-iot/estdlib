@@ -5,6 +5,10 @@
 #include "../internal/handle_with_offset.h"
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
+#include "../initializer_list.h"
+#ifdef FEATURE_CPP_STATIC_ASSERT
+#include <assert.h>
+#endif
 
 namespace estd {
 
