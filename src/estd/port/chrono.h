@@ -48,6 +48,13 @@ public:
 
     CONSTEXPR rep count() const { return ticks; }
 
+    CONSTEXPR duration()
+#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
+        = default;
+#else
+    {}
+#endif
+
     template <class Rep2>
     CONSTEXPR explicit duration(const Rep2& r) : ticks(r)
     {
@@ -135,7 +142,16 @@ public:
     typedef typename duration::rep rep;
     typedef typename duration::period period;
 
-    time_point(const Duration& duration) : m_time_since_epoch(duration) {}
+    // NOTE: *may* deviate from spec.  Leaves m_time_since_epoch undefined
+    // spec, to my ears, is unclear:
+    //   "Default constructor, creates a time_point with a value of Clock's epoch."
+    // this implies a 'now' operation, but I am not sure.  Since we are targetting embedded,
+    // less is more, so swing vote goes to doing nothing here.  This turns out to be helpful,
+    // now one can leave a time_point as a global variable without worring about startup-time
+    // init issues
+    CONSTEXPR time_point() {}
+
+    CONSTEXPR explicit time_point(const Duration& duration) : m_time_since_epoch(duration) {}
 
     // NOTE: Compiles, but not tested
     template <class TDuration2>

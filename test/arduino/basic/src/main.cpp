@@ -3,14 +3,25 @@
 #include <estd/string.h>
 #include <estd/chrono.h>
 
+// NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
+#define TEST_CHRONO
+
 using namespace estd::chrono;
+
+steady_clock::time_point start;
+uint32_t start_ms;
 
 void setup() 
 {
+#ifdef TEST_CHRONO
     // arduini millis() is easy enough, but chrono compatibility is helpful for
     // assisting libraries
-    //steady_clock::time_point time = steady_clock::now();
+    start = steady_clock::now();
+#else
+    start_ms = millis();
+#endif
 
+    // interestingly, code size varies along with this buffer size
     estd::layer1::string<128> buffer;
 
     buffer += "hello";
@@ -24,7 +35,15 @@ void setup()
 
 void loop() 
 {
-    steady_clock::time_point time = steady_clock::now();
+#ifdef TEST_CHRONO
+    steady_clock::time_point now = steady_clock::now();
 
-    //auto count = duration_cast<milliseconds>(time - first).count();
+    auto count = duration_cast<milliseconds>(now - start).count();
+#else
+    uint32_t now_ms = millis();
+
+    auto count = now_ms - start_ms;
+#endif
+
+    Serial.println(count);
 }

@@ -21,6 +21,11 @@ public:
 
 TEST_CASE("chrono tests")
 {
+    SECTION("default time_point")
+    {
+        fake_clock::time_point default_time_point;
+
+    }
     SECTION("basic 1 second test")
     {
         estd::chrono::seconds sec(1);
