@@ -177,6 +177,11 @@ private:
     size_type m_buffer_size;
 
 protected:
+    void set_size(size_type size)
+    {
+        m_buffer_size = size;
+    }
+
     explicit single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
         base_t(buffer),
         m_buffer_size(size)
@@ -263,10 +268,16 @@ struct allocator : internal::single_fixedbuf_allocator<T, len, T*>
 
 namespace layer3 {
 
-template <class T, class TSize = std::size_t>
+// malleable is a special edge case flag which indicates that initial buffer* can
+// move and size can be adjusted.  Generally speaking you don't want this, but
+// special cases like basic_string_view benefit from this adjustability
+template <class T, class TSize = std::size_t, bool malleable = false>
 struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 {
     typedef internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::handle_with_offset handle_with_offset;
+    typedef typename base_t::size_type size_type;
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     allocator(std::initializer_list<T> initlist) : base_t(initlist)
@@ -282,6 +293,21 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 
     template <class TAllocatorParam>
     allocator(const TAllocatorParam& p) : base_t(p) {}
+
+    // Experimental - malleable allocator
+    // TODO: turn these API on or off depending on malleable flag
+
+    // can adjust positively or negatively (operates like pointer math and/or handle_with_offset)
+    void adjust_offset_exp(handle_type h, size_type offset)
+    {
+        base_t::buffer += offset;
+        base_t::set_size(base_t::size(h) - offset);
+    }
+
+    void set_size_exp(handle_type h, size_type size)
+    {
+        base_t::set_size(size);
+    }
 };
 
 }

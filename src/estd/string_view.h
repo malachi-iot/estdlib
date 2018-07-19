@@ -13,7 +13,7 @@ class basic_string_view :
             const CharT,
             Traits,
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-            layer3::allocator<const CharT, size_t>,
+            layer3::allocator<const CharT, typename Policy::size_type>,
 #else
             internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
 #endif
@@ -21,17 +21,18 @@ class basic_string_view :
 {
     typedef basic_string<const CharT, Traits,
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        layer3::allocator<const CharT, size_t>,
+        layer3::allocator<const CharT, typename Policy::size_type>,
 #else
         internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
 #endif
         Policy> base_t;
 
-    typedef typename base_t::size_type size_type;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename allocator_type::InitParam init_param_t;
 
 public:
+    typedef typename base_t::size_type size_type;
+
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
     basic_string_view() : base_t(init_param_t(NULLPTR, 0)) {}
@@ -60,6 +61,7 @@ public:
 #endif
 
 
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     void remove_suffix(size_type n)
     {
         // FIX: Not right - reallocate does nothing in this context
@@ -67,7 +69,19 @@ public:
         // of fixed allocator
         //base_t::helper.reallocate(base_t::capacity() - n);
         //base_t::helper.size(base_t::helper.size() - n);
+        allocator_type& a = base_t::get_allocator();
+
+        a.set_size_exp(true, a.max_size() - n);
     }
+
+
+    void remove_prefix(size_type n)
+    {
+        allocator_type& a = base_t::get_allocator();
+
+        a.adjust_offset_exp(true, n);
+    }
+#endif
 };
 
 

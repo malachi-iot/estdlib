@@ -380,7 +380,7 @@ namespace layer3 {
 
 template<class CharT, bool null_terminated = true,
          class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
-         class StringTraits = typename estd::conditional<null_terminated,
+         class Policy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
 class basic_string
@@ -389,20 +389,20 @@ class basic_string
 // FIX: Not ready yet, because layer3::allocator constructor and class InitParam doesn't fully
 // initialize underlying allocator
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-                estd::layer3::allocator<CharT>,
+                estd::layer3::allocator<CharT, typename Policy::size_type>,
 #else
                 estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
 #endif
-                StringTraits>
+                Policy>
 {
     typedef estd::basic_string<
             CharT, Traits,
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-            estd::layer3::allocator<CharT>,
+            estd::layer3::allocator<CharT, typename Policy::size_type>,
 #else
             estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
 #endif
-            StringTraits>
+            Policy>
             base_t;
 
     typedef typename base_t::allocator_type allocator_type;

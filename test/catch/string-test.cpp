@@ -403,17 +403,34 @@ TEST_CASE("string tests")
         string_view sv2 = sv;
         string_view sv3 = "test3";
 
-        int s = sizeof(sv);
+        int sz = sizeof(sv);
+
+        // policy makes all strings default to size type of uint16_t
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        REQUIRE(sizeof(string_view::size_type) == sizeof(uint16_t));
+#endif
+        REQUIRE(sz == sizeof(char*) + sizeof(size_t));
 
         REQUIRE(sv3.starts_with(sv));
         REQUIRE(sv2 == sv);
         REQUIRE(sv2.compare(sv) == 0);
         REQUIRE(sv2 == "test");
 
-        // FIX: Does not work yet - need to make helper/allocator shrink
-        // the end of the buffer which is not something allocator normally
-        // does (remember, we're treating allocator max_size as string_view
-        // size, so a regular reallocation is a bit of an unknown)
+        // NOTE: Only works in an experimental capacity right now.  Adjusted
+        // layer3::allocator to have experimental setters to adjust its pointer
+        // and size
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         sv3.remove_suffix(2);
+
+        REQUIRE(sv3 == "tes");
+
+        sv3.remove_prefix(1);
+
+        REQUIRE(sv3 == "es");
+#endif
+
+        // Does not compile, as is correct behavior - string_views are read only except
+        // for remove_suffix and remove_prefix
+        //sv3 += "T";
     }
 }
