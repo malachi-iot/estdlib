@@ -13,5 +13,11 @@ template<
     class Policy
 > class basic_string;
 
+template <class CharT,
+          class Traits,
+          class Policy>
+class basic_string_view;
+
+
 }
 

@@ -256,7 +256,7 @@ public:
             TForeignTraits>& copy_from)
     {
         base_t::operator=(copy_from);
-    };
+    }
 
     // using ForeignCharT and ForeignTraits because incoming string might use const char
     template <class ForeignCharT, class ForeignTraits, class ForeignAllocator>
@@ -268,6 +268,14 @@ public:
     {
         base_t::operator =(copy_from);
         return *this;
+    }
+
+    // layer1 strings can safely issue a lock like this, since unlock is a no-op
+    CharT* data() { return base_t::lock(); }
+
+    operator basic_string_view<CharT, Traits, StringPolicy>() const
+    {
+        return basic_string_view<CharT, Traits, StringPolicy>(data(), base_t::size());
     }
 };
 
@@ -366,6 +374,14 @@ public:
     {
         base_t::operator =(copy_from);
         return *this;
+    }
+
+    // layer2 strings can safely issue a lock like this, since unlock is a no-op
+    CharT* data() { return base_t::lock(); }
+
+    operator basic_string_view<CharT, Traits, StringPolicy>() const
+    {
+        return basic_string_view<CharT, Traits, StringPolicy>(data(), base_t::size());
     }
 };
 
