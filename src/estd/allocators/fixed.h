@@ -14,7 +14,8 @@ namespace internal {
 // maps to one and only one regular non-locking buffer
 // also this is a stateful allocator, by nature of TBuffer taking up some space
 // if one wishes to be stateless, a different (base) class should be used
-template <class T, class TBuffer, typename TSize>
+template <class T, class TBuffer, typename TSize,
+          typename TDiff = typename estd::make_signed<TSize>::type>
 struct single_allocator_base
 {
     typedef const void* const_void_pointer;
@@ -22,6 +23,7 @@ struct single_allocator_base
     // represent an invalid handle too
     typedef bool handle_type;
     typedef TSize size_type;
+    typedef TDiff difference_type;
     typedef handle_type handle_with_size;
     //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
@@ -278,6 +280,7 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
     typedef typename base_t::size_type size_type;
+    typedef typename base_t::difference_type difference_type;
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     allocator(std::initializer_list<T> initlist) : base_t(initlist)
@@ -298,7 +301,7 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
     // TODO: turn these API on or off depending on malleable flag
 
     // can adjust positively or negatively (operates like pointer math and/or handle_with_offset)
-    void adjust_offset_exp(handle_type h, size_type offset)
+    void adjust_offset_exp(handle_type h, difference_type offset)
     {
         base_t::buffer += offset;
         base_t::set_size(base_t::size(h) - offset);

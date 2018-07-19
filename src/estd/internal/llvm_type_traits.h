@@ -140,8 +140,11 @@ template <class _Tp> struct is_enum
                                      !is_reference<_Tp>::value        &&
                                      //!is_member_pointer<_Tp>::value   &&
                                      //!is_union<_Tp>::value            &&
-                                     !is_class<_Tp>::value            &&
-                                     !is_function<_Tp>::value         > {};
+#ifdef FEATURE_CPP_VARIADIC
+                                    !is_function<_Tp>::value         &&
+#endif
+                                     !is_class<_Tp>::value
+        > {};
 
 namespace internal {
 

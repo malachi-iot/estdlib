@@ -53,6 +53,12 @@ struct has_size_tag : estd::false_type {};
 template<typename T>
 struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag_exp>::type> : estd::true_type {};
 
+template<typename T, typename = void>
+struct has_difference_type : estd::false_type {};
+
+template<typename T>
+struct has_difference_type<T, typename estd::internal::has_typedef<typename T::difference_type>::type> : estd::true_type {};
+
 
 // FIX: eventually use something a bit like our Range<bool> trick in the fixed_size_t finder
 template <class TAllocator, bool is_locking>
@@ -93,8 +99,16 @@ struct allocator_traits
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
     typedef typename TAllocator::pointer        pointer;
-    //typedef std::size_t                         size_type;
     typedef typename TAllocator::size_type      size_type;
+    // FIX: Do a SFINAE extraction of difference type
+    // doesn't work, still tries to resolve allocator_type::difference_type always
+    /*
+    typedef estd::conditional<
+        experimental::has_difference_type<allocator_type>::value,
+            typename allocator_type::difference_type,
+            estd::make_signed<size_type> >
+        difference_type; */
+
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
     // non-standard, for handle based scenarios
