@@ -1,10 +1,7 @@
 #include <Arduino.h>
 
-// already defined
-//#define ARDUINO
-
-//#include <estd/vector.h>
 #include <estd/string.h>
+#include <estd/chrono.h>
 
 void setup() 
 {
@@ -14,9 +11,14 @@ void setup()
 
     // doesn't work yet, overloads don't know what to do with __FlashStringHelper*
     buffer += F(" world");
+    buffer += '!';
 
-    Serial.print(buffer.lock());
-    buffer.unlock();
+    Serial.print(buffer.data());
 }
 
-void loop() {}
+void loop() 
+{
+    // arduini millis() is easy enough, but chrono compatibility is helpful for
+    // assisting libraries
+    estd::chrono::steady_clock::now();
+}

@@ -115,7 +115,6 @@ typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60>> minute
 typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600>> hours;
 typedef internal::estd_chrono::duration<internal::days_rep, ratio<3600 * 24>> days;
 
-
 #ifdef FEATURE_ESTD_CHRONO
 
 template<

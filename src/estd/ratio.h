@@ -2,7 +2,7 @@
 
 #include "internal/platform.h"
 #include "type_traits.h"
-#include <cstdint>
+#include "cstdint.h"
 
 namespace estd {
 

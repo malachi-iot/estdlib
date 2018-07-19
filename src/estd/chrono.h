@@ -2,8 +2,10 @@
 
 #include "port/chrono.h"
 
-#if defined(FEATURE_ESTD_FREERTOS) || defined(FREERTOS)
+#if defined(ESTD_FREERTOS)
 #include "port/freertos/chrono.h"
+#elif defined(ESTD_ARDUINO)
+#include "port/arduino/chrono.h"
 #else
 #error Unsupported platform
 #endif

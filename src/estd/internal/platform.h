@@ -2,6 +2,7 @@
 
 // FIX: eventually do this as <estd/opts.h> so users can override it
 #include "opts.h"
+#include "../port/identify_platform.h"
 
 // TODO: consider utilizing
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
@@ -60,6 +61,7 @@
 #if !defined(ARDUINO) && __cplusplus >= 201103L
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
+#define FEATURE_STD_CSTDINT
 #define FEATURE_STD_CASSERT
 #define FEATURE_STD_INITIALIZER_LIST
 #define FEATURE_STD_ITERATOR
