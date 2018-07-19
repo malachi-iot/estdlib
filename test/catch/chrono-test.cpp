@@ -37,6 +37,13 @@ TEST_CASE("chrono tests")
 
         REQUIRE(sec.count() == 120);
     }
+    SECTION("daily tests")
+    {
+        estd::chrono::days days(5);
+        estd::chrono::minutes minutes = days;
+
+        REQUIRE(minutes.count() == (5 * 24 * 60));
+    }
     SECTION("Ratio dividing")
     {
         SECTION("Simplest case")
@@ -93,5 +100,9 @@ TEST_CASE("chrono tests")
         // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
         // which in turns needs greatest common divider for the two ratios
         //bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
+
+        second = first;
+
+        REQUIRE(second == first);
     }
 }

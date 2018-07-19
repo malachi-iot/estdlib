@@ -84,6 +84,9 @@ template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs);
 
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
+                          const duration<Rep2, Period2>& rhs);
 
 #endif // FEATURE_ESTD_CHRONO
 
@@ -113,7 +116,9 @@ typedef internal::estd_chrono::duration<internal::miilli_rep, milli> millisecond
 typedef internal::estd_chrono::duration<internal::seconds_rep> seconds;
 typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60>> minutes;
 typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600>> hours;
-typedef internal::estd_chrono::duration<internal::days_rep, ratio<3600 * 24>> days;
+// NOTE: AVR compiler requires this long typecast.  Doesn't hurt anything (though it's
+// a bit ugly)
+typedef internal::estd_chrono::duration<internal::days_rep, ratio<(long)3600 * 24>> days;
 
 #ifdef FEATURE_ESTD_CHRONO
 
@@ -132,6 +137,12 @@ public:
 
     time_point(const Duration& duration) : m_time_since_epoch(duration) {}
 
+    // NOTE: Compiles, but not tested
+    template <class TDuration2>
+    time_point(const time_point<Clock, TDuration2>& t) :
+        m_time_since_epoch(t.m_time_since_epoch)
+    {}
+
     Duration time_since_epoch() const { return m_time_since_epoch; }
 };
 
@@ -147,6 +158,10 @@ constexpr bool operator>( const time_point<Clock,Dur1>& lhs,
 
 template< class Clock, class Dur1, class Dur2 >
 constexpr bool operator>=( const time_point<Clock,Dur1>& lhs,
+                          const time_point<Clock,Dur2>& rhs );
+
+template< class Clock, class Dur1, class Dur2 >
+constexpr bool operator==( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
 

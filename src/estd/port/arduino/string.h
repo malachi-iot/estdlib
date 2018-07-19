@@ -7,7 +7,7 @@ template< class CharT, class Traits, class Alloc, class Policy >
         operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,
                    const __FlashStringHelper* rhs )
 {
-    lhs += "";
+    lhs.append((const char*) rhs);
     return lhs;
 }
 
