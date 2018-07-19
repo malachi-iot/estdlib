@@ -44,6 +44,8 @@ set(SOURCE_FILES
 
         estd/port/chrono.h
         estd/port/chrono.hpp
+        estd/port/string.h
+        estd/port/arduino/string.h
         estd/port/freertos/chrono.h
 
         estd/queue.h

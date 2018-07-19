@@ -6,25 +6,13 @@
 #include "traits/char_traits.h"
 #include "traits/string.h"
 #include "policy/string.h"
+#include "port/string.h"
 #include "algorithm.h"
 #include "span.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>
 #endif
-
-namespace estd {
-
-// prototype
-// FIX: Probably can remove this, since we don't specialize on core basic_string itself
-template<
-    class CharT,
-    class Traits,
-    class Allocator,
-    class StringTraits
-> class basic_string;
-
-}
 
 namespace estd {
 
@@ -37,12 +25,22 @@ namespace estd {
 template<
     class CharT,
     class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+#ifdef FEATURE_STD_MEMORY
     class Allocator = std::allocator<CharT>,
     class StringPolicy = experimental::sized_string_policy<Traits>
+#else
+    class Allocator, class StringPolicy
+#endif
 > class basic_string :
         public internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> >
 {
     typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> > base_t;
+
+    /*
+     * Was using this for Arduino port += but actually it's not necessary and causes linker
+     * errors for POSIX mode
+    template <class TInput>
+    friend basic_string operator +=(basic_string& lhs, TInput rhs); */
 
 public:
     typedef typename base_t::size_type size_type;
@@ -148,11 +146,13 @@ public:
     }
 
 
+    /*
     template <class TString>
     basic_string& operator += (TString s)
     {
         return append(s);
-    }
+        return *this;
+    } */
 
 
     basic_string& operator += (value_type c)
@@ -206,7 +206,10 @@ public:
 };
 
 
+// this typedef relies on std::allocator
+#ifdef FEATURE_STD_MEMORY
 typedef basic_string<char> string;
+#endif
 
 
 
@@ -517,6 +520,14 @@ public:
 
 
 
+template< class CharT, class Traits, class Alloc, class Policy, class TString >
+    estd::basic_string<CharT,Traits,Alloc,Policy>&
+        operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,
+                   TString rhs )
+{
+    lhs.append(rhs);
+    return lhs;
+}
 
 
 
