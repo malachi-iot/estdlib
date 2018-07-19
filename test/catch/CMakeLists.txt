@@ -25,7 +25,9 @@ add_executable(${PROJECT_NAME} "main.cpp"
     queue-test.cpp
     string-test.cpp
     test-data.h
+    type-traits-test.cpp
     vector-test.cpp
-        priority-queue-test.cpp)
+    priority-queue-test.cpp
+    )
 
 target_link_libraries(${PROJECT_NAME} estd_lib)

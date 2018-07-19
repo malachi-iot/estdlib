@@ -30,6 +30,7 @@ set(SOURCE_FILES
         estd/internal/reverse_list.h
         estd/internal/runtime_array.h
         estd/internal/to_string.h
+        estd/internal/llvm_type_traits.h
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h

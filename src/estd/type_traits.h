@@ -7,6 +7,16 @@
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
 
+template <class T> struct remove_cv;
+template <class T> struct is_integral;
+template <class T> struct is_floating_point;
+template <class T> struct is_pointer;
+template <class T> struct is_reference;
+template <class T> struct is_member_pointer;
+template <class T> struct is_union;
+template <class T> struct is_class;
+
+
 template<class T, T v>
 struct integral_constant {
     static CONSTEXPR T value = v;
@@ -58,8 +68,32 @@ class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
 
+namespace internal {
+
+template <class T> char is_class_test(int T::*);
+struct two { char c[2]; };
+template <class T> two is_class_test(...);
+
+template <class _Tp> struct __libcpp_union : public false_type {};
+
+}
+
+template <class _Tp> struct is_union
+    : public internal::__libcpp_union<typename remove_cv<_Tp>::type> {};
+
+template <class T>
+struct is_class : integral_constant<bool, sizeof(internal::is_class_test<T>(0))==1
+                                            && !is_union<T>::value> {};
+
+
 template<class T> struct is_const          : false_type {};
 template<class T> struct is_const<const T> : true_type {};
+
+template <class T> struct is_reference      : false_type {};
+template <class T> struct is_reference<T&>  : true_type {};
+#ifdef FEATURE_CPP_MOVESEMANTIC
+template <class T> struct is_reference<T&&> : true_type {};
+#endif
 
 template<class T> struct is_lvalue_reference     : false_type {};
 template<class T> struct is_lvalue_reference<T&> : true_type {};
@@ -68,6 +102,42 @@ template<class T> struct is_lvalue_reference<T&> : true_type {};
 template <class T> struct is_rvalue_reference      : false_type {};
 template <class T> struct is_rvalue_reference<T&&> : true_type {};
 #endif
+
+template< class T >
+struct is_arithmetic : integral_constant<bool,
+                                    is_integral<T>::value ||
+                                    is_floating_point<T>::value> {};
+
+namespace internal {
+
+template< class T > struct ___is_pointer     : false_type {};
+template< class T > struct ___is_pointer<T*> : true_type {};
+
+template<typename T,bool = is_arithmetic<T>::value>
+struct is_signed : integral_constant<bool, T(-1) < T(0)> {};
+
+template<typename T>
+struct is_signed<T,false> : false_type {};
+
+}
+
+template<typename T>
+struct is_signed : internal::is_signed<T>::type {};
+
+template< class T > struct is_pointer : internal::___is_pointer<typename remove_cv<T>::type> {};
+
+template<class T> struct is_volatile             : false_type {};
+template<class T> struct is_volatile<volatile T> : true_type {};
+
+template< class T >
+struct is_floating_point
+     : integral_constant<
+         bool,
+         is_same<float, typename remove_cv<T>::type>::value  ||
+         is_same<double, typename remove_cv<T>::type>::value  ||
+         is_same<long double, typename remove_cv<T>::type>::value
+     > {};
+
 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
@@ -194,6 +264,8 @@ using decay_t = typename decay<T>::type;
 #endif
 
 }
+
+#include "internal/llvm_type_traits.h"
 
 #if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
 #include "internal/common_type.h"
