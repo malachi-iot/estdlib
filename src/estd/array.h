@@ -184,13 +184,13 @@ public:
 template<
     class T,
     std::size_t N,
-    typename size_t = std::size_t
+    typename TSize = typename internal::deduce_fixed_size_t<N>::size_type
 > struct array : public experimental::array_base<T, T[N], size_t>
 {
     typedef experimental::array_base<T, T[N], size_t> base_t;
 
 public:
-    typedef size_t size_type;
+    typedef TSize size_type;
     typedef T value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;

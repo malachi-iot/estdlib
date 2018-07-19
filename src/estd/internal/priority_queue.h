@@ -4,8 +4,15 @@
 
 #pragma once
 
+#include "platform.h"
+
+// relies on std::push_heap
+#ifdef FEATURE_STD_ALGORITHM
+
 #include "../vector.h"
 #include "../functional.h"
+
+#include <algorithm>
 
 namespace estd {
 
@@ -22,7 +29,11 @@ class priority_queue_helper;
 // problem is
 template <
         class T,
+#ifdef FEATURE_STD_MEMORY
         class Container = vector<T>,
+#else
+        class Container,
+#endif
         class Compare = less<typename Container::value_type>,
         class THelper = internal::priority_queue_helper<Container, Compare> >
 class priority_queue
@@ -119,3 +130,5 @@ public:
 }
 
 }
+
+#endif

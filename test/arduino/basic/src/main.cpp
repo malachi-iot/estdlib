@@ -2,6 +2,7 @@
 
 #include <estd/string.h>
 #include <estd/chrono.h>
+#include <estd/queue.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 #define TEST_CHRONO
@@ -10,6 +11,8 @@ using namespace estd::chrono;
 
 steady_clock::time_point start;
 uint32_t start_ms;
+
+estd::layer1::queue<uint8_t, 16> test_queue;
 
 void setup() 
 {

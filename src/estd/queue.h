@@ -3,6 +3,7 @@
 #include "array.h"
 #include "vector.h"
 #include "functional.h"
+#include "internal/deduce_fixed_size.h"
 #include "internal/priority_queue.h"
 
 // deviates from C++ standard queue in that a bool is returned to indicate
@@ -16,10 +17,16 @@ namespace layer1 {
 // *circular* queue.  Otherwise we'd have a queue which goes to the
 // end and basically always fails.  If that's really your desired behavior
 // you can recreate that here by checking size() against max_size()
-template <class T, size_t N, typename size_t = std::size_t>
+// NOTE: kind of general use and uses iterators straight from array.  Using size_type begin/end
+// pos would be more memory efficient.  Eventually do that as an optimization, but even
+// then keep this general use one around as it is arguably faster using direct pointers.
+// For above, refactoring to standard deque<T, Allocator> would fit the bill - 'grow' type
+// operations would merely compile-time fail [as they should] for fixed allocations
+template <class T, size_t N, typename TSize = typename internal::deduce_fixed_size_t<N>::size_type >
 class deque
 {
     typedef array<T, N> array_t;
+    typedef array_t container_type;
 
     array_t m_array;
 
@@ -104,7 +111,7 @@ public:
     typedef T value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
-    typedef size_t size_type;
+    typedef typename container_type::size_type size_type;
 
     bool empty() const { return m_empty; }
 
