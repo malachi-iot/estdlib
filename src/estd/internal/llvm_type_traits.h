@@ -83,7 +83,7 @@ struct __align_type
 
 struct __nat
 {
-#ifndef _LIBCPP_CXX03_LANG
+#ifdef FEATURE_CPP_DELETE_CTOR
     __nat() = delete;
     __nat(const __nat&) = delete;
     __nat& operator=(const __nat&) = delete;
@@ -155,7 +155,7 @@ template <>          struct __libcpp_is_integral<char>               : public tr
 template <>          struct __libcpp_is_integral<signed char>        : public true_type {};
 template <>          struct __libcpp_is_integral<unsigned char>      : public true_type {};
 template <>          struct __libcpp_is_integral<wchar_t>            : public true_type {};
-#ifndef _LIBCPP_HAS_NO_UNICODE_CHARS
+#ifdef FEATURE_CPP_CHAR16_T
 template <>          struct __libcpp_is_integral<char16_t>           : public true_type {};
 template <>          struct __libcpp_is_integral<char32_t>           : public true_type {};
 #endif  // _LIBCPP_HAS_NO_UNICODE_CHARS

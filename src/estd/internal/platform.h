@@ -17,9 +17,11 @@
 #define FEATURE_CPP_LAMBDA
 #define FEATURE_CPP_RANGED_FORLOOP
 #define FEATURE_CPP_INITIALIZER_LIST
+#define FEATURE_CPP_DELETE_CTOR
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #define FEATURE_CPP_DEFAULT_TARGS   // default template arguments for a function template
 #define FEATURE_CPP_ENUM_CLASS
+#define FEATURE_CPP_CHAR16_T
 
 #if defined(__STDC_LIB_EXT1__)
 // see http://en.cppreference.com/w/c/string/byte/strncpy
@@ -56,14 +58,16 @@
 #endif
 #endif
 
-// some platforms have c++11 but don't have STL headers.  Explicitly state when we *do*
+// some platforms have c++98 onward but don't have STL headers.  Explicitly state when we *do*
 // have them
-#if !defined(ARDUINO) && __cplusplus >= 201103L
+#if !defined(ARDUINO)
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
 #define FEATURE_STD_CSTDINT
+#if __cplusplus >= 201103L
 #define FEATURE_STD_CASSERT
 #define FEATURE_STD_INITIALIZER_LIST
+#endif
 #define FEATURE_STD_ITERATOR
 #define FEATURE_STD_MEMORY
 #define FEATURE_STD_STRING
