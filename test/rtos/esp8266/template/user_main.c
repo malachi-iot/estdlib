@@ -52,21 +52,36 @@ void test_task(void*);
 
 
 
-#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
 /******************************************************************************
  * FunctionName : wifi_event_handler_cb
  * Description  : wifi event callback
  * Parameters   : system event
  * Returns      : none
  *******************************************************************************/
+#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
 void wifi_event_handler_cb(System_Event_t * event)
+#else
+void wifi_event_handler_cb(system_event_t * event)
+#endif
 {
     if (event == NULL) {
         return;
     }
     switch (event->event_id) {
+#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
         case EVENT_STAMODE_GOT_IP:
-            printf("free heap size %d line %d \n", system_get_free_heap_size(), __LINE__);
+#else
+        case SYSTEM_EVENT_STA_GOT_IP:
+#endif
+            printf("free heap size %d line %d \n", 
+#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
+                system_get_free_heap_size(), 
+#else
+                // NOTE: Not even sure if this is the right substitute
+                // but it looks right
+                esp_get_free_heap_size(),
+#endif
+                __LINE__);
             break;
         default:
             break;
@@ -74,7 +89,7 @@ void wifi_event_handler_cb(System_Event_t * event)
     }
     return;
 }
-#endif
+
 
 #ifdef CONFIG_WIFI_SSID
 /******************************************************************************

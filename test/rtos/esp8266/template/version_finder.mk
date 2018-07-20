@@ -1,3 +1,5 @@
+# wired for ESP8266 but very likely can and should be used for ESP32 also
+
 # this is completely lame.  IDF_VER is not available from main project.mk
 # either here or in Makefile, so we have to dup code to make it
 # furthermore, the lameness continues in that IDF_VER is stock-populated
@@ -40,4 +42,5 @@ endif
 CPPFLAGS += -D ESTD_IDF_VER_MAJOR=$(IDF_VER_MAJOR) \
 	-D ESTD_IDF_VER_MINOR=$(IDF_VER_MINOR) \
 	-D ESTD_IDF_VER_PATCH=$(IDF_VER_PATCH) \
-	-D ESTD_IDF_VER_SUFFIX=$(IDF_VER_SUFFIX)
+	-D ESTD_IDF_VER_SUFFIX=$(IDF_VER_SUFFIX) \
+	-D ESP8266
