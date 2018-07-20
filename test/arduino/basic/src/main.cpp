@@ -3,6 +3,7 @@
 #include <estd/string.h>
 #include <estd/chrono.h>
 #include <estd/queue.h>
+#include <estd/thread.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 #define TEST_CHRONO
@@ -42,10 +43,14 @@ void loop()
     steady_clock::time_point now = steady_clock::now();
 
     auto count = duration_cast<milliseconds>(now - start).count();
+
+    estd::this_thread::sleep_for(milliseconds(1000));
 #else
     uint32_t now_ms = millis();
 
     auto count = now_ms - start_ms;
+
+    delay(1000);
 #endif
 
     Serial.println(count);

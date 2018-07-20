@@ -48,13 +48,17 @@ set(SOURCE_FILES
         estd/port/identify_platform.h
         estd/port/arduino/chrono.h
         estd/port/arduino/string.h
+        estd/port/arduino/thread.h
         estd/port/freertos/chrono.h
+        estd/port/freertos/thread.h
+        estd/port/thread.h
 
         estd/queue.h
         estd/ratio.h
         estd/span.h
         estd/string.h
         estd/string_view.h
+        estd/thread.h
         estd/traits/char_traits.h
         estd/traits/list_node.h
         estd/traits/allocator_traits.h
