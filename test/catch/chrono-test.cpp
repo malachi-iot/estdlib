@@ -49,31 +49,44 @@ TEST_CASE("chrono tests")
 
         REQUIRE(minutes.count() == (5 * 24 * 60));
     }
-    SECTION("Ratio dividing")
+    SECTION("Ratios")
     {
-        SECTION("Simplest case")
+        typedef estd::ratio<1, 3> one_third;
+        typedef estd::ratio<2, 3> two_third;
+        typedef estd::ratio<1, 6> one_sixth;
+
+        SECTION("Ratio dividing")
         {
-            typedef estd::ratio<1, 3> one_third;
-            typedef estd::ratio<1, 6> one_sixth;
-            typedef estd::ratio_divide<one_third, one_sixth> r;
+            SECTION("Simplest case")
+            {
+                typedef estd::ratio_divide<one_third, one_sixth> r;
 
-            CONSTEXPR int num = r::num;
-            CONSTEXPR int den = r::den;
+                CONSTEXPR int num = r::num;
+                CONSTEXPR int den = r::den;
 
-            REQUIRE(num == 6);
-            REQUIRE(den == 3);
+                REQUIRE(num == 6 / 3);
+                REQUIRE(den == 3 / 3);
+            }
+            SECTION("std lib example case")
+            {
+                typedef estd::ratio_divide<two_third, one_sixth> r;
+
+                CONSTEXPR int num = r::num;
+                CONSTEXPR int den = r::den;
+
+                REQUIRE(num == 4);
+                REQUIRE(den == 1);
+            }
         }
-        SECTION("std lib example case")
+        SECTION("ratio multiplying")
         {
-            typedef estd::ratio<2, 3> two_third;
-            typedef estd::ratio<1, 6> one_sixth;
-            typedef estd::ratio_divide<two_third, one_sixth> r;
+            typedef estd::ratio_multiply<two_third, one_sixth> r;
 
             CONSTEXPR int num = r::num;
             CONSTEXPR int den = r::den;
 
-            REQUIRE(num == 4);
-            REQUIRE(den == 1);
+            REQUIRE(num == 1);
+            REQUIRE(den == 9);
         }
     }
     SECTION("common_type specialization")
