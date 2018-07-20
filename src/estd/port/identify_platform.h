@@ -16,3 +16,10 @@
 #if defined(ESTD_UNIX) || defined(ESTD_MACOS)
 #define ESTD_POSIX
 #endif
+
+// ESP_PLATFORM always does freeRTOS for esp-idf
+#if defined(ESP_PLATFORM) && defined(IDF_VER)
+#if !defined(ESTD_FREERTOS)
+#define ESTD_FREERTOS
+#endif
+#endif
