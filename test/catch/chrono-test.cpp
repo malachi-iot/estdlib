@@ -106,6 +106,7 @@ TEST_CASE("chrono tests")
 
         REQUIRE(count == 333);
 
+#ifdef FEATURE_ESTD_CHRONO_EXP
         // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
         // which in turns needs greatest common divider for the two ratios
         bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
@@ -118,6 +119,7 @@ TEST_CASE("chrono tests")
         result = (clock.now() - second) == estd::chrono::milliseconds(333);
 
         REQUIRE(result); */
+#endif
 
         second = first;
 

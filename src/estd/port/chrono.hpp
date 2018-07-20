@@ -138,6 +138,8 @@ CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
 
 namespace estd {
 
+#ifdef FEATURE_ESTD_CHRONO_EXP
+
 /*
 // TODO: move this to better location
 template<std::intmax_t Denom1, std::intmax_t Denom2>
@@ -162,5 +164,7 @@ public:
     // dummy type, for now
     typedef chrono::duration<unsigned, estd::ratio<num1gtnum2 ? Num1 : Num2, NewDenom> > type;
 };
+
+#endif
 
 }
