@@ -29,9 +29,11 @@ protected:
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     // used only when locking allocator is present, otherwise resolves
     // to noops
     typename allocator_t::lock_counter lock_counter;
+#endif
 
     // FIX: Pretty sure we want this to be a reference, not a value
     traits_t traits;
@@ -74,7 +76,9 @@ public:
     // proper behavior
     nv_reference operator*()
     {
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
         lock_counter++;
+#endif
         // FIX: strong implications for leaving this unlocked,
         //      but in practice stronger implications for unlocking it.
         //      needs attention
@@ -126,6 +130,7 @@ struct ForwardIterator : public TBase
 
     ForwardIterator& operator++()
     {
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
         // special iterator behavior: unlocks any locks it itself
         // put into place.  Useful for iteration evaluation
         // operations using the lock() and unlock()
@@ -135,6 +140,7 @@ struct ForwardIterator : public TBase
             this->lock_counter--;
             this->unlock();
         }
+#endif
 
         node_type& c = base_t::lock_internal();
 

@@ -49,6 +49,8 @@ public:
 
     // technically we ARE locking since we have to convert the dummy 'bool' handle
     // to a pointer
+
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return true; }
 
     static CONSTEXPR bool is_stateful() { return true; }
@@ -56,11 +58,12 @@ public:
     static CONSTEXPR bool is_singular() { return true; }
 
     static CONSTEXPR bool has_size() { return true; }
+#endif
 
-    typedef void is_locking_tag_exp;
-    typedef void has_size_tag_exp;
-    typedef void is_singular_tag_exp;
-    typedef void is_stateful_tag_exp;
+    typedef void is_locking_tag;
+    typedef void has_size_tag;
+    typedef void is_singular_tag;
+    typedef void is_stateful_tag;
 
     value_type& lock(handle_type h, int pos = 0, int count = 0)
     {
@@ -106,7 +109,9 @@ public:
     }
 
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
+#endif
 };
 
 // Can only have its allocate function called ONCE
@@ -183,6 +188,8 @@ private:
     size_type m_buffer_size;
 
 protected:
+    // primarily used with special use case like basic_string_view which needs to adjust
+    // 'allocated' size manually during remove_suffix
     void set_size(size_type size)
     {
         m_buffer_size = size;
@@ -198,8 +205,8 @@ protected:
 public:
     struct InitParam
     {
-        T* buffer;
-        size_type size;
+        T* buffer;      // incoming layer3 buffer
+        size_type size; // size of layer3 buffer (remember this represents allocated size)
 
         InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
     };
@@ -301,7 +308,8 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
     template <class TAllocatorParam>
     allocator(const TAllocatorParam& p) : base_t(p) {}
 
-    // Experimental - malleable allocator
+    // Experimental - malleable allocator.  Used primarily for basic_string_view
+    // remove_prefix and remove_suffix
     // TODO: turn these API on or off depending on malleable flag
 
     // can adjust positively or negatively (operates like pointer math and/or handle_with_offset)

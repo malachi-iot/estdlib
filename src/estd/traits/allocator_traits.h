@@ -19,45 +19,44 @@ struct has_typedef
     typedef void type;
 };
 
-}
-
-namespace experimental {
-
 // since < c++11 can't do static constexpr bool functions, we need an alternate
 // way to build up specializations based on attribute_traits.  Also has benefit
-// of not requiring every allocator to implement true/false on this entire feature
-// spread.  Not yet tested or in use as of this writing
+// of easier SFINAE application for allocators who don't have tags present
 
 template<typename T, typename = void>
 struct has_locking_tag : estd::false_type {};
 
 template<typename T>
-struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag_exp>::type> : estd::true_type {};
+struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag>::type> : estd::true_type {};
 
 
 template<typename T, typename = void>
 struct has_stateful_tag : estd::false_type {};
 
 template<typename T>
-struct has_stateful_tag<T, typename estd::internal::has_typedef<typename T::is_stateful_tag_exp>::type> : estd::true_type {};
+struct has_stateful_tag<T, typename estd::internal::has_typedef<typename T::is_stateful_tag>::type> : estd::true_type {};
 
 template<typename T, typename = void>
 struct has_singular_tag : estd::false_type {};
 
 template<typename T>
-struct has_singular_tag<T, typename estd::internal::has_typedef<typename T::is_singular_tag_exp>::type> : estd::true_type {};
+struct has_singular_tag<T, typename estd::internal::has_typedef<typename T::is_singular_tag>::type> : estd::true_type {};
 
 template<typename T, typename = void>
 struct has_size_tag : estd::false_type {};
 
 template<typename T>
-struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag_exp>::type> : estd::true_type {};
+struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag>::type> : estd::true_type {};
 
 template<typename T, typename = void>
 struct has_difference_type : estd::false_type {};
 
 template<typename T>
 struct has_difference_type<T, typename estd::internal::has_typedef<typename T::difference_type>::type> : estd::true_type {};
+
+}
+
+namespace experimental {
 
 
 // FIX: eventually use something a bit like our Range<bool> trick in the fixed_size_t finder
@@ -93,7 +92,7 @@ template <class TAllocator>
 struct allocator_traits
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         :
-        experimental::locking_allocator_traits<TAllocator, experimental::has_locking_tag<TAllocator>::value >
+        experimental::locking_allocator_traits<TAllocator, internal::has_locking_tag<TAllocator>::value >
 #endif
 {
     typedef TAllocator                          allocator_type;
@@ -119,9 +118,11 @@ struct allocator_traits
 
     //typedef typename allocator_type::accessor           accessor;
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     // non-standard, and phase this out in favor of 'helpers' to wrap up
     // empty counters
     typedef typename TAllocator::lock_counter           lock_counter;
+#endif
 
     static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
 
@@ -140,13 +141,13 @@ struct allocator_traits
     static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
 #endif
 
-    static CONSTEXPR bool is_locking_exp = experimental::has_locking_tag<allocator_type>::value;
+    static CONSTEXPR bool is_locking_exp = internal::has_locking_tag<allocator_type>::value;
 
-    static CONSTEXPR bool is_stateful_exp = experimental::has_stateful_tag<allocator_type>::value;
+    static CONSTEXPR bool is_stateful_exp = internal::has_stateful_tag<allocator_type>::value;
 
-    static CONSTEXPR bool is_singular_exp = experimental::has_singular_tag<allocator_type>::value;
+    static CONSTEXPR bool is_singular_exp = internal::has_singular_tag<allocator_type>::value;
 
-    static CONSTEXPR bool has_size_exp = experimental::has_size_tag<allocator_type>::value;
+    static CONSTEXPR bool has_size_exp = internal::has_size_tag<allocator_type>::value;
 
     static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
 

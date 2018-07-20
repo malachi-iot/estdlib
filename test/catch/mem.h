@@ -15,7 +15,9 @@ public:
     // for iterators
     static constexpr bool is_locking() { return false; }
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
+#endif
 
     typedef T value_type;
     typedef value_type* pointer;
@@ -162,10 +164,12 @@ public:
         return handle_with_offset(h + size);
     }
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_stateful() { return false; }
 
     static CONSTEXPR bool is_singular() { return false; }
 
     static CONSTEXPR bool has_size() { return false; }
+#endif
 };
 

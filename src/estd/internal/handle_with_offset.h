@@ -356,13 +356,17 @@ class stateful_locking_accessor
     // FIX: Undecided if we should track 'is locked' status by p, lock_counter
     // or inbuilt allocator counter
     pointer p;
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typename allocator_traits::lock_counter lock_counter;
+#endif
 
     handle_with_offset h;
 
     reference lock()
     {
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
         lock_counter++;
+#endif
         reference retval = allocator_traits::lock(a, h);
         p = &retval;
         return retval;
@@ -377,9 +381,11 @@ class stateful_locking_accessor
 
     void unlock()
     {
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
         lock_counter--;
         if(lock_counter == 0)
             p = NULLPTR;
+#endif
         allocator_traits::unlock(a, h.handle());
     }
 
@@ -393,8 +399,10 @@ public:
 
     ~stateful_locking_accessor()
     {
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
         if(lock_counter > 0)
             unlock();
+#endif
     }
 
     operator reference()

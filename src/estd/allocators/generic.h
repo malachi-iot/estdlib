@@ -17,6 +17,7 @@ struct nothing_allocator
 {
     NODATA_MOTIVATOR;
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     struct lock_counter
     {
         NODATA_MOTIVATOR;
@@ -31,6 +32,7 @@ struct nothing_allocator
 #endif
         operator int() const { return 0; }
     };
+#endif
 
     struct allocated_size_helper
     {
@@ -47,7 +49,10 @@ struct nothing_allocator
     typedef size_t size_type;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return false; }
+#endif
 
     reference lock(handle_type h,
                    size_type pos,
@@ -85,7 +90,9 @@ struct experimental_std_allocator : public ::std::allocator<T>
     typedef typename base_t::pointer handle_type;
     typedef handle_type handle_with_size;
     typedef typename estd::internal::handle_with_offset_raw<handle_type> handle_with_offset;
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typedef typename estd::nothing_allocator<T>::lock_counter lock_counter;
+#endif
     typedef const void* const_void_pointer;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
@@ -93,7 +100,9 @@ struct experimental_std_allocator : public ::std::allocator<T>
     static T& lock(handle_type h, size_t pos, size_t count) { return *(h + pos); }
     void unlock(handle_type) {}
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return false; }
+#endif
 
     template <class TNew>
     experimental_std_allocator<TNew> rebind_experimental()
@@ -143,7 +152,9 @@ struct allocator_traits< ::std::allocator<T> >
     static CONSTEXPR bool is_singular_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
 
+#ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
+#endif
 
     static value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)
     {
