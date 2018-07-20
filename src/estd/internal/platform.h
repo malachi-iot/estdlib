@@ -63,8 +63,11 @@
 #if !defined(ARDUINO)
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
-#define FEATURE_STD_CSTDINT
 #if __cplusplus >= 201103L
+// https://stackoverflow.com/questions/13642827/cstdint-vs-stdint-h indicates it's a c++11 feature, as
+// corroborated by https://en.cppreference.com/w/cpp/types/integer.  stackoverflow also indicates it's
+// not present in VC2008, but hopefully now years later it is in VC
+#define FEATURE_STD_CSTDINT
 #define FEATURE_STD_CASSERT
 #define FEATURE_STD_INITIALIZER_LIST
 #endif
