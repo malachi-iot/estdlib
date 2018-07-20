@@ -12,8 +12,10 @@ template<
 > class ratio
 {
 public:
-    static CONSTEXPR std::intmax_t num() { return Num; }
-    static CONSTEXPR std::intmax_t den() { return Denom; }
+    typedef ratio type;
+
+    static CONSTEXPR std::intmax_t num = Num;
+    static CONSTEXPR std::intmax_t den = Denom;
 };
 
 typedef ratio<1, 1000000000> nano;

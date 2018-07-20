@@ -3,6 +3,9 @@
 // While developing, leave this on
 #define FEATURE_ESTD_CHRONO
 
+// EXP actually works, just want to do a little more testing before enabling it
+//#define FEATURE_ESTD_CHRONO_EXP
+
 #include "../ratio.h"
 
 namespace estd {

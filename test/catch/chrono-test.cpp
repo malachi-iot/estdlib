@@ -78,7 +78,54 @@ TEST_CASE("chrono tests")
     }
     SECTION("common_type specialization")
     {
-        //estd::common_type<estd::chrono::seconds, estd::chrono::milliseconds>::type d;
+#ifdef FEATURE_ESTD_CHRONO_EXP
+        typedef estd::common_type<estd::chrono::seconds, estd::chrono::milliseconds>::type common;
+        typedef common::period period;
+        int num = period::num;
+        int den = period::den;
+        REQUIRE(num == 1);
+        REQUIRE(den == 1000);
+
+        typedef estd::common_type<estd::chrono::seconds, estd::chrono::minutes>::type common2;
+        typedef common2::period period2;
+        num = period2::num;
+        den = period2::den;
+        REQUIRE(num == 60);
+        REQUIRE(den == 1);
+
+        typedef estd::common_type<fake_clock::duration, estd::chrono::seconds>::type common3;
+        typedef common3::period period3;
+        num = period3::num;
+        den = period3::den;
+        REQUIRE(num == 1);
+        REQUIRE(den == 15);
+
+        SECTION("Equality")
+        {
+            fake_clock::duration lhs(3); // 3/15 = 1/5 of a second
+            estd::chrono::milliseconds rhs(200); // 200ms = 1/5 of a second
+
+            typedef typename estd::common_type<fake_clock::duration,
+                                     estd::chrono::milliseconds>::type CT;
+
+            num = CT::period::num;
+            den = CT::period::den;
+
+            // CT has to be a ratio which won't lose precision, so we're looking for something like
+            // 1/1000 since it is the higher precision, however, it's not able to do exactly 1/3 of a second
+            // where 1/15 does.  So we need a common type that doesn't lose precision during 1/1000
+            // or 1/15 scenarios.  So, we can't have a denominator of < 1000, and it also has to be 3000
+            // do divide evenly with 15.  So we actually want 1/3000 to represent ticks of either source
+
+            REQUIRE(num == 1);
+            REQUIRE(den == 3000);
+
+            int count_lhs = CT(lhs).count();
+            int count_rhs = CT(rhs).count();
+
+            REQUIRE(count_lhs == count_rhs);
+        }
+#endif
     }
     SECTION("fake_clock tests")
     {
@@ -107,18 +154,22 @@ TEST_CASE("chrono tests")
         REQUIRE(count == 333);
 
 #ifdef FEATURE_ESTD_CHRONO_EXP
+        fake_clock::duration delta = clock.now() - second;
         // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
         // which in turns needs greatest common divider for the two ratios
-        bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
+        bool result = delta > estd::chrono::milliseconds(500);
 
         REQUIRE(!result);
 
-        // almost there, but our specialized common_type doesn't seem to be quite working
-        // we need explicit unit test just for that one
-        /*
-        result = (clock.now() - second) == estd::chrono::milliseconds(333);
+        // pretty cool, 1/3 of a second really does fall between the 1/1000 so this is how
+        // we have to compare
+        result = delta > estd::chrono::milliseconds(333);
 
-        REQUIRE(result); */
+        REQUIRE(result);
+
+        result = delta < estd::chrono::milliseconds(334);
+
+        REQUIRE(result);
 #endif
 
         second = first;
