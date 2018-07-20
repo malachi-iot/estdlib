@@ -81,9 +81,9 @@ public:
     // a necessary evil - since most STL-type operations reasonably are const'd for things
     // like 'size' etc, but underlying mechanisms which they call (this one in particular)
     // are not const when it comes to locking/stateful operations
-    value_type& clock(size_type pos = 0, size_type count = 0) const
+    const value_type& clock(size_type pos = 0, size_type count = 0) const
     {
-        return const_cast<this_t*>(this)->lock(pos, count);
+        return handle_base_t::clock(base_t::get_allocator(), pos, count);
     }
 
     void unlock() { handle_base_t::unlock(base_t::get_allocator()); }

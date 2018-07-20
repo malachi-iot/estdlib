@@ -4,28 +4,39 @@
 
 namespace estd { namespace internal { namespace impl {
 
-template <class TValue, bool is_present, TValue default_value>
+template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated default_value = TEvaporated()>
 class value_evaporator;
 
-template <class TValue, TValue default_value>
-class value_evaporator<TValue, true, default_value>
+template <class TValue, class TEvaporated, TEvaporated default_value>
+class value_evaporator<TValue, true, TEvaporated, default_value>
 {
-public:
-    TValue value() const { return default_value; }
+protected:
+    void value(TEvaporated) {}
 
-    static CONSTEXPR bool is_evaporated() { return true; }
+public:
+    TEvaporated value() const { return default_value; }
+
+    static CONSTEXPR bool is_evaporated = true;
+
+    value_evaporator(TEvaporated) {}
+    value_evaporator() {}
 };
 
-template <class TValue, TValue default_value>
-class value_evaporator<TValue, false, default_value>
+template <class TValue, class TEvaporated, TEvaporated default_value>
+class value_evaporator<TValue, false, TEvaporated, default_value>
 {
 protected:
     TValue m_value;
 
+    void value(const TValue& v) { m_value = v; }
+
 public:
     TValue value() const { return m_value; }
 
-    static CONSTEXPR bool is_evaporated() { return false; }
+    static CONSTEXPR bool is_evaporated = false;
+
+    value_evaporator(const TValue& v) : m_value(v) {}
+    value_evaporator() {}
 };
 
 
@@ -130,69 +141,45 @@ protected:
 
 };
 
-// singular technically doesn't track a handle
-// TODO: refactor to utilize value_evaporator (get_allocator, too)
-template <class TAllocator, bool is_singular>
-class handle_descriptor;
 
-template <class TAllocator>
-class handle_descriptor<TAllocator, true>
-        //: value_evaporator<bool, false, true>
+template <class TAllocator, bool is_singular, class TTraits =
+        estd::allocator_traits<typename remove_reference<TAllocator>::type> >
+class handle_descriptor :
+        value_evaporator<typename TTraits::handle_type, is_singular, bool, true>
 {
-    typedef typename remove_reference<TAllocator>::type allocator_type;
-    typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::size_type size_type;
+    typedef TTraits allocator_traits;
+    typedef typename allocator_traits::value_type value_type;
+    typedef typename allocator_traits::size_type size_type;
 
 protected:
-    handle_descriptor(bool) {}
-
-    typedef typename allocator_type::handle_type handle_type;
-
-    void handle(bool) {}
-
-    value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
-    {
-        return a.lock(true, pos, len);
-    }
-
-    void unlock(allocator_type& a) { a.unlock(true); }
-
-    void cunlock(const allocator_type& a) const { a.cunlock(true); }
-
-public:
-    bool handle() const { return true; }
-};
-
-
-template <class TAllocator>
-struct handle_descriptor<TAllocator, false>
-{
-    typedef typename remove_reference<TAllocator>::type allocator_type;
-    typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::handle_type handle_type;
-    typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::size_type size_type;
+    typedef typename allocator_traits::allocator_type allocator_type;
 
-private:
-    handle_type m_handle;
+    typedef value_evaporator<handle_type, is_singular, bool, true> base_t;
+
+public:
+    handle_type handle() const { return base_t::value(); }
 
 protected:
-    void handle(const handle_type& h) { m_handle = h; }
+    void handle(const handle_type& h) { base_t::value(h); }
 
-    handle_descriptor(const handle_type& h) : m_handle(h) {}
+    handle_descriptor(const handle_type& h) : base_t(h) {}
 
     value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
     {
-        return a.lock(m_handle, pos, len);
+        return a.lock(handle(), pos, len);
     }
 
-    void unlock(allocator_type& a) { a.unlock(m_handle); }
+    const value_type& clock(const allocator_type& a, size_type pos = 0, size_type len = 0) const
+    {
+        return a.clock(handle(), pos, len);
+    }
 
-    void cunlock(const allocator_type& a) const { a.cunlock(m_handle); }
+    void unlock(allocator_type& a) { a.unlock(handle()); }
 
-public:
-    handle_type handle() const { return m_handle; }
+    void cunlock(const allocator_type& a) const { a.cunlock(handle()); }
 };
+
 
 
 }}}

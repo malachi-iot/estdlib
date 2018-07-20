@@ -34,6 +34,7 @@ set(SOURCE_FILES
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
+        estd/internal/value_evaporator.h
 
         estd/iterators/list.h
         estd/list.h
