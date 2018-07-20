@@ -1,0 +1,9 @@
+menu "Network configuration"
+
+config WIFI_SSID
+    string "WiFi SSID Name"
+
+config WIFI_PASSWORD
+    string "WiFi Password"
+
+endmenu
