@@ -7,7 +7,11 @@ template< class CharT, class Traits, class Alloc, class Policy >
         operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,
                    const __FlashStringHelper* rhs )
 {
-    lhs.append((const char*) rhs);
+    int sz = lhs.size();
+    int sz_rhs = strlen_P((const char*)rhs);
+    lhs.resize(sz + sz_rhs);
+    memcpy_P(lhs.lock(sz), rhs, sz_rhs);
+    lhs.unlock();
     return lhs;
 }
 

@@ -17,6 +17,9 @@ estd::layer1::queue<uint8_t, 16> test_queue;
 
 void setup() 
 {
+    // TODO: this is for 32u4 only.  Change this for other targets
+    Serial.begin(115200);
+
 #ifdef TEST_CHRONO
     // arduini millis() is easy enough, but chrono compatibility is helpful for
     // assisting libraries
@@ -24,17 +27,6 @@ void setup()
 #else
     start_ms = millis();
 #endif
-
-    // interestingly, code size varies along with this buffer size
-    estd::layer1::string<128> buffer;
-
-    buffer += "hello";
-
-    // doesn't work yet, overloads don't know what to do with __FlashStringHelper*
-    buffer += F(" world");
-    buffer += '!';
-
-    Serial.print(buffer.data());
 }
 
 void loop() 
@@ -52,6 +44,17 @@ void loop()
 
     delay(1000);
 #endif
+
+    // interestingly, code size varies along with this buffer size
+    estd::layer1::string<128> buffer;
+
+    buffer += "hello";
+
+    // doesn't work yet, overloads don't know what to do with __FlashStringHelper*
+    buffer += F(" world");
+    buffer += '!';
+
+    Serial.print(buffer.data());
 
     Serial.println(count);
 }

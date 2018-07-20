@@ -4,6 +4,7 @@
         "__locale": "cpp",
         "regex": "cpp",
         "sstream": "cpp",
-        "identify_platform.h": "c"
+        "identify_platform.h": "c",
+        "system_error": "cpp"
     }
 }

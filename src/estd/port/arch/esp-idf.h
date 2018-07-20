@@ -25,7 +25,10 @@ constexpr int c_strcmp( char const* lhs, char const* rhs )
 #endif
 
 // now, makefile magic (version_finder.mk) populates critical values
-
+// for flash data , this is interesting https://github.com/espressif/ESP8266_RTOS_SDK/blob/0d718b24b35481eb5614a1bc9481bbb81273b6b0/components/esp8266/include/esp_attr.h
+// https://richard.burtons.org/2015/07/08/accessing-byte-data-stored-on-flash/
+// couldn't find explicit copy mechanisms tailored to FLASH/alignment.  Maybe it's
+// "automagic" but pretty sure gonna have to go hands-on for some of our string operations
 
 // under this approach, version 1.4.1 (for example) would be:
 // 10401
