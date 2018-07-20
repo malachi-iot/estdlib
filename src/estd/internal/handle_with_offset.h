@@ -318,6 +318,8 @@ public:
 
 namespace experimental {
 
+// TODO: Interrogate TAllocator::is_locking_tag to decide which accessor to use
+
 // nonlocking:
 // we still go through the 'lock' paradigm for handle -> pointer translation, but
 // there's no necessity to unlock and we don't expect the pointer to ever move
@@ -373,9 +375,9 @@ class stateful_locking_accessor
     }
 
 
-    const value_type& clock_experimental() const
+    const value_type& clock() const
     {
-        allocator_traits::clock_experimental(a, h);
+        allocator_traits::clock(a, h);
     }
 
 
@@ -412,7 +414,7 @@ public:
 
     operator const value_type& () const
     {
-        return clock_experimental();
+        return clock();
     }
 
     operator value_type()

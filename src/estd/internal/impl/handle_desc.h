@@ -137,6 +137,7 @@ class handle_descriptor;
 
 template <class TAllocator>
 class handle_descriptor<TAllocator, true>
+        //: value_evaporator<bool, false, true>
 {
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename allocator_type::value_type value_type;
@@ -155,6 +156,8 @@ protected:
     }
 
     void unlock(allocator_type& a) { a.unlock(true); }
+
+    void cunlock(const allocator_type& a) const { a.cunlock(true); }
 
 public:
     bool handle() const { return true; }
@@ -184,6 +187,8 @@ protected:
     }
 
     void unlock(allocator_type& a) { a.unlock(m_handle); }
+
+    void cunlock(const allocator_type& a) const { a.cunlock(m_handle); }
 
 public:
     handle_type handle() const { return m_handle; }

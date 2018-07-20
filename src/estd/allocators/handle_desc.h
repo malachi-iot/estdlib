@@ -83,12 +83,12 @@ public:
     // are not const when it comes to locking/stateful operations
     value_type& clock(size_type pos = 0, size_type count = 0) const
     {
-        return const_cast<this_t*>(this)->lock();
+        return const_cast<this_t*>(this)->lock(pos, count);
     }
 
     void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
 
-    void cunlock() const { const_cast<this_t*>(this)->unlock(); }
+    void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
 
 
     void copy_into(const value_type* source, size_type pos, size_type len)
