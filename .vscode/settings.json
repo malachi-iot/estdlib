@@ -3,6 +3,7 @@
         "chrono": "cpp",
         "__locale": "cpp",
         "regex": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "identify_platform.h": "c"
     }
 }

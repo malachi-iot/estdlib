@@ -22,10 +22,21 @@
  *
  */
 
+#include <estd/port/identify_platform.h>
+
 // If need be, we can access IDF-VER ala https://github.com/espressif/ESP8266_RTOS_SDK/blob/master/make/project.mk
+// OK above was a bit of a pipe dream, since C preprocessor isn't powerful enough to decompose it well
+// so instead we rebuild ourselves with special version_finder.mk
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
+#include "esp_wifi.h"
+#include "esp_event_loop.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+#else
 #include "esp_misc.h"
 #include "esp_sta.h"
 #include "esp_system.h"
+#endif
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -37,7 +48,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
- void test_task(void*);
+void test_task(void*);
 
 
 /******************************************************************************
@@ -71,6 +82,10 @@ void wifi_event_handler_cb(System_Event_t * event)
  *******************************************************************************/
 void wifi_config(void *pvParameters)
 {
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
+    tcpip_adapter_init();
+#endif
+
     struct ip_info ip_config;
     struct station_config sta_config;
     memset(&sta_config, 0, sizeof(struct station_config));
@@ -88,6 +103,7 @@ void wifi_config(void *pvParameters)
 }
 #endif
 
+#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
  * Description  : SDK just reversed 4 sectors, used for rf init data and paramters.
@@ -131,7 +147,7 @@ uint32_t user_rf_cal_sector_set(void)
 
     return rf_cal_sec;
 }
-
+#endif
 
 /******************************************************************************
  * FunctionName : user_init
@@ -139,9 +155,15 @@ uint32_t user_rf_cal_sector_set(void)
  * Parameters   : none
  * Returns      : none
  *******************************************************************************/
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
+void app_main(void)
+{
+    ESP_ERROR_CHECK(nvs_flash_init());
+#else
 void user_init(void)
 {
     printf("SDK version:%s\n", system_get_sdk_version());
+#endif
 
     wifi_set_event_handler_cb(wifi_event_handler_cb);
 #ifdef CONFIG_WIFI_SSID

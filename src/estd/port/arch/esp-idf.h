@@ -23,3 +23,19 @@ constexpr int c_strcmp( char const* lhs, char const* rhs )
 #endif
 
 #endif
+
+// now, makefile magic (version_finder.mk) populates critical values
+
+
+// under this approach, version 1.4.1 (for example) would be:
+// 10401
+// so we're giving each decimal place 100 to work with
+#define ESTD_BUILD_IDF_SHORT_VER(major, minor, patch)  ((major * 10000) + (minor * 100) + patch)
+#define ESTD_BUILD_IDF_VER(major, minor, patch, suffix) \
+    ((ESTD_BUILD_IDF_SHORT_VER(major, minor, patch) * 10000) + suffix)
+//#define ESTD_IDF_SHORT_VER    (ESTD_IDF_VER_MAJOR * 10000) + (ESTD_IDF_VER_MINOR * 100) + ESTD_IDF_VER_PATCH
+//#define ESTD_IDF_VER   ((ESTD_IDF_SHORT_VER * 10000) + ESTD_IDF_VER_SUFFIX)
+#define ESTD_IDF_VER    ESTD_BUILD_IDF_VER(ESTD_IDF_VER_MAJOR, ESTD_IDF_VER_MINOR, ESTD_IDF_VER_PATCH, ESTD_IDF_VER_SUFFIX)
+
+#define ESTD_IDF_VER_2_0_0_444  ESTD_BUILD_IDF_VER(2, 0, 0, 444)
+#define ESTD_IDF_VER_2_0_0_644  ESTD_BUILD_IDF_VER(2, 0, 0, 644)
