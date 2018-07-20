@@ -51,6 +51,8 @@
 void test_task(void*);
 
 
+
+#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
 /******************************************************************************
  * FunctionName : wifi_event_handler_cb
  * Description  : wifi event callback
@@ -72,6 +74,7 @@ void wifi_event_handler_cb(System_Event_t * event)
     }
     return;
 }
+#endif
 
 #ifdef CONFIG_WIFI_SSID
 /******************************************************************************
@@ -163,9 +166,9 @@ void app_main(void)
 void user_init(void)
 {
     printf("SDK version:%s\n", system_get_sdk_version());
+    wifi_set_event_handler_cb(wifi_event_handler_cb);
 #endif
 
-    wifi_set_event_handler_cb(wifi_event_handler_cb);
 #ifdef CONFIG_WIFI_SSID
     xTaskCreate(wifi_config, "wfcf", 512, NULL, 4, NULL);
 #endif
