@@ -42,6 +42,8 @@ set(SOURCE_FILES
 
         estd/policy/string.h
 
+        estd/port/arch/esp-idf.h
+
         estd/port/chrono.h
         estd/port/chrono.hpp
         estd/port/string.h

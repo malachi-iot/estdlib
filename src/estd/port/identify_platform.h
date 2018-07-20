@@ -19,6 +19,7 @@
 
 // ESP_PLATFORM always does freeRTOS for esp-idf
 #if defined(ESP_PLATFORM) && defined(IDF_VER)
+#include "arch/esp-idf.h"
 #if !defined(ESTD_FREERTOS)
 #define ESTD_FREERTOS
 #endif

@@ -3,6 +3,8 @@
 
 using namespace estd;
 
+#pragma message IDF_VER
+
 extern "C" void test_task(void* pv)
 {
     for(;;)
