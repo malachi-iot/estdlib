@@ -76,6 +76,10 @@ TEST_CASE("chrono tests")
             REQUIRE(den == 1);
         }
     }
+    SECTION("common_type specialization")
+    {
+        //estd::common_type<estd::chrono::seconds, estd::chrono::milliseconds>::type d;
+    }
     SECTION("fake_clock tests")
     {
         fake_clock clock;
@@ -104,7 +108,16 @@ TEST_CASE("chrono tests")
 
         // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
         // which in turns needs greatest common divider for the two ratios
-        //bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
+        bool result = (clock.now() - second) > estd::chrono::milliseconds(500);
+
+        REQUIRE(!result);
+
+        // almost there, but our specialized common_type doesn't seem to be quite working
+        // we need explicit unit test just for that one
+        /*
+        result = (clock.now() - second) == estd::chrono::milliseconds(333);
+
+        REQUIRE(result); */
 
         second = first;
 

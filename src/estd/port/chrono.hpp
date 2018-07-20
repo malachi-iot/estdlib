@@ -143,4 +143,24 @@ namespace estd {
 template<std::intmax_t Denom1, std::intmax_t Denom2>
 static CONSTEXPR std::intmax_t ratio_dividenum */
 
+// for duration to be a common type, we need the same denominator.  This means
+// one of the ratio's numerators must increase, thus reducing the precision on the
+// other ratio.
+template <int Denom1, int Denom2>
+struct common_type<
+        chrono::duration<unsigned, ratio<1, Denom1> >,
+        chrono::duration<unsigned, ratio<1, Denom2> > >
+{
+private:
+    static CONSTEXPR int gcd = internal::gcd<Denom2, Denom1>::value;
+    static CONSTEXPR int Num1 = Denom2 / gcd;
+    static CONSTEXPR int Num2 = Denom1 / gcd;
+    static CONSTEXPR int NewDenom = (Denom1 * Denom2) / gcd;
+    static CONSTEXPR bool num1gtnum2 = Num1 > Num2;
+
+public:
+    // dummy type, for now
+    typedef chrono::duration<unsigned, estd::ratio<num1gtnum2 ? Num1 : Num2, NewDenom> > type;
+};
+
 }
