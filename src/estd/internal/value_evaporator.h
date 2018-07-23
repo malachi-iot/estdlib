@@ -4,6 +4,8 @@
 
 namespace estd { namespace internal {
 
+// utility class using specialization to eliminate a stored value from memory if the consuming
+// class does not require it and can instead always rely on a default value
 template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated default_value = TEvaporated()>
 class value_evaporator;
 

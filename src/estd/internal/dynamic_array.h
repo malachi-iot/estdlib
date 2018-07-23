@@ -115,8 +115,6 @@ namespace internal {
 // accounts for lock/unlock behaviors. Used for vector and string
 // More or less 1:1 with vector
 // and may get rolled back completely into vector at some point -
-// size_tracker_* are very experimental
-//template <class TAllocator, class TImpl = impl::dynamic_array<TAllocator, void > >
 template <class TImpl>
 class dynamic_array : public allocated_array<TImpl>
 {

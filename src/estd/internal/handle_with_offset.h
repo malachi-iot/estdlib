@@ -67,6 +67,7 @@ public:
 template<class THandle, typename size_t = std::size_t>
 class handle_with_only_offset;
 
+// 'fake' handle (typically used with singular-allocator) with explicit offset
 template<typename size_t>
 class handle_with_only_offset<bool, size_t> :
         public handle_with_offset_base<size_t>
@@ -90,6 +91,7 @@ public:
 };
 
 
+// 'traditional' handle with offset with a proper handle and explicit offset
 template<class THandle, typename size_type = std::size_t>
 class handle_with_offset :
         public handle_with_offset_base<size_type>
@@ -114,6 +116,7 @@ public:
 };
 
 
+// handle_with_offset class which actually contains a pointer
 template<class TPointer, typename size_t = std::size_t>
 class handle_with_offset_raw
 {

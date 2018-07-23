@@ -30,7 +30,8 @@ public:
     typedef typename allocator_type::value_type value_type;
 
 protected:
-
+    // NOTE: It's conceivable we could use a value_evaporator here in situations where
+    // allocated array pointed to a static const(expr) * of some kind
     TImpl m_impl;
 
 public:

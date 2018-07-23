@@ -14,6 +14,7 @@ set(SOURCE_FILES
         estd/chrono.h
 
         estd/exp/observer.h
+        estd/exp/tmr.h
 
         estd/forward_list.h
         estd/functional.h

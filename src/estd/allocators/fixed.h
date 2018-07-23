@@ -46,6 +46,8 @@ protected:
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }
+    // 'valid()' handle call only applicable for singlular-allocator scenarios
+    static CONSTEXPR handle_type valid() { return true; }
 
     // technically we ARE locking since we have to convert the dummy 'bool' handle
     // to a pointer
@@ -150,6 +152,8 @@ public:
         return size <= len;
     }
 
+    // TODO: Make a debug mode which actually does track an allocated handle, just to make
+    // sure we don't allocate a 2nd time for these fixed+singular scenarios
     handle_type allocate(size_t size)
     {
         return allocate_ext(size);
