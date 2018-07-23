@@ -97,7 +97,8 @@ struct allocator_descriptor<TAllocator, false>
     typedef typename allocator_traits::handle_type handle_type;
 
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
-    // would be an invalid reference
+    // would be an invalid reference.  We have to pull this stunt since
+    // consumers of get_allocator() won't take an rvalue
     allocator_type& get_allocator() const
     {
         allocator_type* _fake = NULLPTR;
@@ -135,17 +136,23 @@ protected:
 
     value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
     {
-        return a.lock(handle(), pos, len);
+        return allocator_traits::lock(a, handle(), pos, len);
     }
 
     const value_type& clock(const allocator_type& a, size_type pos = 0, size_type len = 0) const
     {
-        return a.clock(handle(), pos, len);
+        return allocator_traits::clock(a, handle(), pos, len);
     }
 
-    void unlock(allocator_type& a) { a.unlock(handle()); }
+    void unlock(allocator_type& a)
+    {
+        allocator_traits::unlock(a, handle());
+    }
 
-    void cunlock(const allocator_type& a) const { a.cunlock(handle()); }
+    void cunlock(const allocator_type& a) const
+    {
+        allocator_traits::cunlock(a, handle());
+    }
 };
 
 

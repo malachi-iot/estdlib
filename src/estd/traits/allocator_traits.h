@@ -172,9 +172,9 @@ struct allocator_traits
         return a.lock(h, pos, count);
     }
 
-    static const value_type& clock(const allocator_type& a, handle_type h, size_type pos = 0)
+    static const value_type& clock(const allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
     {
-        return a.clock(h, pos);
+        return a.clock(h, pos, count);
     }
 
     static const value_type& clock(const allocator_type& a, const handle_with_offset& h, size_type pos = 0)
