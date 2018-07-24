@@ -5,6 +5,8 @@
 #include <cassert>
 #endif
 
+// TODO: Consider organizing this under internal/handle_desc since even though this is all
+// very allocator oriented, it doesn't in it of itself define an allocator
 namespace estd { namespace internal {
 
 // TODO: Utilize allocator_traits throughout
@@ -29,114 +31,6 @@ template <class TAllocator,
           bool is_contiguous>
 class handle_descriptor_base;
 
-
-
-
-// common base class
-// size managed by classes derived from this one
-// singular allocators have a simplified handle model, basically true = successful/good handle
-// false = bad/unallocated handle - we assume always good handle for this descriptor, so no
-// handle is actually tracked
-template <class TAllocator, bool is_stateful, bool is_singular,
-          class TTraits = estd::allocator_traits<TAllocator> >
-class allocator_and_handle_descriptor :
-        public impl::allocator_descriptor<TAllocator, is_stateful>,
-        public impl::handle_descriptor<TAllocator, is_singular>,
-        public impl::contiguous_descriptor<TAllocator, true> // hard-wired to contiguous, for now
-{
-    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> this_t;
-    typedef impl::allocator_descriptor<TAllocator, is_stateful> base_t;
-    typedef impl::handle_descriptor<TAllocator, is_singular> handle_base_t;
-    typedef impl::contiguous_descriptor<TAllocator, true> contiguous_base;
-
-public:
-    typedef typename remove_reference<TAllocator>::type allocator_type;
-    typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::size_type size_type;
-    typedef typename handle_base_t::handle_type handle_type;
-    typedef TTraits allocator_traits;
-
-public:
-    // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
-    template <class TAllocatorParameter>
-    allocator_and_handle_descriptor(TAllocatorParameter& p, const handle_type& h) :
-            base_t(p),
-            handle_base_t(h)
-    {}
-
-    allocator_and_handle_descriptor(const handle_type& h) :
-        handle_base_t(h) {}
-
-
-    // Indicates whether this handle can be invalid or not.
-    // FALSE = invalid is possible (typical dynamic allocation behavior)
-    // TRUE = invalid is impossible (fixed/singular behavior)
-    static bool CONSTEXPR is_always_allocated() { return is_singular; }
-
-    value_type& lock(size_type pos = 0, size_type count = 0)
-    {
-        return handle_base_t::lock(base_t::get_allocator(), pos, count);
-    }
-
-    // a necessary evil - since most STL-type operations reasonably are const'd for things
-    // like 'size' etc, but underlying mechanisms which they call (this one in particular)
-    // are not const when it comes to locking/stateful operations
-    const value_type& clock(size_type pos = 0, size_type count = 0) const
-    {
-        return handle_base_t::clock(base_t::get_allocator(), pos, count);
-    }
-
-    void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
-
-    void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
-
-#ifdef FEATURE_CPP_VARIADIC
-    template <class ...TArgs>
-    void construct(size_type pos, TArgs...args)
-    {
-        allocator_type& a = base_t::get_allocator();
-        allocator_traits::construct(a, &lock(pos, 1), std::forward<TArgs>(args)...);
-        unlock();
-    }
-#endif
-
-    void destroy(size_type pos)
-    {
-        allocator_type& a = base_t::get_allocator();
-        allocator_traits::destroy(a, &lock(pos, 1));
-        unlock();
-    }
-
-    void copy_into(const value_type* source, size_type pos, size_type len)
-    {
-        contiguous_base::copy_into(
-                base_t::get_allocator(),
-                handle_base_t::handle(),
-                source, pos, len);
-    }
-
-    bool reallocate(size_type size)
-    {
-        handle_base_t::handle(base_t::get_allocator().reallocate(handle_base_t::handle(), size));
-        return handle_base_t::handle() != allocator_traits::invalid();
-    }
-
-    bool is_allocated() const
-    {
-        return allocator_traits::invalid() != handle_base_t::handle();
-    }
-
-    bool allocate(size_type n)
-    {
-        handle_base_t::handle(base_t::get_allocator().allocate(n));
-        return is_allocated();
-    }
-
-    void free()
-    {
-        base_t::get_allocator().free(handle_base_t::handle());
-    }
-};
 
 
 
@@ -227,14 +121,14 @@ class handle_descriptor :
              TTraits::is_stateful_exp,
              TTraits::has_size_exp,
              TTraits::is_singular_exp,
-             true>
+             TTraits::is_contiguous_exp>
 {
      typedef internal::handle_descriptor_base<
              TAllocator,
              TTraits::is_stateful_exp,
              TTraits::has_size_exp,
              TTraits::is_singular_exp,
-             true> base_t;
+             TTraits::is_contiguous_exp> base_t;
 
 public:
      handle_descriptor() : base_t(TTraits::invalid()) {}

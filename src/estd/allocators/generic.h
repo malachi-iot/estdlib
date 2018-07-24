@@ -151,17 +151,20 @@ struct allocator_traits< ::std::allocator<T> >
     static CONSTEXPR bool has_size_exp = false;
     static CONSTEXPR bool is_singular_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
+    static CONSTEXPR bool is_contiguous_exp = true;
 
 #ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     typedef typename nothing_allocator<T>::lock_counter lock_counter;
 #endif
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static value_type& lock(allocator_type& a, handle_type h, size_type pos, size_type count)
     {
         return *(h + pos);
     }
 
     static void unlock(allocator_type& a, handle_type h) {}
+#endif
 };
 #endif
 

@@ -127,6 +127,13 @@ template<typename T>
 struct has_size_tag<T, typename estd::internal::has_typedef<typename T::has_size_tag>::type> : estd::true_type {};
 
 template<typename T, typename = void>
+struct has_noncontiguous_tag : estd::false_type {};
+
+template<typename T>
+struct has_noncontiguous_tag<T, typename estd::internal::has_typedef<typename T::is_noncontiguous_tag>::type> : estd::true_type {};
+
+
+template<typename T, typename = void>
 struct has_difference_type : estd::false_type {};
 
 template<typename T>
@@ -304,6 +311,10 @@ struct allocator_traits
     static CONSTEXPR bool is_singular_exp = internal::has_singular_tag<allocator_type>::value;
 
     static CONSTEXPR bool has_size_exp = internal::has_size_tag<allocator_type>::value;
+
+    // NOTE: contiguous is an experimental and incomplete feature, and one can safely assume all
+    // allocators are marked as TRUE for is_contiguous as this time
+    static CONSTEXPR bool is_contiguous_exp = !internal::has_noncontiguous_tag<allocator_type>::value;
 
     static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
 
