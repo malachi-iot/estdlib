@@ -97,10 +97,10 @@ struct experimental_std_allocator : public ::std::allocator<T>
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static T& lock(handle_type h, size_t pos, size_t count) { return *(h + pos); }
     void unlock(handle_type) {}
 
-#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return false; }
 #endif
 
