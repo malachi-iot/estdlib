@@ -2,7 +2,7 @@
 
 #include "generic.h"
 #include "../traits/allocator_traits.h"
-#include "../internal/handle_with_offset.h"
+#include "../internal/accessor.h"
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"

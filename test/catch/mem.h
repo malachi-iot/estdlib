@@ -95,6 +95,7 @@ public:
         operator handle_type() const { return h; }
     };
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     T& lock(handle_type h, size_t pos = 0, size_t count = 0) { return *(h + pos); }
 
     T& lock(handle_with_offset h, size_t pos = 0, size_t count = 0)
@@ -115,12 +116,14 @@ public:
     void unlock(handle_type) { }
 
     void cunlock(handle_type) const {}
+#endif
 
     pointer allocate(size_t size)
     {
         return (pointer) malloc(size * sizeof(T));
     }
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     // consider merging this with regular allocate and letting optimizer shake out
     // pointer access
     handle_with_size allocate_ext(size_t size)
@@ -133,6 +136,7 @@ public:
     {
         return h.size();
     }
+#endif
 
 
     void deallocate(handle_type p, size_t size)
@@ -140,10 +144,12 @@ public:
         free(p);
     }
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     void deallocate(handle_with_size h)
     {
         free(h);
     }
+#endif
 
 
     handle_type reallocate(handle_type h, size_t size)
@@ -152,10 +158,12 @@ public:
     }
 
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     handle_with_size reallocate_ext(handle_type h, size_t size)
     {
         return handle_with_size(reallocate(h, size), size);
     }
+#endif
 
 
     // TODO: template this to work with both handle_with_size or not

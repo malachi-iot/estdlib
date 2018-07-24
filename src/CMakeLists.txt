@@ -21,6 +21,7 @@ set(SOURCE_FILES
         estd/initializer_list.h
         estd/iterator.h
 
+        estd/internal/accessor.h
         estd/internal/buffer.h
         estd/internal/common_type.h
         estd/internal/dynamic_array.h

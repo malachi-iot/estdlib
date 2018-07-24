@@ -2,7 +2,7 @@
 
 #include "platform.h"
 #include "../traits/allocator_traits.h"
-#include "../internal/handle_with_offset.h"
+#include "../internal/accessor.h"
 #include "../algorithm.h"
 #include "../initializer_list.h"
 #include "../iterator.h"

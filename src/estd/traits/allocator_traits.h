@@ -1,5 +1,12 @@
 #pragma once
 
+namespace estd {
+
+template <class TAllocator>
+struct allocator_traits;
+
+}
+
 #include "../type_traits.h"
 #include "../utility.h"
 #ifdef FEATURE_STD_MEMORY
@@ -7,6 +14,7 @@
 #endif
 #include <stdint.h> // for uint8_t and friends
 #include "../internal/deduce_fixed_size.h"
+#include "../internal/handle_with_offset.h"
 
 namespace estd {
 
@@ -119,7 +127,10 @@ struct locking_allocator_traits<TAllocator, true>
     typedef typename TAllocator::pointer        pointer;
     typedef typename TAllocator::size_type      size_type;
     typedef typename TAllocator::handle_type            handle_type;
-    typedef typename TAllocator::handle_with_size       handle_with_size;
+
+    // handle_with_size is phased out with advent of has_size_tag coupled with
+    // outside-of-allocator specializations
+    //typedef typename TAllocator::handle_with_size       handle_with_size;
     typedef typename TAllocator::handle_with_offset     handle_with_offset;
 
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
@@ -164,9 +175,13 @@ struct locking_allocator_traits<TAllocator, false>
     typedef typename TAllocator::value_type     value_type;
     typedef typename TAllocator::pointer        pointer;
     typedef typename TAllocator::size_type      size_type;
-    typedef typename TAllocator::handle_type            handle_type;
-    typedef typename TAllocator::handle_with_size       handle_with_size;
-    typedef typename TAllocator::handle_with_offset     handle_with_offset;
+    typedef typename TAllocator::pointer        handle_type;
+
+    // handle_with_size is phased out with advent of has_size_tag coupled with
+    // outside-of-allocator specializations
+    //typedef typename TAllocator::handle_with_size       handle_with_size;
+
+    typedef estd::internal::handle_with_offset_raw<pointer>    handle_with_offset;
 
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
@@ -202,10 +217,6 @@ struct locking_allocator_traits<TAllocator, false>
 
 
 }
-
-template <class TAllocator>
-struct allocator_traits;
-
 
 // NOTE: May very well be better off using inbuilt version and perhaps extending it with
 // our own lock mechanism
