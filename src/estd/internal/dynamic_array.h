@@ -128,7 +128,7 @@ public:
     typedef typename base_t::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
-    typedef typename allocator_traits::handle_with_size handle_with_size;
+    //typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
     typedef typename base_t::size_type size_type;
@@ -414,8 +414,12 @@ public:
         size_type end = impl().size() - 1;
 
         // lock down element at that position and run the destructor
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        impl().destroy(end);
+#else
         impl().lock(end).~value_type();
         impl().unlock();
+#endif
 
         // TODO: put in warning if this doesn't work, remember
         // documentation says 'undefined' behavior if empty
@@ -475,11 +479,15 @@ public:
         // TODO: combine this with _append since it's mostly overlapping code
         size_type current_size = grow(1);
 
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+        impl().construct(current_size, std::forward<TArgs>(args)...);
+#else
         value_type* raw = lock(current_size);
 
         allocator_traits::construct(base_t::get_allocator(), raw, std::forward<TArgs>(args)...);
 
         unlock();
+#endif
 
         return base_t::back();
     }

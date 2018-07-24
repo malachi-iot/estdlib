@@ -21,7 +21,7 @@ public:
     typedef typename impl_type::allocator_type allocator_type;
     typedef typename impl_type::allocator_traits allocator_traits;
     typedef typename allocator_traits::handle_type handle_type;
-    typedef typename allocator_traits::handle_with_size handle_with_size;
+    //typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
     typedef typename allocator_traits::size_type size_type;

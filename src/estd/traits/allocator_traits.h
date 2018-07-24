@@ -35,11 +35,6 @@ struct has_member_base
     // reallyHas<std::string (C::*)(), &C::serialize> should be substituted by
     // reallyHas<std::string (C::*)(), std::string (C::*)() &C::serialize> and work!
     template <typename U, U u> struct reallyHas;
-
-    // The famous C++ sink-hole.
-    // Note that sink-hole must be templated too as we are testing test<T>(0).
-    // If the method serialize isn't available, we will end up in this method.
-    template <typename> static no& test(...) { /* dark matter */ }
 };
 
 // lifted directly from https://jguegant.github.io/blogs/tech/sfinae-introduction.html
@@ -51,6 +46,11 @@ template <class T> struct hasSerialize : has_member_base
     template <typename C> static yes& test(reallyHas<std::string (C::*)(), &C::serialize>* /*unused*/) { }
     template <typename C> static yes& test(reallyHas<std::string (C::*)() const, &C::serialize>* /*unused*/) { }
 
+    // The famous C++ sink-hole.
+    // Note that sink-hole must be templated too as we are testing test<T>(0).
+    // If the method serialize isn't available, we will end up in this method.
+    template <typename> static no& test(...) { /* dark matter */ }
+
     // The constant used as a return value for the test.
     // The test is actually done here, thanks to the sizeof compile-time evaluation.
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes);
@@ -60,11 +60,34 @@ template <class T> struct hasSerialize : has_member_base
 template <class T> struct has_construct_method : has_member_base
 {
     template <typename C> static yes& test(reallyHas<std::string (C::*)(), &C::construct>* /*unused*/) { }
+    // The famous C++ sink-hole.
+    // Note that sink-hole must be templated too as we are testing test<T>(0).
+    // If the method serialize isn't available, we will end up in this method.
+    template <typename> static no& test(...) { /* dark matter */ }
 
     // The constant used as a return value for the test.
     // The test is actually done here, thanks to the sizeof compile-time evaluation.
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes);
 };
+
+
+template <class TAlloc2, class T, class... TArgs>
+static typename estd::enable_if<internal::has_construct_method<TAlloc2>::value, int>::type
+    construct_sfinae(TAlloc2& a, T* p, TArgs&&... args)
+{
+    a.construct(p, std::forward<TArgs>(args)...);
+    return true;
+}
+
+// no construct method in underlying allocator, so use our own placement new
+template <class TAlloc2, class T, class... TArgs>
+static typename estd::enable_if<!internal::has_construct_method<TAlloc2>::value, int>::type
+    construct_sfinae(TAlloc2& a, T* p, TArgs&&... args)
+{
+    new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
+    return false;
+}
+
 
 
 // experimental feature, has_typedef (lifted from PGGCC-13)
@@ -245,7 +268,7 @@ struct allocator_traits
 
     // non-standard, for handle based scenarios
     typedef typename TAllocator::handle_type            handle_type;
-    typedef typename TAllocator::handle_with_size       handle_with_size;
+    //typedef typename TAllocator::handle_with_size       handle_with_size;
     typedef typename TAllocator::handle_with_offset     handle_with_offset;
     typedef typename allocator_type::const_void_pointer     const_void_pointer;
 
@@ -337,15 +360,27 @@ struct allocator_traits
 
 #ifdef FEATURE_CPP_VARIADIC
 private:
-
 public:
     // TODO: Consider changing T* p to handle_type for locking variant
+    //       note that we'd have to do a handle_with_offset version too since
+    //       this call is often used in an allocated-array capacity
     template <class T, class... TArgs>
     static void construct(allocator_type& a, T* p, TArgs&&... args)
     {
-        new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
+        internal::construct_sfinae(a, p, std::forward<TArgs>(args)...);
+        //new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
     }
 #endif
+
+    // just for feature parity with construct
+    // same concepts apply, namely:
+    // a) SFINAE approach should be coded here
+    // b) consider a handle_type/handle_with_offset variety
+    template <class T>
+    static void destroy(allocator_type& a, T* p)
+    {
+        p->~T();
+    }
 };
 
 

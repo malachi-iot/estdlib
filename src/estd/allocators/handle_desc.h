@@ -90,6 +90,22 @@ public:
 
     void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
 
+#ifdef FEATURE_CPP_VARIADIC
+    template <class ...TArgs>
+    void construct(size_type pos, TArgs...args)
+    {
+        allocator_type& a = base_t::get_allocator();
+        allocator_traits::construct(a, &lock(pos, 1), std::forward<TArgs>(args)...);
+        unlock();
+    }
+#endif
+
+    void destroy(size_type pos)
+    {
+        allocator_type& a = base_t::get_allocator();
+        allocator_traits::destroy(a, &lock(pos, 1));
+        unlock();
+    }
 
     void copy_into(const value_type* source, size_type pos, size_type len)
     {
