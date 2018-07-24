@@ -131,14 +131,11 @@ class handle_descriptor :
              TTraits::is_contiguous_exp> base_t;
 
 public:
-     handle_descriptor() : base_t(TTraits::invalid()) {}
+     handle_descriptor(typename TTraits::handle_type h = TTraits::invalid()) :
+         base_t(h) {}
 
      template <class TAllocatorParameter>
      handle_descriptor(TAllocatorParameter& p) : base_t(p, TTraits::invalid()) {}
-
-     typedef typename base_t::allocator_traits allocator_traits;
-     typedef typename base_t::size_type size_type;
-
 };
 #else
 #ifdef FEATURE_CPP_CONSTEXPR

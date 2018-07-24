@@ -9,8 +9,9 @@ struct allocator_traits;
 
 #include "../type_traits.h"
 #include "../utility.h"
+//#include "../memory.h" // for std::allocator
 #ifdef FEATURE_STD_MEMORY
-#include <memory> // for std::allocator
+#include <memory>
 #endif
 #include <stdint.h> // for uint8_t and friends
 #include "../internal/deduce_fixed_size.h"
@@ -71,6 +72,7 @@ template <class T> struct has_construct_method : has_member_base
 };
 
 
+#ifdef FEATURE_CPP_VARIADIC
 template <class TAlloc2, class T, class... TArgs>
 static typename estd::enable_if<internal::has_construct_method<TAlloc2>::value, int>::type
     construct_sfinae(TAlloc2& a, T* p, TArgs&&... args)
@@ -87,7 +89,7 @@ static typename estd::enable_if<!internal::has_construct_method<TAlloc2>::value,
     new (static_cast<void*>(p)) T(std::forward<TArgs>(args)...);
     return false;
 }
-
+#endif
 
 
 // experimental feature, has_typedef (lifted from PGGCC-13)
@@ -139,9 +141,19 @@ struct has_difference_type : estd::false_type {};
 template<typename T>
 struct has_difference_type<T, typename estd::internal::has_typedef<typename T::difference_type>::type> : estd::true_type {};
 
-}
 
-namespace experimental {
+template<typename TAlloc, typename = void>
+struct get_difference_type
+{
+    typedef typename std::pointer_traits<typename TAlloc::pointer>::difference_type type;
+};
+
+template<typename TAlloc>
+struct get_difference_type<TAlloc,
+        typename estd::internal::has_typedef<typename TAlloc::difference_type>::type>
+{
+    typedef typename TAlloc::difference_type type;
+};
 
 
 // FIX: eventually use something a bit like our Range<bool> trick in the fixed_size_t finder
@@ -194,6 +206,8 @@ struct locking_allocator_traits<TAllocator, true>
     {
         a.cunlock(h);
     }
+
+    static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
 };
 
 
@@ -243,6 +257,8 @@ struct locking_allocator_traits<TAllocator, false>
     static void cunlock(const allocator_type& a, handle_type h)
     {
     }
+
+    static CONSTEXPR handle_type invalid() { return NULLPTR; }
 };
 
 
@@ -255,13 +271,15 @@ template <class TAllocator>
 struct allocator_traits
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         :
-        experimental::locking_allocator_traits<TAllocator, internal::has_locking_tag<TAllocator>::value >
+        internal::locking_allocator_traits<TAllocator, internal::has_locking_tag<TAllocator>::value >
 #endif
 {
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
     typedef typename TAllocator::pointer        pointer;
     typedef typename TAllocator::size_type      size_type;
+
+    typedef typename internal::get_difference_type<allocator_type>::type difference_type;
     // FIX: Do a SFINAE extraction of difference type
     // doesn't work, still tries to resolve allocator_type::difference_type always
     /*
@@ -274,9 +292,16 @@ struct allocator_traits
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
     // non-standard, for handle based scenarios
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     typedef typename TAllocator::handle_type            handle_type;
     //typedef typename TAllocator::handle_with_size       handle_with_size;
     typedef typename TAllocator::handle_with_offset     handle_with_offset;
+#else
+    typedef internal::locking_allocator_traits<TAllocator, internal::has_locking_tag<TAllocator>::value > base_t;
+    typedef typename base_t::handle_type handle_type;
+    typedef typename base_t::handle_with_offset handle_with_offset;
+#endif
+
     typedef typename allocator_type::const_void_pointer     const_void_pointer;
 
     //typedef typename allocator_type::accessor           accessor;
@@ -287,9 +312,9 @@ struct allocator_traits
     typedef typename TAllocator::lock_counter           lock_counter;
 #endif
 
+#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
 
-#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return allocator_type::is_locking(); }
 
     // indicates whether the allocator_type is stateful (requiring an instance variable)
@@ -316,7 +341,7 @@ struct allocator_traits
     // allocators are marked as TRUE for is_contiguous as this time
     static CONSTEXPR bool is_contiguous_exp = !internal::has_noncontiguous_tag<allocator_type>::value;
 
-    static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
+    //static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
 
     static handle_type allocate(allocator_type& a, size_type n, const_void_pointer hint = NULLPTR)
     {

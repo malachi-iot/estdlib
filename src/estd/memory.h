@@ -3,6 +3,9 @@
 #include "traits/allocator_traits.h"
 #include "allocators/generic.h"
 #include "allocators/fixed.h"
+#ifdef FEATURE_STD_MEMORY
+#include <memory>
+#endif
 
 namespace estd {
 
