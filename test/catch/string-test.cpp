@@ -148,9 +148,15 @@ TEST_CASE("string tests")
         REQUIRE(v == 3);
         REQUIRE(vv == 3);
     }
-    SECTION("single_fixedbuf_allocator")
+    SECTION("layer1 / single_fixedbuf_allocator")
     {
-        estd::basic_string<char, std::char_traits<char>, internal::single_fixedbuf_allocator<char, 30>> s;
+        estd::basic_string<char, std::char_traits<char>,
+#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+                layer1::allocator<char, 30>
+#else
+                internal::single_fixedbuf_allocator<char, 30>
+#endif
+                > s;
         char buf[128];
 
         s += test_str;
@@ -317,11 +323,6 @@ TEST_CASE("string tests")
         REQUIRE(strlen(buf) > 0);
         REQUIRE(s2 == "Hello World");
         REQUIRE(s3 == "Hello World, again");
-
-        /*
-        estd::basic_string<
-                        char, std::char_traits<char>,
-                        estd::experimental::single_fixedbuf_allocator < char, 0, true, char* > > s2 = "hello"; */
     }
     SECTION("Erase portion of string")
     {

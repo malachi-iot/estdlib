@@ -44,6 +44,7 @@ set(SOURCE_FILES
         estd/map.h
         estd/memory.h
 
+        estd/policy/list.h
         estd/policy/string.h
 
         estd/port/arch/esp-idf.h
