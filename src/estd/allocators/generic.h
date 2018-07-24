@@ -1,9 +1,11 @@
 #pragma once
 
 #include <stdlib.h> // for size_t
-//#include <memory> // for allocator_traits
 #include "../traits/allocator_traits.h"
 #include "../internal/handle_with_offset.h"
+#ifdef FEATURE_STD_MEMORY
+#include <memory> // for std::allocator_traits and friends
+#endif
 
 namespace estd {
 

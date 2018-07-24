@@ -1,5 +1,6 @@
 #include <catch.hpp>
 
+#include <estd/allocators/fixed.h>
 #include "estd/memory.h"
 #include "estd/exp/tmr.h"
 #include "mem.h"

@@ -9,7 +9,7 @@ struct allocator_traits;
 
 #include "../type_traits.h"
 #include "../utility.h"
-//#include "../memory.h" // for std::allocator
+#include "../memory.h" // for std::allocator
 #ifdef FEATURE_STD_MEMORY
 #include <memory>
 #endif
@@ -27,6 +27,13 @@ struct has_member_base
     typedef char yes[1];
     typedef yes no[2];
 
+    // helpers to suppress warnings on non-return type
+    // pretty sure this only appears on rather old (pre c++11) compilers who aren't sure that it compile-time
+    // resolves to not matter.
+    static CONSTEXPR yes yes_value = { 0 };
+    // SAMD compiler fails on this one, so can't use it
+    //static CONSTEXPR no no_value = { 0, 1 };
+
     // This helper struct permits us to check that serialize is truly a method.
     // The second argument must be of the type of the first.
     // For instance reallyHas<int, 10> would be substituted by reallyHas<int, int 10> and works!
@@ -38,6 +45,7 @@ struct has_member_base
     template <typename U, U u> struct reallyHas;
 };
 
+#ifdef UNUSED
 // lifted directly from https://jguegant.github.io/blogs/tech/sfinae-introduction.html
 template <class T> struct hasSerialize : has_member_base
 {
@@ -56,15 +64,17 @@ template <class T> struct hasSerialize : has_member_base
     // The test is actually done here, thanks to the sizeof compile-time evaluation.
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes);
 };
-
+#endif
 
 template <class T> struct has_construct_method : has_member_base
 {
-    template <typename C> static yes& test(reallyHas<std::string (C::*)(), &C::construct>* /*unused*/) { }
+    template <typename C> static const yes& test(reallyHas<void (C::*)(), &C::construct>* /*unused*/)
+    { return yes_value; } // returning yes_value to quell warnings on older compilers
+
     // The famous C++ sink-hole.
     // Note that sink-hole must be templated too as we are testing test<T>(0).
     // If the method serialize isn't available, we will end up in this method.
-    template <typename> static no& test(...) { /* dark matter */ }
+    template <typename> static const no& test(...) { /* dark matter */ }
 
     // The constant used as a return value for the test.
     // The test is actually done here, thanks to the sizeof compile-time evaluation.
@@ -145,7 +155,7 @@ struct has_difference_type<T, typename estd::internal::has_typedef<typename T::d
 template<typename TAlloc, typename = void>
 struct get_difference_type
 {
-    typedef typename std::pointer_traits<typename TAlloc::pointer>::difference_type type;
+    typedef typename estd::pointer_traits<typename TAlloc::pointer>::difference_type type;
 };
 
 template<typename TAlloc>

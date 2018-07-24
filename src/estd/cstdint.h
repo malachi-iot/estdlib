@@ -10,6 +10,7 @@
 namespace std {
 
 typedef ::intmax_t intmax_t;
+typedef ::ptrdiff_t ptrdiff_t;
 
 }
 #endif
