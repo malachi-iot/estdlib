@@ -24,6 +24,8 @@
 
 #include <estd/port/identify_platform.h>
 
+// higher versions of esp-idf are (more) api compatible between ESP32 and ESP8266
+
 // If need be, we can access IDF-VER ala https://github.com/espressif/ESP8266_RTOS_SDK/blob/master/make/project.mk
 // OK above was a bit of a pipe dream, since C preprocessor isn't powerful enough to decompose it well
 // so instead we rebuild ourselves with special version_finder.mk
