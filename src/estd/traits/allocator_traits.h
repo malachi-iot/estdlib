@@ -24,7 +24,7 @@ namespace internal {
 struct has_member_base
 {
     // For the compile time comparison.
-    typedef char yes[1];
+    typedef const char yes[1];
     typedef yes no[2];
 
     // helpers to suppress warnings on non-return type
@@ -32,7 +32,7 @@ struct has_member_base
     // resolves to not matter.
     static CONSTEXPR yes yes_value = { 0 };
     // SAMD compiler fails on this one, so can't use it
-    //static CONSTEXPR no no_value = { 0, 1 };
+    static CONSTEXPR no no_value = { { 0 }, { 1 } };
 
     // This helper struct permits us to check that serialize is truly a method.
     // The second argument must be of the type of the first.
@@ -66,15 +66,30 @@ template <class T> struct hasSerialize : has_member_base
 };
 #endif
 
+
+#define ESTD_HAS_METHOD_EXPERIMENTAL(ret_type, method_name) \
+template <class T> struct has_##method_name##_method : has_member_base \
+{ \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(), &C::method_name>* /*unused*/) \
+    { return yes_value; }  \
+\
+    template <typename> static CONSTEXPR no& test(...) { return no_value; } \
+\
+    static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
+};
+
+ESTD_HAS_METHOD_EXPERIMENTAL(void, destroy)
+
+
 template <class T> struct has_construct_method : has_member_base
 {
-    template <typename C> static const yes& test(reallyHas<void (C::*)(), &C::construct>* /*unused*/)
+    template <typename C> static CONSTEXPR yes& test(reallyHas<void (C::*)(), &C::construct>* /*unused*/)
     { return yes_value; } // returning yes_value to quell warnings on older compilers
 
     // The famous C++ sink-hole.
     // Note that sink-hole must be templated too as we are testing test<T>(0).
     // If the method serialize isn't available, we will end up in this method.
-    template <typename> static const no& test(...) { /* dark matter */ }
+    template <typename> static CONSTEXPR no& test(...) { return no_value; }
 
     // The constant used as a return value for the test.
     // The test is actually done here, thanks to the sizeof compile-time evaluation.
@@ -101,6 +116,21 @@ static typename estd::enable_if<!internal::has_construct_method<TAlloc2>::value,
 }
 #endif
 
+template <class TAlloc, class T>
+static typename estd::enable_if<internal::has_destroy_method<TAlloc>::value, bool>::type
+    destroy_sfinae(TAlloc& a, T* p)
+{
+    a.destroy(p);
+    return true;
+}
+
+template <class TAlloc, class T>
+static typename estd::enable_if<!internal::has_destroy_method<TAlloc>::value, bool>::type
+    destroy_sfinae(TAlloc& a, T* p)
+{
+    p->~T();
+    return false;
+}
 
 // experimental feature, has_typedef (lifted from PGGCC-13)
 template<typename>
@@ -425,7 +455,7 @@ public:
     template <class T>
     static void destroy(allocator_type& a, T* p)
     {
-        p->~T();
+        internal::destroy_sfinae(a, p);
     }
 };
 
