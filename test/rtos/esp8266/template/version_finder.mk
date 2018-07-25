@@ -16,10 +16,27 @@ endif
 # more smoothly
 IDF_VER := $(subst -, ,$(IDF_VER))
 
-#$(info ************  VERSION: $(IDF_VER) ************)
+IDF_VER_MAIN := $(subst ., ,$(word 1, $(IDF_VER)))
+
+$(info ************  VERSION: $(IDF_VER) / $(IDF_VER_MAIN) ************)
 
 # I would decompose v2.0.0 more, but I don't trust espressif will necessarily
 # do something like a v2.1.0.  If they do, then I'll write the decomposer
+ifeq ($(word 1,$(IDF_VER_MAIN)),v2)
+	IDF_VER_MAJOR=2
+	IDF_VER_MINOR=$(word 2,$(IDF_VER_MAIN))
+	IDF_VER_PATCH=0
+	IDF_VER_SUFFIX=$(word 2,$(IDF_VER))
+	IDF_VER_GIT=$(word 3,$(IDF_VER))
+else ifeq ($(word 1,$(IDF_VER_MAIN)),v3)
+	IDF_VER_MAJOR=3
+	IDF_VER_MINOR=$(word 2,$(IDF_VER_MAIN))
+	IDF_VER_PATCH=0
+	# has 'dev' or similar in the middle, complicating matters
+	IDF_VER_SUFFIX=$(word 3,$(IDF_VER))
+	IDF_VER_GIT=$(word 4,$(IDF_VER))
+else
+
 ifeq ($(word 1,$(IDF_VER)),v2.0.0)
 	#$(info got here)
 	IDF_VER_MAJOR=2
@@ -34,13 +51,21 @@ else
 	IDF_VER_SUFFIX=0
 endif
 
-# for v2.0.0
+endif
+
+# for v2.0.0 (ESP8266)
 # notable IDF_VER_SUFFIX:
 #   444 = fairly stable version, lightly buggy
 #   644 = more esp32 esp-idf like, noticable API breaking changes from 444
 
+$(info ** v$(IDF_VER_MAJOR).$(IDF_VER_MINOR).$(IDF_VER_PATCH) $(IDF_VER_SUFFIX) **)
+
+# somehow IDF_VER_SUFFIX gets blasted to blank during CPPFLAGS.  
+# Not sure how, but have to shim this in
+IDF_VER_SUFFIX2 := $(IDF_VER_SUFFIX)
+
 CPPFLAGS += -D ESTD_IDF_VER_MAJOR=$(IDF_VER_MAJOR) \
 	-D ESTD_IDF_VER_MINOR=$(IDF_VER_MINOR) \
 	-D ESTD_IDF_VER_PATCH=$(IDF_VER_PATCH) \
-	-D ESTD_IDF_VER_SUFFIX=$(IDF_VER_SUFFIX) \
-	-D ESP8266
+	-D ESTD_IDF_VER_SUFFIX=$(IDF_VER_SUFFIX2) \
+	-D TEST
