@@ -8,3 +8,7 @@
 // times a handle has been locked (pinned).  Seems it's better to do this externally,
 // so unless you have something specific in mind, keep this disabled
 //#define FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
+
+// experimental feature to use proper strong-typed handles more often vs resoloving to
+// 'just a bool' - doesn't work yet, some abiguity on lock overload fails it
+//#define FEATURE_ESTD_ENHANCED_HANDLE_EXP

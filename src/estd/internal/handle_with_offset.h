@@ -90,6 +90,38 @@ public:
     }
 };
 
+#ifdef FEATURE_ESTD_ENHANCED_HANDLE_EXP
+struct single_allocator_handle
+{
+    bool is_valid;
+    CONSTEXPR single_allocator_handle(bool is_valid) : is_valid(is_valid) {}
+
+    operator bool() const { return is_valid; }
+};
+
+// 'fake' handle (typically used with singular-allocator) with explicit offset
+template<typename size_t>
+class handle_with_only_offset<single_allocator_handle, size_t> :
+        public handle_with_offset_base<size_t>
+{
+    typedef handle_with_offset_base<size_t> base_t;
+
+public:
+    handle_with_only_offset(size_t offset) :
+            base_t(offset) {}
+
+    // TODO: Assert that incoming h == true
+    handle_with_only_offset(single_allocator_handle h, size_t offset) :
+            base_t(offset) {}
+
+    size_t offset() const { return base_t::m_offset; }
+
+    single_allocator_handle handle() const
+    {
+        return true;
+    }
+};
+#endif
 
 // 'traditional' handle with offset with a proper handle and explicit offset
 template<class THandle, typename size_type = std::size_t>

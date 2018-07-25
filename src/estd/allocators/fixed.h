@@ -25,11 +25,14 @@ struct single_allocator_base
     typedef const void* const_void_pointer;
     // really I want it an empty struct.  Bool is somewhat convenient though since we can
     // represent an invalid handle too
+#ifdef FEATURE_ESTD_ENHANCED_HANDLE_EXP
+    typedef single_allocator_handle handle_type;
+#else
     typedef bool handle_type;
+#endif
     typedef TSize size_type;
     typedef TDiff difference_type;
-    typedef handle_type handle_with_size;
-    //typedef T& handle_with_offset; // represents a pointer location past initial location of buffer
+    //typedef handle_type handle_with_size;
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
     typedef T value_type;
     typedef T* pointer;
@@ -96,9 +99,10 @@ public:
         return handle_with_offset(h, pos);
     }
 
+    /*
     void deallocate(handle_with_size h, size_type count)
     {
-    }
+    } */
 
     handle_type reallocate(handle_type h, size_t len)
     {
