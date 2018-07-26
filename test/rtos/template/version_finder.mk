@@ -16,6 +16,7 @@ endif
 # more smoothly
 IDF_VER := $(subst -, ,$(IDF_VER))
 
+# decompose actual primary v2.0.0 (or whatever v#.#.# we are presented with)
 IDF_VER_MAIN := $(subst ., ,$(word 1, $(IDF_VER)))
 
 $(info ************  VERSION: $(IDF_VER) / $(IDF_VER_MAIN) ************)
@@ -33,6 +34,7 @@ else ifeq ($(word 1,$(IDF_VER_MAIN)),v3)
 	IDF_VER_MINOR=$(word 2,$(IDF_VER_MAIN))
 	IDF_VER_PATCH=0
 	# has 'dev' or similar in the middle, complicating matters
+	IDF_VER_TAG=$(word 2,$(IDF_VER))
 	IDF_VER_SUFFIX=$(word 3,$(IDF_VER))
 	IDF_VER_GIT=$(word 4,$(IDF_VER))
 else
@@ -58,7 +60,7 @@ endif
 #   444 = fairly stable version, lightly buggy
 #   644 = more esp32 esp-idf like, noticable API breaking changes from 444
 
-$(info ** v$(IDF_VER_MAJOR).$(IDF_VER_MINOR).$(IDF_VER_PATCH) $(IDF_VER_SUFFIX) **)
+$(info ** v$(IDF_VER_MAJOR).$(IDF_VER_MINOR).$(IDF_VER_PATCH) ($(IDF_VER_TAG)) $(IDF_VER_SUFFIX) **)
 
 # somehow IDF_VER_SUFFIX gets blasted to blank during CPPFLAGS.  
 # Not sure how, but have to shim this in
