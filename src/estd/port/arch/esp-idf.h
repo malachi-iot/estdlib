@@ -43,6 +43,7 @@ constexpr int c_strcmp( char const* lhs, char const* rhs )
 // noteworthy ESP8266 versions
 #define ESTD_IDF_VER_2_0_0_444  ESTD_BUILD_IDF_VER(2, 0, 0, 444)
 #define ESTD_IDF_VER_2_0_0_644  ESTD_BUILD_IDF_VER(2, 0, 0, 644)
+#define ESTD_IDF_VER_2_0_0_740  ESTD_BUILD_IDF_VER(2, 0, 0, 740)
 
 // current ESP32 versions that I'm working with
 #define ESTD_IDF_VER_3_1_0_1319 ESTD_BUILD_IDF_VER(3, 1, 0, 1319)

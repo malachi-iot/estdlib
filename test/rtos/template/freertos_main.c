@@ -62,18 +62,29 @@ void test_task(void*);
  *******************************************************************************/
 #if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
 void wifi_event_handler_cb(System_Event_t * event)
-#else
+#elif ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_644
 void wifi_event_handler_cb(system_event_t * event)
+#else
+esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
 #endif
 {
-    if (event == NULL) {
-        return;
-    }
+    static const char *TAG = "wifi event";
+
+    if (event != NULL) 
+    {
     switch (event->event_id) {
 #if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
         case EVENT_STAMODE_GOT_IP:
 #else
         case SYSTEM_EVENT_STA_GOT_IP:
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+        case SYSTEM_EVENT_ETH_GOT_IP:
+        case SYSTEM_EVENT_GOT_IP6:
+#endif
+            // 2.0.0-740 never gets here, but arp and ping shows IP address
+            // does actually get assigned
+            ESP_LOGI(TAG, "got ip:%s",
+                 ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
 #endif
             printf("free heap size %d line %d \n", 
 #if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
@@ -85,11 +96,39 @@ void wifi_event_handler_cb(system_event_t * event)
 #endif
                 __LINE__);
             break;
+
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
+        case SYSTEM_EVENT_STA_START:
+            ESP_LOGI(TAG, "STA_START");
+            esp_wifi_connect();
+            break;
+
+        case SYSTEM_EVENT_STA_CONNECTED:
+            // at this point, doesn't have WLAN-provided address yet
+            ESP_LOGI(TAG, "STA_CONNECTED: ip=%s",
+                ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
+            break;
+
+        case SYSTEM_EVENT_STA_DISCONNECTED:
+            ESP_LOGI(TAG, "STA_DISCONNECTED");
+            esp_wifi_connect();
+            break;
+
+#endif
+
         default:
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
+            ESP_LOGI(TAG, "Servicing event: %d", event->event_id);
+#endif
             break;
 
     }
+    }
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+    return ESP_OK;
+#else
     return;
+#endif
 }
 
 
@@ -102,10 +141,31 @@ void wifi_event_handler_cb(system_event_t * event)
  *******************************************************************************/
 void wifi_config(void *pvParameters)
 {
+    static const char *TAG = "wifi config";
+
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
     tcpip_adapter_init();
 #endif
 
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = CONFIG_WIFI_SSID,
+            .password = CONFIG_WIFI_PASSWORD
+        },
+    };
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
+    ESP_ERROR_CHECK(esp_wifi_start() );
+
+    ESP_LOGI(TAG, "wifi_init_sta finished.");
+    ESP_LOGI(TAG, "connect to ap SSID:%s password:%s",
+             CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD);
+
+#else
     struct ip_info ip_config;
     struct station_config sta_config;
     memset(&sta_config, 0, sizeof(struct station_config));
@@ -116,10 +176,9 @@ void wifi_config(void *pvParameters)
 
     wifi_station_disconnect();
     wifi_station_connect();
+#endif
 
-    while (1) {
-        vTaskDelay(10);
-    }
+    vTaskDelete( NULL );
 }
 #endif
 
@@ -179,15 +238,27 @@ uint32_t user_rf_cal_sector_set(void)
 void app_main(void)
 {
     ESP_ERROR_CHECK(nvs_flash_init());
+
 #else
 void user_init(void)
 {
     printf("SDK version:%s\n", system_get_sdk_version());
+#endif
+
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+    ESP_ERROR_CHECK(esp_event_loop_init(wifi_event_handler_cb, NULL) );
+#else
     wifi_set_event_handler_cb(wifi_event_handler_cb);
 #endif
 
 #ifdef CONFIG_WIFI_SSID
-    xTaskCreate(wifi_config, "wfcf", 512, NULL, 4, NULL);
+    xTaskCreate(wifi_config, "wfcf", 
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+        2048,
+#else
+        512,
+#endif
+        NULL, 4, NULL);
 #endif
     xTaskCreate(test_task, "test_task", 2048, NULL, 4, NULL);
 }
