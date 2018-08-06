@@ -228,6 +228,10 @@ uint32_t user_rf_cal_sector_set(void)
 }
 #endif
 
+#ifndef CONFIG_TESTTASK_STACKSIZE
+#define CONFIG_TESTTASK_STACKSIZE 2048
+#endif
+
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -260,5 +264,5 @@ void user_init(void)
 #endif
         NULL, 4, NULL);
 #endif
-    xTaskCreate(test_task, "test_task", 2048, NULL, 4, NULL);
+    xTaskCreate(test_task, "test_task", CONFIG_TESTTASK_STACKSIZE, NULL, 4, NULL);
 }
