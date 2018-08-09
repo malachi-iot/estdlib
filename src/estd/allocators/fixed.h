@@ -70,29 +70,29 @@ public:
     typedef void is_singular_tag;
     typedef void is_stateful_tag;
 
-    value_type& lock(handle_type h, int pos = 0, int count = 0)
+    value_type& lock(handle_type, int pos = 0, int = 0)
     {
         return buffer[pos];
     }
 
-    value_type& lock(const handle_with_offset& h, int pos = 0, int count = 0)
+    value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
     {
         return buffer[h.offset() + pos];
     }
 
-    const value_type& clock(handle_type h, int pos = 0, int count = 0) const
+    const value_type& clock(handle_type, int pos = 0, int = 0) const
     {
         return buffer[pos];
     }
 
-    const value_type& clock(const handle_with_offset& h, int pos = 0, int count = 0) const
+    const value_type& clock(const handle_with_offset& h, int pos = 0, int = 0) const
     {
         return buffer[h.offset() + pos];
     }
 
-    void unlock(handle_type h) {}
+    void unlock(handle_type) {}
 
-    void cunlock(handle_type h) const {}
+    void cunlock(handle_type) const {}
 
     handle_with_offset offset(handle_type h, size_t pos) const
     {
@@ -104,7 +104,7 @@ public:
     {
     } */
 
-    handle_type reallocate(handle_type h, size_t len)
+    handle_type reallocate(handle_type h, size_t)
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         // Not supported operation
@@ -174,7 +174,7 @@ public:
     // FIX: returns actual maximum size of unsigned,not ideal
     size_t max_size() const { return len == 0 ? -1 : len; }
 
-    size_t size(handle_with_size h) const { return max_size(); }
+    size_t size(handle_with_size) const { return max_size(); }
 };
 
 
