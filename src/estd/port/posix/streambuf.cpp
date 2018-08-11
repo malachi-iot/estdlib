@@ -2,6 +2,7 @@
 
 #if defined(ESTD_POSIX) || defined(ESP_OPEN_RTOS)
 
+#include <stdio.h>
 #include "../../streambuf.h"
 
 namespace estd { namespace layer3 {

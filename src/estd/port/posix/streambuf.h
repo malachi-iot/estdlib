@@ -5,7 +5,7 @@
 
 //namespace FactUtilEmbedded { namespace std {
 
-typedef ::FILE TEST_STREAM_T;
+typedef ::FILE& TEST_STREAM_T;
 //typedef ::_IO_FILE TEST_STREAM_T;
 
 #ifdef __EXP1

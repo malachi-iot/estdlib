@@ -4,6 +4,7 @@
 
 #include "internal/platform.h"
 #include "traits/char_traits.h"
+#include "type_traits.h"
 
 #ifdef ESP_OPEN_RTOS
 #elif defined(__MBED__)
@@ -38,11 +39,13 @@
 #endif
 
 
+#ifdef ESTD_POSIX
 extern "C"
 {
 #include <stdio.h> // For POSIX modes
 #include <stdint.h>
 }
+#endif
 
 namespace estd {
 
@@ -65,7 +68,7 @@ class basic_streambuf
 protected:
     typedef TChar char_type;
     typedef typename Traits::int_type int_type;
-    TStream &stream;
+    TStream stream;
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
     FactUtilEmbedded::layer1::CircularBuffer<char_type, (uint16_t)FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF> experimental_buf;
@@ -76,10 +79,15 @@ protected:
     streamsize xsgetn(char_type *s, streamsize count);
 
 public:
-    typedef TStream stream_t;
+    // NOTE: we'll need to revisit this if we want a proper pointer in here
+    typedef typename estd::remove_reference<TStream>::type stream_type;
 
-    basic_streambuf(TStream &stream) : stream(stream)
+    basic_streambuf(stream_type& stream) : stream(stream)
     {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    basic_streambuf(stream_type&& move_from) : stream(std::move(move_from)) {}
+#endif
 
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls

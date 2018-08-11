@@ -92,9 +92,9 @@ public:
 #else
     basic_streambuf_t _rdbuf;
 
-    typedef typename basic_streambuf_t::stream_t stream_t;
+    typedef typename basic_streambuf_t::stream_type stream_type;
 
-    basic_ios(stream_t &stream) : _rdbuf(stream)
+    basic_ios(stream_type &stream) : _rdbuf(stream)
     {}
 
     template <class _TStream, class ...TArgs>
