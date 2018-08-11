@@ -4,6 +4,8 @@
 #include "streambuf.h"
 #include "ios.h"
 #include "features.h"
+#include "algorithm"
+#include "traits/char_traits.h"
 
 //#include <cassert>
 
@@ -19,8 +21,9 @@
 
 #define FEATURE_IOS_GCOUNT
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
+/*
 #ifdef min
 #undef min
 #endif
@@ -30,9 +33,9 @@ namespace FactUtilEmbedded { namespace std {
 template <class T> const T& min (const T& a, const T& b)
 {
     return !(b<a)?a:b;     // or: return !comp(b,a)?a:b; for version (2)
-}
+}*/
 
-template<class TChar, class Traits = char_traits<TChar>>
+template<class TChar, class Traits = std::char_traits<TChar>>
 class basic_istream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
@@ -281,5 +284,5 @@ inline basic_istream<TChar>& ws(basic_istream<TChar>& __is)
 }
 #endif
 
-} }
+}
 #endif //UTIL_EMBEDDED_ISTREAM_H
