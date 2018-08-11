@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include "internal/platform.h"
+#include "traits/char_traits.h"
+
 #ifdef ESP_OPEN_RTOS
 #elif defined(__MBED__)
 #include <drivers/Stream.h>
@@ -41,7 +44,7 @@ extern "C"
 #include <stdint.h>
 }
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
 
 // TODO: find a better home for char_traits and friends.  Normally it lives in <string> -
@@ -53,52 +56,10 @@ namespace FactUtilEmbedded { namespace std {
 typedef uint16_t streamoff;
 typedef uint16_t streamsize;
 
-#if __cplusplus > 199711L
-#define CONSTEXPR constexpr
-#else
-#define CONSTEXPR
-#endif
-//  As per http://tuttlem.github.io/2014/08/18/getting-istream-to-work-off-a-byte-array.html
-//  I won't try to stuff in a uint8_t as a TChar anywhere, although it seems like I could
-// safely make a fully uint8_t version of things
-
-// TODO: move this into our string.h (also this prototype is present in c_types.h)
-template <class TChar> struct char_traits;
-
-template <> struct char_traits<char>
-{
-    typedef char char_type;
-#ifdef __MBED__
-    typedef int16_t int_type;
-#else
-    typedef int int_type;
-#endif
-
-    static CONSTEXPR char_type to_char_type(int_type ch) { return ch; }
-    static CONSTEXPR int_type to_int_type(const char ch) { return ch; }
-    static CONSTEXPR int_type eof() { return -1; }
-    static CONSTEXPR bool eq(char c1, char c2) { return c1 == c2; }
-    static const char_type* find(const char_type* p, size_t count, const char_type& ch)
-    {
-        while(count--)
-        {
-            if(*p == ch) return p;
-            p++;
-        }
-
-        return nullptr;
-    }
-
-#ifdef FEATURE_IOS_EXPERIMENTAL_TRAIT_NODATA
-    // Non-standard timeout/data unavailable return value, since eof() suggests no more data EVER
-    // we want a different error code
-    static CONSTEXPR int_type nodata() { return -2; }
-#endif
-};
 
 namespace layer3 {
 
-template<class TChar, class TStream, class Traits = char_traits <TChar>>
+template<class TChar, class TStream, class Traits = ::std::char_traits <TChar>>
 class basic_streambuf
 {
 protected:
@@ -210,8 +171,8 @@ public:
 #else
 #if defined(__MBED__)
 #include "streams/iostream_mbed_streambuf.h"
-#elif defined(__POSIX__)
-#include "streams/iostream_posix_streambuf.h"
+#elif defined(ESTD_POSIX)
+#include "port/posix/streambuf.h"
 #elif defined(ARDUINO)
 #include "streams/iostream_arduino_streambuf.h"
 #elif defined(ESP_OPEN_RTOS)
@@ -221,4 +182,4 @@ public:
 #endif
 #endif
 
-}}
+}

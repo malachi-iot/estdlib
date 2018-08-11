@@ -3,12 +3,13 @@
 
 #include "streambuf.h"
 #include "ios.h"
+#include "traits/char_traits.h"
 
 #define FEATURE_IOS_GCOUNT
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
-template<class TChar, class Traits = char_traits<TChar>>
+template<class TChar, class Traits = std::char_traits<TChar>>
 class basic_istream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual

@@ -68,7 +68,7 @@ public:
 };
 
 
-template<class TChar, class Traits = char_traits <TChar>>
+template<class TChar, class Traits = std::char_traits <TChar>>
 class basic_ios : public ios_base
 {
 public:
