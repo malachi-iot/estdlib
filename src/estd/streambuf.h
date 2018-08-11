@@ -65,9 +65,11 @@ namespace layer3 {
 template<class TChar, class TStream, class Traits = ::std::char_traits <TChar>>
 class basic_streambuf
 {
-protected:
+public:
     typedef TChar char_type;
+    typedef Traits traits_type;
     typedef typename Traits::int_type int_type;
+protected:
     TStream stream;
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF

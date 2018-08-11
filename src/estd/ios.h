@@ -11,23 +11,24 @@ class ios_base
 public:
     typedef uint8_t fmtflags;
 
-    static constexpr fmtflags dec = 1;
-    static constexpr fmtflags hex = 2;
-    static constexpr fmtflags basefield = dec | hex;
+    static CONSTEXPR fmtflags dec = 0x01;
+    static CONSTEXPR fmtflags hex = 0x02;
+    static CONSTEXPR fmtflags unitbuf = 0x04;
+    static CONSTEXPR fmtflags basefield = dec | hex;
 
     typedef uint8_t openmode;
 
-    static constexpr openmode app = 0x01;
-    static constexpr openmode binary = 0x02;
-    static constexpr openmode in = 0x04;
-    static constexpr openmode out = 0x08;
+    static CONSTEXPR openmode app = 0x01;
+    static CONSTEXPR openmode binary = 0x02;
+    static CONSTEXPR openmode in = 0x04;
+    static CONSTEXPR openmode out = 0x08;
 
     typedef uint8_t iostate;
 
-    static constexpr iostate goodbit = 0x00;
-    static constexpr iostate badbit = 0x01;
-    static constexpr iostate failbit = 0x02;
-    static constexpr iostate eofbit = 0x04;
+    static CONSTEXPR iostate goodbit = 0x00;
+    static CONSTEXPR iostate badbit = 0x01;
+    static CONSTEXPR iostate failbit = 0x02;
+    static CONSTEXPR iostate eofbit = 0x04;
 
 private:
     fmtflags fmtfl;
@@ -67,56 +68,19 @@ public:
     { return rdstate() & eofbit; }
 };
 
+}
 
-template<class TChar, class Traits = std::char_traits <TChar>>
-class basic_ios : public ios_base
-{
-public:
-    typedef basic_streambuf <TChar, Traits> basic_streambuf_t;
-    typedef Traits traits_type;
+#include "internal/ios.h"
 
-protected:
-#ifdef FEATURE_IOS_STREAMBUF_FULL
-    basic_streambuf_t* _rdbuf;
+namespace estd {
 
-public:
-    basic_streambuf_t* rdbuf() const { return _rdbuf; }
-    basic_streambuf_t* rdbuf(basic_streambuf_t* sb)
-    {
-        clear();
-        auto temp = _rdbuf;
-        _rdbuf = sb;
-        return temp;
-    }
+// TODO: hardwire in more of a explicit 'posix_streambuf' or whatever based on platform, since proper
+// std::ios stuff basic_streambuf is a polymorphic base class.  That or perhaps do away with ios
+// typedef altogether
+template<class TChar, class Traits = ::std::char_traits<TChar> >
+using basic_ios = estd::internal::basic_ios<basic_streambuf <TChar, Traits> >;
 
-#else
-    basic_streambuf_t _rdbuf;
-
-    typedef typename basic_streambuf_t::stream_type stream_type;
-
-    basic_ios(stream_type &stream) : _rdbuf(stream)
-    {}
-
-    template <class _TStream, class ...TArgs>
-    basic_ios(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
-
-public:
-    basic_streambuf_t *rdbuf() const
-    { return (basic_streambuf_t *) &_rdbuf; }
-
-#endif
-public:
-    // NOTE: spec calls for this actually in ios_base, but for now putting it
-    // here so that it can reach into streambuf to grab it.  A slight but notable
-    // deviation from standard C++
-    experimental::locale getloc() const
-    {
-        experimental::locale l;
-        return l;
-    }
-};
-
-
-typedef basic_ios<char> ios;
+typedef
+basic_ios<char> ios;
 
 }
