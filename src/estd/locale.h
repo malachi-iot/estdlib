@@ -4,7 +4,7 @@ extern "C" {
 #include <stdint.h>
 }
 
-namespace FactUtilEmbedded { namespace std { namespace experimental {
+namespace estd { namespace experimental {
 
 struct ctype_base
 {
@@ -156,4 +156,4 @@ inline bool isspace(TChar ch, const locale& loc)
     return use_facet<ctype<TChar>>(loc).is(ctype_base::space, ch);
 }
 
-}}}
+}}

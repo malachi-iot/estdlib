@@ -1,8 +1,10 @@
-#if defined(__POSIX__) || defined(ESP_OPEN_RTOS)
+#include "../identify_platform.h"
 
-#include "../streambuf.h"
+#if defined(ESTD_POSIX) || defined(ESP_OPEN_RTOS)
 
-namespace FactUtilEmbedded { namespace std { namespace layer3 {
+#include "../../streambuf.h"
+
+namespace estd { namespace layer3 {
 
 template<>
 streamsize basic_streambuf<char, TEST_STREAM_T>::
@@ -40,6 +42,6 @@ int basic_streambuf<char, TEST_STREAM_T>::sgetc()
     return c;
 }
 
-} } }
+} }
 
 #endif

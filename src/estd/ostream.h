@@ -21,11 +21,12 @@ extern "C" {
 
 #include "streambuf.h"
 #include "ios.h"
-#include "string_convert.h"
+#include "internal/string_convert.h"
+#include "traits/char_traits.h"
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
-template<class TChar, class traits = char_traits<TChar>>
+template<class TChar, class traits = std::char_traits<TChar>>
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
@@ -47,7 +48,7 @@ public:
 
     __ostream_type& put(TChar ch)
     {
-        if(this->rdbuf()->sputc(ch) == char_traits<TChar>::eof())
+        if(this->rdbuf()->sputc(ch) == std::char_traits<TChar>::eof())
             this->setstate(base_t::eofbit);
 
         return *this;
@@ -174,7 +175,7 @@ inline basic_ostream<char>& hex(basic_ostream<char>& __os)
 }
 
 
-} }
+}
 
 #ifdef ARDUINO
 #include "streams/ostream_arduino.h"
