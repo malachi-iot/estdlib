@@ -29,6 +29,7 @@ set(SOURCE_FILES
         estd/internal/accessor.h
         estd/internal/buffer.h
         estd/internal/common_type.h
+        estd/internal/deduce_fixed_size.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/is_function.h
@@ -38,6 +39,7 @@ set(SOURCE_FILES
         estd/internal/priority_queue.h
         estd/internal/reverse_list.h
         estd/internal/runtime_array.h
+        estd/internal/string_convert.h
         estd/internal/to_string.h
         estd/internal/llvm_type_traits.h
         estd/internal/impl/allocated_array.h
@@ -47,6 +49,8 @@ set(SOURCE_FILES
 
         estd/iterators/list.h
         estd/list.h
+        estd/locale.h
+
         estd/map.h
         estd/memory.h
 
@@ -66,6 +70,7 @@ set(SOURCE_FILES
         estd/port/arduino/thread.h
         estd/port/freertos/chrono.h
         estd/port/freertos/thread.h
+        estd/port/posix/streambuf.cpp
         estd/port/thread.h
 
         estd/queue.h
@@ -82,9 +87,8 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-        estd/internal/deduce_fixed_size.h
 
-        estd/internal/string_convert.h estd/port/posix/streambuf.cpp)
+        )
 
 add_library(estd_lib ${SOURCE_FILES})
 

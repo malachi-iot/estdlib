@@ -1,4 +1,4 @@
-#ifdef __POSIX__
+#if defined(__POSIX__) || defined(ESP_OPEN_RTOS)
 
 #include "../streambuf.h"
 
