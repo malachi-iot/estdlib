@@ -27,7 +27,7 @@
 #include <Arduino.h>
 #endif
 
-#include "features.h"
+//#include "features.h"
 #include "locale.h"
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
