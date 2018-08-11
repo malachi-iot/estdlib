@@ -19,6 +19,11 @@ set(SOURCE_FILES
         estd/forward_list.h
         estd/functional.h
         estd/initializer_list.h
+
+        estd/istream.h
+        estd/ios.h
+        estd/iostream.h
+
         estd/iterator.h
 
         estd/internal/accessor.h
@@ -45,6 +50,8 @@ set(SOURCE_FILES
         estd/map.h
         estd/memory.h
 
+        estd/ostream.h
+
         estd/policy/list.h
         estd/policy/string.h
 
@@ -64,6 +71,7 @@ set(SOURCE_FILES
         estd/queue.h
         estd/ratio.h
         estd/span.h
+        estd/streambuf.h
         estd/string.h
         estd/string_view.h
         estd/thread.h
@@ -74,7 +82,9 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-        estd/internal/deduce_fixed_size.h)
+        estd/internal/deduce_fixed_size.h
+
+        estd/internal/string_convert.h estd/port/posix/streambuf.cpp)
 
 add_library(estd_lib ${SOURCE_FILES})
 
