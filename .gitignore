@@ -33,6 +33,7 @@
 
 # CLion specific
 cmake-build-debug/
+build-catch-*/
 **/.idea/workspace.xml
 **/.idea/vcs.xml
 

@@ -71,6 +71,7 @@ set(SOURCE_FILES
         estd/port/freertos/chrono.h
         estd/port/freertos/thread.h
         estd/port/posix/streambuf.cpp
+        estd/port/streambuf.h
         estd/port/thread.h
 
         estd/queue.h
