@@ -44,7 +44,7 @@ class basic_istream :
 {
     typedef basic_ios<TChar> base_t;
     typedef TChar char_type;
-    typedef typename base_t::basic_streambuf_t basic_streambuf_t;
+    typedef typename base_t::streambuf_type streambuf_type;
     typedef typename Traits::int_type int_type;
 
     inline int_type standard_peek()
@@ -124,7 +124,7 @@ public:
     // TODO: optimize, ensure this isn't inlined
     __istream_type& getline(char_type* s, streamsize count, char_type delim = '\n')
     {
-        basic_streambuf_t* stream = this->rdbuf();
+        streambuf_type* stream = this->rdbuf();
 
 #ifdef FEATURE_IOS_GCOUNT
         _gcount = 0;

@@ -2,49 +2,77 @@
 
 // just for IDE really - in production code, this file is always included by estd/ios.h
 #include "../ios.h"
+#include "../type_traits.h"
 
 namespace estd { namespace internal {
 
-//template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf>
-class basic_ios : public ios_base
+template <class TStreambuf, bool use_pointer>
+class basic_ios_base;
+
+template <class TStreambuf>
+class basic_ios_base<TStreambuf, true> : public ios_base
 {
-public:
-    //typedef basic_streambuf <TChar, Traits> basic_streambuf_t;
-    //typedef Traits traits_type;
-    typedef TStreambuf basic_streambuf_t;
-    typedef typename TStreambuf::traits_type traits_type;
+    typedef TStreambuf streambuf_type;
+    streambuf_type* _rdbuf;
+
+    streambuf_type* rdbuf() const { return _rdbuf; }
 
 protected:
-#ifdef FEATURE_IOS_STREAMBUF_FULL
-    basic_streambuf_t* _rdbuf;
+    basic_ios_base(streambuf_type* sb) : _rdbuf(sb) {}
 
-public:
-    basic_streambuf_t* rdbuf() const { return _rdbuf; }
-    basic_streambuf_t* rdbuf(basic_streambuf_t* sb)
+    void init(streambuf_type* sb)
+    {
+        _rdbuf = sb;
+    }
+
+    streambuf_type* rdbuf(streambuf_type* sb)
     {
         clear();
-        auto temp = _rdbuf;
+        streambuf_type temp = _rdbuf;
         _rdbuf = sb;
         return temp;
     }
+};
 
-#else
-    basic_streambuf_t _rdbuf;
 
-    typedef typename basic_streambuf_t::stream_type stream_type;
+// this one assumes for now our special 'native_streambuf' which shall be the
+// de-specialized version of our basic_streambuf
+template <class TStreambuf>
+class basic_ios_base<TStreambuf, false> : public ios_base
+{
+public:
+    typedef TStreambuf streambuf_type;
 
-    basic_ios(stream_type &stream) : _rdbuf(stream)
-    {}
+    // currently (temporarily) hard wired to streambufs which know about a stream object
+    // to interact with
+    typedef typename streambuf_type::stream_type stream_type;
+
+protected:
+    streambuf_type _rdbuf;
+
+    basic_ios_base(stream_type &stream) : _rdbuf(stream)
+            {}
 
     template <class _TStream, class ...TArgs>
-    basic_ios(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
+    basic_ios_base(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
 
+    streambuf_type* rdbuf()
+    { return &_rdbuf; }
+};
+
+
+//template<class TChar, class Traits = std::char_traits <TChar>>
+template<class TStreambuf>
+class basic_ios : public basic_ios_base<TStreambuf, false>
+{
 public:
-    basic_streambuf_t *rdbuf() const
-    { return (basic_streambuf_t *) &_rdbuf; }
+    typedef typename TStreambuf::traits_type traits_type;
+    typedef basic_ios_base<TStreambuf, false> base_type;
 
-#endif
+protected:
+    template <class TParam1>
+    basic_ios(TParam1& p) : base_type(p) {}
+
 public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
     // here so that it can reach into streambuf to grab it.  A slight but notable
