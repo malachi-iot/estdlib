@@ -88,7 +88,7 @@ set(SOURCE_FILES
         estd/utility.h
         estd/vector.h
 
-        estd/internal/iostream.h estd/internal/ios.h)
+        estd/internal/iostream.h estd/internal/ios.h estd/internal/string_convert.cpp)
 
 add_library(estd_lib ${SOURCE_FILES})
 

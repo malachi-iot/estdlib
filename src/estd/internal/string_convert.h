@@ -1,5 +1,9 @@
 #pragma once
 
+#include "platform.h"
+#include <stdint.h>
+#include <stdlib.h>
+
 template<class T> T fromString(const char* input);
 
 template<> inline unsigned char fromString(const char* input)
