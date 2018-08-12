@@ -32,6 +32,8 @@ set(SOURCE_FILES
         estd/internal/deduce_fixed_size.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/ios.h
+        estd/internal/iostream.h
         estd/internal/is_function.h
         estd/internal/list_node.h
         estd/internal/opts.h
@@ -40,11 +42,13 @@ set(SOURCE_FILES
         estd/internal/reverse_list.h
         estd/internal/runtime_array.h
         estd/internal/string_convert.h
+        estd/internal/string_convert.cpp
         estd/internal/to_string.h
         estd/internal/llvm_type_traits.h
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
+        estd/internal/impl/streambuf.h
         estd/internal/value_evaporator.h
 
         estd/iterators/list.h
@@ -89,7 +93,7 @@ set(SOURCE_FILES
         estd/utility.h
         estd/vector.h
 
-        estd/internal/iostream.h estd/internal/ios.h estd/internal/string_convert.cpp)
+         )
 
 add_library(estd_lib ${SOURCE_FILES})
 

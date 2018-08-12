@@ -166,7 +166,7 @@ public:
     int_type getsome()
     {
 #ifdef FEATURE_IOS_SPEEKC
-        // TODO: change this to call non-standard this->rdbuf()->speekc();
+        // calling non-standard rdbuf()->speekc()
         return this->good() ? this->rdbuf()->speekc() : Traits::eof();
 #else
         if(this->rdbuf()->in_avail())

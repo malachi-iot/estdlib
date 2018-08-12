@@ -6,6 +6,8 @@
 #include "traits/char_traits.h"
 #include "type_traits.h"
 #include "port/streambuf.h"
+#include "internal/ios.h"
+#include "internal/impl/streambuf.h"
 
 
 //#include "features.h"
@@ -31,20 +33,15 @@ extern "C"
 namespace estd {
 
 
-// TODO: find a better home for char_traits and friends.  Normally it lives in <string> -
-// it seems likely most platforms would have this already, so check into that and if so, eliminate
-// our special version
 
-// C++ spec actually defines streamsize as signed to accomodate some streambuf operations
-// which we don't support, so I'm gonna make them unsigned
-typedef uint16_t streamoff;
-typedef uint16_t streamsize;
-
-
+// layer3::basic_streambuf is no longer an acceptable name.  Something at least like
+// internal::streambuf since it is fed a TImpl to define what variety of streambuf
+// it ends up being, even if it ends up feeding stock-standard virtualized basic_streambuf
 namespace layer3 {
 
-template<class TChar, class TStream, class Traits = ::std::char_traits <TChar>>
-class basic_streambuf
+// TODO: Phase out TStream and rely totally on TImpl
+template<class TChar, class TStream, class Traits = ::std::char_traits <TChar>, class TImpl = estd::internal::impl::native_streambuf<TChar, TStream, Traits>>
+class basic_streambuf : public TImpl
 {
 public:
     typedef TChar char_type;

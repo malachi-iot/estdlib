@@ -1,10 +1,82 @@
 #pragma once
 
 // just for IDE really - in production code, this file is always included by estd/ios.h
-#include "../ios.h"
+//#include "../ios.h"
 #include "../type_traits.h"
+#include "../locale.h"
+#include <stdint.h>
 
-namespace estd { namespace internal {
+namespace estd {
+
+// C++ spec actually defines streamsize as signed to accomodate some streambuf operations
+// which we don't support, so I'm gonna make them unsigned
+typedef uint16_t streamoff;
+typedef uint16_t streamsize;
+
+class ios_base
+{
+public:
+    typedef uint8_t fmtflags;
+
+    static CONSTEXPR fmtflags dec = 0x01;
+    static CONSTEXPR fmtflags hex = 0x02;
+    static CONSTEXPR fmtflags unitbuf = 0x04;
+    static CONSTEXPR fmtflags basefield = dec | hex;
+
+    typedef uint8_t openmode;
+
+    static CONSTEXPR openmode app = 0x01;
+    static CONSTEXPR openmode binary = 0x02;
+    static CONSTEXPR openmode in = 0x04;
+    static CONSTEXPR openmode out = 0x08;
+
+    typedef uint8_t iostate;
+
+    static CONSTEXPR iostate goodbit = 0x00;
+    static CONSTEXPR iostate badbit = 0x01;
+    static CONSTEXPR iostate failbit = 0x02;
+    static CONSTEXPR iostate eofbit = 0x04;
+
+private:
+    fmtflags fmtfl;
+    iostate _iostate;
+
+protected:
+    static constexpr openmode _openmode_null = 0; // proprietary, default of 'text'
+
+public:
+    fmtflags flags() const
+    { return fmtfl; }
+
+    fmtflags flags(fmtflags fmtfl)
+    { return this->fmtfl = fmtfl; }
+
+    iostate rdstate() const
+    { return _iostate; }
+
+    void clear(iostate state = goodbit)
+    { _iostate = state; }
+
+    void setstate(iostate state)
+    {
+        _iostate |= state;
+    }
+
+    bool good() const
+    { return rdstate() == goodbit; }
+
+    bool bad() const
+    { return rdstate() & badbit; }
+
+    bool fail() const
+    { return rdstate() & failbit || rdstate() & badbit; }
+
+    bool eof() const
+    { return rdstate() & eofbit; }
+};
+
+
+namespace internal {
 
 template <class TStreambuf, bool use_pointer>
 class basic_ios_base;
