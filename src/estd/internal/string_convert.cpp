@@ -11,6 +11,8 @@
 #define PROGMEM
 #endif
 
+namespace estd { namespace internal {
+
 const char VALIDATE_NULLSTR_ERROR[] PROGMEM = "Null String";
 const char VALIDATE_STRTOOLONG_ERROR[] PROGMEM = "String too long";
 const char VALIDATE_FORMAT_ERROR[] PROGMEM = "Invalid format";
@@ -178,3 +180,5 @@ template<> PGM_P getTypeName<int>()
 {
   return TYPENAME_INT;
 }
+
+}}

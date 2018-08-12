@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+namespace estd { namespace internal {
+
 template<class T> T fromString(const char* input);
 
 template<> inline unsigned char fromString(const char* input)
@@ -43,7 +45,6 @@ template<> inline unsigned short fromString(const char* input)
     return (unsigned short) strtoul(input, NULL, 10);
 }
 
-namespace experimental {
 // EXCLUDING null termination
 template<class T> constexpr uint8_t maxStringLength();
 
@@ -56,7 +57,6 @@ template<> inline constexpr uint8_t maxStringLength<uint32_t>() { return 10; }
 template<> inline constexpr uint8_t maxStringLength<float>() { return 32; }
 template<> inline constexpr uint8_t maxStringLength<double>() { return 64; }
 
-}
 
 extern const char VALIDATE_NULLSTR_ERROR[];
 extern const char VALIDATE_STRTOOLONG_ERROR[];
@@ -101,3 +101,5 @@ template<> inline PGM_P validateString<unsigned char>(const char* input)
 {
     return validateString<int>(input);
 }
+
+}}

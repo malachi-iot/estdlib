@@ -107,7 +107,7 @@ inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint16_t value
 {
     char buffer[10];
 
-    toString(buffer, value, sizeof(buffer) - 1);
+    internal::toString(buffer, value, sizeof(buffer) - 1);
 
     return out << buffer;
 }
@@ -143,16 +143,16 @@ inline basic_ostream<char>& operator<<(basic_ostream<char>& out, int value)
 {
     char buffer[10];
 
-    toString(buffer, value, sizeof(buffer) - 1);
+    internal::toString(buffer, value, sizeof(buffer) - 1);
 
     return out << buffer;
 }
 
 inline ostream& operator<<(ostream& out, float value)
 {
-    char buffer[::experimental::maxStringLength<float>()];
+    char buffer[internal::maxStringLength<float>()];
 
-    toString(buffer, value, sizeof(buffer) - 1);
+    internal::toString(buffer, value, sizeof(buffer) - 1);
 
     return out << buffer;
 }
