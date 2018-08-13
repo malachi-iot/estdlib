@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef ESTD_ARDUINO
+#include <Arduino.h>
+#endif
+
 namespace estd { namespace internal {
 
 template<class T> T fromString(const char* input);

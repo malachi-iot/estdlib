@@ -13,7 +13,6 @@ template<>
 struct char_traits<char>
 {
     typedef char char_type;
-    typedef int int_type;
 
 #ifdef __MBED__
     typedef int16_t int_type;

@@ -119,10 +119,11 @@ template<> char* toString(char* output, unsigned int input)
     return utoa(input, output, 10);
 }
 
+/*
 template<> char* toString(char* output, uint16_t input)
 {
     return utoa(input, output, 10);
-}
+} */
 
 #elif defined(ESP_OPEN_RTOS)
 // ESP RTOS has its own flavor of stdlib calls
@@ -176,7 +177,7 @@ template<> char* toString(char* output, int32_t input)
 #if defined(__AVR__)
 template<> char* toString(char* output, float input)
 {
-    constexpr size_t len = ::experimental::maxStringLength<float>();
+    constexpr size_t len = maxStringLength<float>();
     // UNTESTED
     dtostrf(input, len, len / 2, output);
     return output;
