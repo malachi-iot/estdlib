@@ -161,6 +161,41 @@ struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streamb
     typedef internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> > base_type;
 };
 
+namespace internal {
+// Could use a better name
+// more or less turns a non-virtualized streambuf into a virtualized one
+// but also could be used to wrap a virtualized one
+template<class TStreambuf>
+struct basic_streambuf_wrapped :
+        basic_streambuf<
+                typename TStreambuf::char_type,
+                typename TStreambuf::traits_type
+        >
+{
+    typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::char_type char_type;
+
+private:
+    TStreambuf _rdbuf;
+
+    virtual streamsize xsgetn(char_type* s, streamsize count) OVERRIDE
+    {
+        return _rdbuf.xsgetn(s, count);
+    }
+
+    virtual streamsize xsputn(const char_type* s, streamsize count) OVERRIDE
+    {
+        return _rdbuf.xsputn(s, count);
+    }
+
+public:
+    template <class TParam1>
+    basic_streambuf_wrapped(TParam1& p) : _rdbuf(p) {}
+
+};
+
+}
+
 #ifdef FEATURE_IOS_STREAMBUF_FULL
 template<class TChar, class Traits = char_traits<TChar>>
 class basic_streambuf

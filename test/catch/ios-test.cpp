@@ -21,6 +21,15 @@ TEST_CASE("iostreams")
 
         REQUIRE(has_method);
     }
+    SECTION("basic_streambuf test")
+    {
+        // NOTE: posix_streambuf probably technically should be able to take stdin AND stdout...
+        //posix_streambuf<char> psb(*stdout);
+        //internal::basic_streambuf_wrapped<posix_streambuf<char>& > sbw(psb);
+
+        //internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
+        //basic_streambuf<char>& sb = ;
+    }
     SECTION("cin")
     {
         // limited testing since an automated test shouldn't pause for input
