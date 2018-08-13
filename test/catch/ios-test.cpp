@@ -13,7 +13,8 @@ TEST_CASE("iostreams")
     {
         typedef estd::internal::impl::native_streambuf<char, estd::TEST_STREAM_T, std::char_traits<char> >
                 streambuf_impl_type;
-        bool has_method = estd::internal::has_sputc_method<streambuf_impl_type>::value;
+        typedef estd::internal::streambuf<streambuf_impl_type> streambuf_type;
+        bool has_method = streambuf_type::has_sputc_method<streambuf_impl_type>::value;
 
         REQUIRE(has_method);
     }

@@ -4,7 +4,7 @@
 
 #include "internal/platform.h"
 #include "traits/char_traits.h"
-#include "traits/allocator_traits.h" // for ESTD_HAS_METHOD_EXPERIMENTAL
+#include "traits/allocator_traits.h" // for ESTD_HAS_METHOD_EXPERIMENTAL1 dependencies
 #include "type_traits.h"
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
@@ -23,10 +23,12 @@ namespace estd {
 
 namespace internal {
 
-#define ESTD_HAS_METHOD_EXPERIMENTAL1(ret_type, method_name, param_type1) \
+// TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL later when we are ready to merge
+// and ready to handle possible breakages
+#define ESTD_HAS_METHOD_EXPERIMENTAL1(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : has_member_base \
 { \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(param_type1), &C::method_name>* /*unused*/) \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
     { return yes_value; }  \
 \
     template <typename> static CONSTEXPR no& test(...) { return no_value; } \
@@ -34,25 +36,29 @@ template <class T> struct has_##method_name##_method : has_member_base \
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
 };
 
-ESTD_HAS_METHOD_EXPERIMENTAL1(int, sputc, char);
-ESTD_HAS_METHOD_EXPERIMENTAL(int, sgetc);
-ESTD_HAS_METHOD_EXPERIMENTAL(int, sbumpc);
-
 template<class TImpl>
 class streambuf : public TImpl
 {
     typedef TImpl base_type;
+
 public:
     // estd::internal::impl::native_streambuf<TChar, TStream, Traits
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
+
+    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sputc, char_type)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sgetc)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sbumpc)
+
 protected:
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
     FactUtilEmbedded::layer1::CircularBuffer<char_type, (uint16_t)FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF> experimental_buf;
 #endif
 
+    /*
+     * Not doing these because I bet polymorphism breaks if you do
     streamsize xsputn(const char_type *s, streamsize count)
     {
         return base_type::xsputn(s, count);
@@ -61,7 +67,7 @@ protected:
     streamsize xsgetn(char_type *s, streamsize count)
     {
         return base_type::xsgetn(s, count);
-    }
+    } */
 
 public:
 
@@ -78,12 +84,12 @@ public:
     // acts like many sbumpc calls
     streamsize sgetn(char_type *s, streamsize count)
     {
-        return xsgetn(s, count);
+        return this->xsgetn(s, count);
     }
 
     streamsize sputn(const char_type *s, streamsize count)
     {
-        return xsputn(s, count);
+        return this->xsputn(s, count);
     }
 
     // Do SFINAE and call TImpl version if present
@@ -99,7 +105,7 @@ public:
     typename enable_if<!has_sputc_method<T>::value, int_type>::type
     sputc(char_type ch)
     {
-        bool success = xsputn(&ch, sizeof(ch)) == sizeof(ch);
+        bool success = sputn(&ch, sizeof(ch)) == sizeof(ch);
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
@@ -120,7 +126,7 @@ public:
     {
         char_type ch;
 
-        bool success = xsgetn(&ch, sizeof(ch)) == sizeof(ch);
+        bool success = sgetn(&ch, sizeof(ch)) == sizeof(ch);
 
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
