@@ -6,8 +6,9 @@
 #include <stdio.h> // For POSIX modes
 #include <stdint.h>
 
+#include "../../internal/impl/streambuf.h"
+
 namespace estd {
-//namespace FactUtilEmbedded { namespace std {
 
 typedef ::FILE& TEST_STREAM_T;
 //typedef ::_IO_FILE TEST_STREAM_T;
@@ -65,13 +66,35 @@ public:
 };
 #else
 
-template <class TChar, class Traits = ::std::char_traits<TChar>>
-using basic_streambuf = ::estd::internal::streambuf<TChar, TEST_STREAM_T, Traits>;
+namespace internal { namespace impl {
+
+template <>
+struct native_streambuf<char, TEST_STREAM_T, ::std::char_traits<char> > :
+        native_streambuf_base<char, TEST_STREAM_T, ::std::char_traits<char> >
+{
+    typedef native_streambuf_base<char, TEST_STREAM_T, ::std::char_traits<char> > base_type;
+    typedef typename base_type::char_type char_type;
+    //typedef char char_type;
+
+    streamsize xsgetn(char_type* s, streamsize count);
+    streamsize xsputn(const char_type* s, streamsize count);
+
+    int sgetc();
+    int sbumpc();
+    int sputc(char);
+
+    native_streambuf(TEST_STREAM_T stream) : base_type(stream) {}
+};
+
+} }
 
 template <class TChar, class Traits = ::std::char_traits<TChar> >
 class posix_streambuf : public ::estd::internal::native_streambuf<TChar, TEST_STREAM_T, Traits>
 {
+    typedef ::estd::internal::native_streambuf<TChar, TEST_STREAM_T, Traits> base_type;
 
+public:
+    posix_streambuf(TEST_STREAM_T stdstream) : base_type(stdstream) {}
 };
 
 #endif

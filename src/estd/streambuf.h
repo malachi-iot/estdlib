@@ -26,34 +26,41 @@ namespace estd {
 namespace internal {
 
 // TODO: Phase out TStream and rely totally on TImpl
-template<class TChar, class TStream, class Traits = ::std::char_traits <TChar>, class TImpl = estd::internal::impl::native_streambuf<TChar, TStream, Traits>>
+template<class TImpl>
 class streambuf : public TImpl
 {
+    typedef TImpl base_type;
 public:
-    typedef TChar char_type;
-    typedef Traits traits_type;
-    typedef typename Traits::int_type int_type;
+    // estd::internal::impl::native_streambuf<TChar, TStream, Traits
+    typedef typename TImpl::char_type char_type;
+    typedef typename TImpl::traits_type traits_type;
+    typedef typename traits_type::int_type int_type;
 protected:
-    TStream stream;
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
     FactUtilEmbedded::layer1::CircularBuffer<char_type, (uint16_t)FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF> experimental_buf;
 #endif
 
-    streamsize xsputn(const char_type *s, streamsize count);
+    streamsize xsputn(const char_type *s, streamsize count)
+    {
+        return base_type::xsputn(s, count);
+    }
 
-    streamsize xsgetn(char_type *s, streamsize count);
+    streamsize xsgetn(char_type *s, streamsize count)
+    {
+        return base_type::xsgetn(s, count);
+    }
 
 public:
-    // NOTE: we'll need to revisit this if we want a proper pointer in here
-    typedef typename estd::remove_reference<TStream>::type stream_type;
 
-    streambuf(stream_type& stream) : stream(stream)
+    template <class Param1>
+    streambuf(Param1& p1) : base_type(p1)
     {}
 
+    /*
 #ifdef FEATURE_CPP_MOVESEMANTIC
     streambuf(stream_type&& move_from) : stream(std::move(move_from)) {}
-#endif
+#endif */
 
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls
@@ -71,7 +78,7 @@ public:
     int_type sputc(char_type ch)
     {
         bool success = xsputn(&ch, sizeof(ch)) == sizeof(ch);
-        return success ? Traits::to_int_type(ch) : Traits::eof();
+        return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
 
@@ -83,7 +90,7 @@ public:
 
         bool success = xsgetn(&ch, sizeof(ch)) == sizeof(ch);
 
-        return success ? Traits::to_int_type(ch) : Traits::eof();
+        return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
     int_type sgetc();
@@ -98,13 +105,22 @@ public:
 };
 
 template<class TChar, class TStream, class Traits = ::std::char_traits <TChar> >
-class native_streambuf : public streambuf<TChar, TStream, Traits,
+class native_streambuf : public streambuf<
         impl::native_streambuf<TChar, TStream, Traits> >
 {
-
+    typedef streambuf<
+    impl::native_streambuf<TChar, TStream, Traits> > base_type;
+public:
+    native_streambuf(TStream& stream) : base_type(stream) {}
 };
 
 }
+
+template<class TChar, class Traits = std::char_traits<TChar>>
+struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> >
+{
+    typedef internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> > base_type;
+};
 
 #ifdef FEATURE_IOS_STREAMBUF_FULL
 template<class TChar, class Traits = char_traits<TChar>>
