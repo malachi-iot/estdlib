@@ -39,7 +39,7 @@ namespace internal {
 
 //template<class TChar, class Traits = std::char_traits<TChar>>
 template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
-class basic_istream :
+class basic_istream : public
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
 #endif
@@ -253,9 +253,9 @@ public:
 
 #ifdef ESTD_POSIX
 template<class TChar, class Traits = std::char_traits<TChar>>
-using basic_istream = internal::basic_istream< posix_streambuf<TChar, Traits> >;
+using posix_istream = internal::basic_istream< posix_streambuf<TChar, Traits> >;
 
-typedef basic_istream<char> istream;
+typedef posix_istream<char> istream;
 #endif
 
 
@@ -278,8 +278,8 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
  *
  * Compiles but not runtime tested
  */
-template <class TChar>
-inline basic_istream<TChar>& ws(basic_istream<TChar>& __is)
+template <class TStreambuf>
+inline internal::basic_istream<TStreambuf>& ws(internal::basic_istream<TStreambuf>& __is)
 {
     auto loc = __is.getloc();
 

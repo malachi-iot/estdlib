@@ -130,6 +130,7 @@ protected:
     template <class _TStream, class ...TArgs>
     basic_ios_base(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
 
+public:
     streambuf_type* rdbuf()
     { return &_rdbuf; }
 };

@@ -25,6 +25,9 @@ TEST_CASE("iostreams")
     {
         // limited testing since an automated test shouldn't pause for input
         estd::istream _cin(*stdin);
+
+        // POSIX in doesn't reveal in_avail
+        //_cin.rdbuf()->in_avail();
     }
     SECTION("cout")
     {
