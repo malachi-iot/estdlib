@@ -6,6 +6,9 @@
 
 #include <estd/istream.h>
 #include <estd/ostream.h>
+#include <estd/string.h>
+
+using namespace estd;
 
 TEST_CASE("iostreams")
 {
@@ -31,5 +34,12 @@ TEST_CASE("iostreams")
 
         //_cout.put('!');
         _cout << '!';
+
+        SECTION("estd::string")
+        {
+            layer1::string<20> s = "hi";
+
+            _cout << s << endl;
+        }
     }
 }

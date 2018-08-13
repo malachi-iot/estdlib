@@ -2,7 +2,6 @@
 
 #include "../internal/platform.h"
 
-
 // Only for scenarios where system has no std::char_traits to lean on
 #ifndef FEATURE_STD_STRING
 
@@ -34,7 +33,12 @@ struct char_traits<char>
             p++;
         }
 
-        return nullptr;
+        return NULLPTR;
+    }
+
+    static CONSTEXPR size_t length(const char_type* s)
+    {
+        return strlen(s);
     }
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_TRAIT_NODATA

@@ -10,7 +10,7 @@
 
 extern "C" {
 
-#if defined(USING_SPRINTF) || defined(__POSIX__)
+#if defined(USING_SPRINTF) || defined(ESTD_POSIX)
 #include <inttypes.h>
 #endif
 
@@ -116,17 +116,13 @@ inline internal::basic_ostream<TStreambuf>& operator<<(internal::basic_ostream<T
 }
 
 
-inline ostream& operator <<(ostream& out, const char* arg)
+template <class TStreambuf>
+inline internal::basic_ostream<TStreambuf>& operator <<(internal::basic_ostream<TStreambuf>& out,
+                                                         const typename TStreambuf::char_type* s)
 {
-    return out.write(arg, strlen(arg));
+    typedef typename TStreambuf::traits_type traits_type;
+    return out.write(s, traits_type::length(s));
 }
-
-/*
-inline basic_ostream<char>& operator <<(basic_ostream<char>& out, char ch)
-{
-    return out.put(ch);
-} */
-
 
 template <class TStreambuf>
 inline internal::basic_ostream<TStreambuf>& operator <<(internal::basic_ostream<TStreambuf>& out,
