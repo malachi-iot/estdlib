@@ -4,6 +4,7 @@
 
 #include "internal/platform.h"
 #include "traits/char_traits.h"
+#include "traits/allocator_traits.h" // for ESTD_HAS_METHOD_EXPERIMENTAL
 #include "type_traits.h"
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
@@ -20,12 +21,23 @@
 
 namespace estd {
 
-// layer3::basic_streambuf is no longer an acceptable name.  Something at least like
-// internal::streambuf since it is fed a TImpl to define what variety of streambuf
-// it ends up being, even if it ends up feeding stock-standard virtualized basic_streambuf
 namespace internal {
 
-// TODO: Phase out TStream and rely totally on TImpl
+#define ESTD_HAS_METHOD_EXPERIMENTAL1(ret_type, method_name, param_type1) \
+template <class T> struct has_##method_name##_method : has_member_base \
+{ \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(param_type1), &C::method_name>* /*unused*/) \
+    { return yes_value; }  \
+\
+    template <typename> static CONSTEXPR no& test(...) { return no_value; } \
+\
+    static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
+};
+
+ESTD_HAS_METHOD_EXPERIMENTAL1(int, sputc, char);
+ESTD_HAS_METHOD_EXPERIMENTAL(int, sgetc);
+ESTD_HAS_METHOD_EXPERIMENTAL(int, sbumpc);
+
 template<class TImpl>
 class streambuf : public TImpl
 {
@@ -74,17 +86,37 @@ public:
         return xsputn(s, count);
     }
 
+    // Do SFINAE and call TImpl version if present
+    template <class T = base_type>
+    typename enable_if<has_sputc_method<T>::value, int_type>::type
+    sputc(char_type ch)
+    {
+        return base_type::sputc(ch);
+    }
 
-    int_type sputc(char_type ch)
+    // if TImpl doesn't have one, use a generic one-size-fits all version
+    template <class T = base_type>
+    typename enable_if<!has_sputc_method<T>::value, int_type>::type
+    sputc(char_type ch)
     {
         bool success = xsputn(&ch, sizeof(ch)) == sizeof(ch);
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
 
+    // Do SFINAE and call TImpl version if present
+    template <class T = base_type>
+    typename enable_if<has_sbumpc_method<T>::value, int_type>::type
+    sbumpc()
+    {
+        return base_type::sbumpc();
+    }
+
     // TODO: *possibly* implement underflow, if I like it...
     // Don't think I made this one quite right...
-    int_type sbumpc()
+    template <class T = base_type>
+    typename enable_if<!has_sbumpc_method<T>::value, int_type>::type
+    sbumpc()
     {
         char_type ch;
 
@@ -93,7 +125,7 @@ public:
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
-    int_type sgetc();
+    //int_type sgetc();
 
 #ifdef FEATURE_IOS_SPEEKC
     int_type speekc();
@@ -101,7 +133,7 @@ public:
 
     // NOTE: this deviates from spec in that it won't wait for CR, for example,
     // to reflect characters are available
-    streamsize in_avail();
+    //streamsize in_avail();
 };
 
 template<class TChar, class TStream, class Traits = ::std::char_traits <TChar> >
@@ -116,6 +148,7 @@ public:
 
 }
 
+// traditional basic_streambuf, complete with virtual functions
 template<class TChar, class Traits = std::char_traits<TChar>>
 struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> >
 {
