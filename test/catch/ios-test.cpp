@@ -21,6 +21,11 @@ TEST_CASE("iostreams")
 
         REQUIRE(has_method);
     }
+    SECTION("cin")
+    {
+        // limited testing since an automated test shouldn't pause for input
+        estd::istream _cin(*stdin);
+    }
     SECTION("cout")
     {
         //estd::basic_streambuf<char> streambuf(*stdout);

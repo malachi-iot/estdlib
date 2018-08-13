@@ -74,7 +74,7 @@ public:
     const T* data() const { return base_t::clock(); }
 };
 
-};
+}
 
 
 namespace layer2 {

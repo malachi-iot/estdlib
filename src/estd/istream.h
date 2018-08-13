@@ -35,21 +35,26 @@ template <class T> const T& min (const T& a, const T& b)
     return !(b<a)?a:b;     // or: return !comp(b,a)?a:b; for version (2)
 }*/
 
-template<class TChar, class Traits = std::char_traits<TChar>>
+namespace internal {
+
+//template<class TChar, class Traits = std::char_traits<TChar>>
+template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
 class basic_istream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
 #endif
-        public basic_ios<TChar, Traits>
+        TBase
 {
-    typedef basic_ios<TChar> base_t;
-    typedef TChar char_type;
-    typedef typename base_t::streambuf_type streambuf_type;
-    typedef typename Traits::int_type int_type;
+    typedef TBase base_t;
+
+    typedef typename base_t::char_type char_type;
+    typedef TStreambuf streambuf_type;
+    typedef typename TStreambuf::traits_type traits_type;
+    typedef typename traits_type::int_type int_type;
 
     inline int_type standard_peek()
     {
-        return this->good() ? this->rdbuf()->sgetc() : Traits::eof();
+        return this->good() ? this->rdbuf()->sgetc() : traits_type::eof();
     }
 
     /**
@@ -89,9 +94,9 @@ public:
 #endif
 
 public:
-    typedef basic_istream<TChar, Traits> __istream_type;
+    typedef basic_istream<char_type, traits_type> __istream_type;
 
-    int get()
+    int_type get()
     {
         return this->rdbuf()->sbumpc();
     }
@@ -99,7 +104,7 @@ public:
 
     // nonblocking read
     // UNTESTED
-    streamsize readsome(TChar* s, streamsize count)
+    streamsize readsome(char_type* s, streamsize count)
     {
         auto rdbuf = *(this->rdbuf());
         // if count > number of available bytes
@@ -110,7 +115,7 @@ public:
         return rdbuf.sgetn(s, m);
     }
 
-    __istream_type& read(TChar* s, streamsize n)
+    __istream_type& read(char_type* s, streamsize n)
     {
         // TODO: optimization point.  We want to do something
         // so that we don't inline this (and other read/write operations like it)
@@ -134,13 +139,13 @@ public:
         {
             int_type c = stream->sbumpc();
 
-            if(Traits::eq(c, Traits::eof()))
+            if(traits_type::eq(c, traits_type::eof()))
             {
                 this->setstate(base_t::eofbit);
                 break;
             }
 
-            if(!count-- || Traits::eq(c, delim))
+            if(!count-- || traits_type::eq(c, delim))
             {
                 this->setstate(base_t::failbit);
                 break;
@@ -167,7 +172,7 @@ public:
     {
 #ifdef FEATURE_IOS_SPEEKC
         // calling non-standard rdbuf()->speekc()
-        return this->good() ? this->rdbuf()->speekc() : Traits::eof();
+        return this->good() ? this->rdbuf()->speekc() : traits_type::eof();
 #else
         if(this->rdbuf()->in_avail())
         {
@@ -176,10 +181,10 @@ public:
         else
         {
 #ifdef FEATURE_IOS_EXPERIMENTAL_TRAIT_NODATA
-            return Traits::nodata();
+            return traits_type::nodata();
 #else
 #warning "eof used to indicate non-eof lack of data condition.   Not advised!"
-            return Traits::eof();
+            return traits_type::eof();
 #endif
         }
 #endif
@@ -217,7 +222,7 @@ public:
     // http://en.cppreference.com/w/cpp/io/basic_istream/ignore
     basic_istream& ignore(streamsize count, const int_type delim)
     {
-        if(delim == Traits::eof()) return ignore(count);
+        if(delim == traits_type::eof()) return ignore(count);
 
         while(count--)
         {
@@ -243,7 +248,15 @@ public:
 #endif
 };
 
+}
+
+
+#ifdef ESTD_POSIX
+template<class TChar, class Traits = std::char_traits<TChar>>
+using basic_istream = internal::basic_istream< posix_streambuf<TChar, Traits> >;
+
 typedef basic_istream<char> istream;
+#endif
 
 
 // To change delimiters, we'll need to do something like this:
