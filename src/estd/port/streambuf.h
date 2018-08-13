@@ -1,6 +1,9 @@
 #pragma once
 
-#ifdef ESP_OPEN_RTOS
+#ifdef ESTD_POSIX
+// Not ready quite yet
+#include "posix/streambuf.h"
+#elif defined(ESP_OPEN_RTOS)
 #elif defined(__MBED__)
 #include <drivers/Stream.h>
 // looks like a collision

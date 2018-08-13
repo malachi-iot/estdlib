@@ -78,6 +78,8 @@ public:
 
 namespace internal {
 
+// eventually, depending on layering, we will use a pointer to a streambuf or an actual
+// value of streambuf itself
 template <class TStreambuf, bool use_pointer>
 class basic_ios_base;
 

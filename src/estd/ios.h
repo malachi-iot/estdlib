@@ -14,7 +14,7 @@ namespace estd {
 template<class TChar, class Traits = ::std::char_traits<TChar> >
 using basic_ios = estd::internal::basic_ios<basic_streambuf <TChar, Traits> >;
 
-typedef
-basic_ios<char> ios;
+//typedef
+//basic_ios<char> ios;
 
 }
