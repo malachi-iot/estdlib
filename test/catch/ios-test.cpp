@@ -23,8 +23,9 @@ TEST_CASE("iostreams")
         //estd::basic_streambuf<char> streambuf(*stdout);
         estd::ostream _cout(*stdout);
 
-        _cout << "Got here" << estd::endl;
+        _cout << "Got here #" << 123 << estd::endl;
 
-        _cout.put('!');
+        //_cout.put('!');
+        _cout << '!';
     }
 }

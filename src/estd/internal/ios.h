@@ -141,6 +141,7 @@ class basic_ios : public basic_ios_base<TStreambuf, false>
 {
 public:
     typedef typename TStreambuf::traits_type traits_type;
+    typedef typename traits_type::char_type char_type;
     typedef basic_ios_base<TStreambuf, false> base_type;
 
 protected:

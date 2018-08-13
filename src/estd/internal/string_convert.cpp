@@ -11,6 +11,14 @@
 #define PROGMEM
 #endif
 
+#if defined(USING_SPRINTF) || defined(ESTD_POSIX)
+#include <inttypes.h>
+#endif
+
+// TODO: Make all these toStrings return actual number of bytes used
+// TODO: Make all these toStrings take a maximum length parameter
+
+
 namespace estd { namespace internal {
 
 const char VALIDATE_NULLSTR_ERROR[] PROGMEM = "Null String";
@@ -149,6 +157,12 @@ template<> char* toString(char* output, uint16_t input)
 {
   sprintf(output, "%u", input);
   return output;
+}
+
+
+template<> char* toString(char* output, uint32_t input)
+{
+    sprintf(output, "%" PRIu32, input);
 }
 
 #endif

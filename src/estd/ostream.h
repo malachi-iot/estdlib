@@ -26,29 +26,33 @@ extern "C" {
 
 namespace estd {
 
-template<class TChar, class traits = std::char_traits<TChar>>
+namespace internal {
+
+//template<class TChar, class traits = std::char_traits<TChar>>
+template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
 #endif
-        public basic_ios<TChar, traits>
+        public TBase
 {
-    typedef basic_ios<TChar> base_t;
+    typedef TBase base_t;
+    typedef typename TBase::char_type char_type;
 
 public:
-    typedef basic_ostream<TChar> __ostream_type;
+    typedef basic_ostream<TStreambuf, TBase> __ostream_type;
 
     // When the time comes, these will replace the old virtual ones
-    __ostream_type& write(const TChar* s, streamsize n)
+    __ostream_type& write(const char_type* s, streamsize n)
     {
         this->rdbuf()->sputn(s, n);
         return *this;
     }
 
 
-    __ostream_type& put(TChar ch)
+    __ostream_type& put(char_type ch)
     {
-        if(this->rdbuf()->sputc(ch) == std::char_traits<TChar>::eof())
+        if(this->rdbuf()->sputc(ch) == std::char_traits<char_type>::eof())
             this->setstate(base_t::eofbit);
 
         return *this;
@@ -68,11 +72,19 @@ public:
     }*/
 
 #ifndef FEATURE_IOS_STREAMBUF_FULL
-    typedef typename base_t::stream_type stream_t;
+    //typedef typename base_t::stream_type stream_t;
 
-    basic_ostream(stream_t& stream) : base_t(stream) {}
+    template <class TParam1>
+    basic_ostream(TParam1& p1) : base_t(p1) {}
 #endif
 };
+
+}
+
+// TODO: Eventually make basic_ostream at this level inherit directly from basic_ios
+// once we have layer1 version sitting side by side
+template<class TChar, class Traits = std::char_traits<TChar> >
+using basic_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
 
 typedef basic_ostream<char> ostream;
 
@@ -91,16 +103,38 @@ inline ostream& operator<<(ostream& out, T value)
 }
 */
 
+/*
+template <class T, int N = internal::maxStringLength<T>(),
+          class enabled = typename enable_if<(N > 1), bool>::type >
+inline ostream& operator<<(ostream& out, T value)
+{
+    char buffer[N];
+
+    toString(buffer, value, sizeof(buffer) - 1);
+
+    return out << buffer;
+}
+*/
 
 inline ostream& operator <<(ostream& out, const char* arg)
 {
     return out.write(arg, strlen(arg));
 }
 
+/*
 inline basic_ostream<char>& operator <<(basic_ostream<char>& out, char ch)
 {
     return out.put(ch);
+} */
+
+
+template <class TStreambuf>
+inline internal::basic_ostream<TStreambuf>& operator <<(internal::basic_ostream<TStreambuf>& out,
+                                                        typename TStreambuf::char_type ch)
+{
+    return out.put(ch);
 }
+
 
 
 inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint16_t value)
@@ -115,7 +149,11 @@ inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint16_t value
 
 inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint32_t value)
 {
-    char buffer[16];
+    char buffer[internal::maxStringLength<uint32_t>() + 1];
+    //char buffer[16];
+
+    // don't have this one just yet
+    //internal::toString(buffer, value, sizeof(buffer) - 1);
 
 #ifdef ESP_OPEN_RTOS
     __utoa(value, buffer, 10);
@@ -139,6 +177,7 @@ inline basic_ostream<char>& operator<<(basic_ostream<char>& out, void* addr)
     return out << buffer;
 }
 
+
 inline basic_ostream<char>& operator<<(basic_ostream<char>& out, int value)
 {
     char buffer[10];
@@ -157,7 +196,6 @@ inline ostream& operator<<(ostream& out, float value)
     return out << buffer;
 }
 
-
 inline basic_ostream<char>& endl(basic_ostream<char>& __os)
 { return __os.put('\n'); }
 
@@ -173,7 +211,6 @@ inline basic_ostream<char>& hex(basic_ostream<char>& __os)
     __os.flags((__os.flags() & ~ios_base::basefield) | ios_base::hex);
     return __os;
 }
-
 
 }
 

@@ -46,16 +46,16 @@ template<> inline unsigned short fromString(const char* input)
 }
 
 // EXCLUDING null termination
-template<class T> constexpr uint8_t maxStringLength();
+template<class T> CONSTEXPR uint8_t maxStringLength();
 
-template<> inline constexpr uint8_t maxStringLength<char>() { return 1; }
-template<> inline constexpr uint8_t maxStringLength<uint8_t>() { return 3; }
-template<> inline constexpr uint8_t maxStringLength<int8_t>() { return 4; }
-template<> inline constexpr uint8_t maxStringLength<uint16_t>() { return 5; }
-template<> inline constexpr uint8_t maxStringLength<int16_t>() { return 6; }
-template<> inline constexpr uint8_t maxStringLength<uint32_t>() { return 10; }
-template<> inline constexpr uint8_t maxStringLength<float>() { return 32; }
-template<> inline constexpr uint8_t maxStringLength<double>() { return 64; }
+template<> inline CONSTEXPR uint8_t maxStringLength<char>() { return 1; }
+template<> inline CONSTEXPR uint8_t maxStringLength<uint8_t>() { return 3; }
+template<> inline CONSTEXPR uint8_t maxStringLength<int8_t>() { return 4; }
+template<> inline CONSTEXPR uint8_t maxStringLength<uint16_t>() { return 5; }
+template<> inline CONSTEXPR uint8_t maxStringLength<int16_t>() { return 6; }
+template<> inline CONSTEXPR uint8_t maxStringLength<uint32_t>() { return 10; }
+template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
+template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
 
 
 extern const char VALIDATE_NULLSTR_ERROR[];
