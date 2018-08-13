@@ -54,6 +54,7 @@ template<> inline CONSTEXPR uint8_t maxStringLength<int8_t>() { return 4; }
 template<> inline CONSTEXPR uint8_t maxStringLength<uint16_t>() { return 5; }
 template<> inline CONSTEXPR uint8_t maxStringLength<int16_t>() { return 6; }
 template<> inline CONSTEXPR uint8_t maxStringLength<uint32_t>() { return 10; }
+template<> inline CONSTEXPR uint8_t maxStringLength<int32_t>() { return 11;}
 template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
 template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
 
@@ -72,10 +73,10 @@ extern const char TYPENAME_CHARPTR[];
 #endif
 
 template<class T> PGM_P validateString(const char* input);
-template<class T> char* toString(char* output, T input);
+template<class T, class TChar> char* toString(TChar* output, T input);
 
 // TODO: route this to actual snprintfs etc.
-template<class T> char* toString(char* output, T input, size_t maxlen)
+template<class T, class TChar> char* toString(TChar* output, T input, size_t maxlen)
 {
     return toString(output, input);
 }

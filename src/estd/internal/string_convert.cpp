@@ -142,8 +142,8 @@ template<> char* toString(char* output, unsigned int input)
 
 template<> char* toString(char* output, int input)
 {
-  sprintf(output, "%d", input);
-  return output;
+    sprintf(output, "%d", input);
+    return output;
 }
 
 template<> char* toString(char* output, uint8_t input)
@@ -164,6 +164,12 @@ template<> char* toString(char* output, uint32_t input)
 {
     sprintf(output, "%" PRIu32, input);
 }
+
+/*
+template<> char* toString(char* output, int32_t input)
+{
+    sprintf(output, "%" PRIi32, input);
+} */
 
 #endif
 

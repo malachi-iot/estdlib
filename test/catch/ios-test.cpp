@@ -23,7 +23,11 @@ TEST_CASE("iostreams")
         //estd::basic_streambuf<char> streambuf(*stdout);
         estd::ostream _cout(*stdout);
 
-        _cout << "Got here #" << 123 << estd::endl;
+        int value = 123;
+
+        _cout << "Got here #";
+        _cout << value;
+        _cout << estd::endl;
 
         //_cout.put('!');
         _cout << '!';

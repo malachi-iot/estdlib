@@ -103,18 +103,18 @@ inline ostream& operator<<(ostream& out, T value)
 }
 */
 
-/*
-template <class T, int N = internal::maxStringLength<T>(),
+template <class TStreambuf, class T,
+          int N = internal::maxStringLength<T>(),
           class enabled = typename enable_if<(N > 1), bool>::type >
-inline ostream& operator<<(ostream& out, T value)
+inline internal::basic_ostream<TStreambuf>& operator<<(internal::basic_ostream<TStreambuf>& out, T value)
 {
     char buffer[N];
 
-    toString(buffer, value, sizeof(buffer) - 1);
+    internal::toString(buffer, value, sizeof(buffer) - 1);
 
     return out << buffer;
 }
-*/
+
 
 inline ostream& operator <<(ostream& out, const char* arg)
 {
@@ -136,7 +136,7 @@ inline internal::basic_ostream<TStreambuf>& operator <<(internal::basic_ostream<
 }
 
 
-
+/*
 inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint16_t value)
 {
     char buffer[10];
@@ -163,7 +163,7 @@ inline basic_ostream<char>& operator <<(basic_ostream<char>& out, uint32_t value
 
     return out << buffer;
 }
-
+*/
 
 inline basic_ostream<char>& operator<<(basic_ostream<char>& out, void* addr)
 {
@@ -178,6 +178,7 @@ inline basic_ostream<char>& operator<<(basic_ostream<char>& out, void* addr)
 }
 
 
+/*
 inline basic_ostream<char>& operator<<(basic_ostream<char>& out, int value)
 {
     char buffer[10];
@@ -195,6 +196,7 @@ inline ostream& operator<<(ostream& out, float value)
 
     return out << buffer;
 }
+*/
 
 inline basic_ostream<char>& endl(basic_ostream<char>& __os)
 { return __os.put('\n'); }
