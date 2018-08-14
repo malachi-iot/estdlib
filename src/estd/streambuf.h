@@ -69,6 +69,9 @@ protected:
         return base_type::xsgetn(s, count);
     } */
 
+    // some streambufs don't need any initialization at the base level
+    streambuf() {}
+
 public:
 
     template <class Param1>

@@ -27,8 +27,11 @@ TEST_CASE("iostreams")
         //posix_streambuf<char> psb(*stdout);
         //internal::basic_streambuf_wrapped<posix_streambuf<char>& > sbw(psb);
 
-        //internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
-        //basic_streambuf<char>& sb = ;
+        internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
+        basic_streambuf<char>& sb = sbw;
+        char str[] = "raw 'traditional' output\n";
+
+        sb.sputn(str, sizeof(str) - 1);
     }
     SECTION("cin")
     {
