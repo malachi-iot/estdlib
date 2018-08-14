@@ -2,7 +2,7 @@
 
 // string.h includes US, so this should never actually include anything,
 // just using it for tooltip help
-#include "estd/string.h"
+#include "../string.h"
 
 // not doing #include <stdio.h> because all its putc/putchar macros get things
 // confused

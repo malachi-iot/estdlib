@@ -141,6 +141,30 @@ public:
     }
 };
 
+
+template <class TString>
+struct basic_stringbuf
+{
+    typedef typename remove_reference<TString>::type string_type;
+    typedef typename string_type::value_type char_type;
+    typedef typename string_type::traits_type traits_type;
+
+    TString _str;
+
+    streamsize xsputn(const char_type* s, streamsize count)
+    {
+        // FIX: normal strings throw an exception if we exceed internal
+        // buffer size, but here we should instead have an optional error
+        // facility
+        _str.append(s, count);
+        return count;
+    }
+
+    // deviates from spec in that this is NOT a copy, but rather a direct reference
+    // to the tracked string.  Take care
+    string_type& str() { return _str; }
+};
+
 // this represents traditional std::basic_streambuf implementations
 template <class TChar, class TCharTraits = ::std::char_traits<TChar> >
 struct basic_streambuf

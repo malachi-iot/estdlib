@@ -239,7 +239,7 @@ public:
 
 
 #ifndef FEATURE_IOS_STREAMBUF_FULL
-    typedef typename base_t::stream_type stream_t;
+    //typedef typename base_t::stream_type stream_t;
 
     //basic_istream(stream_t& stream) : base_t(stream) {}
 

@@ -119,12 +119,16 @@ public:
 
     // currently (temporarily) hard wired to streambufs which know about a stream object
     // to interact with
-    typedef typename streambuf_type::stream_type stream_type;
+    //typedef typename streambuf_type::stream_type stream_type;
 
 protected:
     streambuf_type _rdbuf;
 
-    basic_ios_base(stream_type &stream) : _rdbuf(stream)
+    basic_ios_base() {}
+
+    template <class TParam1>
+    basic_ios_base(TParam1& p1) : _rdbuf(p1)
+    //basic_ios_base(stream_type &stream) : _rdbuf(stream)
             {}
 
     template <class _TStream, class ...TArgs>
@@ -146,6 +150,8 @@ public:
     typedef basic_ios_base<TStreambuf, false> base_type;
 
 protected:
+    basic_ios() {}
+
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
 

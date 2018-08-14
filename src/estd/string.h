@@ -93,13 +93,16 @@ public:
         return *this;
     }
 
+    basic_string& append(const value_type* s, size_type count)
+    {
+        base_t::append(s, count);
+        return *this;
+    }
+
+
     basic_string& append(const value_type* s)
     {
-        size_t len = strlen(s);
-
-        base_t::append(s, len);
-
-        return *this;
+        return append(s, strlen(s));
     }
 
 

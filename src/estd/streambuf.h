@@ -3,12 +3,12 @@
 #pragma once
 
 #include "internal/platform.h"
-#include "traits/char_traits.h"
+//#include "traits/char_traits.h"
 #include "traits/allocator_traits.h" // for ESTD_HAS_METHOD_EXPERIMENTAL1 dependencies
 #include "type_traits.h"
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
-#include "internal/ios.h"
+//#include "internal/ios.h"
 #include "internal/impl/streambuf.h"
 
 
@@ -69,10 +69,10 @@ protected:
         return base_type::xsgetn(s, count);
     } */
 
+public:
     // some streambufs don't need any initialization at the base level
     streambuf() {}
 
-public:
 
     template <class Param1>
     streambuf(Param1& p1) : base_type(p1)

@@ -12,6 +12,8 @@ using namespace estd;
 
 TEST_CASE("iostreams")
 {
+    char raw_str[] = "raw 'traditional' output\n";
+
     SECTION("SFINAE tests")
     {
         typedef estd::internal::impl::native_streambuf<char, estd::TEST_STREAM_T, std::char_traits<char> >
@@ -29,9 +31,41 @@ TEST_CASE("iostreams")
 
         internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
         basic_streambuf<char>& sb = sbw;
-        char str[] = "raw 'traditional' output\n";
 
-        sb.sputn(str, sizeof(str) - 1);
+        sb.sputn(raw_str, sizeof(raw_str) - 1);
+    }
+    SECTION("internal basic_stringbuf test")
+    {
+        typedef internal::impl::basic_stringbuf<layer1::string<32> > impl_type;
+
+        SECTION("impl")
+        {
+            impl_type sb;
+
+            sb.xsputn(raw_str, sizeof (raw_str) - 1);
+
+            REQUIRE(sb.str() == raw_str);
+        }
+        SECTION("internal")
+        {
+            internal::streambuf<impl_type> sb;
+
+            sb.sputn(raw_str, sizeof (raw_str) - 1);
+
+            REQUIRE(sb.str() == raw_str);
+        }
+        SECTION("ostream")
+        {
+            internal::basic_ostream<internal::streambuf<impl_type> > _cout;
+
+            _cout << raw_str;
+
+            REQUIRE(_cout.rdbuf()->str() == raw_str);
+
+            //_cout.rdbuf()->str().clear();
+
+            _cout << '!';
+        }
     }
     SECTION("cin")
     {
