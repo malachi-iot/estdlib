@@ -37,6 +37,7 @@ TEST_CASE("iostreams")
     SECTION("internal basic_stringbuf test")
     {
         typedef internal::impl::basic_stringbuf<layer1::string<32> > impl_type;
+        typedef internal::streambuf<impl_type> streambuf_type;
 
         SECTION("impl")
         {
@@ -48,15 +49,18 @@ TEST_CASE("iostreams")
         }
         SECTION("internal")
         {
-            internal::streambuf<impl_type> sb;
+            streambuf_type sb;
 
             sb.sputn(raw_str, sizeof (raw_str) - 1);
 
             REQUIRE(sb.str() == raw_str);
         }
-        SECTION("ostream")
+        SECTION("ostream / istream")
         {
-            internal::basic_ostream<internal::streambuf<impl_type> > _cout;
+            char localbuf[128];
+
+            internal::basic_ostream<streambuf_type> _cout;
+            streambuf_type* rdbuf = _cout.rdbuf();
 
             _cout << raw_str;
 
@@ -65,6 +69,15 @@ TEST_CASE("iostreams")
             //_cout.rdbuf()->str().clear();
 
             _cout << '!';
+
+            internal::basic_istream<streambuf_type&> _cin(*rdbuf);
+
+            _cin.read(localbuf, 10);
+
+            localbuf[10] = 0;
+
+            REQUIRE(localbuf[0] == raw_str[0]);
+            //_cin >> localbuf;
         }
     }
     SECTION("cin")

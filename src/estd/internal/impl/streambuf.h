@@ -143,13 +143,18 @@ public:
 
 
 template <class TString>
-struct basic_stringbuf
+struct out_stringbuf
 {
     typedef typename remove_reference<TString>::type string_type;
     typedef typename string_type::value_type char_type;
     typedef typename string_type::traits_type traits_type;
 
     TString _str;
+
+    out_stringbuf() {}
+
+    template <class TParam1>
+    out_stringbuf(TParam1& p) : _str(p) {}
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
@@ -163,6 +168,31 @@ struct basic_stringbuf
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
     string_type& str() { return _str; }
+};
+
+
+template <class TString>
+struct basic_stringbuf : out_stringbuf<TString>
+{
+    typedef out_stringbuf<TString> base_type;
+    typedef typename base_type::char_type char_type;
+    typedef typename base_type::string_type string_type;
+    typedef typename string_type::size_type size_type;
+
+    size_type get_pos;
+
+    basic_stringbuf() : get_pos(0) {}
+
+    streamsize xsgetn(char_type* s, streamsize count)
+    {
+        streamsize orig_count = count;
+        const char_type* src = base_type::_str.clock(get_pos, count);
+
+        while(count--) *s++ = *src++;
+
+        base_type::_str.unlock();
+        return orig_count;
+    }
 };
 
 // this represents traditional std::basic_streambuf implementations

@@ -48,8 +48,8 @@ class basic_istream : public
     typedef TBase base_t;
 
     typedef typename base_t::char_type char_type;
-    typedef TStreambuf streambuf_type;
-    typedef typename TStreambuf::traits_type traits_type;
+    typedef typename remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
     inline int_type standard_peek()
@@ -94,7 +94,7 @@ public:
 #endif
 
 public:
-    typedef basic_istream<char_type, traits_type> __istream_type;
+    typedef basic_istream<TStreambuf, TBase> __istream_type;
 
     int_type get()
     {

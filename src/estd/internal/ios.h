@@ -115,14 +115,14 @@ template <class TStreambuf>
 class basic_ios_base<TStreambuf, false> : public ios_base
 {
 public:
-    typedef TStreambuf streambuf_type;
+    typedef typename remove_reference<TStreambuf>::type streambuf_type;
 
     // currently (temporarily) hard wired to streambufs which know about a stream object
     // to interact with
     //typedef typename streambuf_type::stream_type stream_type;
 
 protected:
-    streambuf_type _rdbuf;
+    TStreambuf _rdbuf;
 
     basic_ios_base() {}
 
@@ -145,9 +145,10 @@ template<class TStreambuf>
 class basic_ios : public basic_ios_base<TStreambuf, false>
 {
 public:
-    typedef typename TStreambuf::traits_type traits_type;
-    typedef typename traits_type::char_type char_type;
     typedef basic_ios_base<TStreambuf, false> base_type;
+    typedef typename base_type::streambuf_type streambuf_type;
+    typedef typename streambuf_type::traits_type traits_type;
+    typedef typename traits_type::char_type char_type;
 
 protected:
     basic_ios() {}
