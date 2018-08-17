@@ -302,7 +302,7 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
 template <class TStreambuf>
 inline internal::basic_istream<TStreambuf>& ws(internal::basic_istream<TStreambuf>& __is)
 {
-    auto loc = __is.getloc();
+    experimental::locale loc = __is.getloc();
 
     // isspace will automatically fall out if it's an EOF (or nodata)
     for(;;)

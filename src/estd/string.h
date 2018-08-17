@@ -538,7 +538,6 @@ public:
 }
 
 
-
 template< class CharT, class Traits, class Alloc, class Policy, class TString >
     estd::basic_string<CharT,Traits,Alloc,Policy>&
         operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,

@@ -42,9 +42,11 @@ private:
     iostate _iostate;
 
 protected:
-    static constexpr openmode _openmode_null = 0; // proprietary, default of 'text'
+    static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
 
 public:
+    ios_base() : fmtfl(dec), _iostate(goodbit) {}
+
     fmtflags flags() const
     { return fmtfl; }
 

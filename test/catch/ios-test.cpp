@@ -18,14 +18,39 @@ template <class TImpl, class TStringImpl>
 internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
                                             internal::dynamic_array<TStringImpl>& value)
 {
+    typedef typename internal::basic_istream<TImpl> istream_type;
     typedef typename estd::remove_reference<TImpl>::type impl_type;
+    typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
 
     in >> ws;
 
-    char_type* dest = value.lock();
-    value.unlock();
+    //char_type* dest = value.lock();
+
+    experimental::locale loc = in.getloc();
+
+    for(;;)
+    {
+        int_type ch = in.peek();
+
+        if(ch == traits_type::eof())
+        {
+            in.setstate(istream_type::failbit | istream_type::eofbit);
+            break;
+        }
+        else if(isspace((char_type)ch, loc)) break;
+
+        //*dest++ = ch;
+
+        // NOTE: += is defined and should have worked
+        value.push_back((char_type)ch);
+        //value += (char_type)ch;
+
+        in.get();
+    }
+
+    //value.unlock();
     return in;
 }
 
@@ -143,8 +168,12 @@ TEST_CASE("iostreams")
 
             _cout << "     lots of whitespace!  ";
 
-            _cin >> estd::ws;
+            //_cin >> estd::ws;
             _cin >> str;
+
+            const char* helper = str.clock();
+
+            REQUIRE(str == "lots");
         }
     }
     SECTION("cin")
