@@ -14,11 +14,11 @@ namespace estd {
 
 
 // NOTE: This will work but doesn't filter specifically by string, which perhaps we want
-template <class TImpl, class TStringImpl>
-internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
+template <class TImpl, class TBase, class TStringImpl>
+internal::basic_istream<TImpl, TBase>& operator >>(internal::basic_istream<TImpl, TBase>& in,
                                             internal::dynamic_array<TStringImpl>& value)
 {
-    typedef typename internal::basic_istream<TImpl> istream_type;
+    typedef typename internal::basic_istream<TImpl, TBase> istream_type;
     typedef typename estd::remove_reference<TImpl>::type impl_type;
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
@@ -29,6 +29,8 @@ internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
     //char_type* dest = value.lock();
 
     experimental::locale loc = in.getloc();
+
+    value.clear();
 
     for(;;)
     {
@@ -70,6 +72,86 @@ internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
 }
 */
 
+/*
+ * Up against this error:
+
+Undefined symbols for architecture x86_64:
+
+"estd::internal::basic_istream<
+    estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<
+            estd::layer1::basic_string<
+                char, 32ul, true, std::__1::char_traits<char>,
+                estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+            >
+        >
+    >&,
+    estd::internal::basic_ios<estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<
+            estd::layer1::basic_string<
+                char, 32ul, true, std::__1::char_traits<char>,
+                estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+            >
+        >
+    >&>
+>& estd::operator>><
+    estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<
+            estd::layer1::basic_string<
+                char, 32ul, true, std::__1::char_traits<char>,
+                estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+            >
+        >
+    >&,
+    estd::layer1::basic_string<
+        char, 32ul, true, std::__1::char_traits<char>,
+        estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+    >
+>(
+    estd::internal::basic_istream<estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<
+            estd::layer1::basic_string<
+                char, 32ul, true, std::__1::char_traits<char>,
+                estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+            >
+        >
+    >&,
+    estd::internal::basic_ios<
+        estd::internal::streambuf<
+            estd::internal::impl::basic_stringbuf<
+                estd::layer1::basic_string<
+                    char, 32ul, true, std::__1::char_traits<char>,
+                    estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false>
+                >
+            >
+        >&>
+    >&,
+    estd::layer1::basic_string<
+        char, 32ul, true, std::__1::char_traits<char>,
+        estd::experimental::null_terminated_string_policy<std::__1::char_traits<char>, short, false> >&
+)", referenced from:
+      ____C_A_T_C_H____T_E_S_T____0() in ios-test.cpp.o
+
+ */
+
+// NOTE: This isn't active yet.  Specialization still broken for prototype in istream.h
+// pretty sure it has to do with us not getting the specialization signature *exactly right*
+// so that when the compiler chooses the definition based on the prototype it matches up
+// with the implementation here
+template <class TImpl, class TBase, unsigned N, class CharT, class Traits, class Policy>
+internal::basic_istream<TImpl, TBase>& operator >>(
+        internal::basic_istream<TImpl, TBase>& in,
+        layer1::basic_string<
+            //typename TImpl::char_type,
+            CharT,
+            N, true,
+            //typename TImpl::traits_type
+            Traits,
+            Policy
+            >& s)
+{
+    return in;
+}
 
 }
 
@@ -174,6 +256,24 @@ TEST_CASE("iostreams")
             const char* helper = str.clock();
 
             REQUIRE(str == "lots");
+
+            _cin >> str;
+
+            helper = str.clock();
+
+            REQUIRE(str == "of");
+
+            _cin >> str;
+
+            helper = str.clock();
+
+            REQUIRE(str == "whitespace!");
+
+            _cin >> str;
+
+            // FIX: SHOULD be eof but we have our lingering null-termination coming back out
+            // (which we shouldn't)
+            //REQUIRE(_cin.eof());
         }
     }
     SECTION("cin")

@@ -288,6 +288,11 @@ public:
         return ensure_total_size(count);
     }
 
+    void clear()
+    {
+        resize(0);
+    }
+
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
     bool reserve( size_type new_cap )
