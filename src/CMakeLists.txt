@@ -35,6 +35,8 @@ set(SOURCE_FILES
         estd/internal/ios.h
         estd/internal/iostream.h
         estd/internal/is_function.h
+        estd/internal/istream.h
+        estd/internal/istream_runtimearray.hpp
         estd/internal/list_node.h
         estd/internal/opts.h
         estd/internal/platform.h
