@@ -282,14 +282,15 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
 }
 */
 
-// NOTE: Can't enable this yet, somehow I can't implement specializations of this function
-// with this in place.
-//template <class TImpl, class T>
-//internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
-//                                            T& value);
+// NOTE: Due to C++ rules disallowing partial function specialization, we can't do
+// a prototype here.  I would prefer specialization
+// so that we can link in specialized implementations instead of forcing inline-includes
+// but inline-includes are reasonable
+// discussed here https://www.fluentcpp.com/2017/08/15/function-templates-partial-specialization-cpp/
+//template <class TImpl, class TBase, class T>
+//internal::basic_istream<TImpl, TBase>& operator >>(internal::basic_istream<TImpl, TBase>& in,
+//                                                   T& value);
 
-
-#ifndef FEATURE_IOSTREAM
 
 /**
  * Consume whitespace
@@ -316,7 +317,6 @@ inline internal::basic_istream<TStreambuf>& ws(internal::basic_istream<TStreambu
             return __is;
     }
 }
-#endif
 
 }
 #endif //UTIL_EMBEDDED_ISTREAM_H

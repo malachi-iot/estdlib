@@ -14,12 +14,13 @@ namespace estd {
 
 
 // NOTE: This will work but doesn't filter specifically by string, which perhaps we want
-template <class TImpl, class TBase, class TStringImpl>
-internal::basic_istream<TImpl, TBase>& operator >>(internal::basic_istream<TImpl, TBase>& in,
-                                            internal::dynamic_array<TStringImpl>& value)
+template <class TStreambuf, class TBase, class TStringImpl>
+internal::basic_istream<TStreambuf, TBase>& operator >>(
+        internal::basic_istream<TStreambuf, TBase>& in,
+        internal::dynamic_array<TStringImpl>& value)
 {
-    typedef typename internal::basic_istream<TImpl, TBase> istream_type;
-    typedef typename estd::remove_reference<TImpl>::type impl_type;
+    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename estd::remove_reference<TStreambuf>::type impl_type;
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
@@ -133,7 +134,7 @@ Undefined symbols for architecture x86_64:
       ____C_A_T_C_H____T_E_S_T____0() in ios-test.cpp.o
 
  */
-
+/*
 // NOTE: This isn't active yet.  Specialization still broken for prototype in istream.h
 // pretty sure it has to do with us not getting the specialization signature *exactly right*
 // so that when the compiler chooses the definition based on the prototype it matches up
@@ -152,7 +153,7 @@ internal::basic_istream<TImpl, TBase>& operator >>(
 {
     return in;
 }
-
+*/
 }
 
 TEST_CASE("iostreams")
