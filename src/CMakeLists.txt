@@ -39,6 +39,8 @@ set(SOURCE_FILES
         estd/internal/istream_runtimearray.hpp
         estd/internal/list_node.h
         estd/internal/opts.h
+        estd/internal/ostream.h
+        estd/internal/ostream_basic_string.hpp
         estd/internal/platform.h
         estd/internal/priority_queue.h
         estd/internal/reverse_list.h

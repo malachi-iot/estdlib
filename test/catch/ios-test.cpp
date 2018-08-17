@@ -11,6 +11,7 @@
 // TODO: We need a better place to locate specialized overloads of << [this one
 // is for the dynamic_array handler for istream]
 #include <estd/internal/istream.h>
+#include <estd/internal/ostream.h>
 
 using namespace estd;
 
