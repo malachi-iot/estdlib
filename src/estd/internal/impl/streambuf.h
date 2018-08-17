@@ -199,10 +199,20 @@ struct basic_stringbuf : out_stringbuf<TString>
 
     int_type sgetc()
     {
-        const char_type* ch = base_type::_str.clock(get_pos, 1);
+        // no 'underflow' for a basic string.  no more chars means no more chars, plain
+        // and simple
+        if(get_pos == base_type::_str.length())
+            return traits_type::eof();
+
+        const char_type ch = *base_type::_str.clock(get_pos, 1);
         base_type::_str.cunlock();
-        return *ch;
+        return ch;
     }
+
+    // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
+    // this implicitly is the case as we do not implement 'data()' except for scenarios
+    // where locking/unlocking is a noop (or otherwise inconsequential)
+    char_type* gptr() { return base_type::_str.data() + get_pos; }
 };
 
 // this represents traditional std::basic_streambuf implementations

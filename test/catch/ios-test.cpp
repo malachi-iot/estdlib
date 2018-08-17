@@ -270,11 +270,13 @@ TEST_CASE("iostreams")
 
             REQUIRE(str == "whitespace!");
 
+            REQUIRE(_cin.good());
+
             _cin >> str;
 
             // FIX: SHOULD be eof but we have our lingering null-termination coming back out
             // (which we shouldn't)
-            //REQUIRE(_cin.eof());
+            REQUIRE(_cin.eof());
         }
     }
     SECTION("cin")
