@@ -13,6 +13,7 @@ using namespace estd;
 TEST_CASE("iostreams")
 {
     char raw_str[] = "raw 'traditional' output\n";
+    CONSTEXPR int raw_str_len = sizeof(raw_str_len) - 1;
 
     SECTION("SFINAE tests")
     {
@@ -32,7 +33,9 @@ TEST_CASE("iostreams")
         internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
         basic_streambuf<char>& sb = sbw;
 
+#ifdef TEST_COUT
         sb.sputn(raw_str, sizeof(raw_str) - 1);
+#endif
     }
     SECTION("internal basic_stringbuf test")
     {
@@ -58,8 +61,11 @@ TEST_CASE("iostreams")
         SECTION("ostream / istream")
         {
             char localbuf[128];
+            layer1::string<32> str = "hi2u";
 
+            // wrap with a (basically) real ostream
             internal::basic_ostream<streambuf_type> _cout;
+            // extract the internal inline-value rdbuf
             streambuf_type* rdbuf = _cout.rdbuf();
 
             _cout << raw_str;
@@ -69,14 +75,21 @@ TEST_CASE("iostreams")
             //_cout.rdbuf()->str().clear();
 
             _cout << '!';
+            _cout << str;
 
+            // wrap reference to streambuf with (basically) real istream
             internal::basic_istream<streambuf_type&> _cin(*rdbuf);
 
-            _cin.read(localbuf, 10);
+            // pull data out, using same rdbuf as _cout
+            _cin.read(localbuf, raw_str_len);
 
-            localbuf[10] = 0;
+            //localbuf[10] = 0;
 
-            REQUIRE(localbuf[0] == raw_str[0]);
+            //REQUIRE(localbuf[0] == raw_str[0]);
+            REQUIRE(memcmp(localbuf, raw_str, raw_str_len) == 0);
+
+            // FIX: Doesn't work, because internal pointers don't advance
+            //REQUIRE((char)_cin.get() == '!');
             //_cin >> localbuf;
         }
     }
@@ -93,6 +106,8 @@ TEST_CASE("iostreams")
         //estd::basic_streambuf<char> streambuf(*stdout);
         estd::ostream _cout(*stdout);
 
+#ifdef TEST_COUT
+
         int value = 123;
 
         _cout << "Got here #";
@@ -108,5 +123,6 @@ TEST_CASE("iostreams")
 
             _cout << s << endl;
         }
+#endif
     }
 }
