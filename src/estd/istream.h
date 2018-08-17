@@ -89,13 +89,27 @@ class basic_istream : public
 #ifdef FEATURE_IOS_GCOUNT
     streamsize _gcount = 0;
 
+    typedef basic_istream<TStreambuf, TBase> __istream_type;
+
+    // just a formality for now, to prep for if we ever want a real sentry
+    struct sentry
+    {
+        typedef traits_type traits_type;
+        __istream_type& is;
+
+        sentry(__istream_type& is, bool noskipws = false) : is(is) {}
+
+        operator bool() const
+        {
+            return is.good();
+        }
+    };
+
 public:
     streamsize gcount() const { return _gcount; }
 #endif
 
 public:
-    typedef basic_istream<TStreambuf, TBase> __istream_type;
-
     int_type get()
     {
         return this->rdbuf()->sbumpc();
@@ -252,7 +266,7 @@ public:
 
 
 #ifdef ESTD_POSIX
-template<class TChar, class Traits = std::char_traits<TChar>>
+template<class TChar, class Traits = std::char_traits<TChar> >
 using posix_istream = internal::basic_istream< posix_streambuf<TChar, Traits> >;
 
 typedef posix_istream<char> istream;
@@ -267,6 +281,13 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
     return *in;
 }
 */
+
+// NOTE: Can't enable this yet, somehow I can't implement specializations of this function
+// with this in place.
+//template <class TImpl, class T>
+//internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
+//                                            T& value);
+
 
 #ifndef FEATURE_IOSTREAM
 

@@ -10,10 +10,48 @@
 
 using namespace estd;
 
+namespace estd {
+
+
+// NOTE: This will work but doesn't filter specifically by string, which perhaps we want
+template <class TImpl, class TStringImpl>
+internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
+                                            internal::dynamic_array<TStringImpl>& value)
+{
+    typedef typename estd::remove_reference<TImpl>::type impl_type;
+    typedef typename impl_type::char_type char_type;
+    typedef typename impl_type::int_type int_type;
+
+    in >> ws;
+
+    char_type* dest = value.lock();
+    value.unlock();
+    return in;
+}
+
+
+// NOTE: Experimental, only use if above doesn't satisfy things
+/*
+template <class TImpl, class TStringAllocator, class TStringPolicy>
+internal::basic_istream<TImpl>& operator >>(internal::basic_istream<TImpl>& in,
+                                            basic_string<
+                                                typename TImpl::char_type,
+                                                typename TImpl::traits_type,
+                                                TStringAllocator,
+                                                TStringPolicy>&
+                                            value)
+{
+    return in;
+}
+*/
+
+
+}
+
 TEST_CASE("iostreams")
 {
     char raw_str[] = "raw 'traditional' output\n";
-    CONSTEXPR int raw_str_len = sizeof(raw_str_len) - 1;
+    CONSTEXPR int raw_str_len = sizeof(raw_str) - 1;
 
     SECTION("SFINAE tests")
     {
@@ -89,8 +127,24 @@ TEST_CASE("iostreams")
             REQUIRE(memcmp(localbuf, raw_str, raw_str_len) == 0);
 
             // FIX: Doesn't work, because internal pointers don't advance
-            //REQUIRE((char)_cin.get() == '!');
+            REQUIRE(_cin.get() == '!');
             //_cin >> localbuf;
+        }
+        SECTION("whitespace on input")
+        {
+            // wrap with a (basically) real ostream
+            internal::basic_ostream<streambuf_type> _cout;
+            // extract the internal inline-value rdbuf
+            streambuf_type* rdbuf = _cout.rdbuf();
+            // wrap reference to streambuf with (basically) real istream
+            internal::basic_istream<streambuf_type&> _cin(*rdbuf);
+
+            layer1::string<32> str;
+
+            _cout << "     lots of whitespace!  ";
+
+            _cin >> estd::ws;
+            _cin >> str;
         }
     }
     SECTION("cin")

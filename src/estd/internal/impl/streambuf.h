@@ -175,7 +175,9 @@ template <class TString>
 struct basic_stringbuf : out_stringbuf<TString>
 {
     typedef out_stringbuf<TString> base_type;
+    typedef typename base_type::traits_type traits_type;
     typedef typename base_type::char_type char_type;
+    typedef typename traits_type::int_type int_type;
     typedef typename base_type::string_type string_type;
     typedef typename string_type::size_type size_type;
 
@@ -191,7 +193,15 @@ struct basic_stringbuf : out_stringbuf<TString>
         while(count--) *s++ = *src++;
 
         base_type::_str.unlock();
+        get_pos += orig_count;
         return orig_count;
+    }
+
+    int_type sgetc()
+    {
+        const char_type* ch = base_type::_str.clock(get_pos, 1);
+        base_type::_str.cunlock();
+        return *ch;
     }
 };
 

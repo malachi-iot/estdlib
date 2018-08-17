@@ -134,6 +134,22 @@ public:
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
+    /* NOTE: implementation of sgetc is kind of specific, so we can't make
+     * a generic handler like the others [reading a char without advancing]
+    template <class T = base_type>
+    typename enable_if<has_sgetc_method<T>::value, int_type>::type
+    sgetc()
+    {
+        return base_type::sgetc();
+    }
+
+    template <class T = base_type>
+    typename enable_if<!has_sgetc_method<T>::value, int_type>::type
+    sgetc()
+    {
+        return -1;
+    } */
+
     //int_type sgetc();
 
 #ifdef FEATURE_IOS_SPEEKC
