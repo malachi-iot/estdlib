@@ -332,11 +332,12 @@ class basic_string
 #endif
             StringPolicy >
             base_t;
-    typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::impl_type helper_type;
-    typedef typename base_t::size_type size_type;
 
 public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::size_type size_type;
+
     // n = -1 means treat str_buffer as pre-initialized and null-terminated
     // n >= 0 means copy n characters from str_buffer, ignoring any null termination
     //        0 is a useful value as it will auto set underlying string to 0

@@ -223,6 +223,10 @@ TEST_CASE("iostreams")
     }
     SECTION("layer1")
     {
+        SECTION("stringbuf")
+        {
+            layer1::stringbuf<32> sb;
+        }
         // NOTE: current layer1 ostringstream and istringstream is interesting
         // but I don't think representative of real use cases - i.e.
         // fusing the data and the format metadata together.  Smells like a solution
@@ -246,6 +250,9 @@ TEST_CASE("iostreams")
     }
     SECTION("layer2")
     {
-
+        SECTION("stringbuf")
+        {
+            //layer2::stringbuf(raw_str);
+        }
     }
 }
