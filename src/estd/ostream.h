@@ -147,6 +147,8 @@ template <class TChar, class CharTraits = std::char_traits<TChar> >
 using basic_ostream = internal::basic_ostream<
     basic_streambuf<TChar, CharTraits>,
     internal::basic_ios<basic_streambuf<TChar, CharTraits>, true> >;
+
+typedef basic_ostream<char> ostream;
 #endif
 
 namespace experimental {
@@ -155,17 +157,22 @@ namespace experimental {
 // basic_streambuf.  Note that this will auto wrap TStreambuf, because otherwise
 // if TStreambuf didn't need wrapping, you wouldn't use wrapped_ostream in the first
 // place (you'd instead use traditional basic_ostream)
-template <class TStreambuf, class TBase = estd::internal::basic_ios<TStreambuf, true> >
+template <class TStreambuf, class TBase =
+        estd::internal::basic_ios<estd::basic_streambuf<
+            typename estd::remove_reference<TStreambuf>::type::char_type,
+            typename estd::remove_reference<TStreambuf>::type::traits_type
+            >, true>
+        >
 struct wrapped_ostream : internal::basic_ostream<
         estd::basic_streambuf<
-            typename TStreambuf::char_type,
-            typename TStreambuf::traits_type>,
+            typename TBase::char_type,
+            typename TBase::traits_type>,
         TBase>
 {
     typedef internal::basic_ostream<
         estd::basic_streambuf<
-            typename TStreambuf::char_type,
-            typename TStreambuf::traits_type>,
+            typename TBase::char_type,
+            typename TBase::traits_type>,
         TBase> base_type;
 
     // NOTE: Not well supported TStreambuf being a value vs a reference yet, needs work
@@ -182,6 +189,15 @@ struct wrapped_ostream : internal::basic_ostream<
 
     }
 };
+
+
+template <class TStreambuf, class TBase>
+wrapped_ostream<TStreambuf&>
+convert(internal::basic_ostream<TStreambuf, TBase>& os)
+{
+    wrapped_ostream<TStreambuf&> wrapped_os(*os.rdbuf());
+    return wrapped_os;
+}
 
 }
 
@@ -206,13 +222,12 @@ inline internal::basic_ostream<TStreambuf>& hex(internal::basic_ostream<TStreamb
 }
 
 
-// TODO: Eventually make a basic_ostream at this level inherit directly from basic_ios
-// once we have layer1 version sitting side by side
+// TODO: Put this in layer1/layer2 since it isn't the traditional/fully virtual-capable version
 #ifdef ESTD_POSIX
 template<class TChar, class Traits = std::char_traits<TChar> >
 using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
 
-typedef posix_ostream<char> ostream;
+//typedef posix_ostream<char> ostream;
 #endif
 
 

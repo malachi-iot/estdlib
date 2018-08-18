@@ -66,7 +66,9 @@ public:
 };
 #else
 
-namespace internal { namespace impl {
+namespace internal {
+
+namespace impl {
 
 template <>
 struct native_streambuf<char, TEST_STREAM_T, ::std::char_traits<char> > :

@@ -15,6 +15,16 @@
 
 using namespace estd;
 
+struct dummy_streambuf
+{
+    typedef char char_type;
+    typedef int int_type;
+    typedef std::char_traits<char_type> traits_type;
+
+    int xsputn(const char_type*, int len) { return len; }
+    int xsgetn(char_type*, int len) { return len; }
+};
+
 TEST_CASE("iostreams")
 {
     char raw_str[] = "raw 'traditional' output\n";
@@ -28,6 +38,13 @@ TEST_CASE("iostreams")
         bool has_method = streambuf_type::has_sputc_method<streambuf_impl_type>::value;
 
         REQUIRE(has_method);
+    }
+    SECTION("experimental tests")
+    {
+        internal::basic_ostream<dummy_streambuf> _cout;
+
+        auto wrapped_out = experimental::convert(_cout);
+        ostream& out = wrapped_out;
     }
     SECTION("basic_streambuf test")
     {
@@ -156,7 +173,17 @@ TEST_CASE("iostreams")
         SECTION("wrapped_ostream")
         {
             streambuf_type sb;
-            //experimental::wrapped_ostream<streambuf_type> _cout(sb);
+            internal::basic_ostream<streambuf_type&> native_cout(sb);
+            experimental::wrapped_ostream<streambuf_type&> _cout(sb);
+            ostream& __cout = _cout;
+
+            __cout << "hi2u";
+
+            const char* helper = sb.str().data();
+
+            REQUIRE(sb.str() == "hi2u");
+
+            auto wrapped_out = experimental::convert(native_cout);
         }
     }
     SECTION("cin")
@@ -170,7 +197,7 @@ TEST_CASE("iostreams")
     SECTION("cout")
     {
         //estd::basic_streambuf<char> streambuf(*stdout);
-        estd::ostream _cout(*stdout);
+        estd::posix_ostream<char> _cout(*stdout);
 
 #ifdef TEST_COUT
 
