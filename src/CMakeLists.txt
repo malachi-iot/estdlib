@@ -86,6 +86,7 @@ set(SOURCE_FILES
         estd/queue.h
         estd/ratio.h
         estd/span.h
+        estd/sstream.h
         estd/streambuf.h
         estd/string.h
         estd/string_view.h

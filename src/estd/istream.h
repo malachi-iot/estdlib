@@ -94,7 +94,7 @@ class basic_istream : public
     // just a formality for now, to prep for if we ever want a real sentry
     struct sentry
     {
-        typedef traits_type traits_type;
+        typedef typename streambuf_type::traits_type traits_type;
         __istream_type& is;
 
         sentry(__istream_type& is, bool noskipws = false) : is(is) {}

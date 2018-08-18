@@ -7,6 +7,7 @@
 #include <estd/istream.h>
 #include <estd/ostream.h>
 #include <estd/string.h>
+#include <estd/sstream.h>
 
 // TODO: We need a better place to locate specialized overloads of << [this one
 // is for the dynamic_array handler for istream]
@@ -219,5 +220,32 @@ TEST_CASE("iostreams")
             _cout << s << endl;
         }
 #endif
+    }
+    SECTION("layer1")
+    {
+        // NOTE: current layer1 ostringstream and istringstream is interesting
+        // but I don't think representative of real use cases - i.e.
+        // fusing the data and the format metadata together.  Smells like a solution
+        // looking for a problem.  So, marking it as experimental
+        SECTION("ostringstream")
+        {
+            experimental::ostringstream<32> out;
+
+            int sz = sizeof(out);
+
+            out << "hi2u";
+
+            REQUIRE(out.rdbuf()->str() == "hi2u");
+        }
+        SECTION("istringstream")
+        {
+            experimental::istringstream<32> in = "hi2u";
+
+            REQUIRE(in.rdbuf()->str() == "hi2u");
+        }
+    }
+    SECTION("layer2")
+    {
+
     }
 }

@@ -185,6 +185,11 @@ struct basic_stringbuf : out_stringbuf<TString>
 
     basic_stringbuf() : get_pos(0) {}
 
+    template <class TParam1>
+    basic_stringbuf(TParam1& p) :
+        base_type(p),
+        get_pos(0) {}
+
     streamsize xsgetn(char_type* s, streamsize count)
     {
         streamsize orig_count = count;
