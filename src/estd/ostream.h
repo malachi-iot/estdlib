@@ -93,11 +93,12 @@ public:
 
 };
 
+// Using TBase::char_type as it's the most reliable non-reference
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
-                                                         const typename TStreambuf::char_type* s)
+                                                         const typename TBase::char_type* s)
 {
-    typedef typename TStreambuf::traits_type traits_type;
+    typedef typename TBase::traits_type traits_type;
     return out.write(s, traits_type::length(s));
 }
 
@@ -118,9 +119,9 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 
 
 
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator <<(basic_ostream<TStreambuf>& out,
-                                                        typename TStreambuf::char_type ch)
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
+                                                        typename TBase::char_type ch)
 {
     return out.put(ch);
 }
