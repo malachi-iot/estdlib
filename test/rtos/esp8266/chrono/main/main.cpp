@@ -1,5 +1,6 @@
 #include <estd/string.h>
 #include <estd/thread.h>
+#include <estd/sstream.h>
 
 using namespace estd;
 

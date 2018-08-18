@@ -164,6 +164,7 @@ template<> char* toString(char* output, uint16_t input)
 template<> char* toString(char* output, uint32_t input)
 {
     sprintf(output, "%" PRIu32, input);
+    return output;
 }
 
 /*

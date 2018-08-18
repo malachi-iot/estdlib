@@ -5,4 +5,6 @@
 
 PROJECT_NAME := chrono
 
+include version_finder.mk
+
 include $(IDF_PATH)/make/project.mk

@@ -35,7 +35,7 @@ protected:
 template <class T, size_t N>
 struct layer1_queue_policy
 {
-    typedef layer1::deque<T, N> queue_type;
+    typedef estd::layer1::deque<T, N> queue_type;
 };
 
 
@@ -53,10 +53,14 @@ private:
 public:
     streamsize xsputn(const char_type* s, streamsize count)
     {
+        streamsize orig_count = count;
+
         while(count--)
         {
             put_area.push_back(*s++);
         }
+
+        return orig_count;
     }
 
     int sync()
@@ -64,6 +68,7 @@ public:
         // TODO: Keep bumping into needing intrusive inspectors into queue to
         // get at underlying data buffers
         // _rdbuf.xsputn(put_area.data1());
+        return 0;
     }
 };
 
