@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal/platform.h"
+
 extern "C" {
 #include <stdint.h>
 }
@@ -10,13 +12,13 @@ struct ctype_base
 {
     typedef uint8_t mask;
 
-    static constexpr mask space = 0x01;
-    static constexpr mask digit = 0x02;
-    static constexpr mask alpha = 0x04;
-    static constexpr mask punct = 0x08;
+    static CONSTEXPR mask space = 0x01;
+    static CONSTEXPR mask digit = 0x02;
+    static CONSTEXPR mask alpha = 0x04;
+    static CONSTEXPR mask punct = 0x08;
 
-    static constexpr mask alnum = alpha | digit;
-    static constexpr mask graph = alnum | punct;
+    static CONSTEXPR mask alnum = alpha | digit;
+    static CONSTEXPR mask graph = alnum | punct;
 };
 
 
@@ -68,9 +70,9 @@ struct locale
 
     typedef int category;
 
-    static constexpr category none = 0x0000;
-    static constexpr category ctype = 0x0001;
-    static constexpr category numeric = 0x0002;
+    static CONSTEXPR category none = 0x0000;
+    static CONSTEXPR category ctype = 0x0001;
+    static CONSTEXPR category numeric = 0x0002;
 
     // TODO: deviates in that standard version uses a std::string
     // I want my own std::string (beginnings of which are in experimental::layer3::string)
@@ -137,7 +139,7 @@ template <class TFacet>
 bool has_facet(const locale& loc);
 
 template<>
-inline bool has_facet<ctype<char>>(const locale& loc)
+inline bool has_facet<ctype<char> >(const locale& loc)
 {
     return true;
 }
@@ -153,7 +155,7 @@ inline const ctype<char>& use_facet(const locale& loc)
 template <class TChar>
 inline bool isspace(TChar ch, const locale& loc)
 {
-    return use_facet<ctype<TChar>>(loc).is(ctype_base::space, ch);
+    return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
 }
 
 }}

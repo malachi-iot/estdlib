@@ -99,7 +99,7 @@ template<> PGM_P validateString<int>(const char* input);
 template<> inline PGM_P validateString<const char*>(const char*)
 {
     DO_VALIDATE_FORNULL;
-    return nullptr;
+    return NULLPTR;
 }
 
 template<> inline PGM_P validateString<unsigned char>(const char* input)

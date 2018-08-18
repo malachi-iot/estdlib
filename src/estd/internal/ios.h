@@ -134,9 +134,10 @@ protected:
     //basic_ios_base(stream_type &stream) : _rdbuf(stream)
             {}
 
+#ifdef FEATURE_CPP_VARIADIC
     template <class _TStream, class ...TArgs>
     basic_ios_base(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
-
+#endif
 public:
     streambuf_type* rdbuf()
     { return &_rdbuf; }

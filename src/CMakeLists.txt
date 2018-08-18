@@ -93,6 +93,7 @@ set(SOURCE_FILES
         estd/thread.h
         estd/traits/char_traits.h
         estd/traits/list_node.h
+        estd/traits/allocator_traits.cpp
         estd/traits/allocator_traits.h
         estd/traits/string.h
         estd/type_traits.h

@@ -189,7 +189,7 @@ public:
 }
 
 // traditional basic_streambuf, complete with virtual functions
-template<class TChar, class Traits = std::char_traits<TChar>>
+template<class TChar, class Traits = std::char_traits<TChar> >
 struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> >
 {
     typedef internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> > base_type;

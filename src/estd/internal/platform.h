@@ -21,6 +21,7 @@
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #define FEATURE_CPP_DEFAULT_TARGS   // default template arguments for a function template
 #define FEATURE_CPP_ENUM_CLASS
+#define FEATURE_CPP_INLINE_STATIC   // whether static variables can be initialized inline
 #define FEATURE_CPP_CHAR16_T
 
 #if defined(__STDC_LIB_EXT1__)

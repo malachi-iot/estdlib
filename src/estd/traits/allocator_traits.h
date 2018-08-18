@@ -30,9 +30,14 @@ struct has_member_base
     // helpers to suppress warnings on non-return type
     // pretty sure this only appears on rather old (pre c++11) compilers who aren't sure that it compile-time
     // resolves to not matter.
+#ifdef FEATURE_CPP_INLINE_STATIC
     static CONSTEXPR yes yes_value = { 0 };
     // SAMD compiler fails on this one, so can't use it
     static CONSTEXPR no no_value = { { 0 }, { 1 } };
+#else
+    static CONSTEXPR yes yes_value;
+    static CONSTEXPR no no_value;
+#endif
 
     // This helper struct permits us to check that serialize is truly a method.
     // The second argument must be of the type of the first.

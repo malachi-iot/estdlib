@@ -42,7 +42,7 @@ template<> PGM_P validateString<char>(const char* input)
   DO_VALIDATE_FORNULL;
   if(strlen(input) > 1) return VALIDATE_STRTOOLONG_ERROR;
 
-  return nullptr;
+    return NULLPTR;
 }
 
 
@@ -54,7 +54,7 @@ template<> PGM_P validateString<int>(const char* input)
     if(!isdigit(*input)) return VALIDATE_FORMAT_ERROR;
   } while(*++input);
 
-  return nullptr;
+    return NULLPTR;
 }
 
 
@@ -65,7 +65,7 @@ template<> PGM_P validateString<float>(const char* input)
   char* str_end;
   strtof(input, &str_end);
 
-  return input == str_end ? VALIDATE_FORMAT_ERROR : nullptr;
+  return input == str_end ? VALIDATE_FORMAT_ERROR : NULLPTR;
 }
 #endif
 
@@ -76,7 +76,7 @@ template<> PGM_P validateString<double>(const char* input)
   char* str_end;
   strtod(input, &str_end);
 
-  return input == str_end ? VALIDATE_FORMAT_ERROR : nullptr;
+  return input == str_end ? VALIDATE_FORMAT_ERROR : NULLPTR;
 }
 
 
@@ -87,7 +87,7 @@ template <> PGM_P validateString<unsigned short>(const char* input)
 
     strtoul(input, &str_end, 10);
 
-    return input == str_end ? VALIDATE_FORMAT_ERROR : nullptr;
+    return input == str_end ? VALIDATE_FORMAT_ERROR : NULLPTR;
 }
 
 

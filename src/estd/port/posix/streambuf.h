@@ -76,7 +76,7 @@ struct native_streambuf<char, posix_stream_t, ::std::char_traits<char> > :
         native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> >
 {
     typedef native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> > base_type;
-    typedef typename base_type::char_type char_type;
+    typedef base_type::char_type char_type;
     //typedef char char_type;
 
     streamsize xsgetn(char_type* s, streamsize count);
