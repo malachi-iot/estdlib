@@ -138,6 +138,8 @@ TEST_CASE("iostreams")
             _cin >> str;
 
             REQUIRE(_cin.eof());
+
+            _cin.sync();
         }
         SECTION("basic_streambuf_wrapped")
         {

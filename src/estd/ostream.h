@@ -41,8 +41,14 @@ public:
 
     typedef basic_ostream<TStreambuf, TBase> __ostream_type;
 
-    // eventually will call rdbuf()->sync
-    __ostream_type& flush() { return *this; }
+    // NOTE: Untested
+    __ostream_type& flush()
+    {
+        if(this->rdbuf()->pubsync() == -1)
+            this->setstate(base_t::badbit);
+
+        return *this;
+    }
 
     // When the time comes, these will replace the old virtual ones
     __ostream_type& write(const char_type* s, streamsize n)

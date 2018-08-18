@@ -50,7 +50,7 @@ public:
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sputc, char_type)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sgetc)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sbumpc)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(void, sync)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(int, sync)
 
 protected:
 
@@ -160,6 +160,20 @@ public:
     // NOTE: this deviates from spec in that it won't wait for CR, for example,
     // to reflect characters are available
     //streamsize in_avail();
+
+    template <class T = base_type>
+    typename enable_if<!has_sync_method<T>::value, int>::type
+    pubsync()
+    {
+        return 0;
+    }
+
+    template <class T = base_type>
+    typename enable_if<has_sync_method<T>::value, int>::type
+    pubsync()
+    {
+        return this->sync();
+    }
 };
 
 template<class TChar, class TStream, class Traits = ::std::char_traits <TChar> >

@@ -246,6 +246,15 @@ public:
         return *this;
     }
 
+
+    basic_istream& sync()
+    {
+        if(this->rdbuf()->pubsync() == -1)
+            this->setstate(base_t::badbit);
+
+        return *this;
+    }
+
     basic_istream& operator>>(basic_istream& (*__pf)(basic_istream&))
     {
         return __pf(*this);
