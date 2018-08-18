@@ -15,7 +15,7 @@
 
 using namespace estd;
 
-struct dummy_streambuf
+struct dummy_streambuf_impl
 {
     typedef char char_type;
     typedef int int_type;
@@ -24,6 +24,8 @@ struct dummy_streambuf
     int xsputn(const char_type*, int len) { return len; }
     int xsgetn(char_type*, int len) { return len; }
 };
+
+typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;
 
 TEST_CASE("iostreams")
 {

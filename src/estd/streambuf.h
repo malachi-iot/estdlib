@@ -222,6 +222,11 @@ private:
         return _rdbuf.xsputn(s, count);
     }
 
+    virtual int sync() OVERRIDE
+    {
+        return _rdbuf.pubsync();
+    }
+
 public:
     template <class TParam1>
     basic_streambuf_wrapped(TParam1& p) : _rdbuf(p) {}

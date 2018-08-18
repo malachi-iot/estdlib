@@ -226,6 +226,7 @@ struct basic_streambuf
 protected:
     virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
     virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
+    virtual int sync() = 0;
 };
 
 }}}
