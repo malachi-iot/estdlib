@@ -34,7 +34,7 @@ TEST_CASE("iostreams")
 
     SECTION("SFINAE tests")
     {
-        typedef estd::internal::impl::native_streambuf<char, estd::TEST_STREAM_T, std::char_traits<char> >
+        typedef estd::internal::impl::native_streambuf<char, estd::internal::posix_stream_t, std::char_traits<char> >
                 streambuf_impl_type;
         typedef estd::internal::streambuf<streambuf_impl_type> streambuf_type;
         bool has_method = streambuf_type::has_sputc_method<streambuf_impl_type>::value;
