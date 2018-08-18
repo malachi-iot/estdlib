@@ -88,6 +88,7 @@ class basic_ios_base;
 template <class TStreambuf>
 class basic_ios_base<TStreambuf, true> : public ios_base
 {
+protected:
     typedef TStreambuf streambuf_type;
     streambuf_type* _rdbuf;
 
@@ -143,11 +144,11 @@ public:
 
 
 //template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf>
-class basic_ios : public basic_ios_base<TStreambuf, false>
+template<class TStreambuf, bool use_pointer = false>
+class basic_ios : public basic_ios_base<TStreambuf, use_pointer>
 {
 public:
-    typedef basic_ios_base<TStreambuf, false> base_type;
+    typedef basic_ios_base<TStreambuf, use_pointer> base_type;
     typedef typename base_type::streambuf_type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
@@ -157,6 +158,9 @@ protected:
 
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
+
+    template <class TParam1>
+    basic_ios(TParam1* p) : base_type(p) {}
 
 public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it

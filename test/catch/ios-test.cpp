@@ -139,6 +139,23 @@ TEST_CASE("iostreams")
 
             REQUIRE(_cin.eof());
         }
+        SECTION("basic_streambuf_wrapped")
+        {
+            streambuf_type sb;
+            internal::basic_streambuf_wrapped<streambuf_type&> sbw(sb);
+            estd::basic_ostream<char> _cout(&sbw);
+
+            _cout << "hi2u";
+
+            const char* helper = sb.str().data();
+
+            REQUIRE(sb.str() == "hi2u");
+        }
+        SECTION("wrapped_ostream")
+        {
+            streambuf_type sb;
+            //experimental::wrapped_ostream<streambuf_type> _cout(sb);
+        }
     }
     SECTION("cin")
     {

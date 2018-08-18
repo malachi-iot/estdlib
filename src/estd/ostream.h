@@ -37,6 +37,8 @@ class basic_ostream :
     typedef typename TBase::char_type char_type;
 
 public:
+    typedef typename TBase::traits_type traits_type;
+
     typedef basic_ostream<TStreambuf, TBase> __ostream_type;
 
     // eventually will call rdbuf()->sync
@@ -78,12 +80,15 @@ public:
 
     template <class TParam1>
     basic_ostream(TParam1& p1) : base_t(p1) {}
+
+    template <class TParam1>
+    basic_ostream(TParam1* p1) : base_t(p1) {}
 #endif
+
 };
 
-
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator <<(basic_ostream<TStreambuf>& out,
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
                                                          const typename TStreambuf::char_type* s)
 {
     typedef typename TStreambuf::traits_type traits_type;
@@ -130,6 +135,50 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 
 
 }
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <class TChar, class CharTraits = std::char_traits<TChar> >
+using basic_ostream = internal::basic_ostream<
+    basic_streambuf<TChar, CharTraits>,
+    internal::basic_ios<basic_streambuf<TChar, CharTraits>, true> >;
+#endif
+
+namespace experimental {
+
+// manage both a native TStreambuf as well as a pointer to a traditional-style
+// basic_streambuf.  Note that this will auto wrap TStreambuf, because otherwise
+// if TStreambuf didn't need wrapping, you wouldn't use wrapped_ostream in the first
+// place (you'd instead use traditional basic_ostream)
+template <class TStreambuf, class TBase = estd::internal::basic_ios<TStreambuf, true> >
+struct wrapped_ostream : internal::basic_ostream<
+        estd::basic_streambuf<
+            typename TStreambuf::char_type,
+            typename TStreambuf::traits_type>,
+        TBase>
+{
+    typedef internal::basic_ostream<
+        estd::basic_streambuf<
+            typename TStreambuf::char_type,
+            typename TStreambuf::traits_type>,
+        TBase> base_type;
+
+    // NOTE: Not well supported TStreambuf being a value vs a reference yet, needs work
+    typedef estd::internal::basic_streambuf_wrapped<TStreambuf> streambuf_type;
+
+    // need a value type here so that the wrapped streambuf has a place to live
+    // i.e. be allocated
+    streambuf_type wrapped_streambuf;
+
+    wrapped_ostream(TStreambuf& native_streambuf) :
+        base_type(&wrapped_streambuf),
+        wrapped_streambuf(native_streambuf)
+    {
+
+    }
+};
+
+}
+
 
 template <class TStreambuf>
 inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStreambuf>& __os)

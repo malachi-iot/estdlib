@@ -50,6 +50,7 @@ public:
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sputc, char_type)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sgetc)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sbumpc)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(void, sync)
 
 protected:
 
@@ -187,8 +188,8 @@ namespace internal {
 template<class TStreambuf>
 struct basic_streambuf_wrapped :
         basic_streambuf<
-                typename TStreambuf::char_type,
-                typename TStreambuf::traits_type
+                typename estd::remove_reference<TStreambuf>::type::char_type,
+                typename estd::remove_reference<TStreambuf>::type::traits_type
         >
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
