@@ -1,5 +1,5 @@
-#include "../internal/platform.h"
-#include "allocator_traits.h"
+#include "platform.h"
+#include "utility.h"
 
 #ifndef FEATURE_CPP_INLINE_STATIC
 namespace estd { namespace internal {

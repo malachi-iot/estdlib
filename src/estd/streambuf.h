@@ -7,6 +7,7 @@
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
 #include "internal/impl/streambuf.h"
+#include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
 
 //#include "features.h"
@@ -15,18 +16,6 @@
 namespace estd {
 
 namespace internal {
-
-// TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL
-#define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
-template <class T> struct has_##method_name##_method : has_member_base \
-{ \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
-    { return yes_value; }  \
-\
-    template <typename> static CONSTEXPR no& test(...) { return no_value; } \
-\
-    static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
-};
 
 template<class TImpl>
 class streambuf : public TImpl

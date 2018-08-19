@@ -32,6 +32,10 @@ set(SOURCE_FILES
         estd/internal/deduce_fixed_size.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/impl/allocated_array.h
+        estd/internal/impl/dynamic_array.h
+        estd/internal/impl/handle_desc.h
+        estd/internal/impl/streambuf.h
         estd/internal/ios.h
         estd/internal/iostream.h
         estd/internal/is_function.h
@@ -49,10 +53,8 @@ set(SOURCE_FILES
         estd/internal/string_convert.cpp
         estd/internal/to_string.h
         estd/internal/llvm_type_traits.h
-        estd/internal/impl/allocated_array.h
-        estd/internal/impl/dynamic_array.h
-        estd/internal/impl/handle_desc.h
-        estd/internal/impl/streambuf.h
+        estd/internal/utility.cpp
+        estd/internal/utility.h
         estd/internal/value_evaporator.h
 
         estd/iterators/list.h
@@ -93,7 +95,6 @@ set(SOURCE_FILES
         estd/thread.h
         estd/traits/char_traits.h
         estd/traits/list_node.h
-        estd/traits/allocator_traits.cpp
         estd/traits/allocator_traits.h
         estd/traits/string.h
         estd/type_traits.h
