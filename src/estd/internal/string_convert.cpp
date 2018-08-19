@@ -1,6 +1,4 @@
-//#include <Arduino.h>
 //#include "fact/c_types.h"
-#include "platform.h"
 #include "string_convert.h"
 
 #include <string.h>
@@ -28,11 +26,6 @@ const char VALIDATE_FORMAT_ERROR[] PROGMEM = "Invalid format";
 const char TYPENAME_INT[] PROGMEM = "Integer";
 const char TYPENAME_CHARPTR[] PROGMEM = "String";
 
-// FIX: Unknown if these can safely live here.
-//  conditions occur while compiling for ESP8266
-//  If I don't put them here and leave them in includes, I get linker dup errors
-//  If I do put them in here, then I get linker ref not found errors
-// For the time being disabling the feature (disabling validateInvokeNative)
 
 // TODO: combine validate/convert functions since they happen lock step, this way
 //   we can avoid double-conversion at times

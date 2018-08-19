@@ -1,5 +1,3 @@
-// Pulled in from util.embedded, but not yet adapted to estd environment
-
 #pragma once
 
 #include "internal/platform.h"
@@ -14,10 +12,6 @@
 
 //#include "features.h"
 #include "locale.h"
-
-#ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
-#include "CircularBuffer.h"
-#endif
 
 namespace estd {
 
@@ -254,69 +248,10 @@ public:
 
 };
 
-}
+}}
 
-#ifdef FEATURE_IOS_STREAMBUF_FULL
-template<class TChar, class Traits = char_traits<TChar>>
-class basic_streambuf
-{
-protected:
-    typedef TChar char_type;
-    typedef typename Traits::int_type int_type;
 
-    virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
-    virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
-
-    //virtual int_type uflow() = 0;
-
-public:
-    streamsize sputn(const char_type* s, streamsize count)
-    {
-        return xsputn(s, count);
-    }
-
-    int_type sputc(char_type ch)
-    {
-        bool success = xsputn(&ch, sizeof(ch)) == sizeof(ch);
-        return success ? (int_type) ch : Traits::eof();
-    }
-
-    streamsize sgetn(char_type* s, streamsize count)
-    {
-        return xsgetn(s, count);
-    }
-
-    // TODO: *possibly* implement underflow, if I like it...
-    // Don't think I made this one quite right...
-    int_type sbumpc()
-    {
-        char_type ch;
-
-        bool success = xsgetn(&ch, sizeof(ch)) == sizeof(ch);
-
-        return success ? Traits::to_int_type(ch) : Traits::eof();
-    }
-
-    // FIX: make this pure and implement in derived class
-    virtual streamsize in_avail() { return 0; }
-};
-}
-#else
-}
-/*
-#if defined(__MBED__)
-#include "streams/iostream_mbed_streambuf.h"
-#elif defined(ESTD_POSIX)
-#include "port/posix/streambuf.h"
-#elif defined(ARDUINO)
-#include "streams/iostream_arduino_streambuf.h"
-#elif defined(ESP_OPEN_RTOS)
-#include "streams/iostream_posix_streambuf.h"
-#else
-#error "Architecture not yet supported"
-#endif
-*/
 #include "port/streambuf.h"
-#endif
+
 
 
