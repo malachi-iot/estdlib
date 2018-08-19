@@ -2,11 +2,10 @@
 
 #include "internal/platform.h"
 //#include "traits/char_traits.h"
-#include "traits/allocator_traits.h" // for ESTD_HAS_METHOD_EXPERIMENTAL1 dependencies
+#include "traits/allocator_traits.h" // for ESTD_FN_HAS_METHOD dependencies
 #include "type_traits.h"
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
-//#include "internal/ios.h"
 #include "internal/impl/streambuf.h"
 
 
@@ -17,10 +16,8 @@ namespace estd {
 
 namespace internal {
 
-// TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL later when we are ready to merge
-// and ready to handle possible breakages.  Working pretty well, just about ready to
-// rename it to ESTD_HAS_METHOD
-#define ESTD_HAS_METHOD_EXPERIMENTAL1(ret_type, method_name, ...) \
+// TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL
+#define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : has_member_base \
 { \
     template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
@@ -42,15 +39,15 @@ public:
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
-    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sputc, char_type)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sgetc)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sbumpc)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(int, sync)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, gptr)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, egptr)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, pptr)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, epptr)
-    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, underflow)
+    ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
+    ESTD_FN_HAS_METHOD(int_type, sgetc)
+    ESTD_FN_HAS_METHOD(int_type, sbumpc)
+    ESTD_FN_HAS_METHOD(int, sync)
+    ESTD_FN_HAS_METHOD(char_type*, gptr)
+    ESTD_FN_HAS_METHOD(char_type*, egptr)
+    ESTD_FN_HAS_METHOD(char_type*, pptr)
+    ESTD_FN_HAS_METHOD(char_type*, epptr)
+    ESTD_FN_HAS_METHOD(int_type, underflow)
 
 protected:
 
