@@ -71,8 +71,7 @@ typedef ::FILE& posix_stream_t;
 
 namespace impl {
 
-template <>
-struct native_streambuf<char, posix_stream_t, ::std::char_traits<char> > :
+struct posix_streambuf :
         native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> >
 {
     typedef native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> > base_type;
@@ -86,15 +85,21 @@ struct native_streambuf<char, posix_stream_t, ::std::char_traits<char> > :
     int sbumpc();
     int sputc(char);
 
-    native_streambuf(posix_stream_t stream) : base_type(stream) {}
+    // TODO: Might want this one day, but it will mandate carring that #include <stdio.h> around
+    // though at the moment we have to do that anyway due to ::FILE
+    //int_type sputc(char_type ch) { return fputc(ch, &this->stream); }
+
+    posix_streambuf(posix_stream_t stream) : base_type(stream) {}
 };
 
 } }
 
+// FIX: TChar and Traits evaporate, for the time being
+// we'll want to repair that
 template <class TChar, class Traits = ::std::char_traits<TChar> >
-class posix_streambuf : public ::estd::internal::native_streambuf<TChar, internal::posix_stream_t, Traits>
+class posix_streambuf : public ::estd::internal::streambuf<internal::impl::posix_streambuf>
 {
-    typedef ::estd::internal::native_streambuf<TChar, internal::posix_stream_t, Traits> base_type;
+    typedef internal::streambuf<internal::impl::posix_streambuf> base_type;
 
 public:
     posix_streambuf(internal::posix_stream_t stdstream) : base_type(stdstream) {}

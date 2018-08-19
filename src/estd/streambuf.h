@@ -56,6 +56,7 @@ public:
     ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, egptr)
     ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, pptr)
     ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, epptr)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, underflow)
 
 protected:
 
@@ -142,6 +143,16 @@ public:
     // clumsily, underflow is technically also responsible for then
     // producing (not just populating) a new gptr with
     // data - if any
+
+    /*
+     *  Reasonable code, but enabling this disables any existing sgetc
+     *
+    template <class T = base_type>
+    typename enable_if<has_underflow_method<T>::value, int_type>::type
+    sgetc()
+    {
+        return this->underflow();
+    } */
 
     /* NOTE: implementation of sgetc is kind of specific, so we can't make
      * a generic handler like the others [reading a char without advancing]

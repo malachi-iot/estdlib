@@ -16,6 +16,8 @@
 
 using namespace estd;
 
+//#define TEST_COUT
+
 struct dummy_streambuf_impl
 {
     typedef char char_type;
@@ -35,8 +37,9 @@ TEST_CASE("iostreams")
 
     SECTION("SFINAE tests")
     {
-        typedef estd::internal::impl::native_streambuf<char, estd::internal::posix_stream_t, std::char_traits<char> >
-                streambuf_impl_type;
+        //typedef estd::internal::impl::native_streambuf<char, estd::internal::posix_stream_t, std::char_traits<char> >
+        //        streambuf_impl_type;
+        typedef estd::internal::impl::posix_streambuf streambuf_impl_type;
         typedef estd::internal::streambuf<streambuf_impl_type> streambuf_type;
         bool has_method = streambuf_type::has_sputc_method<streambuf_impl_type>::value;
 
