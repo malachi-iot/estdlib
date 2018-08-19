@@ -184,7 +184,7 @@ public:
 #ifdef FEATURE_IOS_EXPERIMENTAL_GETSOME
     int_type getsome()
     {
-#ifdef FEATURE_IOS_SPEEKC
+#ifdef FEATURE_ESTD_IOS_SPEEKC
         // calling non-standard rdbuf()->speekc()
         return this->good() ? this->rdbuf()->speekc() : traits_type::eof();
 #else

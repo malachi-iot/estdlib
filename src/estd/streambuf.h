@@ -24,7 +24,8 @@ namespace estd {
 namespace internal {
 
 // TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL later when we are ready to merge
-// and ready to handle possible breakages
+// and ready to handle possible breakages.  Working pretty well, just about ready to
+// rename it to ESTD_HAS_METHOD
 #define ESTD_HAS_METHOD_EXPERIMENTAL1(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : has_member_base \
 { \
@@ -51,12 +52,12 @@ public:
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sgetc)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int_type, sbumpc)
     ESTD_HAS_METHOD_EXPERIMENTAL1(int, sync)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, gptr)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, egptr)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, pptr)
+    ESTD_HAS_METHOD_EXPERIMENTAL1(char_type*, epptr)
 
 protected:
-
-#ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
-    FactUtilEmbedded::layer1::CircularBuffer<char_type, (uint16_t)FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF> experimental_buf;
-#endif
 
     /*
      * Not doing these because I bet polymorphism breaks if you do
@@ -135,6 +136,13 @@ public:
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
+    // TODO: sgetc is actually more of a wrapper around underflow, who
+    // mainly interacts with buffers otherwise so consider implementing
+    // underflow instead for our low level character acquisition.  Note though,
+    // clumsily, underflow is technically also responsible for then
+    // producing (not just populating) a new gptr with
+    // data - if any
+
     /* NOTE: implementation of sgetc is kind of specific, so we can't make
      * a generic handler like the others [reading a char without advancing]
     template <class T = base_type>
@@ -151,9 +159,11 @@ public:
         return -1;
     } */
 
-    //int_type sgetc();
-
-#ifdef FEATURE_IOS_SPEEKC
+    // sgetc implies nonblocking, but in fact typically does block in std environments
+    // speekc gauruntees nonblocking.  however, since we strive to make sgetc nonblocking
+    // speekc might be considered superfluous and a deviation from spec, so for now it's
+    // wrapped in a feature flag
+#ifdef FEATURE_ESTD_IOS_SPEEKC
     int_type speekc();
 #endif
 
