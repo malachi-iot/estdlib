@@ -57,6 +57,14 @@ It's presently being considered to map 1, 2 and 3 to layer1, layer2 and layer3 f
 
 Doubly-linked list having the same capabilities as forward_list with its node allocation.
 
+## IO Streams
+
+Rudimentary ostream/istream support is now present.  The API is mostly internal,
+but functionally it's shaping up well.  These have been implemented differently
+than regular std::ios and friends - it uses templates much more strongly and
+does not depend on virtual functions.  A deeper discussion is warranted, expect
+better documentation in time.
+
 ## Queues
 
 Circular queues are particularly useful in embedded environments, and as such layer1::deque provides exactly that.  A layer2 and layer3 variant are planned.
@@ -77,7 +85,7 @@ Planned
 
 ## Strings
 
-All strings can operate in either null-terimanted or explicit size-tracked modes.  Note that as of this writing, size-tracked modes are not fully operational or tested but the feature is architected in.
+All strings can operate in either null-terimanted or explicit size-tracked modes.  
 
 ### estd::basic_string
 
@@ -85,7 +93,12 @@ Very closely resembles std::string, but utilizes extra behaviors of our allocato
 
 ### estd::layer1::basic_string
 
-Has the same memory footprint as a char[N] array
+Has the same memory footprint as a traditional char[N] string when null terminated.
+When in size-tracked mode, size_type will be the smallest possible unsigned int which
+can manage up to N
+
+When N is less than 256, then null-nullterminated and size-tracked
+take the same amount of memory since size_type can be uint8_t.
 
 ### estd::layer2::basic_string
 

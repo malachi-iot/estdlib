@@ -284,11 +284,11 @@ public:
 
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template <size_t N>
-using string = basic_string<char, N>;
+template <size_t N, bool null_terminated = true>
+using string = basic_string<char, N, null_terminated>;
 #else
-template <size_t N>
-class string : public basic_string<char, N>
+template <size_t N, bool null_terminated = true>
+class string : public basic_string<char, N, null_terminated>
 {
     typedef basic_string<char, N> base_t;
 

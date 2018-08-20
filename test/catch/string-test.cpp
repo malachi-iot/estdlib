@@ -71,6 +71,19 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
     }
+    SECTION("layer 1 size-tracked")
+    {
+        layer1::string<20, false> s;
+
+        int sz = sizeof(s);
+
+        REQUIRE(s.length() == 0);
+
+        s += test_str;
+
+        REQUIRE(s.length() == 5);
+        REQUIRE(s == test_str);
+    }
     SECTION("layer 2 (non-experimental) null terminated")
     {
         char buf[128] = ""; // as per spec, this actually

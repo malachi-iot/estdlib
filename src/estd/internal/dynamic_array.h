@@ -317,8 +317,10 @@ public:
     }
 
 protected:
+    // internal call: grows entire size() by amount,
+    // ensuring that there's enough space along the
+    // way to do so (allocating more if necessary)
     // returns size before growth
-    // internal call
     size_type grow(int by_amount)
     {
         ensure_additional_capacity(by_amount);
