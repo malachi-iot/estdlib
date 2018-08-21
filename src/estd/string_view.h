@@ -7,7 +7,10 @@ template <class CharT,
           // NOTE: Because this is marked as a 'const' string policy, resize-ish operations
           // are not as available (thus affecting remove_suffix).  Might be prudent to make
           // a special 'view' policy which is mostly const, but permits changes to size/pointer
-          class Policy = experimental::sized_string_policy<Traits, int16_t, true> >
+          class Policy
+          // already specified in policy/string.h
+          //= experimental::sized_string_policy<Traits, int16_t, true>
+          >
 class basic_string_view :
         public basic_string<
             const CharT,

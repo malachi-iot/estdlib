@@ -453,14 +453,21 @@ TEST_CASE("string tests")
         // for remove_suffix and remove_prefix
         //sv3 += "T";
 
-        SECTION("from basic_string")
+        SECTION("from layer1::string")
         {
-            layer1::string<32> s;
+            layer1::string<32> s = "hi2u";
 
-            estd::basic_string_view<
-                    char,
-                    decltype(s)::traits_type,
-                    decltype(s)::policy_type> v = s;
+            estd::string_view v = s;
+
+            REQUIRE(v == "hi2u");
+        }
+        SECTION("from layer2::string")
+        {
+            layer2::const_string s = "hi2u";
+
+            estd::string_view v = s;
+
+            REQUIRE(v == "hi2u");
         }
     }
 }

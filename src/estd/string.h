@@ -385,9 +385,13 @@ public:
     // layer2 strings can safely issue a lock like this, since unlock is a no-op
     CharT* data() { return base_t::lock(); }
 
-    operator basic_string_view<CharT, Traits, StringPolicy>() const
+    const CharT* data() const { return base_t::clock(); }
+
+    // A little clumsy since basic_string_view treats everything as const already,
+    // so if we are converting from a const_string we have to remove const from CharT
+    operator basic_string_view<typename estd::remove_const<CharT>::type, Traits>() const
     {
-        return basic_string_view<CharT, Traits, StringPolicy>(data(), base_t::size());
+        return basic_string_view<typename estd::remove_const<CharT>::type, Traits>(data(), base_t::size());
     }
 };
 
