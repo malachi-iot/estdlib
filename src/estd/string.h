@@ -59,7 +59,7 @@ public:
     typedef CharT value_type;
     typedef Traits traits_type;
     typedef typename base_t::allocator_type allocator_type;
-    typedef StringPolicy string_traits_type;
+    typedef StringPolicy policy_type;
 
     typedef typename allocator_type::handle_type handle_type;
 
@@ -276,9 +276,11 @@ public:
     // layer1 strings can safely issue a lock like this, since unlock is a no-op
     CharT* data() { return base_t::lock(); }
 
-    operator basic_string_view<CharT, Traits, StringPolicy>() const
+    const CharT* data() const { return base_t::clock(); }
+
+    operator basic_string_view<CharT, Traits>() const
     {
-        return basic_string_view<CharT, Traits, StringPolicy>(data(), base_t::size());
+        return basic_string_view<CharT, Traits>(data(), base_t::size());
     }
 };
 

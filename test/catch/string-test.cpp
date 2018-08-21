@@ -84,7 +84,7 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
     }
-    SECTION("layer 2 (non-experimental) null terminated")
+    SECTION("layer 2 null terminated")
     {
         char buf[128] = ""; // as per spec, this actually
         layer2::basic_string<char, 20> s(buf, 0);
@@ -98,6 +98,11 @@ TEST_CASE("string tests")
 
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
+
+        // TODO: Doesn't work, but should
+        // (make it interact with data() so that this *only* works with non-locking
+        //  stuff)
+        //layer2::string<> str3 = test_str;
     }
     // deactivated because string construction for layer2 is still a bit funky
     // and depends on dynamic_array_helper.  dynamic_array_helper code needs a
@@ -121,7 +126,8 @@ TEST_CASE("string tests")
         REQUIRE(str == str2);
         REQUIRE(str == "val");
 
-        //experimental::layer2::string<> str3 = str;
+        // NOTE: Doesn't work by design - loses const-qualifiers
+        //layer2::string<> str3 = "hi2u";
     }
     SECTION("layer 3 null terminated")
     {
@@ -446,5 +452,15 @@ TEST_CASE("string tests")
         // Does not compile, as is correct behavior - string_views are read only except
         // for remove_suffix and remove_prefix
         //sv3 += "T";
+
+        SECTION("from basic_string")
+        {
+            layer1::string<32> s;
+
+            estd::basic_string_view<
+                    char,
+                    decltype(s)::traits_type,
+                    decltype(s)::policy_type> v = s;
+        }
     }
 }
