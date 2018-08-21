@@ -144,9 +144,11 @@ struct ForwardIterator : public TBase
 
         node_type& c = base_t::lock_internal();
 
-        this->current = base_t::traits.next(c);
+        node_handle_t new_current = base_t::traits.next(c);
 
         base_t::unlock_internal();
+
+        this->current = new_current;
 
         return *this;
     }

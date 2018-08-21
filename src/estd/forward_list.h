@@ -264,7 +264,7 @@ public:
 
 // Inspired by ETL library
 template <class T>
-class intrustive_forward_list : public internal::forward_list<T>  { };
+class intrusive_forward_list : public internal::forward_list<T>  { };
 
 #ifdef UNUSED
 // yanked directly in from util.embedded
