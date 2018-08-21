@@ -469,5 +469,13 @@ TEST_CASE("string tests")
 
             REQUIRE(v == "hi2u");
         }
+
+        sv3 = "test3";
+
+        estd::string_view sv4 = sv3.substr(1, 2);
+
+        const char* helper = sv4.lock();
+
+        REQUIRE(sv4 == "es");
     }
 }

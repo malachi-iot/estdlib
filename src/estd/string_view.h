@@ -84,6 +84,26 @@ public:
 
         a.adjust_offset_exp(true, n);
     }
+
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+    CONSTEXPR
+#endif
+    basic_string_view substr(
+            size_type pos = 0,
+            size_type count = base_t::npos) const
+    {
+        basic_string_view copy(*this);
+
+        copy.remove_prefix(pos);
+        if(count != base_t::npos)
+        {
+            allocator_type& a = copy.get_allocator();
+
+            a.set_size_exp(true, count);
+        }
+
+        return copy;
+    }
 #endif
 };
 

@@ -63,6 +63,8 @@ public:
 
     typedef typename allocator_type::handle_type handle_type;
 
+    static CONSTEXPR size_type npos = -1;
+
     size_type length() const { return base_t::size(); }
 
     basic_string& erase(size_type index = 0, size_type count = -1)

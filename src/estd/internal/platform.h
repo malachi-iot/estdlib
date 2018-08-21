@@ -44,6 +44,8 @@
 
 // C++17 onward features go here
 #if __cplusplus >= 201703L
+// for inline method constexpr as described https://en.cppreference.com/w/cpp/language/constexpr
+#define FEATURE_CPP_CONSTEXPR_METHOD
 #endif
 
 #else
