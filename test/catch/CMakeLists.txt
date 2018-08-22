@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     buffer-test.cpp
     chrono-test.cpp
     experimental-test.cpp
+    functional-test.cpp
     list-test.cpp
     map-test.cpp
     memory-test.cpp
