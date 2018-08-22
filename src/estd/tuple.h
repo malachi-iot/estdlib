@@ -25,7 +25,7 @@ template <>
 class tuple<>
 {
 public:
-    static CONSTEXPR int index = 0;
+    //static CONSTEXPR int index = 0;
 };
 
 template <class T, class ...TArgs>
@@ -41,17 +41,29 @@ public:
         value(std::move(value))
     {}
 
-    static CONSTEXPR int index = sizeof...(TArgs) + 1;
+    static CONSTEXPR int index = sizeof...(TArgs);
+
+    typedef T element_type;
 };
 
 template< std::size_t I, class... Types >
 typename tuple_element<I, tuple<Types...> >::type&
-    get( tuple<Types...>& t ) noexcept
+    get( const tuple<Types...>& t ) noexcept
 {
-    tuple_element<I, tuple<Types...> > e;
-    // TBD
+    if(t.index == I)
+    {
+        tuple_element<I, tuple<Types...> > e;
+        return e;
+    }
+    else
+        return get<I - 1, tuple<Types...>::base_type>(t);
+}
 
-    return e;
+
+template <class...Types>
+tuple<Types...> make_tuple( Types&&... args )
+{
+    return tuple<Types...>(std::forward<Types>(args)...);
 }
 
 
