@@ -104,5 +104,9 @@ set(SOURCE_FILES
 
          )
 
-add_library(estd_lib ${SOURCE_FILES})
+set(EMBR_SOURCE_FILES
+    embr/observer.h
+    )
+
+add_library(estd_lib ${SOURCE_FILES} ${EMBR_SOURCE_FILES})
 

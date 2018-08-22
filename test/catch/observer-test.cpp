@@ -1,6 +1,8 @@
 #include <estd/exp/observer.h>
 #include <estd/vector.h>
 
+#include <embr/observer.h>
+
 #include <tuple>
 
 #include <catch.hpp>
@@ -255,5 +257,9 @@ TEST_CASE("observer tests")
         container_subject<estd::layer1::vector<IObserver*, 10> > c;
 
         c.notify(event_1 { 3 });
+    }
+    SECTION("next-gen tuple based observer")
+    {
+        embr::layer0::subject<StatelessObserver> s;
     }
 }

@@ -42,6 +42,8 @@ public:
         value(std::move(value))
     {}
 
+    explicit tuple() {}
+
     static CONSTEXPR int index = sizeof...(TArgs);
 
     typedef T element_type;
