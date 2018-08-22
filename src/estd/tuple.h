@@ -44,8 +44,36 @@ public:
     static CONSTEXPR int index = sizeof...(TArgs);
 
     typedef T element_type;
+
+    const T& first() const { return value; }
 };
 
+// lifted from https://gist.github.com/IvanVergiliev/9639530
+namespace internal {
+
+template<int index, typename First, typename... Rest>
+struct GetImpl
+{
+    static auto value(const tuple<First, Rest...>* t) ->
+        decltype(GetImpl<index - 1, Rest...>::value(t))
+    {
+        return GetImpl<index - 1, Rest...>::value(t);
+    }
+};
+
+template<typename First, typename... Rest>
+struct GetImpl<0, First, Rest...>
+{
+    static First value(const tuple<First, Rest...>* t)
+    {
+        return t->first();
+    }
+};
+
+
+}
+
+/*
 template< std::size_t I, class... Types >
 typename tuple_element<I, tuple<Types...> >::type&
     get( const tuple<Types...>& t ) noexcept
@@ -57,6 +85,13 @@ typename tuple_element<I, tuple<Types...> >::type&
     }
     else
         return get<I - 1, tuple<Types...>::base_type>(t);
+} */
+
+template<int index, typename First, typename... Rest>
+auto get(const tuple<First, Rest...>& t) ->
+    decltype(internal::GetImpl<index, First, Rest...>::value(&t))
+{ //typename Type<index, First, Rest...>::value {
+    return internal::GetImpl<index, First, Rest...>::value(&t);
 }
 
 

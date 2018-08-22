@@ -19,7 +19,13 @@ TEST_CASE("functional")
 
         REQUIRE(sz == sizeof(long) * 2 + sizeof(double));
 
-        //auto val = estd::get<0>(tuple);
+        auto val1 = estd::get<0>(tuple);
+
+        REQUIRE(val1 == 0);
+
+        auto val2 = estd::get<1>(tuple);
+
+        REQUIRE(val2 == 1.0);
     }
     SECTION("A")
     {
