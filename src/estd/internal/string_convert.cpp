@@ -177,6 +177,7 @@ template<> char* toString(char* output, float input)
     return output;
 }
 #else
+#include <stdio.h>
 template<> char* toString(char* output, float input)
 {
   sprintf(output, "%f", input);
