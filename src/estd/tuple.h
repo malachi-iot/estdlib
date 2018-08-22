@@ -3,6 +3,7 @@
 #include "internal/platform.h"
 
 #include "utility.h"
+#include "type_traits.h"
 
 namespace estd {
 
@@ -17,7 +18,7 @@ class tuple_element;
 template< std::size_t I, class T >
 class tuple_element< I, const T > {
   typedef typename
-      std::add_const<typename std::tuple_element<I, T>::type>::type type;
+      std::add_const<typename estd::tuple_element<I, T>::type>::type type;
 };
 
 
@@ -93,6 +94,22 @@ auto get(const tuple<First, Rest...>& t) ->
 { //typename Type<index, First, Rest...>::value {
     return internal::GetImpl<index, First, Rest...>::value(&t);
 }
+
+
+/*
+template< class T >
+class tuple_size;
+
+template< class T >
+class tuple_size<const T>
+ : public integral_constant<std::size_t, tuple_size<T>::value> { };
+*/
+template< class T >
+struct tuple_size
+        : estd::integral_constant<std::size_t, T::index + 1>
+{
+    //static constexpr unsigned value();// T::index;
+};
 
 
 template <class...Types>
