@@ -3,9 +3,12 @@
 #include <estd/functional.h>
 
 
+static const char* got_something = NULLPTR;
+
 void do_something(const char* msg)
 {
-    printf("I did something: %s\n", msg);
+    got_something = msg;
+    //printf("I did something: %s\n", msg);
 }
 
 using namespace estd;
@@ -67,6 +70,10 @@ TEST_CASE("functional")
     {
         auto b = estd::bind(&do_something, "hello");
 
-        //b();
+        int sz = sizeof(b);
+
+        b();
+
+        REQUIRE(got_something == "hello");
     }
 }

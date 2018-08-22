@@ -121,6 +121,31 @@ tuple<Types...> make_tuple( Types&&... args )
 }
 
 
+// FIX: important deviation from spec in that we aren't returning
+// a value.  That is a little tricky
+template <class F2, class Tuple, size_t... Is>
+inline void apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>)
+{
+    f(get<Is>(t)...);
+}
+
+template <class F2, class Tuple>
+inline void apply(F2&& f, Tuple&& t)
+{
+    typedef make_index_sequence<
+                tuple_size<
+                    Tuple
+                >::value
+            > seq;
+
+    apply_impl(std::move(f),
+               std::forward<Tuple>(t),
+               seq {});
+}
+
+
+
+
 #endif
 
 }

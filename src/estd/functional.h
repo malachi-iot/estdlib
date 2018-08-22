@@ -46,14 +46,35 @@ struct bind_type
     tuple<TArgs...> args;
 
     bind_type(F&& f, TArgs&&...args) :
+        f(std::move(f)),
         args(std::forward<TArgs>(args)...)
     {
 
     }
 
+    // index_sequence parameter makes it easier to get at
+    // size_t... Is, which in turn lets us do the get<Is>... call
+    // TODO: refactor make+use 'apply'
+    // https://en.cppreference.com/w/cpp/utility/apply
+    template <class Tuple, size_t... Is>
+    void invoker(Tuple t, index_sequence<Is...>)
+    {
+        return f(get<Is>(t)...);
+    }
+
     void operator ()()
     {
-        f();
+        apply(std::move(f), std::move(args));
+        /*
+        typedef make_index_sequence<
+                    tuple_size<
+                        tuple<TArgs...>
+                    >::value
+                > seq;
+
+        invoker(args, seq {}); */
+
+        //f(get<>(args)...);
     }
 };
 
