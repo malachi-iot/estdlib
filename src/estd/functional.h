@@ -62,19 +62,9 @@ struct bind_type
         return f(get<Is>(t)...);
     }
 
-    void operator ()()
+    auto operator ()() -> decltype (apply(std::move(f), std::move(args)))
     {
-        apply(std::move(f), std::move(args));
-        /*
-        typedef make_index_sequence<
-                    tuple_size<
-                        tuple<TArgs...>
-                    >::value
-                > seq;
-
-        invoker(args, seq {}); */
-
-        //f(get<>(args)...);
+        return apply(std::move(f), std::move(args));
     }
 };
 

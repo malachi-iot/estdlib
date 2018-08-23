@@ -5,10 +5,12 @@
 
 static const char* got_something = NULLPTR;
 
-void do_something(const char* msg)
+int do_something(const char* msg)
 {
     got_something = msg;
     //printf("I did something: %s\n", msg);
+
+    return -1;
 }
 
 using namespace estd;
@@ -72,13 +74,13 @@ TEST_CASE("functional")
 
         REQUIRE(is_same);
     }
-    SECTION("A")
+    SECTION("bind")
     {
-        auto b = estd::bind(&do_something, "hello");
+        auto b = estd::bind(do_something, "hello");
 
         int sz = sizeof(b);
 
-        b();
+        REQUIRE(b() == -1);
 
         REQUIRE(got_something == "hello");
     }

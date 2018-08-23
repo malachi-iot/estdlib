@@ -165,25 +165,26 @@ namespace internal {
 // FIX: important deviation from spec in that we aren't returning
 // a value.  That is a little tricky
 template <class F2, class Tuple, size_t... Is>
-inline void apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>)
+inline auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
+    decltype (f(get<Is>(t)...))
 {
-    f(get<Is>(t)...);
+    return f(get<Is>(t)...);
 }
 
 }
 
-template <class F2, class Tuple>
-inline void apply(F2&& f, Tuple&& t)
+template <class F2, class Tuple, class TSeq = make_index_sequence<
+              tuple_size<
+                  Tuple
+              >::value> >
+inline auto apply(F2&& f, Tuple&& t) ->
+    decltype (internal::apply_impl(std::move(f),
+                                   std::forward<Tuple>(t),
+                                   TSeq {}))
 {
-    typedef make_index_sequence<
-                tuple_size<
-                    Tuple
-                >::value
-            > seq;
-
-    internal::apply_impl(std::move(f),
+    return internal::apply_impl(std::move(f),
                std::forward<Tuple>(t),
-               seq {});
+               TSeq {});
 }
 
 
