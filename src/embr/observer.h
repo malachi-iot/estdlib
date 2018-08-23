@@ -14,11 +14,13 @@ namespace layer0 {
 template <class ...TObservers>
 class subject
 {
-    estd::tuple<TObservers...> observers;
+    typedef estd::tuple<TObservers...> tuple_type;
+
+    tuple_type observers;
 
     template <int index, class TEvent,
               class TEnabled = typename estd::enable_if<index < 0, bool>::type >
-    void notify_helper(const TEvent& e)
+    void notify_helper(const TEvent&)
     {
 
     }
@@ -27,6 +29,8 @@ class subject
               class TEnabled = typename estd::enable_if<index >= 0, void>::type >
     void notify_helper(const TEvent& e, bool = true)
     {
+        // FIX: Currently get call only spits out a temporary, need an overload which
+        // produces a reference
         const auto& observer =
                 estd::get<index>(observers);
 

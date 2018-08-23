@@ -65,6 +65,12 @@ TEST_CASE("functional")
             // Compile time error, as it should be:
             //estd::get<2>(tuple2);
         }
+
+        typedef estd::tuple_element<0, decltype (tuple)>::type te;
+
+        bool is_same = estd::is_same<te, int>::value;
+
+        REQUIRE(is_same);
     }
     SECTION("A")
     {

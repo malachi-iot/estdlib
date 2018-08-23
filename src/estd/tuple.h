@@ -15,10 +15,21 @@ template<std::size_t I, class T>
 class tuple_element;
 
 
+// recursive case
+template< std::size_t I, class Head, class... Tail >
+struct tuple_element<I, estd::tuple<Head, Tail...>>
+    : estd::tuple_element<I-1, estd::tuple<Tail...>> { };
+
+// base case
+template< class Head, class... Tail >
+struct tuple_element<0, estd::tuple<Head, Tail...>> {
+   typedef Head type;
+};
+
 template< std::size_t I, class T >
 class tuple_element< I, const T > {
   typedef typename
-      std::add_const<typename estd::tuple_element<I, T>::type>::type type;
+      estd::add_const<typename estd::tuple_element<I, T>::type>::type type;
 };
 
 
@@ -120,6 +131,7 @@ tuple<Types...> make_tuple( Types&&... args )
     return tuple<Types...>(std::forward<Types>(args)...);
 }
 
+namespace internal {
 
 // FIX: important deviation from spec in that we aren't returning
 // a value.  That is a little tricky
@@ -127,6 +139,8 @@ template <class F2, class Tuple, size_t... Is>
 inline void apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>)
 {
     f(get<Is>(t)...);
+}
+
 }
 
 template <class F2, class Tuple>
@@ -138,7 +152,7 @@ inline void apply(F2&& f, Tuple&& t)
                 >::value
             > seq;
 
-    apply_impl(std::move(f),
+    internal::apply_impl(std::move(f),
                std::forward<Tuple>(t),
                seq {});
 }
