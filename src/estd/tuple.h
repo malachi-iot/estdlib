@@ -60,6 +60,8 @@ public:
     typedef T element_type;
 
     const T& first() const { return value; }
+
+    T& first() { return value; }
 };
 
 // lifted from https://gist.github.com/IvanVergiliev/9639530
@@ -68,17 +70,32 @@ namespace internal {
 template<int index, typename First, typename... Rest>
 struct GetImpl
 {
+    typedef GetImpl<index - 1, Rest...> parent_type;
+    typedef First first_type;
+
     static auto value(const tuple<First, Rest...>* t) ->
         decltype(GetImpl<index - 1, Rest...>::value(t))
     {
         return GetImpl<index - 1, Rest...>::value(t);
+    }
+
+    static typename parent_type::first_type& value(tuple<First, Rest...>* t)
+    {
+        return parent_type::value(t);
     }
 };
 
 template<typename First, typename... Rest>
 struct GetImpl<0, First, Rest...>
 {
+    typedef First first_type;
+
     static First value(const tuple<First, Rest...>* t)
+    {
+        return t->first();
+    }
+
+    static First& value(tuple<First, Rest...>* t)
     {
         return t->first();
     }
@@ -107,6 +124,15 @@ auto get(const tuple<First, Rest...>& t) ->
 { //typename Type<index, First, Rest...>::value {
     return internal::GetImpl<index, First, Rest...>::value(&t);
 }
+
+
+/*
+template<int index, typename First, typename... Rest>
+auto get(tuple<First, Rest...>& t) ->
+    decltype(internal::GetImpl<index, First, Rest...>::value(&t))&
+{ //typename Type<index, First, Rest...>::value {
+    return internal::GetImpl<index, First, Rest...>::value(&t);
+} */
 
 
 /*
