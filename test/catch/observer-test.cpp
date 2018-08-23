@@ -260,6 +260,10 @@ TEST_CASE("observer tests")
     }
     SECTION("next-gen tuple based observer")
     {
-        embr::layer0::subject<StatelessObserver> s;
+        embr::layer0::subject<
+                StatelessObserver,
+                StatelessObserver> s;
+
+        s.notify(event_1 {});
     }
 }
