@@ -36,35 +36,47 @@ struct less;
 */
 
 #if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
+
+template <class F>
+struct function
+{
+    F f;
+
+    template <class F2>
+    function(F2 f) : f(f) {}
+
+    // deviates from spec here, but doing this to conform with how bind likes to
+    // do things
+    function(F&& f) : f(std::move(f)) {}
+
+    // deviates from spec, function class itself is supposed to take these args
+    template <class ...TArgs>
+    auto operator()(TArgs&&...args) -> decltype (f(args...))
+    {
+        return f(std::forward<TArgs>(args)...);
+    }
+};
+
 namespace internal {
 
 
 template <class F, class ...TArgs>
-struct bind_type
+struct bind_type : function<F>
 {
-    F f;
+    typedef function<F> base_type;
+
     tuple<TArgs...> args;
 
     bind_type(F&& f, TArgs&&...args) :
-        f(std::move(f)),
+        base_type(std::move(f)),
         args(std::forward<TArgs>(args)...)
     {
 
     }
 
-    // index_sequence parameter makes it easier to get at
-    // size_t... Is, which in turn lets us do the get<Is>... call
-    // TODO: refactor make+use 'apply'
-    // https://en.cppreference.com/w/cpp/utility/apply
-    template <class Tuple, size_t... Is>
-    void invoker(Tuple t, index_sequence<Is...>)
+    auto operator ()() -> decltype (apply(std::move(base_type::f), std::move(args)))
     {
-        return f(get<Is>(t)...);
-    }
-
-    auto operator ()() -> decltype (apply(std::move(f), std::move(args)))
-    {
-        return apply(std::move(f), std::move(args));
+        return apply(std::move(base_type::f), std::move(args));
     }
 };
 
