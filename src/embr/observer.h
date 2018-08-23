@@ -7,7 +7,6 @@
 namespace embr {
 
 #ifdef FEATURE_CPP_VARIADIC
-#endif
 
 namespace layer1 {
 
@@ -59,7 +58,7 @@ class subject : internal::tuple_base<TObservers...>
 
     template <int index, class TEvent,
               class TEnabled = typename estd::enable_if<index < 0, bool>::type >
-    void notify_helper(const TEvent&)
+    void notify_helper(const TEvent&) const
     {
 
     }
@@ -74,8 +73,7 @@ class subject : internal::tuple_base<TObservers...>
         // SFINAE magic to call best matching on_notify function
         estd::experimental::internal::notify_helper(observer, e, true);
 
-        if(index > 0)
-            notify_helper<index - 1>(e);
+        notify_helper<index - 1>(e);
     }
 
 public:
@@ -93,5 +91,7 @@ public:
 };
 
 }
+
+#endif
 
 }
