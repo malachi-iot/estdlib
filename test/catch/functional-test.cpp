@@ -15,7 +15,7 @@ using namespace estd;
 
 
 template <class Tuple, size_t... Is>
-constexpr auto take_front_impl(Tuple t,
+constexpr auto take_front_impl(const Tuple& t,
                                index_sequence<Is...>) ->
 decltype (make_tuple(get<Is>(t)...))
 {
@@ -23,7 +23,7 @@ decltype (make_tuple(get<Is>(t)...))
 }
 
 template <size_t N, class Tuple>
-constexpr auto take_front(Tuple t) ->
+constexpr auto take_front(const Tuple& t) ->
 decltype (take_front_impl(t, make_index_sequence<N>{}))
 {
     return take_front_impl(t, make_index_sequence<N>{});

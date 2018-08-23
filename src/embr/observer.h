@@ -9,7 +9,7 @@ namespace embr {
 #ifdef FEATURE_CPP_VARIADIC
 #endif
 
-namespace layer0 {
+namespace layer1 {
 
 template <class ...TObservers>
 class subject
@@ -29,11 +29,10 @@ class subject
               class TEnabled = typename estd::enable_if<index >= 0, void>::type >
     void notify_helper(const TEvent& e, bool = true)
     {
-        // FIX: Currently get call only spits out a temporary, need an overload which
-        // produces a reference
-        const auto& observer =
+        estd::tuple_element_t<index, tuple_type>& observer =
                 estd::get<index>(observers);
 
+        // SFINAE magic to call best matching on_notify function
         estd::experimental::internal::notify_helper(observer, e, true);
 
         if(index > 0)

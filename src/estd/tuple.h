@@ -12,7 +12,10 @@ template<class... TArgs>
 class tuple;
 
 template<std::size_t I, class T>
-class tuple_element;
+struct tuple_element;
+
+template <std::size_t I, class T>
+using tuple_element_t = typename tuple_element<I, T>::type;
 
 
 // recursive case
@@ -27,7 +30,7 @@ struct tuple_element<0, estd::tuple<Head, Tail...>> {
 };
 
 template< std::size_t I, class T >
-class tuple_element< I, const T > {
+struct tuple_element< I, const T > {
   typedef typename
       estd::add_const<typename estd::tuple_element<I, T>::type>::type type;
 };
@@ -73,13 +76,13 @@ struct GetImpl
     typedef GetImpl<index - 1, Rest...> parent_type;
     typedef First first_type;
 
-    static auto value(const tuple<First, Rest...>* t) ->
+    static auto value(const tuple<First, Rest...>& t) ->
         decltype(GetImpl<index - 1, Rest...>::value(t))
     {
         return GetImpl<index - 1, Rest...>::value(t);
     }
 
-    static typename parent_type::first_type& value(tuple<First, Rest...>* t)
+    static typename parent_type::first_type& value(tuple<First, Rest...>& t)
     {
         return parent_type::value(t);
     }
@@ -90,14 +93,14 @@ struct GetImpl<0, First, Rest...>
 {
     typedef First first_type;
 
-    static First value(const tuple<First, Rest...>* t)
+    static const First& value(const tuple<First, Rest...>& t)
     {
-        return t->first();
+        return t.first();
     }
 
-    static First& value(tuple<First, Rest...>* t)
+    static First& value(tuple<First, Rest...>& t)
     {
-        return t->first();
+        return t.first();
     }
 };
 
@@ -118,31 +121,31 @@ typename tuple_element<I, tuple<Types...> >::type&
         return get<I - 1, tuple<Types...>::base_type>(t);
 } */
 
-template<int index, typename First, typename... Rest>
-auto get(const tuple<First, Rest...>& t) ->
-    decltype(internal::GetImpl<index, First, Rest...>::value(&t))
-{ //typename Type<index, First, Rest...>::value {
-    return internal::GetImpl<index, First, Rest...>::value(&t);
+
+template<int index, typename... Types>
+const tuple_element_t<index, tuple<Types...> >& get(const tuple<Types...>& t)
+{
+    return internal::GetImpl<index, Types...>::value(t);
 }
 
+template<int index, typename... Types>
+tuple_element_t<index, tuple<Types...> >& get(tuple<Types...>& t)
+{
+    return internal::GetImpl<index, Types...>::value(t);
+}
 
-/*
-template<int index, typename First, typename... Rest>
-auto get(tuple<First, Rest...>& t) ->
-    decltype(internal::GetImpl<index, First, Rest...>::value(&t))&
-{ //typename Type<index, First, Rest...>::value {
-    return internal::GetImpl<index, First, Rest...>::value(&t);
-} */
+template<int index, typename... Types>
+tuple_element_t<index, tuple<Types...> >&& get(tuple<Types...>&& t)
+{
+    return internal::GetImpl<index, Types...>::value(std::move(t));
+}
 
+template<int index, typename... Types>
+const tuple_element_t<index, tuple<Types...> >&& get(const tuple<Types...>&& t)
+{
+    return internal::GetImpl<index, Types...>::value(t);
+}
 
-/*
-template< class T >
-class tuple_size;
-
-template< class T >
-class tuple_size<const T>
- : public integral_constant<std::size_t, tuple_size<T>::value> { };
-*/
 template< class T >
 struct tuple_size
         : estd::integral_constant<std::size_t, T::index + 1>
