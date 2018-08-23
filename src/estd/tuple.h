@@ -67,27 +67,28 @@ public:
     T& first() { return value; }
 };
 
-// lifted from https://gist.github.com/IvanVergiliev/9639530
+// lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
 namespace internal {
 
 template<int index, typename First, typename... Rest>
-struct GetImpl
+struct GetImpl : GetImpl<index - 1, Rest...>
 {
-    typedef GetImpl<index - 1, Rest...> parent_type;
-    typedef First first_type;
+    typedef GetImpl<index - 1, Rest...> base_type;
+    typedef typename base_type::first_type first_type;
 
-    static auto value(const tuple<First, Rest...>& t) ->
-        decltype(GetImpl<index - 1, Rest...>::value(t))
+    static const first_type& value(const tuple<First, Rest...>& t)
     {
-        return GetImpl<index - 1, Rest...>::value(t);
+        return base_type::value(t);
     }
 
-    static typename parent_type::first_type& value(tuple<First, Rest...>& t)
+    static first_type& value(tuple<First, Rest...>& t)
     {
-        return parent_type::value(t);
+        return base_type::value(t);
     }
 };
 
+// cascades down eventually to this particular specialization
+// to retrieve the 'first' item
 template<typename First, typename... Rest>
 struct GetImpl<0, First, Rest...>
 {
@@ -99,6 +100,11 @@ struct GetImpl<0, First, Rest...>
     }
 
     static First& value(tuple<First, Rest...>& t)
+    {
+        return t.first();
+    }
+
+    static First&& value(tuple<First, Rest...>&& t)
     {
         return t.first();
     }

@@ -49,6 +49,10 @@ TEST_CASE("functional")
 
         REQUIRE(val2 == 1.0);
 
+        auto val3 = estd::get<2>(tuple);
+
+        REQUIRE(val3 == 2);
+
         typedef estd::tuple_size<decltype (tuple)> test_type;
         int val = test_type::value;
         REQUIRE(val == 3);
@@ -73,6 +77,25 @@ TEST_CASE("functional")
         bool is_same = estd::is_same<te, int>::value;
 
         REQUIRE(is_same);
+
+        is_same = estd::is_same<estd::tuple_element_t<1, decltype (tuple)>, double>::value;
+
+        REQUIRE(is_same);
+
+        is_same = estd::is_same<estd::tuple_element_t<2, decltype (tuple)>, int>::value;
+
+        REQUIRE(is_same);
+
+        WHEN("reference tests")
+        {
+            int& v1 = get<0>(tuple);
+
+            REQUIRE(v1 == val1);
+
+            double& v2 = get<1>(tuple);
+
+            REQUIRE(v2 == val2);
+        }
     }
     SECTION("bind")
     {

@@ -275,13 +275,13 @@ TEST_CASE("observer tests")
 
             s.notify(3);
             REQUIRE(counter == 2);
-            s.notify(event_1 {});
+            s.notify(event_1 { 3 }); // goes nowhere
         }
         SECTION("layer1")
         {
             embr::layer1::subject<
-                    //StatefulObserver,
                     StatelessObserver,
+                    StatefulObserver,
                     StatelessObserver
                     > s;
 
@@ -289,7 +289,7 @@ TEST_CASE("observer tests")
 
             s.notify(3);
             REQUIRE(counter == 2);
-            s.notify(event_1 {});
+            s.notify(event_1 { 3 });
         }
     }
 }
