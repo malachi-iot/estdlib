@@ -3,12 +3,10 @@
 #include "../estd/exp/observer.h"
 #include "../estd/tuple.h"
 
-// NOTE: Not otherwise labeled as such but this file's naming is experimental
-namespace embr {
-
 #ifdef FEATURE_CPP_VARIADIC
 
-namespace layer1 {
+// NOTE: Not otherwise labeled as such but this file's naming is experimental
+namespace embr {
 
 namespace internal {
 
@@ -48,12 +46,10 @@ protected:
     }
 };
 
-}
-
-template <class ...TObservers>
-class subject : internal::tuple_base<TObservers...>
+template <class TBase, class ...TObservers>
+class subject : TBase
 {
-    typedef internal::tuple_base<TObservers...> base_type;
+    typedef TBase base_type;
     typedef typename base_type::tuple_type tuple_type;
 
     template <int index, class TEvent,
@@ -92,6 +88,35 @@ public:
 
 }
 
+namespace layer0 {
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <class ...TObservers>
+using subject = internal::subject<
+    internal::stateless_base<TObservers...>,
+    TObservers...>;
+#endif
+}
+namespace layer1 {
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <class ...TObservers>
+using subject = internal::subject<
+    internal::tuple_base<TObservers...>,
+    TObservers...>;
+#else
+template <class ...TObservers>
+class subject : internal::subject<internal::tuple_base<TObservers...> >
+{
+public:
+};
 #endif
 
+
+
 }
+
+}
+
+#endif
+

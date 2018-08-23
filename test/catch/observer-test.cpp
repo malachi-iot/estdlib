@@ -260,11 +260,28 @@ TEST_CASE("observer tests")
     }
     SECTION("next-gen tuple based observer")
     {
-        embr::layer1::subject<
-                StatelessObserver,
-                StatelessObserver> s;
+        SECTION("layer0")
+        {
+            /*
+            embr::layer0::subject<
+                    StatelessObserver,
+                    StatelessObserver> s;
 
-        s.notify(3);
-        s.notify(event_1 {});
+            int sz = sizeof(s);
+
+            s.notify(3);
+            s.notify(event_1 {}); */
+        }
+        SECTION("layer1")
+        {
+            embr::layer1::subject<
+                    StatelessObserver,
+                    StatelessObserver> s;
+
+            int sz = sizeof(s);
+
+            s.notify(3);
+            s.notify(event_1 {});
+        }
     }
 }
