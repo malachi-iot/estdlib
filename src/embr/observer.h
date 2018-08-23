@@ -18,10 +18,13 @@ protected:
 
     tuple_type observers;
 
-    template <int index>
-    estd::tuple_element_t<index, tuple_type>& get()
+    template <int index, class TEvent>
+    void _notify_helper(const TEvent& e)
     {
-        return estd::get<index>(observers);
+        estd::tuple_element_t<index, tuple_type>& observer =
+                estd::get<index>(observers);
+
+        estd::experimental::internal::notify_helper(observer, e, true);
     }
 
     tuple_base(TObservers&&...observers) :
@@ -39,10 +42,17 @@ class stateless_base
 protected:
     typedef estd::tuple<TObservers...> tuple_type;
 
-    template <int index>
-    estd::tuple_element_t<index, tuple_type> get()
+    template <int index, class TEvent>
+    void _notify_helper(const TEvent& e)
     {
-        return estd::tuple_element_t<index, tuple_type> {};
+        // allocate a purely temporary observer, as this has
+        // been explicitly set up as stateless
+        estd::tuple_element_t<index, tuple_type> observer;
+
+        // SFINAE magic to call best matching on_notify function
+        estd::experimental::internal::notify_helper(
+                    observer,
+                    e, true);
     }
 };
 
@@ -63,11 +73,7 @@ class subject : TBase
               class TEnabled = typename estd::enable_if<index >= 0, void>::type >
     void notify_helper(const TEvent& e, bool = true)
     {
-        estd::tuple_element_t<index, tuple_type>& observer =
-                base_type::template get<index>();
-
-        // SFINAE magic to call best matching on_notify function
-        estd::experimental::internal::notify_helper(observer, e, true);
+        base_type::template _notify_helper<index>(e);
 
         notify_helper<index - 1>(e);
     }

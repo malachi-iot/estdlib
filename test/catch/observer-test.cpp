@@ -29,12 +29,15 @@ struct event_3
     int data;
 };
 
+static int counter = 0;
+
 class StatelessObserver
 {
 public:
     static void on_notify(int val)
     {
         REQUIRE(val == expected);
+        counter++;
     }
 
     static void on_notify(event_1 val, const int& context)
@@ -260,9 +263,10 @@ TEST_CASE("observer tests")
     }
     SECTION("next-gen tuple based observer")
     {
+        counter = 0;
+
         SECTION("layer0")
         {
-            /*
             embr::layer0::subject<
                     StatelessObserver,
                     StatelessObserver> s;
@@ -270,17 +274,21 @@ TEST_CASE("observer tests")
             int sz = sizeof(s);
 
             s.notify(3);
-            s.notify(event_1 {}); */
+            REQUIRE(counter == 2);
+            s.notify(event_1 {});
         }
         SECTION("layer1")
         {
             embr::layer1::subject<
+                    //StatefulObserver,
                     StatelessObserver,
-                    StatelessObserver> s;
+                    StatelessObserver
+                    > s;
 
             int sz = sizeof(s);
 
             s.notify(3);
+            REQUIRE(counter == 2);
             s.notify(event_1 {});
         }
     }
