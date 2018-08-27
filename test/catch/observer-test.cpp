@@ -267,15 +267,18 @@ TEST_CASE("observer tests")
 
         SECTION("layer0")
         {
-            embr::layer0::subject<
-                    StatelessObserver,
-                    StatelessObserver> s;
+            SECTION("raw")
+            {
+                embr::layer0::subject<
+                        StatelessObserver,
+                        StatelessObserver> s;
 
-            int sz = sizeof(s);
+                int sz = sizeof(s);
 
-            s.notify(3);
-            REQUIRE(counter == 2);
-            s.notify(event_1 { 3 }); // goes nowhere
+                s.notify(3);
+                REQUIRE(counter == 2);
+                s.notify(event_1 { 3 }); // goes nowhere
+            }
         }
         SECTION("layer1")
         {
@@ -290,6 +293,18 @@ TEST_CASE("observer tests")
             s.notify(3);
             REQUIRE(counter == 2);
             s.notify(event_1 { 3 });
+
+            SECTION("make_subject")
+            {
+                StatelessObserver o1;
+                StatefulObserver o2;
+
+                /*
+                auto s = embr::layer1::make_subject(
+                            o1,
+                            o2);
+                */
+            }
         }
     }
 }

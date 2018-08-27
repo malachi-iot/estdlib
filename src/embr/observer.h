@@ -2,6 +2,7 @@
 
 #include "../estd/exp/observer.h"
 #include "../estd/tuple.h"
+#include "../estd/functional.h"
 
 #ifdef FEATURE_CPP_VARIADIC
 
@@ -62,15 +63,16 @@ class subject : TBase
     typedef TBase base_type;
     typedef typename base_type::tuple_type tuple_type;
 
+    // using slightly clumsy index >= 0 so that Qt tabbing doesn't get confused
     template <int index, class TEvent,
-              class TEnabled = typename estd::enable_if<index < 0, bool>::type >
+              class TEnabled = typename estd::enable_if <!(index >= 0), bool>::type >
     void notify_helper(const TEvent&) const
     {
 
     }
 
     template <int index, class TEvent,
-              class TEnabled = typename estd::enable_if<index >= 0, void>::type >
+              class TEnabled = typename estd::enable_if<(index >= 0), void>::type >
     void notify_helper(const TEvent& e, bool = true)
     {
         base_type::template _notify_helper<index>(e);
@@ -101,7 +103,9 @@ template <class ...TObservers>
 using subject = internal::subject<
     internal::stateless_base<TObservers...>,
     TObservers...>;
+
 #endif
+
 }
 namespace layer1 {
 
@@ -117,6 +121,13 @@ class subject : internal::subject<internal::tuple_base<TObservers...> >
 public:
 };
 #endif
+
+template <class ...TObservers>
+subject<TObservers&&...> make_subject(TObservers&&...observers)
+{
+    return subject<TObservers&&...>(
+            std::forward<TObservers>(observers)...);
+}
 
 
 
