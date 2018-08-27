@@ -59,7 +59,7 @@ class StatefulObserver : public FakeBase
 public:
     int id;
 
-    StatefulObserver() {}
+    StatefulObserver() : id(0x77) {}
 
     StatefulObserver(int id) : id(id) {}
 
