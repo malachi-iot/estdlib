@@ -28,6 +28,15 @@ protected:
         estd::experimental::internal::notify_helper(observer, e, true);
     }
 
+    template <int index, class TEvent, class TContext>
+    void _notify_helper(const TEvent& e, TContext& c)
+    {
+        estd::tuple_element_t<index, tuple_type>& observer =
+                estd::get<index>(observers);
+
+        estd::experimental::internal::notify_helper(observer, e, c, true);
+    }
+
     tuple_base(TObservers&&...observers) :
         observers(std::forward<TObservers>(observers)...)
     {}
@@ -71,6 +80,13 @@ class subject : TBase
 
     }
 
+    template <int index, class TEvent, class TContext,
+              class TEnabled = typename estd::enable_if <!(index >= 0), bool>::type >
+    void notify_c_helper(const TEvent&, TContext&) const
+    {
+
+    }
+
     template <int index, class TEvent,
               class TEnabled = typename estd::enable_if<(index >= 0), void>::type >
     void notify_helper(const TEvent& e, bool = true)
@@ -80,6 +96,14 @@ class subject : TBase
         notify_helper<index - 1>(e);
     }
 
+    template <int index, class TEvent, class TContext,
+              class TEnabled = typename estd::enable_if<(index >= 0), void>::type >
+    void notify_c_helper(const TEvent& e, TContext& c, bool = true)
+    {
+        base_type::template _notify_helper<index>(e, c);
+
+        notify_c_helper<index - 1>(e, c);
+    }
 public:
     constexpr subject(TObservers&&...observers) :
             base_type(std::forward<TObservers>(observers)...)
@@ -91,6 +115,12 @@ public:
     void notify(const TEvent& e)
     {
         notify_helper<sizeof... (TObservers) - 1>(e);
+    }
+
+    template <class TEvent, class TContext>
+    void notify(const TEvent& e, TContext& c)
+    {
+        notify_c_helper<sizeof... (TObservers) - 1>(e, c);
     }
 };
 

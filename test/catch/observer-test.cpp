@@ -285,14 +285,29 @@ TEST_CASE("observer tests")
             embr::layer1::subject<
                     StatelessObserver,
                     StatefulObserver,
+                    StatelessObserver,
                     StatelessObserver
                     > s;
 
             int sz = sizeof(s);
 
             s.notify(3);
-            REQUIRE(counter == 2);
+
+            // count 3 times, once per stateless observer
+            REQUIRE(counter == 3);
             s.notify(event_1 { 3 });
+
+            event_3 ctx;
+
+            // Notify is gonna evaluate whether 'data' matches 'expected', which
+            // is 3 in this case
+            ctx.data = expected;
+
+            s.notify(ctx, ctx);
+
+            // context should be modified by stateful observer
+
+            REQUIRE(ctx.data == 77);
 
             SECTION("make_subject")
             {
