@@ -1,8 +1,6 @@
 #include <estd/exp/observer.h>
 #include <estd/vector.h>
 
-#include <embr/observer.h>
-
 #include <tuple>
 
 #include <catch.hpp>
