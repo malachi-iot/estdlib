@@ -2,11 +2,11 @@
 
 // mainly just for tooltips, normally you don't include internal/common_type directly
 #include "../type_traits.h"
-#ifdef FEATURE_STD_UTILITY
-#include <utility>
-#else
+//#ifdef FEATURE_STD_UTILITY
+//#include <utility>
+//#else
 #include "../utility.h"
-#endif
+//#endif
 
 namespace estd {
 

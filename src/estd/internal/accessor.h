@@ -1,5 +1,9 @@
 #pragma once
 
+// accessor is a special variety of allocator_descriptor which tracks
+// handle and offset, but not specifically size.  Particularly useful
+// when trying to substitute for a standard pointer
+
 #include "handle_with_offset.h"
 
 namespace estd {

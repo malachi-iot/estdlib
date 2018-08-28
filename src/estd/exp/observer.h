@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../internal/platform.h"
-#include "../utility.h" // for declval + type_traits
+#include "../utility.h" // for declval
+#include "../type_traits.h"
 
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 

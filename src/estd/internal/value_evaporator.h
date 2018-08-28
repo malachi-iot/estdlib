@@ -41,4 +41,37 @@ public:
     value_evaporator() {}
 };
 
-}}
+
+}
+
+// very similar to value evaporator but this is for scenarios where we explicitly know
+// exactly what kind of evaporation we are after
+// experimental because I am mostly, but not completely, sure that this is sound and useful
+namespace experimental {
+
+template <class T, T& v>
+struct global_provider
+{
+    static T& value() { return v; }
+};
+
+
+template <class T>
+struct instance_provider
+{
+    T _value;
+
+    T& value() { return _value; }
+    const T& value() const { return _value; }
+};
+
+
+template <class T, T temporary_value = T()>
+struct temporary_provider
+{
+    static T value() { return temporary_value; }
+};
+
+}
+
+}

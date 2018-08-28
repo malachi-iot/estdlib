@@ -1,6 +1,10 @@
 #pragma once
 
-#include "type_traits.h"
+// can't include this here as it would cause a circular loop
+// type_traits.h -> internal/common_type.h -> utility.h and
+// given the specific way type_traits includes it #pragma once
+// doesn't help us
+//#include "type_traits.h"
 
 namespace estd {
 

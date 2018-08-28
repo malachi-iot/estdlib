@@ -64,4 +64,10 @@ TEST_CASE("experimental tests")
             REQUIRE(sizeof(deducer_t::size_type) == 2);
         }
     }
+    SECTION("providers")
+    {
+        estd::experimental::temporary_provider<int> v;
+
+        REQUIRE(v.value() == 0);
+    }
 }
