@@ -1,6 +1,7 @@
 #pragma once
 
 #include "port/mutex.h"
+#include "chrono.h"
 #include "internal/value_evaporator.h"
 
 namespace estd {
@@ -17,20 +18,22 @@ struct adopt_lock_t { explicit adopt_lock_t() = default; };
 // TODO: Consider deviating this from normal unique_lock by using an inline mutex
 // or perhaps we make a layer1::unique_lock for that purpose
 // NOTE: value_evaporator extra experimental code ironically disappeared...
-template <class TMutex, class TBase = void>
-class unique_lock
+template <
+        class TMutex,
+        class TBase = experimental::instance_provider<TMutex*> >
+class unique_lock : protected TBase
 {
-    TMutex* _mutex;
+    typedef TBase base_type;
 
 public:
     typedef TMutex mutex_type;
 
-    mutex_type* mutex() const { return _mutex; }
+    mutex_type* mutex() const { return base_type::value(); }
 
     mutex_type* release()
     {
-        mutex_type* temp = _mutex;
-        _mutex = NULLPTR;
+        mutex_type* temp = mutex();
+        base_type::value(NULLPTR);
         return temp;
     }
 
@@ -44,17 +47,17 @@ public:
         return mutex()->try_lock_for(timeout_duration);
     }
 
-    //unique_lock() : _mutex(NULLPTR) {}
+    unique_lock() : base_type(NULLPTR) {}
 
-    explicit unique_lock(mutex_type& m) : _mutex(&m) 
+    explicit unique_lock(mutex_type& m) : base_type(&m)
     {
         m.lock();
     }
 
-    unique_lock(mutex_type& m, defer_lock_t) : _mutex(&m) {}
-    unique_lock(mutex_type& m, adopt_lock_t) : _mutex(&m) {}
+    unique_lock(mutex_type& m, defer_lock_t) : base_type(&m) {}
+    unique_lock(mutex_type& m, adopt_lock_t) : base_type(&m) {}
 
-    unique_lock( mutex_type& m, try_to_lock_t) : _mutex(&m)
+    unique_lock( mutex_type& m, try_to_lock_t) : base_type(&m)
     {
         m.try_lock();
     }
@@ -62,7 +65,7 @@ public:
     template< class Rep, class Period >
     unique_lock( mutex_type& m, 
              const estd::chrono::duration<Rep,Period>& timeout_duration ) :
-             _mutex(&m)
+            base_type(&m)
     {
         m.try_lock_for(timeout_duration);
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.h"
+#include "../utility.h"
 
 namespace estd { namespace internal {
 
@@ -53,6 +54,11 @@ template <class T, T& v>
 struct global_provider
 {
     static T& value() { return v; }
+    static void value(const T& _v) { v = _v; }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    static void value(T&& _v) { v = std::move(_v); }
+#endif
 };
 
 
@@ -63,6 +69,30 @@ struct instance_provider
 
     T& value() { return _value; }
     const T& value() const { return _value; }
+
+    void value(const T& v) { _value = v; }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void value(T&& v) { _value = std::move(v); }
+#endif
+
+protected:
+    instance_provider(const T& v) : _value(v) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    instance_provider(T&& v) : _value(std::move(v)) {}
+#endif
+};
+
+
+template <class T>
+struct pointer_from_value_provider
+{
+    T _value;
+
+    T* value() { return &_value; }
+    const T* value() const { return &_value; }
+
+protected:
 };
 
 
