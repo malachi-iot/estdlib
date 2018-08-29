@@ -63,6 +63,7 @@ set(SOURCE_FILES
 
         estd/map.h
         estd/memory.h
+        estd/mutex.h
 
         estd/ostream.h
 
@@ -73,17 +74,18 @@ set(SOURCE_FILES
 
         estd/port/chrono.h
         estd/port/chrono.hpp
-        estd/port/string.h
         estd/port/identify_platform.h
         estd/port/arduino/chrono.h
         estd/port/arduino/string.h
         estd/port/arduino/thread.h
+        estd/port/mutex.h
         estd/port/freertos/chrono.h
         estd/port/freertos/thread.h
         estd/port/freertos/mutex.h
         estd/port/posix/streambuf.cpp
         estd/port/posix/streambuf.h
         estd/port/streambuf.h
+        estd/port/string.h
         estd/port/thread.h
 
         estd/queue.h
