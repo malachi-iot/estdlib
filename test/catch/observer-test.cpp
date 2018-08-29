@@ -1,8 +1,6 @@
 #include <estd/exp/observer.h>
 #include <estd/vector.h>
 
-#include <tuple>
-
 #include <catch.hpp>
 
 using namespace estd::experimental;
@@ -115,13 +113,6 @@ public:
 
 StatefulObserver stateful_observer_1, stateful_observer_2;
 OtherStatefulObserver stateful_observer_0;
-
-// clang doesn't like constexpr tuple, and to be fair, c++11 doesn't indicate you can make one in
-// the spec (gnu allows it)
-#if defined(__GNUC__) && !defined(__clang__)
-constexpr auto z = std::make_tuple(1, 2);
-#endif
-
 
 TEST_CASE("observer tests")
 {

@@ -33,6 +33,8 @@ decltype (take_front_impl(t, make_index_sequence<N>{}))
 
 TEST_CASE("functional")
 {
+    constexpr auto z = estd::make_tuple(1, 2);
+
     SECTION("minimal tuple")
     {
         auto tuple = estd::make_tuple(false, true);

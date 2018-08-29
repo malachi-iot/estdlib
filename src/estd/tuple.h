@@ -51,7 +51,7 @@ class tuple<T, TArgs...> : public tuple<TArgs...>
     typedef tuple<TArgs...> base_type;
 
 public:
-    tuple(T&& value, TArgs&&...args) :
+    CONSTEXPR tuple(T&& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
         value(std::move(value))
     {}
@@ -161,7 +161,7 @@ struct tuple_size
 
 
 template <class...Types>
-tuple<Types...> make_tuple( Types&&... args )
+CONSTEXPR tuple<Types...> make_tuple( Types&&... args )
 {
     return tuple<Types...>(std::forward<Types>(args)...);
 }
