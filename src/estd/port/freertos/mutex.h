@@ -44,6 +44,11 @@ public:
         xSemaphoreTake(s, portMAX_DELAY);
     }
 
+    bool try_lock()
+    {
+        return xSemaphoreTake(s, 0);
+    }
+
     void unlock()
     {
         xSemaphoreGive(s);
@@ -64,31 +69,10 @@ public:
         estd::chrono::steady_clock::duration d = timeout_duration;
 
         // get number of ticks
-        xSemaphoreTake(s, d.count());
+        return xSemaphoreTake(s, d.count());
     }
 };
 
-
-template <class TMutex>
-class unique_lock
-{
-    TMutex _mutex;
-
-public:
-    typedef TMutex mutex_type;
-
-    mutex_type* mutex() const { return &_mutex; }
-
-    void lock() { mutex()->lock(); }
-
-    void unlock() { mutex()->unlock(); }
-
-    template< class Rep, class Period >
-    bool try_lock_for( const estd::chrono::duration<Rep,Period>& timeout_duration )
-    {
-        mutex()->try_lock_for(timeout_duration);
-    }
-};
 
 }
 }
