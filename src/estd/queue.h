@@ -102,6 +102,16 @@ public:
         m_back(m_array.begin()),
         m_empty(true) {}
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    constexpr deque(deque&& move_from) :
+        m_array(std::move(move_from.m_array)),
+        m_front(std::move(move_from.m_front)),
+        m_back(std::move(move_from.m_back)),
+        m_empty(std::move(move_from.m_empty))
+    {}
+#endif
+    
+
     ~deque()
     {
         // TODO: destruct all remaining items
@@ -247,6 +257,12 @@ class queue
     Container c;
 
 public:
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    constexpr queue(queue&& move_from) : c(std::move(move_from.c)) {}
+
+    queue() {}
+#endif
+    
     typedef typename Container::value_type value_type;
     typedef typename Container::const_reference const_reference;
     typedef typename Container::reference reference;
@@ -292,9 +308,13 @@ public:
 namespace layer1 {
 
 template <class T, size_t size>
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+using queue = estd::queue<T, layer1::deque<T, size> >;
+#else
 class queue : public estd::queue<T, layer1::deque<T, size> >
 {
 };
+#endif
 
 }
 
