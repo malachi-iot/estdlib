@@ -98,5 +98,10 @@ TEST_CASE("queue-test")
         REQUIRE(q.front().val1 == 9);
         q.pop();
         REQUIRE(q.size() == 1);
+
+        SECTION("move whole queue")
+        {
+            queue<Dummy, layer1::deque<Dummy, 4 > > q2(std::move(q));
+        }
     }
 }

@@ -96,7 +96,13 @@ TEST_CASE("priority-queue-test")
         pq.emplace(8, "val8");
 
         d7.val1 = 6;
-        pq.emplace(d7); // remember this effectively is an efficient 'push'
+
+        pq.push(d7);
+
+        // it seems one could but shouldn't use emplace this way, since it's an alias
+        // to push but going through the move mechanisms.  If you really want to move
+        // I expect a std::move should be involved
+        //pq.emplace(d7); // remember this effectively is an efficient 'push'
 
         REQUIRE(pq.top().lock().val1 == 9);
         pq.pop();;

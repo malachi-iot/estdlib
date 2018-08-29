@@ -1,5 +1,8 @@
 #pragma once
 
+#include <estd/utility.h>
+#include <new>
+
 namespace estd { namespace test {
 
 struct Dummy
@@ -15,25 +18,44 @@ struct Dummy
         {}
 
     Dummy(Dummy&& move_from) :
-        val1(move_from.val1),
-        value2(move_from.value2)
+        val1(std::move(move_from.val1)),
+        value2(std::move(move_from.value2))
     {
 
     }
 
-    Dummy(const Dummy& copy_from) :
+    explicit Dummy(const Dummy& copy_from) :
         val1(copy_from.val1),
         value2(copy_from.value2)
     {
 
     }
 
+    // this partially undoes our explicit copy constructor
     Dummy& operator =(const Dummy& copy_from)
     {
         new (this) Dummy(copy_from);
         return *this;
     }
 };
+
+
+struct NonCopyable
+{
+    int val;
+
+    NonCopyable() {}
+
+    // technically we are somewhat-copyable with this explicit
+    // constructor
+    explicit NonCopyable(const NonCopyable& copy_from) : val(copy_from.val) {}
+
+    NonCopyable(NonCopyable&& move_from) :
+        val(std::move(move_from.val))
+    {}
+};
+
+
 
 static uint8_t octet_data[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
