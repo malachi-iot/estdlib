@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "../utility.h"
+#include "../type_traits.h"
 
 namespace estd { namespace internal {
 
@@ -50,15 +51,24 @@ public:
 // experimental because I am mostly, but not completely, sure that this is sound and useful
 namespace experimental {
 
-template <class T, T& v>
+template <class T, T v>
 struct global_provider
 {
+    typedef typename estd::remove_reference<T>::type  value_type;
+
     static T& value() { return v; }
-    static void value(const T& _v) { v = _v; }
+    static void value(const value_type& _v) { v = _v; }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    static void value(T&& _v) { v = std::move(_v); }
+    static void value(value_type&& _v) { v = std::move(_v); }
 #endif
+};
+
+template <class T, T v>
+struct literal_provider : global_provider<T, v>
+{
+    static const T value() { return v; }
+
 };
 
 
@@ -76,7 +86,7 @@ struct instance_provider
     void value(T&& v) { _value = std::move(v); }
 #endif
 
-protected:
+//protected:
     instance_provider(const T& v) : _value(v) {}
 #ifdef FEATURE_CPP_MOVESEMANTIC
     instance_provider(T&& v) : _value(std::move(v)) {}
@@ -84,13 +94,16 @@ protected:
 };
 
 
+// semi-converts value to pointer on value() call
 template <class T>
-struct pointer_from_value_provider
+struct pointer_from_instance_provider
 {
     T _value;
 
     T* value() { return &_value; }
     const T* value() const { return &_value; }
+
+    pointer_from_instance_provider(const T& v) : _value(v) {}
 
 protected:
 };

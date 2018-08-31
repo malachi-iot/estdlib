@@ -20,6 +20,26 @@ struct Test
 
 TestA t;
 
+template <class TBase>
+struct provider_test : TBase
+{
+    typedef TBase value_provider;
+
+    void do_require(int value)
+    {
+        int v = value_provider::value();
+
+        REQUIRE(v == value);
+    }
+
+    provider_test() {}
+
+    provider_test(int v) : value_provider (v) {}
+};
+
+int global_provider_test_value = 6;
+
+
 TEST_CASE("experimental tests")
 {
     SECTION("A")
@@ -66,8 +86,45 @@ TEST_CASE("experimental tests")
     }
     SECTION("providers")
     {
-        estd::experimental::temporary_provider<int> v;
+        using namespace estd::experimental;
 
-        REQUIRE(v.value() == 0);
+        SECTION("temporary")
+        {
+            provider_test<temporary_provider<int> > pt;
+
+            REQUIRE(pt.value() == 0);
+
+            pt.do_require(0);
+        }
+        SECTION("instanced")
+        {
+            provider_test<instance_provider<int> > pt(5);
+
+            REQUIRE(pt.value() == 5);
+
+            pt.do_require(5);
+        }
+        SECTION("global")
+        {
+            provider_test<global_provider<int&, global_provider_test_value> > pt;
+
+            REQUIRE(pt.value() == 6);
+
+            pt.do_require(6);
+        }
+        SECTION("global")
+        {
+            provider_test<literal_provider<int, 7> > pt;
+
+            REQUIRE(pt.value() == 7);
+
+            pt.do_require(7);
+        }
+        SECTION("pointer from value")
+        {
+            provider_test<pointer_from_instance_provider<int> > pt(5);
+
+            REQUIRE(*pt.value() == 5);
+        }
     }
 }
