@@ -388,6 +388,13 @@ public:
         return *this;
     }
 
+    basic_string& operator=(const CharT* s)
+    {
+        //return base_t::operator =(s);
+        base_t::assign(s, strlen(s));
+        return *this;
+    }
+
     // layer2 strings can safely issue a lock like this, since unlock is a no-op
     CharT* data() { return base_t::lock(); }
 
@@ -409,6 +416,15 @@ using string = basic_string<char, N, null_terminated>;
 
 typedef basic_string<const char, 0> const_string;
 
+namespace experimental {
+
+template <size_t N>
+basic_string<char, N, true> make_string(char (&buffer)[N], int n = -1)
+{
+    return basic_string<char, N, true>(buffer, n);
+}
+
+}
 
 }
 

@@ -84,50 +84,79 @@ TEST_CASE("string tests")
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
     }
-    SECTION("layer 2 null terminated")
+    SECTION("layer 2")
     {
-        char buf[128] = ""; // as per spec, this actually
-        layer2::basic_string<char, 20> s(buf, 0);
-        //layer2::basic_string<const char, 20> s2 = "hi";
+        SECTION("null terminated")
+        {
+            char buf[128] = ""; // as per spec, this actually
+            layer2::basic_string<char, 20> s(buf, 0);
+            //layer2::basic_string<const char, 20> s2 = "hi";
 
-        int sz = sizeof(s);
+            int sz = sizeof(s);
 
-        REQUIRE(s.length() == 0);
+            REQUIRE(s.length() == 0);
 
-        s += test_str;
+            s += test_str;
 
-        REQUIRE(s.length() == 5);
-        REQUIRE(s == test_str);
+            REQUIRE(s.length() == 5);
+            REQUIRE(s == test_str);
 
-        // TODO: Doesn't work, but should
-        // (make it interact with data() so that this *only* works with non-locking
-        //  stuff)
-        //layer2::string<> str3 = test_str;
-    }
-    // deactivated because string construction for layer2 is still a bit funky
-    // and depends on dynamic_array_helper.  dynamic_array_helper code needs a
-    // cleanup, so do that first, then fix this
-    SECTION("layer 2 null terminated")
-    {
-        char buf[128];
-        layer2::basic_string<const char, 4> str("val");
+            // TODO: Doesn't work, but should
+            // (make it interact with data() so that this *only* works with non-locking
+            //  stuff)
+            //layer2::string<> str3 = test_str;
+        }
+        // deactivated because string construction for layer2 is still a bit funky
+        // and depends on dynamic_array_helper.  dynamic_array_helper code needs a
+        // cleanup, so do that first, then fix this
+        SECTION("null terminated")
+        {
+            char buf[128];
+            layer2::basic_string<const char, 4> str("val");
 
-        str.copy(buf, 128);
+            str.copy(buf, 128);
 
-        REQUIRE(buf[0] == 'v');
-        REQUIRE(buf[1] == 'a');
+            REQUIRE(buf[0] == 'v');
+            REQUIRE(buf[1] == 'a');
 
-        REQUIRE(str.size() == 3);
-        REQUIRE(str.max_size() == 3);
+            REQUIRE(str.size() == 3);
+            REQUIRE(str.max_size() == 3);
 
-        layer2::basic_string<const char, 0> str2 = str;
+            layer2::basic_string<const char, 0> str2 = str;
 
-        REQUIRE(str2.size() == 3);
-        REQUIRE(str == str2);
-        REQUIRE(str == "val");
+            REQUIRE(str2.size() == 3);
+            REQUIRE(str == str2);
+            REQUIRE(str == "val");
 
-        // NOTE: Doesn't work by design - loses const-qualifiers
-        //layer2::string<> str3 = "hi2u";
+            // NOTE: Doesn't work by design - loses const-qualifiers
+            //layer2::string<> str3 = "hi2u";
+        }
+        SECTION("assignment to literal")
+        {
+            char buf[128];
+            layer2::string<> str(buf, 0);
+
+            // Remember, an = here is a copy into while an =
+            // during instantiation is specifying the underlying layer2 ptr
+            str = "hi2u";
+
+            REQUIRE(str == "hi2u");
+            REQUIRE(str.size() == 4);
+            REQUIRE(strcmp(buf, "hi2u") == 0);
+            REQUIRE(str.data() == buf);
+        }
+        SECTION("make_string (experimental)")
+        {
+            char buf[128];
+            auto str = layer2::experimental::make_string(buf, 0);
+
+            str = "hi2u";
+
+            REQUIRE(str == "hi2u");
+            REQUIRE(str.size() == 4);
+            REQUIRE(strcmp(buf, "hi2u") == 0);
+            REQUIRE(str.data() == buf);
+        }
     }
     SECTION("layer 3 null terminated")
     {
@@ -359,7 +388,7 @@ TEST_CASE("string tests")
     {
         layer1::string<40> s = "Hello World";
 
-        int i = 0;
+        uint8_t i = 0;
 
         for(auto c : s)
         {
