@@ -3,6 +3,7 @@
 #include "estd/array.h"
 //#include "estd/exp/buffer.h"
 #include "mem.h"
+#include <estd/string.h>
 
 struct TestA {};
 
@@ -24,10 +25,12 @@ template <class TBase>
 struct provider_test : TBase
 {
     typedef TBase value_provider;
+    typedef typename value_provider::value_type value_type;
 
-    void do_require(int value)
+    template <class T>
+    void do_require(const T& value)
     {
-        int v = value_provider::value();
+        const value_type& v = value_provider::value();
 
         REQUIRE(v == value);
     }
@@ -39,6 +42,7 @@ struct provider_test : TBase
 
 int global_provider_test_value = 6;
 
+estd::layer1::string<128> provider_string;
 
 TEST_CASE("experimental tests")
 {
@@ -111,6 +115,19 @@ TEST_CASE("experimental tests")
             REQUIRE(pt.value() == 6);
 
             pt.do_require(6);
+
+            provider_test<global_provider<
+                    estd::layer1::string<128>&,
+                            provider_string> > pt2;
+
+            estd::layer1::string<64> f = "hi2u";
+
+            provider_string = "hi2u";
+
+            REQUIRE(pt2.value() == f);
+            REQUIRE(pt2.value() == "hi2u");
+
+            pt2.do_require(f);
         }
         SECTION("global")
         {

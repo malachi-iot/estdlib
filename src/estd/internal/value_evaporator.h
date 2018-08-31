@@ -56,7 +56,7 @@ struct global_provider
 {
     typedef typename estd::remove_reference<T>::type  value_type;
 
-    static T& value() { return v; }
+    static value_type& value() { return v; }
     static void value(const value_type& _v) { v = _v; }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
@@ -75,6 +75,8 @@ struct literal_provider : global_provider<T, v>
 template <class T>
 struct instance_provider
 {
+    typedef typename estd::remove_reference<T>::type  value_type;
+
     T _value;
 
     T& value() { return _value; }
@@ -98,6 +100,8 @@ struct instance_provider
 template <class T>
 struct pointer_from_instance_provider
 {
+    typedef typename estd::remove_reference<T>::type  value_type;
+
     T _value;
 
     T* value() { return &_value; }
@@ -112,6 +116,8 @@ protected:
 template <class T, T temporary_value = T()>
 struct temporary_provider
 {
+    typedef T  value_type;
+
     static T value() { return temporary_value; }
 };
 
