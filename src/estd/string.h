@@ -342,24 +342,28 @@ public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
 
-    // n = -1 means treat str_buffer as pre-initialized and null-terminated
-    // n >= 0 means copy n characters from str_buffer, ignoring any null termination
-    //        0 is a useful value as it will auto set underlying string to 0
-    // NOTE: Above not active yet
-    // This particular constructor is good for string literals, but any const char* probably is fine
-    basic_string(const CharT* str_buffer, int n = -1) : base_t(str_buffer)
-    {
-        // TODO: optimize this explicit strlen out
-        //base_t::assign(str_buffer, strlen(str_buffer));
-    }
-
-    /*
+    // this one we presume we're looking at either:
+    // - an already initialized null terminated string
+    // - a size=capacity variant, in which str_buffer isn't (necessarily) null terminated
+    //   but size() still reflects the right size of the string
+    // This particular constructor is good for string literals, assuming CharT is const char
     basic_string(CharT* str_buffer) : base_t(str_buffer)
     {
+    }
 
-    } */
+    // n means assign length to n, ignoring any null termination if present
+    basic_string(CharT* str_buffer, int n) : base_t(str_buffer)
+    {
+        // doing this separately from above constructor because not all
+        // specializations permit explicitly (re)sizing the string
+        base_t::impl().size(n);
+    }
 
     // See 'n' documentation above
+    // FIX: above constructor greedily consumes this one's chance at running.
+    // Before, I was using const CharT* to differenciate it but technically
+    // a const CharT* is just incorrect as the underlying layer2::basic_string
+    // isn't intrinsically const
     template <size_type IncomingN>
     basic_string(CharT (&buffer) [IncomingN], int n = -1) : base_t(&buffer[0])
     {
