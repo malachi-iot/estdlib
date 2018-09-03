@@ -17,9 +17,13 @@ endif
 IDF_VER := $(subst -, ,$(IDF_VER))
 
 # decompose actual primary v2.0.0 (or whatever v#.#.# we are presented with)
+# this *excludes* the dashed suffix for the tag
 IDF_VER_MAIN := $(subst ., ,$(word 1, $(IDF_VER)))
 
 $(info ************  VERSION: $(IDF_VER) / $(IDF_VER_MAIN) ************)
+
+# useful for auto-stripping the v off the front
+#$(info -- $(IDF_VER_MAIN:v%=%) --)
 
 # I would decompose v2.0.0 more, but I don't trust espressif will necessarily
 # do something like a v2.1.0.  If they do, then I'll write the decomposer
@@ -32,7 +36,11 @@ ifeq ($(word 1,$(IDF_VER_MAIN)),v2)
 else ifeq ($(word 1,$(IDF_VER_MAIN)),v3)
 	IDF_VER_MAJOR=3
 	IDF_VER_MINOR=$(word 2,$(IDF_VER_MAIN))
-	IDF_VER_PATCH=0
+	ifeq ($(words $(IDF_VER_MAIN)),3)
+		IDF_VER_PATCH=$(word 3,$(IDF_VER_MAIN))
+	else
+		IDF_VER_PATCH=0
+	endif
 	# has 'dev' or similar in the middle, complicating matters
 	IDF_VER_TAG=$(word 2,$(IDF_VER))
 	IDF_VER_SUFFIX=$(word 3,$(IDF_VER))
