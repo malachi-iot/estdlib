@@ -139,13 +139,13 @@ template <class TFacet>
 bool has_facet(const locale& loc);
 
 template<>
-inline bool has_facet<ctype<char> >(const locale& loc)
+inline bool has_facet<ctype<char> >(const locale&)
 {
     return true;
 }
 
 template<>
-inline const ctype<char>& use_facet(const locale& loc)
+inline const ctype<char>& use_facet(const locale&)
 {
     static ctype<char> facet;
 

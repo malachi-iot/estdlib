@@ -14,7 +14,7 @@ extern "C" {
 #include <inttypes.h>
 #endif
 
-};
+}
 
 #include "streambuf.h"
 #include "ios.h"
