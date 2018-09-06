@@ -6,31 +6,49 @@ namespace estd {
 
 #ifdef FEATURE_CPP_INLINE_VARIABLES
 inline CONSTEXPR ptrdiff_t dynamic_extent = -1;
+#else
+// hate doing global collision-prone defines like this
+//#define dynamic_extent = -1
 #endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template <class T, ptrdiff_t Extent = -1>
-using span = estd::internal::layer3::mutable_buffer<T, size_t>;
-#else
-template <class T, class TSize = size_t>
-class span : public estd::internal::layer3::mutable_buffer<T, size_t>
+template <class T, ptrdiff_t Extent = -1,
+          class TBase = typename estd::conditional<Extent == -1,
+                      estd::internal::layer3::buffer<T, size_t>,
+                      estd::layer2::array<T, static_cast<size_t>(Extent)> >::type>
+class span : public TBase
 {
-    typedef estd::internal::layer3::mutable_buffer<T, size_t> base_t;
+    typedef TBase base_t;
+
+    static CONSTEXPR bool is_dynamic = Extent == -1;
 
 public:
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::value_type value_type;
+    static CONSTEXPR ptrdiff_t extent = Extent;
 
-    span(value_type* data, size_type size) :
+    typedef T element_type;
+    typedef T* pointer;
+    typedef typename base_t::size_type index_type;
+    typedef typename estd::remove_cv<T>::type value_type;
+
+    span(pointer data, index_type size) :
             base_t(data, size) {}
 
-    template <size_t N>
-    span(value_type (&data) [N]) : base_t(data, N) {}
+    // ExtendLocal needed because SFINAE function selection needs that
+    // fluidity
+    // dynamic flavor
+    template <size_t N, ptrdiff_t ExtentLocal = Extent,
+              class ExtentOnly = typename enable_if<ExtentLocal == -1>::type>
+    span(element_type (&data) [N]) : base_t(data, N) {}
+
+    // constant size flavor
+    template <size_t N, ptrdiff_t ExtentLocal = Extent,
+              class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
+    span(element_type (&data) [N], bool = true) : base_t(data) {}
 
     // most definitely a 'shallow clone'
     span(const base_t& clone_from) : base_t(clone_from) {}
 };
-#endif
+
+
 
 // this one in particular is getting some use and performing well
 // TODO: Move this out into span

@@ -64,7 +64,7 @@ namespace layer3 {
 // NOTE: being that this is the underlying code for span, we conform this to
 // span's signatures (index_type, for example instead of size_type)
 template <class T, class TSize = size_t>
-class mutable_buffer : public estd::layer3::array<T, size_t>
+class buffer : public estd::layer3::array<T, size_t>
 {
 protected:
     typedef estd::layer3::array<T, size_t> base_t;
@@ -84,14 +84,14 @@ public:
     CONSTEXPR index_type size_bytes() const
     { return base_t::size() * sizeof(element_type); }
 
-    mutable_buffer(pointer data, index_type size) :
+    buffer(pointer data, index_type size) :
             base_t(data, size) {}
 
     template <size_t N>
-    mutable_buffer(element_type (&data) [N]) : base_t(data, N) {}
+    buffer(element_type (&data) [N]) : base_t(data, N) {}
 
     // most definitely a 'shallow clone'
-    mutable_buffer(const base_t& clone_from) :
+    buffer(const base_t& clone_from) :
             base_t(clone_from.data(), clone_from.size()) {}
 };
 
