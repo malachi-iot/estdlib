@@ -9,12 +9,16 @@
 
 namespace estd { namespace internal {
 
+// experimental and not good
+// maxStringLength needs a clue to not inspect a type for length so that
+// we don't get 'not implemented' problems with SFINAE
+struct no_max_string_length_tag {};
 
 // base class for any 'allocated' array, even ones using a fixed allocator
 // which pushes the boundaries of what allocated even really means
 // importantly, this allocated_array doesn't provide for growing/shrinking the array
 template <class TImpl>
-class allocated_array
+class allocated_array : no_max_string_length_tag
 {
 public:
     typedef TImpl impl_type;

@@ -33,5 +33,22 @@ inline layer1::string<N> to_string(const T& value)
     return s;
 }
 
+namespace experimental {
+
+template <>
+struct string_convert_traits<char, int16_t>
+{
+    static CONSTEXPR uint8_t max_size() { return 5; }
+
+    template <class TImpl>
+    static void to_string(internal::allocated_array<TImpl>& s, int16_t value)
+    {
+        internal::toString(s.lock(), value);
+        s.unlock();
+    }
+};
+
+
+}
 
 }

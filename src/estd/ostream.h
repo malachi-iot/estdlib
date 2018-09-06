@@ -185,7 +185,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 // warnings here
 template <class TStreambuf, class T,
           int N = internal::maxStringLength<T>(),
-          class enabled = typename enable_if<(N > 1), bool>::type >
+          class enabled = typename enable_if<(N > 1)>::type >
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
     char buffer[N];

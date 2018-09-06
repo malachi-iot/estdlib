@@ -8,7 +8,16 @@
 #include <Arduino.h>
 #endif
 
-namespace estd { namespace internal {
+namespace estd {
+
+namespace experimental {
+
+template <class TChar, class T>
+struct string_convert_traits;
+
+}
+
+namespace internal {
 
 template<class T> T fromString(const char* input);
 
@@ -50,6 +59,7 @@ template<> inline unsigned short fromString(const char* input)
 }
 
 // EXCLUDING null termination
+// a value of 0 indicates type not supported
 template<class T> CONSTEXPR uint8_t maxStringLength();
 
 template<> inline CONSTEXPR uint8_t maxStringLength<char>() { return 1; }
@@ -61,6 +71,10 @@ template<> inline CONSTEXPR uint8_t maxStringLength<uint32_t>() { return 10; }
 template<> inline CONSTEXPR uint8_t maxStringLength<int32_t>() { return 11;}
 template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
 template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
+
+// not supported, we can't tell how long these are
+template<> inline CONSTEXPR uint8_t maxStringLength<char*>() { return 0; }
+template<> inline CONSTEXPR uint8_t maxStringLength<const char*>() { return 0; }
 
 
 extern const char VALIDATE_NULLSTR_ERROR[];

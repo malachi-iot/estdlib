@@ -630,6 +630,19 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 
 #include "internal/to_string.h"
 
+namespace estd {
+namespace internal {
+
+// FIX: Is not helping, we still get warnings.  Might be because string_convert
+// is picked up before this specialization, but I don't think so - that's not
+// usually something specializations are subject to
+template<>
+inline CONSTEXPR uint8_t maxStringLength<estd::internal::no_max_string_length_tag>()
+{ return 0; }
+
+}
+}
+
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 
 //A bit finicky so that we can remove const (via Traits::char_type)
