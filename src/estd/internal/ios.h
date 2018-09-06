@@ -108,6 +108,37 @@ inline ios_base& nounitbuf(ios_base& s)
 }
 
 
+namespace experimental {
+
+struct ios_policy
+{
+    // whether to do timeouts at all
+    // for now timeout parameters apply equally to both istream and ostream
+    typedef void do_timeout_tag;
+
+    // whether to do yield/sleeps while polling
+    typedef void do_sleep_tag;
+
+    // doing a timeout also means that we attempt retries on read/write operations
+    static CONSTEXPR bool do_timeout() { return true; }
+
+    static CONSTEXPR size_t timeout_in_ms() { return 1000; }
+
+    static CONSTEXPR size_t sleep_in_ms() { return 1000; }
+};
+
+template <typename>
+struct has_typedef { typedef void type; };
+
+template<typename T, typename = void>
+struct is_do_timeout_tag_present : estd::false_type {};
+
+template<typename T>
+struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_tag>::type> : estd::true_type {};
+
+
+}
+
 namespace internal {
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual

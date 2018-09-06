@@ -20,6 +20,8 @@ extern "C" {
 #include "ios.h"
 #include "internal/string_convert.h"
 #include "traits/char_traits.h"
+#include "chrono.h"
+#include "thread.h"
 
 namespace estd {
 
@@ -35,6 +37,58 @@ class basic_ostream :
 {
     typedef TBase base_t;
     typedef typename TBase::char_type char_type;
+    typedef experimental::ios_policy policy_type;
+    //typedef int policy_type;
+
+    policy_type get_policy() { return policy_type{}; }
+
+    template <class TPolicy = policy_type,
+              class Enabled = typename TPolicy::do_timeout_tag>
+    void write_timeout(const char_type* s, streamsize n)
+    {
+        estd::chrono::milliseconds timeout(get_policy().timeout_in_ms());
+        estd::chrono::milliseconds sleep_for(get_policy().sleep_in_ms());
+        typedef chrono::steady_clock clock;
+        typedef clock::time_point time_point;
+        time_point start = clock::now();
+        estd::chrono::milliseconds elapsed;
+
+        streamsize remaining = n;
+
+        do
+        {
+            streamsize written = this->rdbuf()->sputn(s, n);
+
+            remaining -= written;
+            s += written;
+
+            if(remaining > 0 && sleep_for.count() > 0)
+            {
+                this_thread::sleep_for(sleep_for);
+            }
+            else
+            {
+                this_thread::yield();
+            }
+
+            //elapsed = clock::now() - start;
+        }
+        // TODO: Still need to do actual timeout here.  posix version of our estd::chrono
+        // is a little fiddly.  Would likely be better to alias everything as estd rather
+        // than reimplementing, so that native chrono steady clock and friends don't get
+        // irritated
+        while(remaining > 0);
+    }
+
+    template <class TPolicy = policy_type,
+              class Enabled = typename enable_if<!experimental::is_do_timeout_tag_present<TPolicy>::value>::type>
+    void write_timeout(const char_type* s, streamsize n, bool = false)
+    {
+        streamsize written = this->rdbuf()->sputn(s, n);
+
+        if(written != n)
+            base_t::setstate(ios_base::failbit);
+    }
 
 public:
     struct sentry
@@ -73,7 +127,7 @@ public:
     // When the time comes, these will replace the old virtual ones
     __ostream_type& write(const char_type* s, streamsize n)
     {
-        this->rdbuf()->sputn(s, n);
+        write_timeout(s, n);
         sentry::destroy(*this);
         return *this;
     }

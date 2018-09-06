@@ -85,8 +85,10 @@ set(SOURCE_FILES
         estd/port/freertos/chrono.h
         estd/port/freertos/thread.h
         estd/port/freertos/mutex.h
+        estd/port/posix/chrono.h
         estd/port/posix/streambuf.cpp
         estd/port/posix/streambuf.h
+        estd/port/posix/thread.h
         estd/port/streambuf.h
         estd/port/string.h
         estd/port/thread.h

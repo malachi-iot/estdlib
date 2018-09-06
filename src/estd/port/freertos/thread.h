@@ -80,6 +80,8 @@ void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
     vTaskDelay(count);
 }
 
+inline void yield() { taskYIELD(); }
+
 thread::id get_id()
 {
     return xTaskGetCurrentTaskHandle();
