@@ -9,21 +9,13 @@
 
 namespace estd {
 
-// Non-standard and doesn't make a difference for some compilers
-// https://stackoverflow.com/questions/621616/c-what-is-the-size-of-an-object-of-an-empty-class
-#define NODATA_MOTIVATOR    char NO_DATA[0]
-
 // Non standard
 template <class T>
 struct nothing_allocator
 {
-    NODATA_MOTIVATOR;
-
 #ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
     struct lock_counter
     {
-        NODATA_MOTIVATOR;
-
         lock_counter& operator++() {return *this;}
         lock_counter& operator--() {return *this;}
         lock_counter& operator++(int) {return *this;}
@@ -36,18 +28,13 @@ struct nothing_allocator
     };
 #endif
 
-    struct allocated_size_helper
-    {
-        NODATA_MOTIVATOR;
-    };
-
     typedef T value_type;
     typedef T& reference;
     typedef T* handle_type;
     typedef T* pointer;
     typedef const void* const_void_pointer;
     typedef internal::handle_with_offset_raw<pointer> handle_with_offset;
-    typedef pointer handle_with_size;
+    //typedef pointer handle_with_size;
     typedef size_t size_type;
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
@@ -72,12 +59,6 @@ struct nothing_allocator
     handle_type reallocate(handle_type h, int size) { return invalid(); }
 
     size_t max_size() const { return 0; }
-
-    // return size used by handle, with help from size helper
-    size_t allocated_size(handle_type h, const allocated_size_helper& ash)
-    {
-        return 0;
-    }
 };
 
 #ifdef FEATURE_STD_MEMORY

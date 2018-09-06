@@ -8,8 +8,6 @@
 template <class T>
 class _allocator
 {
-    NODATA_MOTIVATOR;
-
 public:
     // Would like to use this somehow to enable/disable auto-unlocking
     // for iterators
