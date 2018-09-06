@@ -40,9 +40,10 @@ TEST_CASE("buffers")
     }
     SECTION("span")
     {
+        uint8_t buf[128];
+
         SECTION("dynamic (default)")
         {
-            uint8_t buf[128];
             estd::span<uint8_t> s(buf);
             int sz = sizeof(s);
 
@@ -52,11 +53,19 @@ TEST_CASE("buffers")
         }
         SECTION("constexpr-sized")
         {
-            uint8_t buf[128];
             estd::span<uint8_t, 128> s(buf);
             int sz = sizeof(s);
 
             REQUIRE(sz == sizeof(void*));
+            REQUIRE(s.size() == sizeof(buf));
+            REQUIRE(s.data() == &buf[0]);
+        }
+        SECTION("dynamic with explicit size")
+        {
+            estd::span<uint8_t> s(buf, sizeof(buf));
+            int sz = sizeof(s);
+
+            REQUIRE(sz == sizeof(void*) + sizeof(size_t));
             REQUIRE(s.size() == sizeof(buf));
             REQUIRE(s.data() == &buf[0]);
         }
