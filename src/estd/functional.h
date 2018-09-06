@@ -102,7 +102,9 @@ public:
 
   // construct/copy/destroy
   reference_wrapper(T& ref) noexcept : _ptr(estd::addressof(ref)) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
   reference_wrapper(T&&) = delete;
+#endif
   reference_wrapper(const reference_wrapper&) noexcept = default;
 
   // assignment
