@@ -20,9 +20,10 @@ set(SOURCE_FILES
         estd/functional.h
         estd/initializer_list.h
 
-        estd/istream.h
+        estd/iomanip.h
         estd/ios.h
         estd/iostream.h
+        estd/istream.h
 
         estd/iterator.h
 

@@ -79,12 +79,14 @@ public:
     }
 
 
-    __ostream_type& put(char_type ch)
+    __ostream_type& put(char_type ch, bool bypass_sentry = false)
     {
         if(this->rdbuf()->sputc(ch) == std::char_traits<char_type>::eof())
             this->setstate(base_t::eofbit);
 
-        sentry::destroy(*this);
+        if(!bypass_sentry)
+            sentry::destroy(*this);
+
         return *this;
     }
 
@@ -228,7 +230,9 @@ convert(internal::basic_ostream<TStreambuf, TBase>& os)
 template <class TStreambuf>
 inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStreambuf>& os)
 {
-    return os.put(os.widen('\n'));
+    // uses specialized call to bypass sentry so that we don't needlessly check
+    // unitbuf and potentially double-flush
+    return os.put(os.widen('\n'), true);
     os.flush();
 }
 

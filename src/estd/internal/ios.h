@@ -20,8 +20,14 @@ public:
 
     static CONSTEXPR fmtflags dec = 0x01;
     static CONSTEXPR fmtflags hex = 0x02;
-    static CONSTEXPR fmtflags unitbuf = 0x04;
     static CONSTEXPR fmtflags basefield = dec | hex;
+
+    static CONSTEXPR fmtflags left = 0x08;
+    static CONSTEXPR fmtflags right = 0x10;
+    static CONSTEXPR fmtflags adjustfield = left | right;
+
+    static CONSTEXPR fmtflags unitbuf = 0x20;
+
 
     typedef uint8_t openmode;
 
