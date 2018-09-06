@@ -92,7 +92,9 @@ template <>
 class ctype<char> : public ctype_base, public locale::facet
 {
 public:
-    static locale::id id;
+    //static locale::id id;
+
+    char widen(char c) const { return c; }
 
     bool is(mask m, char ch) const
     {

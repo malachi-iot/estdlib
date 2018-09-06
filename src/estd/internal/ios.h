@@ -47,11 +47,17 @@ protected:
 public:
     ios_base() : fmtfl(dec), _iostate(goodbit) {}
 
+    fmtflags setf(fmtflags flags)
+    { fmtflags prior = fmtfl; fmtfl |= flags; return prior; }
+
+    fmtflags unsetf(fmtflags flags)
+    { fmtflags prior = fmtfl; fmtfl &= ~flags; return prior; }
+
     fmtflags flags() const
     { return fmtfl; }
 
     fmtflags flags(fmtflags fmtfl)
-    { return this->fmtfl = fmtfl; }
+    { fmtflags prior = fmtfl; this->fmtfl = fmtfl; return prior; }
 
     iostate rdstate() const
     { return _iostate; }
@@ -75,7 +81,25 @@ public:
 
     bool eof() const
     { return rdstate() & eofbit; }
+
+protected:
+    // internal call which we may make a layer0 version for optimization
+    bool is_unitbuf_set() const { return fmtfl & unitbuf; }
+
 };
+
+// NOTE: these are not heeded quite yet
+inline ios_base& unitbuf(ios_base& s)
+{
+    s.setf(ios_base::unitbuf);
+    return s;
+}
+
+inline ios_base& nounitbuf(ios_base& s)
+{
+    s.unsetf(ios_base::unitbuf);
+    return s;
+}
 
 
 namespace internal {
@@ -171,6 +195,17 @@ public:
     {
         experimental::locale l;
         return l;
+    }
+
+    char_type widen(char c) const
+    {
+        experimental::ctype<char_type> ctype;
+        return ctype.widen(c);
+    }
+
+    char narrow(char_type c, char /* default */)
+    {
+        return c;
     }
 };
 

@@ -37,11 +37,31 @@ class basic_ostream :
     typedef typename TBase::char_type char_type;
 
 public:
+    struct sentry
+    {
+        explicit sentry(basic_ostream&) {}
+
+        // NOTE: deviate from spec so that we don't risk extra stuff floating
+        // around on stack.  This won't always be convenient though
+        // NOTE also we might opt for a compile-time flag on unitbuf to further
+        // optimize things
+        inline static void destroy(basic_ostream& os)
+        {
+            //if(os.flags() & ios_base::unitbuf)
+            if(os.is_unitbuf_set() && os.good())
+                os.flush();
+        }
+
+        ~sentry()
+        {
+
+        }
+    };
+
     typedef typename TBase::traits_type traits_type;
 
     typedef basic_ostream<TStreambuf, TBase> __ostream_type;
 
-    // NOTE: Untested
     __ostream_type& flush()
     {
         if(this->rdbuf()->pubsync() == -1)
@@ -54,6 +74,7 @@ public:
     __ostream_type& write(const char_type* s, streamsize n)
     {
         this->rdbuf()->sputn(s, n);
+        sentry::destroy(*this);
         return *this;
     }
 
@@ -63,6 +84,7 @@ public:
         if(this->rdbuf()->sputc(ch) == std::char_traits<char_type>::eof())
             this->setstate(base_t::eofbit);
 
+        sentry::destroy(*this);
         return *this;
     }
 
@@ -204,8 +226,11 @@ convert(internal::basic_ostream<TStreambuf, TBase>& os)
 
 
 template <class TStreambuf>
-inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStreambuf>& __os)
-{ return __os.put('\n'); }
+inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStreambuf>& os)
+{
+    return os.put(os.widen('\n'));
+    os.flush();
+}
 
 
 template <class TStreambuf>

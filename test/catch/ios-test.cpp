@@ -243,6 +243,8 @@ TEST_CASE("iostreams")
             out << "hi2u";
 
             REQUIRE(out.rdbuf()->str() == "hi2u");
+
+            out << endl;
         }
         SECTION("istringstream")
         {
