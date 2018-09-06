@@ -92,6 +92,43 @@ auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
 
     return b;
 }
+
+
+template <class T>
+class reference_wrapper {
+public:
+  // types
+  typedef T type;
+
+  // construct/copy/destroy
+  reference_wrapper(T& ref) noexcept : _ptr(estd::addressof(ref)) {}
+  reference_wrapper(T&&) = delete;
+  reference_wrapper(const reference_wrapper&) noexcept = default;
+
+  // assignment
+  reference_wrapper& operator=(const reference_wrapper& x) noexcept = default;
+
+  // access
+  operator T& () const noexcept { return *_ptr; }
+  T& get() const noexcept { return *_ptr; }
+
+  /*
+  template< class... ArgTypes >
+  estd::invoke_result_t<T&, ArgTypes...>
+    operator() ( ArgTypes&&... args ) const {
+    return estd::invoke(get(), std::forward<ArgTypes>(args)...);
+  } */
+
+private:
+  T* _ptr;
+};
+
+#ifdef FEATURE_CPP_DEDUCTION_GUIDES
+// deduction guides
+template<class T>
+reference_wrapper(reference_wrapper<T>) -> reference_wrapper<T>;
+#endif
+
 #endif
 
 }

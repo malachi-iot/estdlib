@@ -36,8 +36,10 @@ set(SOURCE_FILES
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
         estd/internal/impl/streambuf.h
+        estd/internal/invoke_result.h
         estd/internal/ios.h
         estd/internal/iostream.h
+        estd/internal/is_base_of.h
         estd/internal/is_function.h
         estd/internal/istream.h
         estd/internal/istream_runtimearray.hpp

@@ -61,6 +61,9 @@ struct enable_if<true, T> { typedef T type; };
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template< bool B, class T = void >
 using enable_if_t = typename enable_if<B,T>::type;
+
+template< bool B, class T, class F >
+using conditional_t = typename conditional<B,T,F>::type;
 #else
 // UNTESTED
 template< bool B, class T = void >
@@ -263,9 +266,22 @@ template< class T >
 using decay_t = typename decay<T>::type;
 #endif
 
+template< class T >
+T* addressof(T& arg)
+{
+    return reinterpret_cast<T*>(
+               &const_cast<char&>(
+                  reinterpret_cast<const volatile char&>(arg)));
+}
+
 }
 
 #include "internal/llvm_type_traits.h"
+
+#ifdef FEATURE_CPP_VARIADIC
+#include "internal/is_base_of.h"
+#include "internal/invoke_result.h"
+#endif
 
 #if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
 #include "internal/common_type.h"
