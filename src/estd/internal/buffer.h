@@ -61,30 +61,37 @@ public:
 namespace layer3 {
 
 // TODO: once we lean array itself on allocated_array, beef up constructors here
+// NOTE: being that this is the underlying code for span, we conform this to
+// span's signatures (index_type, for example instead of size_type)
 template <class T, class TSize = size_t>
-class buffer : public estd::layer3::array<T, size_t>
+class mutable_buffer : public estd::layer3::array<T, size_t>
 {
 protected:
     typedef estd::layer3::array<T, size_t> base_t;
 
 public:
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::value_type value_type;
+    typedef T element_type;
+    typedef typename base_t::pointer pointer;
+    typedef typename base_t::size_type index_type;
+    typedef typename estd::remove_cv<T>::type value_type;
 
     // This is a low level call, but buffers are low level creatures
     // gently discouraged during mutable_buffer,
     // strongly discouraged during const_buffer,
     // but not necessarily wrong to use it
-    void resize(size_type n) { base_t::m_size = n; }
+    void resize(index_type n) { base_t::m_size = n; }
 
-    buffer(value_type* data, size_type size) :
+    CONSTEXPR index_type size_bytes() const
+    { return base_t::size() * sizeof(element_type); }
+
+    mutable_buffer(pointer data, index_type size) :
             base_t(data, size) {}
 
     template <size_t N>
-    buffer(value_type (&data) [N]) : base_t(data, N) {}
+    mutable_buffer(element_type (&data) [N]) : base_t(data, N) {}
 
     // most definitely a 'shallow clone'
-    buffer(const base_t& clone_from) :
+    mutable_buffer(const base_t& clone_from) :
             base_t(clone_from.data(), clone_from.size()) {}
 };
 

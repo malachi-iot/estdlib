@@ -47,6 +47,7 @@
 // for inline method constexpr as described https://en.cppreference.com/w/cpp/language/constexpr
 #define FEATURE_CPP_CONSTEXPR_METHOD
 #define FEATURE_CPP_DEDUCTION_GUIDES
+#define FEATURE_CPP_INLINE_VARIABLES    // whether freestanding variables can be declared inline
 #endif
 
 #else

@@ -4,14 +4,18 @@
 
 namespace estd {
 
+#ifdef FEATURE_CPP_INLINE_VARIABLES
+inline CONSTEXPR ptrdiff_t dynamic_extent = -1;
+#endif
+
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template <class T>
-using span = estd::internal::layer3::buffer<T, size_t>;
+template <class T, ptrdiff_t Extent = -1>
+using span = estd::internal::layer3::mutable_buffer<T, size_t>;
 #else
 template <class T, class TSize = size_t>
-class span : public estd::internal::layer3::buffer<T, size_t>
+class span : public estd::internal::layer3::mutable_buffer<T, size_t>
 {
-    typedef estd::internal::layer3::buffer<T, size_t> base_t;
+    typedef estd::internal::layer3::mutable_buffer<T, size_t> base_t;
 
 public:
     typedef typename base_t::size_type size_type;
