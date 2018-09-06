@@ -110,6 +110,19 @@ TEST_CASE("functional")
 
             REQUIRE(v2 == val2);
         }
+        WHEN("more reference tests")
+        {
+            int int_value = 7;
+            estd::tuple<int&> tuple3(int_value);
+
+            int& int_ref = get<0>(tuple3);
+
+            REQUIRE(int_ref == 7);
+
+            int_ref = 5;
+
+            REQUIRE(int_value == 5);
+        }
     }
     SECTION("bind")
     {

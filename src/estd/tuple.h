@@ -44,6 +44,27 @@ public:
 };
 
 template <class T, class ...TArgs>
+class tuple<T&, TArgs...> : public tuple<TArgs...>
+{
+    T& value;
+
+    typedef tuple<TArgs...> base_type;
+
+public:
+    CONSTEXPR tuple(T& value, TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...),
+        value(value)
+    {}
+
+    static CONSTEXPR int index = sizeof...(TArgs);
+
+    const T& first() const { return value; }
+
+    T& first() { return value; }
+};
+
+
+template <class T, class ...TArgs>
 class tuple<T, TArgs...> : public tuple<TArgs...>
 {
     T value;
