@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_STANDARD 98)
 
 project(simple-tests)
-add_executable(${PROJECT_NAME} "main.cpp")
+add_executable(${PROJECT_NAME}
+    chrono-test.cpp
+    "main.cpp"
+    misc.cpp
+    )
 
 set(ESTDLIB_DIR ../../../src)
 

@@ -29,7 +29,10 @@ template<
         class Rep2,
         class Period2
 >
-CONSTEXPR duration<Rep, Period>::duration(const duration<Rep2, Period2>& d)
+#ifdef FEATURE_CPP_CONSTEXPR
+constexpr
+#endif
+duration<Rep, Period>::duration(const duration<Rep2, Period2>& d)
     : ticks(convert_from(d))
 {
 }

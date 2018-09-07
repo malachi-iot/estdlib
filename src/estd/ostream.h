@@ -7,6 +7,12 @@
 #define USING_SPRINTF
 #endif
 
+#if __cplusplus >= 201103L
+// permits ostream timeout capabilities, but you still need to enable it with policy
+// as well (though it's default to on right now).  #ifdef'ing because chrono is currently
+// highly c++11 dependent
+#define FEATURE_ESTD_OSTREAM_TIMEOUT
+#endif
 
 extern "C" {
 
@@ -20,8 +26,10 @@ extern "C" {
 #include "ios.h"
 #include "internal/string_convert.h"
 #include "traits/char_traits.h"
+#ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
 #include "chrono.h"
 #include "thread.h"
+#endif
 
 namespace estd {
 
@@ -40,6 +48,7 @@ class basic_ostream :
     typedef experimental::ios_policy policy_type;
     //typedef int policy_type;
 
+#ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
     policy_type get_policy() { return policy_type{}; }
 
     template <class TPolicy = policy_type,
@@ -82,6 +91,7 @@ class basic_ostream :
 
     template <class TPolicy = policy_type,
               class Enabled = typename enable_if<!experimental::is_do_timeout_tag_present<TPolicy>::value>::type>
+#endif
     void write_timeout(const char_type* s, streamsize n, bool = false)
     {
         streamsize written = this->rdbuf()->sputn(s, n);

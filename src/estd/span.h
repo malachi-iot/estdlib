@@ -35,6 +35,7 @@ public:
     // ExtendLocal needed because SFINAE function selection needs that
     // fluidity
     // dynamic flavor
+#ifdef FEATURE_CPP_DEFAULT_TARGS
     template <size_t N, ptrdiff_t ExtentLocal = Extent,
               class ExtentOnly = typename enable_if<ExtentLocal == -1>::type>
     span(element_type (&data) [N]) : base_t(data, N) {}
@@ -43,6 +44,7 @@ public:
     template <size_t N, ptrdiff_t ExtentLocal = Extent,
               class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
     span(element_type (&data) [N], bool = true) : base_t(data) {}
+#endif
 
     // most definitely a 'shallow clone'
     span(const base_t& clone_from) : base_t(clone_from) {}

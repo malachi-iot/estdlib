@@ -6,6 +6,7 @@
 // EXP actually works, just want to do a little more testing before enabling it
 //#define FEATURE_ESTD_CHRONO_EXP
 
+#include "../internal/common_type.h"
 #include "../ratio.h"
 
 namespace estd {
@@ -51,7 +52,10 @@ public:
 
     CONSTEXPR rep count() const { return ticks; }
 
-    CONSTEXPR duration()
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    duration()
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         = default;
 #else
@@ -59,13 +63,19 @@ public:
 #endif
 
     template <class Rep2>
-    CONSTEXPR explicit duration(const Rep2& r) : ticks(r)
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    explicit duration(const Rep2& r) : ticks(r)
     {
 
     }
 
     template <class Rep2, class Period2>
-    CONSTEXPR duration(const duration<Rep2, Period2>& d);
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    duration(const duration<Rep2, Period2>& d);
 
 };
 
@@ -74,7 +84,7 @@ ToDuration duration_cast(const duration<Rep, Period>& d);
 
 
 template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs );
 
@@ -152,9 +162,15 @@ public:
     // less is more, so swing vote goes to doing nothing here.  This turns out to be helpful,
     // now one can leave a time_point as a global variable without worring about startup-time
     // init issues
-    CONSTEXPR time_point() {}
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    time_point() {}
 
-    CONSTEXPR explicit time_point(const Duration& duration) : m_time_since_epoch(duration) {}
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    explicit time_point(const Duration& duration) : m_time_since_epoch(duration) {}
 
     // NOTE: Compiles, but not tested
     template <class TDuration2>
@@ -167,20 +183,20 @@ public:
 
 
 template< class C, class D1, class D2 >
-constexpr typename estd::common_type<D1,D2>::type
+CONSTEXPR typename estd::common_type<D1,D2>::type
     operator-( const time_point<C,D1>& pt_lhs,
                const time_point<C,D2>& pt_rhs );
 
 template< class Clock, class Dur1, class Dur2 >
-constexpr bool operator>( const time_point<Clock,Dur1>& lhs,
+CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 
 template< class Clock, class Dur1, class Dur2 >
-constexpr bool operator>=( const time_point<Clock,Dur1>& lhs,
+CONSTEXPR bool operator>=( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 
 template< class Clock, class Dur1, class Dur2 >
-constexpr bool operator==( const time_point<Clock,Dur1>& lhs,
+CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
 

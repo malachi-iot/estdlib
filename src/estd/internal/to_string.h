@@ -15,6 +15,7 @@ extern "C" int sprintf ( char * str, const char * format, ... );
 
 namespace estd {
 
+#ifdef FEATURE_CPP_DEFAULT_TARGS
 // non standard but non intrusive overload in case you've already got the string
 // you'd like to populate
 template <class T, class TStrImpl, size_t N = internal::maxStringLength<T>() >
@@ -32,6 +33,7 @@ inline layer1::string<N> to_string(const T& value)
     to_string(s, value);
     return s;
 }
+#endif
 
 namespace experimental {
 
