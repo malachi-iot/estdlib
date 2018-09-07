@@ -37,6 +37,7 @@ public:
     ESTD_FN_HAS_METHOD(char_type*, pptr)
     ESTD_FN_HAS_METHOD(char_type*, epptr)
     ESTD_FN_HAS_METHOD(int_type, underflow)
+    ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
 
 protected:
 
@@ -51,6 +52,30 @@ protected:
     {
         return base_type::xsgetn(s, count);
     } */
+
+    // not yet used overflow helpers
+    // overflow() without parameter looks loosely similar to sync, but
+    // devoted to flushing output.  Spec verbiage indicates
+    // actually spitting output to sink is optional, but implies heavily
+    // that you'll be doing it.  Also the output to sink will be from the pending
+    // put area, not specifically incoming ch
+    // NOTE: We expect overflow to sometimes be a locus of timeout activity
+    // consider a traits_type::pending() or similar to indicate a nonblocking
+    // async activity (counterpart to traits_type::nodata() ).  That said,
+    // maybe eof() can do that job albeit in a less informative way
+    template <class T = base_type>
+    typename enable_if<has_overflow_method<T>::value, int_type>::type
+    overflow(int_type ch = traits_type::eof())
+    {
+        return base_type::overflow(ch);
+    }
+
+    template <class T = base_type>
+    typename enable_if<!has_overflow_method<T>::value, int_type>::type
+    overflow(int_type = traits_type::eof())
+    {
+        return traits_type::eof();
+    }
 
 public:
     // some streambufs don't need any initialization at the base level
@@ -75,7 +100,24 @@ public:
 
     streamsize sputn(const char_type *s, streamsize count)
     {
-        return this->xsputn(s, count);
+        streamsize written = this->xsputn(s, count);
+
+        if(written < count)
+        {
+            s += written;
+            // should optimize out if we have noop-overflow
+            if(overflow(*s) != traits_type::eof())
+            {
+                // getting here means one more character was placed into put area
+                count -= ++written;
+
+                // a successful overflow indicates more put area
+                // is available, so give it a shot
+                written += this->xsputn(s + 1, count);
+            }
+        }
+
+        return written;
     }
 
     // Do SFINAE and call TImpl version if present
