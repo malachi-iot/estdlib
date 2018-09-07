@@ -260,4 +260,11 @@ TEST_CASE("iostreams")
             //layer2::stringbuf(raw_str);
         }
     }
+    SECTION("impl::out_span_streambuf")
+    {
+        // FIX: Not quite there because span constructor won't switch between Extent and
+        // non Extent version for explicit buffer just yet
+        //uint32_t val[64];
+        //estd::internal::impl::out_span_streambuf<uint32_t, 32> test(val, 32);
+    }
 }

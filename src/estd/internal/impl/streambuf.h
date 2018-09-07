@@ -3,6 +3,7 @@
 #include "../../traits/char_traits.h"
 #include "../ios.h"
 #include "../../queue.h" // for out_queue_streambuf
+#include "../../span.h" // for span streambuf
 
 namespace estd { namespace internal { namespace impl {
 
@@ -151,6 +152,65 @@ struct basic_stringbuf : out_stringbuf<TString>
     // where locking/unlocking is a noop (or otherwise inconsequential)
     char_type* gptr() { return base_type::_str.data() + get_pos; }
 };
+
+
+// just the fundamental pieces, overflow/sync device handling will have to
+// be implemented in a derived class
+template <class T, std::ptrdiff_t Extent = -1,
+          class TBase = experimental::instance_provider<estd::span<T, Extent> > >
+struct out_span_streambuf : TBase
+{
+    typedef TBase base_type;
+    typedef typename base_type::value_type span_type;
+
+    span_type& out() { return base_type::value(); }
+
+    size_t pos;
+
+    typedef char char_type;
+
+    out_span_streambuf(T* buf, size_t size) :
+        base_type(span_type(buf, size)),
+        pos(0)
+    {
+
+    }
+
+    out_span_streambuf(const estd::span<T, Extent>& copy_from) :
+        base_type(copy_from),
+        pos(0)
+    {
+
+    }
+
+    char_type* pbase() const { return  static_cast<char_type*>(out().data()); }
+    char_type* pptr() const { return pbase() + pos; }
+    char_type* epptr() const { return pbase() + out().size_in_bytes(); }
+};
+
+
+// just the fundamental pieces, overflow/sync device handling will have to
+// be implemented in a derived class
+template <class T, std::ptrdiff_t Extent = -1>
+struct in_span_streambuf
+{
+    estd::span<T, Extent> in;
+    size_t pos;
+
+    typedef char char_type;
+
+    in_span_streambuf(const estd::span<T, Extent>& copy_from) :
+        in(copy_from),
+        pos(0)
+    {
+
+    }
+
+    char_type* eback() const { return static_cast<char_type*>(in.data()); }
+    char_type* gptr() const { return eback() + pos; }
+    char_type* egptr() const { return eback() + in.size_in_bytes(); }
+};
+
 
 // this represents traditional std::basic_streambuf implementations
 template <class TChar, class TCharTraits = ::std::char_traits<TChar> >
