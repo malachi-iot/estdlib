@@ -41,6 +41,8 @@ public:
 
 protected:
 
+    static CONSTEXPR bool has_overflow_method_ = has_overflow_method<base_type>::value;
+
     /*
      * Not doing these because I bet polymorphism breaks if you do
     streamsize xsputn(const char_type *s, streamsize count)
@@ -102,10 +104,12 @@ public:
     {
         streamsize written = this->xsputn(s, count);
 
-        if(written < count)
+        // only interact with overflow method if it's really present
+        // a little extra gauruntee for optimization
+        if(has_overflow_method_ && written < count)
         {
             s += written;
-            // should optimize out if we have noop-overflow
+
             if(overflow(*s) != traits_type::eof())
             {
                 // getting here means one more character was placed into put area
