@@ -13,7 +13,34 @@ namespace estd {
 
 namespace experimental {
 
+template <size_t N>
 struct smalL_dequeue_policy
+{
+    static CONSTEXPR uint8_t size_bits = internal::deduce_bit_count<N>::value;
+    static CONSTEXPR ptrdiff_t size_max = 1 << (size_bits - 1);
+    typedef typename internal::deduce_fixed_size_t<size_max * 2>::size_type size_2_type;
+
+    struct size_2_type_
+    {
+        size_2_type m_front : size_bits;
+        size_2_type m_back : size_bits;
+    } positions;
+
+    template <class TArray>
+    typename TArray::iterator front(TArray& a)
+    {
+        return &a[positions.m_front];
+    }
+
+    template <class TArray>
+    typename TArray::iterator back(TArray& a)
+    {
+        return &a[positions.m_back];
+    }
+};
+
+
+struct fast_dequeue_policy
 {
 
 };
@@ -31,8 +58,8 @@ namespace layer1 {
 // then keep this general use one around as it is arguably faster using direct pointers.
 // For above, refactoring to standard deque<T, Allocator> would fit the bill - 'grow' type
 // operations would merely compile-time fail [as they should] for fixed allocations
-template <class T, size_t N, class TPolicy = experimental::smalL_dequeue_policy>
-class deque
+template <class T, size_t N, class TPolicy = experimental::fast_dequeue_policy >
+class deque : protected TPolicy
 {
     typedef array<T, N> array_t;
     typedef array_t container_type;
@@ -109,7 +136,9 @@ public:
     deque() :
         m_front(m_array.begin()),
         m_back(m_array.begin()),
-        m_empty(true) {}
+        m_empty(true)
+    {
+    }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     constexpr deque(deque&& move_from) :
