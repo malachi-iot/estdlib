@@ -11,6 +11,15 @@
 
 namespace estd {
 
+namespace experimental {
+
+struct smalL_dequeue_policy
+{
+
+};
+
+}
+
 namespace layer1 {
 
 // NOTE: Since layer1 is always a fixed size, this is hard wired as a
@@ -22,7 +31,7 @@ namespace layer1 {
 // then keep this general use one around as it is arguably faster using direct pointers.
 // For above, refactoring to standard deque<T, Allocator> would fit the bill - 'grow' type
 // operations would merely compile-time fail [as they should] for fixed allocations
-template <class T, size_t N, typename TSize = typename internal::deduce_fixed_size_t<N>::size_type >
+template <class T, size_t N, class TPolicy = experimental::smalL_dequeue_policy>
 class deque
 {
     typedef array<T, N> array_t;
