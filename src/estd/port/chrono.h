@@ -9,6 +9,10 @@
 #include "../internal/common_type.h"
 #include "../ratio.h"
 
+#ifdef ESTD_POSIX
+#include <chrono>
+#endif
+
 namespace estd {
 
 namespace internal {
@@ -44,7 +48,12 @@ class duration
 
 protected:
     template <class Rep2, class Period2>
-    static Rep convert_from(const duration<Rep2, Period2>& d);
+    static CONSTEXPR Rep convert_from(const duration<Rep2, Period2>& d);
+
+#ifdef ESTD_POSIX
+    template <class Rep2, class Period2>
+    static CONSTEXPR Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
+#endif
 
 public:
     typedef Rep rep;
@@ -77,11 +86,40 @@ public:
 #endif
     duration(const duration<Rep2, Period2>& d);
 
+#ifdef ESTD_POSIX
+    template <class Rep2, class Period2>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    duration(const std::chrono::duration<Rep2, Period2>& d) :
+        ticks(convert_from(d))
+    {}
+
+    typedef std::ratio<Period::num, Period::den> std_period_type;
+
+    operator std::chrono::duration<Rep, std_period_type>() const
+    {
+        std::chrono::duration<Rep, std_period_type> converted(count());
+
+        return converted;
+    }
+#endif
 };
 
 template <class ToDuration, class Rep, class Period>
 ToDuration duration_cast(const duration<Rep, Period>& d);
 
+#ifdef ESTD_POSIX
+template <class ToDuration, class Rep, class Period>
+inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
+{
+    typedef ratio<Period::num, Period::den> period_type;
+
+    duration<Rep, period_type> our_d(d);
+
+    return duration_cast<ToDuration>(our_d);
+}
+#endif
 
 template< class Rep1, class Period1, class Rep2, class Period2 >
 typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type

@@ -10,7 +10,7 @@ template<
         class Rep2,
         class Period2
 >
-Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
+CONSTEXPR Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
 {
     typedef ratio_divide<Period2, Period> rd;
 
@@ -20,6 +20,27 @@ Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
     //return d.count() * Period2::num() * Period::den() / (Period2::den() * Period::num());
     return d.count() * rd::num / rd::den;
 }
+
+#ifdef ESTD_POSIX
+template<
+        class Rep,
+        class Period
+>
+template<
+        class Rep2,
+        class Period2
+>
+CONSTEXPR Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Rep2, Period2>& d)
+{
+    typedef std::ratio_divide<Period2, Period> rd;
+
+    // FIX: Overly simplistic and going to overflow in some conditions
+    // put into this helper method so that (perhaps) we can specialize/overload
+    // to avoid that
+    //return d.count() * Period2::num() * Period::den() / (Period2::den() * Period::num());
+    return d.count() * rd::num / rd::den;
+}
+#endif
 
 template<
         class Rep,

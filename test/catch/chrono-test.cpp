@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 // TODO: Once we get POSIX mode for this, include in estd/chrono.h directly
-#include <estd/port/chrono.h>
+#include <estd/chrono.h>
 
 class fake_clock
 {
@@ -188,5 +188,21 @@ TEST_CASE("chrono tests")
         second = first;
 
         REQUIRE(second == first);
+    }
+    SECTION("posix compat")
+    {
+        typedef estd::chrono::steady_clock clock;
+
+        clock::time_point first = clock::now();
+        clock::time_point next = clock::now();
+
+        next += std::chrono::seconds(3);
+
+        auto duration = next - first;
+
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+        auto ms2 = estd::chrono::duration_cast<estd::chrono::milliseconds>(duration);
+
+        REQUIRE(ms.count() == ms2.count());
     }
 }
