@@ -29,14 +29,14 @@ public:
     typedef typename traits_type::int_type int_type;
 
     ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
-    ESTD_FN_HAS_METHOD(int_type, sgetc)
-    ESTD_FN_HAS_METHOD(int_type, sbumpc)
-    ESTD_FN_HAS_METHOD(int, sync)
-    ESTD_FN_HAS_METHOD(char_type*, gptr)
-    ESTD_FN_HAS_METHOD(char_type*, egptr)
-    ESTD_FN_HAS_METHOD(char_type*, pptr)
-    ESTD_FN_HAS_METHOD(char_type*, epptr)
-    ESTD_FN_HAS_METHOD(int_type, underflow)
+    ESTD_FN_HAS_METHOD(int_type, sgetc,)
+    ESTD_FN_HAS_METHOD(int_type, sbumpc,)
+    ESTD_FN_HAS_METHOD(int, sync,)
+    ESTD_FN_HAS_METHOD(char_type*, gptr,)
+    ESTD_FN_HAS_METHOD(char_type*, egptr,)
+    ESTD_FN_HAS_METHOD(char_type*, pptr,)
+    ESTD_FN_HAS_METHOD(char_type*, epptr,)
+    ESTD_FN_HAS_METHOD(int_type, underflow,)
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
 
 protected:
