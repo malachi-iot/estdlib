@@ -178,11 +178,16 @@ public:
 
     basic_ostream() {}
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+    basic_ostream(TArgs&&...args) : base_t(std::forward<TArgs>(args)...) {}
+#else
     template <class TParam1>
     basic_ostream(TParam1& p1) : base_t(p1) {}
 
     template <class TParam1>
     basic_ostream(TParam1* p1) : base_t(p1) {}
+#endif
 #endif
 
 };

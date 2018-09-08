@@ -190,6 +190,8 @@ protected:
 
     basic_ios_base() {}
 
+    // TODO: constructor needs cleanup here
+
     template <class TParam1>
     basic_ios_base(TParam1& p1) : _rdbuf(p1)
     //basic_ios_base(stream_type &stream) : _rdbuf(stream)
@@ -218,11 +220,16 @@ public:
 protected:
     basic_ios() {}
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+    basic_ios(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
+#else
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
 
     template <class TParam1>
     basic_ios(TParam1* p) : base_type(p) {}
+#endif
 
 public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
