@@ -55,12 +55,13 @@ class basic_ostream :
               class Enabled = typename TPolicy::do_timeout_tag>
     void write_timeout(const char_type* s, streamsize n)
     {
-        estd::chrono::milliseconds timeout(get_policy().timeout_in_ms());
-        estd::chrono::milliseconds sleep_for(get_policy().sleep_in_ms());
-        typedef chrono::steady_clock clock;
-        typedef clock::time_point time_point;
-        time_point start = clock::now();
-        estd::chrono::milliseconds elapsed;
+        using namespace chrono;
+
+        milliseconds timeout(get_policy().timeout_in_ms());
+        milliseconds sleep_for(get_policy().sleep_in_ms());
+        typedef steady_clock::time_point time_point;
+        time_point start = steady_clock::now();
+        milliseconds elapsed;
 
         streamsize remaining = n;
 
@@ -80,13 +81,18 @@ class basic_ostream :
                 this_thread::yield();
             }
 
-            //elapsed = clock::now() - start;
+            // FIX: Can't quite do this because std::duration doesn't
+            // interact with estd::duration well and implicit conversions
+            // aren't kicking in presumably due to the templates
+            /*
+            if(steady_clock::now() - start > timeout)
+            {
+
+            } */
+
+            elapsed = duration_cast<milliseconds>(steady_clock::now() - start);
         }
-        // TODO: Still need to do actual timeout here.  posix version of our estd::chrono
-        // is a little fiddly.  Would likely be better to alias everything as estd rather
-        // than reimplementing, so that native chrono steady clock and friends don't get
-        // irritated
-        while(remaining > 0);
+        while(remaining > 0 && elapsed < timeout);
     }
 
     template <class TPolicy = policy_type,
