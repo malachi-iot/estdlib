@@ -1,5 +1,6 @@
 #pragma once
 
+#include "internal/platform.h"
 #include "port/chrono.h"
 
 #if defined(ESTD_FREERTOS)

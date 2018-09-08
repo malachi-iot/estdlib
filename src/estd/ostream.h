@@ -214,6 +214,9 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.put(ch);
 }
 
+// explicit prototype here to avoid pulling in collision-happy stdio
+// watch out for linker errors if your environment doesn't have this call
+int snprintf( char* buffer, std::size_t buf_size, const char* format, ... );
 
 template <class TStreambuf>
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, void* addr)
