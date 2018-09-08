@@ -16,9 +16,9 @@ namespace experimental {
 template <size_t N>
 struct smalL_dequeue_policy
 {
-    static CONSTEXPR uint8_t size_bits = internal::deduce_bit_count<N>::value;
+    static CONSTEXPR uint8_t size_bits = estd::internal::deduce_bit_count<N>::value;
     static CONSTEXPR ptrdiff_t size_max = 1 << (size_bits - 1);
-    typedef typename internal::deduce_fixed_size_t<size_max * 2>::size_type size_2_type;
+    typedef typename estd::internal::deduce_fixed_size_t<size_max * 2>::size_type size_2_type;
 
     struct size_2_type_
     {
