@@ -28,6 +28,10 @@ public:
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
+    // custom estd nonblocking variants
+    ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
+    ESTD_FN_HAS_METHOD(int_type, speekc)
+
     ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
     ESTD_FN_HAS_METHOD(int_type, sgetc,)
     ESTD_FN_HAS_METHOD(int_type, sbumpc,)
@@ -134,11 +138,24 @@ public:
 
     // if TImpl doesn't have one, use a generic one-size-fits all version
     template <class T = base_type>
-    typename enable_if<!has_sputc_method<T>::value, int_type>::type
+    typename enable_if<!has_sputc_method<T>::value && !has_spostc_method<T>::value, int_type>::type
     sputc(char_type ch)
     {
         bool success = sputn(&ch, sizeof(ch)) == sizeof(ch);
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
+    }
+
+
+    // if an spostc IS specified, but not sputc is present, we can generate an sputc
+    // note that we depend on overflow presence for this specialization
+    template <class T = base_type>
+    typename enable_if<!has_sputc_method<T>::value && has_spostc_method<T>::value, int_type>::type
+    sputc(char_type ch)
+    {
+        if(this->spostc(ch) == traits_type::eof())
+            return this->overflow(ch);
+        else
+            return traits_type::to_int_type(ch);
     }
 
 
