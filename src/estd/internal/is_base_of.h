@@ -25,9 +25,9 @@ namespace details {
 template <typename Base, typename Derived>
 struct is_base_of :
     public estd::conditional_t<
-        std::is_class<Base>::value && std::is_class<Derived>::value,
+        estd::is_class<Base>::value && estd::is_class<Derived>::value,
         details::pre_is_base_of2<Base, Derived>,
-        std::false_type
+        estd::false_type
     > { };
 
 }

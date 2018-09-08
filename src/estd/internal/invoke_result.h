@@ -50,7 +50,7 @@ struct invoke_impl<MT B::*> {
         -> decltype(invoke_impl::get(std::forward<T>(t)).*pmd);
 };
 
-template<class F, class... Args, class Fd = typename std::decay<F>::type>
+template<class F, class... Args, class Fd = typename estd::decay<F>::type>
 auto INVOKE(F&& f, Args&&... args)
     -> decltype(invoke_impl<Fd>::call(std::forward<F>(f), std::forward<Args>(args)...));
 
