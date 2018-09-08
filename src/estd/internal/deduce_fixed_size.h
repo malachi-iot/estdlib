@@ -37,7 +37,7 @@ struct deduce_fixed_size_t<val, Range<(0xFFFF < val && val <= 0xFFFFFFFF)> >
 };
 
 
-template <size_t val, typename = Range<true> >
+template <ptrdiff_t val, typename = Range<true> >
 class deduce_bit_count {};
 
 template<ptrdiff_t val>
