@@ -181,10 +181,6 @@ class basic_ios_base<TStreambuf, false> : public ios_base
 public:
     typedef typename remove_reference<TStreambuf>::type streambuf_type;
 
-    // currently (temporarily) hard wired to streambufs which know about a stream object
-    // to interact with
-    //typedef typename streambuf_type::stream_type stream_type;
-
 protected:
     TStreambuf _rdbuf;
 
@@ -192,14 +188,17 @@ protected:
 
     // TODO: constructor needs cleanup here
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    basic_ios_base(TArgs&&...args) : 
+        _rdbuf(std::forward<TArgs>(args)...) {}
+#else
     template <class TParam1>
     basic_ios_base(TParam1& p1) : _rdbuf(p1)
-    //basic_ios_base(stream_type &stream) : _rdbuf(stream)
             {}
-
-#ifdef FEATURE_CPP_VARIADIC
-    template <class _TStream, class ...TArgs>
-    basic_ios_base(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
 #endif
 public:
     streambuf_type* rdbuf()
@@ -222,6 +221,9 @@ protected:
 
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     template <class ...TArgs>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
     basic_ios(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
 #else
     template <class TParam1>

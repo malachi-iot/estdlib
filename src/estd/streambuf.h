@@ -30,7 +30,7 @@ public:
 
     // custom estd nonblocking variants
     ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
-    ESTD_FN_HAS_METHOD(int_type, speekc)
+    ESTD_FN_HAS_METHOD(int_type, speekc,)
 
     ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
     ESTD_FN_HAS_METHOD(int_type, sgetc,)
@@ -88,9 +88,19 @@ public:
     streambuf() {}
 
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    streambuf(TArgs&&...args) : 
+        base_type(std::forward<TArgs>(args)...)
+    {}
+#else
     template <class Param1>
     streambuf(Param1& p1) : base_type(p1)
     {}
+#endif
 
     /*
 #ifdef FEATURE_CPP_MOVESEMANTIC
