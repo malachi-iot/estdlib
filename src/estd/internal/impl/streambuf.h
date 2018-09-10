@@ -221,6 +221,7 @@ struct basic_streambuf
     typedef typename traits_type::int_type int_type;
 
 protected:
+    //virtual int_type overflow(int_type ch) = 0;
     virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
     virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
     virtual int sync() = 0;

@@ -17,18 +17,27 @@ namespace estd {
 
 namespace internal {
 
-template<class TImpl>
+// TODO: TPolicy shall specify modes:
+// 1. never blocking
+// 2. blocking with timeout (including infinite timeout)
+// 3. blocking
+// Note that consuming istream/ostream may independely implement its own timeout code
+// in which case 'never blocking' mode may be utilized for streambuf
+template<class TImpl, class TPolicy = void>
 class streambuf : public TImpl
 {
     typedef TImpl base_type;
 
 public:
+    typedef TPolicy policy_type;
+
     // estd::internal::impl::native_streambuf<TChar, TStream, Traits
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
     // custom estd nonblocking variants
+    // TODO: Determine if spostc should kick off a kind of soft/async overflow
     ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
     ESTD_FN_HAS_METHOD(int_type, speekc,)
 
@@ -36,8 +45,10 @@ public:
     ESTD_FN_HAS_METHOD(int_type, sgetc,)
     ESTD_FN_HAS_METHOD(int_type, sbumpc,)
     ESTD_FN_HAS_METHOD(int, sync,)
+    ESTD_FN_HAS_METHOD(char_type*, eback,)
     ESTD_FN_HAS_METHOD(char_type*, gptr,)
     ESTD_FN_HAS_METHOD(char_type*, egptr,)
+    ESTD_FN_HAS_METHOD(char_type*, pbase,)
     ESTD_FN_HAS_METHOD(char_type*, pptr,)
     ESTD_FN_HAS_METHOD(char_type*, epptr,)
     ESTD_FN_HAS_METHOD(int_type, underflow,)
@@ -281,9 +292,13 @@ struct basic_streambuf_wrapped :
         >
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
-    typedef typename streambuf_type::char_type char_type;
+    typedef typename streambuf_type::traits_type traits_type;
+    typedef typename traits_type::char_type char_type;
+    typedef typename traits_type::int_type int_type;
 
-private:
+protected:
+    // TODO: May have to turn this into an is-a relationship so that we can
+    // get at its protected methods
     TStreambuf _rdbuf;
 
     virtual streamsize xsgetn(char_type* s, streamsize count) OVERRIDE
@@ -300,6 +315,12 @@ private:
     {
         return _rdbuf.pubsync();
     }
+
+    /*
+    virtual int_type overflow(int_type ch = traits_type::eof()) OVERRIDE
+    {
+        return _rdbuf.overflow();
+    } */
 
 public:
     template <class TParam1>

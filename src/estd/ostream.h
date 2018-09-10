@@ -45,8 +45,8 @@ class basic_ostream :
 {
     typedef TBase base_t;
     typedef typename TBase::char_type char_type;
-    typedef experimental::ios_policy policy_type;
-    //typedef int policy_type;
+    //typedef experimental::ios_policy policy_type;
+    typedef int policy_type;
 
 #ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
     policy_type get_policy() { return policy_type{}; }
