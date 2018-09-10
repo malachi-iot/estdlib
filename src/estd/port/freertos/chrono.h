@@ -24,18 +24,18 @@ namespace estd {
 // constant representing the number of seconds from one tick to the next."
 namespace internal {
 
-typedef estd_ratio::ratio<1, configTICK_RATE_HZ> system_period;
+typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
 }
 
 namespace chrono {
 
-struct steady_clock
+struct freertos_clock
 {
-    typedef estd::internal::miilli_rep rep;
-    typedef internal::system_period period;
+    typedef estd::internal::milli_rep rep;
+    typedef internal::freertos_system_period period;
     typedef internal::estd_chrono::duration<rep, period> duration;
-    typedef internal::estd_chrono::time_point<steady_clock> time_point;
+    typedef internal::estd_chrono::time_point<freertos_clock> time_point;
 
     static CONSTEXPR bool is_steady = true;
 

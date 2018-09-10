@@ -75,6 +75,9 @@ set(SOURCE_FILES
 
         estd/port/arch/esp-idf.h
 
+        estd/port/asf/chrono.h
+        estd/port/asf/thread.h
+
         estd/port/chrono.h
         estd/port/chrono.hpp
         estd/port/identify_platform.h

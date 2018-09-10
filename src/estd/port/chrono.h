@@ -9,7 +9,7 @@
 #include "../internal/common_type.h"
 #include "../ratio.h"
 
-#ifdef ESTD_POSIX
+#if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO)
 #include <chrono>
 #endif
 
@@ -22,7 +22,7 @@ namespace internal {
 // option-selectable level
 typedef uint32_t nano_rep;
 typedef uint32_t micro_rep;
-typedef uint32_t miilli_rep;
+typedef uint32_t milli_rep;
 typedef uint16_t seconds_rep;
 typedef uint16_t minutes_rep;
 typedef uint16_t hours_rep;
@@ -170,7 +170,7 @@ namespace chrono {
 // These lower-precision ones are available even during non-FEATURE_ESTD_CHRONO
 typedef internal::estd_chrono::duration<internal::nano_rep, nano> nanoseconds;
 typedef internal::estd_chrono::duration<internal::micro_rep, micro> microseconds;
-typedef internal::estd_chrono::duration<internal::miilli_rep, milli> milliseconds;
+typedef internal::estd_chrono::duration<internal::milli_rep, milli> milliseconds;
 typedef internal::estd_chrono::duration<internal::seconds_rep> seconds;
 typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60>> minutes;
 typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600>> hours;

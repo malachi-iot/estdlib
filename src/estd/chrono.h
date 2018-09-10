@@ -12,3 +12,17 @@
 #else
 #error Unsupported platform
 #endif
+
+// alias out steady_clock depending on system settings
+namespace estd { namespace chrono {
+#ifdef ATMEL_ASF
+#include "port/asf/chrono.h"
+#ifdef FEATURE_ESTD_FREERTOS_CHRONO
+typedef freertos_clock steady_clock;
+#else
+typedef asf_clock steady_clock;
+#endif
+#elif defined(ESTD_ARDUINO) // finish from ATMEL_ASF
+typedef arduino_clock steady_clock;
+#endif
+} }

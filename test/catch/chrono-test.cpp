@@ -8,7 +8,7 @@ class fake_clock
 public:
     int ticks;
 
-    typedef estd::internal::miilli_rep rep;
+    typedef estd::internal::milli_rep rep;
     typedef estd::ratio<1, 15> period; // each 'fake' tick is 1/15 of a second
     typedef estd::chrono::duration<rep, period> duration;
     typedef estd::chrono::time_point<fake_clock> time_point;

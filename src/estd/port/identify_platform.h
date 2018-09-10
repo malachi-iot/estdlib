@@ -24,3 +24,11 @@
 #define ESTD_FREERTOS
 #endif
 #endif
+
+#ifdef ESTD_FREERTOS
+
+#ifndef FEATURE_ESTD_NATIVE_CHRONO
+#define FEATURE_ESTD_FREERTOS_CHRONO
+#endif
+
+#endif
