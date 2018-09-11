@@ -252,6 +252,19 @@ TEST_CASE("iostreams")
 
             REQUIRE(in.rdbuf()->str() == "hi2u");
         }
+        SECTION("numeric test")
+        {
+            experimental::ostringstream<32> out;
+            int value = 2;
+
+            out << "hi" << value++ << 'u';
+
+            auto& s = out.rdbuf()->str();
+
+            // NOTE: Works here but in ASF/Atmel land the 'value' gets
+            // treated as a character
+            REQUIRE(s == "hi2u");
+        }
     }
     SECTION("layer2")
     {

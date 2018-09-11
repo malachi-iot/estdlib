@@ -310,8 +310,9 @@ inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStream
 {
     // uses specialized call to bypass sentry so that we don't needlessly check
     // unitbuf and potentially double-flush
-    return os.put(os.widen('\n'), true);
+    os.put(os.widen('\n'), true);
     os.flush();
+    return os;
 }
 
 

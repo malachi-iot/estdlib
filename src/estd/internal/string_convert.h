@@ -58,7 +58,7 @@ template<> inline unsigned short fromString(const char* input)
     return (unsigned short) strtoul(input, NULL, 10);
 }
 
-// EXCLUDING null termination
+// EXCLUDING null termination but room for a - sign
 // a value of 0 indicates type not supported
 template<class T> CONSTEXPR uint8_t maxStringLength();
 
@@ -69,6 +69,8 @@ template<> inline CONSTEXPR uint8_t maxStringLength<uint16_t>() { return 5; }
 template<> inline CONSTEXPR uint8_t maxStringLength<int16_t>() { return 6; }
 template<> inline CONSTEXPR uint8_t maxStringLength<uint32_t>() { return 10; }
 template<> inline CONSTEXPR uint8_t maxStringLength<int32_t>() { return 11;}
+template<> inline CONSTEXPR uint8_t maxStringLength<uint64_t>() { return 21;}
+template<> inline CONSTEXPR uint8_t maxStringLength<int64_t>() { return 20;}
 template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
 template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
 
