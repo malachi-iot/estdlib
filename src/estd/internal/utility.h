@@ -5,6 +5,7 @@
 namespace estd { namespace internal {
 
 // https://stackoverflow.com/questions/42175294/how-get-the-class-object-type-from-pointer-to-method
+// TODO: Fuse with functional's invoke_result
 template<class T>
 struct MethodInfo;
 
@@ -19,6 +20,14 @@ struct MethodInfo<R(C::*)(A...)> //method pointer
 
 template<class C, class R, class... A>
 struct MethodInfo<R(C::*)(A...) const> : MethodInfo<R(C::*)(A...)> {}; //const method pointer
+#else
+template<class C, class R, class P1>
+struct MethodInfo<R(C::*)(P1)> //method pointer
+{
+    typedef C ClassType;
+    typedef R ReturnType;
+    //typedef estd::tuple<A...> ArgsTuple;
+};
 #endif
 
 
@@ -62,7 +71,9 @@ struct has_member_base
 
 } }
 
-// TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL
+// MethodInfo usage is to resolve base classes
+// don't know at this time how to do this without using decltype
+#ifdef FEATURE_CPP_DECLTYPE
 #define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : estd::internal::has_member_base \
 { \
@@ -76,5 +87,22 @@ template <class T> struct has_##method_name##_method : estd::internal::has_membe
 \
     template <typename> static CONSTEXPR no& test(...) { return no_value; } \
 \
+    static CONSTEXPR bool value = sizeof(test<T>(nullptr)) == sizeof(yes); \
+};
+#else
+#define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
+template <class T> struct has_##method_name##_method : estd::internal::has_member_base \
+{ \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
+        C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
+    { return yes_value; }  \
+\
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
+        C::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
+    { return yes_value; }  \
+\
+    template <typename> static CONSTEXPR no& test(...) { return no_value; } \
+\
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
 };
+#endif

@@ -44,18 +44,7 @@ template <class T> struct hasSerialize : has_member_base
 #endif
 
 
-#define ESTD_HAS_METHOD_EXPERIMENTAL(ret_type, method_name) \
-template <class T> struct has_##method_name##_method : has_member_base \
-{ \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(), &C::method_name>* /*unused*/) \
-    { return yes_value; }  \
-\
-    template <typename> static CONSTEXPR no& test(...) { return no_value; } \
-\
-    static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
-};
-
-ESTD_HAS_METHOD_EXPERIMENTAL(void, destroy)
+ESTD_FN_HAS_METHOD(void, destroy,)
 
 
 template <class T> struct has_construct_method : has_member_base

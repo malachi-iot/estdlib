@@ -22,7 +22,7 @@ struct test_class_2 : test_class_1
 template <class TRetVal = void>
 struct test_class_3 : test_class_2
 {
-    TRetVal test_fn3() {}
+    TRetVal test_fn3() const {}
 };
 
 struct test_class_4 : test_class_3<>
