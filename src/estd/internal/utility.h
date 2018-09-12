@@ -37,7 +37,7 @@ struct has_member_base
 
 // TODO: Replace regular ESTD_HAS_METHOD_EXPERIMENTAL
 #define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
-template <class T> struct has_##method_name##_method : has_member_base \
+template <class T> struct has_##method_name##_method : estd::internal::has_member_base \
 { \
     template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
     { return yes_value; }  \
