@@ -4,6 +4,25 @@
 
 namespace estd { namespace internal {
 
+// https://stackoverflow.com/questions/42175294/how-get-the-class-object-type-from-pointer-to-method
+template<class T>
+struct MethodInfo;
+
+#ifdef FEATURE_CPP_VARIADIC
+template<class C, class R, class... A>
+struct MethodInfo<R(C::*)(A...)> //method pointer
+{
+    typedef C ClassType;
+    typedef R ReturnType;
+    //typedef estd::tuple<A...> ArgsTuple;
+};
+
+template<class C, class R, class... A>
+struct MethodInfo<R(C::*)(A...) const> : MethodInfo<R(C::*)(A...)> {}; //const method pointer
+#endif
+
+
+
 struct has_member_base
 {
     // For the compile time comparison.
@@ -31,6 +50,14 @@ struct has_member_base
     // reallyHas<std::string (C::*)(), &C::serialize> should be substituted by
     // reallyHas<std::string (C::*)(), std::string (C::*)() &C::serialize> and work!
     template <typename U, U u> struct reallyHas;
+
+#if defined(FEATURE_CPP_DECLTYPE) && defined(FEATURE_CPP_ALIASTEMPLATE)
+    //typedef estd::internal::MethodInfo<decltype(&T::method_name)> method_info; \
+    //\
+    //template <typename F>
+    //typedef
+#endif
+
 };
 
 } }
@@ -39,10 +66,12 @@ struct has_member_base
 #define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : estd::internal::has_member_base \
 { \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
+        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
     { return yes_value; }  \
 \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
+        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
     { return yes_value; }  \
 \
     template <typename> static CONSTEXPR no& test(...) { return no_value; } \

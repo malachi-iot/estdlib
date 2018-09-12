@@ -32,22 +32,6 @@ struct test_class_4 : test_class_3<>
 
 using namespace estd::internal;
 
-// https://stackoverflow.com/questions/42175294/how-get-the-class-object-type-from-pointer-to-method
-template<class T>
-struct MethodInfo;
-
-#ifdef FEATURE_CPP_VARIADIC
-template<class C, class R, class... A>
-struct MethodInfo<R(C::*)(A...)> //method pointer
-{
-    typedef C ClassType;
-    typedef R ReturnType;
-    typedef std::tuple<A...> ArgsTuple;
-};
-
-template<class C, class R, class... A>
-struct MethodInfo<R(C::*)(A...) const> : MethodInfo<R(C::*)(A...)> {}; //const method pointer
-#endif
 
 template <typename U, U u> struct reallyHas2;
 
@@ -63,6 +47,7 @@ TEST_CASE("utility")
         auto f = &test_class_2::test_fn1;
 
         typedef MethodInfo<decltype(f)> mi2;
+        typedef MethodInfo<decltype(&test_class_2::test_fn1)> mi3;
 
         typedef mi2::ClassType class_type;
 
@@ -85,7 +70,7 @@ TEST_CASE("utility")
     }
     SECTION("class 2")
     {
-        //REQUIRE(has_test_fn1_method<test_class_2>::value);
+        REQUIRE(has_test_fn1_method<test_class_2>::value);
 
         test_class_1 tc1;
         test_class_2 tc2;
@@ -95,9 +80,6 @@ TEST_CASE("utility")
 
         REQUIRE(has_test_fn2_method<test_class_2>::value);
     }
-    /*
-     * These are all failing, indicating that ESTD_FN_HAS_METHOD isn't walking
-     * up hierarchy chain
     SECTION("class 3")
     {
         REQUIRE(has_test_fn1_method<test_class_3<> >::value);
@@ -110,5 +92,5 @@ TEST_CASE("utility")
         REQUIRE(has_test_fn2_method<test_class_4>::value);
         REQUIRE(has_test_fn3_method<test_class_4>::value);
         REQUIRE(has_test_fn4_method<test_class_4>::value);
-    } */
+    }
 }
