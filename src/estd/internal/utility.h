@@ -42,6 +42,9 @@ template <class T> struct has_##method_name##_method : estd::internal::has_membe
     template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
     { return yes_value; }  \
 \
+    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type (C::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
+    { return yes_value; }  \
+\
     template <typename> static CONSTEXPR no& test(...) { return no_value; } \
 \
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes); \
