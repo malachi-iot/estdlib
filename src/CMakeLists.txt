@@ -15,6 +15,7 @@ set(SOURCE_FILES
 
         estd/exp/observer.h
         estd/exp/tmr.h
+        estd/exp/tuple.h
 
         estd/forward_list.h
         estd/functional.h

@@ -15,6 +15,9 @@ int do_something(const char* msg)
 
 using namespace estd;
 
+// temporarily switching this on or off here as I build out experimental pre C++03 tuple
+#ifdef FEATURE_CPP_VARIADIC
+
 
 template <class Tuple, size_t... Is>
 constexpr auto take_front_impl(const Tuple& t,
@@ -135,3 +138,5 @@ TEST_CASE("functional")
         REQUIRE(got_something == "hello");
     }
 }
+
+#endif

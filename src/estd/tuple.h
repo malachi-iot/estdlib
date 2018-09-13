@@ -5,9 +5,9 @@
 #include "utility.h"
 #include "type_traits.h"
 
+#ifdef FEATURE_CPP_VARIADIC
 namespace estd {
 
-#ifdef FEATURE_CPP_VARIADIC
 template<class... TArgs>
 class tuple;
 
@@ -215,8 +215,8 @@ inline auto apply(F2&& f, Tuple&& t) ->
 }
 
 
-
-
-#endif
-
 }
+
+#else
+#include "exp/tuple.h"
+#endif

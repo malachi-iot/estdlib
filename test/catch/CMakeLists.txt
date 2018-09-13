@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     chrono-test.cpp
     experimental-test.cpp
     functional-test.cpp
+    ios-test.cpp
     list-test.cpp
     map-test.cpp
     memory-test.cpp
@@ -27,8 +28,9 @@ add_executable(${PROJECT_NAME} "main.cpp"
     string-test.cpp
     test-data.h
     type-traits-test.cpp
+    tuple-test.cpp
     vector-test.cpp
     priority-queue-test.cpp
-        ios-test.cpp utility-test.cpp)
+    utility-test.cpp)
 
 target_link_libraries(${PROJECT_NAME} estd_lib)
