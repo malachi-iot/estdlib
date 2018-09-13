@@ -61,8 +61,7 @@ struct has_member_base
     template <typename U, U u> struct reallyHas;
 
 #if defined(FEATURE_CPP_DECLTYPE) && defined(FEATURE_CPP_ALIASTEMPLATE)
-    //typedef estd::internal::MethodInfo<decltype(&T::method_name)> method_info; \
-    //\
+    //typedef estd::internal::MethodInfo<decltype(&T::method_name)> method_info;
     //template <typename F>
     //typedef
 #endif
