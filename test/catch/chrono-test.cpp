@@ -24,7 +24,11 @@ TEST_CASE("chrono tests")
     SECTION("default time_point")
     {
         fake_clock::time_point default_time_point;
+        fake_clock::duration epoch = default_time_point.time_since_epoch();
 
+        REQUIRE(epoch.count() == 0);
+        default_time_point += fake_clock::duration(100);
+        REQUIRE(default_time_point.time_since_epoch().count() == epoch.count() + 100);
     }
     SECTION("basic 1 second test")
     {

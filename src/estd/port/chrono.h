@@ -104,6 +104,25 @@ public:
         return converted;
     }
 #endif
+
+    duration& operator+=(const duration& d)
+    {
+        ticks += d.ticks;
+        return *this;
+    }
+
+
+    duration& operator-=(const duration& d)
+    {
+        ticks -= d.ticks;
+        return *this;
+    }
+
+    duration& operator*=(const rep& r)
+    {
+        ticks *= r;
+        return *this;
+    }
 };
 
 template <class ToDuration, class Rep, class Period>
@@ -200,10 +219,14 @@ public:
     // less is more, so swing vote goes to doing nothing here.  This turns out to be helpful,
     // now one can leave a time_point as a global variable without worring about startup-time
     // init issues
+    // NOTE: considering above, I am interpreting 'value of Clock's epoch' to generally
+    // mean 0 i.e. the starting point from which the clock begins - unix epoch is around 1970,
+    // and the seconds count up from there so 0 = 1970.  The inspecific nature of things
+    // implies there's a way to reach into Clock itself and grab this epoch
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
 #endif
-    time_point() {}
+    time_point() : m_time_since_epoch(0) {}
 
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
@@ -217,6 +240,20 @@ public:
     {}
 
     Duration time_since_epoch() const { return m_time_since_epoch; }
+
+
+    //constexpr
+    time_point& operator+=( const duration& d )
+    {
+        m_time_since_epoch += d;
+        return *this;
+    }
+
+    time_point& operator-=( const duration& d )
+    {
+        m_time_since_epoch -= d;
+        return *this;
+    }
 };
 
 
@@ -224,6 +261,7 @@ template< class C, class D1, class D2 >
 CONSTEXPR typename estd::common_type<D1,D2>::type
     operator-( const time_point<C,D1>& pt_lhs,
                const time_point<C,D2>& pt_rhs );
+
 
 template< class Clock, class Dur1, class Dur2 >
 CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
