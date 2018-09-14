@@ -5,6 +5,7 @@
 #include "estd/exp/tmr.h"
 #include "mem.h"
 
+#ifdef UNUSED
 // https://stackoverflow.com/questions/621616/c-what-is-the-size-of-an-object-of-an-empty-class
 // non-standard, but seemingly reliable way to ensure 0-length empty
 // struct
@@ -12,6 +13,7 @@ struct empty
 {
     char NO_DATA[0];
 };
+#endif
 
 using namespace estd;
 
@@ -56,5 +58,10 @@ TEST_CASE("memory.h tests")
             REQUIRE(test.max_size() == 256);
             test.allocate(15);
         }
+    }
+    SECTION("shared_ptr")
+    {
+        int val;
+        experimental::shared_ptr<int> sp(&val);
     }
 }
