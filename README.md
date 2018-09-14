@@ -103,7 +103,7 @@ mutable_buffer code
 
 ## Chrono
 
-Many primitives for basic time handling and comparison are brought in mirroring `std::chrono` namespace and for bonus fun there's a minimal `steady_clock` implementation for FreeRTOS and Atmel Start Framework
+Many primitives for basic time handling and comparison are brought in mirroring `std::chrono` namespace and for bonus fun there's a minimal `steady_clock` implementation for FreeRTOS
 
 ## Tuples
 
