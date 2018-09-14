@@ -8,6 +8,7 @@
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
 // http://en.cppreference.com/w/cpp/experimental
 #if __cplusplus >= 201103L
+#define FEATURE_CPP_AUTO
 #define FEATURE_CPP_ALIASTEMPLATE
 #define FEATURE_CPP_CONSTEXPR
 #define FEATURE_CPP_DECLTYPE
@@ -23,15 +24,13 @@
 #define FEATURE_CPP_ENUM_CLASS
 #define FEATURE_CPP_INLINE_STATIC   // whether static variables can be initialized inline
 #define FEATURE_CPP_CHAR16_T
+#define FEATURE_CPP_NULLPTR
+#define FEATURE_CPP_OVERRIDE
 
 #if defined(__STDC_LIB_EXT1__)
 // see http://en.cppreference.com/w/c/string/byte/strncpy
 #define FEATURE_CPP_STRNCPY_S
 #endif
-
-#define OVERRIDE override
-#define CONSTEXPR constexpr
-#define NULLPTR nullptr
 
 // C++14 onward features go here
 #if __cplusplus >= 201402L
@@ -51,9 +50,64 @@
 #endif
 
 #else
+// GCC had early support for many c++11 features
+// https://gcc.gnu.org/projects/cxx-status.html
+#if __cpp_variadic_templates >= 200704
+#define FEATURE_CPP_VARIADIC
+#endif
+
+#if __cpp_decltype >= 200707
+#define FEATURE_CPP_DECLTYPE
+#endif
+
+#if __cpp_alias_templates >= 200704
+#define FEATURE_CPP_ALIASTEMPLATE
+#endif
+
+#if __cpp_constexpr >= 200704
+#define FEATURE_CPP_CONSTEXPR
+#endif
+
+#if __cpp_static_assert >= 200410
+#define FEATURE_CPP_STATIC_ASSERT
+#endif
+
+// for old c++0x mode, which was in affect for quite some time before c++11
+// assumes GCC 4.3 or higher
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+
+#  include <features.h>
+#  if __GNUC_PREREQ(4,6)
+#define FEATURE_CPP_OVERRIDE
+#  endif
+#  if __GNUC_PREREQ(4,6)
+#define FEATURE_CPP_NULLPTR
+#  endif
+#  if __GNUC_PREREQ(4,4)
+#define FEATURE_CPP_ENUM_CLASS
+#define FEATURE_CPP_AUTO
+#  endif
+
+#endif
+
+#endif
+
+#ifdef FEATURE_CPP_OVERRIDE
+#define OVERRIDE override
+#else
 #define OVERRIDE
-#define CONSTEXPR const
+#endif
+
+#ifdef FEATURE_CPP_NULLPTR
+#define NULLPTR nullptr
+#else
 #define NULLPTR NULL
+#endif
+
+#ifdef FEATURE_CPP_CONSTEXPR
+#define CONSTEXPR constexpr
+#else
+#define CONSTEXPR const
 #endif
 
 // TODO: Identify a better way to identify presence of C++ iostreams
