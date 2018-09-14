@@ -12,6 +12,8 @@ typedef estd::ratio_divide<ratio1, ratio2> divided;
 
 void test();
 void test2();
+void test_chrono();
+void test_tuple();
 
 int main()
 {
@@ -22,6 +24,10 @@ int main()
 
     test();
     test2();
+#if defined(FEATURE_CPP_VARIADIC)
+    test_chrono();
+    test_tuple();
+#endif
 
     return 0;
 }

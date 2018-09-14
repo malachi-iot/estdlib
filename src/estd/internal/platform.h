@@ -49,7 +49,10 @@
 #define FEATURE_CPP_INLINE_VARIABLES    // whether freestanding variables can be declared inline
 #endif
 
-#else
+#elif defined(__GXX_EXPERIMENTAL_CXX0X__)
+// for old c++0x mode, which was in affect for quite some time before c++11
+// assumes GCC 4.3 or higher
+
 // GCC had early support for many c++11 features
 // https://gcc.gnu.org/projects/cxx-status.html
 #if __cpp_variadic_templates >= 200704
@@ -72,10 +75,6 @@
 #define FEATURE_CPP_STATIC_ASSERT
 #endif
 
-// for old c++0x mode, which was in affect for quite some time before c++11
-// assumes GCC 4.3 or higher
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-
 #  include <features.h>
 #  if __GNUC_PREREQ(4,6)
 #define FEATURE_CPP_OVERRIDE
@@ -90,7 +89,6 @@
 
 #endif
 
-#endif
 
 #ifdef FEATURE_CPP_OVERRIDE
 #define OVERRIDE override
