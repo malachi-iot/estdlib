@@ -52,9 +52,11 @@
 #elif defined(__GXX_EXPERIMENTAL_CXX0X__)
 // for old c++0x mode, which was in affect for quite some time before c++11
 // assumes GCC 4.3 or higher
-
 // GCC had early support for many c++11 features
 // https://gcc.gnu.org/projects/cxx-status.html
+
+#define FEATURE_CPP_DEFAULT_TARGS
+
 #if __cpp_variadic_templates >= 200704
 #define FEATURE_CPP_VARIADIC
 #endif
@@ -76,15 +78,18 @@
 #endif
 
 #  include <features.h>
-#  if __GNUC_PREREQ(4,6)
+#  if __GNUC_PREREQ(4,7)
 #define FEATURE_CPP_OVERRIDE
 #  endif
 #  if __GNUC_PREREQ(4,6)
 #define FEATURE_CPP_NULLPTR
+#define FEATURE_CPP_MOVESEMANTIC
 #  endif
 #  if __GNUC_PREREQ(4,4)
 #define FEATURE_CPP_ENUM_CLASS
 #define FEATURE_CPP_AUTO
+#define FEATURE_CPP_DELETE_CTOR
+#define FEATURE_CPP_DEFAULT_FUNCDEF
 #  endif
 
 #endif
