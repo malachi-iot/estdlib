@@ -26,6 +26,19 @@ indicator of dynamic memory dependency
 
 Many embedded libraries eschew dynamic allocation (ish) behaviors. estdlib takes a slightly different approach.  Static-only allocations *are fully supported and encouraged* but it isn't your only option.  See wiki for more detail
 
+## Compiler Support
+
+We try to enable std-like features sooner than the actual spec, when possible.
+For example a fair number of type_traits are available even if you're in c++98 mode
+
+## Platform Support
+
+There is minimal platform abstraction.  It isn't this library's function but
+sometimes (like during chrono) it's convenient to do it and have it in estdlib
+
+Also since I use Espressif chips a lot, there's some version-query helpers for
+them
+
 # std-like library implementations
 
 ## Allocators
@@ -82,6 +95,20 @@ Vector is implemented quite similarly to standard library, but utilizes extra fe
 ## Maps
 
 Planned
+
+## Span
+
+Buffer helpers, and also bringing some extra boost-inspired const_buffer and
+mutable_buffer code
+
+## Chrono
+
+Many primitives for basic time handling and comparison are brought in mirroring `std::chrono` namespace and for bonus fun there's a minimal `steady_clock` implementation for FreeRTOS and Atmel Start Framework
+
+## Tuples
+
+Much of the same functionality as you would expect from `std::tuples`.  Mainly
+just here in case std isn't available
 
 ## Strings
 
