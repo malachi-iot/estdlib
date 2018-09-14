@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../internal/platform.h"
+
 namespace estd {
 
 namespace experimental {

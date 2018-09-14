@@ -20,7 +20,6 @@ protected:
 
     node_handle_t current;
 
-
     //typedef typename traits_t::node_allocator_t node_alloc_t;
     typedef typename traits_t::node_type node_type;
     typedef node_type* node_pointer;
@@ -107,6 +106,11 @@ namespace internal { namespace list {
 template <class TValue, class TNodeTraits, class TBase = InputIterator<TValue, TNodeTraits> >
 struct ForwardIterator : public TBase
 {
+    // special mode for iterator representing before beginning.  we use NULL (invalid())
+    // to designate end, so we need this to disambiguate
+    // consider this experimental and unfortunately it fattens up the iterator as well
+    bool before_beginning;
+
     typedef TNodeTraits traits_t;
     typedef TBase base_t;
     typedef typename base_t::node_type   node_type;
@@ -123,7 +127,8 @@ struct ForwardIterator : public TBase
     } */
 
     ForwardIterator(node_handle_t node, const traits_t& t) :
-            base_t(node, t)
+            base_t(node, t),
+            before_beginning(false)
     {
     }
 
@@ -141,6 +146,11 @@ struct ForwardIterator : public TBase
             this->unlock();
         }
 #endif
+        if(before_beginning)
+        {
+            before_beginning = false;
+            return *this;
+        }
 
         node_type& c = base_t::lock_internal();
 
@@ -175,6 +185,19 @@ struct ForwardIterator : public TBase
 
         return temp += summand;
     }
+
+    bool operator==(const ForwardIterator& compare_to) const
+    {
+        return before_beginning == compare_to.before_beginning &&
+                base_t::current == compare_to.current;
+    }
+
+    bool operator!=(const ForwardIterator& compare_to) const
+    {
+        return before_beginning != compare_to.before_beginning ||
+                base_t::current != compare_to.current;
+    }
+
 };
 
 
