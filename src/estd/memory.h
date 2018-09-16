@@ -57,6 +57,8 @@ struct deleter_base
 };
 
 
+// shared_ptr itself sort of bypasses RIAA pattern, but this underlying control
+// structure doesn't have to
 template <class T>
 struct shared_ptr_control_block2_base :
         deleter_base
@@ -70,14 +72,9 @@ struct shared_ptr_control_block2_base :
 
     bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
 
-    shared_ptr_control_block2_base()
-    {
-        shared_count = 0;
-        weak_count = 0;
-    }
-
     shared_ptr_control_block2_base(T* shared) :
-        shared(shared)
+        shared(shared),
+        is_active(true)
     {
         shared_count = 1;
         weak_count = 0;
@@ -131,7 +128,7 @@ struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 // obviously we don't want to do that, so experimenting with possibilities
 namespace experimental {
 
-template <class T, class TDeleter, class TBase>
+template <class T, class TBase>
 class shared_ptr2_base : public TBase
 {
     // not using this yet until I better grasp the use cases for the stored ptr feature
@@ -149,11 +146,6 @@ protected:
 
     const control_type& control() const { return base_type::value(); }
 
-    count_type use_count() const
-    {
-        return control().shared_count;
-    }
-
     // run this only if we're actually connected to
     // a managed object
     void eval_delete()
@@ -164,14 +156,18 @@ protected:
         }
     }
 
-    // internal one, doesn't decouple *this
+public:
+    count_type use_count() const
+    {
+        return base_type::is_active() ? control().shared_count : 0;
+    }
+
     void reset()
     {
         eval_delete();
-        //control().shared_count--;
+        base_type::deactivate();
     }
 
-public:
     typedef typename estd::remove_extent<T>::type element_type;
 
     element_type* get() const noexcept { return stored; }
@@ -192,9 +188,14 @@ public:
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
     // shared_ptr
     shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
-        base_type(&temp)
+        base_type(temp)
     {
         temp.shared_count++;
+    }
+
+    ~shared_ptr2_base()
+    {
+        if(base_type::is_active()) eval_delete();
     }
 
     T* operator ->() const noexcept { return get(); }
@@ -202,79 +203,46 @@ public:
     T& operator *() const noexcept { return *get(); }
 };
 
-template <class T>
-class shared_ptr2 : public shared_ptr2_base<T, void,
-        instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> > >
+}
+
+namespace layer1 {
+
+template <class T, class TDeleter>
+struct shared_ptr_base :
+        experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
 {
-    typedef shared_ptr2_base<T, void,
-        instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> > > base_type;
+    typedef experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > base_type;
 
-protected:
-    bool is_active() const { return this->value_ptr() != NULLPTR; }
-
-public:
-    typedef typename base_type::count_type count_type;
-
-    count_type use_count() const
-    {
-        return is_active() ? base_type::use_count() : 0;
-    }
-
-    void reset()
-    {
-        base_type::reset();
-        this->value_ptr(NULLPTR);
-    }
-
-    template <class TDeleter>
-    shared_ptr2(instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >& temp) :
-        base_type(temp.value())
+    template <class TDeleter2>
+    shared_ptr_base(T* managed, TDeleter2 d) :
+        base_type(managed, d)
     {}
 
-    //shared_ptr2(estd::internal::shared_ptr_control_block2_base<T>& temp) : base_type(temp) {}
-
-    explicit shared_ptr2(shared_ptr2& copy_from) : base_type(copy_from.value()) {}
-
-    ~shared_ptr2()
-    {
-        if(is_active()) base_type::eval_delete();
-    }
-};
-
-template <class T, class TDeleter = void>
-class shared_ptr2_master : public shared_ptr2_base<T, TDeleter,
-        instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > >
-{
-    typedef shared_ptr2_base<T, TDeleter,
-        instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > > base_type;
+    shared_ptr_base(T* managed) : base_type(managed)
+    {}
 
 protected:
-    bool is_active() const { return this->control().is_active; }
+    bool is_active() const { return this->value().is_active; }
+    void deactivate() { this->value().is_active = false; }
+};
+
+
+template <class T, class TDeleter = void>
+class shared_ptr : public experimental::shared_ptr2_base<T,
+        shared_ptr_base<T, TDeleter> >
+{
+    typedef experimental::shared_ptr2_base<T,
+        shared_ptr_base<T, TDeleter> > base_type;
 
 public:
-    typedef typename base_type::count_type count_type;
-
-    count_type use_count() const
+    shared_ptr(T* managed) : base_type(managed)
     {
-        return is_active() ? base_type::use_count() : 0;
-    }
-
-    void reset()
-    {
-        base_type::reset();
-        this->control().is_active = false;
-    }
-
-    shared_ptr2_master(T* managed) : base_type(managed)
-    {
-        this->control().is_active = true;
     }
 
     template <class TDeleter2>
-    shared_ptr2_master(T* managed, TDeleter2 d) :
+    shared_ptr(T* managed, TDeleter2 d) :
         base_type(managed, d)
     {
-        this->control().is_active = true;
     }
 
     /*
@@ -284,12 +252,55 @@ public:
     {
         return shared_ptr2<T>(this->control());
     } */
+};
 
-    ~shared_ptr2_master()
+
+}
+
+namespace layer2 {
+
+
+template <class T>
+struct shared_ptr_base :
+        experimental::instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> >
+{
+    typedef experimental::instance_from_pointer_provider<
+        estd::internal::shared_ptr_control_block2_base<T> > base_type;
+
+protected:
+    bool is_active() const { return this->value_ptr() != NULLPTR; }
+    void deactivate() { this->value_ptr(NULLPTR); }
+
+    shared_ptr_base(estd::internal::shared_ptr_control_block2_base<T>& assign_from) :
+        base_type(&assign_from)
     {
-        if(this->control().is_active) base_type::eval_delete();
+
     }
 };
+
+
+template <class T>
+class shared_ptr : public experimental::shared_ptr2_base<T,
+        shared_ptr_base<T> >
+{
+    typedef experimental::shared_ptr2_base<T, shared_ptr_base<T> > base_type;
+
+public:
+    // for when copying/referencing a master provider
+    template <class TDeleter>
+    shared_ptr(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >& temp) :
+        base_type(temp.value())
+    {}
+
+    //shared_ptr2(estd::internal::shared_ptr_control_block2_base<T>& temp) : base_type(temp) {}
+
+    explicit shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value()) {}
+};
+
+
+}
+
+namespace experimental {
 
 // TODO: use a memory pool to allocate a shared_ptr_control_block
 template <class T, class TDeleter = void>

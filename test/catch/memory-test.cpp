@@ -75,11 +75,11 @@ TEST_CASE("memory.h tests")
                 auto f = [](int*) {};
                 int val = 5;
 
-                experimental::shared_ptr2_master<int, decltype(f)> sp(&val, f);
+                layer1::shared_ptr<int, decltype(f)> sp(&val, f);
                 REQUIRE(sp.use_count() == 1);
-                experimental::shared_ptr2<int> sp2(sp);
+                layer2::shared_ptr<int> sp2(sp);
                 REQUIRE(sp.use_count() == 2);
-                experimental::shared_ptr2<int> sp3(sp2);
+                layer2::shared_ptr<int> sp3(sp2);
                 REQUIRE(sp.use_count() == 3);
 
                 sp.reset();
@@ -91,7 +91,7 @@ TEST_CASE("memory.h tests")
             SECTION("2")
             {
                 test::Dummy dummy;
-                experimental::shared_ptr2_master<test::Dummy> sp(&dummy);
+                layer1::shared_ptr<test::Dummy> sp(&dummy);
 
                 sp->val1 = 5;
 
