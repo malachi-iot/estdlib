@@ -69,8 +69,19 @@ TEST_CASE("memory.h tests")
         SECTION("shared_ptr2")
         {
             auto f = [](int*) {};
+            int val = 5;
 
-            experimental::shared_ptr2_base<int, decltype(f)> sp(f);
+            experimental::shared_ptr2_master<int, decltype(f)> sp(&val, f);
+            REQUIRE(sp.value().shared_count == 1);
+            experimental::shared_ptr2<int> sp2(sp);
+            REQUIRE(sp.value().shared_count == 2);
+            experimental::shared_ptr2<int> sp3(sp2);
+            REQUIRE(sp.value().shared_count == 3);
+
+            sp.reset();
+            REQUIRE(sp.value().shared_count == 2);
+            sp2.reset();
+            REQUIRE(sp.value().shared_count == 1);
         }
     }
 }

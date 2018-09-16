@@ -51,7 +51,6 @@ struct shared_ptr_control_block
 };
 
 
-template <class T>
 struct deleter_base
 {
     virtual void Deleter() {}
@@ -59,12 +58,27 @@ struct deleter_base
 
 
 template <class T>
-struct shared_ptr_control_block2_base
+struct shared_ptr_control_block2_base :
+        deleter_base
 {
     T* shared;
 
     uint16_t shared_count;
     uint16_t weak_count;
+    bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
+
+    shared_ptr_control_block2_base()
+    {
+        shared_count = 0;
+        weak_count = 0;
+    }
+
+    shared_ptr_control_block2_base(T* shared) :
+        shared(shared)
+    {
+        shared_count = 1;
+        weak_count = 0;
+    }
 };
 
 
@@ -72,17 +86,21 @@ struct shared_ptr_control_block2_base
 // delete to be destructor and deallocator, as delete traditionally does
 template <class T, class TDeleter>
 struct shared_ptr_control_block2 :
-        shared_ptr_control_block2_base<T>,
-        deleter_base<T>
+        shared_ptr_control_block2_base<T>
 {
+    typedef shared_ptr_control_block2_base<T> base_type;
+
     TDeleter d;
 
-    virtual void Deleter() OVERRIDE
+    void Deleter() OVERRIDE
     {
         d(this->shared);
     }
 
-    shared_ptr_control_block2(TDeleter d) : d(d) {}
+    shared_ptr_control_block2(T* managed, TDeleter d) :
+        base_type(managed),
+        d(d)
+    {}
 };
 
 // memory for 'shared' has been allocated in a way which the memory itself
@@ -91,7 +109,7 @@ struct shared_ptr_control_block2 :
 template <class T>
 struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 {
-    void Deleter()
+    void Deleter() OVERRIDE
     {
         this->shared->~T();
     }
@@ -105,35 +123,143 @@ struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 // obviously we don't want to do that, so experimenting with possibilities
 namespace experimental {
 
-template <class T, class TDeleter>
-class shared_ptr2_base :
-        protected instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
+template <class T, class TDeleter, class TBase>
+class shared_ptr2_base : public TBase
 {
+    // not using this yet until I better grasp the use cases for the stored ptr feature
     T* stored;
 
-    typedef instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > base_type;
+    typedef TBase base_type;
 
-    typedef estd::internal::shared_ptr_control_block2<T, TDeleter> control_type;
+    //typedef estd::internal::shared_ptr_control_block2<T, TDeleter> control_type;
+    typedef typename base_type::value_type control_type;
 
+protected:
     control_type& control() { return base_type::value(); }
 
     const control_type& control() const { return base_type::value(); }
 
+    long use_count()
+    {
+        return control().shared_count;
+    }
+
+    // run this only if we're actually connected to
+    // a managed object
+    void eval_delete()
+    {
+        if(--control().shared_count == 0)
+        {
+            control().Deleter();
+        }
+    }
+
+    // internal one, doesn't decouple *this
+    void reset()
+    {
+        eval_delete();
+        //control().shared_count--;
+    }
+
 public:
     typedef typename estd::remove_extent<T>::type element_type;
 
-    shared_ptr2_base(TDeleter d) : base_type(d) {}
+    element_type* get() const noexcept { return stored; }
+
+    // TDeleter2 just because TDeleter sometimes is void in inheritance chain and
+    // that irritates the compiler
+    template <class TDeleter2>
+    shared_ptr2_base(T* managed, TDeleter2 d) :
+        base_type(managed, d),
+        stored(managed)
+    {}
+
+    // still-ugly version of copy-increase-ref-counter. used primarily by non-master
+    // shared_ptr
+    shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
+        base_type(&temp)
+    {
+        temp.shared_count++;
+    }
 };
 
 template <class T>
-class shared_ptr2_master
+class shared_ptr2 : public shared_ptr2_base<T, void,
+        instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> > >
 {
-    T* stored;
+    typedef shared_ptr2_base<T, void,
+        instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> > > base_type;
 
-    //typedef estd::internal::shared_ptr_control_block2<T> control_type;
+protected:
+    bool is_active() const { return this->value_ptr() != NULLPTR; }
 
 public:
-    typedef typename estd::remove_extent<T>::type element_type;
+    long use_count() const
+    {
+        return is_active() ? base_type::use_count() : 0;
+    }
+
+    void reset()
+    {
+        base_type::reset();
+        this->value_ptr(NULLPTR);
+    }
+
+    template <class TDeleter>
+    shared_ptr2(instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >& temp) :
+        base_type(temp.value())
+    {}
+
+    //shared_ptr2(estd::internal::shared_ptr_control_block2_base<T>& temp) : base_type(temp) {}
+
+    explicit shared_ptr2(shared_ptr2& copy_from) : base_type(copy_from.value()) {}
+
+    ~shared_ptr2()
+    {
+        if(is_active()) base_type::eval_delete();
+    }
+};
+
+template <class T, class TDeleter>
+class shared_ptr2_master : public shared_ptr2_base<T, TDeleter,
+        instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > >
+{
+    typedef shared_ptr2_base<T, TDeleter,
+        instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > > base_type;
+
+protected:
+    bool is_active() const { return this->control().is_active; }
+
+public:
+    long use_count() const
+    {
+        return is_active() ? base_type::use_count() : 0;
+    }
+
+    void reset()
+    {
+        base_type::reset();
+        this->control().is_active = false;
+    }
+
+    shared_ptr2_master(T* managed, TDeleter d) :
+        base_type(managed, d)
+    {
+        this->control().is_active = true;
+    }
+
+    /*
+    // FIX: This is turning out to be kind of bad because it seems a copy-constructor
+    // is attempted for shared_ptr2
+    operator shared_ptr2<T>()
+    {
+        return shared_ptr2<T>(this->control());
+    } */
+
+    ~shared_ptr2_master()
+    {
+        if(this->control().is_active) base_type::eval_delete();
+    }
 };
 
 // TODO: use a memory pool to allocate a shared_ptr_control_block
