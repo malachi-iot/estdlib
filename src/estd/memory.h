@@ -1,3 +1,6 @@
+/*
+ * @file
+ */
 #pragma once
 
 #include "internal/platform.h"
@@ -131,15 +134,13 @@ namespace experimental {
 template <class T, class TBase>
 class shared_ptr2_base : public TBase
 {
-    // not using this yet until I better grasp the use cases for the stored ptr feature
-    T* stored;
-
     typedef TBase base_type;
 
-    //typedef estd::internal::shared_ptr_control_block2<T, TDeleter> control_type;
     typedef typename base_type::value_type control_type;
 
 protected:
+    T* stored;
+
     typedef typename control_type::count_type count_type;
 
     control_type& control() { return base_type::value(); }
@@ -185,6 +186,8 @@ public:
         stored(managed)
     {}
 
+    shared_ptr2_base() {}
+
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
     // shared_ptr
     shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
@@ -207,6 +210,52 @@ public:
 
 namespace layer1 {
 
+template <class T, class TDeleter, std::ptrdiff_t size = sizeof(T)>
+struct shared_ptr_base :
+        experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
+{
+    typedef experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > base_type;
+
+    experimental::raw_instance_provider<T> _provided;
+
+    // FIX: clean up naming - getting 'value' collisions from multiple providers
+    T& provided() { return _provided.value(); }
+
+    template <class TDeleter2>
+    shared_ptr_base(TDeleter2 d) :
+        base_type(&provided(), d)
+    {}
+
+
+    shared_ptr_base() :
+        base_type(&provided())
+    {}
+
+protected:
+    bool is_active() const { return base_type::value().is_active; }
+    void deactivate() { base_type::value().is_active = false; }
+};
+
+
+///
+/// \brief Experimental
+///
+template <class T, class TDeleter = void, std::ptrdiff_t size = sizeof(T)>
+class shared_ptr : public experimental::shared_ptr2_base<T,
+        shared_ptr_base<T, TDeleter, size> >
+{
+    typedef experimental::shared_ptr2_base<T,
+        shared_ptr_base<T, TDeleter> > base_type;
+
+public:
+    shared_ptr() { this->stored = &(base_type::provided()); }
+};
+
+
+}
+
+namespace layer2 {
+
 template <class T, class TDeleter>
 struct shared_ptr_base :
         experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
@@ -227,6 +276,9 @@ protected:
 };
 
 
+///
+/// \brief Experimental
+///
 template <class T, class TDeleter = void>
 class shared_ptr : public experimental::shared_ptr2_base<T,
         shared_ptr_base<T, TDeleter> >
@@ -257,7 +309,7 @@ public:
 
 }
 
-namespace layer2 {
+namespace layer3 {
 
 
 template <class T>
@@ -279,6 +331,9 @@ protected:
 };
 
 
+///
+/// \brief Experimental
+///
 template <class T>
 class shared_ptr : public experimental::shared_ptr2_base<T,
         shared_ptr_base<T> >

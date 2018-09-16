@@ -70,16 +70,26 @@ TEST_CASE("memory.h tests")
         }
         SECTION("shared_ptr")
         {
-            SECTION("basic usage")
+            SECTION("layer1")
+            {
+                layer1::shared_ptr<test::Dummy> sp;
+
+                REQUIRE(sp.use_count() == 1);
+
+                sp->val1 = 10;
+
+                REQUIRE(sp.provided().val1 == 10);
+            }
+            SECTION("layer2 + 3: basic usage")
             {
                 auto f = [](int*) {};
                 int val = 5;
 
-                layer1::shared_ptr<int, decltype(f)> sp(&val, f);
+                layer2::shared_ptr<int, decltype(f)> sp(&val, f);
                 REQUIRE(sp.use_count() == 1);
-                layer2::shared_ptr<int> sp2(sp);
+                layer3::shared_ptr<int> sp2(sp);
                 REQUIRE(sp.use_count() == 2);
-                layer2::shared_ptr<int> sp3(sp2);
+                layer3::shared_ptr<int> sp3(sp2);
                 REQUIRE(sp.use_count() == 3);
 
                 sp.reset();
@@ -88,7 +98,7 @@ TEST_CASE("memory.h tests")
                 sp2.reset();
                 REQUIRE(sp.value().shared_count == 1);
             }
-            SECTION("using a more complex type")
+            SECTION("layer2: using a more complex type")
             {
                 // experimenting with ensuring alignment/casting is proper.  the casting
                 // is needed so that dummy's destructor is not called twice
@@ -96,7 +106,7 @@ TEST_CASE("memory.h tests")
                 test::Dummy* dummy = reinterpret_cast<test::Dummy*>(buffer);
                 new (dummy) test::Dummy();
 
-                layer1::shared_ptr<test::Dummy> sp(dummy);
+                layer2::shared_ptr<test::Dummy> sp(dummy);
 
                 sp->val1 = 5;
 
@@ -116,7 +126,7 @@ TEST_CASE("memory.h tests")
                     free(to_delete);
                 };
                 {
-                    layer1::shared_ptr<test::Dummy, deleter> sp(dummy, F);
+                    layer2::shared_ptr<test::Dummy, deleter> sp(dummy, F);
 
                     sp->val1 = 3;
 

@@ -105,6 +105,16 @@ struct instance_provider
 };
 
 
+// FIX: pretty sure std C++ has a thing akin to this
+template <class T, std::ptrdiff_t size = sizeof(T)>
+struct raw_instance_provider
+{
+    // NOTE: Watch out for alignment issues here
+    estd::byte buf[size];
+
+    T& value() { return *reinterpret_cast<T*>(buf); }
+};
+
 // tracks as a pointer, but presents as an inline instance/reference
 template <class T>
 struct instance_from_pointer_provider
