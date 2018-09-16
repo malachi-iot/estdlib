@@ -59,9 +59,18 @@ TEST_CASE("memory.h tests")
             test.allocate(15);
         }
     }
-    SECTION("shared_ptr")
+    SECTION("experimental")
     {
-        int val;
-        experimental::shared_ptr<int> sp(&val);
+        SECTION("shared_ptr")
+        {
+            int val;
+            experimental::shared_ptr<int> sp(&val);
+        }
+        SECTION("shared_ptr2")
+        {
+            auto f = [](int*) {};
+
+            experimental::shared_ptr2_base<int, decltype(f)> sp(f);
+        }
     }
 }

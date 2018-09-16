@@ -90,9 +90,32 @@ struct instance_provider
 
 //protected:
     instance_provider(const T& v) : _value(v) {}
+
 #ifdef FEATURE_CPP_MOVESEMANTIC
     instance_provider(T&& v) : _value(std::move(v)) {}
 #endif
+
+#ifdef FEATURE_CPP_VARIADIC
+    // basically an emplace type operation
+    template <class ...TArgs>
+    instance_provider(TArgs...args) :
+        _value(std::forward<TArgs>(args)...)
+    {}
+#endif
+};
+
+
+// tracks as a pointer, but presents as an inline instance/reference
+template <class T>
+struct instance_from_pointer_provider
+{
+    typedef typename estd::remove_reference<T>::type  value_type;
+
+    T* _value;
+
+    T& value() { return *_value; }
+
+    instance_from_pointer_provider(T* v) : _value(v) {}
 };
 
 
