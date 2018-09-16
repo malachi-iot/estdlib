@@ -63,8 +63,11 @@ struct shared_ptr_control_block2_base :
 {
     T* shared;
 
-    uint16_t shared_count;
-    uint16_t weak_count;
+    typedef uint16_t count_type;
+
+    count_type shared_count;
+    count_type weak_count;
+
     bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
 
     shared_ptr_control_block2_base()
@@ -109,10 +112,15 @@ struct shared_ptr_control_block2 :
 template <class T>
 struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 {
+    typedef shared_ptr_control_block2_base<T> base_type;
+
     void Deleter() OVERRIDE
     {
         this->shared->~T();
     }
+
+    shared_ptr_control_block2(T* managed) : base_type(managed)
+    {}
 };
 
 
@@ -135,11 +143,13 @@ class shared_ptr2_base : public TBase
     typedef typename base_type::value_type control_type;
 
 protected:
+    typedef typename control_type::count_type count_type;
+
     control_type& control() { return base_type::value(); }
 
     const control_type& control() const { return base_type::value(); }
 
-    long use_count()
+    count_type use_count() const
     {
         return control().shared_count;
     }
@@ -174,6 +184,11 @@ public:
         stored(managed)
     {}
 
+    shared_ptr2_base(T* managed) :
+        base_type(managed),
+        stored(managed)
+    {}
+
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
     // shared_ptr
     shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
@@ -181,6 +196,10 @@ public:
     {
         temp.shared_count++;
     }
+
+    T* operator ->() const noexcept { return get(); }
+
+    T& operator *() const noexcept { return *get(); }
 };
 
 template <class T>
@@ -194,7 +213,9 @@ protected:
     bool is_active() const { return this->value_ptr() != NULLPTR; }
 
 public:
-    long use_count() const
+    typedef typename base_type::count_type count_type;
+
+    count_type use_count() const
     {
         return is_active() ? base_type::use_count() : 0;
     }
@@ -220,7 +241,7 @@ public:
     }
 };
 
-template <class T, class TDeleter>
+template <class T, class TDeleter = void>
 class shared_ptr2_master : public shared_ptr2_base<T, TDeleter,
         instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > >
 {
@@ -231,7 +252,9 @@ protected:
     bool is_active() const { return this->control().is_active; }
 
 public:
-    long use_count() const
+    typedef typename base_type::count_type count_type;
+
+    count_type use_count() const
     {
         return is_active() ? base_type::use_count() : 0;
     }
@@ -242,7 +265,13 @@ public:
         this->control().is_active = false;
     }
 
-    shared_ptr2_master(T* managed, TDeleter d) :
+    shared_ptr2_master(T* managed) : base_type(managed)
+    {
+        this->control().is_active = true;
+    }
+
+    template <class TDeleter2>
+    shared_ptr2_master(T* managed, TDeleter2 d) :
         base_type(managed, d)
     {
         this->control().is_active = true;

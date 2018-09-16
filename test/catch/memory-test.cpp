@@ -3,7 +3,9 @@
 #include <estd/allocators/fixed.h>
 #include "estd/memory.h"
 #include "estd/exp/tmr.h"
+
 #include "mem.h"
+#include "test-data.h"
 
 #ifdef UNUSED
 // https://stackoverflow.com/questions/621616/c-what-is-the-size-of-an-object-of-an-empty-class
@@ -68,20 +70,34 @@ TEST_CASE("memory.h tests")
         }
         SECTION("shared_ptr2")
         {
-            auto f = [](int*) {};
-            int val = 5;
+            SECTION("1")
+            {
+                auto f = [](int*) {};
+                int val = 5;
 
-            experimental::shared_ptr2_master<int, decltype(f)> sp(&val, f);
-            REQUIRE(sp.value().shared_count == 1);
-            experimental::shared_ptr2<int> sp2(sp);
-            REQUIRE(sp.value().shared_count == 2);
-            experimental::shared_ptr2<int> sp3(sp2);
-            REQUIRE(sp.value().shared_count == 3);
+                experimental::shared_ptr2_master<int, decltype(f)> sp(&val, f);
+                REQUIRE(sp.use_count() == 1);
+                experimental::shared_ptr2<int> sp2(sp);
+                REQUIRE(sp.use_count() == 2);
+                experimental::shared_ptr2<int> sp3(sp2);
+                REQUIRE(sp.use_count() == 3);
 
-            sp.reset();
-            REQUIRE(sp.value().shared_count == 2);
-            sp2.reset();
-            REQUIRE(sp.value().shared_count == 1);
+                sp.reset();
+                // can't use use_count() here because it's 0 once we decouple
+                REQUIRE(sp.value().shared_count == 2);
+                sp2.reset();
+                REQUIRE(sp.value().shared_count == 1);
+            }
+            SECTION("2")
+            {
+                test::Dummy dummy;
+                experimental::shared_ptr2_master<test::Dummy> sp(&dummy);
+
+                sp->val1 = 5;
+
+                REQUIRE(sp.use_count() == 1);
+                REQUIRE(sp->val1 == 5);
+            }
         }
     }
 }
