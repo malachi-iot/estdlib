@@ -104,8 +104,8 @@ struct shared_ptr_control_block2 :
 };
 
 // memory for 'shared' has been allocated in a way which the memory itself
-// will be freed, but we still need to explicitly call destructor when the
-// ref count goes to 0
+// will be freed by a party outside shared_ptr, but we still need to explicitly
+// call destructor when the ref count goes to 0
 template <class T>
 struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 {

@@ -31,6 +31,10 @@ struct Dummy
 
     }
 
+    ~Dummy()
+    {
+    }
+
     // this partially undoes our explicit copy constructor
     Dummy& operator =(const Dummy& copy_from)
     {

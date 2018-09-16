@@ -63,14 +63,14 @@ TEST_CASE("memory.h tests")
     }
     SECTION("experimental")
     {
-        SECTION("shared_ptr")
+        SECTION("shared_ptr [old]")
         {
             int val;
             experimental::shared_ptr<int> sp(&val);
         }
-        SECTION("shared_ptr2")
+        SECTION("shared_ptr")
         {
-            SECTION("1")
+            SECTION("basic usage")
             {
                 auto f = [](int*) {};
                 int val = 5;
@@ -88,15 +88,41 @@ TEST_CASE("memory.h tests")
                 sp2.reset();
                 REQUIRE(sp.value().shared_count == 1);
             }
-            SECTION("2")
+            SECTION("using a more complex type")
             {
-                test::Dummy dummy;
-                layer1::shared_ptr<test::Dummy> sp(&dummy);
+                // experimenting with ensuring alignment/casting is proper.  the casting
+                // is needed so that dummy's destructor is not called twice
+                alignas(alignof(test::Dummy)) uint8_t buffer[sizeof(test::Dummy)];
+                test::Dummy* dummy = reinterpret_cast<test::Dummy*>(buffer);
+                new (dummy) test::Dummy();
+
+                layer1::shared_ptr<test::Dummy> sp(dummy);
 
                 sp->val1 = 5;
 
                 REQUIRE(sp.use_count() == 1);
                 REQUIRE(sp->val1 == 5);
+            }
+            SECTION("pre-c++11-style")
+            {
+                static bool deleter_ran = false;
+                typedef void (*deleter)(test::Dummy* to_destruct);
+                test::Dummy* dummy = reinterpret_cast<test::Dummy*>(malloc(sizeof(test::Dummy)));
+                deleter F = [](test::Dummy* to_delete)
+                {
+                    REQUIRE(to_delete->val1 == 3);
+                    deleter_ran = true;
+                    to_delete->~Dummy();
+                    free(to_delete);
+                };
+                {
+                    layer1::shared_ptr<test::Dummy, deleter> sp(dummy, F);
+
+                    sp->val1 = 3;
+
+                    REQUIRE(sp.use_count() == 1);
+                }
+                REQUIRE(deleter_ran);
             }
         }
     }
