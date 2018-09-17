@@ -109,8 +109,12 @@ struct instance_provider
 template <class T, std::ptrdiff_t size = sizeof(T)>
 struct raw_instance_provider
 {
+#ifdef BROKEN_FEATURE_CPP_ALIGN
+    typename estd::aligned_storage<size, alignof (T)>::type buf;
+#else
     // NOTE: Watch out for alignment issues here
     estd::byte buf[size];
+#endif
 
     T& value() { return *reinterpret_cast<T*>(buf); }
 };

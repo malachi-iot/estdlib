@@ -71,6 +71,7 @@ set(SOURCE_FILES
         estd/memory.h
         estd/mutex.h
 
+        estd/optional.h
         estd/ostream.h
 
         estd/policy/list.h

@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
 #include <estd/functional.h>
-
+#include <estd/optional.h>
 
 static const char* got_something = NULLPTR;
 
@@ -136,6 +136,25 @@ TEST_CASE("functional")
         REQUIRE(b() == -1);
 
         REQUIRE(got_something == "hello");
+    }
+    SECTION("optional")
+    {
+        SECTION("simple")
+        {
+            optional<int> val(5);
+
+            REQUIRE(val.has_value());
+        }
+        SECTION("simple 2")
+        {
+            optional<int> val;
+
+            REQUIRE(!val);
+
+            val = 5;
+
+            REQUIRE(val);
+        }
     }
 }
 
