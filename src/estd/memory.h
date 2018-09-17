@@ -12,6 +12,9 @@ template <class TPtr> struct pointer_traits;
 template <class TAllocator>
 struct allocator_traits;
 
+template <class T>
+class intrusive_forward_list;
+
 }
 
 #include "allocators/generic.h"
@@ -27,6 +30,13 @@ template <class T> struct pointer_traits<T*>
 {
     typedef std::ptrdiff_t difference_type;
 };
+
+
+///
+/// @brief Not ready for prime time - fiddling with forward_list dependencies
+///
+template <class T>
+class weak_ptr;
 
 
 namespace internal {
@@ -72,6 +82,10 @@ struct shared_ptr_control_block2_base :
 
     count_type shared_count;
     count_type weak_count;
+
+    // FIX: this needs forward_list.h but we can't include that since it itself
+    // includes memory.h
+    //intrusive_forward_list<weak_ptr<T> > weak_list;
 
     typedef T managed_type;
 
@@ -159,12 +173,27 @@ struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
 };
 
 
-
 }
+
+
+template <class T>
+class weak_ptr
+{
+    weak_ptr<T>* _next;
+
+    weak_ptr<T>* next() const { return _next; }
+    void next(weak_ptr<T>* assign) { _next = assign; }
+
+    internal::shared_ptr_control_block2_base<T>* control;
+
+public:
+};
+
 
 // std::shared_ptr sometimes leans on dynamic allocation for its control block
 // obviously we don't want to do that, so experimenting with possibilities
 namespace experimental {
+
 
 template <class T, class TBase>
 class shared_ptr2_base : public TBase

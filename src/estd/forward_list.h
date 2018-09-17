@@ -1,7 +1,10 @@
+/**
+ *  @file
+ */
 #pragma once
 
 #include "internal/platform.h"
-#include "memory.h"
+//#include "memory.h"
 #include "traits/list_node.h"
 #include "internal/list_node.h"
 #include "iterators/list.h"
@@ -15,7 +18,7 @@ namespace estd {
 
 // ugly one to try to get inline value working
 template <class TValue, class TNodeAllocator>
-class node_traits<experimental::ValueNode<TValue, experimental::forward_node_base>,
+struct node_traits<experimental::ValueNode<TValue, experimental::forward_node_base>,
         TNodeAllocator,
         nothing_allocator<TValue> > :
         public inlinevalue_node_traits_new_base<

@@ -3,6 +3,7 @@
 #include <estd/allocators/fixed.h>
 #include "estd/memory.h"
 #include "estd/exp/tmr.h"
+#include <estd/forward_list.h>
 
 #include "mem.h"
 #include "test-data.h"
