@@ -156,6 +156,29 @@ TEST_CASE("memory.h tests")
 
                 //layer1::shared_ptr<test::Dummy, deleter>(F, context);
             }
+            SECTION("pushing deleter harder")
+            {
+                void* testval;
+                int val = 0;
+                auto F = [&](test::Dummy* to_delete)
+                {
+                    to_delete->~Dummy();
+                    val++;
+                };
+                {
+                    layer1::shared_ptr<test::Dummy, decltype(F)> p(F);
+
+                    p.construct();
+
+                    int sz = sizeof(decltype (p)::control_type);
+
+                    sz = sizeof(F);
+
+                    REQUIRE(val == 0);
+                }
+
+                REQUIRE(val == 1);
+            }
         }
     }
 }

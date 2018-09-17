@@ -116,8 +116,8 @@ struct shared_ptr_control_block2 :
         d(this->shared);
     }
 
-    shared_ptr_control_block2(T* managed, TDeleter d) :
-        base_type(managed),
+    shared_ptr_control_block2(T* managed, TDeleter d, bool is_active = true) :
+        base_type(managed, is_active),
         d(d)
     {}
 };
@@ -200,9 +200,14 @@ class shared_ptr2_base : public TBase
 {
     typedef TBase base_type;
 
+#ifdef UNIT_TESTING
+public:
+#endif
     typedef typename base_type::value_type control_type;
 
 protected:
+    struct deleter_tag {};
+
     T* stored;
 
     typedef typename control_type::count_type count_type;
@@ -255,8 +260,13 @@ public:
     shared_ptr2_base() {}
 
 
+    template <class TDeleter2>
+    shared_ptr2_base(TDeleter2 d, deleter_tag) :
+        base_type(d)
+    {}
+
     template <class TDeleter2, class TContext>
-    shared_ptr2_base(TDeleter2 d, TContext& context) :
+    shared_ptr2_base(TDeleter2 d, TContext& context, deleter_tag) :
         base_type(d, context)
     {}
 
@@ -298,13 +308,13 @@ struct shared_ptr_base :
 
     template <class TDeleter2>
     shared_ptr_base(TDeleter2 d) :
-        base_type(&provided(), d)
+        base_type(&provided(), d, false)
     {}
 
 
     template <class TDeleter2, class TContext>
     shared_ptr_base(TDeleter2 d, TContext& context) :
-        base_type(&provided(), d, context)
+        base_type(&provided(), d, context, false)
     {}
 
     // layer1 is special case where we've already allocated the buffer
@@ -331,6 +341,7 @@ class shared_ptr : public experimental::shared_ptr2_base<T,
 {
     typedef experimental::shared_ptr2_base<T,
         shared_ptr_base<TControlBlock, size> > base_type;
+    typedef typename base_type::deleter_tag deleter_tag;
 
 public:
 #ifdef FEATURE_CPP_DELETE_CTOR
@@ -343,13 +354,13 @@ public:
 
     template <class TDeleter2>
     shared_ptr(TDeleter2 d) :
-        base_type(d)
+        base_type(d, deleter_tag{})
     {}
 
 
     template <class TDeleter2, class TContext>
     shared_ptr(TDeleter2 d, TContext& context) :
-        base_type(d, context)
+        base_type(d, context, deleter_tag{})
     {}
 
     // non-standard call to initialize raw T
