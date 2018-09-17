@@ -542,6 +542,15 @@ public:
         return *this;
     }
 
+    /*
+    template <class TControlBlock>
+    shared_ptr& operator=(layer1::shared_ptr_base<TControlBlock>& assign_from)
+    {
+        this->reset();
+        new (this) shared_ptr(assign_from);
+        return *this;
+    } */
+
     void swap(shared_ptr& r) noexcept
     {
         /*

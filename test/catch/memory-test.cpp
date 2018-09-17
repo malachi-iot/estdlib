@@ -199,6 +199,31 @@ TEST_CASE("memory.h tests")
                 REQUIRE(p2.use_count() == 2);
                 REQUIRE(p3.use_count() == 0);
             }
+            SECTION("layer3: assignment")
+            {
+                // these didn't seem to work in clang but do work in gcc
+                // but now I'm thinking it's an artifact of the shared_ptr
+                // massaging that memory_pool needs to do
+                layer1::shared_ptr<int> p;
+                int counter = 0;
+
+                auto F = [&](layer3::shared_ptr<int> p3)
+                {
+                    counter++;
+                    REQUIRE(p3.use_count() == 3);
+                };
+
+                p.construct(5);
+
+                layer3::shared_ptr<int> p2 = p;
+
+                REQUIRE(p.use_count() == 2);
+                REQUIRE(p2.use_count() == 2);
+
+                F(p);
+
+                REQUIRE(counter == 1);
+            }
         }
     }
 }
