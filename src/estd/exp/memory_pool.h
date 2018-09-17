@@ -62,12 +62,14 @@ class memory_pool_1
         node_type& lock(node_handle h)
         {
             return storage[h];
-            // FIX:
-            //return dummy_item;
         }
 
         void unlock(node_handle) {}
 
+        // node allocation is specifically taking the 'value' portion and allocating
+        // + associating just the node portion with it.  for intrusive lists, this
+        // is largely a noop - we merely resolve where the pointer lives and report
+        // its already-allocated handle from the storage area
         node_handle allocate(nv_ref_t n)
         {
             item* data = storage.data();
@@ -89,24 +91,26 @@ class memory_pool_1
         }
     };
 
-    item_node_traits traits;
+    // TODO: we can simplify & optimize this and have the traits live completely inside the
+    // list.  again clumsy because traits aren't typically thought of as stateful
+    //item_node_traits traits;
 
-    uint16_t count;
-
-    typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits&> list_type;
+    typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
     list_type free;
     //intrusive_forward_list<item> free;
 
 public:
-    memory_pool_1() : free(traits)
+    memory_pool_1()
     {
+        item_node_traits& t = free.get_traits();
+
         // prime the intrusive list
-        free.push_front(traits.storage[0]);
+        free.push_front(t.storage[0]);
 
         for(int i = 0; i < N - 1; i++)
-            traits.storage[i]._next = i + 1;
+            t.storage[i]._next = i + 1;
 
-        traits.storage[N - 1]._next = traits.eol();
+        t.storage[N - 1]._next = item_node_traits::eol();
     }
 
     size_type count_free() const
@@ -131,7 +135,7 @@ public:
 
     void deallocate(T* to_free)
     {
-        free.push_front(*traits.adjust_from(to_free));
+        free.push_front(*item_node_traits::adjust_from(to_free));
     }
 
 #ifdef FEATURE_CPP_VARIADIC

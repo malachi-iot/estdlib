@@ -191,6 +191,8 @@ protected:
 
 
 public:
+    node_traits_t& get_traits() { return traits; }
+
     bool empty() const { return m_front == after_end_node(); }
 
     // TODO: move towards 'accessor' pattern instead of direct references, not as
