@@ -220,6 +220,12 @@ protected:
     }
 
 public:
+    // untested
+    bool owner_before(const shared_ptr2_base& other) const
+    {
+        return &control() < &other.control();
+    }
+
     count_type use_count() const
     {
         return base_type::is_active() ? control().shared_count : 0;
@@ -567,6 +573,22 @@ public:
 }
 
 
+template <class T, class TBase, class TBase2>
+bool operator==(const experimental::shared_ptr2_base<T, TBase>& lhs,
+                const experimental::shared_ptr2_base<T, TBase2>& rhs)
+{
+    return lhs.get() == rhs.get();
+}
+
+
+/*
+ * Getting activated in a strange way so need to disable this
+template <class T, class TBase, class TBase2>
+bool operator<(const experimental::shared_ptr2_base<T, TBase>& lhs,
+                const experimental::shared_ptr2_base<T, TBase2>& rhs)
+{
+    return lhs.get() < rhs.get();
+} */
 
 
 }
