@@ -185,8 +185,12 @@ TEST_CASE("experimental tests")
             // NOTE: pool construct will call shared_ptr constructor,
             // but shared_ptr themselves don't auto construct their
             // managed pointer
+            /*
             layer1::shared_ptr<test::Dummy>& p = pool.construct();
             layer1::shared_ptr<test::Dummy>& p3 = pool.construct();
+            */
+            auto& p = pool.construct();
+            auto& p3 = pool.construct();
 
             REQUIRE(pool.count_free() == 8);
 

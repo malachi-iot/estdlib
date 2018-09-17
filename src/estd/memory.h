@@ -480,6 +480,13 @@ public:
         base_type(copy_from.value().is_active ? &copy_from.value() : NULLPTR)
     {}
 
+    template <class TControlBlock>
+    shared_ptr(layer1::shared_ptr_base<TControlBlock>& copy_from) :
+        base_type(copy_from.value().is_active ? &copy_from.value() : NULLPTR)
+    {
+
+    }
+
     // value_ptr might be null here if copy_from isn't tracking anything
     explicit shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value_ptr()) {}
 

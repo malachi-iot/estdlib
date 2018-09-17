@@ -43,7 +43,8 @@ struct memory_pool_item_traits
 };
 
 
-/*
+
+#ifdef NOTREADY
 // totally proof of concepting. bad name, used for shared_ptr
 template <class T, class TMemoryPool2>
 struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
@@ -55,38 +56,57 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
     //    return sizeof(F);
     //}
 
-    static void deleter(TMemoryPool2& mp, T* d)
+    struct control_block : internal::shared_ptr_control_block2_base<T>
     {
-        mp.destroy(*d);
-    }
+        TMemoryPool2& pool;
+        void* pool_item;
+
+        void Deleter() OVERRIDE
+        {
+            //pool.destroy(*this->shared);
+            pool.destroy_internal(pool_item);
+        }
+
+        control_block(TMemoryPool2& pool, void* pool_item) :
+            pool(pool, pool_item) {}
+    };
+
+
+    //static void deleter(TMemoryPool2& mp, T* d)
+    //{
+    //    mp.destroy(*d);
+    //}
 
     // can't do this, according to https://stackoverflow.com/questions/4846540/c11-lambda-in-decltype
     //typedef estd::layer1::shared_ptr<T, std::decltype([](T*){})> value_type;
-    typedef estd::layer1::shared_ptr<T, decltype(deleter)> value_type;
+    //typedef estd::layer1::shared_ptr<T, void> value_type;
+    typedef estd::layer1::shared_ptr<T, void, control_block> value_type;
 
     template <class TMemoryPool, class ...TArgs>
     static void construct(TMemoryPool& pool, value_type* value, TArgs...args)
     {
         // TODO: use allocator_traits
         //new (value) value_type([](TMemoryPool2& mp, T* d){});
-        new (value) value_type(deleter);
+        //new (value) value_type(deleter);
     }
 
 
     template <class TMemoryPool>
-    static void destroy(TMemoryPool& pool, T& value)
+    static void destroy(TMemoryPool& pool, value_type& value)
     {
-        value.~T();
+        value.~value_type();
     }
 };
-*/
+#endif
 
-template <class T, std::ptrdiff_t N, class Traits = memory_pool_item_traits<T> >
+template <class T, std::ptrdiff_t N
+          //class Traits = memory_pool_item_traits<T>
+          >
 class memory_pool_1
 {
     typedef uint16_t size_type;
-    typedef Traits traits_type;
-    typedef memory_pool_item_traits<T, memory_pool_1> traits2_type;
+    //typedef Traits traits_type;
+    typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
     typedef typename traits_type::value_type value_type;
 
     struct item
@@ -214,6 +234,7 @@ public:
 
         return *value;
     }
+#endif
 
 
     void destroy(value_type& value)
@@ -221,7 +242,15 @@ public:
         traits_type::destroy(*this, value);
         deallocate(&value);
     }
-#endif
+
+
+    // only for use from shared_ptr control structure.  value is still
+    // value_type, but it's hard for shared_ptr control structure to
+    // know that exact type at that time
+    void destroy_internal(void* value)
+    {
+        destroy(*(value_type*)value);
+    }
 };
 
 }}
