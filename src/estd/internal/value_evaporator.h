@@ -124,6 +124,7 @@ struct instance_from_pointer_provider
     T* _value;
 
     T& value() { return *_value; }
+    const T& value() const { return *_value; }
     void value_ptr(T* v) { _value = v; }
     T* value_ptr() const { return _value; }
 

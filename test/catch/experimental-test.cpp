@@ -3,8 +3,10 @@
 #include "estd/array.h"
 //#include "estd/exp/buffer.h"
 #include "mem.h"
+#include "test-data.h"
 #include <estd/string.h>
 #include <estd/exp/memory_pool.h>
+#include <estd/memory.h>
 
 struct TestA {};
 
@@ -147,19 +149,72 @@ TEST_CASE("experimental tests")
     }
     SECTION("memory pool")
     {
-        estd::experimental::memory_pool_1<int, 10> pool;
+        using namespace estd;
+        using namespace estd::experimental;
 
-        int* i = pool.allocate();
-        REQUIRE(pool.count_free() == 9);
-        int& i2 = pool.construct(3);
-        REQUIRE(pool.count_free() == 8);
+        SECTION("simple integer pool")
+        {
+            estd::experimental::memory_pool_1<int, 10> pool;
 
-        pool.deallocate(i);
-        REQUIRE(pool.count_free() == 9);
+            int* i = pool.allocate();
+            REQUIRE(pool.count_free() == 9);
+            int& i2 = pool.construct(3);
+            REQUIRE(pool.count_free() == 8);
 
-        REQUIRE(i2 == 3);
+            pool.deallocate(i);
+            REQUIRE(pool.count_free() == 9);
 
-        pool.destroy(i2);
-        REQUIRE(pool.count_free() == 10);
+            REQUIRE(i2 == 3);
+
+            pool.destroy(i2);
+            REQUIRE(pool.count_free() == 10);
+        }
+        SECTION("advanced shared_ptr pool")
+        {
+            typedef void (*deleter_fn)(test::Dummy* to_delete, void* context);
+            deleter_fn F = [](test::Dummy* to_delete, void* context)
+            {
+
+            };
+
+            // NOTE: Can't easily get our destructor in here for shared_ptr - damn
+            // I see now why they passed in their Destructor type in shared_ptr constructor
+            memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
+
+            // NOTE: pool construct will call shared_ptr constructor,
+            // but shared_ptr themselves don't auto construct their
+            // managed pointer
+            layer1::shared_ptr<test::Dummy>& p = pool.construct();
+            layer1::shared_ptr<test::Dummy>& p3 = pool.construct();
+
+            REQUIRE(pool.count_free() == 8);
+
+            {
+                layer3::shared_ptr<test::Dummy> p2(p);
+
+                REQUIRE(p.use_count() == 0);
+
+                p.construct(7, "hi2u");
+                p3.construct(8, "hi2u!");
+
+                REQUIRE(p.use_count() == 1);
+
+                p2 = p;
+
+                REQUIRE(p.use_count() == 2);
+
+                layer3::shared_ptr<test::Dummy> p4(p3);
+
+                REQUIRE(p4.use_count() == 2);
+
+                p3.reset();
+            }
+
+            REQUIRE(p.use_count() == 1);
+
+            pool.destroy(p);
+
+            REQUIRE(pool.count_free() == 9);
+        }
     }
 }

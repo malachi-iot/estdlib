@@ -200,6 +200,8 @@ public:
 
     void reset()
     {
+        if(!base_type::is_active()) return;
+
         eval_delete();
         base_type::deactivate();
     }
@@ -230,11 +232,12 @@ public:
     {}
 
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
-    // shared_ptr
-    shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
-        base_type(temp)
+    // shared_ptr to copy from master shared_ptr
+    shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>* master_shared_ptr) :
+        base_type(master_shared_ptr)
     {
-        temp.shared_count++;
+        if(master_shared_ptr && master_shared_ptr->is_active)
+            master_shared_ptr->shared_count++;
     }
 
     ~shared_ptr2_base()
@@ -301,6 +304,11 @@ class shared_ptr : public experimental::shared_ptr2_base<T,
         shared_ptr_base<TControlBlock, size> > base_type;
 
 public:
+#ifdef FEATURE_CPP_DELETE_CTOR
+    // this would duplicate the inline control structure. you don't want that
+    shared_ptr(const shared_ptr&) = delete;
+#endif
+
     shared_ptr() { this->stored = &(base_type::provided()); }
 
 
@@ -364,6 +372,11 @@ class shared_ptr : public experimental::shared_ptr2_base<T,
         shared_ptr_base<T, TDeleter> > base_type;
 
 public:
+#ifdef FEATURE_CPP_DELETE_CTOR
+    // this would duplicate the inline control structure. you don't want that
+    shared_ptr(const shared_ptr&) = delete;
+#endif
+
     shared_ptr(T* managed) : base_type(managed)
     {
     }
@@ -400,8 +413,8 @@ protected:
     bool is_active() const { return this->value_ptr() != NULLPTR; }
     void deactivate() { this->value_ptr(NULLPTR); }
 
-    shared_ptr_base(estd::internal::shared_ptr_control_block2_base<T>& assign_from) :
-        base_type(&assign_from)
+    shared_ptr_base(estd::internal::shared_ptr_control_block2_base<T>* assign_from) :
+        base_type(assign_from)
     {
 
     }
@@ -418,15 +431,28 @@ class shared_ptr : public experimental::shared_ptr2_base<T,
     typedef experimental::shared_ptr2_base<T, shared_ptr_base<T> > base_type;
 
 public:
-    // for when copying/referencing a master provider
+    // for when copying/referencing a master provider.  they are always allocated
+    // if we didn't distinctively need master type here then we could genericize and
+    // share code with the shared_ptr& copy_from constructor below
     template <class TDeleter>
-    shared_ptr(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >& temp) :
-        base_type(temp.value())
+    shared_ptr(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&
+               copy_from) :
+        base_type(copy_from.value().is_active ? &copy_from.value() : NULLPTR)
     {}
 
-    //shared_ptr2(estd::internal::shared_ptr_control_block2_base<T>& temp) : base_type(temp) {}
+    // value_ptr might be null here if copy_from isn't tracking anything
+    explicit shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value_ptr()) {}
 
-    explicit shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value()) {}
+    //template <class TDeleter>
+    //shared_ptr& operator=(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&
+    template <class TSharedPtr>
+    shared_ptr& operator=(TSharedPtr&
+                         copy_from)
+    {
+        this->reset();
+        new (this) shared_ptr(copy_from);
+        return *this;
+    }
 };
 
 
