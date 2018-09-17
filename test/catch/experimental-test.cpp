@@ -180,6 +180,8 @@ TEST_CASE("experimental tests")
 
             // NOTE: Can't easily get our destructor in here for shared_ptr - damn
             // I see now why they passed in their Destructor type in shared_ptr constructor
+            // - so instead, memory_pool_1 has s specialized behavior when it
+            // encounters layer1 shared ptrs
             memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
 
             // NOTE: pool construct will call shared_ptr constructor,
@@ -217,14 +219,48 @@ TEST_CASE("experimental tests")
                 REQUIRE(p4.use_count() == 2);
 
                 p3.reset();
-                p4.reset();
+
+                // superfluous - p4 going out of scope achieves the same affect
+                //p4.reset();
             }
+
+            REQUIRE(pool.count_free() == 9);
 
             REQUIRE(p.use_count() == 1);
 
-            pool.destroy(p);
+            // now that shared_ptr's own destructor is linked in to pool.destory,
+            // you must never call pool.destroy manually - otherwise it will cascade
+            // out through shared_ptr's destructor and call itself again (via pool.destroy_internal)
+            //pool.destroy(p);
+            p.reset();  // do this instead of direct pool.destroy
 
-            REQUIRE(pool.count_free() == 9);
+            REQUIRE(pool.count_free() == 10);
+
+            SECTION("layer3 conversions")
+            {
+                auto& _p = pool.construct();
+
+                // there's a slight oddness (but maybe necessary) in that a
+                // freshly constructed shared_ptr has no use count, but obviously
+                // counts as allocated in the pool.  this means that you have to
+                // actually use the shared_ptr if you ever expect it to be freed,
+                // since its pool removal is kicked off by shared_ptr's auto destruction
+                // at the moment if you want to bypass that, then in this condition
+                // only you can call pool.destroy
+                REQUIRE(_p.use_count() == 0);
+
+                pool.destroy(_p);
+
+                /*
+                 * this doesn't do what you expect because what really needs to happen
+                 * is a pool.construct().construct() to activate allocated shared_ptr,
+                 * otherwise the layer3 initialization ends up empty
+                layer3::shared_ptr<test::Dummy> p(pool.construct());
+
+                REQUIRE(p.use_count() == 1); */
+            }
+
+            REQUIRE(pool.count_free() == 10);
         }
     }
 }

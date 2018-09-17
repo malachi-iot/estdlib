@@ -23,7 +23,7 @@ struct typed_aligned_storage
 
 // Experimental - just here to try to suppose shared_ptr specialization, but that
 // isn't going so well
-template <class T, class TMemoryPool2 = int>
+template <class T, class TMemoryPool2>
 struct memory_pool_item_traits
 {
     typedef T value_type;
@@ -44,7 +44,7 @@ struct memory_pool_item_traits
 
 
 
-#ifdef NOTREADY
+#ifndef NOTREADY
 // totally proof of concepting. bad name, used for shared_ptr
 template <class T, class TMemoryPool2>
 struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
