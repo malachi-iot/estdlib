@@ -58,17 +58,26 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
 
     struct control_block : internal::shared_ptr_control_block2_base<T>
     {
-        TMemoryPool2& pool;
+        typedef internal::shared_ptr_control_block2_base<T> base_type;
+
+        TMemoryPool2* pool;
+
+        // should be a pointer to shared_ptr itself that comes from the construct operation
+        // which very technically should also be the this-pointer but that feels a little
+        // too hack-y right now
         void* pool_item;
 
         void Deleter() OVERRIDE
         {
             //pool.destroy(*this->shared);
-            pool.destroy_internal(pool_item);
+            pool->destroy_internal(pool_item);
         }
 
+        control_block(T* shared, bool is_active) : base_type(shared, is_active)
+        {}
+        /*
         control_block(TMemoryPool2& pool, void* pool_item) :
-            pool(pool, pool_item) {}
+            pool(pool, pool_item) {} */
     };
 
 
@@ -88,6 +97,9 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
         // TODO: use allocator_traits
         //new (value) value_type([](TMemoryPool2& mp, T* d){});
         //new (value) value_type(deleter);
+        value->_value.pool = &pool;
+        value->_value.pool_item = value;
+        new (value) value_type();
     }
 
 
@@ -134,7 +146,7 @@ class memory_pool_1
 
         static CONSTEXPR node_handle eol() { return numeric_limits::max<node_handle>(); }
 
-        static item* adjust_from(T* val)
+        static item* adjust_from(typename traits_type::value_type * val)
         {
             item temp;
 

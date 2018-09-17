@@ -198,6 +198,7 @@ TEST_CASE("experimental tests")
                 layer3::shared_ptr<test::Dummy> p2(p);
 
                 REQUIRE(p.use_count() == 0);
+                REQUIRE(p3.use_count() == 0);
 
                 p.construct(7, "hi2u");
                 p3.construct(8, "hi2u!");
@@ -208,11 +209,15 @@ TEST_CASE("experimental tests")
 
                 REQUIRE(p.use_count() == 2);
 
+                REQUIRE(p3.use_count() == 1);
+
                 layer3::shared_ptr<test::Dummy> p4(p3);
 
+                REQUIRE(p3.use_count() == 2);
                 REQUIRE(p4.use_count() == 2);
 
                 p3.reset();
+                p4.reset();
             }
 
             REQUIRE(p.use_count() == 1);

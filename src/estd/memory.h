@@ -6,6 +6,9 @@
 #include "internal/platform.h"
 #include "internal/value_evaporator.h"
 
+#define FEATURE_ESTD_SHARED_PTR_ALIAS
+#define FEATURE_ESTD_WEAK_PTR
+
 namespace estd {
 template <class TPtr> struct pointer_traits;
 
@@ -50,20 +53,22 @@ struct deleter_base
 
 // shared_ptr itself sort of bypasses RIAA pattern, but this underlying control
 // structure doesn't have to
-template <class T>
+template <class T, typename TCount = uint16_t>
 struct shared_ptr_control_block2_base :
         deleter_base
 {
     T* const shared;
 
-    typedef uint16_t count_type;
+    typedef TCount count_type;
 
     count_type shared_count;
+#ifdef FEATURE_ESTD_WEAK_PTR
     count_type weak_count;
 
     // FIX: this needs forward_list.h but we can't include that since it itself
     // includes memory.h
     //intrusive_forward_list<weak_ptr<T> > weak_list;
+#endif
 
     typedef T managed_type;
 
@@ -74,7 +79,9 @@ struct shared_ptr_control_block2_base :
         is_active(is_active)
     {
         shared_count = is_active ? 1 : 0;
+#ifdef FEATURE_ESTD_WEAK_PTR
         weak_count = 0;
+#endif
     }
 };
 
@@ -186,7 +193,9 @@ public:
 protected:
     struct deleter_tag {};
 
+#ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
     T* stored;
+#endif
 
     typedef typename control_type::count_type count_type;
 
@@ -220,7 +229,14 @@ public:
 
     typedef typename estd::remove_extent<T>::type element_type;
 
-    element_type* get() const noexcept { return stored; }
+    element_type* get() const noexcept
+    {
+#ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
+        return stored;
+#else
+        return control().shared;
+#endif
+    }
 
     // TDeleter2 just because TDeleter sometimes is void in inheritance chain and
     // that irritates the compiler
