@@ -151,7 +151,15 @@ TEST_CASE("experimental tests")
 
         int* i = pool.allocate();
         REQUIRE(pool.count_free() == 9);
+        int& i2 = pool.construct(3);
+        REQUIRE(pool.count_free() == 8);
+
         pool.deallocate(i);
+        REQUIRE(pool.count_free() == 9);
+
+        REQUIRE(i2 == 3);
+
+        pool.destroy(i2);
         REQUIRE(pool.count_free() == 10);
     }
 }

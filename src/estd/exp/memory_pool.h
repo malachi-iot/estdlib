@@ -29,7 +29,7 @@ class memory_pool_1
 
         size_type next() const { return _next; }
 
-        T value;
+        estd::experimental::raw_instance_provider<T> value;
     };
 
     struct item_node_traits
@@ -114,6 +114,10 @@ public:
         return distance(free.begin(), free.end());
     }
 
+    ///
+    /// \brief allocates but does not construct the item
+    /// \return
+    ///
     T* allocate()
     {
         if(free.empty()) return NULLPTR;
@@ -122,13 +126,33 @@ public:
 
         free.pop_front();
 
-        return &to_allocate.value;
+        return &to_allocate.value.value();
     }
 
     void deallocate(T* to_free)
     {
         free.push_front(*traits.adjust_from(to_free));
     }
+
+#ifdef FEATURE_CPP_VARIADIC
+    template <class ...TArgs>
+    T& construct(TArgs&&...args)
+    {
+        T* value = allocate();
+
+        // TODO: use allocator_traits
+        new (value) T(std::forward<TArgs>(args)...);
+
+        return *value;
+    }
+
+
+    void destroy(T& value)
+    {
+        value.~T();
+        deallocate(&value);
+    }
+#endif
 };
 
 }}
