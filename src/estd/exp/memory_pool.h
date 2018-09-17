@@ -62,9 +62,9 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
     /**
      * @brief Specialized shared_ptr control block for memory pool interaction
      */
-    struct control_block : internal::shared_ptr_control_block2_base<T>
+    struct control_block : internal::shared_ptr_control_block<T>
     {
-        typedef internal::shared_ptr_control_block2_base<T> base_type;
+        typedef internal::shared_ptr_control_block<T> base_type;
 
         TMemoryPool* pool;
 

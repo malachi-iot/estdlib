@@ -54,7 +54,7 @@ struct deleter_base
 // shared_ptr itself sort of bypasses RIAA pattern, but this underlying control
 // structure doesn't have to
 template <class T, typename TCount = uint16_t>
-struct shared_ptr_control_block2_base :
+struct shared_ptr_control_block :
         deleter_base
 {
     T* const shared;
@@ -74,7 +74,7 @@ struct shared_ptr_control_block2_base :
 
     bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
 
-    shared_ptr_control_block2_base(T* shared, bool is_active = true) :
+    shared_ptr_control_block(T* shared, bool is_active = true) :
         shared(shared),
         is_active(is_active)
     {
@@ -89,10 +89,10 @@ struct shared_ptr_control_block2_base :
 // memory for 'shared' has been allocated dynamically and we need
 // delete to be destructor and deallocator, as delete traditionally does
 template <class T, class TDeleter>
-struct shared_ptr_control_block2 :
-        shared_ptr_control_block2_base<T>
+struct shared_ptr_inline_deleter_control_block :
+        shared_ptr_control_block<T>
 {
-    typedef shared_ptr_control_block2_base<T> base_type;
+    typedef shared_ptr_control_block<T> base_type;
 
     TDeleter d;
 
@@ -101,7 +101,7 @@ struct shared_ptr_control_block2 :
         d(this->shared);
     }
 
-    shared_ptr_control_block2(T* managed, TDeleter d, bool is_active = true) :
+    shared_ptr_inline_deleter_control_block(T* managed, TDeleter d, bool is_active = true) :
         base_type(managed, is_active),
         d(d)
     {}
@@ -114,11 +114,11 @@ struct shared_ptr_control_block2 :
 /// can't quite get this one initialized...
 ///
 template <class T, class TContext>
-struct shared_ptr_control_block2<T, void (*)(T*, TContext)
+struct shared_ptr_inline_deleter_control_block<T, void (*)(T*, TContext)
     > :
-    shared_ptr_control_block2_base<T>
+    shared_ptr_control_block<T>
 {
-    typedef shared_ptr_control_block2_base<T> base_type;
+    typedef shared_ptr_control_block<T> base_type;
 
     typedef typename estd::remove_reference<TContext>::type context_type;
 
@@ -132,7 +132,7 @@ struct shared_ptr_control_block2<T, void (*)(T*, TContext)
         d(this->shared, context);
     }
 
-    shared_ptr_control_block2(T* managed, deleter_type d, context_type& context) :
+    shared_ptr_inline_deleter_control_block(T* managed, deleter_type d, context_type& context) :
         base_type(managed),
         context(context),
         d(d)
@@ -143,16 +143,16 @@ struct shared_ptr_control_block2<T, void (*)(T*, TContext)
 // will be freed by a party outside shared_ptr, but we still need to explicitly
 // call destructor when the ref count goes to 0
 template <class T>
-struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
+struct shared_ptr_inline_deleter_control_block<T, void> : shared_ptr_control_block<T>
 {
-    typedef shared_ptr_control_block2_base<T> base_type;
+    typedef shared_ptr_control_block<T> base_type;
 
     void Deleter() OVERRIDE
     {
         this->shared->~T();
     }
 
-    shared_ptr_control_block2(T* managed, bool is_active = true) :
+    shared_ptr_inline_deleter_control_block(T* managed, bool is_active = true) :
         base_type(managed, is_active)
     {}
 };
@@ -169,7 +169,7 @@ class weak_ptr
     weak_ptr<T>* next() const { return _next; }
     void next(weak_ptr<T>* assign) { _next = assign; }
 
-    internal::shared_ptr_control_block2_base<T>* control;
+    internal::shared_ptr_control_block<T>* control;
 
 public:
 };
@@ -272,7 +272,7 @@ public:
 
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
     // shared_ptr to copy from master shared_ptr
-    shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>* master_shared_ptr) :
+    shared_ptr2_base(estd::internal::shared_ptr_control_block<T>* master_shared_ptr) :
         base_type(master_shared_ptr)
     {
         if(master_shared_ptr && master_shared_ptr->is_active)
@@ -342,7 +342,7 @@ protected:
 /// \brief Experimental
 ///
 template <class T, class TDeleter = void,
-          class TControlBlock = estd::internal::shared_ptr_control_block2<T, TDeleter>,
+          class TControlBlock = estd::internal::shared_ptr_inline_deleter_control_block<T, TDeleter>,
           std::ptrdiff_t size = sizeof(T)>
 class shared_ptr : public experimental::shared_ptr2_base<T,
         shared_ptr_base<TControlBlock, size> >
@@ -400,9 +400,9 @@ namespace layer2 {
 
 template <class T, class TDeleter>
 struct shared_ptr_base :
-        experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
+        experimental::instance_provider<estd::internal::shared_ptr_inline_deleter_control_block<T, TDeleter> >
 {
-    typedef experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > base_type;
+    typedef experimental::instance_provider<estd::internal::shared_ptr_inline_deleter_control_block<T, TDeleter> > base_type;
 
     template <class TDeleter2>
     shared_ptr_base(T* managed, TDeleter2 d) :
@@ -461,16 +461,16 @@ namespace layer3 {
 
 template <class T>
 struct shared_ptr_base :
-        experimental::instance_from_pointer_provider<estd::internal::shared_ptr_control_block2_base<T> >
+        experimental::instance_from_pointer_provider<estd::internal::shared_ptr_control_block<T> >
 {
     typedef experimental::instance_from_pointer_provider<
-        estd::internal::shared_ptr_control_block2_base<T> > base_type;
+        estd::internal::shared_ptr_control_block<T> > base_type;
 
 protected:
     bool is_active() const { return this->value_ptr() != NULLPTR; }
     void deactivate() { this->value_ptr(NULLPTR); }
 
-    shared_ptr_base(estd::internal::shared_ptr_control_block2_base<T>* assign_from) :
+    shared_ptr_base(estd::internal::shared_ptr_control_block<T>* assign_from) :
         base_type(assign_from)
     {
 
@@ -500,7 +500,7 @@ public:
     // if we didn't distinctively need master type here then we could genericize and
     // share code with the shared_ptr& copy_from constructor below
     template <class TDeleter>
-    shared_ptr(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&
+    shared_ptr(experimental::instance_provider<estd::internal::shared_ptr_inline_deleter_control_block<T, TDeleter> >&
                copy_from) :
         base_type(copy_from.value().is_active ? &copy_from.value() : NULLPTR)
     {}
@@ -532,7 +532,7 @@ public:
 #endif
 
     //template <class TDeleter>
-    //shared_ptr& operator=(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&
+    //shared_ptr& operator=(experimental::instance_provider<estd::internal::shared_ptr_inline_deleter_control_block<T, TDeleter> >&
     template <class TSharedPtr>
     shared_ptr& operator=(TSharedPtr&
                          copy_from)
