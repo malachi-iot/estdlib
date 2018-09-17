@@ -98,8 +98,15 @@ protected:
     }
 
 public:
+    //forward_list(node_traits_t& traits)
     forward_list(allocator_t* allocator = NULLPTR) :
             base_t(allocator) {}
+
+    // NOTE: traits eventually should become stateless and
+    // perhaps have allocator passed into it, in which case
+    // this constructor will be obsolete
+    forward_list(node_traits_t& traits) :
+        base_t(traits) {}
 
     void pop_front()
     {

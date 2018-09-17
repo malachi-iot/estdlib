@@ -70,6 +70,15 @@ template< bool B, class T = void >
 class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
+#ifdef FEATURE_CPP_ALIGN
+template<std::size_t Len, std::size_t Align /* default alignment not implemented */>
+struct aligned_storage {
+    struct type {
+        alignas(Align) byte data[Len];
+    };
+};
+#endif
+
 
 namespace internal {
 

@@ -7,8 +7,20 @@
 namespace estd {
 
 template< class InputIt >
-typename std::iterator_traits<InputIt>::difference_type
-    distance( InputIt first, InputIt last );
+//typename std::iterator_traits<InputIt>::difference_type
+    int
+    distance( InputIt first, InputIt last )
+{
+    int count = 0;
+    while(first != last)
+    {
+        count++;
+        first++;
+    }
+    //std::iterator_traits<InputIt>::difference_type count = 0;
+
+    return count;
+}
 
 }
 #else

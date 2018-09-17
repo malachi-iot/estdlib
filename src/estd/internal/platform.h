@@ -79,6 +79,9 @@
 #endif
 
 #  include <features.h>
+#  if __GNUC_PREREQ(4,8)
+#define FEATURE_CPP_ALIGN
+#  endif
 #  if __GNUC_PREREQ(4,7)
 #define FEATURE_CPP_OVERRIDE
 #  endif

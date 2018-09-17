@@ -13,6 +13,7 @@ set(SOURCE_FILES
         estd/cstddef.h
         estd/chrono.h
 
+        estd/exp/memory_pool.h
         estd/exp/observer.h
         estd/exp/tmr.h
         estd/exp/tuple.h

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../internal/platform.h"
+#include "../type_traits.h"
 
 namespace estd {
 
@@ -100,9 +101,9 @@ template<class TNodeTraits, class TIterator>
 class linkedlist_base
 {
 public:
-    typedef typename TNodeTraits::value_type value_type;
+    typedef typename estd::remove_reference<TNodeTraits>::type node_traits_t;
+    typedef typename node_traits_t::value_type value_type;
     typedef value_type& reference;
-    typedef TNodeTraits node_traits_t;
     typedef TIterator iterator;
     typedef const iterator   const_iterator;
     typedef typename node_traits_t::node_allocator_type node_allocator_t;
@@ -122,7 +123,7 @@ protected:
 
     // for now assume stateful traits (contains allocators)
     // optimize this out later
-    node_traits_t traits;
+    TNodeTraits traits;
 
     node_handle m_front;
 
@@ -130,6 +131,13 @@ protected:
             m_front(after_end_node())
 
     {}
+
+    linkedlist_base(node_traits_t& traits) :
+        traits(traits),
+        m_front(after_end_node())
+    {
+
+    }
 
     node_type& alloc_lock(node_handle& to_lock)
     {

@@ -4,6 +4,7 @@
 //#include "estd/exp/buffer.h"
 #include "mem.h"
 #include <estd/string.h>
+#include <estd/exp/memory_pool.h>
 
 struct TestA {};
 
@@ -143,5 +144,14 @@ TEST_CASE("experimental tests")
 
             REQUIRE(*pt.value() == 5);
         }
+    }
+    SECTION("memory pool")
+    {
+        estd::experimental::memory_pool_1<int, 10> pool;
+
+        int* i = pool.allocate();
+        REQUIRE(pool.count_free() == 9);
+        pool.deallocate(i);
+        REQUIRE(pool.count_free() == 10);
     }
 }

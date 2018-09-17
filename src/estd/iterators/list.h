@@ -1,12 +1,14 @@
 #pragma once
 
+#include "../type_traits.h"
+
 namespace estd {
 
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
 struct InputIterator
 {
-    typedef TNodeTraits traits_t;
+    typedef typename estd::remove_reference<TNodeTraits>::type traits_t;
     typedef TValue value_type;
     //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef typename traits_t::node_allocator_type node_allocator_t;
@@ -35,7 +37,7 @@ protected:
 #endif
 
     // FIX: Pretty sure we want this to be a reference, not a value
-    traits_t traits;
+    TNodeTraits traits;
 
     node_type& lock_internal()
     {
@@ -50,7 +52,8 @@ protected:
 public:
     InputIterator(node_handle_t node, const traits_t& traits) :
         current(node),
-        traits(traits)
+        // FIX: clean up this brute force const removal
+        traits((traits_t&)traits)
     {}
 
     //~InputIterator() {}
@@ -194,7 +197,8 @@ struct ForwardIterator : public TBase
 
     bool operator!=(const ForwardIterator& compare_to) const
     {
-        return before_beginning != compare_to.before_beginning ||
+        //return before_beginning != compare_to.before_beginning ||
+        return
                 base_t::current != compare_to.current;
     }
 
