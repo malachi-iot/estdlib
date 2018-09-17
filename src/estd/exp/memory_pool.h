@@ -49,8 +49,8 @@ struct memory_pool_item_traits
 #define FEATURE_ESTD_EXP_AUTOCONSTRUCT
 
 // totally proof of concepting. bad name, used for shared_ptr
-template <class T, class TMemoryPool2>
-struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
+template <class T, class TMemoryPool>
+struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
 {
     //static constexpr int total_size()
     //{
@@ -59,26 +59,35 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
     //    return sizeof(F);
     //}
 
+    /**
+     * @brief Specialized shared_ptr control block for memory pool interaction
+     */
     struct control_block : internal::shared_ptr_control_block2_base<T>
     {
         typedef internal::shared_ptr_control_block2_base<T> base_type;
 
-        TMemoryPool2* pool;
+        TMemoryPool* pool;
 
         // should be a pointer to shared_ptr itself that comes from the construct operation
         // which very technically should also be the this-pointer but that feels a little
         // too hack-y right now
         void* pool_item;
 
+        ///
+        /// \brief interacts directly with memory pool to free memory from there
+        ///
+        /// runs this object's destructor also (destroy)
+        ///
         void Deleter() OVERRIDE
         {
-            //pool.destroy(*this->shared);
             pool->destroy_internal(pool_item);
         }
 
         control_block(T* shared, bool is_active) : base_type(shared, is_active)
         {}
-        /*
+
+        /* NOTE: this would be better, but currently very complicated to integrate into
+         *  architecture
         control_block(TMemoryPool2& pool, void* pool_item) :
             pool(pool, pool_item) {} */
     };
@@ -94,8 +103,8 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
     //typedef estd::layer1::shared_ptr<T, void> value_type;
     typedef estd::layer1::shared_ptr<T, void, control_block> value_type;
 
-    template <class TMemoryPool, class ...TArgs>
-    static void construct(TMemoryPool& pool, value_type* value, TArgs...args)
+    template <class ...TArgs>
+    static void construct(TMemoryPool& pool, value_type* value, TArgs&&...args)
     {
         // TODO: use allocator_traits
         //new (value) value_type([](TMemoryPool2& mp, T* d){});
@@ -110,7 +119,6 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
     }
 
 
-    template <class TMemoryPool>
     static void destroy(TMemoryPool& pool, value_type& value)
     {
         value.~value_type();
@@ -134,12 +142,12 @@ protected:
     {
         size_type _next;
 
-        size_type next() const { return _next; }
-
         estd::experimental::raw_instance_provider<value_type> value;
     };
 
-    struct item_node_traits
+    // going to be challenging, but attempt to decouple node storage/allocator
+    // from node traits itself
+    struct item_storage_exp
     {
         typedef array<item, N> storage_type;
         //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
@@ -147,7 +155,19 @@ protected:
         // in allocator to lock/unlock and friends
         storage_type storage;
 
+        typedef size_type handle_type;
         typedef item value_type;
+
+        value_type& lock(handle_type h)
+        {
+            return storage[h];
+        }
+
+        void unlock(handle_type) {}
+    };
+
+    struct item_node_traits : item_storage_exp
+    {
         typedef item node_type;
         typedef size_type node_handle;
         typedef item& nv_ref_t;
@@ -166,20 +186,13 @@ protected:
             return _val;
         }
 
-        node_type& lock(node_handle h)
-        {
-            return storage[h];
-        }
-
-        void unlock(node_handle) {}
-
         // node allocation is specifically taking the 'value' portion and allocating
         // + associating just the node portion with it.  for intrusive lists, this
         // is largely a noop - we merely resolve where the pointer lives and report
         // its already-allocated handle from the storage area
         node_handle allocate(nv_ref_t n)
         {
-            item* data = storage.data();
+            item* data = this->storage.data();
             item* _n = &n;
             node_handle h = _n - data;
             return h;
@@ -187,12 +200,12 @@ protected:
 
         void deallocate(node_handle) {}
 
-        node_handle next(node_type& n)
+        static node_handle next(node_type& n)
         {
-            return n.next();
+            return n._next;
         }
 
-        void next(node_type& to_attach_to, node_handle& n2)
+        static void next(node_type& to_attach_to, node_handle& n2)
         {
             to_attach_to._next = n2;
         }
@@ -247,6 +260,11 @@ public:
 
 #ifdef FEATURE_CPP_VARIADIC
     template <class ...TArgs>
+    ///
+    /// \brief allocate and construct
+    /// \param args
+    /// \return
+    ///
     value_type& construct(TArgs&&...args)
     {
         value_type* value = allocate();
@@ -258,6 +276,10 @@ public:
 #endif
 
 
+    ///
+    /// \brief execute destructor and deallocate
+    /// \param value
+    ///
     void destroy(value_type& value)
     {
         traits_type::destroy(*this, value);
