@@ -8,6 +8,7 @@
 #include "../cstdint.h"
 #include "../forward_list.h"
 #include "../algorithm.h"
+#include "../limits.h"
 
 // memory pools continually turn out to be kinda tricky, so numbering my attempts
 namespace estd { namespace experimental {
@@ -46,7 +47,7 @@ class memory_pool_1
         typedef item& nv_ref_t;
         typedef nothing_allocator<item> node_allocator_type;
 
-        static CONSTEXPR node_handle eol() { return -1; }
+        static CONSTEXPR node_handle eol() { return numeric_limits::max<node_handle>(); }
 
         static item* adjust_from(T* val)
         {
