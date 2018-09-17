@@ -64,11 +64,6 @@ TEST_CASE("memory.h tests")
     }
     SECTION("experimental")
     {
-        SECTION("shared_ptr [old]")
-        {
-            int val;
-            experimental::shared_ptr<int> sp(&val);
-        }
         SECTION("shared_ptr")
         {
             SECTION("layer1")
