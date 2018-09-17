@@ -278,7 +278,6 @@ TEST_CASE("experimental tests")
 
                 REQUIRE(p.use_count() == 1); */
 
-#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
                 int counter = 0;
                 auto F2 = [&](layer3::shared_ptr<test::Dummy> p)
                 {
@@ -288,6 +287,7 @@ TEST_CASE("experimental tests")
 
                 layer3::shared_ptr<test::Dummy> p(_p);
 
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
                 REQUIRE(_p.use_count() == 2);
 
                 F2(p);
@@ -301,6 +301,8 @@ TEST_CASE("experimental tests")
                 _p.reset();
 
                 REQUIRE(p.use_count() == 1);
+
+                //layer3::shared_ptr<test::Dummy> _p2 = _p;
 #endif
             }
 

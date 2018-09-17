@@ -174,6 +174,31 @@ TEST_CASE("memory.h tests")
 
                 REQUIRE(val == 1);
             }
+            SECTION("layer3: move constructor")
+            {
+                layer1::shared_ptr<int> p;
+
+                p.construct(5);
+
+                layer3::shared_ptr<int> p2(p);
+
+                REQUIRE(p.use_count() == 2);
+
+                // this deactivates p2
+                layer3::shared_ptr<int> p3(std::move(p2));
+
+                REQUIRE(p.use_count() == 2);
+                REQUIRE(p3.use_count() == 2);
+
+                REQUIRE(p2.use_count() == 0);
+
+                // reverse roles, reactivating p2
+                // and deactivating p3
+                p3.swap(p2);
+
+                REQUIRE(p2.use_count() == 2);
+                REQUIRE(p3.use_count() == 0);
+            }
         }
     }
 }

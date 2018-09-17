@@ -174,6 +174,12 @@ class weak_ptr
 public:
 };
 
+namespace layer3 {
+
+template <class T>
+class shared_ptr;
+
+}
 
 // std::shared_ptr sometimes leans on dynamic allocation for its control block
 // obviously we don't want to do that, so experimenting with possibilities
@@ -273,6 +279,14 @@ public:
             master_shared_ptr->shared_count++;
     }
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    shared_ptr2_base(shared_ptr2_base&& move_from) :
+        base_type(std::move(move_from))
+    {
+
+    }
+#endif
+
     ~shared_ptr2_base()
     {
         if(base_type::is_active()) eval_delete();
@@ -343,7 +357,10 @@ public:
     shared_ptr(const shared_ptr&) = delete;
 #endif
 
+
+#ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
     shared_ptr() { this->stored = &(base_type::provided()); }
+#endif
 
 
     template <class TDeleter2>
@@ -368,6 +385,12 @@ public:
         this->control().shared_count++;
     }
 #endif
+
+    /*
+    operator layer3::shared_ptr<T>()
+    {
+        return layer3::shared_ptr<T>(*this);
+    } */
 };
 
 
@@ -452,6 +475,14 @@ protected:
     {
 
     }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    shared_ptr_base(shared_ptr_base&& move_from) :
+        base_type(move_from.value_ptr())
+    {
+
+    }
+#endif
 };
 
 
@@ -493,6 +524,13 @@ public:
     // value_ptr might be null here if copy_from isn't tracking anything
     shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value_ptr()) {}
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    shared_ptr(shared_ptr&& move_from) : base_type(std::move(move_from))
+    {
+        move_from.deactivate();
+    }
+#endif
+
     //template <class TDeleter>
     //shared_ptr& operator=(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&
     template <class TSharedPtr>
@@ -502,6 +540,17 @@ public:
         this->reset();
         new (this) shared_ptr(copy_from);
         return *this;
+    }
+
+    void swap(shared_ptr& r) noexcept
+    {
+        /*
+        typename base_type::control_type* old = this->value_ptr();
+        this->value_ptr(r.value_ptr());
+        //r.deactivate();
+        r.value_ptr(old); */
+
+        r._value = estd::exchange(this->_value, r._value);
     }
 };
 
