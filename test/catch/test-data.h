@@ -33,6 +33,7 @@ struct Dummy
 
     ~Dummy()
     {
+        const char* val3 = value2;
     }
 
     // this partially undoes our explicit copy constructor

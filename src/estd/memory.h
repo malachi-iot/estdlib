@@ -66,7 +66,7 @@ template <class T>
 struct shared_ptr_control_block2_base :
         deleter_base
 {
-    T* shared;
+    T* const shared;
 
     typedef uint16_t count_type;
 
@@ -77,11 +77,11 @@ struct shared_ptr_control_block2_base :
 
     bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
 
-    shared_ptr_control_block2_base(T* shared) :
+    shared_ptr_control_block2_base(T* shared, bool is_active = true) :
         shared(shared),
-        is_active(true)
+        is_active(is_active)
     {
-        shared_count = 1;
+        shared_count = is_active ? 1 : 0;
         weak_count = 0;
     }
 };
@@ -153,7 +153,8 @@ struct shared_ptr_control_block2<T, void> : shared_ptr_control_block2_base<T>
         this->shared->~T();
     }
 
-    shared_ptr_control_block2(T* managed) : base_type(managed)
+    shared_ptr_control_block2(T* managed, bool is_active = true) :
+        base_type(managed, is_active)
     {}
 };
 
@@ -274,12 +275,15 @@ struct shared_ptr_base :
         base_type(&provided(), d, context)
     {}
 
+    // layer1 is special case where we've already allocated the buffer
+    // but the object is not initialized, so send a false for is_active
     shared_ptr_base() :
-        base_type(&provided())
+        base_type(&provided(), false)
     {}
 
 protected:
     bool is_active() const { return base_type::value().is_active; }
+    void activate() { base_type::value().is_active = true; }
     void deactivate() { base_type::value().is_active = false; }
 };
 
@@ -311,6 +315,17 @@ public:
         base_type(d, context)
     {}
 
+    // non-standard call to initialize raw T
+    // behavior is undefined if construct was called before
+#ifdef FEATURE_CPP_VARIADIC
+    template <class ...TArgs>
+    void construct(TArgs&&...args)
+    {
+        new (&base_type::provided()) T(std::forward<TArgs>(args)...);
+        base_type::activate();
+        this->control().shared_count++;
+    }
+#endif
 };
 
 

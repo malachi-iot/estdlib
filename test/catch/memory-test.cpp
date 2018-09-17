@@ -74,11 +74,19 @@ TEST_CASE("memory.h tests")
             {
                 layer1::shared_ptr<test::Dummy> sp;
 
-                REQUIRE(sp.use_count() == 1);
+                // not yet constructed at this point, though
+                // it is allocated
+                REQUIRE(sp.use_count() == 0);
 
                 sp->val1 = 10;
 
                 REQUIRE(sp.provided().val1 == 10);
+
+                sp.construct(11, "hi2u");
+
+                REQUIRE(sp.use_count() == 1);
+
+                REQUIRE(sp->val1 == 11);
             }
             SECTION("layer2 + 3: basic usage")
             {
