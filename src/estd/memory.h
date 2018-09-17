@@ -481,8 +481,17 @@ public:
 
     }
 
+    /*
+     * Doesn't help
+    template <class Deleter, class TControlBlock>
+    shared_ptr(layer1::shared_ptr<T, Deleter, TControlBlock>& copy_from) :
+        base_type(copy_from.value().is_active ? &copy_from.value() : NULLPTR)
+    {
+
+    } */
+
     // value_ptr might be null here if copy_from isn't tracking anything
-    explicit shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value_ptr()) {}
+    shared_ptr(shared_ptr& copy_from) : base_type(copy_from.value_ptr()) {}
 
     //template <class TDeleter>
     //shared_ptr& operator=(experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >&

@@ -183,6 +183,7 @@ TEST_CASE("experimental tests")
             // - so instead, memory_pool_1 has s specialized behavior when it
             // encounters layer1 shared ptrs
             memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
+            typedef typename decltype (pool)::value_type shared_ptr;
 
             // NOTE: pool construct will call shared_ptr constructor,
             // but shared_ptr themselves don't auto construct their
@@ -191,14 +192,23 @@ TEST_CASE("experimental tests")
             layer1::shared_ptr<test::Dummy>& p = pool.construct();
             layer1::shared_ptr<test::Dummy>& p3 = pool.construct();
             */
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+            shared_ptr& p = pool.construct(7, "hi2u");
+            shared_ptr& p3 = pool.construct(8, "hi2u!");
+#else
             auto& p = pool.construct();
             auto& p3 = pool.construct();
+#endif
 
             REQUIRE(pool.count_free() == 8);
 
             {
                 layer3::shared_ptr<test::Dummy> p2(p);
 
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+                REQUIRE(p.use_count() == 2);
+                REQUIRE(p3.use_count() == 1);
+#else
                 REQUIRE(p.use_count() == 0);
                 REQUIRE(p3.use_count() == 0);
 
@@ -206,6 +216,7 @@ TEST_CASE("experimental tests")
                 p3.construct(8, "hi2u!");
 
                 REQUIRE(p.use_count() == 1);
+#endif
 
                 p2 = p;
 
@@ -238,7 +249,7 @@ TEST_CASE("experimental tests")
 
             SECTION("layer3 conversions")
             {
-                auto& _p = pool.construct();
+                shared_ptr& _p = pool.construct();
 
                 // there's a slight oddness (but maybe necessary) in that a
                 // freshly constructed shared_ptr has no use count, but obviously
@@ -247,17 +258,50 @@ TEST_CASE("experimental tests")
                 // since its pool removal is kicked off by shared_ptr's auto destruction
                 // at the moment if you want to bypass that, then in this condition
                 // only you can call pool.destroy
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+                REQUIRE(_p.use_count() == 1);
+
+#else
                 REQUIRE(_p.use_count() == 0);
 
                 pool.destroy(_p);
+#endif
 
                 /*
                  * this doesn't do what you expect because what really needs to happen
                  * is a pool.construct().construct() to activate allocated shared_ptr,
-                 * otherwise the layer3 initialization ends up empty
+                 * otherwise the layer3 initialization ends up empty.
+                 * trouble continues because even if you DO construct().construct(),
+                 * this code doesn't have easy access to the initial shared_ptr which
+                 * one still has to call reset() on
                 layer3::shared_ptr<test::Dummy> p(pool.construct());
 
                 REQUIRE(p.use_count() == 1); */
+
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+                int counter = 0;
+                auto F2 = [&](layer3::shared_ptr<test::Dummy> p)
+                {
+                    counter++;
+                    REQUIRE(p.use_count() == 3);
+                };
+
+                layer3::shared_ptr<test::Dummy> p(_p);
+
+                REQUIRE(_p.use_count() == 2);
+
+                F2(p);
+
+                REQUIRE(counter == 1);
+
+                //F2(_p);
+
+                REQUIRE(p.use_count() == 2);
+
+                _p.reset();
+
+                REQUIRE(p.use_count() == 1);
+#endif
             }
 
             REQUIRE(pool.count_free() == 10);

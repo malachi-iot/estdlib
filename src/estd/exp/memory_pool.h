@@ -45,6 +45,9 @@ struct memory_pool_item_traits
 
 
 #ifndef NOTREADY
+
+#define FEATURE_ESTD_EXP_AUTOCONSTRUCT
+
 // totally proof of concepting. bad name, used for shared_ptr
 template <class T, class TMemoryPool2>
 struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
@@ -100,6 +103,10 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
         value->_value.pool = &pool;
         value->_value.pool_item = value;
         new (value) value_type();
+
+#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+        value->construct(std::forward<TArgs>(args)...);
+#endif
     }
 
 
@@ -116,11 +123,13 @@ template <class T, std::ptrdiff_t N
           >
 class memory_pool_1
 {
+public:
     typedef uint16_t size_type;
     //typedef Traits traits_type;
     typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
     typedef typename traits_type::value_type value_type;
 
+protected:
     struct item
     {
         size_type _next;
