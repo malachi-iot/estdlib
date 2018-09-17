@@ -78,6 +78,10 @@
 #define FEATURE_CPP_STATIC_ASSERT
 #endif
 
+#if __cpp___cpp_lambdas >= 200907
+#define FEATURE_CPP_LAMBDA
+#endif
+
 #  include <features.h>
 #  if __GNUC_PREREQ(4,8)
 #define FEATURE_CPP_ALIGN
