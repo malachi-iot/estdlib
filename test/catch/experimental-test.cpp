@@ -7,6 +7,7 @@
 #include <estd/string.h>
 #include <estd/exp/memory_pool.h>
 #include <estd/memory.h>
+#include <estd/functional.h>
 
 struct TestA {};
 

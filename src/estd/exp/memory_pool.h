@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../array.h"
+#include "../memory.h"
 #include "../type_traits.h"
 #include "../cstdint.h"
 #include "../forward_list.h"
@@ -19,10 +20,74 @@ struct typed_aligned_storage
 
 };
 
-template <class T, std::ptrdiff_t N>
+
+// Experimental - just here to try to suppose shared_ptr specialization, but that
+// isn't going so well
+template <class T, class TMemoryPool2 = int>
+struct memory_pool_item_traits
+{
+    typedef T value_type;
+
+    template <class TMemoryPool, class ...TArgs>
+    static void construct(TMemoryPool& pool, T* value, TArgs...args)
+    {
+        // TODO: use allocator_traits
+        new (value) T(std::forward<TArgs>(args)...);
+    }
+
+    template <class TMemoryPool>
+    static void destroy(TMemoryPool& pool, T& value)
+    {
+        value.~T();
+    }
+};
+
+
+/*
+// totally proof of concepting. bad name, used for shared_ptr
+template <class T, class TMemoryPool2>
+struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool2 >
+{
+    //static constexpr int total_size()
+    //{
+    //    auto F = [](T*){};
+
+    //    return sizeof(F);
+    //}
+
+    static void deleter(TMemoryPool2& mp, T* d)
+    {
+        mp.destroy(*d);
+    }
+
+    // can't do this, according to https://stackoverflow.com/questions/4846540/c11-lambda-in-decltype
+    //typedef estd::layer1::shared_ptr<T, std::decltype([](T*){})> value_type;
+    typedef estd::layer1::shared_ptr<T, decltype(deleter)> value_type;
+
+    template <class TMemoryPool, class ...TArgs>
+    static void construct(TMemoryPool& pool, value_type* value, TArgs...args)
+    {
+        // TODO: use allocator_traits
+        //new (value) value_type([](TMemoryPool2& mp, T* d){});
+        new (value) value_type(deleter);
+    }
+
+
+    template <class TMemoryPool>
+    static void destroy(TMemoryPool& pool, T& value)
+    {
+        value.~T();
+    }
+};
+*/
+
+template <class T, std::ptrdiff_t N, class Traits = memory_pool_item_traits<T> >
 class memory_pool_1
 {
     typedef uint16_t size_type;
+    typedef Traits traits_type;
+    typedef memory_pool_item_traits<T, memory_pool_1> traits2_type;
+    typedef typename traits_type::value_type value_type;
 
     struct item
     {
@@ -30,7 +95,7 @@ class memory_pool_1
 
         size_type next() const { return _next; }
 
-        estd::experimental::raw_instance_provider<T> value;
+        estd::experimental::raw_instance_provider<value_type> value;
     };
 
     struct item_node_traits
@@ -123,7 +188,7 @@ public:
     /// \brief allocates but does not construct the item
     /// \return
     ///
-    T* allocate()
+    value_type* allocate()
     {
         if(free.empty()) return NULLPTR;
 
@@ -134,27 +199,26 @@ public:
         return &to_allocate.value.value();
     }
 
-    void deallocate(T* to_free)
+    void deallocate(value_type* to_free)
     {
         free.push_front(*item_node_traits::adjust_from(to_free));
     }
 
 #ifdef FEATURE_CPP_VARIADIC
     template <class ...TArgs>
-    T& construct(TArgs&&...args)
+    value_type& construct(TArgs&&...args)
     {
-        T* value = allocate();
+        value_type* value = allocate();
 
-        // TODO: use allocator_traits
-        new (value) T(std::forward<TArgs>(args)...);
+        traits_type::construct(*this, value, std::forward<TArgs>(args)...);
 
         return *value;
     }
 
 
-    void destroy(T& value)
+    void destroy(value_type& value)
     {
-        value.~T();
+        traits_type::destroy(*this, value);
         deallocate(&value);
     }
 #endif
