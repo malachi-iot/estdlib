@@ -134,6 +134,19 @@ TEST_CASE("memory.h tests")
                 }
                 REQUIRE(deleter_ran);
             }
+            SECTION("more pre-c++-11 style")
+            {
+                typedef void (*deleter)(test::Dummy* to_destruct, int& context);
+                deleter F = [](test::Dummy* to_delete, int& context)
+                {
+                    to_delete->~Dummy();
+                    //free(to_delete);
+                };
+                int context;
+                //test::Dummy* dummy = reinterpret_cast<test::Dummy*>(malloc(sizeof(test::Dummy)));
+
+                //layer1::shared_ptr<test::Dummy, deleter>(F, context);
+            }
         }
     }
 }

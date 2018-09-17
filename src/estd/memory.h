@@ -73,6 +73,8 @@ struct shared_ptr_control_block2_base :
     count_type shared_count;
     count_type weak_count;
 
+    typedef T managed_type;
+
     bool is_active; // only for use by 'master' - integrate as a bit field into shared_count possibly
 
     shared_ptr_control_block2_base(T* shared) :
@@ -102,6 +104,38 @@ struct shared_ptr_control_block2 :
 
     shared_ptr_control_block2(T* managed, TDeleter d) :
         base_type(managed),
+        d(d)
+    {}
+};
+
+
+///
+/// @brief context parameter supporting deleter
+///
+/// can't quite get this one initialized...
+///
+template <class T, class TContext>
+struct shared_ptr_control_block2<T, void (*)(T*, TContext)
+    > :
+    shared_ptr_control_block2_base<T>
+{
+    typedef shared_ptr_control_block2_base<T> base_type;
+
+    typedef typename estd::remove_reference<TContext>::type context_type;
+
+    //const void *deleter(TContext&);
+    typedef void (*deleter_type)(T*, TContext);
+    const deleter_type d;
+    TContext& context;
+
+    void Deleter() OVERRIDE
+    {
+        d(this->shared, context);
+    }
+
+    shared_ptr_control_block2(T* managed, deleter_type d, context_type& context) :
+        base_type(managed),
+        context(context),
         d(d)
     {}
 };
@@ -188,6 +222,12 @@ public:
 
     shared_ptr2_base() {}
 
+
+    template <class TDeleter2, class TContext>
+    shared_ptr2_base(TDeleter2 d, TContext& context) :
+        base_type(d, context)
+    {}
+
     // still-ugly version of copy-increase-ref-counter. used primarily by non-master
     // shared_ptr
     shared_ptr2_base(estd::internal::shared_ptr_control_block2_base<T>& temp) :
@@ -210,22 +250,29 @@ public:
 
 namespace layer1 {
 
-template <class T, class TDeleter, std::ptrdiff_t size = sizeof(T)>
+template <class TControlBlock,
+          std::ptrdiff_t size = sizeof(typename TControlBlock::managed_type)>
 struct shared_ptr_base :
-        experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> >
+        experimental::instance_provider<TControlBlock>
 {
-    typedef experimental::instance_provider<estd::internal::shared_ptr_control_block2<T, TDeleter> > base_type;
+    typedef experimental::instance_provider<TControlBlock> base_type;
+    typedef typename TControlBlock::managed_type managed_type;
 
-    experimental::raw_instance_provider<T> _provided;
+    experimental::raw_instance_provider<managed_type, size> _provided;
 
     // FIX: clean up naming - getting 'value' collisions from multiple providers
-    T& provided() { return _provided.value(); }
+    managed_type& provided() { return _provided.value(); }
 
     template <class TDeleter2>
     shared_ptr_base(TDeleter2 d) :
         base_type(&provided(), d)
     {}
 
+
+    template <class TDeleter2, class TContext>
+    shared_ptr_base(TDeleter2 d, TContext& context) :
+        base_type(&provided(), d, context)
+    {}
 
     shared_ptr_base() :
         base_type(&provided())
@@ -240,15 +287,30 @@ protected:
 ///
 /// \brief Experimental
 ///
-template <class T, class TDeleter = void, std::ptrdiff_t size = sizeof(T)>
+template <class T, class TDeleter = void,
+          class TControlBlock = estd::internal::shared_ptr_control_block2<T, TDeleter>,
+          std::ptrdiff_t size = sizeof(T)>
 class shared_ptr : public experimental::shared_ptr2_base<T,
-        shared_ptr_base<T, TDeleter, size> >
+        shared_ptr_base<TControlBlock, size> >
 {
     typedef experimental::shared_ptr2_base<T,
-        shared_ptr_base<T, TDeleter> > base_type;
+        shared_ptr_base<TControlBlock, size> > base_type;
 
 public:
     shared_ptr() { this->stored = &(base_type::provided()); }
+
+
+    template <class TDeleter2>
+    shared_ptr(TDeleter2 d) :
+        base_type(d)
+    {}
+
+
+    template <class TDeleter2, class TContext>
+    shared_ptr(TDeleter2 d, TContext& context) :
+        base_type(d, context)
+    {}
+
 };
 
 
