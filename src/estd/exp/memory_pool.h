@@ -44,9 +44,7 @@ struct memory_pool_item_traits
 
 
 
-#ifndef NOTREADY
-
-#define FEATURE_ESTD_EXP_AUTOCONSTRUCT
+//#define FEATURE_ESTD_EXP_AUTOCONSTRUCT
 
 // totally proof of concepting. bad name, used for shared_ptr
 template <class T, class TMemoryPool>
@@ -124,7 +122,7 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
         value.~value_type();
     }
 };
-#endif
+
 
 template <class T, std::ptrdiff_t N
           //class Traits = memory_pool_item_traits<T>

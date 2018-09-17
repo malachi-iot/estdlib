@@ -258,14 +258,10 @@ TEST_CASE("experimental tests")
                 // since its pool removal is kicked off by shared_ptr's auto destruction
                 // at the moment if you want to bypass that, then in this condition
                 // only you can call pool.destroy
-#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
-                REQUIRE(_p.use_count() == 1);
-
-#else
-                REQUIRE(_p.use_count() == 0);
-
-                pool.destroy(_p);
+#ifndef FEATURE_ESTD_EXP_AUTOCONSTRUCT
+                _p.construct();
 #endif
+                REQUIRE(_p.use_count() == 1);
 
                 /*
                  * this doesn't do what you expect because what really needs to happen
@@ -278,6 +274,8 @@ TEST_CASE("experimental tests")
 
                 REQUIRE(p.use_count() == 1); */
 
+                REQUIRE(pool.count_free() == 9);
+
                 int counter = 0;
                 auto F2 = [&](layer3::shared_ptr<test::Dummy> p)
                 {
@@ -285,25 +283,23 @@ TEST_CASE("experimental tests")
                     REQUIRE(p.use_count() == 3);
                 };
 
-                layer3::shared_ptr<test::Dummy> p(_p);
+                layer3::shared_ptr<test::Dummy> p = _p;
 
-#ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
                 REQUIRE(_p.use_count() == 2);
 
                 F2(p);
 
                 REQUIRE(counter == 1);
 
-                //F2(_p);
+                F2(_p);
 
                 REQUIRE(p.use_count() == 2);
+
+                REQUIRE(counter == 2);
 
                 _p.reset();
 
                 REQUIRE(p.use_count() == 1);
-
-                //layer3::shared_ptr<test::Dummy> _p2 = _p;
-#endif
             }
 
             REQUIRE(pool.count_free() == 10);
