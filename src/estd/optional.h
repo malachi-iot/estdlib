@@ -65,7 +65,10 @@ public:
     }
 
     template< class U >
-    constexpr T value_or( U&& default_value ) &&
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+    constexpr
+#endif
+    T value_or( U&& default_value ) &&
     {
         return base_type::has_value() ? value() : std::move(default_value);
     }

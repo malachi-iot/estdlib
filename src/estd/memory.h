@@ -209,13 +209,29 @@ protected:
 
     const control_type& control() const { return base_type::value(); }
 
-    // run this only if we're actually connected to
-    // a managed object
-    void eval_delete()
+    ///
+    /// \brief eval_delete evaluates whether we should delete and if so, do it
+    ///
+    /// run this only if we're actually connected to a managed object
+    ///
+    /// \param with_deactivate
+    ///
+    void eval_delete(bool with_deactivate = false)
     {
-        if(--control().shared_count == 0)
+        // acquire reference to c here, just incase deactivation
+        // decouples us from it
+        control_type& c = control();
+
+        // Doing inside eval_delete due to semi-recursive nature of
+        // eval_delete call during special deleters (i.e. memory pool)
+        if(with_deactivate)
+            // when using layer3, for example, c is still valid here
+            // even though underlying value* has been decoupled
+            base_type::deactivate();
+
+        if(--c.shared_count == 0)
         {
-            control().Deleter();
+            c.Deleter();
         }
     }
 
@@ -231,12 +247,14 @@ public:
         return base_type::is_active() ? control().shared_count : 0;
     }
 
+    ///
+    /// \brief unlinks this shared_ptr from any managed object
+    ///
+    /// if use_count ends up 0, then also invokes deleter
+    ///
     void reset()
     {
-        if(!base_type::is_active()) return;
-
-        eval_delete();
-        base_type::deactivate();
+        if(base_type::is_active()) eval_delete(true);
     }
 
     typedef typename estd::remove_extent<T>::type element_type;
@@ -254,13 +272,19 @@ public:
     // that irritates the compiler
     template <class TDeleter2>
     shared_ptr2_base(T* managed, TDeleter2 d) :
-        base_type(managed, d),
+        base_type(managed, d)
+#ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
+        ,
         stored(managed)
+#endif
     {}
 
     shared_ptr2_base(T* managed) :
-        base_type(managed),
+        base_type(managed)
+#ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
+        ,
         stored(managed)
+#endif
     {}
 
     shared_ptr2_base() {}
@@ -295,6 +319,8 @@ public:
 
     ~shared_ptr2_base()
     {
+        // we *could* specify deactivate, but memory is about to vanish
+        // anyway so nobody cares about that status
         if(base_type::is_active()) eval_delete();
     }
 
