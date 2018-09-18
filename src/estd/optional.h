@@ -19,8 +19,6 @@ struct optional_base_base
 
     bool has_value() const { return m_initialized; }
 
-    operator bool() const { return has_value(); }
-
 protected:
     void has_value(bool initialized) { m_initialized = initialized; }
 };
@@ -29,6 +27,31 @@ template <class T>
 struct optional_base : optional_base_base
 {
     optional_base(bool initialized = false) : optional_base_base(initialized) {}
+
+    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
+    // TODO: will need attention on the alignment front
+    experimental::raw_instance_provider<T> provider;
+};
+
+
+// experimental: use this when we don't need an external flag, but instead some
+// specific value of T represents a NULL/not present.  To really work well this
+// needs specialization on T, which might not be easy since typedef's fall back
+// down to int, short, long, etc.
+template <class T, T null_value>
+struct optional_reserved_base
+{
+    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
+    // TODO: will need attention on the alignment front
+    experimental::raw_instance_provider<T> provider;
+
+    bool has_value() const { return provider.value() == null_value; }
+
+protected:
+    // FIX: this is a noop, but that is kind of clumsy in cases where
+    // it's passed in a false - except that currently never happens,
+    // therefore there's potential to clean this up
+    void has_value(bool) {}
 };
 
 }
@@ -38,15 +61,12 @@ template <class T, class TBase = internal::optional_base<T> >
 class optional : public TBase
 {
     typedef TBase base_type;
-    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
-    // TODO: will need attention on the alignment front
-    experimental::raw_instance_provider<T> provider;
 
 public:
     typedef T value_type;
 
-    value_type& value() { return provider.value(); }
-    const value_type& value() const { return provider.value(); }
+    value_type& value() { return base_type::provider.value(); }
+    const value_type& value() const { return base_type::provider.value(); }
 
     optional() {}
 
@@ -88,6 +108,8 @@ public:
         return v;
     }
 #endif
+
+    operator bool() const { return base_type::has_value(); }
 };
 
 }
