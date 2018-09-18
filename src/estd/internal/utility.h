@@ -68,7 +68,20 @@ struct has_member_base
 
 };
 
+template <typename>
+struct has_typedef { typedef void type; };
+
+
 } }
+
+
+// semi-formalization of https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
+#define ESTD_FN_HAS_TYPEDEF_EXP(typedef_name) \
+template<typename T, typename = void>   \
+struct has_##typedef_name##_typedef : estd::false_type {}; \
+    \
+template<typename T> \
+struct has_##typedef_name##_typedef<T, typename estd::internal::has_typedef<typename T::typedef_name>::type> : estd::true_type {};
 
 // MethodInfo usage is to resolve base classes
 // don't know at this time how to do this without using decltype

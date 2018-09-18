@@ -136,8 +136,12 @@ public:
     typedef typename traits_type::value_type value_type;
 
 protected:
+    ///
+    /// \brief Internal pool entry
+    ///
     struct item
     {
+        // TODO: consider moving this *after* value to assist in alignment/packing optimization
         size_type _next;
 
         estd::experimental::raw_instance_provider<value_type> value;
@@ -251,8 +255,15 @@ public:
         return &to_allocate.value.value();
     }
 
+    ///
+    /// \brief frees pool slot in which 'to_free' resides
+    /// \param to_free
+    ///
     void deallocate(value_type* to_free)
     {
+#ifdef DEBUG
+        // TODO: do sanity check to make sure to_free resides in proper pointer space
+#endif
         free.push_front(*item_node_traits::adjust_from(to_free));
     }
 
@@ -290,8 +301,31 @@ public:
     // know that exact type at that time
     void destroy_internal(void* value)
     {
-        destroy(*(value_type*)value);
+        destroy(*reinterpret_cast<value_type*>(value));
     }
 };
+
+#ifdef FEATURE_CPP_VARIADIC
+ESTD_FN_HAS_TYPEDEF_EXP(element_type);
+ESTD_FN_HAS_TYPEDEF_EXP(value_type);
+
+template <class TMemoryPool, class ...TArgs>
+typename TMemoryPool::value_type& make_shared(TMemoryPool& pool, TArgs&&...args)
+{
+    typedef typename TMemoryPool::value_type value_type;
+
+#ifdef FEATURE_CPP_STATIC_ASSERT
+    static_assert(has_value_type_typedef<TMemoryPool>::value, "Expecting memory pool with value_type");
+    static_assert(has_element_type_typedef<value_type>::value, "Expecting shared_ptr with element_type");
+#endif
+
+    value_type& value = pool.construct();
+
+    value.construct(std::forward<TArgs>(args)...);
+
+    return value;
+}
+#endif
+
 
 }}

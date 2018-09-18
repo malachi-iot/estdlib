@@ -304,5 +304,21 @@ TEST_CASE("experimental tests")
 
             REQUIRE(pool.count_free() == 10);
         }
+        SECTION("memory-pool specific make_shared")
+        {
+            memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
+            typedef typename decltype (pool)::value_type shared_ptr;
+
+            // would be better to do this kind of in reverse, where make_shared can take any allocator,
+            // including a memory pool
+            shared_ptr& p = experimental::make_shared(pool);
+
+            REQUIRE(p.use_count() == 1);
+            REQUIRE(pool.count_free() == 9);
+
+            p.reset();  // will auto-destroy Dummy and free from pool
+
+            REQUIRE(pool.count_free() == 10);
+        }
     }
 }

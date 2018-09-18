@@ -98,12 +98,13 @@ static typename estd::enable_if<!internal::has_destroy_method<TAlloc>::value, bo
     return false;
 }
 
+/*
 // experimental feature, has_typedef (lifted from PGGCC-13)
 template<typename>
 struct has_typedef
 {
     typedef void type;
-};
+}; */
 
 // since < c++11 can't do static constexpr bool functions, we need an alternate
 // way to build up specializations based on attribute_traits.  Also has benefit
