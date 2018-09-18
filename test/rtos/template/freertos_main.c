@@ -52,6 +52,8 @@
 
 void test_task(void*);
 
+void got_ip_event();
+
 
 
 /******************************************************************************
@@ -83,6 +85,8 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
 #endif
             // 2.0.0-740 never gets here, but arp and ping shows IP address
             // does actually get assigned
+            // 3.2.0-708 *does* get here, so I am gonna assume everything over 3.0
+            // arrives here
             ESP_LOGI(TAG, "got ip:%s",
                  ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
 #endif
@@ -95,6 +99,10 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
                 esp_get_free_heap_size(),
 #endif
                 __LINE__);
+
+#if ESTD_IDF_VER >= ESTD_IDF_VER_3_0_0
+            got_ip_event();
+#endif
             break;
 
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
@@ -131,6 +139,14 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
 #endif
 }
 
+
+/*
+// unforunately this doesn't work out presumably because it's in the
+// same file as freertos_main so can't be non-linked easily... ?
+void __attribute__((weak)) got_ip_event()
+{
+
+} */
 
 #ifdef CONFIG_WIFI_SSID
 /******************************************************************************
