@@ -44,6 +44,9 @@ else ifeq ($(word 1,$(IDF_VER_MAIN)),v3)
 	# has 'dev' or similar in the middle, complicating matters
 	IDF_VER_TAG=$(word 2,$(IDF_VER))
 	IDF_VER_SUFFIX=$(word 3,$(IDF_VER))
+	ifeq ($(IDF_VER_SUFFIX),)
+		IDF_VER_SUFFIX = 0
+	endif
 	IDF_VER_GIT=$(word 4,$(IDF_VER))
 else
 
