@@ -52,3 +52,13 @@ constexpr int c_strcmp( char const* lhs, char const* rhs )
 #define ESTD_IDF_VER_3_1_0_1319 ESTD_BUILD_IDF_VER(3, 1, 0, 1319)
 #define ESTD_IDF_VER_3_2_0_209  ESTD_BUILD_IDF_VER(3, 2, 0, 209)
 #define ESTD_IDF_VER_3_2_0_708  ESTD_BUILD_IDF_VER(3, 2, 0, 708)
+
+// since C preprocessor is terrible at string comparisons, we make these
+// numeric
+#define ESTD_IDF_VER_TAG_UNKNOWN    -1
+#define ESTD_IDF_VER_TAG_NONE       0
+#define ESTD_IDF_VER_TAG_DEV        1
+#define ESTD_IDF_VER_TAG_RC1        2
+#define ESTD_IDF_VER_TAG_RC2        3
+#define ESTD_IDF_VER_TAG_RC         4
+#define ESTD_IDF_VER_TAG_BETA1      5
