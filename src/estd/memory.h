@@ -6,7 +6,8 @@
 #include "internal/platform.h"
 #include "internal/value_evaporator.h"
 
-#define FEATURE_ESTD_SHARED_PTR_ALIAS
+// turns on or off the 'stored' pointer feature of a shared_ptr
+//#define FEATURE_ESTD_SHARED_PTR_ALIAS
 #define FEATURE_ESTD_WEAK_PTR
 
 namespace estd {
@@ -140,8 +141,10 @@ struct shared_ptr_inline_deleter_control_block<T, void (*)(T*, TContext)
 };
 
 // memory for 'shared' has been allocated in a way which the memory itself
-// will be freed by a party outside shared_ptr, but we still need to explicitly
-// call destructor when the ref count goes to 0
+// will be freed by a party outside shared_ptr, but we still need to wire up
+// destructor call for when ref count goes to 0
+// NOTE: this might be better served as the default deleter in shared_ptr_control_block itself
+// we might save some space on virtual function tables
 template <class T>
 struct shared_ptr_inline_deleter_control_block<T, void> : shared_ptr_control_block<T>
 {
@@ -392,6 +395,8 @@ public:
 
 #ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
     shared_ptr() { this->stored = &(base_type::provided()); }
+#else
+    shared_ptr() {}
 #endif
 
 
