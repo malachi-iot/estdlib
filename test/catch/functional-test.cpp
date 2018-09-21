@@ -170,6 +170,31 @@ TEST_CASE("functional")
 
             REQUIRE(!val);
         }
+        SECTION("layer1 version")
+        {
+            layer1::optional<int, -1> val;
+
+            REQUIRE(*val == -1);
+
+            REQUIRE(!val);
+
+            val = 5;
+
+            REQUIRE(val.has_value());
+            REQUIRE(*val == 5);
+
+            optional<int> val2(val);
+            layer1::optional<int> val3(val2);
+
+            REQUIRE(val2);
+            REQUIRE(val3);
+            REQUIRE(*val2 == 5);
+            REQUIRE(*val3 == 5);
+
+            int sz = sizeof(val);
+
+            REQUIRE(sz == sizeof(int));
+        }
     }
 }
 

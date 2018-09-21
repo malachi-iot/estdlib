@@ -126,6 +126,7 @@ struct raw_instance_provider
 #endif
 
     T& value() { return *reinterpret_cast<T*>(buf); }
+    const T& value() const { return *reinterpret_cast<const T*>(buf); }
 };
 
 // tracks as a pointer, but presents as an inline instance/reference

@@ -26,11 +26,16 @@ protected:
 template <class T>
 struct optional_base : optional_base_base
 {
+    typedef T value_type;
+
     optional_base(bool initialized = false) : optional_base_base(initialized) {}
 
     //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
     // TODO: will need attention on the alignment front
     experimental::raw_instance_provider<T> provider;
+
+    value_type& value() { return provider.value(); }
+    const value_type& value() const { return provider.value(); }
 };
 
 
@@ -86,10 +91,11 @@ class optional : public TBase
     typedef TBase base_type;
 
 public:
-    typedef T value_type;
+    typedef typename base_type::value_type value_type;
 
-    value_type& value() { return base_type::provider.value(); }
-    const value_type& value() const { return base_type::provider.value(); }
+    //void value(value_type& v) { base_type::value(v); }
+    value_type& value() { return base_type::value(); }
+    const value_type& value() const { return base_type::value(); }
 
     optional() {}
 
@@ -121,11 +127,18 @@ public:
         return base_type::has_value() ? value() : std::move(default_value);
     }
 #else
-    optional(value_type& v) : base_type(true)
+    optional(value_type& copy_from) : base_type(true)
     {
         new (&value()) value_type(v);
     }
 #endif
+
+    template < class U, class TUBase >
+    optional( const optional<U, TUBase>& copy_from )
+    {
+        base_type::has_value(copy_from.has_value());
+        new (&value()) value_type(copy_from.value());
+    }
 
     optional& operator=(nullopt_t)
     {
@@ -168,5 +181,70 @@ public:
     const value_type* operator->() const { return &value(); }
 };
 
+
+// layer1 version considered experimental
+namespace layer1 {
+
+namespace internal {
+
+template <class T, T null_value>
+class optional_base
+{
+    T _value;
+
+protected:
+//public:
+    //optional_base(T& value) : _value(value) {}
+    // should always bool == true here
+    optional_base(bool) {}
+
+    optional_base() : _value(null_value) {}
+
+    void value(T& value)
+    {
+        _value = value;
+    }
+
+public:
+    typedef T value_type;
+
+    bool has_value() const { return _value != null_value; }
+    void has_value(bool) {}
+    value_type& value() { return _value; }
+    const value_type& value() const { return _value; }
+};
+
+}
+
+template <class T, T null_value = T()>
+class optional : public estd::optional<T, internal::optional_base<T, null_value> >
+{
+    typedef estd::optional<T, internal::optional_base<T, null_value> > base_type;
+    typedef typename base_type::value_type value_type;
+
+public:
+    optional() {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    optional(value_type&& v) : base_type(std::move(v))
+    { }
+
+    template < class U, class TUBase >
+    optional( estd::optional<U, TUBase>& copy_from )
+        //: base_type(copy_from)
+    {
+        // TODO: assert that copy_from has_value value aligns with incoming value() itself
+        // note that this has to be a runtime assertion
+        //value_type& v = copy_from.value();
+        //base_type::value(v);
+        new (&base_type::value()) value_type(copy_from.value());
+    }
+#else
+    optional(value_type& copy_from) : base_type(copy_from)
+    { }
+#endif
+};
+
+}
 
 }
