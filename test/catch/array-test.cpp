@@ -25,6 +25,10 @@ TEST_CASE("array/vector tests")
             REQUIRE(i2 == i);
             i++;
         }
+
+        int sz = sizeof(array1);
+
+        REQUIRE(sz == sizeof(int) * 5);
     }
     SECTION("Array layer2")
     {
@@ -43,6 +47,10 @@ TEST_CASE("array/vector tests")
             REQUIRE(i2 == i);
             i++;
         }
+
+        int sz = sizeof(array1);
+
+        REQUIRE(sz == sizeof(int*));
     }
     SECTION("Array layer3")
     {
@@ -61,6 +69,12 @@ TEST_CASE("array/vector tests")
             REQUIRE(i2 == i);
             i++;
         }
+
+        int sz = sizeof(array1);
+
+        // in theory we could deduce a smaller size_t, but declaring
+        // 'layer3::array<int>' commits us to a full size_t
+        REQUIRE(sz == sizeof(int*) + sizeof(size_t));
     }
     SECTION("Array Move Constructor")
     {
@@ -77,6 +91,10 @@ TEST_CASE("array/vector tests")
 
             REQUIRE(moved_array1[4].val == 4);
         }
+
+    }
+    SECTION("Experimental layer0 array")
+    {
 
     }
 }

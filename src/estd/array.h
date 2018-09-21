@@ -23,8 +23,15 @@ struct array_traits
 };
 
 
-template<class T, class TArray, typename size_type = std::size_t>
+//#define FEATURE_ESTD_ARRAY_PROVIDER
+
+
+template<class T, class TArray, typename size_type = std::size_t,
+         class TProvider = instance_provider<TArray> >
 struct array_base
+#ifdef FEATURE_ESTD_ARRAY_PROVIDER
+        : TProvider
+#endif
 {
     typedef T value_type;
     typedef value_type& reference;
@@ -32,21 +39,41 @@ struct array_base
     typedef value_type* pointer;
 
 protected:
+#ifdef FEATURE_ESTD_ARRAY_PROVIDER
+    typedef TProvider base_type;
+#else
     TArray m_array;
+#endif
 
     array_base() {}
 
+    array_base(const TArray& array) :
+#ifdef FEATURE_ESTD_ARRAY_PROVIDER
+        base_type(array)
+#else
+        m_array(array)
+#endif
+    {
+
+    }
+
 public:
+#ifdef FEATURE_ESTD_ARRAY_PROVIDER
+    T* data() { return base_type::value(); }
+
+    const T* data() const { return base_type::value(); }
+#else
     // Normally we deter attempts to directly acquire data, but arrays really do
     // represent hard data (even later when we utilize allocated_array as its
     // base class) so go ahead and expose this
     T* data() { return m_array; }
 
     const T* data() const { return m_array; }
+#endif
 
     // FIX: perhaps array_base is overengineered and we can merely use
     // array
-    CONSTEXPR size_type size() const { return sizeof(m_array) / sizeof(value_type); }
+    //CONSTEXPR size_type size() const { return sizeof(m_array) / sizeof(value_type); }
 
 protected:
 
@@ -57,7 +84,7 @@ protected:
         // technically should be
         //static_assert(init.size() < size(), "Receiving array too small");
 
-        T* a = m_array;
+        T* a = data();
 
         for(auto it : init)
             *a++ = it;
@@ -67,12 +94,12 @@ protected:
 public:
     reference operator[](size_type pos)
     {
-        return m_array[pos];
+        return data()[pos];
     }
 
     const_reference operator [](size_type pos) const
     {
-        return m_array[pos];
+        return data()[pos];
     }
 
 
@@ -166,15 +193,15 @@ public:
 
     typedef const iterator const_iterator;
 
-    reference front() { return m_array[0]; }
-    const_reference front() const { return  m_array[0]; }
+    reference front() { return data()[0]; }
+    const_reference front() const { return  data()[0]; }
 
 #ifdef FEATURE_ESTD_LEGACY_ARRAY_ITERATOR
     iterator begin() { return iterator(m_array); }
     const_iterator begin() const { return iterator((T* const)m_array); }
 #else
-    T* begin() { return &m_array[0]; }
-    const T* begin() const { return &m_array[0]; }
+    T* begin() { return data(); }
+    const T* begin() const { return data(); }
 #endif
 };
 
@@ -204,8 +231,8 @@ public:
     iterator end() { return iterator(base_t::m_array + N); }
     const_iterator end() const { return iterator(base_t::m_array + N); }
 #else
-    T* end() { return &base_t::m_array[N]; }
-    const T* end() const { return &base_t::m_array[N]; }
+    T* end() { return base_t::data() + N; }
+    const T* end() const { return base_t::data() + N; }
 #endif
 
     CONSTEXPR size_type size() const { return N; }
@@ -274,13 +301,14 @@ template<
     typename size_t = std::size_t
 > struct array : public experimental::array_base<T, T*, size_t>
 {
-    typedef experimental::array_base<T, T*> base_t;
+    typedef experimental::array_base<T, T*, size_t> base_t;
 
 private:
-    T* m_array() { return base_t::m_array; }
+    //T* m_array() { return base_t::m_array; }
 
 public:
-    array(T* const array) { base_t::m_array = array; }
+    array(T* const array) : base_t(array) {}
+    //{ base_t::m_array = array; }
 
     typedef size_t size_type;
     typedef T value_type;
@@ -292,8 +320,8 @@ public:
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
-    iterator end() { return iterator(&m_array()[N]); }
-    const_iterator end() const { return iterator((T* const)&m_array()[N]); }
+    iterator end() { return iterator(base_t::data() + N); }
+    const_iterator end() const { return iterator(base_t::data() + N); }
 
     CONSTEXPR size_type size() const { return N; }
 };
@@ -314,15 +342,17 @@ protected:
     size_t m_size;
 
 public:
-    array(T* const array, size_t size) : m_size(size)
+    array(T* const array, size_t size) :
+        base_t(array),
+        m_size(size)
     {
-        base_t::m_array = array;
     }
 
     template <size_t N>
-    array(T (&array) [N]) : m_size(N)
+    array(T (&array) [N]) :
+        base_t(array),
+        m_size(N)
     {
-        base_t::m_array = array;
     }
 
     typedef size_t size_type;
@@ -335,13 +365,13 @@ public:
 
     size_type size() const { return m_size; }
 
-    reference back() { return base_t::m_array[size() - 1]; }
-    const_reference back() const { return base_t::m_array[size() - 1]; }
+    reference back() { return base_t::data()[size() - 1]; }
+    const_reference back() const { return base_t::data()[size() - 1]; }
 
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
-    iterator end() { return iterator(&base_t::m_array[size()]); }
-    const_iterator end() const { return iterator((T* const)&base_t::m_array[size()]); }
+    iterator end() { return iterator(&base_t::data()[size()]); }
+    const_iterator end() const { return iterator((T* const)&base_t::data()[size()]); }
 };
 
 }
