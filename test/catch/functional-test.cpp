@@ -160,6 +160,15 @@ TEST_CASE("functional")
             optional<int> val(nullopt);
 
             REQUIRE(!val);
+
+            val = 5;
+
+            REQUIRE(val);
+            REQUIRE(*val == 5);
+
+            val = nullopt;
+
+            REQUIRE(!val);
         }
     }
 }

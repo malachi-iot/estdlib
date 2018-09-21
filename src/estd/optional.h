@@ -127,6 +127,26 @@ public:
     }
 #endif
 
+    optional& operator=(nullopt_t)
+    {
+        base_type::has_value(false);
+        return *this;
+    }
+
+    ///
+    /// \brief operator =
+    /// \param copy_from
+    /// \return
+    /// \remarks untested
+    optional& operator=(const optional& copy_from)
+    {
+        base_type::has_value(copy_from.has_value());
+        if(copy_from.has_value())
+        {
+            base_type::value(copy_from.value());
+        }
+    }
+
 #ifdef FEATURE_CPP_VARIADIC
     template< class... TArgs >
     T& emplace( TArgs&&... args )
@@ -138,6 +158,11 @@ public:
 #endif
 
     operator bool() const { return base_type::has_value(); }
+
+    value_type& operator*() { return value(); }
+    const value_type& operator*() const { return value(); }
+    value_type* operator->() { return &value(); }
+    const value_type* operator->() const { return &value(); }
 };
 
 
