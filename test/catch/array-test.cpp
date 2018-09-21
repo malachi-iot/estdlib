@@ -8,6 +8,9 @@
 
 using namespace estd;
 
+static int static_values[] = { 1, 2, 3, 4 };
+
+
 TEST_CASE("array/vector tests")
 {
     SECTION("Array")
@@ -95,6 +98,20 @@ TEST_CASE("array/vector tests")
     }
     SECTION("Experimental layer0 array")
     {
+        experimental::layer0::array_exp2<int, static_values, 4> array1;
+        int counter = 1;
 
+        for(auto i : array1)
+        {
+            REQUIRE(i == counter);
+            counter++;
+        }
+
+        REQUIRE(counter == 5);
+
+        int sz = sizeof(array1);
+
+        // even 0 size data structures in C++ report as 1 most of the time
+        REQUIRE(sz == 1);
     }
 }

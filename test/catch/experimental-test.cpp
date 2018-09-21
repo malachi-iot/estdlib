@@ -79,12 +79,18 @@ TEST_CASE("experimental tests")
     {
         SECTION("8-bit")
         {
-            typedef estd::internal::deduce_fixed_size_t<10> deducer_t;
-            REQUIRE(sizeof(deducer_t::size_type) == 1);
-        }
-        {
-            typedef estd::internal::deduce_fixed_size_t<100> deducer_t;
-            REQUIRE(sizeof(deducer_t::size_type) == 1);
+            {
+                typedef estd::internal::deduce_fixed_size_t<4> deducer_t;
+                REQUIRE(sizeof(deducer_t::size_type) == 1);
+            }
+            {
+                typedef estd::internal::deduce_fixed_size_t<10> deducer1_t;
+                REQUIRE(sizeof(deducer1_t::size_type) == 1);
+            }
+            {
+                typedef estd::internal::deduce_fixed_size_t<100> deducer_t;
+                REQUIRE(sizeof(deducer_t::size_type) == 1);
+            }
         }
         SECTION("16-bit")
         {

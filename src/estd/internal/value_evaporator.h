@@ -64,6 +64,15 @@ struct global_provider
 #endif
 };
 
+// FIX: reconcile this with global_provider
+template <class T, T* const v>
+struct global_pointer_provider
+{
+    typedef T* const value_type;
+
+    static value_type value() { return v; }
+};
+
 template <class T, T v>
 struct literal_provider : global_provider<T, v>
 {

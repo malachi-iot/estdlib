@@ -23,10 +23,10 @@ struct array_traits
 };
 
 
-//#define FEATURE_ESTD_ARRAY_PROVIDER
+#define FEATURE_ESTD_ARRAY_PROVIDER
 
 
-template<class T, class TArray, typename size_type = std::size_t,
+template<class T, class TArray, typename TSize = std::size_t,
          class TProvider = instance_provider<TArray> >
 struct array_base
 #ifdef FEATURE_ESTD_ARRAY_PROVIDER
@@ -37,6 +37,7 @@ struct array_base
     typedef value_type& reference;
     typedef const value_type& const_reference;
     typedef value_type* pointer;
+    typedef TSize size_type;
 
 protected:
 #ifdef FEATURE_ESTD_ARRAY_PROVIDER
@@ -282,6 +283,34 @@ class array<T, value, values...> : array<T, values...>
 {
 
 };
+
+
+template <class T, T* const value, size_t N>
+struct array_exp2 :
+        array_base<T, T* const,
+            size_t,
+            //typename estd::internal::deduce_fixed_size_t<N>::type,
+            global_pointer_provider<T, value> >
+{
+    typedef array_base<T, T* const,
+        size_t,
+        //typename estd::internal::deduce_fixed_size_t<N>::type,
+        global_pointer_provider<T, value> > base_type;
+    typedef typename base_type::size_type size_type;
+    //typedef typename base_type::const_iterator const_iterator;
+
+    typedef const T* const const_iterator;
+    typedef T* iterator;
+
+    // just because pointer casting is different, it creates some warnings, so brute
+    // force code again to reduce those warnings
+    iterator begin() { return base_type::data(); }
+    const_iterator begin() const { return base_type::data(); }
+
+    iterator end() { return base_type::data() + N; }
+    const_iterator end() const { return base_type::data() + N; }
+};
+
 
 
 
