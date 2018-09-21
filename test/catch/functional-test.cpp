@@ -155,6 +155,12 @@ TEST_CASE("functional")
 
             REQUIRE(val);
         }
+        SECTION("null option")
+        {
+            optional<int> val(nullopt);
+
+            REQUIRE(!val);
+        }
     }
 }
 

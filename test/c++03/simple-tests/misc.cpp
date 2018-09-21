@@ -4,6 +4,7 @@
 #include <estd/span.h>
 #include <estd/string_view.h>
 #include <estd/ostream.h>
+#include <estd/optional.h>
 
 void test()
 {
@@ -18,5 +19,9 @@ void test2()
 {
     estd::layer1::string<16> s = "hello";
 
-    char* d = s.data();
+    estd::optional<const char*> d2;
+
+    d2 = s.data();
+
+    printf("optionality: %d %s\n", d2.has_value(), d2.value());
 }

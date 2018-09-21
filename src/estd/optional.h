@@ -56,6 +56,29 @@ protected:
 
 }
 
+struct nullopt_t {
+    explicit
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    nullopt_t(int) {}
+
+#if !defined(FEATURE_CPP_INLINE_VARIABLES) && !defined(FEATURE_CPP_INLINE_STATIC)
+    /// \brief in the case where we can't easily make a global 'nullopt',
+    /// make a provision for more easily creating a nullopt_t on the fly
+    ///
+    nullopt_t() {}
+#endif
+};
+
+
+#ifdef FEATURE_CPP_INLINE_VARIABLES
+inline
+#elif defined(FEATURE_CPP_INLINE_STATIC)
+static
+#endif
+CONSTEXPR nullopt_t nullopt{0};
+
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
 template <class T, class TBase = internal::optional_base<T> >
 class optional : public TBase
@@ -69,6 +92,11 @@ public:
     const value_type& value() const { return base_type::provider.value(); }
 
     optional() {}
+
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    optional(nullopt_t) {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     template< class U = T >
@@ -111,5 +139,6 @@ public:
 
     operator bool() const { return base_type::has_value(); }
 };
+
 
 }
