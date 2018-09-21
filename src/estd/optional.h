@@ -133,6 +133,9 @@ public:
         return *this;
     }
 
+    /*
+     * Pretty sure this untested one is causing problems, and implicit
+     * one is 100% OK
     ///
     /// \brief operator =
     /// \param copy_from
@@ -145,7 +148,7 @@ public:
         {
             base_type::value(copy_from.value());
         }
-    }
+    } */
 
 #ifdef FEATURE_CPP_VARIADIC
     template< class... TArgs >
