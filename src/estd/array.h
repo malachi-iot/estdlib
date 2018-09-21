@@ -1,3 +1,6 @@
+/*
+ * @file
+ */
 #pragma once
 
 #include <stdlib.h>
@@ -368,6 +371,14 @@ public:
     CONSTEXPR size_type size() const { return N; }
 };
 
+
+template <class T, ptrdiff_t N>
+estd::layer2::array<T, N> make_array(T (&a)[N])
+{
+    return estd::layer2::array<T, N>(a);
+}
+
+
 }
 
 
@@ -415,6 +426,18 @@ public:
     iterator end() { return iterator(&base_t::data()[size()]); }
     const_iterator end() const { return iterator((T* const)&base_t::data()[size()]); }
 };
+
+template <class T, ptrdiff_t N,
+          class size_t = typename internal::deduce_fixed_size_t<N>::size_type>
+///
+/// \brief returns a layer3 array with a deduced size_t based on input array size
+/// \return
+///
+estd::layer3::array<T, size_t> make_array(T (&a)[N])
+{
+    return estd::layer3::array<T, size_t>(a);
+}
+
 
 }
 #else

@@ -54,6 +54,14 @@ TEST_CASE("array/vector tests")
         int sz = sizeof(array1);
 
         REQUIRE(sz == sizeof(int*));
+
+        auto array2 = layer2::make_array(static_values);
+
+        // compares entirety of static_values to subset of array1
+        // (excluding first 0 and terminating early since array2 is smaller)
+        bool result = estd::equal(array2.begin(), array2.end(), array1.begin() + 1);
+
+        REQUIRE(result);
     }
     SECTION("Array layer3")
     {
@@ -78,6 +86,19 @@ TEST_CASE("array/vector tests")
         // in theory we could deduce a smaller size_t, but declaring
         // 'layer3::array<int>' commits us to a full size_t
         REQUIRE(sz == sizeof(int*) + sizeof(size_t));
+
+        auto array2 = layer3::make_array(static_values);
+
+        sz = sizeof(array2);
+
+        REQUIRE(estd::is_same<decltype(array2)::size_type, uint8_t>::value);
+        // it's still big, because of padding.  above line verifies it is in fact
+        // a uint8_t
+        //REQUIRE(sz == sizeof(int*) + 1);
+
+        bool result = estd::equal(array2.begin(), array2.end(), array1.begin() + 1);
+
+        REQUIRE(result);
     }
     SECTION("Array Move Constructor")
     {
