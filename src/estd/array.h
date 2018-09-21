@@ -312,8 +312,21 @@ struct array_exp2 :
 };
 
 
+/*
+ * Won't work because 'array' would need to be a constexpr, which is
+ * invalid as a function parameter modifier
+template <class T, size_t N>
+constexpr auto make_array(T (&array)[N]) -> array_exp2<T, array, N>
+{
+    return array_exp2<T, array, N>(array);
+} */
 
-
+/*
+template <class T, class TArray, size_t N = sizeof(TArray) / sizeof(T)>
+constexpr array_exp2<T, TArray, N> make_array()
+{
+}
+*/
 }}
 #endif
 
