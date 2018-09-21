@@ -243,6 +243,14 @@ public:
     optional(value_type& copy_from) : base_type(copy_from)
     { }
 #endif
+
+    optional(estd::nullopt_t) {}
+
+    optional& operator=(estd::nullopt_t)
+    {
+        new (&base_type::value()) value_type(null_value);
+        return *this;
+    }
 };
 
 }

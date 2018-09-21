@@ -183,17 +183,30 @@ TEST_CASE("functional")
             REQUIRE(val.has_value());
             REQUIRE(*val == 5);
 
-            optional<int> val2(val);
-            layer1::optional<int> val3(val2);
+            SECTION("conversion to traditional")
+            {
+                optional<int> val2(val);
+                layer1::optional<int> val3(val2);
 
-            REQUIRE(val2);
-            REQUIRE(val3);
-            REQUIRE(*val2 == 5);
-            REQUIRE(*val3 == 5);
+                REQUIRE(val2);
+                REQUIRE(val3);
+                REQUIRE(*val2 == 5);
+                REQUIRE(*val3 == 5);
 
-            int sz = sizeof(val);
+                int sz = sizeof(val);
 
-            REQUIRE(sz == sizeof(int));
+                REQUIRE(sz == sizeof(int));
+            }
+            SECTION("nullopt")
+            {
+                val = nullopt;
+
+                REQUIRE(!val);
+
+                layer1::optional<int, -1> val(nullopt);
+
+                REQUIRE(!val);
+            }
         }
     }
 }
