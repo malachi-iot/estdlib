@@ -141,7 +141,11 @@ TEST_CASE("functional")
     {
         SECTION("simple")
         {
-            optional<int> val(5);
+            // disabling as I diagnose and clean up constructors & operator=
+            //optional<int> val(5);
+            optional<int> val;
+
+            val = 5;
 
             REQUIRE(val.has_value());
         }
@@ -181,7 +185,10 @@ TEST_CASE("functional")
             val = 5;
 
             REQUIRE(val.has_value());
-            REQUIRE(*val == 5);
+
+            int v = *val;
+
+            REQUIRE(v == 5);
 
             SECTION("conversion to traditional")
             {
@@ -196,6 +203,14 @@ TEST_CASE("functional")
                 int sz = sizeof(val);
 
                 REQUIRE(sz == sizeof(int));
+
+                val2 = val;
+
+                REQUIRE(val2);
+
+                int v = *val2;
+
+                REQUIRE(v == 5);
             }
             SECTION("nullopt")
             {

@@ -105,18 +105,35 @@ public:
     optional(nullopt_t) {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    template< class U = T >
-    optional& operator=( U&& v )
+    template < class U, class TUBase >
+    optional(optional<U, TUBase>&& move_from )
     {
+        base_type::has_value(move_from.has_value());
+        new (&value()) value_type(move_from.value());
+    }
+
+    optional(optional&&) = delete;
+
+
+    // FIX: disabling the template part of this because it's
+    // getting too greedy and consuming other 'optional' , then
+    // that results in the incorrect 'operator bool' cast
+    //template< class U = T >
+    //optional& operator=( U&& v )
+    optional& operator=(value_type&& v)
+    {
+        // FIX: ends up treating 'v' as a bool using bool operator
         new (&value()) value_type(std::move(v));
         base_type::has_value(true);
         return *this;
     }
 
+
+    /*
     optional(value_type&& v) : base_type(true)
     {
         new (&value()) value_type(std::move(v));
-    }
+    } */
 
     template< class U >
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
@@ -146,14 +163,17 @@ public:
         return *this;
     }
 
+
     /*
      * Pretty sure this untested one is causing problems, and implicit
      * one is 100% OK
+     */
     ///
     /// \brief operator =
     /// \param copy_from
     /// \return
     /// \remarks untested
+    /*
     optional& operator=(const optional& copy_from)
     {
         base_type::has_value(copy_from.has_value());
@@ -162,6 +182,18 @@ public:
             base_type::value(copy_from.value());
         }
     } */
+
+    template <class U, class TBase2>
+    optional& operator=(const optional<U, TBase2>& assign_from)
+    {
+        base_type::has_value(assign_from.has_value());
+        if(assign_from.has_value())
+        {
+            new (&base_type::value()) value_type(assign_from.value());
+            //base_type::value(assign_from.value());
+        }
+        return *this;
+    }
 
 #ifdef FEATURE_CPP_VARIADIC
     template< class... TArgs >
@@ -226,11 +258,11 @@ public:
     optional() {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    optional(value_type&& v) : base_type(std::move(v))
-    { }
+    //optional(value_type&& v) : base_type(std::move(v))
+    //{ }
 
     template < class U, class TUBase >
-    optional( estd::optional<U, TUBase>& copy_from )
+    optional( const estd::optional<U, TUBase>& copy_from )
         //: base_type(copy_from)
     {
         // TODO: assert that copy_from has_value value aligns with incoming value() itself
@@ -251,6 +283,21 @@ public:
         new (&base_type::value()) value_type(null_value);
         return *this;
     }
+
+    //template <class U = T>
+    //optional& operator=(U&& value)
+    optional& operator=(value_type&& value)
+    {
+        base_type::operator=(std::move(value));
+        return *this;
+    }
+
+    optional& operator=(estd::optional<value_type>& assign_from)
+    {
+        base_type::operator=(assign_from);
+        return *this;
+    }
+
 };
 
 }
