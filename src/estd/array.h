@@ -287,7 +287,8 @@ class array<T, value, values...> : array<T, values...>
 
 };
 
-
+// FIX: So far is not viable under gcc, but not sure why.  Merely rejects
+// anything coming into 'value'.  Maybe because 'T* const'?
 template <class T, T* const value, size_t N>
 struct array_exp2 :
         array_base<T, T* const,

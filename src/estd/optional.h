@@ -10,6 +10,13 @@ namespace estd {
 
 namespace internal {
 
+struct optional_tag_base
+{
+    typedef void optional_tag;
+
+    ESTD_FN_HAS_TYPEDEF_EXP(optional_tag)
+};
+
 struct optional_base_base
 {
     bool m_initialized;
@@ -86,7 +93,9 @@ CONSTEXPR nullopt_t nullopt{0};
 
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
 template <class T, class TBase = internal::optional_base<T> >
-class optional : public TBase
+class optional :
+        public internal::optional_tag_base,
+        public TBase
 {
     typedef TBase base_type;
 
@@ -102,6 +111,9 @@ protected:
     }
 
 public:
+    // even this doesn't help de-selecting this for value-initializer type
+    // constructor
+    //typedef void optional_tag;
     typedef typename base_type::value_type value_type;
 
     //void value(value_type& v) { base_type::value(v); }
@@ -124,6 +136,20 @@ public:
         base_type::has_value(move_from.has_value());
         new (&value()) value_type(std::move(move_from.value()));
     }
+
+    /**
+     * Just won't work.  In every case layer1 gets passed into here
+    template <class U = value_type
+            ,
+            //class = estd::enable_if_t<!estd::is_base_of<internal::optional_tag_base, U>::value >
+            class = typename estd::enable_if<!has_optional_tag_typedef<U>::value>::type
+                    >
+    optional(U&& move_from)
+    {
+        base_type::has_value(true);
+        new (&value()) value_type(std::move(move_from));
+    }
+     */
 #endif
 
     template < class U, class TUBase >
@@ -221,7 +247,7 @@ namespace layer1 {
 namespace internal {
 
 template <class T, T null_value>
-class optional_base
+class optional_base //: public estd::internal::optional_tag_base
 {
     T _value;
 
