@@ -127,24 +127,46 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
 template <class T, std::ptrdiff_t N
           //class Traits = memory_pool_item_traits<T>
           >
+///
+/// \brief Memory pool utilizing a handle-based intrusive linked list
+///
+/// Starts out with N slots, each slot comprised of 'item' structure which in turn
+/// has memory space for a full T.  It's managed so that it's properly unconstructed
+///
 class memory_pool_1
 {
 public:
-    typedef uint16_t size_type;
+    //typedef uint16_t size_type;
+    typedef typename internal::deduce_fixed_size_t<N>::size_type size_type;
+
     //typedef Traits traits_type;
     typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
     typedef typename traits_type::value_type value_type;
 
+#ifdef UNIT_TESTING
+public:
+#else
 protected:
+#endif
     ///
     /// \brief Internal pool entry
     ///
-    struct item
+    /// aligned along 'T' boundaries so that any pointers etc. in T don't cause issues
+    ///
+    struct
+#ifdef FEATURE_CPP_ALIGN
+            //alignas (alignof (value_type))
+#else
+//#error Memory pool requires memory alignment
+#endif
+            item
     {
-        // TODO: consider moving this *after* value to assist in alignment/packing optimization
-        size_type _next;
-
         estd::experimental::raw_instance_provider<value_type> value;
+
+        // put this here to ease pressure on alignment issues.  Presumably this can land on
+        // any alignment because it's not a pointer type, but because it may be a multibyte
+        // integer it might still need to be aligned?  we'll find out
+        size_type _next;
     };
 
     // going to be challenging, but attempt to decouple node storage/allocator
@@ -217,6 +239,9 @@ protected:
     // list.  again clumsy because traits aren't typically thought of as stateful
     //item_node_traits traits;
 
+    // a bit clusmy, item_node_traits instance lives inside forward list, and that also is where
+    // our memory pool is living (item_storage_exp).  Works efficiently, but convoluted.  This
+    // is why we want to decouple it from traits if we can
     typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
     list_type free;
     //intrusive_forward_list<item> free;

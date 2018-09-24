@@ -161,7 +161,8 @@ TEST_CASE("experimental tests")
 
         SECTION("simple integer pool")
         {
-            estd::experimental::memory_pool_1<int, 10> pool;
+            typedef estd::experimental::memory_pool_1<int, 10> memory_pool_type;
+            memory_pool_type pool;
 
             int* i = pool.allocate();
             REQUIRE(pool.count_free() == 9);
@@ -175,6 +176,38 @@ TEST_CASE("experimental tests")
 
             pool.destroy(i2);
             REQUIRE(pool.count_free() == 10);
+
+            constexpr int sz = sizeof(pool);
+            constexpr int sz_item = sizeof(memory_pool_type::item);
+            constexpr int sz_size_type = sizeof(memory_pool_type::size_type);
+
+            // TODO: We actually want to autodeduce this size to uint8_t, etc. eventually
+            REQUIRE(sz_size_type == sizeof(uint8_t));
+            REQUIRE(sz_item == sizeof(int) + sz_size_type);
+            REQUIRE(sz == sz_item * 10 + sz_size_type);
+        }
+        SECTION("alignment testing")
+        {
+            struct
+                    //alignas(8)
+                    test1 { int val; };
+
+            typedef estd::experimental::memory_pool_1<test1, 10> memory_pool_type;
+            memory_pool_type pool;
+
+            constexpr int sz = sizeof(pool);
+            constexpr int sz_item = sizeof(memory_pool_type::item);
+            constexpr int sz_size_type = sizeof(memory_pool_type::size_type);
+
+            // TODO: We actually want to autodeduce this size to uint8_t, etc. eventually
+            REQUIRE(sz_size_type == sizeof(uint8_t));
+
+            // Not ready yet, still experimenting
+            //REQUIRE(sz_item == sizeof(int*));
+
+            // was expecting '81' but got '84'.  didn't expect alignof/alignas to affect this,
+            // but that's why we experiment
+            //REQUIRE(sz == sz_item * 10 + sz_size_type);
         }
         SECTION("advanced shared_ptr pool")
         {
