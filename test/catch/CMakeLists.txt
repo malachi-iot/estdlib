@@ -24,6 +24,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     map-test.cpp
     memory-test.cpp
     observer-test.cpp
+    optional-test.cpp
     queue-test.cpp
     string-test.cpp
     test-data.h

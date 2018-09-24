@@ -90,12 +90,25 @@ class optional : public TBase
 {
     typedef TBase base_type;
 
+protected:
+    template < class U, class TUBase >
+    void copy(const optional<U, TUBase>& copy_from)
+    {
+        base_type::has_value(copy_from.has_value());
+        if(copy_from.has_value())
+        {
+            new (&base_type::value()) value_type(copy_from.value());
+        }
+    }
+
 public:
     typedef typename base_type::value_type value_type;
 
     //void value(value_type& v) { base_type::value(v); }
     value_type& value() { return base_type::value(); }
     const value_type& value() const { return base_type::value(); }
+
+    // --- constructors
 
     optional() {}
 
@@ -109,12 +122,33 @@ public:
     optional(optional<U, TUBase>&& move_from )
     {
         base_type::has_value(move_from.has_value());
-        new (&value()) value_type(move_from.value());
+        new (&value()) value_type(std::move(move_from.value()));
+    }
+#endif
+
+    template < class U, class TUBase >
+    optional( const optional<U, TUBase>& copy_from )
+    {
+        copy(copy_from);
     }
 
-    optional(optional&&) = delete;
+    // --- assignment operators
+
+    optional& operator=(nullopt_t)
+    {
+        base_type::has_value(false);
+        return *this;
+    }
 
 
+    template <class U, class TBase2>
+    optional& operator=(const optional<U, TBase2>& assign_from)
+    {
+        copy(assign_from);
+        return *this;
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
     // FIX: disabling the template part of this because it's
     // getting too greedy and consuming other 'optional' , then
     // that results in the incorrect 'operator bool' cast
@@ -127,73 +161,16 @@ public:
         base_type::has_value(true);
         return *this;
     }
-
-
-    /*
-    optional(value_type&& v) : base_type(true)
-    {
-        new (&value()) value_type(std::move(v));
-    } */
-
-    template< class U >
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-    constexpr
-#endif
-    T value_or( U&& default_value ) &&
-    {
-        return base_type::has_value() ? value() : std::move(default_value);
-    }
 #else
-    optional(value_type& copy_from) : base_type(true)
+    // Untested
+    optional& operator=(const value_type& v)
     {
         new (&value()) value_type(v);
+        base_type::has_value(true);
+        return *this;
     }
+
 #endif
-
-    template < class U, class TUBase >
-    optional( const optional<U, TUBase>& copy_from )
-    {
-        base_type::has_value(copy_from.has_value());
-        new (&value()) value_type(copy_from.value());
-    }
-
-    optional& operator=(nullopt_t)
-    {
-        base_type::has_value(false);
-        return *this;
-    }
-
-
-    /*
-     * Pretty sure this untested one is causing problems, and implicit
-     * one is 100% OK
-     */
-    ///
-    /// \brief operator =
-    /// \param copy_from
-    /// \return
-    /// \remarks untested
-    /*
-    optional& operator=(const optional& copy_from)
-    {
-        base_type::has_value(copy_from.has_value());
-        if(copy_from.has_value())
-        {
-            base_type::value(copy_from.value());
-        }
-    } */
-
-    template <class U, class TBase2>
-    optional& operator=(const optional<U, TBase2>& assign_from)
-    {
-        base_type::has_value(assign_from.has_value());
-        if(assign_from.has_value())
-        {
-            new (&base_type::value()) value_type(assign_from.value());
-            //base_type::value(assign_from.value());
-        }
-        return *this;
-    }
 
 #ifdef FEATURE_CPP_VARIADIC
     template< class... TArgs >
@@ -202,6 +179,30 @@ public:
         T& v = value();
         new (&v) T(std::forward<TArgs>(args)...);
         return v;
+    }
+#endif
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    template< class U >
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+    constexpr
+#endif
+    T value_or( U&& default_value ) &&
+    {
+        return base_type::has_value() ? value() : std::move(default_value);
+    }
+
+    template <class U>
+    constexpr T value_or( U&& default_value ) const&
+    {
+        return base_type::has_value() ? value() : std::move(default_value);
+    }
+#else
+    // Untested
+    template <class U>
+    const T& value_or(const U& default_value) const
+    {
+        return base_type::has_value() ? value() : default_value;
     }
 #endif
 
