@@ -99,6 +99,20 @@ TEST_CASE("optional")
             layer1::optional<int, -1> val(nullopt);
 
             REQUIRE(!val);
+
+            val = 5;
+
+            optional<int> val2;
+
+            // NOTE: according to spec, this is a semi-valid operation,
+            // though leaning on the NO because we haven't set has_value to true this way
+            val2.value() = 1;
+
+            REQUIRE(!val2);
+
+            val = val2;
+
+            REQUIRE(!val);
         }
     }
 }

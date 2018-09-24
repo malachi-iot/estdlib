@@ -287,6 +287,26 @@ class optional : public estd::optional<T, internal::optional_base<T, null_value>
     typedef estd::optional<T, internal::optional_base<T, null_value> > base_type;
     typedef typename base_type::value_type value_type;
 
+protected:
+    template < class U, class TUBase >
+    void copy(const estd::optional<U, TUBase>& copy_from)
+    {
+        if(copy_from.has_value())
+        {
+            // if has_value is true but this is null_value, we have a runtime error
+            if(copy_from.value() == null_value)
+            {
+                // TODO: assert that copy_from has_value value aligns with incoming value() itself
+                // note that this has to be a runtime assertion
+            }
+            new (&base_type::value()) value_type(copy_from.value());
+        }
+        else
+        {
+            new (&base_type::value()) value_type(null_value);
+        }
+    }
+
 public:
     optional() {}
 
@@ -305,12 +325,7 @@ public:
     template < class U, class TUBase >
     optional( const estd::optional<U, TUBase>& copy_from )
     {
-        if(copy_from.value() == null_value && copy_from.has_value())
-        {
-            // TODO: assert that copy_from has_value value aligns with incoming value() itself
-            // note that this has to be a runtime assertion
-        }
-        base_type::copy(copy_from); // has_value
+        copy(copy_from);
     }
 
     optional(estd::nullopt_t no) : base_type(no) {}
@@ -331,7 +346,7 @@ public:
 
     optional& operator=(estd::optional<value_type>& assign_from)
     {
-        base_type::operator=(assign_from);
+        copy(assign_from);
         return *this;
     }
 
