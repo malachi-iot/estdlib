@@ -138,18 +138,24 @@ public:
     }
 
     /**
-     * Just won't work.  In every case layer1 gets passed into here
+     * FIX: really do not like brute forcing the is_same here, but
+     * no provision to detect (and reject) presence of 'optional'
+     * class itself here was working.  In the spec, c++17 utilizes
+     * deduction guides for this purpose
+     **/
     template <class U = value_type
             ,
             //class = estd::enable_if_t<!estd::is_base_of<internal::optional_tag_base, U>::value >
-            class = typename estd::enable_if<!has_optional_tag_typedef<U>::value>::type
+            class = typename estd::enable_if_t<
+                  //!has_optional_tag_typedef<U>::value &&
+                    estd::is_same<U, value_type>::value
                     >
+              >
     optional(U&& move_from)
     {
         base_type::has_value(true);
         new (&value()) value_type(std::move(move_from));
     }
-     */
 #endif
 
     template < class U, class TUBase >
@@ -285,25 +291,29 @@ public:
     optional() {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    //optional(value_type&& v) : base_type(std::move(v))
-    //{ }
+    // FIX: Not doing 'U' deduction for same reason that
+    // we can't properly detect presence of 'optional' coming
+    // in here
+    //template <class U>
+    optional(value_type&& v) : base_type(std::move(v))
+    { }
 
-    template < class U, class TUBase >
-    optional( const estd::optional<U, TUBase>& copy_from )
-        //: base_type(copy_from)
-    {
-        // TODO: assert that copy_from has_value value aligns with incoming value() itself
-        // note that this has to be a runtime assertion
-        //value_type& v = copy_from.value();
-        //base_type::value(v);
-        new (&base_type::value()) value_type(copy_from.value());
-    }
 #else
-    optional(value_type& copy_from) : base_type(copy_from)
+    optional(const value_type& copy_from) : base_type(copy_from)
     { }
 #endif
+    template < class U, class TUBase >
+    optional( const estd::optional<U, TUBase>& copy_from )
+    {
+        if(copy_from.value() == null_value && copy_from.has_value())
+        {
+            // TODO: assert that copy_from has_value value aligns with incoming value() itself
+            // note that this has to be a runtime assertion
+        }
+        base_type::copy(copy_from); // has_value
+    }
 
-    optional(estd::nullopt_t) {}
+    optional(estd::nullopt_t no) : base_type(no) {}
 
     optional& operator=(estd::nullopt_t)
     {

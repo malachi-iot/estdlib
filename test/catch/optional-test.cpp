@@ -8,11 +8,10 @@ TEST_CASE("optional")
 {
     SECTION("simple")
     {
-        // disabling as I diagnose and clean up constructors & operator=
-        //optional<int> val(5);
-        optional<int> val;
+        optional<int> val(5);
+        //optional<int> val;
 
-        val = 5;
+        //val = 5;
 
         REQUIRE(val.has_value());
     }
@@ -40,6 +39,18 @@ TEST_CASE("optional")
         val = nullopt;
 
         REQUIRE(!val);
+    }
+    SECTION("looking for tag")
+    {
+        REQUIRE(internal::optional_tag_base::has_optional_tag_typedef<internal::optional_tag_base>::value);
+
+        REQUIRE(optional<int>::has_optional_tag_typedef<internal::optional_tag_base>::value);
+        REQUIRE(optional<int>::has_optional_tag_typedef<layer1::optional<int>>::value);
+
+        REQUIRE(layer1::optional<int>::has_optional_tag_typedef<internal::optional_tag_base>::value);
+        REQUIRE(layer1::optional<int>::has_optional_tag_typedef<optional<int>>::value);
+
+        REQUIRE(!layer1::optional<int>::has_optional_tag_typedef<int>::value);
     }
     SECTION("layer1 version")
     {
