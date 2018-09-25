@@ -1,3 +1,6 @@
+/**
+ *  @file
+ */
 #pragma once
 
 #include "array.h"
@@ -78,6 +81,13 @@ class deque : protected TPolicy
     array_iterator m_front;
     array_iterator m_back;
 
+    // an easy, but not the only, use case is where m_back is more
+    // to the right than m_front, indicating that m_back - m_front
+    // items are present, starting from m_front
+    // alternatively, m_back might be *before* m_front, indicating
+    // 0-m_back + m_fromt-end = range of items
+
+
     // because I don't want to waste a slot
     bool m_empty;
 
@@ -108,8 +118,9 @@ class deque : protected TPolicy
     // wouldn't handle rollovers/rollunders
     void decrement(array_iterator* i)
     {
-        // doing i-- after because we don't have a serviceable cbegin just yet
-        if(!evaluate_rollunder(i))
+        // doing i-- after because we don't have a 'before begin' iterator
+        evaluate_rollunder(i);
+        //if(!evaluate_rollunder(i))
             (*i)--;
     }
 
@@ -176,7 +187,7 @@ public:
 
     size_type max_size() const { return m_array.size(); }
 
-    bool push_back(const T& value)
+    bool push_back(const_reference value)
     {
         *m_back++ = value;
         m_empty = false;
@@ -187,11 +198,22 @@ public:
     }
 
 
-    bool push_front(const T& value)
+    ///
+    /// \brief prepend element to the double-ended queue
+    ///
+    /// this means internal iterator moves left and evaluates a rollunder
+    ///
+    /// \param value
+    /// \return
+    ///
+    bool push_front(const_reference value)
     {
-        *m_front++ = value;
+        // NOTE: doesn't do a before-begin style, but for consistency probably should
+        evaluate_rollunder(&m_front);
+        m_front--; // due to the non-before-begin approach. confusing
 
-        evaluate_rollover(&m_front);
+        *m_front = value;
+
         m_empty = false;
 
         return true;
@@ -213,12 +235,20 @@ public:
 
     reference front()
     {
-        return *m_front;
+        iterator i = m_front;
+
+        //increment(&i);
+
+        return *i;
     }
 
     const_reference front() const
     {
-        return *m_front;
+        iterator i = m_front;
+
+        //increment(&i);
+
+        return *i;
     }
 
     reference back()

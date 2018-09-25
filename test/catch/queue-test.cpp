@@ -57,6 +57,36 @@ TEST_CASE("queue-test")
             queue.pop();
         }
     }
+    SECTION("dequeue pointers and iterators")
+    {
+        layer1::deque<const int*, 10> queue;
+        typedef decltype (queue)::value_type value_type;
+
+        REQUIRE(estd::is_same<const int*, value_type>::value);
+
+        int val1 = 5;
+        const int* real_ptr = &val1;
+
+        queue.push_front(&val1);
+
+        REQUIRE(!queue.empty());
+
+        const int* out = queue.back();
+
+        REQUIRE(out != NULLPTR);
+        REQUIRE(out == real_ptr);
+        REQUIRE(*out == 5);
+
+        out = queue.front();
+
+        REQUIRE(out != NULLPTR);
+        REQUIRE(out == real_ptr);
+        REQUIRE(*out == 5);
+
+        queue.pop_front();
+
+        REQUIRE(queue.empty());
+    }
     SECTION("Emplacement tests")
     {
         queue<Dummy, layer1::deque<Dummy, 4 > > queue;
