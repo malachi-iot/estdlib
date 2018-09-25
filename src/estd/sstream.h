@@ -61,4 +61,24 @@ typedef basic_stringbuf<char, 0> stringbuf;
 
 }
 
+
+namespace layer3 {
+
+// NOTE: not defaulting null_terminated yet as I'm not sure if we want to lean one way or the
+// other for layer3 ostringstream
+// also - code compiles but is untested
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template<class TChar, bool null_terminated, class Traits = std::char_traits<TChar> >
+using basic_stringbuf = estd::internal::streambuf <
+    estd::internal::impl::basic_stringbuf<
+        layer3::basic_string < TChar, null_terminated, Traits> > >;
+
+typedef basic_stringbuf<char, 0> stringbuf;
+
+template<class TChar, bool null_terminated, class Traits = std::char_traits<TChar> >
+using basic_ostringstream = estd::internal::basic_ostream<basic_stringbuf<TChar, null_terminated, Traits> >;
+
+#endif
+}
+
 }
