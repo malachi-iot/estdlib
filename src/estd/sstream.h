@@ -9,12 +9,12 @@ namespace estd {
 namespace layer1 {
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template<class TChar, size_t N, bool null_terminated = true, class Traits = std::char_traits<TChar> >
-using basic_stringbuf = internal::streambuf <
-    internal::impl::basic_stringbuf<layer1::basic_string < TChar, N, null_terminated, Traits> > >;
+using basic_stringbuf = estd::internal::streambuf <
+    estd::internal::impl::basic_stringbuf<layer1::basic_string < TChar, N, null_terminated, Traits> > >;
 
 template<class TChar, size_t N, bool null_terminated = true, class Traits = std::char_traits<TChar> >
-using basic_out_stringbuf = internal::streambuf <
-    internal::impl::out_stringbuf<layer1::basic_string < TChar, N, null_terminated, Traits> > >;
+using basic_out_stringbuf = estd::internal::streambuf <
+    estd::internal::impl::out_stringbuf<layer1::basic_string < TChar, N, null_terminated, Traits> > >;
 
 template<size_t N, bool null_terminated = true>
 using stringbuf = basic_stringbuf<char, N, null_terminated>;

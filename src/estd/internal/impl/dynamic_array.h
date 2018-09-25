@@ -184,7 +184,7 @@ public:
     {
         // FIX: still resolving what size resolves to be for layer2 unbounded null terminated
         // strings
-        bool empty = hd.clock(0) != 0;
+        bool empty = hd.clock(0, 1) == 0;
 
         hd.cunlock();
 
