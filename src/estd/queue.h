@@ -166,11 +166,40 @@ public:
         // TODO: destruct all remaining items
     }
 
-    typedef array_iterator iterator; // I think we should use this one all the way around, not sure why I have an explicit 'array_iterator'
     typedef T value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
     typedef typename container_type::size_type size_type;
+
+
+    // THIS iterator will do rollovers.  array_iterator won't
+    struct forward_iterator
+    {
+        array_iterator current;
+        const deque& parent;
+
+        forward_iterator(const deque& parent, array_iterator current)
+            : parent(parent),
+              current(current)
+        {}
+
+        forward_iterator& operator++()
+        {
+            parent.increment(&current);
+        }
+
+        forward_iterator& operator++(int)
+        {
+            forward_iterator retval = *this;
+            ++retval;
+            return retval;
+        }
+
+        reference operator *()
+        {
+            return *current;
+        }
+    };
 
     bool empty() const { return m_empty; }
 
@@ -235,7 +264,7 @@ public:
 
     reference front()
     {
-        iterator i = m_front;
+        array_iterator i = m_front;
 
         //increment(&i);
 
@@ -244,7 +273,7 @@ public:
 
     const_reference front() const
     {
-        iterator i = m_front;
+        array_iterator i = m_front;
 
         //increment(&i);
 
@@ -253,7 +282,7 @@ public:
 
     reference back()
     {
-        iterator i = m_back;
+        array_iterator i = m_back;
 
         decrement(&i);
 
@@ -262,7 +291,7 @@ public:
 
     const_reference back() const
     {
-        iterator i = m_back;
+        array_iterator i = m_back;
 
         decrement(&i);
 

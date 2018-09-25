@@ -57,7 +57,7 @@ TEST_CASE("queue-test")
             queue.pop();
         }
     }
-    SECTION("dequeue pointers and iterators")
+    SECTION("dequeue pointers")
     {
         layer1::deque<const int*, 10> queue;
         typedef decltype (queue)::value_type value_type;
@@ -133,5 +133,21 @@ TEST_CASE("queue-test")
         {
             queue<Dummy, layer1::deque<Dummy, 4 > > q2(std::move(q));
         }
+    }
+    SECTION("layer1 iterators")
+    {
+        layer1::deque<int, 10> queue;
+        typedef decltype (queue)::forward_iterator iterator;
+
+        queue.push_back(1);
+        queue.push_back(2);
+
+        REQUIRE(queue.size() == 2);
+
+        iterator i(queue, &queue.front());
+
+        REQUIRE(*i == 1);
+        //i++;
+        //REQUIRE(*i++ == 2);
     }
 }
