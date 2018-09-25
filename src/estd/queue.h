@@ -93,21 +93,23 @@ class deque : protected TPolicy
 
     // called when i is incremented, evaluates if i reaches rollover point
     // and if so points it back at the beginning
-    void evaluate_rollover(array_iterator* i)
+    void evaluate_rollover(array_iterator* i) const
     {
         if(*i == m_array.end())
-            *i = m_array.begin();
+            // FIX: cleanup const abuse
+            *i = (array_iterator)m_array.begin();
     }
 
     // called when i is decremented, opposite of rollover check
     // returns true when a rollover is detected.  Returns whether
     // we rolled over to help with decrement (again, artifact
     // of no cbegin)
-    bool evaluate_rollunder(array_iterator* i)
+    bool evaluate_rollunder(array_iterator* i) const
     {
         if(*i == m_array.begin())
         {
-            *i = m_array.end();
+            // FIX: cleanup const abuse
+            *i = (array_iterator)m_array.end();
             return true;
         }
         else
@@ -116,7 +118,7 @@ class deque : protected TPolicy
 
     // have to do these increment/decrements out here because array iterator itself
     // wouldn't handle rollovers/rollunders
-    void decrement(array_iterator* i)
+    void decrement(array_iterator* i) const
     {
         // doing i-- after because we don't have a 'before begin' iterator
         evaluate_rollunder(i);
@@ -125,10 +127,16 @@ class deque : protected TPolicy
     }
 
     // handle rollover and empty-flag set for iterator
-    void increment(array_iterator* i, bool empty = false)
+    void increment(array_iterator* i) const //, bool empty = false)
     {
         (*i)++;
         evaluate_rollover(i);
+        //m_empty = empty;
+    }
+
+    void increment(array_iterator* i, bool empty)
+    {
+        increment(i);
         m_empty = empty;
     }
 
@@ -186,12 +194,20 @@ public:
         forward_iterator& operator++()
         {
             parent.increment(&current);
+            return *this;
+        }
+
+        // FIX: perhaps we can do reverse iteration easily here after all
+        forward_iterator& operator--()
+        {
+            parent.decrement(&current);
+            return *this;
         }
 
         forward_iterator& operator++(int)
         {
             forward_iterator retval = *this;
-            ++retval;
+            ++(*this);
             return retval;
         }
 
@@ -199,7 +215,23 @@ public:
         {
             return *current;
         }
+
+        bool operator==(const forward_iterator& compare_to)
+        {
+            return compare_to.current == current;
+        }
+
+        bool operator!=(const forward_iterator& compare_to)
+        {
+            return compare_to.current != current;
+        }
     };
+
+    typedef forward_iterator iterator;
+
+    iterator begin() { return iterator(*this, m_front); }
+
+    iterator end() { return iterator(*this, m_back); }
 
     bool empty() const { return m_empty; }
 
@@ -307,7 +339,8 @@ public:
 
         new (&retval) value_type(std::forward<TArgs>(args)...);
 
-        increment(&m_front);
+        decrement(&m_front);
+        m_empty = false;
 
         return retval;
     }
@@ -320,7 +353,7 @@ public:
 
         new (&retval) value_type(std::forward<TArgs>(args)...);
 
-        increment(&m_back);
+        increment(&m_back, false);
 
         return retval;
     }

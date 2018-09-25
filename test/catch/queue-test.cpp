@@ -93,7 +93,9 @@ TEST_CASE("queue-test")
 
         queue.emplace(4, "hi there");
 
-        REQUIRE(queue.size() == 1);
+        int size = queue.size();
+
+        REQUIRE(size == 1);
         REQUIRE(queue.back().val1 == 4);
         REQUIRE(queue.pop());
     }
@@ -146,8 +148,17 @@ TEST_CASE("queue-test")
 
         iterator i(queue, &queue.front());
 
-        REQUIRE(*i == 1);
-        //i++;
-        //REQUIRE(*i++ == 2);
+        REQUIRE(*i++ == 1);
+        REQUIRE(*i++ == 2);
+
+        int counter = 0;
+
+        for(auto& i2 : queue)
+        {
+            counter++;
+            REQUIRE(i2 == counter);
+        }
+
+        REQUIRE(counter == 2);
     }
 }
