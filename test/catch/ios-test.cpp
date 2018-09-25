@@ -280,4 +280,25 @@ TEST_CASE("iostreams")
         //uint32_t val[64];
         //estd::internal::impl::out_span_streambuf<uint32_t, 32> test(val, 32);
     }
+    SECTION("spitting out various strings")
+    {
+        experimental::ostringstream<256> out;
+
+        SECTION("layer2")
+        {
+            estd::layer2::const_string s = "hi2u";
+
+            out << s;
+
+            REQUIRE(out.rdbuf()->str().size() == 4);
+        }
+        SECTION("layer3")
+        {
+            estd::layer3::const_string s = "hi2u";
+
+            out << s;
+
+            REQUIRE(out.rdbuf()->str().size() == 4);
+        }
+    }
 }
