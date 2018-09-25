@@ -9,11 +9,19 @@
     },
     "authors":
     [
-      {
-        "name": "Malachi Burke",
-        "maintainer": true
-      }
+        {
+            "name": "Malachi Burke",
+            "maintainer": true
+        }
     ],
+    "build":
+    {
+        "srcFilter":
+        [
+            "+<src/>",
+            "-<src/.idea>"
+        ]
+    },
     "version": "0.1.0",
     "platforms": "*"
 }
