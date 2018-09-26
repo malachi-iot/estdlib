@@ -26,7 +26,6 @@ struct test_specialization<layer1::allocator<T, N> > :
     {}
 };
 
-
 TEST_CASE("allocator tests")
 {
     SECTION("fixed allocator handle descriptor")
@@ -174,5 +173,17 @@ TEST_CASE("allocator tests")
 
             REQUIRE(capacity == 100);
         }
+    }
+    SECTION("tag detection")
+    {
+        typedef estd::layer1::allocator<int, 100 > allocator_type;
+        typedef allocator_type::is_pinned_tag_exp test_typedef;
+
+        allocator_type a;
+
+        int& val = a.lock(0);
+
+        // FIX: something is wrong here, this should work
+        REQUIRE(has_is_pinned_tag_exp_typedef<allocator_type>::value);
     }
 }

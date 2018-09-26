@@ -27,7 +27,7 @@ public:
     typedef TTraits allocator_traits;
 
     static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
-    static bool CONSTEXPR is_pinned = internal::has_pinned_tag_exp_typedef<allocator_type>::value;
+    static bool CONSTEXPR is_pinned = internal::has_is_pinned_tag_exp_typedef<allocator_type>::value;
 
 protected:
     // Used because for stateless, this is actually NOT a ref

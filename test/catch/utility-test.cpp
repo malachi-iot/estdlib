@@ -12,7 +12,13 @@ ESTD_FN_HAS_METHOD(void, test_fn4,)
 struct test_class_1
 {
     void test_fn1() {}
+
+    typedef void tag1;
+    typedef void test_tag;
 };
+
+ESTD_FN_HAS_TYPEDEF_EXP(tag1);
+ESTD_FN_HAS_TAG_EXP(test);
 
 struct test_class_2 : test_class_1
 {
@@ -98,7 +104,12 @@ TEST_CASE("utility")
     }
     SECTION("has_typedef testing")
     {
-        // FIX: I think my has-typedef code isn't fully functioning, so be sure we test
-        // that here
+        REQUIRE(has_tag1_typedef<test_class_1>::value);
+        REQUIRE(has_tag1_typedef<test_class_2>::value);
+        REQUIRE(has_tag1_typedef<test_class_4>::value);
+
+        REQUIRE(has_test_tag<test_class_1>::value);
+        REQUIRE(has_test_tag<test_class_2>::value);
+        REQUIRE(has_test_tag<test_class_4>::value);
     }
 }

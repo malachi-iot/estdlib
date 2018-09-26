@@ -48,10 +48,7 @@ TEST_CASE("stack")
         //REQUIRE(!estd::internal::has_locking_tag<container_type::allocator_type>::value);
         //REQUIRE(!container_type::accessor::is_locking);
 
-        // FIX: expecting this to be true, so something is not working as expected
-        // here
-        //REQUIRE(estd::internal::has_pinned_tag_exp_typedef<container_type::allocator_type>::value);
-        //REQUIRE(container_type::accessor::is_pinned);
+        REQUIRE(container_type::accessor::is_pinned);
 
         SECTION("aggressive push of accessor")
         {

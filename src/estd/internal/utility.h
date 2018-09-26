@@ -83,6 +83,13 @@ struct has_##typedef_name##_typedef : estd::false_type {}; \
 template<typename T> \
 struct has_##typedef_name##_typedef<T, typename estd::internal::has_typedef<typename T::typedef_name>::type> : estd::true_type {};
 
+#define ESTD_FN_HAS_TAG_EXP(tag_name_minus_suffix) \
+template<typename T, typename = void>   \
+struct has_##tag_name_minus_suffix##_tag : estd::false_type {}; \
+    \
+template<typename T> \
+struct has_##tag_name_minus_suffix##_tag<T, typename estd::internal::has_typedef<typename T::tag_name_minus_suffix##_tag>::type> : estd::true_type {};
+
 // MethodInfo usage is to resolve base classes
 // don't know at this time how to do this without using decltype
 #ifdef FEATURE_CPP_DECLTYPE

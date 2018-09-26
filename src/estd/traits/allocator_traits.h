@@ -132,7 +132,7 @@ struct has_locking_tag : estd::false_type {};
 template<typename T>
 struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag>::type> : estd::true_type {};
 
-ESTD_FN_HAS_TYPEDEF_EXP(pinned_tag_exp)
+ESTD_FN_HAS_TYPEDEF_EXP(is_pinned_tag_exp)
 
 template<typename T, typename = void>
 struct has_stateful_tag : estd::false_type {};
