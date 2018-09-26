@@ -59,7 +59,12 @@ TEST_CASE("stack")
             s.push(&dummy1);
             // FIX: Need to clean this up so a lock() isn't required for layer1-layer3
             // (or other 'pinned' memory scenarios)
+            const estd::test::Dummy* val = s.top();
+
+            REQUIRE(val->val1 == 7);
             REQUIRE(s.top().lock()->val1 == 7);
+            REQUIRE(s.top()->val1 == 7);
+
         }
     }
 }

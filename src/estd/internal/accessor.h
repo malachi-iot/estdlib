@@ -34,6 +34,8 @@ protected:
     typedef typename base_t::allocator_ref allocator_ref;
 
     typedef typename estd::conditional<is_locking, value_type, value_type&>::type lockless_value_type;
+    typedef typename estd::conditional<is_pinned, value_type&, value_type>::type ref_when_pinned;
+    typedef typename estd::conditional<is_pinned, const value_type&, value_type>::type const_ref_when_pinned;
 
     handle_with_offset h;
 
@@ -91,20 +93,43 @@ public:
         allocator_traits::cunlock(base_t::get_allocator(), h.handle());
     }
 
-    operator value_type()
+    operator ref_when_pinned()
     {
         // copies it - beware, some T we don't want to copy!
-        value_type retval = lock();
+        ref_when_pinned retval = lock();
 
         unlock();
 
         return retval;
     }
 
-    operator value_type() const
+    operator const_ref_when_pinned() const
     {
         // copies it - beware, some T we don't want to copy!
-        value_type retval = clock();
+        const_ref_when_pinned retval = clock();
+
+        cunlock();
+
+        return retval;
+    }
+
+    // EXPERIMENTAL: to try to accomodate scenarios where value_type is a *
+    ref_when_pinned operator->()
+    {
+        // copies it - beware, some T we don't want to copy!
+        ref_when_pinned retval = lock();
+
+        unlock();
+
+        return retval;
+    }
+
+
+    // EXPERIMENTAL: to try to accomodate scenarios where value_type is a *
+    const_ref_when_pinned operator->() const
+    {
+        // copies it - beware, some T we don't want to copy!
+        const_ref_when_pinned retval = clock();
 
         cunlock();
 
