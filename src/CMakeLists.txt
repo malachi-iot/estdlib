@@ -12,6 +12,7 @@ set(SOURCE_FILES
         estd/cstdint.h
         estd/cstddef.h
         estd/chrono.h
+        estd/deque.h
 
         estd/exp/memory_pool.h
         estd/exp/observer.h

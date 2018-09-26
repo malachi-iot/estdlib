@@ -85,6 +85,9 @@ TEST_CASE("utility")
         REQUIRE(has_test_fn1_method<test_class_3<> >::value);
         REQUIRE(has_test_fn2_method<test_class_3<> >::value);
         REQUIRE(has_test_fn3_method<test_class_3<> >::value);
+
+        // because method signature matching includes return value
+        REQUIRE(!has_test_fn3_method<test_class_3<int> >::value);
     }
     SECTION("class 4")
     {
