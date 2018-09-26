@@ -133,6 +133,12 @@ template<typename T>
 struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag>::type> : estd::true_type {};
 
 ESTD_FN_HAS_TYPEDEF_EXP(is_pinned_tag_exp)
+// NOTE: Not yet active, following 'pinned' - replaces above has typedef
+// (has tag is a more tailored version, hopefully easier to read and use)
+// currently differs from prior paradigm in that underlying typedef is
+// expected to be 'pinned_tag' and not 'is_pinned_tag'.  Undecided if that's
+// my preference, so yet another reason this is experimental
+ESTD_FN_HAS_TAG_EXP(pinned)
 
 template<typename T, typename = void>
 struct has_stateful_tag : estd::false_type {};

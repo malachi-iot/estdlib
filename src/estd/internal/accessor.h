@@ -105,7 +105,8 @@ public:
 
     operator const_ref_when_pinned() const
     {
-        // copies it - beware, some T we don't want to copy!
+        // when not pinned memory, copies it -
+        // beware, some T we don't want to copy!
         const_ref_when_pinned retval = clock();
 
         cunlock();
@@ -114,6 +115,8 @@ public:
     }
 
     // EXPERIMENTAL: to try to accomodate scenarios where value_type is a *
+    // be careful because in non-pinned scenarios this will be a temporary/copy
+    // though a copy of a pointer type, so probably OK
     ref_when_pinned operator->()
     {
         // copies it - beware, some T we don't want to copy!
@@ -145,6 +148,14 @@ public:
     }
 
 
+    bool operator <(const value_type& compare_to) const
+    {
+        bool is_less_than = clock() < compare_to;
+        cunlock();
+        return is_less_than;
+    }
+
+
     bool operator ==(const value_type& compare_to) const
     {
         const value_type& v = clock();
@@ -154,6 +165,13 @@ public:
         cunlock();
 
         return result;
+    }
+
+    bool operator !=(const value_type& compare_to) const
+    {
+        bool is_not_equal = clock() != compare_to;
+        cunlock();
+        return is_not_equal;
     }
 };
 
