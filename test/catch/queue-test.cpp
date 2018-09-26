@@ -161,4 +161,30 @@ TEST_CASE("queue-test")
 
         REQUIRE(counter == 2);
     }
+    SECTION("edge case layer1 deque operations")
+    {
+        layer1::deque<int, 10> queue;
+
+        queue.push_front(1);
+
+        REQUIRE(queue.back() == 1);
+        REQUIRE(queue.front() == 1);
+        REQUIRE(queue.size() == 1);
+
+        queue.push_front(2);
+
+        REQUIRE(queue.back() == 1);
+        REQUIRE(queue.front() == 2);
+        REQUIRE(queue.size() == 2);
+
+        queue.pop_back();
+
+        REQUIRE(queue.back() == 2);
+        REQUIRE(queue.front() == 2);
+        REQUIRE(queue.size() == 1);
+
+        queue.pop_front();
+
+        REQUIRE(queue.size() == 0);
+    }
 }

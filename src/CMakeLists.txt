@@ -104,6 +104,7 @@ set(SOURCE_FILES
         estd/ratio.h
         estd/span.h
         estd/sstream.h
+        estd/stack.h
         estd/streambuf.h
         estd/string.h
         estd/string_view.h
@@ -116,8 +117,7 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-
-         )
+        )
 
 add_library(estd_lib ${SOURCE_FILES})
 

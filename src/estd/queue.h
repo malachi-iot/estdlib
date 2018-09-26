@@ -61,6 +61,8 @@ namespace layer1 {
 // then keep this general use one around as it is arguably faster using direct pointers.
 // For above, refactoring to standard deque<T, Allocator> would fit the bill - 'grow' type
 // operations would merely compile-time fail [as they should] for fixed allocations
+// TODO: Likely we'll want to mate this to a layer1::stack implementation, right
+// now it seems they differ only in that stack has more of a constant m_front
 template <class T, size_t N, class TPolicy = experimental::fast_dequeue_policy >
 class deque : protected TPolicy
 {
@@ -204,7 +206,7 @@ public:
             return *this;
         }
 
-        forward_iterator& operator++(int)
+        forward_iterator operator++(int)
         {
             forward_iterator retval = *this;
             ++(*this);
@@ -228,6 +230,7 @@ public:
     };
 
     typedef forward_iterator iterator;
+    typedef const iterator const_iterator;
 
     iterator begin() { return iterator(*this, m_front); }
 
@@ -280,6 +283,17 @@ public:
         return true;
     }
 
+
+    bool pop_back()
+    {
+        back().~value_type();
+
+        decrement(&m_back);
+
+        if(m_front == m_back) m_empty = true;
+
+        return true;
+    }
 
     bool pop_front()
     {
