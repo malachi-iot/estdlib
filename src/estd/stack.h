@@ -22,11 +22,20 @@ public:
     typedef typename container_type::reference reference;
     typedef typename container_type::const_reference const_reference;
 
+    // NOTE: because of our lean towards locking-memory possibilities,
+    // remember to use accessor when retrieving elements
+    typedef typename container_type::accessor accessor;
+
     void push(const value_type& value) { c.push_back(value); }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    void push(value_type&& value) { c.push_back(std::move(value)); }
+#endif
+
     void pop() { c.pop_back(); }
 
-    reference top() { return c.back(); }
-    const_reference top() const { return c.back(); }
+    accessor top() { return c.back(); }
+    const accessor& top() const { return c.back(); }
 
     size_type size() const { return c.size(); }
     bool empty() const { return c.empty(); }
@@ -47,18 +56,19 @@ namespace layer1 {
 // cases but not others, but I'd rather the extra complexity of accessors everywhere just to
 // maintain consistency
 template <class T, size_t N>
-class stack : public estd::stack<T, estd::layer1::deque<T, N> >
-//class stack : public estd::stack<T, estd::layer1::vector<T, N> >
+//class stack : public estd::stack<T, estd::layer1::deque<T, N> >
+class stack : public estd::stack<T, estd::layer1::vector<T, N> >
 {
-    typedef estd::stack<T, estd::layer1::deque<T, N> > base_type;
-    //typedef estd::stack<T, estd::layer1::vector<T, N> > base_type;
+    //typedef estd::stack<T, estd::layer1::deque<T, N> > base_type;
+    typedef estd::stack<T, estd::layer1::vector<T, N> > base_type;
 
 public:
     typedef typename base_type::container_type::iterator iterator;
     typedef typename base_type::container_type::const_iterator const_iterator;
 
     // so that we can iterate from 'bottom' of stack all the way to top
-    // spec does not have this functionality
+    // spec does not have this functionality, which is good.  a layer1-layer3 structure
+    // it's reasonable to assume we can do this, but not an abstracted stack
     iterator begin() { return base_type::c.begin(); }
     iterator end() { return base_type::c.end(); }
 };

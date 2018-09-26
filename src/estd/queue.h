@@ -179,6 +179,7 @@ public:
     typedef T value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
+    typedef reference accessor;
     typedef typename container_type::size_type size_type;
 
 
