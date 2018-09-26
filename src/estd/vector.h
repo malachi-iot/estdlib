@@ -59,6 +59,9 @@ class vector : public estd::vector<T,
     > base_t;
 
 public:
+    typedef typename base_t::reference reference;
+    typedef typename base_t::const_reference const_reference;
+
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
     vector() = default;
 #endif
