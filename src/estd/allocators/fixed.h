@@ -54,6 +54,8 @@ public:
 
     // technically we ARE locking since we have to convert the dummy 'bool' handle
     // to a pointer
+    // FIX: need to make two different tags so that we can differenciate between
+    // handles which need a conversion and handles whose memory may move around
 
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_locking() { return true; }
@@ -138,6 +140,9 @@ struct single_fixedbuf_allocator : public
     typedef typename base_t::size_type size_type;
 
 public:
+    // experimental tag reflecting that this memory block will never move
+    typedef void is_pinned_tag_exp;
+
     single_fixedbuf_allocator() {}
 
     // FIX: something bizzare is happening here and base_t is ending

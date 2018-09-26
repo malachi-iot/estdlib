@@ -96,4 +96,9 @@ TEST_CASE("utility")
         REQUIRE(has_test_fn3_method<test_class_4>::value);
         REQUIRE(has_test_fn4_method<test_class_4>::value);
     }
+    SECTION("has_typedef testing")
+    {
+        // FIX: I think my has-typedef code isn't fully functioning, so be sure we test
+        // that here
+    }
 }

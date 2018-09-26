@@ -110,12 +110,29 @@ struct has_typedef
 // way to build up specializations based on attribute_traits.  Also has benefit
 // of easier SFINAE application for allocators who don't have tags present
 
+// locking_tag tells us two things:
+// 1) that locking calls are required to acquire references to underlying data
+// 2) that the requisite locking API is present
+//
+// if locking_tag is not present, the API may still optionally be there, but is
+// not required as handle_type will more or less be pointer type
+// our estd::allocator_traits will always provide a lock/unlock API, even if it's
+// basically a noop
+//
+// FIX: note also that locking actually carries two distinct functionalities:
+// 1) conversion from a handle to a memory location
+// 2) isolation and access to memory location
+//
+// these two operations have occasionally divergent use cases, i.e. it's reasonable to grab a lingering
+// reference to a fixed memory location through a handle, but not a lingering reference to a possibly
+// moving/gc'd memory location.  so with that, we need to revise tags to reflect those 2 distinct cases
 template<typename T, typename = void>
 struct has_locking_tag : estd::false_type {};
 
 template<typename T>
 struct has_locking_tag<T, typename estd::internal::has_typedef<typename T::is_locking_tag>::type> : estd::true_type {};
 
+ESTD_FN_HAS_TYPEDEF_EXP(pinned_tag_exp)
 
 template<typename T, typename = void>
 struct has_stateful_tag : estd::false_type {};

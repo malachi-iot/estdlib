@@ -2,6 +2,8 @@
 
 #include <estd/stack.h>
 
+#include "test-data.h"
+
 TEST_CASE("stack")
 {
     SECTION("layer1")
@@ -40,5 +42,27 @@ TEST_CASE("stack")
         REQUIRE(s.top() == 1);
         s.pop();
 
+        // underlying fixed structure does have a pseudo-handle, so it's 'locking'.
+        // we need to split is_locking into something like is_pinned and is_handle
+        // because even though 'is_handle' implies NOT pinned, that's not always the case
+        //REQUIRE(!estd::internal::has_locking_tag<container_type::allocator_type>::value);
+        //REQUIRE(!container_type::accessor::is_locking);
+
+        // FIX: expecting this to be true, so something is not working as expected
+        // here
+        //REQUIRE(estd::internal::has_pinned_tag_exp_typedef<container_type::allocator_type>::value);
+        //REQUIRE(container_type::accessor::is_pinned);
+
+        SECTION("aggressive push of accessor")
+        {
+            // NOTE: this test probably belongs in 'vector' area
+            estd::layer1::stack<const estd::test::Dummy*, 10> s;
+            estd::test::Dummy dummy1(7, "hi2u");
+
+            s.push(&dummy1);
+            // FIX: Need to clean this up so a lock() isn't required for layer1-layer3
+            // (or other 'pinned' memory scenarios)
+            REQUIRE(s.top().lock()->val1 == 7);
+        }
     }
 }

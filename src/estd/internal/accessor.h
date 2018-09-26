@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #pragma once
 
 // accessor is a special variety of allocator_descriptor which tracks
@@ -23,9 +26,14 @@ public:
     //typedef typename base_t::allocator_traits allocator_traits;
     typedef TTraits allocator_traits;
 
+    static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
+    static bool CONSTEXPR is_pinned = internal::has_pinned_tag_exp_typedef<allocator_type>::value;
+
 protected:
     // Used because for stateless, this is actually NOT a ref
     typedef typename base_t::allocator_ref allocator_ref;
+
+    typedef typename estd::conditional<is_locking, value_type, value_type&>::type lockless_value_type;
 
     handle_with_offset h;
 

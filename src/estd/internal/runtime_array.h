@@ -38,6 +38,8 @@ protected:
     // allocated array pointed to a static const(expr) * of some kind
     TImpl m_impl;
 
+    static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
+
 public:
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
