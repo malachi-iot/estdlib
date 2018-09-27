@@ -22,6 +22,7 @@ template <class T, class TBuffer, typename TSize,
           typename TDiff = typename estd::make_signed<TSize>::type>
 struct single_allocator_base
 {
+    // TODO: Phase this out in favor of SFINAE/detection method from allocator_traits
     typedef const void* const_void_pointer;
     // really I want it an empty struct.  Bool is somewhat convenient though since we can
     // represent an invalid handle too
@@ -35,12 +36,31 @@ struct single_allocator_base
     //typedef handle_type handle_with_size;
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
     typedef T value_type;
+    // NOTE: these pointer typedefs are actually deprecated, but useful for use to have
+    // so I'm keeping them around
     typedef T* pointer;
+    typedef const T* const_pointer;
     typedef estd::experimental::stateful_nonlocking_accessor<single_allocator_base> accessor;
 
 protected:
-
+    // NOTE: Would make private but 'adjust_offset_exp' (which basic_string_view uses)
+    // needs it.  Haven't quite yet moved this to 'aligned_storage' yet, but it's on its
+    // way
     TBuffer buffer;
+
+protected:
+
+    // use this instead of direct buffer reference, for upcoming aligned_storage
+    // compatibility
+    pointer data(size_type offset = 0)
+    {
+        return static_cast<pointer>(&buffer[offset]);
+    }
+
+    const_pointer data(size_type offset = 0) const
+    {
+        return static_cast<const_pointer>(&buffer[offset]);
+    }
 
     // for inline buffers, we want the option of leaving it untouched
     single_allocator_base() {}
@@ -74,22 +94,22 @@ public:
 
     value_type& lock(handle_type, int pos = 0, int = 0)
     {
-        return buffer[pos];
+        return *data(pos);
     }
 
     value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
     {
-        return buffer[h.offset() + pos];
+        return *data(h.offset() + pos);
     }
 
     const value_type& clock(handle_type, int pos = 0, int = 0) const
     {
-        return buffer[pos];
+        return *data(pos);
     }
 
     const value_type& clock(const handle_with_offset& h, int pos = 0, int = 0) const
     {
-        return buffer[h.offset() + pos];
+        return *data(h.offset() + pos);
     }
 
     void unlock(handle_type) {}
