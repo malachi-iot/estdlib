@@ -5,6 +5,8 @@
 #include "tuple.h"
 #include "type_traits.h"
 
+#include "internal/invoke.h"
+
 // TODO: Utilize std version of this, if available
 
 namespace estd {
@@ -93,6 +95,7 @@ auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
     return b;
 }
 
+#endif
 
 template <class T>
 class reference_wrapper {
@@ -125,12 +128,24 @@ private:
   T* _ptr;
 };
 
+
 #ifdef FEATURE_CPP_DEDUCTION_GUIDES
 // deduction guides
 template<class T>
 reference_wrapper(reference_wrapper<T>) -> reference_wrapper<T>;
 #endif
 
-#endif
+template <class T>
+reference_wrapper<T> ref(T& t) noexcept
+{
+    return reference_wrapper<T>(t);
+}
+
+template <class T>
+reference_wrapper<T> cref(const T& t) noexcept
+{
+    return reference_wrapper<T>(t);
+}
+
 
 }

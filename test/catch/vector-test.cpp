@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include <estd/vector.h>
+#include <estd/functional.h>
 
 #include "mem.h"
 
@@ -282,5 +283,9 @@ TEST_CASE("vector tests")
         {
             REQUIRE(!v.empty());
         }
+    }
+    SECTION("ref wrapper")
+    {
+        //layer1::vector<reference_wrapper<int>, 10> a;
     }
 }

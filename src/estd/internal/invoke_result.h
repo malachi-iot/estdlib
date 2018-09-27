@@ -12,7 +12,7 @@ namespace detail {
 template <class T>
 struct is_reference_wrapper : estd::false_type {};
 template <class U>
-struct is_reference_wrapper<estd::reference_wrapper<U>> : estd::true_type {};
+struct is_reference_wrapper<estd::reference_wrapper<U> > : estd::true_type {};
 
 template<class T>
 struct invoke_impl {

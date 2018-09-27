@@ -126,6 +126,8 @@ public:
 // tracks how much of the allocator has been allocated
 // null_terminated flag mainly serves as a trait/clue to specializations
 // len can == 0 in which case we're in unbounded mode
+// FIX: Need to do this in a way where T/TBuffer isn't auto running all its
+// constructors (so like the raw_instance_provider or aligned_storage)
 template <
         class T, size_t len, class TBuffer = T[len],
         class TSize = typename internal::deduce_fixed_size_t<len>::size_type>
