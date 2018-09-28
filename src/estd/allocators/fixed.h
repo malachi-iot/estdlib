@@ -285,6 +285,50 @@ public:
 
 }
 
+namespace experimental {
+
+#ifdef FEATURE_CPP_ALIGN
+// not just aligned, but also uninitialized
+// may want to modify name to reflect that (uninitialized_array ?)
+// or perhaps even a specialization on existing array
+// no constructors because the whole point is to leave this uninitialized
+template <class T, size_t array_len>
+struct aligned_storage_array
+{
+    typedef typename estd::aligned_storage<sizeof(T), alignof (T)>::type item_type;
+    typedef T value_type;
+    typedef value_type& reference;
+    typedef value_type* pointer;
+    typedef pointer iterator;
+    typedef size_t size_type;
+
+private:
+    item_type  array[array_len];
+
+public:
+    pointer data()
+    {
+        return reinterpret_cast<pointer>(array);
+    }
+
+    operator pointer()
+    {
+        return data();
+    }
+
+    reference operator[](size_t i)
+    {
+        item_type& v = array[i];
+
+        return reinterpret_cast<reference>(v);
+    }
+
+    iterator begin() { return data(); }
+    iterator end() { return data() + array_len; }
+};
+#endif
+}
+
 namespace layer1 {
 
 template <class T, size_t len>
