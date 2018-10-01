@@ -344,7 +344,7 @@ namespace layer2 {
 template<
     class T,
     std::size_t N,
-    typename size_t = std::size_t
+    typename size_t = typename estd::internal::deduce_fixed_size_t<N>::size_type
 > struct array : public experimental::array_base<T, T*, size_t>
 {
     typedef experimental::array_base<T, T*, size_t> base_t;

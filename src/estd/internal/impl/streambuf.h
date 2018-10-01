@@ -162,15 +162,27 @@ struct out_span_streambuf : TBase
 {
     typedef TBase base_type;
     typedef typename base_type::value_type span_type;
+    typedef typename span_type::size_type size_type;
 
     span_type& out() { return base_type::value(); }
 
-    size_t pos;
+    size_type pos;
 
     typedef char char_type;
+    typedef std::char_traits<char_type> traits_type;
 
-    out_span_streambuf(T* buf, size_t size) :
+    out_span_streambuf(T* buf, size_type size) :
         base_type(span_type(buf, size)),
+        pos(0)
+    {
+
+    }
+
+    // NOTE: Would use Extent here but that breaks it for scenarios
+    // where Extent == -1
+    template <std::size_t N>
+    out_span_streambuf(T (&array)[N]) :
+        base_type(array),
         pos(0)
     {
 
@@ -183,9 +195,23 @@ struct out_span_streambuf : TBase
 
     }
 
-    char_type* pbase() const { return  static_cast<char_type*>(out().data()); }
+    char_type* pbase() const
+    {
+        // FIX: naughty, dropping const here, because underlying instance
+        // provider is set to track instance not pointer
+        T* data = (T*)base_type::value().data();
+        return reinterpret_cast<char_type*>(data);
+    }
     char_type* pptr() const { return pbase() + pos; }
     char_type* epptr() const { return pbase() + out().size_in_bytes(); }
+
+    streamsize xsputn(const char_type* s, streamsize count)
+    {
+        // TODO: do proper bounds checking here
+        memcpy(pptr(), s, count);
+        pos += count;
+        return count;
+    }
 };
 
 

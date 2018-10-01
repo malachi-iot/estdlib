@@ -14,7 +14,9 @@ inline CONSTEXPR ptrdiff_t dynamic_extent = -1;
 template <class T, ptrdiff_t Extent = -1,
           class TBase = typename estd::conditional<Extent == -1,
                       estd::internal::layer3::buffer<T, size_t>,
-                      estd::layer2::array<T, static_cast<size_t>(Extent)> >::type>
+                      // NOTE: Need explicit size_t trailing here because otherwise -1 sneaks
+                      // its way in
+                      estd::layer2::array<T, static_cast<size_t>(Extent), size_t> >::type>
 class span : public TBase
 {
     typedef TBase base_t;

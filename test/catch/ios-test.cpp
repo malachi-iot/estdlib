@@ -277,8 +277,50 @@ TEST_CASE("iostreams")
     {
         // FIX: Not quite there because span constructor won't switch between Extent and
         // non Extent version for explicit buffer just yet
-        //uint32_t val[64];
-        //estd::internal::impl::out_span_streambuf<uint32_t, 32> test(val, 32);
+        uint32_t val[32];
+
+        val[0] = 0;
+
+        SECTION("full (non impl) version")
+        {
+            // 'test' actually sits dormant and does nothing.  artifact of previous test
+            // approach
+            estd::internal::impl::out_span_streambuf<uint32_t, 32> test(val);
+
+            // NOTE: Wanted to do a ref version here but not sure if I actually
+            // want that to be a supported technique
+            estd::internal::streambuf<decltype(test)> sb(val);
+
+            sb.sputc(0);
+            sb.sputc(1);
+            sb.sputc(2);
+            sb.sputc(3);
+
+            // TODO: Make this endian-inspecific.  For the time being though I anticipate
+            // these unit tests only running on x64 machines
+            REQUIRE(val[0] == 0x03020100);
+
+            int sz = sizeof(sb);
+
+            REQUIRE(sz == sizeof(estd::span<uint32_t, 32>) + sizeof(size_t));
+        }
+        SECTION("non-constexpr size version")
+        {
+            typedef estd::internal::impl::out_span_streambuf<uint32_t> sb_impl_type;
+
+            estd::internal::streambuf<sb_impl_type> sb(val, 32);
+
+            sb.sputc(0);
+            sb.sputc(1);
+            sb.sputc(2);
+            sb.sputc(3);
+
+            REQUIRE(val[0] == 0x03020100);
+
+            int sz = sizeof(sb);
+
+            REQUIRE(sz == sizeof(estd::span<uint32_t>) + sizeof(size_t));
+        }
     }
     SECTION("spitting out various strings")
     {
