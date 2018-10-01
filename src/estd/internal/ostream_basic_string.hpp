@@ -36,7 +36,10 @@ inline internal::basic_ostream<TStreambuf, TBase>& operator <<(
         const internal::dynamic_array<TStringImpl>& str)
 {
 #ifdef FEATURE_CPP_STATIC_ASSERT
-    typedef typename TStreambuf::char_type l_char_type;
+    // TODO: Would be better to pull out a 'streambuf_type'
+    // and also check for type presence with a static_assert for both streambuf_type
+    // and char_type
+    typedef typename estd::remove_reference<TStreambuf>::type::char_type l_char_type;
 
     typedef typename internal::dynamic_array<TStringImpl>::value_type _r_char_type;
     typedef typename estd::remove_const<_r_char_type>::type r_char_type;
