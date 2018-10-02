@@ -115,4 +115,45 @@ TEST_CASE("optional")
             REQUIRE(!val);
         }
     }
+    SECTION("comparisons")
+    {
+        SECTION("standard")
+        {
+            estd::optional<int> val;
+
+            // comparisons should all be false
+            // when uninitialized
+            REQUIRE(!val);
+            bool result = val != 0;
+            REQUIRE(!result);
+            result = val == 0;
+            REQUIRE(!result);
+            REQUIRE(!(val > 4));
+            REQUIRE(!(val < 4));
+
+            val = 5;
+
+            REQUIRE(val > 4);
+            REQUIRE(val == 5);
+        }
+        SECTION("layer1")
+        {
+            estd::layer1::optional<int> val;
+
+            // comparisons should all be false
+            // when uninitialized
+            REQUIRE(!val);
+            bool result = val != 0;
+            REQUIRE(!result);
+            result = val == 0;
+            REQUIRE(!result);
+            REQUIRE(!(val > 4));
+            REQUIRE(!(val < 4));
+
+            val = 5;
+
+            REQUIRE(val > 4);
+            REQUIRE(val == 5);
+        }
+    }
 }

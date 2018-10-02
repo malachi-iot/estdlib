@@ -25,6 +25,7 @@ struct optional_base_base
         m_initialized(initialized) {}
 
     bool has_value() const { return m_initialized; }
+    void reset() { m_initialized = false; }
 
 protected:
     void has_value(bool initialized) { m_initialized = initialized; }
@@ -50,6 +51,7 @@ struct optional_base : optional_base_base
 // specific value of T represents a NULL/not present.  To really work well this
 // needs specialization on T, which might not be easy since typedef's fall back
 // down to int, short, long, etc.
+// NOTE: This seems displaced by the layer1 optional_base
 template <class T, T null_value>
 struct optional_reserved_base
 {
@@ -168,7 +170,7 @@ public:
 
     optional& operator=(nullopt_t)
     {
-        base_type::has_value(false);
+        base_type::reset();
         return *this;
     }
 
@@ -275,6 +277,8 @@ public:
 
     bool has_value() const { return _value != null_value; }
     void has_value(bool) {}
+    void reset() { _value = null_value; }
+
     value_type& value() { return _value; }
     const value_type& value() const { return _value; }
 };
@@ -352,6 +356,40 @@ public:
 
 };
 
+}
+
+template <class T, class U, class TBase>
+CONSTEXPR bool operator==(const optional<T, TBase>& opt, const U& value)
+{
+    return opt.has_value() ? opt.value() == value : false;
+}
+
+
+template <class T, class U, class TBase>
+CONSTEXPR bool operator==(const U& value, const optional<T, TBase>& opt)
+{
+    return opt.has_value() ? value == opt.value() : false;
+}
+
+
+template <class T, class U, class TBase>
+CONSTEXPR bool operator!=(const optional<T, TBase>& opt, const U& value)
+{
+    return opt.has_value() ? opt.value() != value : false;
+}
+
+
+template <class T, class U, class TBase>
+CONSTEXPR bool operator>(const optional<T, TBase>& opt, const U& value)
+{
+    return opt.has_value() ? opt.value() > value : false;
+}
+
+
+template <class T, class U, class TBase>
+CONSTEXPR bool operator<(const optional<T, TBase>& opt, const U& value)
+{
+    return opt.has_value() ? opt.value() < value : false;
 }
 
 }
