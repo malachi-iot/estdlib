@@ -1,7 +1,7 @@
 {
     "name": "estdlib",
     "keywords": "std, STL",
-    "description": "embedded-specific flavor of C++ std library",
+    "description": "Embedded-specific flavor of C++ std library.  No dynamic allocation!",
     "repository":
     {
         "type": "git",
@@ -23,6 +23,18 @@
             "-<src/.idea>"
         ]
     },
+    "export": {
+        "exclude": [
+            "test",
+            "ext"
+        ]
+    },
     "version": "0.1.1",
+    "frameworks": [
+        "arduino",
+        "espidf",
+        "esp8266-rtos-sdk",
+        "cmsis"
+    ],
     "platforms": "*"
 }

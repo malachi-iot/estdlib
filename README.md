@@ -70,6 +70,10 @@ It's presently being considered to map 1, 2 and 3 to layer1, layer2 and layer3 f
 
 Doubly-linked list having the same capabilities as forward_list with its node allocation.
 
+## Optional
+
+The `optional` class is present for your convenience.  Also a `layer1::optional` is available which has no internal boolean flag and instead depends on a null value of your choosing to represent 'no value' state.
+
 ## IO Streams
 
 Rudimentary ostream/istream support is now present.  The API is mostly internal,
@@ -107,8 +111,7 @@ Many primitives for basic time handling and comparison are brought in mirroring 
 
 ## Tuples
 
-Much of the same functionality as you would expect from `std::tuples`.  Mainly
-just here in case std isn't available
+Much of the same functionality as you would expect from `std::tuples`.
 
 ## Strings
 
@@ -150,3 +153,13 @@ This variable is expected to remain constant after instantiation.
 Similar to layer3::basic_string but based on a const char* for that extra
 safety.  Remember, stock std::string doesn't do this because it never points
 at memory other than its own malleable set
+
+## shared_ptr
+
+This is a modified implementation of regular `shared_ptr` to suit our non-dynamic-allocation scenarios.
+
+# Experimental code
+
+Subject/Observer code was experimented on here but now lives in `embr` library.  Do not use the implementation here
+
+There is a memory_pool implementation, it's quite functional but its API is not quite stable.
