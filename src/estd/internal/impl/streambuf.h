@@ -165,6 +165,7 @@ struct out_span_streambuf : TBase
     typedef typename span_type::size_type size_type;
 
     span_type& out() { return base_type::value(); }
+    const span_type& out() const { return base_type::value(); }
 
     size_type pos;
 
@@ -199,11 +200,11 @@ struct out_span_streambuf : TBase
     {
         // FIX: naughty, dropping const here, because underlying instance
         // provider is set to track instance not pointer
-        T* data = (T*)base_type::value().data();
+        T* data = (T*)out().data();
         return reinterpret_cast<char_type*>(data);
     }
     char_type* pptr() const { return pbase() + pos; }
-    char_type* epptr() const { return pbase() + out().size_in_bytes(); }
+    char_type* epptr() const { return pbase() + out().size_bytes(); }
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
@@ -217,24 +218,30 @@ struct out_span_streambuf : TBase
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
-template <class T, std::ptrdiff_t Extent = -1>
-struct in_span_streambuf
+template <class T, std::ptrdiff_t Extent = -1,
+        class TBase = experimental::instance_provider<estd::span<T, Extent> > >
+struct in_span_streambuf : TBase
 {
-    estd::span<T, Extent> in;
+    typedef TBase base_type;
+    typedef typename base_type::value_type span_type;
+    typedef typename span_type::size_type size_type;
+
+    span_type& in() { return base_type::value(); }
+
     size_t pos;
 
     typedef char char_type;
 
     in_span_streambuf(const estd::span<T, Extent>& copy_from) :
-        in(copy_from),
+        base_type(copy_from),
         pos(0)
     {
 
     }
 
-    char_type* eback() const { return static_cast<char_type*>(in.data()); }
+    char_type* eback() const { return static_cast<char_type*>(in().data()); }
     char_type* gptr() const { return eback() + pos; }
-    char_type* egptr() const { return eback() + in.size_in_bytes(); }
+    char_type* egptr() const { return eback() + in().size_bytes(); }
 };
 
 

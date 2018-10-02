@@ -31,8 +31,14 @@ public:
     typedef typename base_t::size_type index_type;
     typedef typename estd::remove_cv<T>::type value_type;
 
-    span(pointer data, index_type size) :
-            base_t(data, size) {}
+    constexpr index_type size_bytes() const
+    { return base_t::size() * sizeof(element_type); }
+
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    span(pointer data, index_type count) :
+            base_t(data, count) {}
 
     // ExtendLocal needed because SFINAE function selection needs that
     // fluidity
@@ -40,24 +46,40 @@ public:
 #ifdef FEATURE_CPP_DEFAULT_TARGS
     template <size_t N, ptrdiff_t ExtentLocal = Extent,
               class ExtentOnly = typename enable_if<ExtentLocal == -1>::type>
-    span(element_type (&data) [N]) : base_t(data, N) {}
+    constexpr span(element_type (&data) [N]) : base_t(data, N) {}
 
     // constant size flavor
     template <size_t N, ptrdiff_t ExtentLocal = Extent,
               class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
-    span(element_type (&data) [N], bool = true) : base_t(data) {}
+    constexpr span(element_type (&data) [N], bool = true) : base_t(data) {}
 #endif
 
     // most definitely a 'shallow clone'
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
     span(const base_t& clone_from) : base_t(clone_from) {}
+
+    span<T, -1> subspan(ptrdiff_t offset, ptrdiff_t count = -1)
+    {
+        if(count == -1) count = base_t::size();
+
+        pointer data = base_t::data();
+
+        return span<T, -1>(data + offset, count);
+    }
 };
 
 
 
-// this one in particular is getting some use and performing well
-// TODO: Move this out into span
 typedef span<const uint8_t> const_buffer;
 typedef span<uint8_t> mutable_buffer;
 
+// FIX: Doesn't work yet
+template <class T, ptrdiff_t N, ptrdiff_t S = N == -1 ? -1 : N * sizeof(T) >
+span<const byte, S> as_bytes(span<T, N> s) noexcept
+{
+    return span<const byte, S>(reinterpret_cast<const byte*>(s.data()), s.size_bytes());
+}
 
 }

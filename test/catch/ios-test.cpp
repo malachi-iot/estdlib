@@ -303,6 +303,8 @@ TEST_CASE("iostreams")
             int sz = sizeof(sb);
 
             REQUIRE(sz == sizeof(estd::span<uint32_t, 32>) + sizeof(size_t));
+
+            REQUIRE(sb.epptr() - sb.pbase() == 32 * 4);
         }
         SECTION("non-constexpr size version")
         {

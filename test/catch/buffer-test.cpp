@@ -69,5 +69,28 @@ TEST_CASE("buffers")
             REQUIRE(s.size() == sizeof(buf));
             REQUIRE(s.data() == &buf[0]);
         }
+        SECTION("subspan")
+        {
+            constexpr uint8_t buf2[] = "hi2u";
+
+            estd::span<uint8_t, 128> s(buf);
+
+            s[0] = 77;
+            s[1] = 78;
+            s[2] = 79;
+            s[3] = 80;
+
+            auto s2 = s.subspan(3, 10);
+
+            REQUIRE(s2[0] == 80);
+        }
+        SECTION("as bytes")
+        {
+            int buf[32];
+
+            estd::span<int, 32> s(buf);
+
+            //auto s2 = estd::as_bytes(s);
+        }
     }
 }
