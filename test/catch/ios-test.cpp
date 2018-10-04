@@ -322,6 +322,11 @@ TEST_CASE("iostreams")
             int sz = sizeof(sb);
 
             REQUIRE(sz == sizeof(estd::span<uint32_t>) + sizeof(size_t));
+
+            // FIX: Not deducing to underlying seekoff because of protected/public
+            // scoping glitch (out_span_streambuf::seekoff needs to be public for
+            // this to work)
+            sb.pubseekoff(1, estd::ios_base::cur, estd::ios_base::out);
         }
     }
     SECTION("spitting out various strings")

@@ -61,8 +61,11 @@ public:
     ESTD_FN_HAS_METHOD(char_type*, epptr,)
     ESTD_FN_HAS_METHOD(int_type, underflow,)
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
-    ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type pos, ios_base::openmode)
-    ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type pos, ios_base::seekdir, ios_base::openmode)
+    ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
+    ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
+
+    ESTD_FN_HAS_METHOD(void, pbump, int)
+    ESTD_FN_HAS_METHOD(void, gbump, int)
 
 protected:
 
@@ -286,17 +289,30 @@ public:
 
 
     template <class T = base_type>
-    typename enable_if<!has_seekoff_method<T>::value, pos_type>::type
-    pubseekoff(off_type pos, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    typename enable_if<
+            !has_seekoff_method<T>::value &&
+            !has_pbump_method<T>::value, pos_type>::type
+    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return -1;
     }
 
     template <class T = base_type>
-    typename enable_if<has_seekoff_method<T>::value, pos_type>::type
-    pubseekoff(off_type pos, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    typename enable_if<
+            !has_seekoff_method<T>::value &&
+            has_pbump_method<T>::value, pos_type>::type
+    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
     {
-        return this->seekoff(pos, dir, which);
+        // TODO: assert that dir = cur and which = ios_base::out
+        this->pbump(off);
+        return -1;
+    }
+
+    template <class T = base_type>
+    typename enable_if<has_seekoff_method<T>::value, pos_type>::type
+    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        return this->seekoff(off, dir, which);
     }
 };
 

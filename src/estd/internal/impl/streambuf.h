@@ -216,7 +216,10 @@ struct out_span_streambuf : TBase
         return count;
     }
 
+protected:
     // NOTE: currently undefined if pos ends up outside boundaries
+    // NOTE: consider changing dir and which to template non-type parameters/compile
+    // time constants
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {
         // openmode MUST include 'out' in this instance, otherwise error or ignore
@@ -230,6 +233,13 @@ struct out_span_streambuf : TBase
                 pos = off;
                 break;
         }
+    }
+
+    // NOTE: could be useful in constructing an automatic pubseekoff, if an explicit one
+    // isn't available
+    void pbump(int count)
+    {
+        pos += count;
     }
 };
 
