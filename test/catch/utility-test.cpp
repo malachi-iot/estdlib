@@ -42,17 +42,15 @@ class test_class_5 : protected test_class_4
     void test_fn5() {}
 
 public:
-    ESTD_FN_HAS_METHOD_EXP(void, test_fn1,)
-    //ESTD_FN_HAS_METHOD_EXP(void, test_fn5,)
-    //ESTD_FN_HAS_METHOD_EXP(void, test_fn6,)
+    ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, test_fn1,)
+    ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, test_fn5,)
+    ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, test_fn6,)
 };
 
 using namespace estd::internal;
 
 
 template <typename U, U u> struct reallyHas2;
-
-ESTD_FN_HAS_METHOD_EXP(void, test_fn5,)
 
 TEST_CASE("utility")
 {
@@ -117,9 +115,9 @@ TEST_CASE("utility")
     }
     SECTION("class 5")
     {
-        REQUIRE(test_class_5::has_test_fn1_method_exp<test_class_5>::value);
-        //REQUIRE(test_class_5::has_test_fn5_method_exp<test_class_5>::value);
-        //REQUIRE(!test_class_5::has_test_fn6_method_exp<test_class_5>::value);
+        REQUIRE(test_class_5::has_test_fn1_method<test_class_5>::value);
+        REQUIRE(test_class_5::has_test_fn5_method<test_class_5>::value);
+        REQUIRE(!test_class_5::has_test_fn6_method<test_class_5>::value);
         /*
          * None of these work because ESTD_FN_HAS_METHOD doesn't detect
          * non-public members
