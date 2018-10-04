@@ -163,6 +163,8 @@ struct out_span_streambuf : TBase
     typedef TBase base_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
+    typedef int off_type;
+    typedef int pos_type;
 
     span_type& out() { return base_type::value(); }
     const span_type& out() const { return base_type::value(); }
@@ -212,6 +214,22 @@ struct out_span_streambuf : TBase
         memcpy(pptr(), s, count);
         pos += count;
         return count;
+    }
+
+    // NOTE: currently undefined if pos ends up outside boundaries
+    pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
+    {
+        // openmode MUST include 'out' in this instance, otherwise error or ignore
+        switch(dir)
+        {
+            case ios_base::cur:
+                pos += off;
+                break;
+
+            case ios_base::beg:
+                pos = off;
+                break;
+        }
     }
 };
 

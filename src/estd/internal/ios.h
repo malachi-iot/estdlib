@@ -43,6 +43,12 @@ public:
     static CONSTEXPR iostate failbit = 0x02;
     static CONSTEXPR iostate eofbit = 0x04;
 
+    typedef uint8_t seekdir;
+
+    static CONSTEXPR seekdir beg = 0x00;
+    static CONSTEXPR seekdir end = 0x01;
+    static CONSTEXPR seekdir cur = 0x02;
+
 private:
     fmtflags fmtfl;
     iostate _iostate;

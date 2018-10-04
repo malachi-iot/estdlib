@@ -36,6 +36,14 @@ public:
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
+    // FIX: would use conditional to set these up, but conditional
+    // always compile-time peers into both classes, so these are dormant right now
+    ESTD_FN_HAS_TYPEDEF_EXP(pos_type)
+    ESTD_FN_HAS_TYPEDEF_EXP(off_type)
+
+    typedef int_type pos_type;
+    typedef int_type off_type;
+
     // custom estd nonblocking variants
     // TODO: Determine if spostc should kick off a kind of soft/async overflow
     ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
@@ -53,6 +61,8 @@ public:
     ESTD_FN_HAS_METHOD(char_type*, epptr,)
     ESTD_FN_HAS_METHOD(int_type, underflow,)
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
+    ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type pos, ios_base::openmode)
+    ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type pos, ios_base::seekdir, ios_base::openmode)
 
 protected:
 
@@ -258,6 +268,35 @@ public:
     pubsync()
     {
         return this->sync();
+    }
+
+    template <class T = base_type>
+    typename enable_if<!has_seekpos_method<T>::value, int_type>::type
+    pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        return -1;
+    }
+
+    template <class T = base_type>
+    typename enable_if<has_seekpos_method<T>::value, int_type>::type
+    pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        return this->seekpos(pos, which);
+    }
+
+
+    template <class T = base_type>
+    typename enable_if<!has_seekoff_method<T>::value, pos_type>::type
+    pubseekoff(off_type pos, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        return -1;
+    }
+
+    template <class T = base_type>
+    typename enable_if<has_seekoff_method<T>::value, pos_type>::type
+    pubseekoff(off_type pos, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        return this->seekoff(pos, dir, which);
     }
 };
 
