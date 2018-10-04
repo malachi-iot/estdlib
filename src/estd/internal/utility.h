@@ -93,16 +93,27 @@ struct has_##tag_name_minus_suffix##_tag<T, typename estd::internal::has_typedef
 // MethodInfo usage is to resolve base classes
 // don't know at this time how to do this without using decltype
 #ifdef FEATURE_CPP_DECLTYPE
+#define ESTD_FN_HAS_METHOD_EXP(ret_type, method_name, ...) \
+    template <typename C> static CONSTEXPR estd::internal::has_member_base::yes& test \
+        (estd::internal::has_member_base::reallyHas<ret_type ( \
+        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
+    { return estd::internal::has_member_base::yes_value; }  \
+\
+    template <typename C> static CONSTEXPR estd::internal::has_member_base::yes& test \
+        (estd::internal::has_member_base::reallyHas<ret_type ( \
+        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
+    { return estd::internal::has_member_base::yes_value; }  \
+\
+    template <class T2> \
+    struct has_##method_name##_method_exp \
+    { \
+        static CONSTEXPR bool value = sizeof(test<T2>(nullptr)) == sizeof(estd::internal::has_member_base::yes); \
+    };
+
 #define ESTD_FN_HAS_METHOD(ret_type, method_name, ...) \
 template <class T> struct has_##method_name##_method : estd::internal::has_member_base \
 { \
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
-        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__), &C::method_name>* /*unused*/) \
-    { return yes_value; }  \
-\
-    template <typename C> static CONSTEXPR yes& test(reallyHas<ret_type ( \
-        estd::internal::MethodInfo<decltype(&C::method_name)>::ClassType::*)(__VA_ARGS__) const, &C::method_name>* /*unused*/) \
-    { return yes_value; }  \
+    ESTD_FN_HAS_METHOD_EXP(ret_type, method_name, __VA_ARGS__) \
 \
     template <typename> static CONSTEXPR no& test(...) { return no_value; } \
 \

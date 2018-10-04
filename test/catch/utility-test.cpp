@@ -36,10 +36,23 @@ struct test_class_4 : test_class_3<>
     void test_fn4() {}
 };
 
+
+class test_class_5 : protected test_class_4
+{
+    void test_fn5() {}
+
+public:
+    ESTD_FN_HAS_METHOD_EXP(void, test_fn1,)
+    //ESTD_FN_HAS_METHOD_EXP(void, test_fn5,)
+    //ESTD_FN_HAS_METHOD_EXP(void, test_fn6,)
+};
+
 using namespace estd::internal;
 
 
 template <typename U, U u> struct reallyHas2;
+
+ESTD_FN_HAS_METHOD_EXP(void, test_fn5,)
 
 TEST_CASE("utility")
 {
@@ -101,6 +114,20 @@ TEST_CASE("utility")
         REQUIRE(has_test_fn2_method<test_class_4>::value);
         REQUIRE(has_test_fn3_method<test_class_4>::value);
         REQUIRE(has_test_fn4_method<test_class_4>::value);
+    }
+    SECTION("class 5")
+    {
+        REQUIRE(test_class_5::has_test_fn1_method_exp<test_class_5>::value);
+        //REQUIRE(test_class_5::has_test_fn5_method_exp<test_class_5>::value);
+        //REQUIRE(!test_class_5::has_test_fn6_method_exp<test_class_5>::value);
+        /*
+         * None of these work because ESTD_FN_HAS_METHOD doesn't detect
+         * non-public members
+        REQUIRE(has_test_fn1_method<test_class_5>::value);
+        REQUIRE(has_test_fn2_method<test_class_5>::value);
+        REQUIRE(has_test_fn3_method<test_class_5>::value);
+        REQUIRE(has_test_fn4_method<test_class_5>::value);
+         */
     }
     SECTION("has_typedef testing")
     {
