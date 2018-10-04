@@ -154,6 +154,17 @@ TEST_CASE("optional")
 
             REQUIRE(val > 4);
             REQUIRE(val == 5);
+
+            int val2 = -1;
+
+            val = val2;
+
+            REQUIRE(val);
+
+            val2 = 0;
+            val = val2;
+
+            REQUIRE(!val);
         }
     }
 }

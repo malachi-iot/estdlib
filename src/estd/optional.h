@@ -195,8 +195,9 @@ public:
         base_type::has_value(true);
         return *this;
     }
-#else
-    // Untested
+#endif
+    // FIX: spec doesn't have this, but I think my lack of class U = T
+    // may be breaking things so stuffing this in here, for now
     optional& operator=(const value_type& v)
     {
         new (&value()) value_type(v);
@@ -204,7 +205,7 @@ public:
         return *this;
     }
 
-#endif
+
 
 #ifdef FEATURE_CPP_VARIADIC
     template< class... TArgs >
@@ -345,6 +346,14 @@ public:
     optional& operator=(value_type&& value)
     {
         base_type::operator=(std::move(value));
+        return *this;
+    }
+
+    // FIX: spec doesn't have this, but I think my lack of class U = T
+    // may be breaking things so stuffing this in here, for now
+    optional& operator=(const value_type& value)
+    {
+        base_type::operator=(value);
         return *this;
     }
 
