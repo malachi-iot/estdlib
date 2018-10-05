@@ -233,6 +233,8 @@ protected:
                 pos = off;
                 break;
         }
+
+        return pos;
     }
 
     // NOTE: could be useful in constructing an automatic pubseekoff, if an explicit one

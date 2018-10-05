@@ -34,10 +34,10 @@ namespace experimental {
 // data + formatting functionality
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template<class TChar, size_t N, bool null_terminated = true, class Traits = std::char_traits<TChar> >
-using basic_ostringstream = internal::basic_ostream<layer1::basic_out_stringbuf<TChar, N, null_terminated, Traits> >;
+using basic_ostringstream = estd::internal::basic_ostream<layer1::basic_out_stringbuf<TChar, N, null_terminated, Traits> >;
 
 template<class TChar, size_t N, bool null_terminated = true, class Traits = std::char_traits<TChar> >
-using basic_istringstream = internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >;
+using basic_istringstream = estd::internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >;
 
 template<size_t N, bool null_terminated = true>
 using ostringstream = basic_ostringstream<char, N, null_terminated>;

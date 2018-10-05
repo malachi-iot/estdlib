@@ -8,10 +8,12 @@
 #endif
 
 #if __cplusplus >= 201103L
+// NOTE: Requirements manual enable because it's a fragile feature still
+// (steady_clock isn't automatically available everywhere)
 // permits ostream timeout capabilities, but you still need to enable it with policy
 // as well (though it's default to on right now).  #ifdef'ing because chrono is currently
 // highly c++11 dependent
-#define FEATURE_ESTD_OSTREAM_TIMEOUT
+//#define FEATURE_ESTD_OSTREAM_TIMEOUT
 #endif
 
 extern "C" {
@@ -266,13 +268,13 @@ template <class TStreambuf, class TBase =
             typename estd::remove_reference<TStreambuf>::type::traits_type
             >, true>
         >
-struct wrapped_ostream : internal::basic_ostream<
+struct wrapped_ostream : estd::internal::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
             typename TBase::traits_type>,
         TBase>
 {
-    typedef internal::basic_ostream<
+    typedef estd::internal::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
             typename TBase::traits_type>,
@@ -296,7 +298,7 @@ struct wrapped_ostream : internal::basic_ostream<
 
 template <class TStreambuf, class TBase>
 wrapped_ostream<TStreambuf&>
-convert(internal::basic_ostream<TStreambuf, TBase>& os)
+convert(estd::internal::basic_ostream<TStreambuf, TBase>& os)
 {
     wrapped_ostream<TStreambuf&> wrapped_os(*os.rdbuf());
     return wrapped_os;
@@ -305,8 +307,9 @@ convert(internal::basic_ostream<TStreambuf, TBase>& os)
 }
 
 
-template <class TStreambuf>
-inline internal::basic_ostream<TStreambuf>& endl(internal::basic_ostream<TStreambuf>& os)
+template <class TStreambuf, class TBase>
+inline internal::basic_ostream<TStreambuf, TBase>& endl(
+    internal::basic_ostream<TStreambuf, TBase>& os)
 {
     // uses specialized call to bypass sentry so that we don't needlessly check
     // unitbuf and potentially double-flush
