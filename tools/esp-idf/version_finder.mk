@@ -1,0 +1,1 @@
+../../test/rtos/template/version_finder.mk
