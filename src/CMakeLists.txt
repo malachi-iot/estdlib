@@ -89,6 +89,7 @@ set(SOURCE_FILES
         estd/port/arduino/chrono.h
         estd/port/arduino/string.h
         estd/port/arduino/thread.h
+        estd/port/esp-idf/chrono.h
         estd/port/mutex.h
         estd/port/freertos/chrono.h
         estd/port/freertos/thread.h

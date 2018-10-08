@@ -20,6 +20,7 @@ namespace internal {
 // embedded-oriented version has lower precision.  Deviates from standard
 // Revisit this on a per-platform and
 // option-selectable level
+#ifdef FEATURE_ESTD_CHRONO_LOWPRECISION
 typedef uint32_t nano_rep;
 typedef uint32_t micro_rep;
 typedef uint32_t milli_rep;
@@ -28,6 +29,16 @@ typedef uint16_t minutes_rep;
 typedef uint16_t hours_rep;
 typedef uint8_t days_rep;
 typedef uint8_t years_rep;
+#else
+typedef uint64_t nano_rep;
+typedef uint64_t micro_rep;
+typedef uint32_t milli_rep;
+typedef uint32_t seconds_rep;
+typedef uint32_t minutes_rep;
+typedef uint32_t hours_rep;
+typedef uint16_t days_rep;
+typedef uint16_t years_rep;
+#endif
 
 
 }

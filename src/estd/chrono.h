@@ -3,6 +3,11 @@
 #include "internal/platform.h"
 #include "port/chrono.h"
 
+// esp-idf native version coexists with the others
+#if defined(ESTD_IDF_VER)
+#include "port/esp-idf/chrono.h"
+#endif
+
 #if defined(ESTD_FREERTOS)
 #include "port/freertos/chrono.h"
 #elif defined(ESTD_ARDUINO)
