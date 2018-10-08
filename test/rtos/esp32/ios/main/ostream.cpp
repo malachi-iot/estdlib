@@ -9,14 +9,17 @@ using namespace estd;
 extern "C" void test_task(void* pv)
 {
     int counter = 0;
+
     for(;;)
     {
         this_thread::sleep_for(chrono::milliseconds(1000));
-        printf("Got here: %d -", counter++);
+        printf("Got here: %d -", ++counter);
 
         experimental::ostringstream<32> out;
 
-        out << "hi2u";
+        out << "hi2u: ";
+        // TODO: ESP32 doesn't support this quite yet, but we need it
+        //out << counter;
         out << endl;
 
         const char* str = out.rdbuf()->str().data();
