@@ -15,6 +15,7 @@ using namespace estd;
 extern "C" void test_task(void* pv)
 {
     int counter = 0;
+    // TODO: Do a freertos_clock (aka stead_clock) test
     for(;;)
     {
         this_thread::sleep_for(chrono::milliseconds(1000));

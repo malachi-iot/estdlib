@@ -55,7 +55,7 @@ void test_task(void*);
 void got_ip_event();
 
 
-
+#ifdef CONFIG_WIFI_SSID
 /******************************************************************************
  * FunctionName : wifi_event_handler_cb
  * Description  : wifi event callback
@@ -148,7 +148,6 @@ void __attribute__((weak)) got_ip_event()
 
 } */
 
-#ifdef CONFIG_WIFI_SSID
 /******************************************************************************
  * FunctionName : wifi_config
  * Description  : wifi_config task
@@ -265,10 +264,12 @@ void user_init(void)
     printf("SDK version:%s\n", system_get_sdk_version());
 #endif
 
+#ifdef CONFIG_WIFI_SSID
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
     ESP_ERROR_CHECK(esp_event_loop_init(wifi_event_handler_cb, NULL) );
 #else
     wifi_set_event_handler_cb(wifi_event_handler_cb);
+#endif
 #endif
 
 #ifdef CONFIG_WIFI_SSID
