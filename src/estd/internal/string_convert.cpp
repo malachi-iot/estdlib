@@ -93,7 +93,8 @@ template<> char* toString(char* output, char input)
 }
 
 
-#if defined(__AVR__) or defined(__SAMD21G18A__) or (defined(ESP8266) and defined(ARDUINO))
+#if defined(__AVR__) or defined(__SAMD21G18A__) or \
+    (defined(ESP8266) and defined(ARDUINO)) or defined(ESP32)
 #define STDLIB_NONISO
 #define STDLIB_NONISO_ITOA
 #define STDLIB_NONISO_UTOA

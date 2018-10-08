@@ -19,7 +19,7 @@ extern "C" void test_task(void* pv)
 
         out << "hi2u: ";
         // TODO: ESP32 doesn't support this quite yet, but we need it
-        //out << counter;
+        out << counter;
         out << endl;
 
         const char* str = out.rdbuf()->str().data();
