@@ -113,11 +113,17 @@ template<> char* toString(char* output, unsigned int input)
     return utoa(input, output, 10);
 }
 
-/*
+#ifdef ESP32
+template<> char* toString(char* output, int16_t input)
+{
+    return itoa(input, output, 10);
+}
+
 template<> char* toString(char* output, uint16_t input)
 {
     return utoa(input, output, 10);
-} */
+}
+#endif
 
 #elif defined(ESP_OPEN_RTOS)
 // ESP RTOS has its own flavor of stdlib calls

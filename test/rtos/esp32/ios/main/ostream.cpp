@@ -8,7 +8,11 @@ using namespace estd;
 
 extern "C" void test_task(void* pv)
 {
-    int counter = 0;
+    // NOTE: interesting that we can't do an int8_t but can
+    // do a char.  Indicates that typedef'ing isn't 100% aliasing,
+    // compiler does seem to differenciate - even though I've
+    // seen indicators to the contrary elsewhere
+    int16_t counter = 0;
 
     for(;;)
     {
