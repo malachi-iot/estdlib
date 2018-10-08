@@ -65,10 +65,12 @@ struct global_provider
 };
 
 // FIX: reconcile this with global_provider
-template <class T, T* const v>
+// NOTE: Including const in here irritates esp32 compiler, and doesn't
+// appear to help anyone else
+template <class T, T* /* const */ v>
 struct global_pointer_provider
 {
-    typedef T* const value_type;
+    typedef T* /* const */ value_type;
 
     static value_type value() { return v; }
 };
