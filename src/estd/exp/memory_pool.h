@@ -207,16 +207,9 @@ protected:
     };
 };
 
-template <class T, std::ptrdiff_t N
-          //class Traits = memory_pool_item_traits<T>
-          >
-///
-/// \brief Memory pool utilizing a handle-based intrusive linked list
-///
-/// Starts out with N slots, each slot comprised of 'item' structure which in turn
-/// has memory space for a full T.  It's managed so that it's properly unconstructed
-///
-class memory_pool_1 : public memory_pool_base<T, N>
+
+template <class T, std::size_t N>
+class memory_pool_1_base : public memory_pool_base<T, N>
 {
     typedef memory_pool_base<T, N> base_type;
 
@@ -224,13 +217,13 @@ public:
     typedef typename base_type::size_type size_type;
 
     //typedef Traits traits_type;
-    typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
+    typedef memory_pool_item_traits<T, memory_pool_1_base> traits_type;
     typedef typename traits_type::value_type value_type;
 
 #ifdef UNIT_TESTING
 public:
 #else
-protected:
+    protected:
 #endif
     struct item_node_traits_base
     {
@@ -275,15 +268,36 @@ protected:
 
         void unlock(handle_type) {}
     };
+};
 
-
+template <class T, std::ptrdiff_t N
+          //class Traits = memory_pool_item_traits<T>
+          >
+///
+/// \brief Memory pool utilizing a handle-based intrusive linked list
+///
+/// Starts out with N slots, each slot comprised of 'item' structure which in turn
+/// has memory space for a full T.  It's managed so that it's properly unconstructed
+///
+class memory_pool_1 : public memory_pool_base<T, N>
+{
+    typedef memory_pool_1_base<T, N> base_type;
 
 public:
+    typedef typename base_type::size_type size_type;
+
+    //typedef Traits traits_type;
+    typedef typename base_type::traits_type traits_type;
+    typedef typename traits_type::value_type value_type;
+
+public:
+    typedef typename base_type::item_node_traits_base item_node_traits_base;
+    typedef typename base_type::item item;
     typedef typename base_type::template _item_node_traits<
-        item_storage_exp<false> > item_node_traits;
+        typename base_type::template item_storage_exp<false> > item_node_traits;
 
     typedef typename base_type::template _item_node_traits<
-        item_storage_exp<true> > item_ext_node_traits;
+            typename base_type::template item_storage_exp<true> > item_ext_node_traits;
 
     // TODO: we can simplify & optimize this and have the traits live completely inside the
     // list.  again clumsy because traits aren't typically thought of as stateful
