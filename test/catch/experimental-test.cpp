@@ -395,5 +395,11 @@ TEST_CASE("experimental tests")
 
             REQUIRE(pool.count_free() == 10);
         }
+        SECTION("ll pool")
+        {
+            // almost there, just some lingering pointer vs non pointer descrepency for handling
+            // '_next'
+            //memory_pool_ll<int, 10> pool;
+        }
     }
 }

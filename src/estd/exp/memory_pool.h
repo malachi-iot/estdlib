@@ -156,13 +156,17 @@ protected:
     };
 
 
-    template <class TBase>
+    // TNextHandle is useful to brute force back to a void* for item._next in here
+    template <class TBase, class TNextHandle = typename TBase::handle_type>
     struct _item_node_traits : TBase
     {
         typedef TBase base_type;
         typedef typename base_type::tracked_value_type tracked_value_type;
         typedef typename base_type::handle_type node_handle;
-        typedef item<tracked_value_type, node_handle> node_type;
+        typedef TNextHandle next_node_handle;
+        // FIX: Pretty sure this line is goofing us up - it's basically fine, but
+        // we're feeding item<TTrackedValue, void*> around and I think they don't mesh
+        typedef item<tracked_value_type, next_node_handle> node_type;
         typedef node_type& nv_ref_t;
         typedef nothing_allocator<node_type> node_allocator_type;
 
@@ -183,23 +187,11 @@ protected:
             return _val;
         }
 
-        // node allocation is specifically taking the 'value' portion and allocating
-        // + associating just the node portion with it.  for intrusive lists, this
-        // is largely a noop - we merely resolve where the pointer lives and report
-        // its already-allocated handle from the storage area
-        node_handle allocate(nv_ref_t n)
-        {
-            node_type* data = this->storage.data();
-            node_type* _n = &n;
-            node_handle h = _n - data;
-            return h;
-        }
-
         void deallocate(node_handle) {}
 
         static node_handle next(node_type& n)
         {
-            return n._next;
+            return reinterpret_cast<node_handle>(n._next);
         }
 
         static void next(node_type& to_attach_to, node_handle& n2)
@@ -223,32 +215,44 @@ protected:
     typedef typename base_type::template item<tracked_value_type,
             void*> item;
 
+    // no byref here, because we can use a pretty normal intrusive forward list
+    // on this one (no translation from handles, we are using pointers for next)
     struct item_storage_exp
     {
-        typedef item handle_type;
+        typedef item value_type;
+        typedef item* handle_type;
+
         // disambiguate value_type of consumer interest vs. value_type that intrusive list
         // needs to operate on (which will be our 'item' class)
         typedef typename traits_type::tracked_value_type tracked_value_type;
-        typedef item value_type;
         typedef array<item, N> storage_type;
+
+        static CONSTEXPR handle_type eol() { return NULLPTR; }
 
         //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
         // TODO: Phase this out into the external 'node allocator' and pass
         // in allocator to lock/unlock and friends
         storage_type storage;
 
-        item_storage_exp() {}
-
-        // Should only use this when in byref=true mode
-        item_storage_exp(storage_type& copy_by_ref) : storage(copy_by_ref) {}
-
-        value_type& lock(handle_type& h)
+        tracked_value_type& lock(handle_type h)
         {
-            return storage[h];
+            return h->value.value();
         }
 
         void unlock(handle_type) {}
+
+        // node allocation is specifically taking the 'value' portion and allocating
+        // + associating just the node portion with it.  for intrusive lists, this
+        // is largely a noop - we merely resolve where the pointer lives and report
+        // its already-allocated handle from the storage area
+        handle_type allocate(value_type& n)
+        {
+            return &n;
+        }
     };
+
+    typedef typename base_type::template _item_node_traits<
+            item_storage_exp, void* > item_node_traits;
 };
 
 // base class specifically for handle-based memory pool.  sets up all requisite typedefs
@@ -313,6 +317,18 @@ public:
         }
 
         void unlock(handle_type) {}
+
+        // node allocation is specifically taking the 'value' portion and allocating
+        // + associating just the node portion with it.  for intrusive lists, this
+        // is largely a noop - we merely resolve where the pointer lives and report
+        // its already-allocated handle from the storage area
+        handle_type allocate(value_type& n)
+        {
+            value_type* data = this->storage.data();
+            value_type* _n = &n;
+            handle_type h = _n - data;
+            return h;
+        }
     };
 
 
@@ -348,7 +364,7 @@ public:
     typedef typename traits_type::tracked_value_type value_type;
 
 public:
-    typedef typename base_type::item_node_traits_base item_node_traits_base;
+    //typedef typename base_type::item_node_traits_base item_node_traits_base;
     typedef typename base_type::item_node_traits item_node_traits;
     typedef typename base_type::item item;
 
@@ -504,6 +520,34 @@ struct memory_pool_1 : public
             t.storage[i]._next = i + 1;
 
         t.storage[N - 1]._next = item_node_traits_base::eol();
+    }
+};
+
+
+template <class T, std::ptrdiff_t N>
+struct memory_pool_ll : public
+                       memory_pool_internal<
+                               memory_pool_ll_base<T, N, memory_pool_item_traits<T, memory_pool_ll<T, N> > > >
+{
+    typedef memory_pool_internal<
+            memory_pool_ll_base<T, N, memory_pool_item_traits<T, memory_pool_ll<T, N> > > > base_type;
+
+    typedef typename base_type::item_node_traits item_node_traits;
+    typedef typename base_type::item item;
+
+    memory_pool_ll()
+    {
+        item_node_traits& t = base_type::node_traits();
+        item& first = t.storage[0];
+
+        // prime the intrusive list
+        // FIX: for some reason this line is unhappy
+        base_type::free.push_front(first);
+
+        for(int i = 0; i < N - 1; i++)
+            t.storage[i]._next = &t.storage[i + 1];
+
+        t.storage[N - 1]._next = item_node_traits::eol();
     }
 };
 
