@@ -93,6 +93,10 @@ static
 #endif
 CONSTEXPR nullopt_t nullopt{0};
 
+// Non-standard workaround for my own failing move semantic
+// however, it will come in handy for pre move semantic compilations as well
+#define FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
+
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
 template <class T, class TBase = internal::optional_base<T> >
 class optional :
@@ -160,6 +164,11 @@ public:
     }
 #endif
 
+    optional(const value_type& copy_from)
+    {
+        operator=(copy_from);
+    }
+
     template < class U, class TUBase >
     optional( const optional<U, TUBase>& copy_from )
     {
@@ -196,6 +205,8 @@ public:
         return *this;
     }
 #endif
+
+#ifdef FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
     // FIX: spec doesn't have this, but I think my lack of class U = T
     // may be breaking things so stuffing this in here, for now
     optional& operator=(const value_type& v)
@@ -204,7 +215,7 @@ public:
         base_type::has_value(true);
         return *this;
     }
-
+#endif
 
 
 #ifdef FEATURE_CPP_VARIADIC
@@ -322,11 +333,11 @@ public:
     //template <class U>
     optional(value_type&& v) : base_type(std::move(v))
     { }
+#endif
 
-#else
     optional(const value_type& copy_from) : base_type(copy_from)
     { }
-#endif
+
     template < class U, class TUBase >
     optional( const estd::optional<U, TUBase>& copy_from )
     {
@@ -349,6 +360,7 @@ public:
         return *this;
     }
 
+#ifdef FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
     // FIX: spec doesn't have this, but I think my lack of class U = T
     // may be breaking things so stuffing this in here, for now
     optional& operator=(const value_type& value)
@@ -356,8 +368,9 @@ public:
         base_type::operator=(value);
         return *this;
     }
+#endif
 
-    optional& operator=(estd::optional<value_type>& assign_from)
+    optional& operator=(const estd::optional<value_type>& assign_from)
     {
         copy(assign_from);
         return *this;

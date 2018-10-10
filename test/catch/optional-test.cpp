@@ -4,6 +4,13 @@
 
 using namespace estd;
 
+estd::optional<int> returning_optional(int val)
+{
+    if(val == 10) return estd::nullopt;
+
+    return val;
+}
+
 TEST_CASE("optional")
 {
     SECTION("simple")
@@ -165,6 +172,32 @@ TEST_CASE("optional")
             val = val2;
 
             REQUIRE(!val);
+        }
+    }
+    SECTION("function interaction/return value")
+    {
+        SECTION("standard")
+        {
+            estd::optional<int> value = returning_optional(5);
+
+            REQUIRE(value);
+            REQUIRE(*value == 5);
+
+            value = returning_optional(10);
+
+            REQUIRE(!value);
+        }
+        SECTION("layer1")
+        {
+            estd::layer1::optional<int, -1> value = returning_optional(5);
+
+            REQUIRE(value);
+            REQUIRE(*value == 5);
+
+            value = returning_optional(10);
+
+            REQUIRE(!value);
+            REQUIRE(value.value() == -1);
         }
     }
 }
