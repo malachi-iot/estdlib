@@ -123,36 +123,20 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
     }
 };
 
-
-template <class T, std::ptrdiff_t N
-          //class Traits = memory_pool_item_traits<T>
-          >
-///
-/// \brief Memory pool utilizing a handle-based intrusive linked list
-///
-/// Starts out with N slots, each slot comprised of 'item' structure which in turn
-/// has memory space for a full T.  It's managed so that it's properly unconstructed
-///
-class memory_pool_1
+// making a base here so we can reuse componentry between pointer-tracked linked list
+// and handle-based linked list varieties
+template <class T, std::size_t N>
+class memory_pool_base
 {
-public:
-    //typedef uint16_t size_type;
+protected:
     typedef typename internal::deduce_fixed_size_t<N>::size_type size_type;
 
-    //typedef Traits traits_type;
-    typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
-    typedef typename traits_type::value_type value_type;
-
-#ifdef UNIT_TESTING
-public:
-#else
-protected:
-#endif
     ///
     /// \brief Internal pool entry
     ///
     /// aligned along 'T' boundaries so that any pointers etc. in T don't cause issues
     ///
+    template <class TValue, class THandle>
     struct
 #ifdef FEATURE_CPP_ALIGN
             //alignas (alignof (value_type))
@@ -161,63 +145,23 @@ protected:
 #endif
             item
     {
-        estd::experimental::raw_instance_provider<value_type> value;
+        estd::experimental::raw_instance_provider<TValue> value;
 
         // put this here to ease pressure on alignment issues.  Presumably this can land on
         // any alignment because it's not a pointer type, but because it may be a multibyte
         // integer it might still need to be aligned?  we'll find out
-        size_type _next;
+        THandle _next;
     };
 
 
-    struct item_node_traits_base
+    template <class TValue, class TBase>
+    struct _item_node_traits : TBase
     {
-        typedef size_type handle_type;
-
-        static CONSTEXPR handle_type eol() { return numeric_limits::max<handle_type>(); }
-    };
-
-    // going to be challenging, but attempt to decouple node storage/allocator
-    // from node traits itself
-    // doing this byref trickery so that we can make external linked lists which use
-    // this memory pool's internal storage
-    template <bool byref>
-    struct item_storage_exp : item_node_traits_base
-    {
-        typedef item_node_traits_base base_type;
-        typedef typename base_type::handle_type handle_type;
-        typedef array<item, N> _storage_type;
-
-        typedef typename estd::conditional<byref, _storage_type&, _storage_type>::type storage_type;
-
-        //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
-        // TODO: Phase this out into the external 'node allocator' and pass
-        // in allocator to lock/unlock and friends
-        storage_type storage;
-
-        typedef item value_type;
-
-        item_storage_exp() {}
-
-        // Should only use this when in byref=true mode
-        item_storage_exp(storage_type& copy_by_ref) : storage(copy_by_ref) {}
-
-        value_type& lock(handle_type h)
-        {
-            return storage[h];
-        }
-
-        void unlock(handle_type) {}
-    };
-
-    template <bool byref>
-    struct _item_node_traits : item_storage_exp<byref>
-    {
-        typedef item_storage_exp<byref> base_type;
+        typedef TBase base_type;
         typedef typename base_type::handle_type node_handle;
-        typedef item node_type;
-        typedef item& nv_ref_t;
-        typedef nothing_allocator<item> node_allocator_type;
+        typedef item<TValue, node_handle> node_type;
+        typedef node_type& nv_ref_t;
+        typedef nothing_allocator<node_type> node_allocator_type;
 
         _item_node_traits() {}
 
@@ -225,13 +169,13 @@ protected:
         template <class TParam>
         _item_node_traits(TParam& p) : base_type(p) {}
 
-        static item* adjust_from(typename traits_type::value_type * val)
+        static node_type* adjust_from(TValue * val)
         {
-            item temp;
+            node_type temp;
 
             int sz = (byte*)&temp.value - (byte*)&temp;
 
-            item* _val = (item*)((byte*)val - sz);
+            node_type* _val = (node_type*)((byte*)val - sz);
 
             return _val;
         }
@@ -242,8 +186,8 @@ protected:
         // its already-allocated handle from the storage area
         node_handle allocate(nv_ref_t n)
         {
-            item* data = this->storage.data();
-            item* _n = &n;
+            node_type* data = this->storage.data();
+            node_type* _n = &n;
             node_handle h = _n - data;
             return h;
         }
@@ -260,9 +204,87 @@ protected:
             to_attach_to._next = n2;
         }
     };
+};
+
+template <class T, std::ptrdiff_t N
+          //class Traits = memory_pool_item_traits<T>
+          >
+///
+/// \brief Memory pool utilizing a handle-based intrusive linked list
+///
+/// Starts out with N slots, each slot comprised of 'item' structure which in turn
+/// has memory space for a full T.  It's managed so that it's properly unconstructed
+///
+class memory_pool_1 : public memory_pool_base<T, N>
+{
+    typedef memory_pool_base<T, N> base_type;
 
 public:
-    typedef _item_node_traits<false> item_node_traits;
+    typedef typename base_type::size_type size_type;
+
+    //typedef Traits traits_type;
+    typedef memory_pool_item_traits<T, memory_pool_1> traits_type;
+    typedef typename traits_type::value_type value_type;
+
+#ifdef UNIT_TESTING
+public:
+#else
+protected:
+#endif
+    struct item_node_traits_base
+    {
+        typedef size_type handle_type;
+        // disambiguate value_type of consumer interest vs. value_type that intrusive list
+        // needs to operate on (which will be our 'item' class)
+        typedef value_type tracked_value_type;
+
+        static CONSTEXPR handle_type eol() { return numeric_limits::max<handle_type>(); }
+    };
+
+    typedef typename base_type::template item<value_type, typename item_node_traits_base::handle_type> item;
+
+    // going to be challenging, but attempt to decouple node storage/allocator
+    // from node traits itself
+    // doing this byref trickery so that we can make external linked lists which use
+    // this memory pool's internal storage
+    template <bool byref>
+    struct item_storage_exp : item_node_traits_base
+    {
+        typedef item_node_traits_base base_type;
+        typedef typename base_type::handle_type handle_type;
+        typedef item value_type;
+        typedef array<item, N> _storage_type;
+
+        typedef typename estd::conditional<byref, _storage_type&, _storage_type>::type storage_type;
+
+        //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
+        // TODO: Phase this out into the external 'node allocator' and pass
+        // in allocator to lock/unlock and friends
+        storage_type storage;
+
+        item_storage_exp() {}
+
+        // Should only use this when in byref=true mode
+        item_storage_exp(storage_type& copy_by_ref) : storage(copy_by_ref) {}
+
+        value_type& lock(handle_type h)
+        {
+            return storage[h];
+        }
+
+        void unlock(handle_type) {}
+    };
+
+
+
+public:
+    typedef typename base_type::template _item_node_traits<
+        value_type,
+        item_storage_exp<false> > item_node_traits;
+
+    typedef typename base_type::template _item_node_traits<
+        value_type,
+        item_storage_exp<true> > item_ext_node_traits;
 
     // TODO: we can simplify & optimize this and have the traits live completely inside the
     // list.  again clumsy because traits aren't typically thought of as stateful
@@ -272,7 +294,7 @@ public:
     // our memory pool is living (item_storage_exp).  Works efficiently, but convoluted.  This
     // is why we want to decouple it from traits if we can
     typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
-    typedef internal::forward_list<item, item, nothing_allocator<item>, _item_node_traits<true> > ext_list_type;
+    typedef internal::forward_list<item, item, nothing_allocator<item>, item_ext_node_traits > ext_list_type;
 
 private:
     list_type free;

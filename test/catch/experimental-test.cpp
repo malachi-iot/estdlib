@@ -204,7 +204,7 @@ TEST_CASE("experimental tests")
                 // including the intrusive portion (the 'next' handle).  The only
                 // memory allocated for ext_list_type therefore should be a pointer
                 // to the original storage (for lock resolution) and the current head
-                pool_type::_item_node_traits<true> traits(pool.node_traits().storage);
+                pool_type::item_ext_node_traits traits(pool.node_traits().storage);
                 pool_type::ext_list_type list(traits);
 
                 list.push_front(item);
@@ -215,7 +215,9 @@ TEST_CASE("experimental tests")
 
                 REQUIRE(sz == 2);
 
-                REQUIRE(&list.front() == &item2);
+                pool_type::item_ext_node_traits::node_type& f = list.front();
+
+                REQUIRE(&f == &item2);
                 list.pop_front();
                 REQUIRE(&list.front() == &item);
             }
