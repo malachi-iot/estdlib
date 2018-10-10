@@ -27,6 +27,7 @@ template <class T, class TMemoryPool2>
 struct memory_pool_item_traits
 {
     typedef T tracked_value_type;
+    typedef TMemoryPool2 pool_type;
 
     template <class TMemoryPool, class ...TArgs>
     static void construct(TMemoryPool& pool, T* value, TArgs...args)
@@ -50,6 +51,7 @@ struct memory_pool_item_traits
 template <class T, class TMemoryPool>
 struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
 {
+    typedef TMemoryPool pool_type;
     //static constexpr int total_size()
     //{
     //    auto F = [](T*){};
@@ -207,9 +209,51 @@ protected:
     };
 };
 
+
+template <class T, std::size_t N, class TTraits>
+class memory_pool_ll_base : public memory_pool_base<T, N>
+{
+    typedef memory_pool_base<T, N> base_type;
+
+protected:
+    typedef TTraits traits_type;
+    //typedef memory_pool_item_traits<T, memory_pool_handle_base> traits_type;
+    typedef typename traits_type::tracked_value_type tracked_value_type;
+
+    typedef typename base_type::template item<tracked_value_type,
+            void*> item;
+
+    struct item_storage_exp
+    {
+        typedef item handle_type;
+        // disambiguate value_type of consumer interest vs. value_type that intrusive list
+        // needs to operate on (which will be our 'item' class)
+        typedef typename traits_type::tracked_value_type tracked_value_type;
+        typedef item value_type;
+        typedef array<item, N> storage_type;
+
+        //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
+        // TODO: Phase this out into the external 'node allocator' and pass
+        // in allocator to lock/unlock and friends
+        storage_type storage;
+
+        item_storage_exp() {}
+
+        // Should only use this when in byref=true mode
+        item_storage_exp(storage_type& copy_by_ref) : storage(copy_by_ref) {}
+
+        value_type& lock(handle_type& h)
+        {
+            return storage[h];
+        }
+
+        void unlock(handle_type) {}
+    };
+};
+
 // base class specifically for handle-based memory pool.  sets up all requisite typedefs
 template <class T, std::size_t N, class TTraits>
-class memory_pool_1_base : public memory_pool_base<T, N>
+class memory_pool_handle_base : public memory_pool_base<T, N>
 {
     typedef memory_pool_base<T, N> base_type;
 
@@ -218,7 +262,7 @@ public:
 
     //typedef Traits traits_type;
     typedef TTraits traits_type;
-    //typedef memory_pool_item_traits<T, memory_pool_1_base> traits_type;
+    //typedef memory_pool_item_traits<T, memory_pool_handle_base> traits_type;
     typedef typename traits_type::tracked_value_type tracked_value_type;
 
 #ifdef UNIT_TESTING
@@ -282,19 +326,19 @@ public:
 
 };
 
-template <class T, std::ptrdiff_t N
-          //class Traits = memory_pool_item_traits<T>
-          >
+template <class TBase>
 ///
 /// \brief Memory pool utilizing a handle-based intrusive linked list
 ///
 /// Starts out with N slots, each slot comprised of 'item' structure which in turn
 /// has memory space for a full T.  It's managed so that it's properly unconstructed
 ///
-class memory_pool_1 :
-        public memory_pool_1_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > >
+class memory_pool_internal :
+        //public memory_pool_handle_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > >
+        public TBase
 {
-    typedef memory_pool_1_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > > base_type;
+    //typedef memory_pool_handle_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > > base_type;
+    typedef TBase base_type;
 
 public:
     typedef typename base_type::size_type size_type;
@@ -317,7 +361,7 @@ public:
     // is why we want to decouple it from traits if we can
     typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
 
-private:
+protected:
     list_type free;
     //intrusive_forward_list<item> free;
 
@@ -337,19 +381,6 @@ public:
     }
 
 public:
-    memory_pool_1()
-    {
-        item_node_traits& t = free.get_traits();
-
-        // prime the intrusive list
-        free.push_front(t.storage[0]);
-
-        for(int i = 0; i < N - 1; i++)
-            t.storage[i]._next = i + 1;
-
-        t.storage[N - 1]._next = item_node_traits_base::eol();
-    }
-
     size_type count_free() const
     {
         return distance(free.begin(), free.end());
@@ -407,8 +438,12 @@ public:
     value_type& construct(TArgs&&...args)
     {
         value_type* value = allocate();
+        // FIX: Repair this awful forward cast.  We have to do this because
+        // traits_type needs to interact directly with the proper memory pool type
+        // (that we are sourced from) but architecture's weakness makes that tricky
+        auto _this = (typename traits_type::pool_type*)this;
 
-        traits_type::construct(*this, value, std::forward<TArgs>(args)...);
+        traits_type::construct(*_this, value, std::forward<TArgs>(args)...);
 
         return *value;
     }
@@ -421,7 +456,12 @@ public:
     ///
     void destroy(value_type& value)
     {
-        traits_type::destroy(*this, value);
+        // FIX: Repair this awful forward cast.  We have to do this because
+        // traits_type needs to interact directly with the proper memory pool type
+        // (that we are sourced from) but architecture's weakness makes that tricky
+        auto _this = (typename traits_type::pool_type*)this;
+
+        traits_type::destroy(*_this, value);
         deallocate(&value);
     }
 
@@ -439,6 +479,31 @@ public:
     {
         return free.get_traits().lock(h);
         //return *(storage() + h);
+    }
+};
+
+template <class T, std::ptrdiff_t N>
+struct memory_pool_1 : public
+        memory_pool_internal<
+        memory_pool_handle_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > > >
+{
+    typedef memory_pool_internal<
+            memory_pool_handle_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > > > base_type;
+
+    typedef typename base_type::item_node_traits_base item_node_traits_base;
+    typedef typename base_type::item_node_traits item_node_traits;
+
+    memory_pool_1()
+    {
+        item_node_traits& t = base_type::node_traits();
+
+        // prime the intrusive list
+        base_type::free.push_front(t.storage[0]);
+
+        for(int i = 0; i < N - 1; i++)
+            t.storage[i]._next = i + 1;
+
+        t.storage[N - 1]._next = item_node_traits_base::eol();
     }
 };
 
