@@ -154,12 +154,13 @@ protected:
     };
 
 
-    template <class TValue, class TBase>
+    template <class TBase>
     struct _item_node_traits : TBase
     {
         typedef TBase base_type;
+        typedef typename base_type::tracked_value_type tracked_value_type;
         typedef typename base_type::handle_type node_handle;
-        typedef item<TValue, node_handle> node_type;
+        typedef item<tracked_value_type, node_handle> node_type;
         typedef node_type& nv_ref_t;
         typedef nothing_allocator<node_type> node_allocator_type;
 
@@ -169,7 +170,7 @@ protected:
         template <class TParam>
         _item_node_traits(TParam& p) : base_type(p) {}
 
-        static node_type* adjust_from(TValue * val)
+        static node_type* adjust_from(tracked_value_type * val)
         {
             node_type temp;
 
@@ -279,11 +280,9 @@ protected:
 
 public:
     typedef typename base_type::template _item_node_traits<
-        value_type,
         item_storage_exp<false> > item_node_traits;
 
     typedef typename base_type::template _item_node_traits<
-        value_type,
         item_storage_exp<true> > item_ext_node_traits;
 
     // TODO: we can simplify & optimize this and have the traits live completely inside the
