@@ -208,7 +208,7 @@ protected:
 };
 
 
-template <class T, std::size_t N>
+template <class T, std::size_t N, class TTraits>
 class memory_pool_1_base : public memory_pool_base<T, N>
 {
     typedef memory_pool_base<T, N> base_type;
@@ -217,7 +217,8 @@ public:
     typedef typename base_type::size_type size_type;
 
     //typedef Traits traits_type;
-    typedef memory_pool_item_traits<T, memory_pool_1_base> traits_type;
+    typedef TTraits traits_type;
+    //typedef memory_pool_item_traits<T, memory_pool_1_base> traits_type;
     typedef typename traits_type::value_type value_type;
 
 #ifdef UNIT_TESTING
@@ -268,6 +269,16 @@ public:
 
         void unlock(handle_type) {}
     };
+
+
+    typedef typename base_type::template _item_node_traits<
+            item_storage_exp<false> > item_node_traits;
+
+    typedef typename base_type::template _item_node_traits<
+            item_storage_exp<true> > item_ext_node_traits;
+
+    typedef internal::forward_list<item, item, nothing_allocator<item>, item_ext_node_traits > ext_list_type;
+
 };
 
 template <class T, std::ptrdiff_t N
@@ -279,9 +290,10 @@ template <class T, std::ptrdiff_t N
 /// Starts out with N slots, each slot comprised of 'item' structure which in turn
 /// has memory space for a full T.  It's managed so that it's properly unconstructed
 ///
-class memory_pool_1 : public memory_pool_base<T, N>
+class memory_pool_1 :
+        public memory_pool_1_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > >
 {
-    typedef memory_pool_1_base<T, N> base_type;
+    typedef memory_pool_1_base<T, N, memory_pool_item_traits<T, memory_pool_1<T, N> > > base_type;
 
 public:
     typedef typename base_type::size_type size_type;
@@ -292,12 +304,8 @@ public:
 
 public:
     typedef typename base_type::item_node_traits_base item_node_traits_base;
+    typedef typename base_type::item_node_traits item_node_traits;
     typedef typename base_type::item item;
-    typedef typename base_type::template _item_node_traits<
-        typename base_type::template item_storage_exp<false> > item_node_traits;
-
-    typedef typename base_type::template _item_node_traits<
-            typename base_type::template item_storage_exp<true> > item_ext_node_traits;
 
     // TODO: we can simplify & optimize this and have the traits live completely inside the
     // list.  again clumsy because traits aren't typically thought of as stateful
@@ -307,7 +315,6 @@ public:
     // our memory pool is living (item_storage_exp).  Works efficiently, but convoluted.  This
     // is why we want to decouple it from traits if we can
     typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
-    typedef internal::forward_list<item, item, nothing_allocator<item>, item_ext_node_traits > ext_list_type;
 
 private:
     list_type free;
