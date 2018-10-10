@@ -26,7 +26,7 @@ struct typed_aligned_storage
 template <class T, class TMemoryPool2>
 struct memory_pool_item_traits
 {
-    typedef T value_type;
+    typedef T tracked_value_type;
 
     template <class TMemoryPool, class ...TArgs>
     static void construct(TMemoryPool& pool, T* value, TArgs...args)
@@ -99,17 +99,17 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
     // can't do this, according to https://stackoverflow.com/questions/4846540/c11-lambda-in-decltype
     //typedef estd::layer1::shared_ptr<T, std::decltype([](T*){})> value_type;
     //typedef estd::layer1::shared_ptr<T, void> value_type;
-    typedef estd::layer1::shared_ptr<T, void, control_block> value_type;
+    typedef estd::layer1::shared_ptr<T, void, control_block> tracked_value_type;
 
     template <class ...TArgs>
-    static void construct(TMemoryPool& pool, value_type* value, TArgs&&...args)
+    static void construct(TMemoryPool& pool, tracked_value_type* value, TArgs&&...args)
     {
         // TODO: use allocator_traits
         //new (value) value_type([](TMemoryPool2& mp, T* d){});
         //new (value) value_type(deleter);
         value->_value.pool = &pool;
         value->_value.pool_item = value;
-        new (value) value_type();
+        new (value) tracked_value_type();
 
 #ifdef FEATURE_ESTD_EXP_AUTOCONSTRUCT
         value->construct(std::forward<TArgs>(args)...);
@@ -117,9 +117,9 @@ struct memory_pool_item_traits<estd::layer1::shared_ptr<T, void>, TMemoryPool >
     }
 
 
-    static void destroy(TMemoryPool& pool, value_type& value)
+    static void destroy(TMemoryPool& pool, tracked_value_type& value)
     {
-        value.~value_type();
+        value.~tracked_value_type();
     }
 };
 
@@ -136,7 +136,7 @@ protected:
     ///
     /// aligned along 'T' boundaries so that any pointers etc. in T don't cause issues
     ///
-    template <class TValue, class THandle>
+    template <class TTrackedValue, class THandle>
     struct
 #ifdef FEATURE_CPP_ALIGN
             //alignas (alignof (value_type))
@@ -145,7 +145,7 @@ protected:
 #endif
             item
     {
-        estd::experimental::raw_instance_provider<TValue> value;
+        estd::experimental::raw_instance_provider<TTrackedValue> value;
 
         // put this here to ease pressure on alignment issues.  Presumably this can land on
         // any alignment because it's not a pointer type, but because it may be a multibyte
@@ -207,7 +207,7 @@ protected:
     };
 };
 
-
+// base class specifically for handle-based memory pool.  sets up all requisite typedefs
 template <class T, std::size_t N, class TTraits>
 class memory_pool_1_base : public memory_pool_base<T, N>
 {
@@ -219,7 +219,7 @@ public:
     //typedef Traits traits_type;
     typedef TTraits traits_type;
     //typedef memory_pool_item_traits<T, memory_pool_1_base> traits_type;
-    typedef typename traits_type::value_type value_type;
+    typedef typename traits_type::tracked_value_type tracked_value_type;
 
 #ifdef UNIT_TESTING
 public:
@@ -231,12 +231,13 @@ public:
         typedef size_type handle_type;
         // disambiguate value_type of consumer interest vs. value_type that intrusive list
         // needs to operate on (which will be our 'item' class)
-        typedef value_type tracked_value_type;
+        typedef typename traits_type::tracked_value_type tracked_value_type;
 
         static CONSTEXPR handle_type eol() { return numeric_limits::max<handle_type>(); }
     };
 
-    typedef typename base_type::template item<value_type, typename item_node_traits_base::handle_type> item;
+    typedef typename base_type::template item<tracked_value_type,
+            typename item_node_traits_base::handle_type> item;
 
     // going to be challenging, but attempt to decouple node storage/allocator
     // from node traits itself
@@ -300,7 +301,7 @@ public:
 
     //typedef Traits traits_type;
     typedef typename base_type::traits_type traits_type;
-    typedef typename traits_type::value_type value_type;
+    typedef typename traits_type::tracked_value_type value_type;
 
 public:
     typedef typename base_type::item_node_traits_base item_node_traits_base;
