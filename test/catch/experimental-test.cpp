@@ -186,6 +186,40 @@ TEST_CASE("experimental tests")
             REQUIRE(sz_item == sizeof(int) + sz_size_type);
             REQUIRE(sz == sz_item * 10 + sz_size_type);
         }
+        SECTION("low level access")
+        {
+            typedef memory_pool_1<int, 10> pool_type;
+            pool_type pool;
+
+            auto& item = pool.allocate_item();
+            auto& item2 = pool.allocate_item();
+
+            auto& _item2 = pool.lock(item._next);
+
+            REQUIRE(&item2 == &_item2);
+
+            SECTION("peering in with linked list")
+            {
+                // this linked list relies completely on the storage from 'pool',
+                // including the intrusive portion (the 'next' handle).  The only
+                // memory allocated for ext_list_type therefore should be a pointer
+                // to the original storage (for lock resolution) and the current head
+                pool_type::_item_node_traits<true> traits(pool.node_traits().storage);
+                pool_type::ext_list_type list(traits);
+
+                list.push_front(item);
+                list.push_front(item2);
+
+                // odd, looks like my iterators are cross wired
+                int sz = estd::distance(list.begin(), list.end());
+
+                REQUIRE(sz == 2);
+
+                REQUIRE(&list.front() == &item2);
+                list.pop_front();
+                REQUIRE(&list.front() == &item);
+            }
+        }
         SECTION("alignment testing")
         {
             struct

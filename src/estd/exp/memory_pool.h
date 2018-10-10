@@ -169,18 +169,38 @@ protected:
         size_type _next;
     };
 
+
+    struct item_node_traits_base
+    {
+        typedef size_type handle_type;
+
+        static CONSTEXPR handle_type eol() { return numeric_limits::max<handle_type>(); }
+    };
+
     // going to be challenging, but attempt to decouple node storage/allocator
     // from node traits itself
-    struct item_storage_exp
+    // doing this byref trickery so that we can make external linked lists which use
+    // this memory pool's internal storage
+    template <bool byref>
+    struct item_storage_exp : item_node_traits_base
     {
-        typedef array<item, N> storage_type;
+        typedef item_node_traits_base base_type;
+        typedef typename base_type::handle_type handle_type;
+        typedef array<item, N> _storage_type;
+
+        typedef typename estd::conditional<byref, _storage_type&, _storage_type>::type storage_type;
+
         //typedef typename aligned_storage<sizeof(item), alignof (item)>::type storage_type;
         // TODO: Phase this out into the external 'node allocator' and pass
         // in allocator to lock/unlock and friends
         storage_type storage;
 
-        typedef size_type handle_type;
         typedef item value_type;
+
+        item_storage_exp() {}
+
+        // Should only use this when in byref=true mode
+        item_storage_exp(storage_type& copy_by_ref) : storage(copy_by_ref) {}
 
         value_type& lock(handle_type h)
         {
@@ -190,14 +210,20 @@ protected:
         void unlock(handle_type) {}
     };
 
-    struct item_node_traits : item_storage_exp
+    template <bool byref>
+    struct _item_node_traits : item_storage_exp<byref>
     {
+        typedef item_storage_exp<byref> base_type;
+        typedef typename base_type::handle_type node_handle;
         typedef item node_type;
-        typedef size_type node_handle;
         typedef item& nv_ref_t;
         typedef nothing_allocator<item> node_allocator_type;
 
-        static CONSTEXPR node_handle eol() { return numeric_limits::max<node_handle>(); }
+        _item_node_traits() {}
+
+        // Should only use this when in byref=true mode
+        template <class TParam>
+        _item_node_traits(TParam& p) : base_type(p) {}
 
         static item* adjust_from(typename traits_type::value_type * val)
         {
@@ -235,6 +261,9 @@ protected:
         }
     };
 
+public:
+    typedef _item_node_traits<false> item_node_traits;
+
     // TODO: we can simplify & optimize this and have the traits live completely inside the
     // list.  again clumsy because traits aren't typically thought of as stateful
     //item_node_traits traits;
@@ -243,8 +272,26 @@ protected:
     // our memory pool is living (item_storage_exp).  Works efficiently, but convoluted.  This
     // is why we want to decouple it from traits if we can
     typedef internal::forward_list<item, item, nothing_allocator<item>, item_node_traits> list_type;
+    typedef internal::forward_list<item, item, nothing_allocator<item>, _item_node_traits<true> > ext_list_type;
+
+private:
     list_type free;
     //intrusive_forward_list<item> free;
+
+#ifdef UNIT_TESTING
+public:
+#endif
+
+    item_node_traits& node_traits()
+    {
+        return free.get_traits();
+    }
+
+    // internal call to easily access underlying pool storage
+    item* storage()
+    {
+        return node_traits().storage.data();
+    }
 
 public:
     memory_pool_1()
@@ -257,12 +304,23 @@ public:
         for(int i = 0; i < N - 1; i++)
             t.storage[i]._next = i + 1;
 
-        t.storage[N - 1]._next = item_node_traits::eol();
+        t.storage[N - 1]._next = item_node_traits_base::eol();
     }
 
     size_type count_free() const
     {
         return distance(free.begin(), free.end());
+    }
+
+    // low-level allocation, returns also easy access to metadata.  Presumes
+    // that there is an item available (that free.empty() == false)
+    item& allocate_item()
+    {
+        item& to_allocate = free.front();
+
+        free.pop_front();
+
+        return to_allocate;
     }
 
     ///
@@ -273,11 +331,15 @@ public:
     {
         if(free.empty()) return NULLPTR;
 
-        item& to_allocate = free.front();
-
-        free.pop_front();
+        item& to_allocate = allocate_item();
 
         return &to_allocate.value.value();
+    }
+
+
+    void deallocate_item(item& to_free)
+    {
+        free.push_front(to_free);
     }
 
     ///
@@ -289,7 +351,7 @@ public:
 #ifdef DEBUG
         // TODO: do sanity check to make sure to_free resides in proper pointer space
 #endif
-        free.push_front(*item_node_traits::adjust_from(to_free));
+        deallocate_item(*item_node_traits::adjust_from(to_free));
     }
 
 #ifdef FEATURE_CPP_VARIADIC
@@ -327,6 +389,13 @@ public:
     void destroy_internal(void* value)
     {
         destroy(*reinterpret_cast<value_type*>(value));
+    }
+
+    // Bad name.  Acquire item from pool by handle directly
+    item& lock(typename item_node_traits::node_handle h)
+    {
+        return free.get_traits().lock(h);
+        //return *(storage() + h);
     }
 };
 
