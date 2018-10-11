@@ -399,7 +399,39 @@ TEST_CASE("experimental tests")
         {
             // almost there, just some lingering pointer vs non pointer descrepency for handling
             // '_next'
-            //memory_pool_ll<int, 10> pool;
+            typedef memory_pool_ll<int, 10> pool_type;
+            intrusive_forward_list<pool_type::item> list;
+            pool_type pool;
+
+            int sz = sizeof(pool_type::item);
+            int expected_sz = sizeof(int) + sizeof(void*) + 4; // extra 4 because of padding on 64-bit gnu
+
+            REQUIRE(sz == expected_sz);
+
+            sz = sizeof(pool);
+
+            REQUIRE(sz == (expected_sz * 10) + sizeof(void*));
+
+            int* val1 = pool.allocate();
+
+            REQUIRE(pool.count_free() == 9);
+
+            *val1 = 123;
+
+            int& val2 = pool.construct(456);
+
+            REQUIRE(pool.count_free() == 8);
+
+            REQUIRE(*val1 == 123);
+            REQUIRE(val2 == 456);
+
+            pool_type::item& item = pool.allocate_item();
+
+            REQUIRE(pool.count_free() == 7);
+
+            // NOTE: almost works - as expected, traits are different for this particular
+            // node type.  I think we can specialize here
+            //list.push_front(item);
         }
     }
 }

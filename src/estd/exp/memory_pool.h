@@ -234,9 +234,9 @@ protected:
         // in allocator to lock/unlock and friends
         storage_type storage;
 
-        tracked_value_type& lock(handle_type h)
+        value_type& lock(handle_type h)
         {
-            return h->value.value();
+            return *h;
         }
 
         void unlock(handle_type) {}
