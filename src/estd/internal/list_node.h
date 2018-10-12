@@ -98,7 +98,7 @@ public:
 namespace internal
 {
 template<class TNodeTraits, class TIterator>
-class linkedlist_base
+class linkedlist_base_base
 {
 public:
     typedef typename estd::remove_reference<TNodeTraits>::type node_traits_t;
@@ -117,36 +117,45 @@ public:
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
     typedef typename node_traits_t::node_handle node_handle;
+
+
+};
+
+template<class TNodeTraits, class TIterator>
+class linkedlist_traits_base : public linkedlist_base_base<TNodeTraits, TIterator>
+{
+    typedef linkedlist_base_base<TNodeTraits, TIterator> base_type;
+
+public:
+    typedef typename base_type::node_traits_t node_traits_t;
+    typedef typename base_type::node_type node_type;
+    typedef typename base_type::node_handle node_handle;
+
 protected:
-
-    static CONSTEXPR node_handle after_end_node() { return node_traits_t::eol(); }
-
     // for now assume stateful traits (contains allocators)
     // optimize this out later
     TNodeTraits traits;
 
-    node_handle m_front;
+    linkedlist_traits_base() {}
 
-    linkedlist_base(allocator_t* a) :
-            m_front(after_end_node())
+    linkedlist_traits_base(node_traits_t& traits) :
+    traits(traits)
+            {
 
-    {}
+            }
 
-    linkedlist_base(node_traits_t& traits) :
-        traits(traits),
-        m_front(after_end_node())
-    {
+    node_traits_t& get_traits() { return traits; }
 
-    }
+    const node_traits_t& get_traits() const { return traits; }
 
     node_type& alloc_lock(node_handle& to_lock)
     {
-        return traits.lock(to_lock);
+        return get_traits().lock(to_lock);
     }
 
     void alloc_unlock(node_handle& to_unlock)
     {
-        traits.unlock(to_unlock);
+        get_traits().unlock(to_unlock);
     }
 
 
@@ -154,7 +163,7 @@ protected:
     {
         node_type& f = alloc_lock(from);
 
-        node_handle n = traits.next(f);
+        node_handle n = get_traits().next(f);
 
         alloc_unlock(from);
 
@@ -165,7 +174,7 @@ protected:
     {
         node_type& f = alloc_lock(from);
 
-        node_handle n = traits.prev(f);
+        node_handle n = get_traits().prev(f);
 
         alloc_unlock(from);
 
@@ -176,23 +185,69 @@ protected:
     {
         node_type& node = alloc_lock(_node);
 
-        traits.next(node, next);
+        get_traits().next(node, next);
 
         alloc_unlock(_node);
     }
+};
 
+
+// kind of implicitly the 'linkedlist_front' + linked list forward
+// rolled together
+template<class TNodeTraits, class TIterator>
+class linkedlist_base : public linkedlist_traits_base<TNodeTraits, TIterator>
+{
+    typedef linkedlist_traits_base<TNodeTraits, TIterator> base_type;
+
+public:
+    typedef typename estd::remove_reference<TNodeTraits>::type node_traits_t;
+    typedef typename node_traits_t::value_type value_type;
+    typedef value_type& reference;
+    typedef TIterator iterator;
+    typedef const iterator   const_iterator;
+    typedef typename node_traits_t::node_allocator_type node_allocator_t;
+    typedef node_allocator_t allocator_t;
+    typedef typename node_traits_t::node_type node_type;
+    //typedef typename node_allocator_t::node_pointer node_pointer;
+
+    typedef typename node_traits_t::nv_ref_t nv_ref_t;
+    typedef nv_ref_t nv_reference;
+
+    typedef allocator_traits<allocator_t> allocator_traits_t;
+
+    typedef typename node_traits_t::node_handle node_handle;
+
+    node_traits_t& get_traits() { return base_type::traits; }
+
+    const node_traits_t& get_traits() const { return base_type::traits; }
+
+protected:
+
+    static CONSTEXPR node_handle after_end_node() { return node_traits_t::eol(); }
+
+    node_handle m_front;
+
+    linkedlist_base(allocator_t* a) :
+            m_front(after_end_node())
+
+    {}
+
+    linkedlist_base(node_traits_t& traits) :
+        base_type(traits),
+        m_front(after_end_node())
+    {
+
+    }
 
     void set_front(node_handle new_front)
     {
-        set_next(new_front, m_front);
+        base_type::set_next(new_front, m_front);
 
         m_front = new_front;
     }
 
 
 public:
-    node_traits_t& get_traits() { return traits; }
-
     bool empty() const { return m_front == after_end_node(); }
 
     // TODO: move towards 'accessor' pattern instead of direct references, not as
@@ -201,16 +256,39 @@ public:
     reference front()
     {
         //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
-        reference front_value = alloc_lock(m_front);
+        reference front_value = base_type::alloc_lock(m_front);
 
-        alloc_unlock(m_front);
+        base_type::alloc_unlock(m_front);
 
         return front_value;
     }
 
-    iterator begin() { return iterator(m_front, traits); }
-    const_iterator begin() const { return iterator(m_front, traits); }
-    const_iterator end() const { return iterator(after_end_node(), traits); }
+    iterator begin() { return iterator(m_front, get_traits()); }
+    const_iterator begin() const { return iterator(m_front, get_traits()); }
+    const_iterator end() const { return iterator(after_end_node(), get_traits()); }
+};
+
+template<class TNodeTraits, class TIterator>
+class linkedlist_back_base : public linkedlist_base_base<TNodeTraits, TIterator>
+{
+    typedef linkedlist_base_base<TNodeTraits, TIterator> base_type;
+
+    typedef typename base_type::node_handle node_handle;
+    typedef typename base_type::reference reference;
+
+protected:
+    node_handle m_back;
+
+public:
+    reference back()
+    {
+        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
+        reference back_value = base_type::alloc_lock(m_back);
+
+        base_type::alloc_unlock(m_back);
+
+        return back_value;
+    }
 };
 
 }

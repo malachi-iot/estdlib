@@ -62,6 +62,9 @@ public:
 
     typedef allocator_traits<allocator_t> allocator_traits_t;
 
+    node_traits_t& get_traits() { return base_t::get_traits(); }
+    const node_traits_t& get_traits() const { return base_t::get_traits(); }
+
 protected:
 
     typedef typename base_t::node_handle node_handle;
@@ -94,7 +97,7 @@ protected:
 
     void destroy(node_handle h)
     {
-        base_t::traits.destroy(h);
+        get_traits().destroy(h);
     }
 
 public:
@@ -117,20 +120,20 @@ public:
 
         base_t::m_front = next(base_t::m_front);
 
-        base_t::traits.deallocate(old);
+        get_traits().deallocate(old);
         //base_t::alloc.dealloc(old);
     }
 
     void push_front(nv_reference value)
     {
-        base_t::set_front(base_t::traits.allocate(value));
+        base_t::set_front(get_traits().allocate(value));
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
 
     void push_front(value_type&& value)
     {
-        base_t::set_front(base_t::traits.alloc_move(std::move(value)));
+        base_t::set_front(get_traits().alloc_move(std::move(value)));
     }
 
 #endif
