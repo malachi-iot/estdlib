@@ -9,6 +9,12 @@
 #include "port/string.h"
 #include "algorithm.h"
 #include "span.h"
+// NOTE: Dormant, always using old-style stdlib.h for now
+#ifdef FEATURE_STD_CSDLIB
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>
@@ -623,6 +629,25 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
                   const basic_string<TCharRight, typename StringTraitsRight::char_traits, AllocRight, StringTraitsRight>& rhs)
 {
     return lhs.compare(rhs) == 0;
+}
+
+
+// FIX: This doesn't account for conversion errors, but should.  std version
+// throws exceptions
+template <class TChar, class Traits, class Alloc, class TStringTraits>
+long stol(
+        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        size_t pos = 0, int base = 10)
+{
+    // FIX: very clunky way to ensure we're looking at a null terminated string
+    // somehow I never expose null_termination indicators on the string itself
+    TStringTraits::is_null_termination(0);
+
+    const TChar* data = str.clock();
+    typename estd::remove_const<TChar>::type* end;
+    long result = strtol(data, &end, base);
+    str.cunlock();
+    return result;
 }
 
 }

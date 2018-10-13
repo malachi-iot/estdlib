@@ -507,4 +507,11 @@ TEST_CASE("string tests")
 
         REQUIRE(sv4 == "es");
     }
+    SECTION("stol")
+    {
+        estd::layer2::const_string val = "1234";
+        long value = estd::stol(val);
+
+        REQUIRE(value == 1234);
+    }
 }
