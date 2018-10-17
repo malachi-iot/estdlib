@@ -158,6 +158,8 @@ void wifi_config(void *pvParameters)
 {
     static const char *TAG = "wifi config";
 
+    ESP_LOGI(TAG, "wifi_config startup");
+
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
     tcpip_adapter_init();
 #endif
