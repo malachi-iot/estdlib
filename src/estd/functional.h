@@ -6,6 +6,7 @@
 #include "type_traits.h"
 
 #include "internal/invoke.h"
+#include "internal/functional.h"
 
 // TODO: Utilize std version of this, if available
 
