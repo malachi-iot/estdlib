@@ -273,6 +273,17 @@ struct ForwardIterator : public TBase
         return !operator ==(compare_to);
     }
 
+    ForwardIterator& operator=(const ForwardIterator& copy_from)
+    {
+        new (this) ForwardIterator(copy_from);
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    ForwardIterator& operator=(ForwardIterator&& move_from)
+    {
+        new (this) ForwardIterator(std::move(move_from));
+    }
+#endif
 };
 
 
