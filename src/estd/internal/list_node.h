@@ -217,9 +217,9 @@ public:
 
     typedef typename node_traits_t::node_handle node_handle;
 
-    node_traits_t& get_traits() { return base_type::traits; }
+    node_traits_t& get_traits() { return base_type::get_traits(); }
 
-    const node_traits_t& get_traits() const { return base_type::traits; }
+    const node_traits_t& get_traits() const { return base_type::get_traits(); }
 
 protected:
 
@@ -264,7 +264,11 @@ public:
     }
 
     iterator begin() { return iterator(m_front, get_traits()); }
-    const_iterator begin() const { return iterator(m_front, get_traits()); }
+    const_iterator begin() const
+    {
+        const node_traits_t& t = get_traits();
+        return iterator(m_front, t);
+    }
     const_iterator end() const { return iterator(after_end_node(), get_traits()); }
 
 #ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
