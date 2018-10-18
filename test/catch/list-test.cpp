@@ -431,4 +431,32 @@ TEST_CASE("linkedlist")
         REQUIRE(*i - 2 == 3);
         REQUIRE((i -= 2) == list.begin());
     }
+    SECTION("iterator low level testing")
+    {
+        struct test_node {};
+        typedef estd::experimental_std_allocator<test_node> allocator_type;
+        typedef estd::node_traits<test_node, allocator_type, estd::nothing_allocator<test_node> > traits_type;
+
+        traits_type t;
+
+        SECTION("inline")
+        {
+            // FIX: inline traits_type is not good.  traits a little bit abused because
+            // it sometimes carries state here, which goes against the general pattern of traits
+            // this also means that state may go out of sync and/or take up way more memory
+            // as duplicates here.  Just bad all the way around
+            typedef estd::internal::list::ForwardIterator<test_node, traits_type> it_type;
+
+            it_type i(NULLPTR, t);
+        }
+        SECTION("const")
+        {
+            typedef estd::internal::list::ForwardIterator<test_node, traits_type&> it_type;
+            const traits_type& t2 = t;
+
+            // FIX: this doesn't compile and this is an obstacle to getting forward_list to
+            // properly use traits_type& in its iterators
+            //it_type i(NULLPTR, t2);
+        }
+    }
 }
