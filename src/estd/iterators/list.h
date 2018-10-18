@@ -60,6 +60,7 @@ protected:
 #endif
 
     traits_t& get_traits() { return base_type::traits; }
+    const traits_t& get_traits() const { return base_type::traits; }
 
     node_type& lock_internal()
     {
@@ -73,10 +74,24 @@ protected:
 
 public:
     InputIterator(node_handle_t node, const traits_t& traits) :
-        current(node),
-        // FIX: clean up this brute force const removal
-        base_type((traits_t&)traits)
+    // FIX: clean up this brute force const removal
+        base_type((traits_t&)traits),
+        current(node)
     {}
+
+    InputIterator(const InputIterator& copy_from) :
+        base_type((traits_t&)copy_from.get_traits()),
+        current(copy_from.current)
+    {
+
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    InputIterator(InputIterator&& move_from) :
+        base_type((traits_t)move_from.get_traits()),
+        current(std::move(move_from.current))
+    {}
+#endif
 
     //~InputIterator() {}
 
@@ -166,6 +181,27 @@ struct ForwardIterator : public TBase
 #endif
     {
     }
+
+
+    ForwardIterator(const ForwardIterator& copy_from) :
+        base_t(copy_from)
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+        ,before_beginning(copy_from.before_beginning)
+#endif
+    {
+
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    ForwardIterator(ForwardIterator&& move_from) :
+        base_t(std::move(move_from))
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+        ,before_beginning(move_from.before_beginning)
+#endif
+    {
+
+    }
+#endif
 
 
     ForwardIterator& operator++()
