@@ -454,9 +454,8 @@ TEST_CASE("linkedlist")
             typedef estd::internal::list::ForwardIterator<test_node, traits_type&> it_type;
             const traits_type& t2 = t;
 
-            // FIX: this doesn't compile and this is an obstacle to getting forward_list to
-            // properly use traits_type& in its iterators
-            //it_type i(NULLPTR, t2);
+            // TODO: Upgrade forward_list to follow suit with traits_type&
+            it_type i(NULLPTR, t2);
         }
     }
 }

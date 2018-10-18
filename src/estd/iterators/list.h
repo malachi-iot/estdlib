@@ -6,11 +6,32 @@
 
 namespace estd {
 
+namespace internal {
+
+// FIX: stateful traits in general is kinda suspect (statefulness should be
+// tracked separately in allocator probably).  But until that point, manage
+// as best we can - treating non-stateful traits appropriately
+template <class TNodeTraits>
+struct node_traits_evaporator
+{
+    typedef typename estd::remove_reference<TNodeTraits>::type traits_type;
+
+protected:
+    // FIX: Pretty sure we want this to be a reference, not a value
+    TNodeTraits traits;
+
+public:
+    node_traits_evaporator(TNodeTraits traits) : traits(traits) {}
+};
+
+}
+
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
-struct InputIterator
+struct InputIterator : internal::node_traits_evaporator<TNodeTraits>
 {
-    typedef typename estd::remove_reference<TNodeTraits>::type traits_t;
+    typedef internal::node_traits_evaporator<TNodeTraits> base_type;
+    typedef typename base_type::traits_type traits_t;
     typedef TValue value_type;
     //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef typename traits_t::node_allocator_type node_allocator_t;
@@ -38,24 +59,23 @@ protected:
     typename allocator_t::lock_counter lock_counter;
 #endif
 
-    // FIX: Pretty sure we want this to be a reference, not a value
-    TNodeTraits traits;
+    traits_t& get_traits() { return base_type::traits; }
 
     node_type& lock_internal()
     {
-        return traits.lock(current);
+        return get_traits().lock(current);
     }
 
     void unlock_internal()
     {
-        traits.unlock(current);
+        get_traits().unlock(current);
     }
 
 public:
     InputIterator(node_handle_t node, const traits_t& traits) :
         current(node),
         // FIX: clean up this brute force const removal
-        traits((traits_t&)traits)
+        base_type((traits_t&)traits)
     {}
 
     //~InputIterator() {}
@@ -67,11 +87,11 @@ public:
     }
 
     // non standard handle-based mem helpers
-    nv_reference lock() { return lock(traits, current); }
+    nv_reference lock() { return lock(get_traits(), current); }
 
     void unlock()
     {
-        traits.unlock(current);
+        get_traits().unlock(current);
     }
 
 
@@ -120,8 +140,8 @@ struct ForwardIterator : public TBase
     bool before_beginning;
 #endif
 
-    typedef TNodeTraits traits_t;
     typedef TBase base_t;
+    typedef typename base_t::traits_t   traits_t;
     typedef typename base_t::node_type   node_type;
     typedef typename base_t::value_type  value_type;
     typedef typename base_t::node_pointer node_pointer;
