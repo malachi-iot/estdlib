@@ -194,6 +194,7 @@ public:
 
     // deviates from std C++ in that this optionally shall remove the first item found
     // in the list, rather than all items matching
+    // TODO: change remove/remove_if to use iterators more directly to avoid this broken before_beginning_node magic
     template<class UnaryPredicate>
     void remove_if(UnaryPredicate p, bool first_only = false)
     {

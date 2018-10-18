@@ -1,5 +1,7 @@
 #pragma once
 
+#define FEATURE_ESTD_LIST_BEFORE_BEGINNING
+
 #include "../type_traits.h"
 
 namespace estd {
@@ -109,10 +111,14 @@ namespace internal { namespace list {
 template <class TValue, class TNodeTraits, class TBase = InputIterator<TValue, TNodeTraits> >
 struct ForwardIterator : public TBase
 {
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
     // special mode for iterator representing before beginning.  we use NULL (invalid())
     // to designate end, so we need this to disambiguate
     // consider this experimental and unfortunately it fattens up the iterator as well
+    // TODO: optimize this with some 'magic' values for this->current, possibly acquired
+    // through a traits
     bool before_beginning;
+#endif
 
     typedef TNodeTraits traits_t;
     typedef TBase base_t;
@@ -129,9 +135,15 @@ struct ForwardIterator : public TBase
     {
     } */
 
-    ForwardIterator(node_handle_t node, const traits_t& t) :
-            base_t(node, t),
-            before_beginning(false)
+    ForwardIterator(node_handle_t node, const traits_t& t
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+        ,bool before_beginning = false
+#endif
+        ) :
+            base_t(node, t)
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+            ,before_beginning(before_beginning)
+#endif
     {
     }
 
@@ -149,11 +161,13 @@ struct ForwardIterator : public TBase
             this->unlock();
         }
 #endif
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
         if(before_beginning)
         {
             before_beginning = false;
             return *this;
         }
+#endif
 
         node_type& c = base_t::lock_internal();
 
@@ -191,15 +205,16 @@ struct ForwardIterator : public TBase
 
     bool operator==(const ForwardIterator& compare_to) const
     {
-        return before_beginning == compare_to.before_beginning &&
-                base_t::current == compare_to.current;
+        return
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+            before_beginning == compare_to.before_beginning &&
+#endif
+            base_t::current == compare_to.current;
     }
 
     bool operator!=(const ForwardIterator& compare_to) const
     {
-        //return before_beginning != compare_to.before_beginning ||
-        return
-                base_t::current != compare_to.current;
+        return !operator ==(compare_to);
     }
 
 };

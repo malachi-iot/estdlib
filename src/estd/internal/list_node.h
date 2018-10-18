@@ -266,6 +266,10 @@ public:
     iterator begin() { return iterator(m_front, get_traits()); }
     const_iterator begin() const { return iterator(m_front, get_traits()); }
     const_iterator end() const { return iterator(after_end_node(), get_traits()); }
+
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+    iterator before_begin() { return iterator(m_front, get_traits(), true); }
+#endif
 };
 
 template<class TNodeTraits, class TIterator>
