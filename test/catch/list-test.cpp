@@ -466,6 +466,16 @@ TEST_CASE("linkedlist")
 
                 REQUIRE(!e1.is_evaporated);
                 REQUIRE(e1.value() == 5);
+
+                estd::internal::reference_evaporator<int, !estd::is_empty<int>::value> e2(value);
+
+                REQUIRE(e2.value() == value);
+
+                estd::internal::reference_evaporator<int, estd::is_empty<int>::value> e3(value);
+
+                REQUIRE(e3.value() == 0);
+
+                REQUIRE(estd::is_empty<decltype(e3)>::value);
             }
             SECTION("traits")
             {

@@ -67,6 +67,54 @@ public:
 template <class T, T default_value = T()>
 struct default_tester {};
 
+template <class T, bool is_present>
+struct reference_evaporator;
+
+template <class T>
+struct reference_evaporator<T, false>
+{
+    typedef typename estd::remove_reference<T>::type value_type;
+    typedef T& reference;
+    // FIX: Get proper name for this, this will be a value or ref depending on how things
+    // got evaporated
+    typedef value_type ref_type_exp;
+
+    value_type value() { return value_type{}; }
+    const value_type value() const { return value_type{}; }
+
+    reference_evaporator(reference) {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    reference_evaporator(value_type&&) {}
+#endif
+};
+
+
+template <class T>
+struct reference_evaporator<T, true>
+{
+    typedef typename estd::remove_reference<T>::type value_type;
+    typedef T& reference;
+    // FIX: Get proper name for this, this will be a value or ref depending on how things
+    // got evaporated
+    typedef reference ref_type_exp;
+
+    reference m_value;
+
+    reference value() { return m_value; }
+    const reference value() const { return m_value; }
+
+    reference_evaporator(reference value) : m_value(value) {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    reference_evaporator(value_type&& value) :
+        //m_value(std::move(value))
+        m_value(value)
+    {}
+#endif
+};
+
+
 // Because of https://stackoverflow.com/questions/5687540/non-type-template-parameters
 // we can't use this here (we are pushing struct thru T)
 template <class T,
@@ -99,22 +147,35 @@ struct reference_evaporator_old :
 
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
-struct InputIterator : internal::node_traits_evaporator<TNodeTraits>
+struct InputIterator : //internal::node_traits_evaporator<TNodeTraits>
         //internal::reference_evaporator<TNodeTraits>
+        internal::reference_evaporator<
+                TNodeTraits,
+                !estd::is_empty<
+                        typename estd::remove_reference<TNodeTraits>::type>
+                        ::value >
         /*
         estd::internal::value_evaporator<
             TNodeTraits&,
             sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> */
 {
-    typedef internal::node_traits_evaporator<TNodeTraits> base_type;
+    //typedef internal::node_traits_evaporator<TNodeTraits> base_type;
     //typedef internal::reference_evaporator<TNodeTraits> base_type;
+    typedef internal::reference_evaporator<
+            TNodeTraits,
+            !estd::is_empty<
+                    typename estd::remove_reference<TNodeTraits>::type>
+                    ::value >
+            base_type;
+
     /*
     typedef estd::internal::value_evaporator<
             TNodeTraits&,
             sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> base_type; */
 
-    typedef typename base_type::traits_type traits_t;
-    //typedef typename base_type::value_type traits_t;
+    //typedef typename base_type::traits_type traits_t;
+    typedef typename base_type::value_type traits_t;
+    typedef typename base_type::ref_type_exp traits_ref_type;
 
     typedef TValue value_type;
     //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
@@ -143,8 +204,11 @@ protected:
     typename allocator_t::lock_counter lock_counter;
 #endif
 
+    traits_ref_type get_traits() { return base_type::value(); }
+    const traits_ref_type get_traits() const { return base_type::value(); }
+    /*
     traits_t& get_traits() { return base_type::traits; }
-    const traits_t& get_traits() const { return base_type::traits; }
+    const traits_t& get_traits() const { return base_type::traits; } */
 
     node_type& lock_internal()
     {
@@ -159,12 +223,12 @@ protected:
 public:
     InputIterator(node_handle_t node, const traits_t& traits) :
     // FIX: clean up this brute force const removal
-        base_type((traits_t&)traits),
+        base_type((traits_ref_type)traits),
         current(node)
     {}
 
     InputIterator(const InputIterator& copy_from) :
-        base_type((traits_t&)copy_from.get_traits()),
+        base_type((traits_ref_type)copy_from.get_traits()),
         current(copy_from.current)
     {
 
@@ -172,14 +236,14 @@ public:
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     InputIterator(InputIterator&& move_from) :
-        base_type((traits_t&)move_from.get_traits()),
+        base_type(std::move(move_from.get_traits())),
         current(std::move(move_from.current))
     {}
 #endif
 
     //~InputIterator() {}
 
-    static nv_reference lock(traits_t& a, node_handle_t& handle_to_lock)
+    static nv_reference lock(traits_ref_type a, node_handle_t& handle_to_lock)
     {
         node_type& n = a.lock(handle_to_lock);
         return traits_t::value(n);
@@ -311,7 +375,7 @@ struct ForwardIterator : public TBase
 
         node_type& c = base_t::lock_internal();
 
-        node_handle_t new_current = base_t::traits.next(c);
+        node_handle_t new_current = base_t::get_traits().next(c);
 
         base_t::unlock_internal();
 
@@ -394,7 +458,7 @@ public:
     {
         node_type& c = base_t::lock_internal();
 
-        this->current = base_t::traits.prev(c);
+        this->current = base_t::get_traits().prev(c);
 
         base_t::unlock_internal();
 

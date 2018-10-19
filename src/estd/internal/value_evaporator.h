@@ -10,6 +10,7 @@ namespace estd { namespace internal {
 // class does not require it and can instead always rely on a default value
 // NOTE: beware, https://stackoverflow.com/questions/5687540/non-type-template-parameters
 // and my own findings indicate TEvaporated can't be a class/struct value
+// FIX: Looking like is_present logic here is backwards
 template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated default_value = TEvaporated()>
 class value_evaporator;
 
