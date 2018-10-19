@@ -117,7 +117,7 @@ protected:
 template <class TAllocator, bool is_singular,
         class TTraits = estd::allocator_traits<typename remove_reference<TAllocator>::type> >
 class handle_descriptor :
-        value_evaporator<typename TTraits::handle_type, is_singular, bool, true>
+        value_evaporator<typename TTraits::handle_type, !is_singular, bool, true>
 {
     typedef TTraits allocator_traits;
     typedef typename allocator_traits::value_type value_type;
@@ -127,7 +127,7 @@ protected:
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::allocator_type allocator_type;
 
-    typedef value_evaporator<handle_type, is_singular, bool, true> base_t;
+    typedef value_evaporator<handle_type, !is_singular, bool, true> base_t;
 
 public:
     handle_type handle() const { return base_t::value(); }

@@ -15,7 +15,7 @@ template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated
 class value_evaporator;
 
 template <class TValue, class TEvaporated, TEvaporated default_value>
-class value_evaporator<TValue, true, TEvaporated, default_value>
+class value_evaporator<TValue, false, TEvaporated, default_value>
 {
 protected:
     void value(TEvaporated) {}
@@ -33,7 +33,7 @@ public:
 };
 
 template <class TValue, class TEvaporated, TEvaporated default_value>
-class value_evaporator<TValue, false, TEvaporated, default_value>
+class value_evaporator<TValue, true, TEvaporated, default_value>
 {
 protected:
     TValue m_value;
@@ -52,6 +52,53 @@ public:
     value_evaporator() {}
 };
 
+
+template <class T, bool is_present>
+struct reference_evaporator;
+
+template <class T>
+struct reference_evaporator<T, false>
+{
+    typedef typename estd::remove_reference<T>::type value_type;
+    typedef T& reference;
+    // FIX: Get proper name for this, this will be a value or ref depending on how things
+    // got evaporated
+    typedef value_type ref_type_exp;
+
+    value_type value() { return value_type{}; }
+    const value_type value() const { return value_type{}; }
+
+    reference_evaporator(reference) {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    reference_evaporator(value_type&&) {}
+#endif
+};
+
+
+template <class T>
+struct reference_evaporator<T, true>
+{
+    typedef typename estd::remove_reference<T>::type value_type;
+    typedef T& reference;
+    // FIX: Get proper name for this, this will be a value or ref depending on how things
+    // got evaporated
+    typedef reference ref_type_exp;
+
+    reference m_value;
+
+    reference value() { return m_value; }
+    const reference value() const { return m_value; }
+
+    reference_evaporator(reference value) : m_value(value) {}
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    reference_evaporator(value_type&& value) :
+    //m_value(std::move(value))
+            m_value(value)
+    {}
+#endif
+};
 
 }
 

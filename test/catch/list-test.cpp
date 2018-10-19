@@ -478,10 +478,6 @@ TEST_CASE("linkedlist")
             SECTION("simple")
             {
                 int value = 5;
-                estd::internal::reference_evaporator_old<int&> e1(value);
-
-                REQUIRE(!e1.is_evaporated);
-                REQUIRE(e1.value() == 5);
 
                 estd::internal::reference_evaporator<int, !estd::is_empty<int>::value> e2(value);
 
