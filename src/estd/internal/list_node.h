@@ -191,16 +191,57 @@ protected:
     }
 };
 
+template<class TNodeTraits, class TIterator>
+class linkedlist_front_base : public linkedlist_traits_base<TNodeTraits, TIterator>
+{
+    typedef linkedlist_traits_base<TNodeTraits, TIterator> base_type;
+public:
+    typedef typename base_type::node_traits_t node_traits_t;
+    typedef typename node_traits_t::value_type value_type;
+    typedef value_type& reference;
+    typedef typename node_traits_t::node_type node_type;
+    typedef typename node_traits_t::node_handle node_handle;
+    typedef typename node_traits_t::nv_ref_t nv_ref_t;
+    typedef nv_ref_t nv_reference;
+
+protected:
+    node_handle m_front;
+
+    linkedlist_front_base(node_handle f) : m_front(f) {}
+
+    linkedlist_front_base(node_traits_t& traits, node_handle f) :
+        base_type(traits),
+        m_front(f) {}
+
+public:
+    // TODO: move towards 'accessor' pattern instead of direct references, not as
+    // critical as with dynamic_array however, since these references are not
+    // expected directly to move (the underlying node itself may, however)
+    reference front()
+    {
+        // NOTE: beware, the condition could arise where:
+        // a) the underlying allocator really is locking and
+        // b) it's an inline node-value pair
+        // in which case, when both are true, front_value will actually be invalid
+        // so the 'accessor' pattern is of increased importance to stave that off
+        reference front_value = base_type::alloc_lock(m_front);
+
+        base_type::alloc_unlock(m_front);
+
+        return front_value;
+    }
+
+};
 
 // kind of implicitly the 'linkedlist_front' + linked list forward
 // rolled together
 template<class TNodeTraits, class TIterator>
-class linkedlist_base : public linkedlist_traits_base<TNodeTraits, TIterator>
+class linkedlist_base : public linkedlist_front_base<TNodeTraits, TIterator>
 {
-    typedef linkedlist_traits_base<TNodeTraits, TIterator> base_type;
+    typedef linkedlist_front_base<TNodeTraits, TIterator> base_type;
 
 public:
-    typedef typename estd::remove_reference<TNodeTraits>::type node_traits_t;
+    typedef typename base_type::node_traits_t node_traits_t;
     typedef typename node_traits_t::value_type value_type;
     typedef value_type& reference;
     typedef TIterator iterator;
@@ -225,49 +266,35 @@ protected:
 
     static CONSTEXPR node_handle after_end_node() { return node_traits_t::eol(); }
 
-    node_handle m_front;
-
+    // FIX: Definitely a bad thing to have this dummy allocator pass in this particular way
+    // - not expressly bad to be passing in an allocator in general though
     linkedlist_base(allocator_t* a) :
-            m_front(after_end_node())
+            base_type(after_end_node())
 
     {}
 
     linkedlist_base(node_traits_t& traits) :
-        base_type(traits),
-        m_front(after_end_node())
+        base_type(traits, after_end_node())
     {
 
     }
 
     void set_front(node_handle new_front)
     {
-        base_type::set_next(new_front, m_front);
+        base_type::set_next(new_front, base_type::m_front);
 
-        m_front = new_front;
+        base_type::m_front = new_front;
     }
 
 
 public:
-    bool empty() const { return m_front == after_end_node(); }
+    bool empty() const { return base_type::m_front == after_end_node(); }
 
-    // TODO: move towards 'accessor' pattern instead of direct references, not as
-    // critical as with dynamic_array however, since these references are not
-    // expected directly to move (the underlying node itself may, however)
-    reference front()
-    {
-        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
-        reference front_value = base_type::alloc_lock(m_front);
-
-        base_type::alloc_unlock(m_front);
-
-        return front_value;
-    }
-
-    iterator begin() { return iterator(m_front, get_traits()); }
+    iterator begin() { return iterator(base_type::m_front, get_traits()); }
     const_iterator begin() const
     {
         const node_traits_t& t = get_traits();
-        return iterator(m_front, t);
+        return iterator(base_type::m_front, t);
     }
     const_iterator end() const { return iterator(after_end_node(), get_traits()); }
 
