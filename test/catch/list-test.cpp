@@ -439,6 +439,12 @@ TEST_CASE("linkedlist")
 
         traits_type t;
 
+        REQUIRE(estd::is_empty<test_node>::value);
+        REQUIRE(estd::is_empty<traits_type>::value);
+        // TODO: put this int check out into a type_traits unit test
+        REQUIRE(!estd::is_empty<int>::value);
+
+
         SECTION("inline")
         {
             // FIX: inline traits_type is not good.  traits a little bit abused because
@@ -448,6 +454,16 @@ TEST_CASE("linkedlist")
             typedef estd::internal::list::ForwardIterator<test_node, traits_type> it_type;
 
             it_type i(NULLPTR, t);
+
+            int sz = sizeof(it_type);
+
+#ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
+            // FIX: 'long' actually is a padded out boolean here and won't be
+            // that on all platforms
+            REQUIRE(sz == sizeof(void*) + sizeof(long));
+#else
+            REQUIRE(sz == sizeof(void*));
+#endif
         }
         SECTION("const")
         {
@@ -470,6 +486,7 @@ TEST_CASE("linkedlist")
                 estd::internal::reference_evaporator<int, !estd::is_empty<int>::value> e2(value);
 
                 REQUIRE(e2.value() == value);
+                REQUIRE(&e2.value() == &value);
 
                 estd::internal::reference_evaporator<int, estd::is_empty<int>::value> e3(value);
 
@@ -479,16 +496,10 @@ TEST_CASE("linkedlist")
             }
             SECTION("traits")
             {
-                REQUIRE(estd::is_empty<test_node>::value);
-                REQUIRE(!estd::is_empty<int>::value);
+                estd::internal::reference_evaporator<traits_type&, false> e1(t);
+                REQUIRE(e1.value().eol() == NULLPTR);
 
-                //REQUIRE(sizeof(test_node) == 0);
-                //REQUIRE(sizeof(traits_type) == 0);
-                typedef typename estd::remove_reference<traits_type&>::type t2;
-                t2 t3;
-                //estd::internal::reference_evaporator<test_node&> e1(test_node{});
-                estd::internal::default_tester<int> d1;
-                //estd::internal::default_tester<test_node, test_node()> d2;
+                REQUIRE(estd::is_empty<decltype(e1)>::value);
             }
         }
     }

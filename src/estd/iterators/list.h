@@ -12,60 +12,6 @@ namespace estd {
 
 namespace internal {
 
-// If T is an empty struct, this will resolve to a temporary
-// Otherwise, it resolves to a reference
-// Almost identical to value_evaporator except this uses references specifically.
-// 90% sure we could in fact use value_evaporator
-template <class T, class Enable>
-struct reference_or_temporary_provider;
-
-/*
-template <class T, class Enable = typename estd::enable_if<sizeof(T) != 0>::type >
-struct reference_or_temporary_provider
-{
-
-};
-
-template <class T, class Enable = typename estd::enable_if<sizeof(T) == 0>::type >
-struct reference_or_temporary_provider<T, Enable>
-{
-
-};
-*/
-
-template <class T>
-struct reference_or_temporary_provider<T, typename estd::enable_if<sizeof(T) != 0>::type>
-{
-
-};
-
-
-template <class T>
-struct reference_or_temporary_provider<T, typename estd::enable_if<sizeof(T) == 0>::type>
-        : estd::experimental::temporary_provider<T>
-{
-
-};
-
-
-// FIX: stateful traits in general is kinda suspect (statefulness should be
-// tracked separately in allocator probably).  But until that point, manage
-// as best we can - treating non-stateful traits appropriately
-template <class TNodeTraits>
-struct node_traits_evaporator
-{
-    typedef typename estd::remove_reference<TNodeTraits>::type traits_type;
-
-protected:
-    // FIX: Pretty sure we want this to be a reference, not a value
-    TNodeTraits traits;
-
-public:
-    node_traits_evaporator(TNodeTraits traits) : traits(traits) {}
-};
-
-template <class T, T default_value = T()>
-struct default_tester {};
 
 template <class T, bool is_present>
 struct reference_evaporator;
@@ -147,20 +93,13 @@ struct reference_evaporator_old :
 
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
-struct InputIterator : //internal::node_traits_evaporator<TNodeTraits>
-        //internal::reference_evaporator<TNodeTraits>
+struct InputIterator :
         internal::reference_evaporator<
                 TNodeTraits,
                 !estd::is_empty<
                         typename estd::remove_reference<TNodeTraits>::type>
                         ::value >
-        /*
-        estd::internal::value_evaporator<
-            TNodeTraits&,
-            sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> */
 {
-    //typedef internal::node_traits_evaporator<TNodeTraits> base_type;
-    //typedef internal::reference_evaporator<TNodeTraits> base_type;
     typedef internal::reference_evaporator<
             TNodeTraits,
             !estd::is_empty<
@@ -168,12 +107,6 @@ struct InputIterator : //internal::node_traits_evaporator<TNodeTraits>
                     ::value >
             base_type;
 
-    /*
-    typedef estd::internal::value_evaporator<
-            TNodeTraits&,
-            sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> base_type; */
-
-    //typedef typename base_type::traits_type traits_t;
     typedef typename base_type::value_type traits_t;
     typedef typename base_type::ref_type_exp traits_ref_type;
 
