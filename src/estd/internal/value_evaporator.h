@@ -8,6 +8,8 @@ namespace estd { namespace internal {
 
 // utility class using specialization to eliminate a stored value from memory if the consuming
 // class does not require it and can instead always rely on a default value
+// NOTE: beware, https://stackoverflow.com/questions/5687540/non-type-template-parameters
+// and my own findings indicate TEvaporated can't be a class/struct value
 template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated default_value = TEvaporated()>
 class value_evaporator;
 
@@ -16,6 +18,9 @@ class value_evaporator<TValue, true, TEvaporated, default_value>
 {
 protected:
     void value(TEvaporated) {}
+
+    // NOTE: special version for when TValue is a ref
+    value_evaporator(TEvaporated v, bool) {}
 
 public:
     TEvaporated value() const { return default_value; }
@@ -33,6 +38,9 @@ protected:
     TValue m_value;
 
     void value(const TValue& v) { m_value = v; }
+
+    // NOTE: special version for when TValue is a ref
+    value_evaporator(TValue v, bool) : m_value(v) {}
 
 public:
     TValue value() const { return m_value; }

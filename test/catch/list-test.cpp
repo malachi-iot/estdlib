@@ -457,5 +457,29 @@ TEST_CASE("linkedlist")
             // TODO: Upgrade forward_list to follow suit with traits_type&
             it_type i(NULLPTR, t2);
         }
+        SECTION("ref evaporator")
+        {
+            SECTION("simple")
+            {
+                int value = 5;
+                estd::internal::reference_evaporator_old<int&> e1(value);
+
+                REQUIRE(!e1.is_evaporated);
+                REQUIRE(e1.value() == 5);
+            }
+            SECTION("traits")
+            {
+                REQUIRE(estd::is_empty<test_node>::value);
+                REQUIRE(!estd::is_empty<int>::value);
+
+                //REQUIRE(sizeof(test_node) == 0);
+                //REQUIRE(sizeof(traits_type) == 0);
+                typedef typename estd::remove_reference<traits_type&>::type t2;
+                t2 t3;
+                //estd::internal::reference_evaporator<test_node&> e1(test_node{});
+                estd::internal::default_tester<int> d1;
+                //estd::internal::default_tester<test_node, test_node()> d2;
+            }
+        }
     }
 }

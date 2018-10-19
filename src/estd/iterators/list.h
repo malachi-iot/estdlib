@@ -1,12 +1,52 @@
+/**
+ * @file
+ */
 #pragma once
 
 #define FEATURE_ESTD_LIST_BEFORE_BEGINNING
 
 #include "../type_traits.h"
+#include "../internal/value_evaporator.h"
 
 namespace estd {
 
 namespace internal {
+
+// If T is an empty struct, this will resolve to a temporary
+// Otherwise, it resolves to a reference
+// Almost identical to value_evaporator except this uses references specifically.
+// 90% sure we could in fact use value_evaporator
+template <class T, class Enable>
+struct reference_or_temporary_provider;
+
+/*
+template <class T, class Enable = typename estd::enable_if<sizeof(T) != 0>::type >
+struct reference_or_temporary_provider
+{
+
+};
+
+template <class T, class Enable = typename estd::enable_if<sizeof(T) == 0>::type >
+struct reference_or_temporary_provider<T, Enable>
+{
+
+};
+*/
+
+template <class T>
+struct reference_or_temporary_provider<T, typename estd::enable_if<sizeof(T) != 0>::type>
+{
+
+};
+
+
+template <class T>
+struct reference_or_temporary_provider<T, typename estd::enable_if<sizeof(T) == 0>::type>
+        : estd::experimental::temporary_provider<T>
+{
+
+};
+
 
 // FIX: stateful traits in general is kinda suspect (statefulness should be
 // tracked separately in allocator probably).  But until that point, manage
@@ -24,14 +64,58 @@ public:
     node_traits_evaporator(TNodeTraits traits) : traits(traits) {}
 };
 
+template <class T, T default_value = T()>
+struct default_tester {};
+
+// Because of https://stackoverflow.com/questions/5687540/non-type-template-parameters
+// we can't use this here (we are pushing struct thru T)
+template <class T,
+        class TValue = typename estd::remove_reference<T>::type,
+        TValue default_value = TValue()>
+struct reference_evaporator_old :
+        estd::internal::value_evaporator<
+            T&,
+            //sizeof(TValue) == 0,
+            false,
+            TValue, default_value>
+{
+    typedef TValue value_type;
+    typedef estd::internal::value_evaporator<
+            T&,
+            //sizeof(value_type) == 0,
+            false,
+            value_type,
+            default_value>
+            base_type;
+
+    typedef T& reference;
+
+    reference_evaporator_old(reference r) : base_type(r, true)
+    {}
+};
+
+
 }
 
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
 struct InputIterator : internal::node_traits_evaporator<TNodeTraits>
+        //internal::reference_evaporator<TNodeTraits>
+        /*
+        estd::internal::value_evaporator<
+            TNodeTraits&,
+            sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> */
 {
     typedef internal::node_traits_evaporator<TNodeTraits> base_type;
+    //typedef internal::reference_evaporator<TNodeTraits> base_type;
+    /*
+    typedef estd::internal::value_evaporator<
+            TNodeTraits&,
+            sizeof(typename estd::remove_reference<TNodeTraits>::type) == 0> base_type; */
+
     typedef typename base_type::traits_type traits_t;
+    //typedef typename base_type::value_type traits_t;
+
     typedef TValue value_type;
     //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
     typedef typename traits_t::node_allocator_type node_allocator_t;
@@ -88,7 +172,7 @@ public:
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     InputIterator(InputIterator&& move_from) :
-        base_type((traits_t)move_from.get_traits()),
+        base_type((traits_t&)move_from.get_traits()),
         current(std::move(move_from.current))
     {}
 #endif
