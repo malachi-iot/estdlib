@@ -13,11 +13,6 @@ namespace estd {
 namespace internal {
 
 
-
-
-
-}
-
 // adapted from util.embedded version
 template <class TValue, class TNodeTraits>
 struct InputIterator :
@@ -148,7 +143,7 @@ public:
 };
 
 
-namespace internal { namespace list {
+namespace list {
 
 // TODO: Rename or put into namespace to isolate this specifically for NODE iteration
 template <class TValue, class TNodeTraits, class TBase = InputIterator<TValue, TNodeTraits> >
