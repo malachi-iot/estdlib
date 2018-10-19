@@ -311,6 +311,7 @@ class linkedlist_back_base : public TBase
 {
     typedef TBase base_type;
 
+public:
     typedef typename base_type::node_handle node_handle;
     typedef typename base_type::reference reference;
 
@@ -329,11 +330,11 @@ public:
     }
 };
 
-template<class TNodeTraits, class TIterator>
+template<class TNodeTraits, class TIterator, class TBase = forward_list_base<TNodeTraits, TIterator> >
 class forward_list_with_back_base : public
-        linkedlist_back_base<TNodeTraits, TIterator, forward_list_base<TNodeTraits, TIterator> >
+        linkedlist_back_base<TNodeTraits, TIterator, TBase >
 {
-    typedef linkedlist_back_base<TNodeTraits, TIterator, forward_list_base<TNodeTraits, TIterator> > base_type;
+    typedef linkedlist_back_base<TNodeTraits, TIterator, TBase > base_type;
     typedef typename base_type::node_handle node_handle;
     typedef typename base_type::nv_reference nv_reference;
 

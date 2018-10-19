@@ -95,10 +95,11 @@ protected:
         base_t::set_next(_node, next);
     }
 
+    /*
     void destroy(node_handle h)
     {
         get_traits().destroy(h);
-    }
+    } */
 
 public:
     //forward_list(node_traits_t& traits)
@@ -121,7 +122,6 @@ public:
         base_t::m_front = next(base_t::m_front);
 
         get_traits().deallocate(old);
-        //base_t::alloc.dealloc(old);
     }
 
     void push_front(nv_reference value)
@@ -271,10 +271,31 @@ public:
     }
 };
 
+///
+/// \tparam T
+/// \tparam TNode
+/// \tparam TNodeAllocator
+/// \tparam TNodeTraits
+/// \remarks UNTESTED!
+template<class T, class TNode = T,
+        class TNodeAllocator = experimental_std_allocator<TNode>,
+        class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
+class forward_list_with_back : public forward_list_with_back_base<
+        TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> >
+{
+    typedef forward_list_with_back_base<
+            TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> > base_type;
+};
+
 }
 
 // Inspired by ETL library
 template <class T>
 class intrusive_forward_list : public internal::forward_list<T>  { };
+
+template <class T>
+class intrusive_forward_list_with_back : public internal::forward_list_with_back<T>  { };
+
+
 
 }
