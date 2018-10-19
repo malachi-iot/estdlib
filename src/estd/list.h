@@ -16,12 +16,12 @@ template<class T, class TNode = T,
          class TNodeTraits = node_traits<TNode, TAllocator, nothing_allocator<T> > >
 class list_base :
         public internal::reverse_list<
-            internal::linkedlist_base<
+            internal::forward_list_base<
                 TNodeTraits,
                 internal::list::BidirectionalIterator<T, TNodeTraits> > >
 {
     typedef internal::reverse_list<
-                internal::linkedlist_base<
+                internal::forward_list_base<
                     TNodeTraits,
                     internal::list::BidirectionalIterator<T, TNodeTraits> > > base_t;
 

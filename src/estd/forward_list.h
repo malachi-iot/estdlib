@@ -43,10 +43,10 @@ namespace internal {
 template<class T, class TNode = T,
         class TNodeAllocator = experimental_std_allocator<TNode>,
         class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
-class forward_list : public linkedlist_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> >
+class forward_list : public forward_list_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> >
 {
 public:
-    typedef internal::linkedlist_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> > base_t;
+    typedef internal::forward_list_base<TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> > base_t;
     typedef T value_type;
     typedef value_type& reference;
     typedef TNodeTraits node_traits_t;

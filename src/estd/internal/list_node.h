@@ -181,6 +181,8 @@ protected:
         return n;
     }
 
+    // presumes forward-capable list - may not actually be the case, but usually is.
+    // If not, probably template semi-late binding will keep this from compiler erroring
     void set_next(node_handle _node, node_handle next)
     {
         node_type& node = alloc_lock(_node);
@@ -236,7 +238,7 @@ public:
 // kind of implicitly the 'linkedlist_front' + linked list forward
 // rolled together
 template<class TNodeTraits, class TIterator>
-class linkedlist_base : public linkedlist_front_base<TNodeTraits, TIterator>
+class forward_list_base : public linkedlist_front_base<TNodeTraits, TIterator>
 {
     typedef linkedlist_front_base<TNodeTraits, TIterator> base_type;
 
@@ -268,12 +270,12 @@ protected:
 
     // FIX: Definitely a bad thing to have this dummy allocator pass in this particular way
     // - not expressly bad to be passing in an allocator in general though
-    linkedlist_base(allocator_t* a) :
+    forward_list_base(allocator_t* a) :
             base_type(after_end_node())
 
     {}
 
-    linkedlist_base(node_traits_t& traits) :
+    forward_list_base(node_traits_t& traits) :
         base_type(traits, after_end_node())
     {
 
@@ -303,10 +305,11 @@ public:
 #endif
 };
 
-template<class TNodeTraits, class TIterator>
-class linkedlist_back_base : public linkedlist_base_base<TNodeTraits, TIterator>
+template<class TNodeTraits, class TIterator,
+        class TBase = linkedlist_base_base<TNodeTraits, TIterator> >
+class linkedlist_back_base : public TBase
 {
-    typedef linkedlist_base_base<TNodeTraits, TIterator> base_type;
+    typedef TBase base_type;
 
     typedef typename base_type::node_handle node_handle;
     typedef typename base_type::reference reference;
@@ -315,9 +318,9 @@ protected:
     node_handle m_back;
 
 public:
+    // all the same caveats to front() apply here
     reference back()
     {
-        //reference front_value = iterator::lock(base_t::_alloc, base_t::m_front);
         reference back_value = base_type::alloc_lock(m_back);
 
         base_type::alloc_unlock(m_back);
@@ -326,6 +329,32 @@ public:
     }
 };
 
-}
+template<class TNodeTraits, class TIterator>
+class forward_list_with_back_base : public
+        linkedlist_back_base<TNodeTraits, TIterator, forward_list_base<TNodeTraits, TIterator> >
+{
+    typedef linkedlist_back_base<TNodeTraits, TIterator, forward_list_base<TNodeTraits, TIterator> > base_type;
+    typedef typename base_type::node_handle node_handle;
+    typedef typename base_type::nv_reference nv_reference;
 
+protected:
+    void set_back(node_handle new_back)
+    {
+        // set the current 'back' next-position to link to the new back
+        base_type::set_next(base_type::m_back, new_back);
+
+        // set the current 'back' tracker to this new_back
+        base_type::m_back = new_back;
+    }
+
+
+
+public:
+    void push_back(nv_reference value)
+    {
+        set_back(base_type::get_traits().allocate(value));
+    }
+};
+
+}
 }
