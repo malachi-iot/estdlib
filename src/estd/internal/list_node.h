@@ -338,11 +338,14 @@ class forward_list_with_back_base : public
         linkedlist_back_base<TNodeTraits, TIterator, TBase >
 {
     typedef linkedlist_back_base<TNodeTraits, TIterator, TBase > base_type;
+
+public:
     typedef typename base_type::node_handle node_handle;
     typedef typename base_type::nv_reference nv_reference;
     typedef typename base_type::iterator iterator;
     typedef typename base_type::const_iterator const_iterator;
 
+private:
     // disable these calls, as they do not yet account for 'back' and can get things out of sync
     // fix them with impl version.  holding off until then - anticipate impl version will also
     // help solve the stateful-traits awkwardness
