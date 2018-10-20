@@ -30,27 +30,28 @@ public:
     value_type& construct(TArgs&&...args)
     {
         void* loc = reinterpret_cast<void*>(&_value);
-        // Something peculiar is going on.  LLVM/macOS spits out a UD2
-        // which suggests a compiler bug maybe?
-        // https://stackoverflow.com/questions/11140136/whats-the-purpose-of-the-ud2-opcode-in-the-linux-kernel
         new (loc) value_type(std::forward<TArgs>(args)...);
+        return value();
     }
 #else
     value_type& construct()
     {
         new (&_value) value_type();
+        return value();
     }
 
     template <class TParam1>
     value_type& construct(TParam1 p1)
     {
         new (&_value) value_type(p1);
+        return value();
     }
 
     template <class TParam1, class TParam2>
     value_type& construct(TParam1 p1, TParam2 p2)
     {
         new (&_value) value_type(p1, p2);
+        return value();
     }
 #endif
 
