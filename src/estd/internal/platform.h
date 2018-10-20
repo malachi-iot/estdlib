@@ -130,7 +130,7 @@
 
 // some platforms have c++98 onward but don't have STL headers.  Explicitly state when we *do*
 // have them
-#if !defined(ARDUINO)
+#if !defined(ARDUINO) || defined(ESP8266)
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
 #if __cplusplus >= 201103L

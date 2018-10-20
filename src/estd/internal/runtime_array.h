@@ -171,7 +171,7 @@ public:
         typedef int difference_type;
         typedef value_type* pointer;
         typedef value_type& reference;
-        typedef ::std::forward_iterator_tag iterator_category;
+        typedef ::std::bidirectional_iterator_tag iterator_category;
 
         value_type& lock() { return current.lock(); }
         void unlock() { current.unlock(); }
