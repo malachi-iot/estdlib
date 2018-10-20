@@ -13,7 +13,7 @@ namespace estd { namespace internal { namespace impl {
 
 // contains no members, just specialized copy helpers
 template <class TAllocator, bool is_contiguous>
-class contiguous_descriptor;
+struct contiguous_descriptor;
 
 
 // experimental, unused, untested, but simple and useful enough I think it will graduate quickly

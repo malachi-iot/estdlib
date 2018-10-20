@@ -32,6 +32,7 @@ struct InputIterator :
 
     typedef typename base_type::value_type traits_t;
     typedef typename base_type::ref_type_exp traits_ref_type;
+    typedef typename base_type::const_ref_type_exp const_traits_ref_type;
 
     typedef TValue value_type;
     //typedef typename traits_t::template node_allocator_t<value_type> node_allocator_t;
@@ -63,7 +64,7 @@ protected:
 #endif
 
     traits_ref_type get_traits() { return base_type::value(); }
-    const traits_ref_type get_traits() const { return base_type::value(); }
+    const_traits_ref_type get_traits() const { return base_type::value(); }
     /*
     traits_t& get_traits() { return base_type::traits; }
     const traits_t& get_traits() const { return base_type::traits; } */

@@ -338,10 +338,10 @@ struct intrusive_node_traits_new_base :
         return *value;
     }
 
-    void unlock(node_handle& value) {}
+    void unlock(node_handle&) {}
 
 
-    void deallocate(node_handle& h) {}
+    void deallocate(node_handle&) {}
 
     // again, TNode == TValue here
     static nv_ref_t value(node_type& n)
@@ -827,7 +827,7 @@ struct intrusive_node_traits : public node_traits_base<TNodeAndValue, nothing_al
 // b) node_traits<TNode matching on node_traits<TValue
 // then we assume intrusive.  Feels kinda fragile
 template <class TNode, class TValue, class TNodeAllocator>
-class node_traits<TValue, TNodeAllocator, nothing_allocator<TNode> > :
+struct node_traits<TValue, TNodeAllocator, nothing_allocator<TNode> > :
         public intrusive_node_traits_new_base<TNode,
             nothing_allocator<TNode>,
             nothing_allocator<TNode> >

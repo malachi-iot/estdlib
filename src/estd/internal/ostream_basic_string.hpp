@@ -6,7 +6,7 @@ namespace estd {
 namespace internal {
 
 template <class TStreambuf, class TBase>
-struct basic_ostream;
+class basic_ostream;
 
 }
 template <class TStreambuf, class TBase, class TStringAllocator, class TStringPolicy>

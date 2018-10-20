@@ -21,7 +21,7 @@ protected:
     void value(TEvaporated) {}
 
     // NOTE: special version for when TValue is a ref
-    value_evaporator(TEvaporated v, bool) {}
+    value_evaporator(TEvaporated, bool) {}
 
 public:
     TEvaporated value() const { return default_value; }
@@ -64,6 +64,7 @@ struct reference_evaporator<T, false>
     // FIX: Get proper name for this, this will be a value or ref depending on how things
     // got evaporated
     typedef value_type ref_type_exp;
+    typedef value_type const_ref_type_exp;
 
     value_type value() { return value_type{}; }
     const value_type value() const { return value_type{}; }
@@ -81,14 +82,16 @@ struct reference_evaporator<T, true>
 {
     typedef typename estd::remove_reference<T>::type value_type;
     typedef T& reference;
+    typedef const T& const_reference;
     // FIX: Get proper name for this, this will be a value or ref depending on how things
     // got evaporated
     typedef reference ref_type_exp;
+    typedef const_reference const_ref_type_exp;
 
     reference m_value;
 
     reference value() { return m_value; }
-    const reference value() const { return m_value; }
+    const_reference value() const { return m_value; }
 
     reference_evaporator(reference value) : m_value(value) {}
 

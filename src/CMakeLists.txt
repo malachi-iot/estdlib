@@ -124,3 +124,5 @@ set(SOURCE_FILES
 
 add_library(estd_lib ${SOURCE_FILES})
 
+target_compile_options(estd_lib PRIVATE -Wall -Werror=return-type)
+
