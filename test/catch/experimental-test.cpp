@@ -439,6 +439,8 @@ TEST_CASE("experimental tests")
         using namespace estd;
         using namespace estd::experimental;
 
+        // can't be 100% sure but I think a compiler bug is causing issues here
+        // hitting a lot of UD2 instructions
         SECTION("simplistic")
         {
             instance_wrapper<int> a;

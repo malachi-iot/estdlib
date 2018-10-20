@@ -284,7 +284,15 @@ T* addressof(T& arg)
                   reinterpret_cast<const volatile char&>(arg)));
 }
 
-#ifdef __GNUC__
+#ifdef __llvm__
+// http://releases.llvm.org/3.5.1/tools/clang/docs/LanguageExtensions.html
+#if __has_extension(is_empty)
+template<typename _Tp>
+struct is_empty
+        : public integral_constant<bool, __is_empty(_Tp)>
+{};
+#endif
+#elif defined(__GNUC__) && defined(__GXX_EXPERIMENTAL_CXX0X__)
 // https://stackoverflow.com/questions/35531309/how-is-stdis-emptyt-implemented-in-vs2015-or-any-compiler
 #if __GNUC_PREREQ(4,8)
 // /usr/include/c++/4.8/type_traits:516
@@ -294,9 +302,6 @@ struct is_empty
 {};
 #endif
 #elif 0 // LLVM
-// http://releases.llvm.org/3.5.1/tools/clang/docs/LanguageExtensions.html
-#if __has_extension(is_empty)
-#endif
 #endif
 
 }
