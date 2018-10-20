@@ -7,6 +7,7 @@
 
 #include "../type_traits.h"
 #include "../internal/value_evaporator.h"
+#include "../iterator.h"
 
 namespace estd {
 
@@ -38,6 +39,8 @@ struct InputIterator :
     //typedef typename TNodeTraits::node_handle node_handle_t;
     typedef InputIterator<TValue, TNodeTraits> iterator;
     typedef const iterator const_iterator;
+    typedef std::input_iterator_tag iterator_category;
+
 
 protected:
     //typedef typename node_allocator_t::node_handle node_handle_t;
@@ -166,6 +169,7 @@ struct ForwardIterator : public TBase
     typedef typename base_t::node_handle_t node_handle_t;
     typedef typename base_t::node_allocator_t node_alloc_t;
     typedef ForwardIterator<TValue, TNodeTraits> iterator;
+    typedef std::forward_iterator_tag iterator_category;
 
     /*
     ForwardIterator(const ForwardIterator& source) :
@@ -302,6 +306,7 @@ struct ReverseIterator : public TBase
     typedef typename base_t::node_handle_t node_handle_t;
     typedef typename base_t::node_allocator_t node_alloc_t;
     typedef ReverseIterator<TValue, TNodeTraits, TBase> iterator;
+    typedef std::reverse_iterator_tag iterator_category;
 
 public:
     ReverseIterator(node_handle_t node, const traits_t& t) :

@@ -504,18 +504,45 @@ TEST_CASE("linkedlist")
         // FIX: implictly deleted function on constructor
         estd::intrusive_forward_list_with_back<test_node> list;
 
-        test_node node1, node2;
+        test_node node1, node2, node3, node4;
 
-        list.push_front(node1);
-        list.push_back(node2);
+        node1.val = 1;
+        node2.val = 2;
+        node3.val = 3;
+        node4.val = 4;
 
-        REQUIRE(&list.front() == &node1);
-        REQUIRE(&list.back() == &node2);
+        SECTION("simplest case")
+        {
+            list.push_front(node1);
+            list.push_back(node2);
 
-        auto i = list.begin();
+            REQUIRE(&list.front() == &node1);
+            REQUIRE(&list.back() == &node2);
 
-        REQUIRE(&(*i++) == &node1);
-        REQUIRE(&(*i++) == &node2);
-        REQUIRE(i == list.end());
+            auto i = list.begin();
+
+            REQUIRE(&(*i++) == &node1);
+            REQUIRE(&(*i++) == &node2);
+            REQUIRE(i == list.end());
+        }
+        SECTION("more advanced case")
+        {
+            // FIFO style behavior
+            list.push_back(node1);
+            list.push_back(node2);
+            list.push_back(node3);
+            list.push_back(node4);
+
+            REQUIRE(!list.empty());
+            REQUIRE(list.front().val == 1);
+            list.pop_front();
+            REQUIRE(list.front().val == 2);
+            list.pop_front();
+            REQUIRE(list.front().val == 3);
+            list.pop_front();
+            REQUIRE(list.front().val == 4);
+            list.pop_front();
+            REQUIRE(list.empty());
+        }
     }
 }
