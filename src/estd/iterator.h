@@ -1,6 +1,8 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "type_traits.h"
+
 #ifdef FEATURE_STD_ITERATOR
 #include <iterator>
 #else
@@ -41,5 +43,28 @@ distance( InputIt first, InputIt last )
 
     return count;
 }
+
+template <class T>
+struct iterator_traits
+{
+    typedef typename T::difference_type difference_type;
+    typedef typename T::value_type value_type;
+    typedef typename T::pointer pointer;
+    typedef typename T::reference reference;
+    typedef typename T::iterator_category iterator_category;
+};
+
+template <class T>
+struct iterator_traits<T*>
+{
+    typedef std::ptrdiff_t difference_type;
+    // jump right to c++20 way of doing things
+    typedef typename estd::remove_cv<T>::type value_type;
+    typedef T* pointer;
+    typedef T& reference;
+    typedef std::random_access_iterator_tag iterator_category;
+};
+
+// TODO: Might need a specialization for our accessor-related things. we'll see
 
 }
