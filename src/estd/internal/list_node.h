@@ -318,6 +318,9 @@ public:
 protected:
     node_handle m_back;
 
+    // Initial value - should always be the NULL/eol value
+    linkedlist_back_base(node_handle b) : m_back(b) {}
+
 public:
     // all the same caveats to front() apply here
     reference back()
@@ -337,24 +340,78 @@ class forward_list_with_back_base : public
     typedef linkedlist_back_base<TNodeTraits, TIterator, TBase > base_type;
     typedef typename base_type::node_handle node_handle;
     typedef typename base_type::nv_reference nv_reference;
+    typedef typename base_type::iterator iterator;
+    typedef typename base_type::const_iterator const_iterator;
+
+    // disable these calls, as they do not yet account for 'back' and can get things out of sync
+    // fix them with impl version.  holding off until then - anticipate impl version will also
+    // help solve the stateful-traits awkwardness
+    iterator insert_after(const_iterator pos, nv_reference value);
+    iterator erase_after(const_iterator pos);
+#ifdef FEATURE_CPP_VARIADIC
+    template<class... TArgs>
+    node_handle emplace_front(TArgs&& ... args);
+#endif
+    template<class UnaryPredicate>
+    void remove_if(UnaryPredicate p, bool first_only = false);
+    void remove(nv_reference value, bool first_only = false);
 
 protected:
+    // this particular set_back is going to handle m_front, too, if necessary
+    // TODO: move the set_back and set_front to an impl, so as to more easily share them
+    // accross strata of list handlers
     void set_back(node_handle new_back)
     {
-        // set the current 'back' next-position to link to the new back
-        base_type::set_next(base_type::m_back, new_back);
+        // are we tracking anything?
+        if(base_type::m_back != base_type::after_end_node())
+        {
+            // set the current 'back' next-position to link to the new back
+            // TODO: could assert that current m_back->next is NULL
+            base_type::set_next(base_type::m_back, new_back);
+        }
+        else
+        {
+            // give attention to m_front here too, since m_back == NULL means m_front == NULL
+            base_type::m_front = new_back;
+        }
 
         // set the current 'back' tracker to this new_back
         base_type::m_back = new_back;
     }
 
 
+    void set_front(node_handle new_front)
+    {
+        base_type::set_next(new_front, base_type::m_front);
+
+        base_type::m_front = new_front;
+
+        // if no back tracked at all, time to start
+        // otherwise, it's assumed old m_front is already pointing its next (eventually)
+        // at existing m_back, so we should be good to go
+        if(base_type::m_back == base_type::after_end_node())
+        {
+            base_type::m_back = new_front;
+        }
+    }
+
 
 public:
+    forward_list_with_back_base() :
+        base_type(base_type::after_end_node())
+    {}
+
     void push_back(nv_reference value)
     {
-        set_back(base_type::get_traits().allocate(value));
+        node_handle h = base_type::get_traits().allocate(value);
+        set_back(h);
     }
+
+    void push_front(nv_reference value)
+    {
+        set_front(base_type::get_traits().allocate(value));
+    }
+
 };
 
 }

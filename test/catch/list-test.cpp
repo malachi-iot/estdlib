@@ -502,6 +502,20 @@ TEST_CASE("linkedlist")
     SECTION("forward with back")
     {
         // FIX: implictly deleted function on constructor
-        //estd::intrusive_forward_list_with_back<test_node> list;
+        estd::intrusive_forward_list_with_back<test_node> list;
+
+        test_node node1, node2;
+
+        list.push_front(node1);
+        list.push_back(node2);
+
+        REQUIRE(&list.front() == &node1);
+        REQUIRE(&list.back() == &node2);
+
+        auto i = list.begin();
+
+        REQUIRE(&(*i++) == &node1);
+        REQUIRE(&(*i++) == &node2);
+        REQUIRE(i == list.end());
     }
 }

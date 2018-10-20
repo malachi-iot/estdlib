@@ -281,10 +281,12 @@ template<class T, class TNode = T,
         class TNodeAllocator = experimental_std_allocator<TNode>,
         class TNodeTraits = node_traits<TNode, TNodeAllocator, nothing_allocator<T> > >
 class forward_list_with_back : public forward_list_with_back_base<
-        TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> >
+        TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&>,
+        forward_list<T, TNode, TNodeAllocator, TNodeTraits > >
 {
     typedef forward_list_with_back_base<
-            TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&> > base_type;
+            TNodeTraits, internal::list::ForwardIterator<T, TNodeTraits&>,
+            forward_list<T, TNode, TNodeAllocator, TNodeTraits> > base_type;
 };
 
 }
