@@ -45,5 +45,18 @@ OutputIt copy(InputIt first, InputIt last,
     return d_first;
 }
 
+template<class InputIt, class UnaryPredicate>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
+InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
+{
+    for (; first != last; ++first) {
+        if (p(*first)) {
+            return first;
+        }
+    }
+    return last;
+}
 
 }

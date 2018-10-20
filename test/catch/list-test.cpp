@@ -2,6 +2,7 @@
 
 #include "estd/forward_list.h"
 #include "estd/list.h"
+#include <estd/algorithm.h>
 #include "mem.h"
 
 struct test_value
@@ -532,6 +533,13 @@ TEST_CASE("linkedlist")
             list.push_back(node2);
             list.push_back(node3);
             list.push_back(node4);
+
+            auto found = estd::find_if(list.begin(), list.end(), [](test_node& x)
+            {
+               return x.val == 2;
+            });
+
+            REQUIRE(&(*found) == &node2);
 
             REQUIRE(!list.empty());
             REQUIRE(list.front().val == 1);
