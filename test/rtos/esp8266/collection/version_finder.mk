@@ -1,0 +1,1 @@
+../template/version_finder.mk

@@ -4,6 +4,18 @@
 #include "opts.h"
 #include "../port/identify_platform.h"
 
+#if defined(__GNUC__)
+#if defined(__linux__)
+#include <features.h>
+#else
+// Only a linux thing
+// https://stackoverflow.com/questions/259248/how-to-test-the-current-version-of-gcc-at-compile-time
+#ifndef __GNUC_PREREQ
+#define __GNUC_PREREQ(major, minor) (__GNUC__ > major || (__GNUC__ == major && __GNUC__MINOR__ >= minor))
+#endif
+#endif
+#endif
+
 // TODO: consider utilizing
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
 // http://en.cppreference.com/w/cpp/experimental
@@ -82,7 +94,7 @@
 #define FEATURE_CPP_LAMBDA
 #endif
 
-#  include <features.h>
+//#  include <features.h>
 #  if __GNUC_PREREQ(4,8)
 #define FEATURE_CPP_ALIGN
 #  endif

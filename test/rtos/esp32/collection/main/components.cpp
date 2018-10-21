@@ -3,6 +3,9 @@
 
 #include <estd/array.h>
 #include <estd/vector.h>
+#include <estd/iterator.h>
+
+#include <stdio.h> // for printf
 
 using namespace estd;
 
