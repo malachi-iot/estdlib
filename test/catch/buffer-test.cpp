@@ -71,7 +71,7 @@ TEST_CASE("buffers")
         }
         SECTION("subspan")
         {
-            constexpr uint8_t buf2[] = "hi2u";
+            //constexpr uint8_t buf2[] = "hi2u";
 
             estd::span<uint8_t, 128> s(buf);
 

@@ -3,6 +3,9 @@
 #include <estd/utility.h>
 #include <new>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 namespace estd { namespace test {
 
 struct Dummy
@@ -66,3 +69,5 @@ static uint8_t octet_data[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
 }}
+
+#pragma GCC diagnostic pop

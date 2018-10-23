@@ -48,6 +48,9 @@ int global_provider_test_value = 6;
 
 estd::layer1::string<128> provider_string;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 TEST_CASE("experimental tests")
 {
     SECTION("A")
@@ -463,3 +466,5 @@ TEST_CASE("experimental tests")
         }
     }
 }
+
+#pragma GCC diagnostic pop

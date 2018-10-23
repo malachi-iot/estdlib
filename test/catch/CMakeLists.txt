@@ -35,6 +35,8 @@ add_executable(${PROJECT_NAME} "main.cpp"
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+# -Wno-unused-variable want this too, remember .H files aren't compiled independently
+#   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
 
 target_link_libraries(${PROJECT_NAME} estd_lib)
