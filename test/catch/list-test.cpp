@@ -5,6 +5,9 @@
 #include <estd/algorithm.h>
 #include "mem.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 struct test_value
 {
     int val;
@@ -505,12 +508,15 @@ TEST_CASE("linkedlist")
         // FIX: implictly deleted function on constructor
         estd::intrusive_forward_list_with_back<test_node> list;
 
-        test_node node1, node2, node3, node4;
+        test_node node1, node2, node3;
+        test_node node4;
+        test_node node5;
 
         node1.val = 1;
         node2.val = 2;
         node3.val = 3;
         node4.val = 4;
+        node5.val = 5;
 
         SECTION("simplest case")
         {
@@ -543,14 +549,21 @@ TEST_CASE("linkedlist")
 
             REQUIRE(!list.empty());
             REQUIRE(list.front().val == 1);
+            REQUIRE(list.back().val == 4);
             list.pop_front();
             REQUIRE(list.front().val == 2);
             list.pop_front();
             REQUIRE(list.front().val == 3);
+            REQUIRE(list.back().val == 4);
+            list.push_back(node5);
             list.pop_front();
             REQUIRE(list.front().val == 4);
+            list.pop_front();
+            REQUIRE(list.front().val == 5);
             list.pop_front();
             REQUIRE(list.empty());
         }
     }
 }
+
+#pragma GCC diagnostic pop
