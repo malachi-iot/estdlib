@@ -18,6 +18,10 @@ struct empty
 };
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+
 using namespace estd;
 
 TEST_CASE("memory.h tests")
@@ -227,3 +231,5 @@ TEST_CASE("memory.h tests")
         }
     }
 }
+
+#pragma GCC diagnostic pop

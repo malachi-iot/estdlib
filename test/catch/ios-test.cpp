@@ -14,6 +14,10 @@
 #include <estd/internal/istream.h>
 #include <estd/internal/ostream.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+
 using namespace estd;
 
 //#define TEST_COUT
@@ -351,3 +355,5 @@ TEST_CASE("iostreams")
         }
     }
 }
+
+#pragma GCC diagnostic pop

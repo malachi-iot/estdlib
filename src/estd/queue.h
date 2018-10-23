@@ -186,8 +186,8 @@ public:
     // THIS iterator will do rollovers.  array_iterator won't
     struct forward_iterator
     {
-        array_iterator current;
         const deque& parent;
+        array_iterator current;
 
         forward_iterator(const deque& parent, array_iterator current)
             : parent(parent),

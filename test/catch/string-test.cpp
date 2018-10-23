@@ -25,6 +25,10 @@ std::ostream& operator <<( std::ostream& os,
 
 #include <catch.hpp>
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 constexpr const char* test_str = "hello";
 
 
@@ -515,3 +519,5 @@ TEST_CASE("string tests")
         REQUIRE(value == 1234);
     }
 }
+
+#pragma GCC diagnostic pop
