@@ -12,6 +12,9 @@
 // FIX: Now re-enabling to avoid any further issues
 #define ARDUINO
 
+#define ACTIVATED
+#ifdef ACTIVATED
+
 // TODO: Move this out of example and into framework code
 template<class TImpl> inline Print &operator <<(
     Print &obj, const estd::internal::dynamic_array<TImpl>& arg) 
@@ -32,6 +35,9 @@ template<class T, class Enable =
         //!estd::is_base_of<estd::internal::no_max_string_length_tag, T>::value
     >::type
 >
+#else
+template <class T>
+#endif
 inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; }
 
 void setup()
@@ -40,10 +46,15 @@ void setup()
 
     estd::layer1::string<64> name;
 
-    // FIX: Can't do this assignment, it confuses the compiler
-    //name = "Mickey";
+    name = "Mickey";
 
-    Serial << F("Hello: ") << name;
+    // these seem to irritate the compiler actually
+    //Serial << F("Hello: ");
+    //Serial.println(F("hi"));
+    Serial << "Hello: ";
+#ifdef ACTIVATED
+    Serial << name;
+#endif
 }
 
 
