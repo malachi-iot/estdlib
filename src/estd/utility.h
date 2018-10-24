@@ -5,6 +5,8 @@
 // given the specific way type_traits includes it #pragma once
 // doesn't help us
 //#include "type_traits.h"
+// internal type_traits has no dependencies, so that's safe
+#include "internal/type_traits.h"
 #include "cstddef.h"
 
 namespace estd {

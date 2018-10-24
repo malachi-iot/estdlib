@@ -59,6 +59,7 @@ set(SOURCE_FILES
         estd/internal/string_convert.h
         estd/internal/string_convert.cpp
         estd/internal/to_string.h
+        estd/internal/type_traits.h
         estd/internal/llvm_type_traits.h
         estd/internal/utility.cpp
         estd/internal/utility.h

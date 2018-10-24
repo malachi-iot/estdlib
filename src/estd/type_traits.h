@@ -1,37 +1,12 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/type_traits.h"
 
 #include "cstddef.h"
 
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
-
-template <class T> struct remove_cv;
-template <class T> struct is_integral;
-template <class T> struct is_floating_point;
-template <class T> struct is_pointer;
-template <class T> struct is_reference;
-template <class T> struct is_member_pointer;
-template <class T> struct is_union;
-template <class T> struct is_class;
-
-
-template<class T, T v>
-struct integral_constant {
-    static CONSTEXPR T value = v;
-    typedef T value_type;
-    typedef integral_constant type; // using injected-class-name
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    operator value_type() const { return value; }
-    //constexpr value_type operator()() const noexcept { return value; } //since c++14
-};
-
-
-typedef integral_constant<bool, true> true_type;
-typedef integral_constant<bool, false> false_type;
 
 #ifdef FEATURE_CPP_VARIADIC
 #include "internal/is_function.h"
@@ -98,24 +73,6 @@ template <class T>
 struct is_class : integral_constant<bool, sizeof(internal::is_class_test<T>(0))==1
                                             && !is_union<T>::value> {};
 
-
-template<class T> struct is_const          : false_type {};
-template<class T> struct is_const<const T> : true_type {};
-
-template <class T> struct is_reference      : false_type {};
-template <class T> struct is_reference<T&>  : true_type {};
-#ifdef FEATURE_CPP_MOVESEMANTIC
-template <class T> struct is_reference<T&&> : true_type {};
-#endif
-
-template<class T> struct is_lvalue_reference     : false_type {};
-template<class T> struct is_lvalue_reference<T&> : true_type {};
-
-#ifdef FEATURE_CPP_MOVESEMANTIC
-template <class T> struct is_rvalue_reference      : false_type {};
-template <class T> struct is_rvalue_reference<T&&> : true_type {};
-#endif
-
 template< class T >
 struct is_arithmetic : integral_constant<bool,
                                     is_integral<T>::value ||
@@ -152,31 +109,7 @@ struct is_floating_point
      > {};
 
 
-template< class T > struct remove_const          { typedef T type; };
-template< class T > struct remove_const<const T> { typedef T type; };
 
-template< class T > struct remove_volatile             { typedef T type; };
-template< class T > struct remove_volatile<volatile T> { typedef T type; };
-
-
-template< class T > struct remove_reference      { typedef T type; };
-template< class T > struct remove_reference<T&>  { typedef T type; };
-#ifdef FEATURE_CPP_MOVESEMANTIC
-template< class T > struct remove_reference<T&&> { typedef T type; };
-#endif
-
-template< class T >
-struct remove_cv {
-    typedef typename estd::remove_volatile<typename remove_const<T>::type>::type type;
-};
-
-
-template< class T >
-struct add_cv { typedef const volatile T type; };
-
-template< class T> struct add_const { typedef const T type; };
-
-template< class T> struct add_volatile { typedef volatile T type; };
 
 #if defined(FEATURE_CPP_ALIASTEMPLATE)
 namespace detail {
@@ -220,10 +153,10 @@ struct is_array<T[N]> : true_type {};
 
 template<class T>
 struct remove_extent { typedef T type; };
- 
+
 template<class T>
 struct remove_extent<T[]> { typedef T type; };
- 
+
 template<class T, std::size_t N>
 struct remove_extent<T[N]> { typedef T type; };
 
