@@ -4,13 +4,17 @@
 // Arduino presence automatically assumes NOT but that was incorrect
 // so temporarily disabling ARDUINO for this example so that we properly
 // heed existing std headers
+#ifdef ESP8266
 #undef ARDUINO
+#endif
 
 #include <estd/type_traits.h>
 #include <estd/string.h>
 
 // FIX: Now re-enabling to avoid any further issues
+#ifndef ARDUINO
 #define ARDUINO
+#endif
 
 #define ACTIVATED
 #ifdef ACTIVATED
