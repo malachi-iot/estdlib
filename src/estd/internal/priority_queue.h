@@ -11,6 +11,7 @@
 
 #include "../vector.h"
 #include "../functional.h"
+#include "../exp/heap.h"
 
 #include <algorithm>
 

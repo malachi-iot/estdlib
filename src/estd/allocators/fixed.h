@@ -260,7 +260,7 @@ public:
         //return m_buffer_size - (null_terminated ? 1 : 0);
     }
 
-    handle_with_size allocate_ext(size_t size)
+    handle_with_size allocate_ext(size_type size)
     {
         // TODO: put in a flag only in debug mode to detect multiple alloc
         // (should only have one for single+fixed allocator)
@@ -269,13 +269,13 @@ public:
         return size <= max_size();
     }
 
-    handle_type allocate(size_t size)
+    handle_type allocate(size_type size)
     {
         return allocate_ext(size);
     }
 
 
-    handle_with_size reallocate_ext(handle_type, size_t size)
+    handle_with_size reallocate_ext(handle_type, size_type size)
     {
         // NOTE: assuming incoming handle_type is valid
 

@@ -117,4 +117,14 @@ TEST_CASE("priority-queue-test")
         REQUIRE(pq.top().lock().val1 == 4);
         pq.pop();
     }
+    SECTION("experimental")
+    {
+        SECTION("make_heap")
+        {
+            int values[] = { 1, 5, 9, 3, 2, 0 };
+            int* begin = values;
+            int* end = values + sizeof(values);
+            estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
+        }
+    }
 }
