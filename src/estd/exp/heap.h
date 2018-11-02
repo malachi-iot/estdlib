@@ -21,6 +21,8 @@ struct internal_heap
     typedef estd::iterator_traits<iterator_type> iterator_traits;
     typedef typename iterator_traits::reference reference;
 
+    // remember, in typical std:: fashion 'last' is node *just after*
+    // last node
     iterator_type first, last;
     // paradigm is comp(a, b) = true means that a should be moved
     // towards root node.  If one wants a minheap, then make
@@ -48,16 +50,21 @@ struct internal_heap
         *b = temp;
     }
 
+    int last_idx() const
+    {
+        int i = last - first;
+        return i;
+    }
+
     // starting from last element, bubble up
     // FIX: I think it's supposed to bubble up from a specific element
     // returns true when no swapping was needed
     bool restore_up()
     {
-        typedef typename iterator_traits::value_type value_type;
+        //typedef typename iterator_traits::value_type value_type;
 
+        const int last_idx = this->last_idx();
         //iterator_type current = last - sizeof(value_type);
-        // FIX: this value_type participation is not going to work with all iterator types
-        int last_idx = (last - first) / sizeof(value_type);
         int current_idx = last_idx - 1;
         iterator_type current = first + current_idx;
 
@@ -85,15 +92,20 @@ struct internal_heap
     // starting from first element, push down
     void restore_down()
     {
-        iterator_type current = first;
+        iterator_type current = this->first;
+        iterator_type last_node = this->first + last_idx() - 1;
 
-        for(;;)
+        while(current != last_node)
         {
             iterator_type last_child = current + k;
             iterator_type chosen_child = current + 1;
 
-            for(iterator_type child = chosen_child + 1; child < last_child; child++)
+            if(chosen_child == last_node) break;
+
+            for(iterator_type child = chosen_child + 1; child <= last_child; child++)
             {
+                if(child == last_node) break;
+
                 // find best candidate child
                 // (minheap this would be child with smallest value)
                 if(comp(*child, *chosen_child))
@@ -103,7 +115,7 @@ struct internal_heap
             if(comp(*chosen_child, *current))
             {
                 swap(chosen_child, current);
-                current = last_child; // move down the heap
+                current = last_child + 1; // move down the heap
             }
             else
                 break;
@@ -114,10 +126,13 @@ struct internal_heap
 
     void pop()
     {
-        // UNTESTED
-        swap(first, last);
-        last--;
+        swap(first, --last);
         restore_down();
+    }
+
+    void make()
+    {
+        while(!restore_up());
     }
 };
 

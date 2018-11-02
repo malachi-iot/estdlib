@@ -121,7 +121,7 @@ TEST_CASE("priority-queue-test")
     {
         int values[] = { 1, 5, 9, 3, 2, 0 };
         int* begin = values;
-        int* end = values + sizeof(values);
+        int* end = values + sizeof(values) / sizeof(values[0]);
 
         SECTION("make_heap")
         {
@@ -129,7 +129,31 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("internal heap")
         {
-            estd::experimental::internal_heap<int*, estd::less<int*> > heap(begin, end);
+            estd::experimental::internal_heap<int*, estd::less<int> > heap(begin, end);
+
+            heap.make();
+
+            REQUIRE(heap.front() == 0);
+
+            heap.pop();
+
+            REQUIRE(heap.front() == 1);
+
+            heap.pop();
+
+            REQUIRE(heap.front() == 2);
+
+            heap.pop();
+
+            REQUIRE(heap.front() == 3);
+
+            //heap.pop();
+
+            //REQUIRE(heap.front() == 5);
+
+            //heap.pop();
+
+            //REQUIRE(heap.front() == 9);
         }
     }
 }
