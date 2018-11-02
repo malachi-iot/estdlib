@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../iterator.h"
+#include "../functional.h"
 
 namespace estd { namespace experimental {
 
@@ -27,7 +28,7 @@ struct internal_heap
     Compare comp;
     const int k;
 
-    internal_heap(RandomIt first, RandomIt last, Compare comp, const int k) :
+    internal_heap(RandomIt first, RandomIt last, const int k = 2, Compare comp = Compare()) :
         first(first),
         last(last),
         comp(comp),
@@ -126,7 +127,7 @@ constexpr
 #endif
 void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
 {
-    internal_heap<RandomIt, Compare> heap(first, last, comp, k);
+    internal_heap<RandomIt, Compare> heap(first, last, k, comp);
 
     while(!heap.restore_up());
 }
