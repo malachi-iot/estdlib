@@ -119,9 +119,10 @@ TEST_CASE("priority-queue-test")
     }
     SECTION("experimental")
     {
+        int values[] = { 1, 5, 9, 3, 2, 0 };
+
         SECTION("make_heap")
         {
-            int values[] = { 1, 5, 9, 3, 2, 0 };
             int* begin = values;
             int* end = values + sizeof(values);
             estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
