@@ -147,7 +147,7 @@ TEST_CASE("priority-queue-test")
 
             REQUIRE(heap.front() == 3);
 
-            //heap.pop();
+            heap.pop();
 
             //REQUIRE(heap.front() == 5);
 

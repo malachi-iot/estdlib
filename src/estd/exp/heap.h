@@ -92,30 +92,48 @@ struct internal_heap
     // starting from first element, push down
     void restore_down()
     {
-        iterator_type current = this->first;
-        iterator_type last_node = this->first + last_idx() - 1;
+        iterator_type current = first;
+        // last actual node present
+        iterator_type last_node = last - 1;
 
+        // only proceed if there is more down to go
         while(current != last_node)
         {
+            // theoretical iterator to last child - it may actually be past the end
+            // FIX: adjust last child based on last_node
             iterator_type last_child = current + k;
+            // start of children.  first child automatically assigned to chosen
             iterator_type chosen_child = current + 1;
+            iterator_type next_node = last_child + 1;
 
+            // FIX: I think we need to eliminate this.  a child in this position
+            // might actually want to be swapped
             if(chosen_child == last_node) break;
 
-            for(iterator_type child = chosen_child + 1; child <= last_child; child++)
+            for(iterator_type child = chosen_child + 1;
+                child <= last_child;
+                child++)
             {
-                if(child == last_node) break;
-
                 // find best candidate child
                 // (minheap this would be child with smallest value)
                 if(comp(*child, *chosen_child))
                     chosen_child = child;
+
+                // if, after evaluating this child, we discover it's the last_node,
+                // then we are done
+                if(child == last_node)
+                {
+                    next_node = last_node;
+                    break;
+                }
             }
 
+            // now, if the best candidate child also should be bumped up
             if(comp(*chosen_child, *current))
             {
+                // then swap and bump it up
                 swap(chosen_child, current);
-                current = last_child + 1; // move down the heap
+                current = next_node; // move down the heap
             }
             else
                 break;
