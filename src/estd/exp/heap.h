@@ -113,7 +113,10 @@ struct internal_heap
 
     void pop()
     {
-        // TBD
+        // UNTESTED
+        swap(first, last);
+        last--;
+        restore_down();
     }
 };
 

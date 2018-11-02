@@ -127,5 +127,9 @@ TEST_CASE("priority-queue-test")
             int* end = values + sizeof(values);
             estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
         }
+        SECTION("internal heap")
+        {
+            //estd::experimental::internal_heap
+        }
     }
 }
