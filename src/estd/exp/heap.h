@@ -71,7 +71,7 @@ struct internal_heap
         while(current != first)
         {
             int parent_idx = (current_idx - 1) / k;
-            RandomIt parent = first + parent_idx;
+            iterator_type parent = first + parent_idx;
 
             // if current actually should bubble up
             if(comp(*current, *parent))
@@ -108,9 +108,9 @@ struct internal_heap
 
             // FIX: I think we need to eliminate this.  a child in this position
             // might actually want to be swapped
-            if(chosen_child == last_node) break;
+            //if(chosen_child == last_node) break;
 
-            for(iterator_type child = chosen_child + 1;
+            for(iterator_type child = chosen_child;
                 child <= last_child;
                 child++)
             {
@@ -150,6 +150,7 @@ struct internal_heap
 
     void make()
     {
+        // FIX: this is not sufficient, because restore_up doesn't evaluate all children
         while(!restore_up());
     }
 };
