@@ -141,7 +141,6 @@ TEST_CASE("priority-queue-test")
             REQUIRE(heap.front() == 1);
 
             heap.pop();
-            /*
 
             REQUIRE(heap.front() == 2);
 
@@ -155,7 +154,7 @@ TEST_CASE("priority-queue-test")
 
             heap.pop();
 
-            REQUIRE(heap.front() == 9); */
+            REQUIRE(heap.front() == 9);
         }
     }
 }

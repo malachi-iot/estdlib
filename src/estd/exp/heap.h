@@ -89,26 +89,28 @@ struct internal_heap
         return current_idx == last_idx - 1;
     }
 
-    // starting from first element, push down
-    void restore_down()
+    // push down
+    void restore_down(iterator_type current)
     {
-        iterator_type current = first;
         // last actual node present
         iterator_type last_node = last - 1;
 
         // only proceed if there is more down to go
         while(current != last_node)
         {
+            int current_idx = current - first;
+            int first_child_idx = (current_idx * k) + 1;
+            iterator_type first_child = first + first_child_idx;
             // theoretical iterator to last child - it may actually be past the end
             // FIX: adjust last child based on last_node
-            iterator_type last_child = current + k;
+            iterator_type last_child = first_child + k - 1;
             // start of children.  first child automatically assigned to chosen
-            iterator_type chosen_child = current + 1;
+            iterator_type chosen_child = first_child;
             iterator_type next_node = last_child + 1;
 
             // FIX: I think we need to eliminate this.  a child in this position
             // might actually want to be swapped
-            //if(chosen_child == last_node) break;
+            if(chosen_child > last_node) break;
 
             for(iterator_type child = chosen_child;
                 child <= last_child;
@@ -140,6 +142,12 @@ struct internal_heap
         }
     }
 
+    // starting from first element, push down
+    void restore_down()
+    {
+        restore_down(first);
+    }
+
     const reference front() const { return *first; }
 
     void pop()
@@ -150,8 +158,16 @@ struct internal_heap
 
     void make()
     {
+        int last_nonleaf_idx = (last_idx() - 1) / k;
         // FIX: this is not sufficient, because restore_up doesn't evaluate all children
-        while(!restore_up());
+        //while(!restore_up());
+        for(iterator_type i = first + last_nonleaf_idx;
+            ;)
+        {
+            restore_down(i);
+
+            if(i-- == first) break;
+        }
     }
 };
 
