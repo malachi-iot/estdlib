@@ -126,35 +126,67 @@ TEST_CASE("priority-queue-test")
         SECTION("make_heap")
         {
             estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
+
+            REQUIRE(values[0] == 0);
+            REQUIRE(values[1] == 2);
+            REQUIRE(values[2] == 1);
+            REQUIRE(values[3] == 3);
+            REQUIRE(values[4] == 5);
+            REQUIRE(values[5] == 9);
         }
         SECTION("internal heap")
         {
             estd::experimental::internal_heap<int*, estd::less<int> > heap(begin, end);
 
-            // FIX: make incomplete right now
             heap.make();
 
-            REQUIRE(heap.front() == 0);
+            REQUIRE(heap.size() == 6);
 
-            heap.pop();
+            SECTION("front/pop")
+            {
+                REQUIRE(heap.front() == 0);
 
-            REQUIRE(heap.front() == 1);
+                heap.pop();
 
-            heap.pop();
+                REQUIRE(heap.front() == 1);
 
-            REQUIRE(heap.front() == 2);
+                heap.pop();
 
-            heap.pop();
+                REQUIRE(heap.front() == 2);
 
-            REQUIRE(heap.front() == 3);
+                heap.pop();
 
-            heap.pop();
+                REQUIRE(heap.front() == 3);
 
-            REQUIRE(heap.front() == 5);
+                heap.pop();
 
-            heap.pop();
+                REQUIRE(heap.front() == 5);
 
-            REQUIRE(heap.front() == 9);
+                heap.pop();
+
+                REQUIRE(heap.front() == 9);
+            }
+            SECTION("pop + push")
+            {
+                heap.pop();
+                heap.push(4);
+
+                REQUIRE(heap.front() == 1);
+
+                heap.pop();
+
+                REQUIRE(heap.front() == 2);
+
+                heap.pop();
+
+                REQUIRE(heap.front() == 3);
+
+                heap.pop();
+
+                REQUIRE(heap.front() == 4);
+
+                REQUIRE(heap.size() == 3);
+            }
         }
     }
 }

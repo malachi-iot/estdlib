@@ -51,20 +51,15 @@ struct internal_heap
         *b = temp;
     }
 
-    int last_idx() const
-    {
-        int i = last - first;
-        return i;
-    }
+    size_t size() const { return last - first; }
 
     // starting from last element, bubble up
-    // FIX: I think it's supposed to bubble up from a specific element
     // returns true when no swapping was needed
     bool restore_up()
     {
         //typedef typename iterator_traits::value_type value_type;
 
-        const int last_idx = this->last_idx();
+        const int last_idx = size();
         //iterator_type current = last - sizeof(value_type);
         int current_idx = last_idx - 1;
         iterator_type current = first + current_idx;
@@ -91,6 +86,9 @@ struct internal_heap
     }
 
     // push down
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+    constexpr
+#endif
     void restore_down(iterator_type current)
     {
         for(;;)
@@ -136,16 +134,30 @@ struct internal_heap
         restore_down();
     }
 
-    // untested
+    // NOTE: be careful, last++ may not produce correct results
     void push(const typename iterator_traits::value_type& v)
     {
         *last++ = v;
         restore_up();
     }
 
+
+    // use this when iterator has substantially changed (like
+    // when a new linked list node has been allocated for the
+    // new last-1 position)
+    void push(iterator_type last)
+    {
+        this->last = last;
+        restore_up();
+    }
+
+
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+    constexpr
+#endif
     void make()
     {
-        int last_nonleaf_idx = (last_idx() - 1) / k;
+        int last_nonleaf_idx = (size() - 1) / k;
         // FIX: this is not sufficient, because restore_up doesn't evaluate all children
         //while(!restore_up());
         for(iterator_type i = first + last_nonleaf_idx;
@@ -166,7 +178,7 @@ void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
 {
     internal_heap<RandomIt, Compare> heap(first, last, k, comp);
 
-    while(!heap.restore_up());
+    heap.make();
 }
 
 }}

@@ -27,6 +27,9 @@ bool equal(InputIt1 first1, InputIt1 last1,
 
 // https://en.cppreference.com/w/cpp/algorithm/min
 template<class T>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
 const T& min(const T& a, const T& b)
 {
     return (b < a) ? b : a;
