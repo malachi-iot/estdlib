@@ -52,6 +52,18 @@ using namespace estd::internal;
 
 template <typename U, U u> struct reallyHas2;
 
+
+template <class T>
+void swap_numeric_test(const T orig_swap1 = 77, const T orig_swap2 = 111)
+{
+    T swap1 = orig_swap1, swap2 = orig_swap2;
+
+    estd::swap(swap1, swap2);
+
+    REQUIRE(swap1 == orig_swap2);
+    REQUIRE(swap2 == orig_swap1);
+}
+
 TEST_CASE("utility")
 {
     typedef void (test_class_1::* fn_1_type)(void);
@@ -136,5 +148,37 @@ TEST_CASE("utility")
         REQUIRE(has_test_tag<test_class_1>::value);
         REQUIRE(has_test_tag<test_class_2>::value);
         REQUIRE(has_test_tag<test_class_4>::value);
+    }
+    SECTION("swap")
+    {
+        SECTION("char")
+        {
+            char swap1 = 'A', swap2 = 'B';
+
+            estd::swap(swap1, swap2);
+
+            REQUIRE(swap1 == 'B');
+            REQUIRE(swap2 == 'A');
+        }
+        SECTION("short")
+        {
+            swap_numeric_test<short>();
+        }
+        SECTION("int")
+        {
+            swap_numeric_test<short>();
+        }
+        SECTION("long")
+        {
+            swap_numeric_test<int>();
+        }
+        SECTION("long long")
+        {
+            swap_numeric_test<long>();
+        }
+        SECTION("uint32_t")
+        {
+            swap_numeric_test<uint32_t>();
+        }
     }
 }

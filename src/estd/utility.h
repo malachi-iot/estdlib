@@ -139,4 +139,54 @@ T exchange(T& obj, U&& new_value)
     return old_value;
 }
 
+template <class T>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
+void swap(T& a, T& b)
+{
+    // NOTE: perhaps we should use move/forward here...?  so that
+    // objects with underlying self-referencing pointers can be managed?
+    const T temp = a;
+
+    a = b;
+    b = temp;
+}
+
+namespace internal {
+
+template <class T>
+void xor_swap(T& a, T& b)
+{
+    a ^= b;
+    b ^= a;
+    a ^= b;
+}
+
+}
+
+template<>
+inline void swap(char& a, char& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(short& a, short& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(int& a, int& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(long& a, long& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(unsigned char& a, unsigned char& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(unsigned short& a, unsigned short& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(unsigned int& a, unsigned int& b) { internal::xor_swap(a, b); }
+
+template<>
+inline void swap(unsigned long& a, unsigned long& b) { internal::xor_swap(a, b); }
+
 }

@@ -42,13 +42,7 @@ struct internal_heap
     // not swap iterators themselves so much as what they are pointing to
     static void swap(iterator_type a, iterator_type b)
     {
-        typedef typename iterator_traits::value_type value_type;
-        //typedef typename iterator_traits::reference reference;
-
-        value_type temp = *a;
-
-        *a = *b;
-        *b = temp;
+        estd::swap(*a, *b);
     }
 
     size_t size() const { return last - first; }
