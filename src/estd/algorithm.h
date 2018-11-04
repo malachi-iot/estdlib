@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/functional.h"
 
 // mainly to fill in gaps for pre C++11 compatibility
 namespace estd {
@@ -32,6 +33,9 @@ const T& min(const T& a, const T& b)
 }
 
 template<class ForwardIt, class Compare>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
 ForwardIt min_element(ForwardIt first, ForwardIt last,
                       Compare comp)
 {
@@ -73,6 +77,26 @@ InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
         }
     }
     return last;
+}
+
+template<class T>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
+const T& clamp( const T& v, const T& lo, const T& hi )
+{
+    return clamp( v, lo, hi, estd::less<T>() );
+}
+
+
+template<class T, class Compare>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
+const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )
+{
+    return assert( !comp(hi, lo) ),
+        comp(v, lo) ? lo : comp(hi, v) ? hi : v;
 }
 
 }

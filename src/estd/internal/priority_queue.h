@@ -6,12 +6,13 @@
 
 #include "platform.h"
 
+#include "../exp/heap.h"
+
 // relies on std::push_heap
 #ifdef FEATURE_STD_ALGORITHM
 
 #include "../vector.h"
 #include "../functional.h"
-#include "../exp/heap.h"
 
 #include <algorithm>
 

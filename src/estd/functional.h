@@ -1,42 +1,16 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/functional.h"
 
 #include "tuple.h"
 #include "type_traits.h"
 
 #include "internal/invoke.h"
-#include "internal/functional.h"
 
 // TODO: Utilize std version of this, if available
 
 namespace estd {
-
-//#if __cplusplus < 201200L
-template<class T>
-struct less
-{
-    CONSTEXPR bool operator()(const T& lhs, const T& rhs) const
-    {
-        return lhs < rhs;
-    }
-};
-
-template <class T>
-struct greater
-{
-    CONSTEXPR bool operator()(const T& lhs, const T& rhs) const
-    {
-        return lhs > rhs;
-    }
-};
-
-/*
-#else
-template< class T = void >
-struct less;
-#endif
-*/
 
 #if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
 
