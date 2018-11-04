@@ -3,6 +3,7 @@
  */
 #pragma once
 
+#include "../algorithm.h"
 #include "../iterator.h"
 #include "../functional.h"
 
@@ -92,52 +93,31 @@ struct internal_heap
     // push down
     void restore_down(iterator_type current)
     {
-        // last actual node present
-        iterator_type last_node = last - 1;
-
-        // only proceed if there is more down to go
-        while(current != last_node)
+        for(;;)
         {
             int current_idx = current - first;
             int first_child_idx = (current_idx * k) + 1;
             iterator_type first_child = first + first_child_idx;
-            // theoretical iterator to last child - it may actually be past the end
-            // FIX: adjust last child based on last_node
-            iterator_type last_child = first_child + k - 1;
-            // start of children.  first child automatically assigned to chosen
-            iterator_type chosen_child = first_child;
-            iterator_type next_node = last_child + 1;
 
-            // FIX: I think we need to eliminate this.  a child in this position
-            // might actually want to be swapped
-            if(chosen_child > last_node) break;
+            // past the end of the leaf
+            if(first_child >= last) break;
 
-            for(iterator_type child = chosen_child;
-                child <= last_child;
-                child++)
-            {
-                // find best candidate child
-                // (minheap this would be child with smallest value)
-                if(comp(*child, *chosen_child))
-                    chosen_child = child;
+            // theoretical iterator one past last child - it may actually be even
+            // further past the end.
+            iterator_type last_child = estd::min(first_child + k, last);
 
-                // if, after evaluating this child, we discover it's the last_node,
-                // then we are done
-                if(child == last_node)
-                {
-                    next_node = last_node;
-                    break;
-                }
-            }
+            iterator_type chosen_child = estd::min_element(first_child, last_child, comp);
 
             // now, if the best candidate child also should be bumped up
             if(comp(*chosen_child, *current))
             {
                 // then swap and bump it up
                 swap(chosen_child, current);
-                current = next_node; // move down the heap
+                //current = next_node; // move down the heap
+                current = chosen_child;
             }
             else
+                // if current is already best option, then we're done
                 break;
         }
     }
@@ -154,6 +134,13 @@ struct internal_heap
     {
         swap(first, --last);
         restore_down();
+    }
+
+    // untested
+    void push(const typename iterator_traits::value_type& v)
+    {
+        *last++ = v;
+        restore_up();
     }
 
     void make()

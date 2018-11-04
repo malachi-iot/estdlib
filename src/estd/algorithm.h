@@ -31,6 +31,22 @@ const T& min(const T& a, const T& b)
     return (b < a) ? b : a;
 }
 
+template<class ForwardIt, class Compare>
+ForwardIt min_element(ForwardIt first, ForwardIt last,
+                      Compare comp)
+{
+    if (first == last) return last;
+
+    ForwardIt smallest = first;
+    ++first;
+    for (; first != last; ++first) {
+        if (comp(*first, *smallest)) {
+            smallest = first;
+        }
+    }
+    return smallest;
+}
+
 #ifdef ESTD_MIN_SAVER
 #define min ESTD_MIN_SAVER
 #endif
