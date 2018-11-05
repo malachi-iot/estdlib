@@ -80,6 +80,20 @@ void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
     vTaskDelay(count);
 }
 
+// FreeRTOS' "delay until" code is subtly but fundamentally different than std lib version,
+// so we don't wrap it
+#ifdef INCLUDE_vTaskDelayUntil
+#endif
+
+// compiles, but untested
+template< class Clock, class Duration >
+void sleep_until( const chrono::time_point<Clock,Duration>& sleep_time )
+{
+    chrono::freertos_clock::rep count = sleep_time - chrono::freertos_clock::now();
+
+    vTaskDelay(count);
+}
+
 inline void yield() { taskYIELD(); }
 
 thread::id get_id()
