@@ -8,6 +8,7 @@
 
 #include "../internal/common_type.h"
 #include "../ratio.h"
+#include "../limits.h"
 
 #if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO)
 #include <chrono>
@@ -48,6 +49,14 @@ typedef int16_t years_rep;
 #ifdef FEATURE_ESTD_CHRONO
 
 namespace chrono {
+
+template <class Rep>
+struct duration_values
+{
+    static CONSTEXPR Rep zero() { return Rep(0); }
+    static CONSTEXPR Rep min() { return estd::numeric_limits<Rep>::min(); }
+    static CONSTEXPR Rep max() { return estd::numeric_limits<Rep>::max(); }
+};
 
 template<
         class Rep,

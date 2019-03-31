@@ -209,4 +209,17 @@ TEST_CASE("chrono tests")
 
         REQUIRE(ms.count() == ms2.count());
     }
+    SECTION("duration values")
+    {
+        REQUIRE(estd::chrono::duration_values<int>::max() == estd::numeric_limits<int>::max());
+        REQUIRE(estd::chrono::duration_values<int16_t>::max() == estd::numeric_limits<int16_t>::max());
+    }
+    SECTION("abs")
+    {
+        estd::chrono::milliseconds mn(-5);
+        estd::chrono::milliseconds mp(5);
+
+        REQUIRE(mp > mn);
+        //REQUIRE(abs(mp) == abs(mn));
+    }
 }
