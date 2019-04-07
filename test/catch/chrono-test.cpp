@@ -1,6 +1,5 @@
 #include <catch.hpp>
 
-// TODO: Once we get POSIX mode for this, include in estd/chrono.h directly
 #include <estd/chrono.h>
 
 class fake_clock
@@ -232,9 +231,9 @@ TEST_CASE("chrono tests")
 
         SECTION("abs + bool")
         {
-            typedef estd::chrono::duration<uint8_t, estd::micro> microseconds_t;
+            typedef estd::chrono::duration<int8_t, estd::milli> milliseconds_st;
 
-            microseconds_t mp2(5);
+            milliseconds_st mp2(5);
 
             // TODO: Get this working
             //bool result = mn < mp2;

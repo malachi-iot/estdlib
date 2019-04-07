@@ -3,6 +3,14 @@
 #include "internal/platform.h"
 #include "cstdint.h"
 
+// NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
+// these limits.h reflect that and focus on 8-bit-boundary computing
+
+// TODO: this actually should be from a climits/climits.h
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 namespace estd {
 
 // FIX: I implemented this wrong, numeric_limits should be a specializing type, not a namespace
@@ -27,7 +35,9 @@ template <class T> struct numeric_limits;
 template <>
 struct numeric_limits<int8_t>
 {
+    static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = true;
+    static CONSTEXPR int digits = 8 - 1;
     static CONSTEXPR int8_t min() { return INT8_MIN; }
     static CONSTEXPR int8_t max() { return INT8_MAX; }
 };
@@ -35,6 +45,9 @@ struct numeric_limits<int8_t>
 template <>
 struct numeric_limits<uint8_t>
 {
+    static CONSTEXPR bool is_integer = true;
+    static CONSTEXPR bool is_signed = false;
+    static CONSTEXPR int digits = 8;
     static CONSTEXPR uint8_t min() { return 0; }
     static CONSTEXPR uint8_t max() { return UINT8_MAX; }
 };
@@ -42,7 +55,9 @@ struct numeric_limits<uint8_t>
 template <>
 struct numeric_limits<int16_t>
 {
+    static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = true;
+    static CONSTEXPR int digits = 16 - 1;
     static CONSTEXPR int16_t min() { return INT16_MIN; }
     static CONSTEXPR int16_t max() { return INT16_MAX; }
 };
@@ -50,6 +65,9 @@ struct numeric_limits<int16_t>
 template <>
 struct numeric_limits<uint16_t>
 {
+    static CONSTEXPR bool is_integer = true;
+    static CONSTEXPR bool is_signed = false;
+    static CONSTEXPR int digits = 16;
     static CONSTEXPR uint16_t min() { return 0; }
     static CONSTEXPR uint16_t max() { return UINT16_MAX; }
 };
@@ -57,7 +75,9 @@ struct numeric_limits<uint16_t>
 template <>
 struct numeric_limits<int32_t>
 {
+    static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = true;
+    static CONSTEXPR int digits = 32 - 1;
     static CONSTEXPR int32_t min() { return INT32_MIN; }
     static CONSTEXPR int32_t max() { return INT32_MAX; }
 };
@@ -65,6 +85,9 @@ struct numeric_limits<int32_t>
 template <>
 struct numeric_limits<uint32_t>
 {
+    static CONSTEXPR bool is_integer = true;
+    static CONSTEXPR bool is_signed = false;
+    static CONSTEXPR int digits = 32;
     static CONSTEXPR uint32_t min() { return 0; }
     static CONSTEXPR uint32_t max() { return UINT32_MAX; }
 };
@@ -74,7 +97,9 @@ struct numeric_limits<uint32_t>
 template <>
 struct numeric_limits<int64_t>
 {
+    static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = true;
+    static CONSTEXPR int digits = 64 - 1;
     static CONSTEXPR int64_t min() { return INT64_MIN; }
     static CONSTEXPR int64_t max() { return INT64_MAX; }
 };
@@ -82,6 +107,9 @@ struct numeric_limits<int64_t>
 template <>
 struct numeric_limits<uint64_t>
 {
+    static CONSTEXPR bool is_integer = true;
+    static CONSTEXPR bool is_signed = false;
+    static CONSTEXPR int digits = 64;
     static CONSTEXPR uint64_t min() { return 0; }
     static CONSTEXPR uint64_t max() { return UINT64_MAX; }
 };

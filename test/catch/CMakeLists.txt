@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     functional-test.cpp
     ios-test.cpp
     list-test.cpp
+    limits-test.cpp
     map-test.cpp
     memory-test.cpp
     observer-test.cpp
