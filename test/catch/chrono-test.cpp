@@ -222,4 +222,25 @@ TEST_CASE("chrono tests")
         REQUIRE(mp > mn);
         //REQUIRE(abs(mp) == abs(mn));
     }
+    SECTION("signed/unsigned test")
+    {
+        typedef estd::chrono::duration<uint8_t, estd::micro> microseconds_t;
+        typedef estd::chrono::duration<int16_t, estd::micro> microseconds_st;
+
+        microseconds_t value1(100), value2(105);
+
+        microseconds_st value3 = value2 - value1;
+
+        REQUIRE(value3.count() == 5);
+
+        value3 = value1;
+        value3 -= value2;
+
+        REQUIRE(value3.count() == -5);
+
+        // TODO: Does not yet compile
+        //value3 = (microseconds_st)value1 - value2;
+
+        //REQUIRE(value3.count() == -5);
+    }
 }
