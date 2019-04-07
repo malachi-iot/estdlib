@@ -229,15 +229,19 @@ TEST_CASE("chrono tests")
 
         REQUIRE(abs(mp) == abs(mn));
 
+        // needs enhanced common_type to operate and switch between precisions
+#ifdef FEATURE_ESTD_CHRONO_EXP
         SECTION("abs + bool")
         {
             typedef estd::chrono::duration<int8_t, estd::milli> milliseconds_st;
 
             milliseconds_st mp2(5);
 
-            // TODO: Get this working
-            //bool result = mn < mp2;
+            bool result = mn < mp2;
+
+            REQUIRE(result);
         }
+#endif
     }
     SECTION("signed/unsigned test")
     {
@@ -255,11 +259,12 @@ TEST_CASE("chrono tests")
 
         REQUIRE(value3.count() == -5);
 
-        // TODO: Does not yet compile
-        //value3 = (microseconds_st)value1 - value2;
-        // value3 = estd::chrono::duration_cast<microseconds_st>(value1) - value2;
-        //value3 = value3 - value2;
+        // needs enhanced common_type to operate and switch between precisions
+#ifdef FEATURE_ESTD_CHRONO_EXP
+        //value3 = (microseconds_st)value1 - value2;    // actually works, but generates warning
+        value3 = estd::chrono::duration_cast<microseconds_st>(value1) - value2;
 
-        //REQUIRE(value3.count() == -5);
+        REQUIRE(value3.count() == -5);
+#endif
     }
 }

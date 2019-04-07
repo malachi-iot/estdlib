@@ -207,21 +207,25 @@ public:
 // for duration to be a common type, we need the same denominator.  This means
 // one of the ratio's numerators must increase, thus reducing the precision on the
 // other ratio.
-template <typename Dur1Int, typename Dur2Int, int Num1, int Num2, int Denom1, int Denom2>
+template <typename Dur1Int, typename Dur2Int, int Num1, int Num2, int64_t Denom1, int64_t Denom2>
 struct common_type<
         chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
         chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
 {
 private:
+    // NOTE: This will dump 'signed' if 'unsigned' is larger bitness
+    // unsure how we want to handle that right now
+    typedef typename common_type<Dur1Int, Dur1Int>::type common_int_type;
+
     static CONSTEXPR int gcd_den = internal::gcd<Denom2, Denom1>::value;
     //static CONSTEXPR int gcd_num = internal::gcd<Num1, Num2>::value;
-    static CONSTEXPR int NewDenom = Denom1 * Denom2;
-    static CONSTEXPR int NewNum = Num1 * Num2 * gcd_den;
-    static CONSTEXPR int gcd = internal::gcd<NewDenom, NewNum>::value;
+    static CONSTEXPR int64_t NewDenom = Denom1 * Denom2;
+    static CONSTEXPR int64_t NewNum = Num1 * Num2 * gcd_den;
+    static CONSTEXPR int64_t gcd = internal::gcd<NewDenom, NewNum>::value;
 
 public:
     // dummy type, for now
-    typedef chrono::duration<unsigned, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
+    typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
 };
 
 #endif

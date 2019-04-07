@@ -37,6 +37,16 @@ TEST_CASE("limits & common_type tests")
             // because of aforementioned comment, this should be signed
             REQUIRE(is_signed);
         }
+        SECTION("signed test 3")
+        {
+            typedef typename common_type<int32_t, uint32_t>::type common_type;
+
+            auto digits = numeric_limits<common_type>::digits;
+            REQUIRE(digits == 32);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be signed
+            REQUIRE(!is_signed);
+        }
     }
     SECTION("8 bit")
     {
