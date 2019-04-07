@@ -213,13 +213,21 @@ TEST_CASE("chrono tests")
     {
         REQUIRE(estd::chrono::duration_values<int>::max() == estd::numeric_limits<int>::max());
         REQUIRE(estd::chrono::duration_values<int16_t>::max() == estd::numeric_limits<int16_t>::max());
+
+        REQUIRE(estd::chrono::duration<int>::min().count() == estd::numeric_limits<int>::min());
     }
-    SECTION("abs")
+    SECTION("comparisons")
     {
         estd::chrono::milliseconds mn(-5);
         estd::chrono::milliseconds mp(5);
 
         REQUIRE(mp > mn);
+
+        REQUIRE(mn < mp);
+
+        // NOTE: Importantly, this isn't working
+        //REQUIRE(mn <= mp);
+
         //REQUIRE(abs(mp) == abs(mn));
     }
     SECTION("signed/unsigned test")
