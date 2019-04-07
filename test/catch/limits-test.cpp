@@ -22,6 +22,27 @@ TEST_CASE("limits & common_type tests")
         auto digits = numeric_limits<common_type>::digits;
         REQUIRE(digits == 32);
         auto is_signed = numeric_limits<common_type>::is_signed;
-        REQUIRE(is_signed);
+        // because of aforementioned comment, this should be unsigned
+        REQUIRE(!is_signed);
+    }
+    SECTION("8 bit")
+    {
+        auto digits = numeric_limits<int8_t>::digits;
+
+        REQUIRE(digits == 7);
+
+        digits = numeric_limits<uint8_t>::digits;
+
+        REQUIRE(digits == 8);
+    }
+    SECTION("32 bit")
+    {
+        auto digits = numeric_limits<int32_t>::digits;
+
+        REQUIRE(digits == 31);
+
+        digits = numeric_limits<uint32_t>::digits;
+
+        REQUIRE(digits == 32);
     }
 }
