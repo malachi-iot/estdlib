@@ -90,8 +90,9 @@ protected:
 
 
 template <class TAllocator>
-struct allocator_descriptor<TAllocator, false>
+class allocator_descriptor<TAllocator, false>
 {
+public:
     typedef typename remove_reference<TAllocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef allocator_type allocator_ref;

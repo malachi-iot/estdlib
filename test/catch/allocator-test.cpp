@@ -11,7 +11,7 @@ using namespace estd;
 using namespace estd::internal;
 
 template <class TAllocator>
-class test_specialization;
+struct test_specialization;
 
 template <class T, size_t N>
 struct test_specialization<layer1::allocator<T, N> > :
