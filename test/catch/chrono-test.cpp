@@ -248,6 +248,8 @@ TEST_CASE("chrono tests")
 
         // TODO: Does not yet compile
         //value3 = (microseconds_st)value1 - value2;
+        // value3 = estd::chrono::duration_cast<microseconds_st>(value1) - value2;
+        //value3 = value3 - value2;
 
         //REQUIRE(value3.count() == -5);
     }

@@ -66,14 +66,16 @@ ToDuration duration_cast(const duration<Rep, Period>& d)
 }
 
 
+// NOTE: Not well tested for operations across different duration types
 template< class Rep1, class Period1, class Rep2, class Period2 >
 typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs )
 {
-    return typename estd::common_type<
-            duration<Rep1,Period1>,
-            duration<Rep2,Period2>>::type(lhs.count() - rhs.count());
+    typedef typename common_type<duration<Rep1, Period1>,
+            duration<Rep2, Period2>>::type CT;
+
+    return CT(CT(lhs).count() - CT(rhs).count());
 }
 
 
