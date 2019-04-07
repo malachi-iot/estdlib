@@ -146,9 +146,16 @@ public:
         return *this;
     }
 
-    static CONSTEXPR duration<rep> min() { return duration(duration_values<rep>::min()); }
-    static CONSTEXPR duration<rep> max() { return duration(duration_values<rep>::max()); }
-    static CONSTEXPR duration<rep> zero() { return duration(duration_values<rep>::zero()); }
+    CONSTEXPR duration operator-() const
+    {
+        return duration(-ticks);
+    }
+
+    CONSTEXPR duration operator+() const { return *this; }
+
+    static CONSTEXPR duration min() { return duration(duration_values<rep>::min()); }
+    static CONSTEXPR duration max() { return duration(duration_values<rep>::max()); }
+    static CONSTEXPR duration zero() { return duration(duration_values<rep>::zero()); }
 };
 
 template <class ToDuration, class Rep, class Period>

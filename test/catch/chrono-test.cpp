@@ -225,10 +225,10 @@ TEST_CASE("chrono tests")
 
         REQUIRE(mn < mp);
 
-        // NOTE: Importantly, this isn't working
-        //REQUIRE(mn <= mp);
+        REQUIRE(mn <= mp);
+        REQUIRE(mn <= mn);
 
-        //REQUIRE(abs(mp) == abs(mn));
+        REQUIRE(abs(mp) == abs(mn));
     }
     SECTION("signed/unsigned test")
     {
