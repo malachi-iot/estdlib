@@ -229,6 +229,16 @@ TEST_CASE("chrono tests")
         REQUIRE(mn <= mn);
 
         REQUIRE(abs(mp) == abs(mn));
+
+        SECTION("abs + bool")
+        {
+            typedef estd::chrono::duration<uint8_t, estd::micro> microseconds_t;
+
+            microseconds_t mp2(5);
+
+            // TODO: Get this working
+            //bool result = mn < mp2;
+        }
     }
     SECTION("signed/unsigned test")
     {
