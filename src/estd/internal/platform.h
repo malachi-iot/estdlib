@@ -39,6 +39,8 @@
 #define FEATURE_CPP_CHAR16_T
 #define FEATURE_CPP_NULLPTR
 #define FEATURE_CPP_OVERRIDE
+#define FEATURE_CPP_USER_LITERAL    // https://en.cppreference.com/w/cpp/language/user_literal
+
 
 #if defined(__STDC_LIB_EXT1__)
 // see http://en.cppreference.com/w/c/string/byte/strncpy

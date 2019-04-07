@@ -12,18 +12,31 @@ TEST_CASE("limits & common_type tests")
     // to choose one of the two
     SECTION("common_type")
     {
-        typedef typename common_type<int16_t, uint32_t>::type common_type;
+        SECTION("signed test 1")
+        {
+            typedef typename common_type<int16_t, uint32_t>::type common_type;
 
-        //int sz = sizeof(common_type);
+            //int sz = sizeof(common_type);
 
-        //REQUIRE(sz == 4);
-        //REQUIRE((numeric_limits<common_type>::digits) == 32);
-        //auto max = numeric_limits<common_type>::max();
-        auto digits = numeric_limits<common_type>::digits;
-        REQUIRE(digits == 32);
-        auto is_signed = numeric_limits<common_type>::is_signed;
-        // because of aforementioned comment, this should be unsigned
-        REQUIRE(!is_signed);
+            //REQUIRE(sz == 4);
+            //REQUIRE((numeric_limits<common_type>::digits) == 32);
+            //auto max = numeric_limits<common_type>::max();
+            auto digits = numeric_limits<common_type>::digits;
+            REQUIRE(digits == 32);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be unsigned
+            REQUIRE(!is_signed);
+        }
+        SECTION("signed test 2")
+        {
+            typedef typename common_type<uint16_t, int32_t>::type common_type;
+
+            auto digits = numeric_limits<common_type>::digits;
+            REQUIRE(digits == 31);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be signed
+            REQUIRE(is_signed);
+        }
     }
     SECTION("8 bit")
     {
