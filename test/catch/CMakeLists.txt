@@ -35,7 +35,12 @@ add_executable(${PROJECT_NAME} "main.cpp"
     utility-test.cpp algorithm-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+# TODO: Instead, filter by presence of GCC
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall /Zc:__cplusplus)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+endif()
 # -Wno-unused-variable want this too, remember .H files aren't compiled independently
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it

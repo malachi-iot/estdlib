@@ -16,6 +16,10 @@
 #endif
 #endif
 
+#if defined(_MSC_VER)
+#define __alignof__(T) __alignof(T)
+#endif
+
 // TODO: consider utilizing
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
 // http://en.cppreference.com/w/cpp/experimental
