@@ -216,6 +216,9 @@ private:
     // NOTE: This will dump 'signed' if 'unsigned' is larger bitness
     // unsure how we want to handle that right now
     typedef typename common_type<Dur1Int, Dur1Int>::type common_int_type;
+    // This will likely solve above issue, but other compilation issues
+    // are stopping us from testing it
+    //typedef typename promoted_type<Dur1Int, Dur1Int>::type common_int_type;
 
     // greatest common divisor of denominator
     static CONSTEXPR std::intmax_t gcd_den = internal::gcd<Denom2, Denom1>::value;

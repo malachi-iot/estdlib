@@ -4,6 +4,7 @@
 #define FEATURE_ESTD_CHRONO
 
 // EXP actually works, just want to do a little more testing before enabling it
+// compiles on macOS, but does not compile on Debian
 //#define FEATURE_ESTD_CHRONO_EXP
 
 #include "../internal/common_type.h"
