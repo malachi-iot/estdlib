@@ -38,6 +38,14 @@ struct promote_type<int32_t>
     typedef int64_t type;
 };
 
+// Can't promote past 64 bit, but some of the conditional-template logic
+// touches the struct so we do need it
+template<>
+struct promote_type<int64_t>
+{
+    typedef void type;
+};
+
 template<>
 struct promote_type<uint8_t>
 {
@@ -48,6 +56,12 @@ template<>
 struct promote_type<uint16_t>
 {
     typedef uint32_t type;
+};
+
+template<>
+struct promote_type<uint32_t>
+{
+    typedef uint64_t type;
 };
 
 }
