@@ -70,13 +70,27 @@ TEST_CASE("limits & common_type tests")
             // because of aforementioned comment, this should be signed
             REQUIRE(is_signed);
         }
+        SECTION("signed test 6")
+        {
+            typedef typename common_type<int64_t, uint8_t>::type common_type;
+
+            auto digits = numeric_limits<common_type>::digits;
+            // FIX: This has a problem, digits reports 31 here
+            REQUIRE(digits == 63);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be signed
+            REQUIRE(is_signed);
+        }
         SECTION("internal::cond_t")
         {
             typedef decltype (std::declval<int16_t>()) t1;
             typedef decltype (std::declval<uint8_t>()) t2;
+            // It seems that this statement always results in a 32-bit type
+            typedef decltype (false ? std::declval<int16_t>() : std::declval<uint8_t>()) t3;
 
             int digits;
 
+            // Interestingly we have to decay t1 and t2 as they come out to be &&
             digits = numeric_limits<estd::decay_t<t1> >::digits;
 
             REQUIRE(digits == 15);
@@ -84,6 +98,10 @@ TEST_CASE("limits & common_type tests")
             digits = numeric_limits<estd::decay_t<t2> >::digits;
 
             REQUIRE(digits == 8);
+
+            digits = numeric_limits<estd::decay_t<t3> >::digits;
+
+            //REQUIRE(digits == 15);
 
             typedef internal::cond_t<int16_t, uint8_t> cond_type;
 
