@@ -208,7 +208,9 @@ public:
 // one of the ratio's numerators must increase, thus reducing the precision on the
 // other ratio.
 // custom "promoted_type" is utilized to keep duration's 'Rep' from bloating
-template <typename Dur1Int, typename Dur2Int, int Num1, int Num2, int64_t Denom1, int64_t Denom2>
+template <typename Dur1Int, typename Dur2Int,
+        std::intmax_t Num1, std::intmax_t Num2,
+        std::intmax_t Denom1, std::intmax_t Denom2>
 struct common_type<
         chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
         chrono::duration<Dur2Int, ratio<Num2, Denom2> > >

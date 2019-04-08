@@ -18,6 +18,7 @@ public:
     static CONSTEXPR std::intmax_t den = Denom;
 };
 
+typedef ratio<1, 1000000000000> pico;
 typedef ratio<1, 1000000000> nano;
 typedef ratio<1, 1000000> micro;
 typedef ratio<1, 1000> milli;
@@ -27,6 +28,7 @@ typedef ratio<10, 1> deca;
 typedef ratio<1000, 1> kilo;
 typedef ratio<1000000, 1> mega;
 typedef ratio<1000000000, 1> giga;
+typedef ratio<1000000000000, 1> tera;
 
 template<class R1, class R2>
 struct ratio_divide;

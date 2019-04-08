@@ -3,9 +3,9 @@
 // While developing, leave this on
 #define FEATURE_ESTD_CHRONO
 
-// EXP actually works, just want to do a little more testing before enabling it
-// compiles on macOS, but does not compile on Debian
-//#define FEATURE_ESTD_CHRONO_EXP
+// Fully activating more advanced common_type/promoted_type fused
+// duration conversions
+#define FEATURE_ESTD_CHRONO_EXP
 
 #include "../internal/common_type.h"
 #include "../ratio.h"
@@ -313,6 +313,38 @@ template< class Clock, class Dur1, class Dur2 >
 CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
+
+namespace literals {
+
+namespace chrono_literals {
+
+// spammy warnings make this too obnoxious to enable right now
+#ifdef UNUSED
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wliteral-suffix"
+
+#ifdef FEATURE_CPP_USER_LITERAL
+constexpr chrono::seconds operator "" s(unsigned long long s)
+{
+    return chrono::seconds(s);
+}
+
+constexpr chrono::seconds operator "" ms(unsigned long long ms)
+{
+    return chrono::milliseconds(ms);
+}
+
+#pragma GCC diagnostic pop
+
+#endif
+
+#endif
+
+}
+
+}
+
 
 }
 
