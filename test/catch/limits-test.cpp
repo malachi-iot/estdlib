@@ -3,6 +3,81 @@
 #include <estd/chrono.h>
 #include <estd/limits.h>
 
+#include <estd/functional.h>
+
+// does what common_type does, but less aggressively promotes type
+// this instead finds the nearest, smallest type to satisfy both sides
+// brute forcing implementation for the short term
+// (common_type it's not unusual for an int8_t to get pushed to a
+//  int32_t - clearly it's meant for temporary/immediate arithmetic
+//  scenarios)
+// common_type has been very rigidly locked down in its defined behavior,
+// so we aren't gonna modify it
+//template <class T1, class T2>
+//struct promoted_type;
+namespace estd {
+namespace internal {
+
+template<class T>
+struct promote_type;
+
+template<>
+struct promote_type<int8_t>
+{
+    typedef int16_t type;
+};
+
+template<>
+struct promote_type<int16_t>
+{
+    typedef int32_t type;
+};
+
+template<>
+struct promote_type<uint8_t>
+{
+    typedef uint16_t type;
+};
+
+template<>
+struct promote_type<uint16_t>
+{
+    typedef uint32_t type;
+};
+
+}
+
+template<class T1, class T2>
+struct promoted_type
+{
+    typedef typename estd::conditional<
+            estd::numeric_limits<T1>::digits >=
+            estd::numeric_limits<T2>::digits,
+            T1,
+            T2>::type more_bits_type;
+
+    typedef typename estd::conditional<
+            estd::numeric_limits<T1>::digits<
+                    estd::numeric_limits<T2>::digits,
+                    T1,
+                    T2>::type less_bits_type;
+
+    // if the bigger type is unsigned and the smaller type is signed,
+    // turn the bigger type into signed.  Otherwise:
+    // big signed + small signed = big signed
+    // big unsigned + small unsigned = big unsigned
+    // big signed + small unsigned = big signed
+    // NOTE: exceptional case when say a uint16_t and a int16_t are presented
+    // in that case we need to detect both have the same bitness and a promotion
+    // to int32_t may be needed
+    typedef typename estd::conditional<
+            !estd::numeric_limits<more_bits_type>::is_signed &&
+            estd::numeric_limits<less_bits_type>::is_signed,
+            typename estd::make_signed<more_bits_type>::type,
+            more_bits_type>::type type;
+};
+}
+
 using namespace estd;
 
 TEST_CASE("limits & common_type tests")
@@ -140,5 +215,34 @@ TEST_CASE("limits & common_type tests")
         digits = numeric_limits<uint32_t>::digits;
 
         REQUIRE(digits == 32);
+    }
+    SECTION("promote_type")
+    {
+        SECTION("simple")
+        {
+            typedef typename promoted_type<int8_t, int16_t>::type type;
+
+            auto digits = numeric_limits<type>::digits;
+
+            REQUIRE(digits == 15);
+        }
+        SECTION("complex 1")
+        {
+            typedef typename promoted_type<uint8_t, int16_t>::type type;
+
+            auto digits = numeric_limits<type>::digits;
+
+            REQUIRE(digits == 15);
+        }
+        SECTION("complex 2")
+        {
+            // TODO: We will want to promote to int32_t byte default,
+            // but have a strict mode to inhibit that
+            typedef typename promoted_type<uint16_t, int16_t>::type type;
+
+            auto digits = numeric_limits<type>::digits;
+
+            REQUIRE(digits == 15);
+        }
     }
 }
