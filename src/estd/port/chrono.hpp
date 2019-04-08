@@ -104,7 +104,7 @@ template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
 {
-    return !(rhs < lhs);
+    return !(rhs > lhs);
 }
 
 
@@ -112,7 +112,7 @@ template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator>=(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
 {
-    return !(lhs > rhs);
+    return !(lhs < rhs);
 }
 
 
