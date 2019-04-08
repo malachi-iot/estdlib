@@ -249,3 +249,5 @@ struct is_empty
 #if defined(FEATURE_CPP_ALIASTEMPLATE) && defined(FEATURE_CPP_DECLTYPE)
 #include "internal/common_type.h"
 #endif
+
+#include "internal/promoted_type.h"
