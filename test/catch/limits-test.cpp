@@ -47,7 +47,9 @@ struct promote_type<uint16_t>
 
 }
 
-template<class T1, class T2>
+// TODO: Fix name - auto_promote means, if necessary, move
+// to a higher bitness than T1 or T2 (for signed/unsigned mixing)
+template<class T1, class T2, bool auto_promote = true>
 struct promoted_type
 {
     typedef typename estd::conditional<
@@ -74,7 +76,22 @@ struct promoted_type
             !estd::numeric_limits<more_bits_type>::is_signed &&
             estd::numeric_limits<less_bits_type>::is_signed,
             typename estd::make_signed<more_bits_type>::type,
-            more_bits_type>::type type;
+            more_bits_type>::type aligned_more_bits_type;
+
+    // if less_bits_type is signed, more_bits_type is unsigned
+    // and after adjusting both digits are the same then we risk
+    // losing precision in more_bits_type when we subtract the bit
+    // so promote to the next precision of type
+    // NOTE: in that case, aligned_more_bits_type will (I think)
+    // be identical to less_bits_type
+    typedef typename estd::conditional<
+            (estd::numeric_limits<aligned_more_bits_type>::digits ==
+            estd::numeric_limits<less_bits_type>::digits) &&
+            estd::numeric_limits<less_bits_type>::is_signed &&
+            !estd::numeric_limits<more_bits_type>::is_signed &&
+            auto_promote,
+            typename internal::promote_type<aligned_more_bits_type>::type,
+            aligned_more_bits_type>::type type;
 };
 }
 
@@ -218,6 +235,14 @@ TEST_CASE("limits & common_type tests")
     }
     SECTION("promote_type")
     {
+        SECTION("1:1")
+        {
+            typedef typename promoted_type<uint8_t, uint8_t>::type type;
+
+            auto digits = numeric_limits<type>::digits;
+
+            REQUIRE(digits == 8);
+        }
         SECTION("simple")
         {
             typedef typename promoted_type<int8_t, int16_t>::type type;
@@ -226,7 +251,7 @@ TEST_CASE("limits & common_type tests")
 
             REQUIRE(digits == 15);
         }
-        SECTION("complex 1")
+        SECTION("uint8_t -> int16_t")
         {
             typedef typename promoted_type<uint8_t, int16_t>::type type;
 
@@ -234,11 +259,20 @@ TEST_CASE("limits & common_type tests")
 
             REQUIRE(digits == 15);
         }
-        SECTION("complex 2")
+        SECTION("int16_t -> uint16_t (auto promote to int32_t)")
         {
-            // TODO: We will want to promote to int32_t byte default,
-            // but have a strict mode to inhibit that
+            // We promote to int32_t by default to avoid precision loss
             typedef typename promoted_type<uint16_t, int16_t>::type type;
+
+            auto digits = numeric_limits<type>::digits;
+
+            REQUIRE(digits == 31);
+        }
+        SECTION("int16_t -> uint16_t (permit 'promoting' to same bitness int16_t)")
+        {
+            // We shut off auto-promote for this, indicating we are confident
+            // no precision loss going from uint16_t -> int16_t
+            typedef typename promoted_type<uint16_t, int16_t, false>::type type;
 
             auto digits = numeric_limits<type>::digits;
 
