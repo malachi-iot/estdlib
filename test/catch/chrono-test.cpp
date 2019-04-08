@@ -150,7 +150,6 @@ TEST_CASE("chrono tests")
 
             auto digits = estd::numeric_limits<common::rep>::digits;
 
-            // FIX: Something not right here, common deduces down to 8 bits unsigned
             REQUIRE(digits == 15);
         }
 #endif

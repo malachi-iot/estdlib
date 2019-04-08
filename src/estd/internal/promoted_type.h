@@ -33,6 +33,12 @@ struct promote_type<int16_t>
 };
 
 template<>
+struct promote_type<int32_t>
+{
+    typedef int64_t type;
+};
+
+template<>
 struct promote_type<uint8_t>
 {
     typedef uint16_t type;

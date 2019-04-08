@@ -207,18 +207,16 @@ public:
 // for duration to be a common type, we need the same denominator.  This means
 // one of the ratio's numerators must increase, thus reducing the precision on the
 // other ratio.
+// custom "promoted_type" is utilized to keep duration's 'Rep' from bloating
 template <typename Dur1Int, typename Dur2Int, int Num1, int Num2, int64_t Denom1, int64_t Denom2>
 struct common_type<
         chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
         chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
 {
 private:
-    // NOTE: This will dump 'signed' if 'unsigned' is larger bitness
-    // unsure how we want to handle that right now
-    typedef typename common_type<Dur1Int, Dur1Int>::type common_int_type;
-    // This will likely solve above issue, but other compilation issues
-    // are stopping us from testing it
-    //typedef typename promoted_type<Dur1Int, Dur1Int>::type common_int_type;
+    // gracefully promote (or not) types used.  non-specialized common_type is very
+    // aggressive about promoting and almost always adds bits - otherwise we'd use it
+    typedef typename promoted_type<Dur1Int, Dur2Int>::type common_int_type;
 
     // greatest common divisor of denominator
     static CONSTEXPR std::intmax_t gcd_den = internal::gcd<Denom2, Denom1>::value;
