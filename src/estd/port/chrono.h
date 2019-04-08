@@ -148,6 +148,10 @@ public:
 
     CONSTEXPR duration operator-() const
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
+        static_assert (numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
+#endif
+
         return duration(-ticks);
     }
 

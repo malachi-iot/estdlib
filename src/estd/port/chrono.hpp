@@ -217,14 +217,14 @@ private:
     // unsure how we want to handle that right now
     typedef typename common_type<Dur1Int, Dur1Int>::type common_int_type;
 
-    static CONSTEXPR int gcd_den = internal::gcd<Denom2, Denom1>::value;
+    // greatest common divisor of denominator
+    static CONSTEXPR std::intmax_t gcd_den = internal::gcd<Denom2, Denom1>::value;
     //static CONSTEXPR int gcd_num = internal::gcd<Num1, Num2>::value;
-    static CONSTEXPR int64_t NewDenom = Denom1 * Denom2;
-    static CONSTEXPR int64_t NewNum = Num1 * Num2 * gcd_den;
-    static CONSTEXPR int64_t gcd = internal::gcd<NewDenom, NewNum>::value;
+    static CONSTEXPR std::intmax_t NewDenom = Denom1 * Denom2;
+    static CONSTEXPR std::intmax_t NewNum = Num1 * Num2 * gcd_den;
+    static CONSTEXPR std::intmax_t gcd = internal::gcd<NewDenom, NewNum>::value;
 
 public:
-    // dummy type, for now
     typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
 };
 

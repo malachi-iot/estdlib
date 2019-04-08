@@ -141,6 +141,18 @@ TEST_CASE("chrono tests")
 
             REQUIRE(count_lhs == count_rhs);
         }
+        SECTION("inspect settled on common type")
+        {
+            typedef estd::chrono::duration<uint8_t, estd::micro> microseconds_t;
+            typedef estd::chrono::duration<int16_t, estd::micro> microseconds_st;
+
+            typedef estd::common_type<microseconds_t, microseconds_st>::type common;
+
+            auto digits = estd::numeric_limits<common::rep>::digits;
+
+            // FIX: Something not right here, common deduces down to 8 bits unsigned
+            REQUIRE(digits == 15);
+        }
 #endif
     }
     SECTION("fake_clock tests")
