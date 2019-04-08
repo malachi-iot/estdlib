@@ -47,6 +47,51 @@ TEST_CASE("limits & common_type tests")
             // because of aforementioned comment, this should be signed
             REQUIRE(!is_signed);
         }
+        SECTION("signed test 4")
+        {
+            typedef typename common_type<int8_t, uint8_t>::type common_type;
+
+            auto digits = numeric_limits<common_type>::digits;
+            // FIX: This has a problem, digits reports 31 here
+            // verified decay itself is working OK
+            //REQUIRE(digits == 15);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be signed
+            REQUIRE(is_signed);
+        }
+        SECTION("signed test 5")
+        {
+            typedef typename common_type<int16_t, uint8_t>::type common_type;
+
+            auto digits = numeric_limits<common_type>::digits;
+            // FIX: This has a problem, digits reports 31 here
+            //REQUIRE(digits == 15);
+            auto is_signed = numeric_limits<common_type>::is_signed;
+            // because of aforementioned comment, this should be signed
+            REQUIRE(is_signed);
+        }
+        SECTION("internal::cond_t")
+        {
+            typedef decltype (std::declval<int16_t>()) t1;
+            typedef decltype (std::declval<uint8_t>()) t2;
+
+            int digits;
+
+            digits = numeric_limits<estd::decay_t<t1> >::digits;
+
+            REQUIRE(digits == 15);
+
+            digits = numeric_limits<estd::decay_t<t2> >::digits;
+
+            REQUIRE(digits == 8);
+
+            typedef internal::cond_t<int16_t, uint8_t> cond_type;
+
+            digits = numeric_limits<cond_type>::digits;
+
+            // FIX: problem localizes here
+            //REQUIRE(digits == 15);
+        }
     }
     SECTION("8 bit")
     {
@@ -57,6 +102,16 @@ TEST_CASE("limits & common_type tests")
         digits = numeric_limits<uint8_t>::digits;
 
         REQUIRE(digits == 8);
+    }
+    SECTION("16 bit")
+    {
+        auto digits = numeric_limits<int16_t>::digits;
+
+        REQUIRE(digits == 15);
+
+        digits = numeric_limits<uint16_t>::digits;
+
+        REQUIRE(digits == 16);
     }
     SECTION("32 bit")
     {

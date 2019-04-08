@@ -1,5 +1,7 @@
 #pragma once
 
+// NOTE: This is rife with C++11 features, but hasn't been gaurded yet
+
 // mainly just for tooltips, normally you don't include internal/common_type directly
 #include "../type_traits.h"
 #include "../utility.h"
@@ -19,6 +21,8 @@ struct common_type<T> {
 
 //////// two types
 
+namespace internal
+{
 // default implementation for two types
 template<class T1, class T2>
 using cond_t = decltype(false ? std::declval<T1>() : std::declval<T2>());
@@ -37,9 +41,10 @@ struct common_type_2_impl : common_type<D1, D2> {};
 
 template<class D1, class D2>
 struct common_type_2_impl<D1, D2, D1, D2> : common_type_2_default<D1, D2> {};
+}
 
 template <class T1, class T2>
-struct common_type<T1, T2> : common_type_2_impl<T1, T2> { };
+struct common_type<T1, T2> : internal::common_type_2_impl<T1, T2> { };
 
 //////// 3+ types
 
