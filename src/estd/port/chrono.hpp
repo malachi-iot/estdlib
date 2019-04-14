@@ -80,6 +80,19 @@ typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
 
 
 
+template< class Rep1, class Period1, class Rep2, class Period2 >
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
+                     const duration<Rep2,Period2>& rhs )
+{
+    typedef typename common_type<duration<Rep1, Period1>,
+            duration<Rep2, Period2>>::type CT;
+
+    return CT(CT(lhs).count() + CT(rhs).count());
+}
+
+
+
 template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
