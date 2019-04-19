@@ -292,7 +292,7 @@ TEST_CASE("chrono tests")
 
         REQUIRE(t1 == t2);
 
-        t2 += estd::chrono::seconds(2);
+        t2 += estd::chrono::duration_cast<microseconds_t2>(estd::chrono::seconds(2));
 
         REQUIRE(t2.count() == 2006);
 

@@ -14,10 +14,20 @@ CONSTEXPR Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>&
 {
     typedef ratio_divide<Period2, Period> rd;
 
+    // So this isn't the answer but it's close
+    // 1) a warning would be much preferred
+    // 2) duration_cast should suppress this, but doesn't
+#ifdef _FEATURE_CPP_STATIC_ASSERT
+    static_assert (estd::numeric_limits<Rep>::digits >= estd::numeric_limits<Rep2>::digits,
+                   "Precision loss");
+#endif
+
     // FIX: Overly simplistic and going to overflow in some conditions
     // put into this helper method so that (perhaps) we can specialize/overload
     // to avoid that
     //return d.count() * Period2::num() * Period::den() / (Period2::den() * Period::num());
+    // A little surprising that this statement doesn't issue compiler warnings about precision loss
+    // even when Rep is much smaller of an integer type than Rep2
     return d.count() * rd::num / rd::den;
 }
 
