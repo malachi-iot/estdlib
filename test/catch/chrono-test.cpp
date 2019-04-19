@@ -235,7 +235,9 @@ TEST_CASE("chrono tests")
 
         REQUIRE(mn < mp);
 
-        REQUIRE(mn <= mp);
+        bool should_be_true = mn <= mp;
+
+        REQUIRE(should_be_true);
         REQUIRE(mn <= mn);
 
         REQUIRE(abs(mp) == abs(mn));
@@ -277,5 +279,26 @@ TEST_CASE("chrono tests")
 
         REQUIRE(value3.count() == -5);
 #endif
+    }
+    SECTION("precision loss")
+    {
+        typedef estd::chrono::duration<int8_t, estd::milli> microseconds_t;
+        typedef estd::chrono::duration<int16_t, estd::milli> microseconds_t2;
+
+        microseconds_t t1(3);
+        microseconds_t2 t2(6);
+
+        t1 = t2;
+
+        REQUIRE(t1 == t2);
+
+        t2 += estd::chrono::seconds(2);
+
+        REQUIRE(t2.count() == 2006);
+
+        t1 = t2;
+
+        // FIX: Here is the problem, silent precision loss
+        //REQUIRE(t1 == t2);
     }
 }
