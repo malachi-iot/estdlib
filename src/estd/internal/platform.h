@@ -43,6 +43,7 @@
 #define FEATURE_CPP_CHAR16_T
 #define FEATURE_CPP_NULLPTR
 #define FEATURE_CPP_OVERRIDE
+#define FEATURE_CPP_NOEXCEPT
 #define FEATURE_CPP_USER_LITERAL    // https://en.cppreference.com/w/cpp/language/user_literal
 
 
@@ -137,6 +138,12 @@
 #define CONSTEXPR constexpr
 #else
 #define CONSTEXPR const
+#endif
+
+#ifdef FEATURE_CPP_NOEXCEPT
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
 #endif
 
 // TODO: Identify a better way to identify presence of C++ iostreams

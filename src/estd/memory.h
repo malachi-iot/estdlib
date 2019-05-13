@@ -262,7 +262,7 @@ public:
 
     typedef typename estd::remove_extent<T>::type element_type;
 
-    element_type* get() const noexcept
+    element_type* get() const NOEXCEPT
     {
 #ifdef FEATURE_ESTD_SHARED_PTR_ALIAS
         return stored;
@@ -327,9 +327,9 @@ public:
         if(base_type::is_active()) eval_delete();
     }
 
-    T* operator ->() const noexcept { return get(); }
+    T* operator ->() const NOEXCEPT { return get(); }
 
-    T& operator *() const noexcept { return *get(); }
+    T& operator *() const NOEXCEPT { return *get(); }
 };
 
 }
@@ -588,7 +588,7 @@ public:
         return *this;
     } */
 
-    void swap(shared_ptr& r) noexcept
+    void swap(shared_ptr& r) NOEXCEPT
     {
         /*
         typename base_type::control_type* old = this->value_ptr();

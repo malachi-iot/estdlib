@@ -51,3 +51,6 @@ test/**/packages/
 
 # macOS misc
 .DS_Store
+
+# Visual Studio code specific
+.vscode/ipch

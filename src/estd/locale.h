@@ -34,7 +34,7 @@ class ctype : public ctype_base
 #endif
 public:
     bool is(mask m, TChar ch) const { return false; }
-    const TChar* is(const TChar* low, const TChar* high, mask* vec) const { return nullptr; }
+    const TChar* is(const TChar* low, const TChar* high, mask* vec) const { return NULLPTR; }
 
     TChar toupper(TChar ch) { return do_toupper(ch); }
     TChar tolower(TChar ch) { return do_tolower(ch); }
