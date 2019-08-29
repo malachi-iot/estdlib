@@ -134,13 +134,14 @@ protected:
     typedef typename internal::deduce_fixed_size_t<N>::size_type size_type;
 
     ///
-    /// \brief Internal pool entry
+    /// \brief Internal linked-list style pool entry
     ///
     /// aligned along 'T' boundaries so that any pointers etc. in T don't cause issues
     ///
     template <class TTrackedValue, class THandle>
     struct
 #ifdef FEATURE_CPP_ALIGN
+            // TODO: Note why we aren't actually doing our memory alignment here
             //alignas (alignof (value_type))
 #else
 //#error Memory pool requires memory alignment
@@ -164,7 +165,7 @@ protected:
         typedef typename base_type::tracked_value_type tracked_value_type;
         typedef typename base_type::handle_type node_handle;
         typedef TNextHandle next_node_handle;
-        // FIX: Pretty sure this line is goofing us up - it's basically fine, but
+        // NOTE: Pretty sure this line is goofing us up - it's basically fine, but
         // we're feeding item<TTrackedValue, void*> around and I think they don't mesh
         typedef item<tracked_value_type, next_node_handle> node_type;
         typedef node_type& nv_ref_t;
@@ -176,12 +177,18 @@ protected:
         template <class TParam>
         _item_node_traits(TParam& p) : base_type(p) {}
 
+        // given a app-level value that we track in our pool, adjust 
+        // and retrieve its contiguously associated node_type
+        // FIX: Broken, because right now 'item' tracks 'next' at the *end*, not
+        // the *beginning*
         static node_type* adjust_from(tracked_value_type * val)
         {
             node_type temp;
 
+            // get diff of size between value region and start of structure
             int sz = (byte*)&temp.value - (byte*)&temp;
 
+            // subtract size from given pointer to get our 'next' pointer
             node_type* _val = (node_type*)((byte*)val - sz);
 
             return _val;
@@ -202,6 +209,7 @@ protected:
 };
 
 
+// intrusive linked list variety, where T also includes forward-node data
 template <class T, std::size_t N, class TTraits>
 class memory_pool_ll_base : public memory_pool_base<T, N>
 {
@@ -212,6 +220,8 @@ protected:
     //typedef memory_pool_item_traits<T, memory_pool_handle_base> traits_type;
     typedef typename traits_type::tracked_value_type tracked_value_type;
 
+    // NOTE: be careful, because underlying item does not yet explicitly memory-align 
+    // its 'next' pointer
     typedef typename base_type::template item<tracked_value_type,
             void*> item;
 
@@ -256,6 +266,7 @@ protected:
 };
 
 // base class specifically for handle-based memory pool.  sets up all requisite typedefs
+// this is one unified array, no provision for "bitmap" approach at this level
 template <class T, std::size_t N, class TTraits>
 class memory_pool_handle_base : public memory_pool_base<T, N>
 {
@@ -324,8 +335,11 @@ public:
         // its already-allocated handle from the storage area
         handle_type allocate(value_type& n)
         {
+            // Get base pool area pointer
             value_type* data = this->storage.data();
+            // Get pointer of incoming value type
             value_type* _n = &n;
+            // handle position is where incoming value type resides in our storage array
             handle_type h = _n - data;
             return h;
         }
