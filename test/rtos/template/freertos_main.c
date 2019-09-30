@@ -258,7 +258,20 @@ uint32_t user_rf_cal_sector_set(void)
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
 void app_main(void)
 {
-    ESP_ERROR_CHECK(nvs_flash_init());
+    static const char *TAG = "app_main";
+
+    esp_err_t ret = nvs_flash_init();
+#if ESTD_IDF_VER >= ESTD_IDF_VER_3_1_0
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+#endif
+    ESP_ERROR_CHECK(ret);
+
+    // TODO: Show SDK version here maybe
+    ESP_LOGI(TAG, "Startup");
 
 #else
 void user_init(void)
