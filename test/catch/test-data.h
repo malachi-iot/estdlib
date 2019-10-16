@@ -64,6 +64,16 @@ struct NonCopyable
 };
 
 
+struct DefaultConstructor
+{
+    static constexpr int default_value() { return 0x77; }
+    int val;
+
+    DefaultConstructor() : val(default_value()) {}
+};
+
+
+
 
 static uint8_t octet_data[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
