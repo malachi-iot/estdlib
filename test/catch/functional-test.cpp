@@ -2,6 +2,10 @@
 
 #include <estd/functional.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 static const char* got_something = NULLPTR;
 
 int do_something(const char* msg)
@@ -139,3 +143,5 @@ TEST_CASE("functional")
 }
 
 #endif
+
+#pragma GCC diagnostic pop

@@ -23,7 +23,6 @@ add_executable(${PROJECT_NAME} "main.cpp"
     limits-test.cpp
     map-test.cpp
     memory-test.cpp
-    observer-test.cpp
     optional-test.cpp
     queue-test.cpp
     stack-test.cpp

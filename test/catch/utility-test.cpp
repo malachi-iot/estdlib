@@ -4,6 +4,11 @@
 #include <estd/internal/utility.h>
 #include <estd/type_traits.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+
 ESTD_FN_HAS_METHOD(void, test_fn1,)
 ESTD_FN_HAS_METHOD(void, test_fn2,)
 ESTD_FN_HAS_METHOD(void, test_fn3,)
@@ -182,3 +187,5 @@ TEST_CASE("utility")
         }
     }
 }
+
+#pragma GCC diagnostic pop

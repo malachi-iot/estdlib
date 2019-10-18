@@ -4,6 +4,8 @@
 #include "../utility.h" // for declval
 #include "../type_traits.h"
 
+#warning This code is deprecated.  Please use 'embr' flavor instead
+
 // inspired by https://github.com/ETLCPP/etl/blob/master/include/etl/observer.h
 
 namespace estd { namespace experimental {

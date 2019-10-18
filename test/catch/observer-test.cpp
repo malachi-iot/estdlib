@@ -3,6 +3,8 @@
 
 #include <catch.hpp>
 
+#warning This code is deprecated and excluded from the unit tests.  Use 'embr' flavor instead
+
 using namespace estd::experimental;
 using namespace estd::experimental::internal;
 
