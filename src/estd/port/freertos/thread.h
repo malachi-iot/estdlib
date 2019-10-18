@@ -15,14 +15,29 @@ namespace estd {
 
 class thread
 {
-    TaskHandle_t th;
+    union
+    {
+        TaskHandle_t th;    // new task
+#ifdef configUSE_TASK_NOTIFICATIONS
+        TaskHandle_t hostTask;
+#else
+        SemaphoreHandle_t semaphore;
+#endif
+    };
 
     template <class Function, class ... Args>
     static void start_thread(void* p)
     {
         auto bound = (internal::bind_type<Function, Args...>*)p;
+        auto bound_inline = std::move(*bound);
 
-        bound->operator ()();
+        //xSemaphoreGive(semaphore);
+
+        // As per https://www.freertos.org/RTOS-task-notifications.html, this is the recommended way for
+        // lightweight notifications
+        xNotifyGive(hostTask);
+
+        bound_inline.operator ()();
     }
 
 protected:
@@ -36,8 +51,19 @@ public:
             std::move(f), 
             std::forward<Args>(args)...);
 
-        th = xTaskCreate(start_thread<Function, Args...>, 
-            "test_task", 4096, NULL, 4, &th);
+        //StaticSemaphore_t semaphoreStorage;
+
+        //semaphore = xSemaphoreCreateBinaryStatic(&semaphoreStorage);
+
+        hostTask = xTaskGetCurrentTaskHandle();
+
+        TaskHandle_t th;
+        BaseType_t status = xTaskCreate(start_thread<Function, Args...>,
+            "test_task", 4096, &binding, 4, &th);
+
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        //xSemaphoreTake(semaphore);
     }
 
     ~thread()
