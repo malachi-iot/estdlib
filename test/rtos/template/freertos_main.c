@@ -288,8 +288,11 @@ void user_init(void)
 #endif
 
 #ifdef CONFIG_WIFI_SSID
+    // TODO: Pretty sure we can do this without a distinct task
     xTaskCreate(wifi_config, "wfcf", 
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+#if ESTD_IDF_VER >= ESTD_IDF_VER_3_1_0
+        3000,
+#elif ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
         2048,
 #else
         512,
