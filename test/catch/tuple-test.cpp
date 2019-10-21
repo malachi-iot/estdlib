@@ -37,4 +37,36 @@ TEST_CASE("tuple")
 
         REQUIRE(dc.val == DefaultConstructor::default_value());
     }
+    SECTION("tuple size")
+    {
+        using namespace estd;
+
+        SECTION("simple type")
+        {
+            tuple<bool, bool, bool> t(true, false, true);
+
+            int sz = sizeof(t);
+
+            REQUIRE(sz == 3);
+        }
+        SECTION("complex empty type")
+        {
+            tuple<EmptyClass, EmptyClass, EmptyClass> t;
+
+            int sz = sizeof(t);
+
+            REQUIRE(sz == 3);
+        }
+        SECTION("intermixed types")
+        {
+            tuple<EmptyClass, Dummy, EmptyClass> t;
+
+            int sz = sizeof(t);
+
+            // on debian x64, this comes out to 32
+            //REQUIRE(sz == 3);
+
+            // TODO: Look into tuple<T&, TArgs...> see if we accidently light that up
+        }
+    }
 }
