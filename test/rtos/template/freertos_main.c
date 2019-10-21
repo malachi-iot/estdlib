@@ -195,7 +195,10 @@ void wifi_config(void *pvParameters)
     wifi_station_connect();
 #endif
 
+// For 3.1 and higher, we initiale wifi inline rather than in parallel
+#if ESTD_IDF_VER < ESTD_IDF_VER_3_1_0
     vTaskDelete( NULL );
+#endif
 }
 #endif
 
@@ -288,16 +291,18 @@ void user_init(void)
 #endif
 
 #ifdef CONFIG_WIFI_SSID
+#if ESTD_IDF_VER >= ESTD_IDF_VER_3_1_0
+    wifi_config(NULL);
+#else
     // TODO: Pretty sure we can do this without a distinct task
     xTaskCreate(wifi_config, "wfcf", 
-#if ESTD_IDF_VER >= ESTD_IDF_VER_3_1_0
-        3000,
-#elif ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
+#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
         2048,
 #else
         512,
 #endif
         NULL, 4, NULL);
+#endif
 #endif
     xTaskCreate(test_task, "test_task", CONFIG_TESTTASK_STACKSIZE, NULL, 4, NULL);
 }

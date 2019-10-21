@@ -49,6 +49,10 @@ constexpr int c_strcmp( char const* lhs, char const* rhs )
 #define ESTD_IDF_VER_3_0_0      ESTD_BUILD_IDF_VER(3, 0, 0, 0)
 #define ESTD_IDF_VER_3_0_3      ESTD_BUILD_IDF_VER(3, 0, 3, 0)
 #define ESTD_IDF_VER_3_1_0      ESTD_BUILD_IDF_VER(3, 1, 0, 0)
+#define ESTD_IDF_VER_3_1_6      ESTD_BUILD_IDF_VER(3, 1, 6, 0)
+#define ESTD_IDF_VER_3_2_0      ESTD_BUILD_IDF_VER(3, 2, 0, 0)
+#define ESTD_IDF_VER_3_3_0      ESTD_BUILD_IDF_VER(3, 3, 0, 0)
+#define ESTD_IDF_VER_4_0_0      ESTD_BUILD_IDF_VER(4, 0, 0, 0)
 
 // current ESP32 versions that I'm working with
 #define ESTD_IDF_VER_3_1_0_1319 ESTD_BUILD_IDF_VER(3, 1, 0, 1319)
