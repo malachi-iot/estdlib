@@ -50,6 +50,11 @@ template< class T > struct remove_reference<T&>  { typedef T type; };
 template< class T > struct remove_reference<T&&> { typedef T type; };
 #endif
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class T >
+using remove_reference_t = typename remove_reference<T>::type;
+#endif
+
 template< class T >
 struct remove_cv {
     typedef typename estd::remove_volatile<typename remove_const<T>::type>::type type;

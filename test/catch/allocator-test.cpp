@@ -10,6 +10,10 @@
 using namespace estd;
 using namespace estd::internal;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 template <class TAllocator>
 struct test_specialization;
 
@@ -213,3 +217,5 @@ TEST_CASE("allocator tests")
         }
     }
 }
+
+#pragma GCC diagnostic pop
