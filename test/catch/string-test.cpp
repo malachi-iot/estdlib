@@ -158,9 +158,14 @@ TEST_CASE("string tests")
 
             layer2::string<4, false> str(s);
 
+            auto size = str.size();
+            auto length = str.length();
+
             // FIX: size comes out to be 0, which is wrong
-            REQUIRE(str.size() == 4);
-            REQUIRE(str.length() == 4);
+            // Needs to use 'dynamic_array_length<TAllocator, false, true>' but instead is using
+            // 'dynamic_array_length<TAllocator, false, false>'
+            REQUIRE(size == 4);
+            REQUIRE(length == 4);
         }
         SECTION("make_string (experimental)")
         {
