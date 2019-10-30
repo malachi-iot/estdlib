@@ -30,6 +30,7 @@ std::ostream& operator <<( std::ostream& os,
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 constexpr const char* test_str = "hello";
+constexpr const char* test_str2 = "hi2u";
 
 
 TEST_CASE("string tests")
@@ -148,6 +149,18 @@ TEST_CASE("string tests")
             REQUIRE(str.size() == 4);
             REQUIRE(strcmp(buf, "hi2u") == 0);
             REQUIRE(str.data() == buf);
+        }
+        SECTION("absolute length")
+        {
+            char s[128];
+
+            strcpy(s, test_str2);
+
+            layer2::string<4, false> str(s);
+
+            // FIX: size comes out to be 0, which is wrong
+            REQUIRE(str.size() == 4);
+            REQUIRE(str.length() == 4);
         }
         SECTION("make_string (experimental)")
         {
