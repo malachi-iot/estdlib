@@ -25,6 +25,15 @@ template<
     //pair(T1& first, T2& second) : first(first), second(second) {}
 };
 
+template <class T1, class T2>
+#ifdef FEATURE_CPP_CONSTEXPR
+constexpr
+#endif
+pair<T1, T2> make_pair(T1 t, T2 u)
+{
+    return pair<T1, T2> { t, u };
+}
+
 /*
 template<class T>
 typename estd::add_rvalue_reference<T>::type declval() */

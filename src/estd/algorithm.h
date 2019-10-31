@@ -68,6 +68,18 @@ OutputIt copy(InputIt first, InputIt last,
     return d_first;
 }
 
+// https://en.cppreference.com/w/cpp/algorithm/copy_n
+// has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
+// iterator unnecessarily?
+template <class InputIt, class Size, class OutputIt>
+OutputIt copy_n(InputIt first, Size count, OutputIt result)
+{
+    while(count--)
+        *result++ = *first++;
+
+    return result;
+}
+
 template<class InputIt, class UnaryPredicate>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
 constexpr
@@ -100,6 +112,19 @@ const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )
 {
     return assert( !comp(hi, lo) ),
         comp(v, lo) ? lo : comp(hi, v) ? hi : v;
+}
+
+// UNTESTED
+template<class InputIt1, class InputIt2>
+#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+constexpr
+#endif
+std::pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+{
+    while (first1 != last1 && *first1 == *first2) {
+        ++first1, ++first2;
+    }
+    return std::make_pair(first1, first2);
 }
 
 }

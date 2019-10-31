@@ -24,4 +24,13 @@ TEST_CASE("algorithm tests")
         // alas, can't do this.  closures are kinda mandatory it seems...
         //estd::find_if(tc1.values.begin(), tc.values.end(), tc1.predicate);
     }
+    SECTION("copy_n")
+    {
+        char buf1[] = "hi2u";
+        char buf2[4] = {0,0,0,0};
+
+        estd::copy_n(buf1, 4, buf2);
+
+        REQUIRE(estd::equal(buf1, &buf1[3], buf2));
+    }
 }
