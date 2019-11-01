@@ -74,9 +74,15 @@ public:
 };
 
 
+// TODO: decouple all these stringbufs so we can have a standalone in_stringbuf
+template <class TString>
+struct stringbuf_base
+{
+    stringbuf_base() {}
+};
 
 template <class TString>
-struct out_stringbuf
+struct out_stringbuf : stringbuf_base<TString>
 {
     typedef typename remove_reference<TString>::type string_type;
     typedef typename string_type::value_type char_type;
@@ -100,12 +106,20 @@ struct out_stringbuf
 
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
-    string_type& str() { return _str; }
+    const string_type& str() const { return _str; }
 };
 
 
 template <class TString>
-struct basic_stringbuf : out_stringbuf<TString>
+struct in_stringbuf
+{
+
+};
+
+template <class TString>
+struct basic_stringbuf :
+        out_stringbuf<TString>,
+        in_stringbuf<TString>
 {
     typedef out_stringbuf<TString> base_type;
     typedef typename base_type::traits_type traits_type;
@@ -133,6 +147,11 @@ struct basic_stringbuf : out_stringbuf<TString>
         base_type::_str.unlock();
         get_pos += orig_count;
         return orig_count;
+    }
+
+    streamsize in_avail() const
+    {
+        return this->_str.length() - get_pos;
     }
 
     int_type sgetc()

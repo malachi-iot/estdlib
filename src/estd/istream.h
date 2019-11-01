@@ -4,7 +4,7 @@
 #include "streambuf.h"
 #include "ios.h"
 //#include "features.h"
-#include "algorithm"
+#include "algorithm.h"
 #include "traits/char_traits.h"
 
 //#include <cassert>
@@ -120,11 +120,11 @@ public:
     // UNTESTED
     streamsize readsome(char_type* s, streamsize count)
     {
-        auto rdbuf = *(this->rdbuf());
+        streambuf_type& rdbuf = *(this->rdbuf());
         // if count > number of available bytes
         // then read only available bytes
         // otherwise read all of count
-        streamsize m = min(count, rdbuf.in_avail());
+        streamsize m = estd::min(count, rdbuf.in_avail());
 
         return rdbuf.sgetn(s, m);
     }
