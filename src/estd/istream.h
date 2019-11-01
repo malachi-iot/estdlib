@@ -266,8 +266,15 @@ public:
 
     //basic_istream(stream_t& stream) : base_t(stream) {}
 
-    template <class _TStream, class ... TArgs>
-    basic_istream(_TStream& stream, TArgs...args) : base_t(stream, args...) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    template <class ... TArgs>
+    basic_istream(TArgs&&...args) :
+        base_t(std::forward<TArgs>(args)...) {}
+
+    basic_istream(streambuf_type&& streambuf) :
+        base_t(std::move(streambuf)) {}
+#endif
+    basic_istream(streambuf_type& streambuf) : base_t(streambuf) {}
 #endif
 };
 

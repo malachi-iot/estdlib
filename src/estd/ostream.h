@@ -46,6 +46,7 @@ class basic_ostream :
         public TBase
 {
     typedef TBase base_t;
+    typedef typename base_t::streambuf_type streambuf_type;
     typedef typename TBase::char_type char_type;
     //typedef experimental::ios_policy policy_type;
     typedef int policy_type;
@@ -183,13 +184,18 @@ public:
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     template <class ...TArgs>
     basic_ostream(TArgs&&...args) : base_t(std::forward<TArgs>(args)...) {}
-#else
+
+    basic_ostream(streambuf_type&& streambuf) :
+        base_t(std::move(streambuf)) {}
+#endif
+    basic_ostream(streambuf_type& streambuf) :
+        base_t(streambuf) {}
+
     template <class TParam1>
     basic_ostream(TParam1& p1) : base_t(p1) {}
 
     template <class TParam1>
     basic_ostream(TParam1* p1) : base_t(p1) {}
-#endif
 #endif
 
 };

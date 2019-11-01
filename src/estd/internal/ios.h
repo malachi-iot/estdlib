@@ -201,11 +201,17 @@ protected:
 #endif
     basic_ios_base(TArgs&&...args) : 
         _rdbuf(std::forward<TArgs>(args)...) {}
-#else
+
+    basic_ios_base(streambuf_type&& streambuf) :
+        _rdbuf(std::move(streambuf))    {}
+#endif
+    basic_ios_base(streambuf_type& streambuf) :
+        _rdbuf(streambuf) {}
+
     template <class TParam1>
     basic_ios_base(TParam1& p1) : _rdbuf(p1)
             {}
-#endif
+
 public:
     streambuf_type* rdbuf()
     { return &_rdbuf; }
@@ -230,14 +236,20 @@ protected:
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
 #endif
-    basic_ios(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
-#else
+    basic_ios(TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...) {}
+
+    basic_ios(streambuf_type&& streambuf) :
+        base_type(std::move(streambuf)) {}
+#endif
+    basic_ios(streambuf_type& streambuf) :
+        base_type(streambuf) {}
+
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
 
     template <class TParam1>
     basic_ios(TParam1* p) : base_type(p) {}
-#endif
 
 public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
