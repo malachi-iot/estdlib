@@ -64,20 +64,21 @@ template <class TBase = test_impl_base>
 class test_impl : TBase
 {
     typedef TBase base_type;
+    typedef test_impl<TBase> this_type;
 
 protected:
     ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, protected_fn1,)
-    ESTD_FN_HAS_PROTECTED_METHOD_EXP(int, protected_fn2,)
+    ESTD_FN_HAS_METHOD(int, protected_fn2,)
 
 public:
     void require_fn1()
     {
-        REQUIRE(has_protected_fn1_method<base_type>::value);
+        REQUIRE(has_protected_fn1_method<test_impl<>>::value);
     }
 
     void require_fn2()
     {
-        REQUIRE(has_protected_fn2_method<base_type>::value);
+        REQUIRE(has_protected_fn2_method<this_type>::value);
     }
 };
 
@@ -188,8 +189,8 @@ TEST_CASE("utility")
         test_impl<> test;
 
         // FIX: Not working yet
-        //test.require_fn1();
-        //test.require_fn2();
+        test.require_fn1();
+        test.require_fn2();
     }
     SECTION("swap")
     {

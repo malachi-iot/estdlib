@@ -27,6 +27,7 @@ template<class TImpl, class TPolicy = void>
 class streambuf : public TImpl
 {
     typedef TImpl base_type;
+    typedef streambuf<TImpl, TPolicy> this_type;
 
 public:
     typedef TPolicy policy_type;
