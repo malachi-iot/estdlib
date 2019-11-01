@@ -336,6 +336,16 @@ TEST_CASE("iostreams")
             // DEBT: Make this non-endian-specific
             REQUIRE(val[0] == 0x04020100);
         }
+        SECTION("ostream usage (complex initialization)")
+        {
+            typedef estd::internal::impl::out_span_streambuf<uint32_t> sb_impl_type;
+            typedef estd::internal::streambuf<sb_impl_type> sb_type;
+
+            // Successfully cascades down 'val, 32' all the way down to out_span_streambuf
+            estd::internal::basic_ostream<sb_type> out(val, 32);
+
+            REQUIRE(out.rdbuf()->value().size() == 32);
+        }
     }
     SECTION("spitting out various strings")
     {
