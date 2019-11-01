@@ -52,6 +52,35 @@ public:
     ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, test_fn6,)
 };
 
+
+class test_impl_base
+{
+protected:
+    void protected_fn1() {}
+    int protected_fn2() { return 0; }
+};
+
+template <class TBase = test_impl_base>
+class test_impl : TBase
+{
+    typedef TBase base_type;
+
+protected:
+    ESTD_FN_HAS_PROTECTED_METHOD_EXP(void, protected_fn1,)
+    ESTD_FN_HAS_PROTECTED_METHOD_EXP(int, protected_fn2,)
+
+public:
+    void require_fn1()
+    {
+        REQUIRE(has_protected_fn1_method<base_type>::value);
+    }
+
+    void require_fn2()
+    {
+        REQUIRE(has_protected_fn2_method<base_type>::value);
+    }
+};
+
 using namespace estd::internal;
 
 
@@ -153,6 +182,14 @@ TEST_CASE("utility")
         REQUIRE(has_test_tag<test_class_1>::value);
         REQUIRE(has_test_tag<test_class_2>::value);
         REQUIRE(has_test_tag<test_class_4>::value);
+    }
+    SECTION("protected 1")
+    {
+        test_impl<> test;
+
+        // FIX: Not working yet
+        //test.require_fn1();
+        //test.require_fn2();
     }
     SECTION("swap")
     {
