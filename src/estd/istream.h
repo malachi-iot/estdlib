@@ -55,6 +55,9 @@ class basic_istream : public
 
     inline int_type standard_peek()
     {
+#ifdef FEATURE_IOS_GCOUNT
+        _gcount = 0;
+#endif
         return this->good() ? this->rdbuf()->sgetc() : traits_type::eof();
     }
 
@@ -113,6 +116,9 @@ public:
 public:
     int_type get()
     {
+#ifdef FEATURE_IOS_GCOUNT
+        _gcount = 1;
+#endif
         return this->rdbuf()->sbumpc();
     }
 
@@ -134,6 +140,9 @@ public:
         // otherwise read all of count
         streamsize m = estd::min(count, rdbuf.in_avail());
 
+#ifdef FEATURE_IOS_GCOUNT
+        _gcount = m;
+#endif
         return rdbuf.sgetn(s, m);
     }
 
