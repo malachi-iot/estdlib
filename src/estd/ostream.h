@@ -48,6 +48,8 @@ class basic_ostream :
     typedef TBase base_t;
     typedef typename base_t::streambuf_type streambuf_type;
     typedef typename TBase::char_type char_type;
+    typedef typename streambuf_type::pos_type pos_type;
+    typedef typename streambuf_type::off_type off_type;
     //typedef experimental::ios_policy policy_type;
     typedef int policy_type;
 
@@ -141,6 +143,12 @@ public:
             this->setstate(base_t::badbit);
 
         return *this;
+    }
+
+    // UNTESTED
+    __ostream_type& seekp(off_type off, ios_base::seekdir dir)
+    {
+        this->rdbuf()->pubseekoff(off, dir, ios_base::out);
     }
 
     // When the time comes, these will replace the old virtual ones

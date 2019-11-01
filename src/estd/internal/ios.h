@@ -56,6 +56,13 @@ private:
 protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
 
+    // remove state, not official call
+    // UNTESTED
+    void unsetstate(iostate state)
+    {
+        _iostate &= ~state;
+    }
+
 public:
     ios_base() : fmtfl(dec), _iostate(goodbit) {}
 

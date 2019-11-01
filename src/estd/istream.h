@@ -49,6 +49,7 @@ class basic_istream : public
 
     typedef typename base_t::char_type char_type;
     typedef typename remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::off_type off_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
@@ -115,9 +116,16 @@ public:
         return this->rdbuf()->sbumpc();
     }
 
+    // UNTESTED
+    __istream_type& seekg(off_type off, ios_base::seekdir dir)
+    {
+        this->unsetstate(ios_base::failbit);
+        this->rdbuf()->pubseekoff(off, dir, ios_base::in);
+    }
+
 
     // nonblocking read
-    // UNTESTED
+    // Only lightly tested
     streamsize readsome(char_type* s, streamsize count)
     {
         streambuf_type& rdbuf = *(this->rdbuf());
