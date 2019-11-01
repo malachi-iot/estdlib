@@ -220,10 +220,12 @@ protected:
     // NOTE: currently undefined if pos ends up outside boundaries
     // NOTE: consider changing dir and which to template non-type parameters/compile
     // time constants
-    pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
+    pos_type seekoff(off_type off, ios_base::seekdir way, ios_base::openmode which)
     {
         // openmode MUST include 'out' in this instance, otherwise error or ignore
-        switch(dir)
+        if(!(which & ios_base::out)) return -1;
+
+        switch(way)
         {
             case ios_base::cur:
                 pos += off;
@@ -231,6 +233,11 @@ protected:
 
             case ios_base::beg:
                 pos = off;
+                break;
+
+            case ios_base::end:
+                // UNTESTED
+                pos = out().size_bytes() + off;
                 break;
         }
 

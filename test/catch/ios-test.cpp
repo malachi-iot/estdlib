@@ -322,16 +322,19 @@ TEST_CASE("iostreams")
             sb.sputc(2);
             sb.sputc(3);
 
+            // DEBT: Make this non-endian-specific
             REQUIRE(val[0] == 0x03020100);
 
             int sz = sizeof(sb);
 
             REQUIRE(sz == sizeof(estd::span<uint32_t>) + sizeof(size_t));
 
-            // FIX: Not deducing to underlying seekoff because of protected/public
-            // scoping glitch (out_span_streambuf::seekoff needs to be public for
-            // this to work)
-            sb.pubseekoff(1, estd::ios_base::cur, estd::ios_base::out);
+            sb.pubseekoff(-1, estd::ios_base::cur);
+
+            sb.sputc(4);
+
+            // DEBT: Make this non-endian-specific
+            REQUIRE(val[0] == 0x04020100);
         }
     }
     SECTION("spitting out various strings")

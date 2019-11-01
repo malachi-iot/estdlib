@@ -260,28 +260,28 @@ public:
     // to reflect characters are available
     //streamsize in_avail();
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<!has_sync_method<T>::value, int>::type
     pubsync()
     {
         return 0;
     }
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<has_sync_method<T>::value, int>::type
     pubsync()
     {
         return this->sync();
     }
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<!has_seekpos_method<T>::value, int_type>::type
     pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return -1;
     }
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<has_seekpos_method<T>::value, int_type>::type
     pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
     {
@@ -289,16 +289,16 @@ public:
     }
 
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<
             !has_seekoff_method<T>::value &&
             !has_pbump_method<T>::value, pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return -1;
     }
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<
             !has_seekoff_method<T>::value &&
             has_pbump_method<T>::value, pos_type>::type
@@ -309,11 +309,11 @@ public:
         return -1;
     }
 
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<has_seekoff_method<T>::value, pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
+    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
-        return this->seekoff(off, dir, which);
+        return this->seekoff(off, way, which);
     }
 };
 
