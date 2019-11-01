@@ -19,7 +19,7 @@
 //     i.e. it seems to specify 'using namespace std'
 //#include <algorithm> // for min function
 
-#define FEATURE_IOS_GCOUNT
+#define FEATURE_ESTD_IOS_GCOUNT
 
 namespace estd {
 
@@ -55,7 +55,7 @@ class basic_istream : public
 
     inline int_type standard_peek()
     {
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = 0;
 #endif
         return this->good() ? this->rdbuf()->sgetc() : traits_type::eof();
@@ -90,7 +90,7 @@ class basic_istream : public
     }
 #endif
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
     streamsize _gcount = 0;
 
     typedef basic_istream<TStreambuf, TBase> __istream_type;
@@ -116,7 +116,7 @@ public:
 public:
     int_type get()
     {
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = 1;
 #endif
         return this->rdbuf()->sbumpc();
@@ -140,7 +140,7 @@ public:
         // otherwise read all of count
         streamsize m = estd::min(count, rdbuf.in_avail());
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = m;
 #endif
         return rdbuf.sgetn(s, m);
@@ -155,7 +155,7 @@ public:
             // TODO: Consider setting _gcount here to what *was* returned
             this->setstate(base_t::eofbit);
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = n;
 #endif
 
@@ -167,7 +167,7 @@ public:
     {
         streambuf_type* stream = this->rdbuf();
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = 0;
 #endif
 
@@ -188,7 +188,7 @@ public:
             }
 
             *s++ = c;
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
             _gcount++;
 #endif
         }
@@ -261,7 +261,7 @@ public:
                 return *this;
             }
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
             _gcount++;
 #endif
         }
@@ -285,7 +285,7 @@ public:
             }
             else if(ch == delim) break;
 
-#ifdef FEATURE_IOS_GCOUNT
+#ifdef FEATURE_ESTD_IOS_GCOUNT
             _gcount++;
 #endif
         }
