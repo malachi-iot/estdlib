@@ -152,7 +152,12 @@ public:
         // so that we don't inline this (and other read/write operations like it)
         // all over the place
         if(this->rdbuf()->sgetn(s, n) != n)
+            // TODO: Consider setting _gcount here to what *was* returned
             this->setstate(base_t::eofbit);
+
+#ifdef FEATURE_IOS_GCOUNT
+        _gcount = n;
+#endif
 
         return *this;
     }
@@ -246,19 +251,43 @@ public:
     // delim test is disabled if delim is default value, which would be EOF
     basic_istream& ignore(streamsize count = 1)
     {
-        while(count--) get();
+        while(count--)
+        {
+            int_type ch = get();
+
+            if(ch == traits_type::eof())
+            {
+                this->setstate(ios_base::eofbit);
+                return *this;
+            }
+
+#ifdef FEATURE_IOS_GCOUNT
+            _gcount++;
+#endif
+        }
         return *this;
     }
 
     // http://en.cppreference.com/w/cpp/io/basic_istream/ignore
     basic_istream& ignore(streamsize count, const int_type delim)
     {
+        // "This [delimiter] test is disabled if delim is Traits::eof()"
         if(delim == traits_type::eof()) return ignore(count);
 
         while(count--)
         {
             int_type ch = get();
-            if(ch == delim) break;
+
+            if(ch == traits_type::eof())
+            {
+                this->setstate(ios_base::eofbit);
+                break;
+            }
+            else if(ch == delim) break;
+
+#ifdef FEATURE_IOS_GCOUNT
+            _gcount++;
+#endif
         }
         return *this;
     }
