@@ -68,6 +68,8 @@ public:
     ESTD_FN_HAS_METHOD(void, pbump, int)
     ESTD_FN_HAS_METHOD(void, gbump, int)
 
+    ESTD_FN_HAS_METHOD(streamsize, showmanyc,);
+
 protected:
 
     static CONSTEXPR bool has_overflow_method_ = has_overflow_method<base_type>::value;
@@ -274,6 +276,20 @@ public:
     // NOTE: this deviates from spec in that it won't wait for CR, for example,
     // to reflect characters are available
     //streamsize in_avail();
+    template <class T = this_type>
+    typename enable_if<!has_showmanyc_method<T>::value, streamsize>::type
+    in_avail()
+    {
+        return 0;
+    }
+
+    template <class T = this_type>
+    typename enable_if<has_showmanyc_method<T>::value, streamsize>::type
+    in_avail()
+    {
+        return base_type::showmanyc();
+    }
+
 
     template <class T = this_type>
     typename enable_if<!has_sync_method<T>::value, int>::type
