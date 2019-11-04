@@ -336,6 +336,8 @@ struct in_span_streambuf :
     const span_type& in() const { return base_type::value(); }
 
     pos_type pos() const { return base_pos_type::pos(); }
+    // NOTE: Needed for has_pos_method to work
+    void pos(pos_type p) { base_pos_type::pos(p); }
 
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
         base_type(copy_from)
@@ -354,8 +356,6 @@ private:
     streamsize remaining() const { return in().size() - pos(); }
 
 protected:
-    // NOTE: Needed for has_pos_method to work
-    void pos(pos_type p) { base_pos_type::pos(p); }
 
     streamsize showmanyc() const
     {

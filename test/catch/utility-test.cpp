@@ -82,6 +82,38 @@ public:
     }
 };
 
+template <class T>
+struct test_template_base
+{
+    typedef T value_type;
+
+protected:
+    T value() const { return T(); }
+    void value(T v) {}
+};
+
+
+struct test_overload
+{
+    typedef int value_type;
+
+    // Enabling this overload kills has_value_method/has_value_method_2 presumably
+    // because it greedily notices that the overload DOES NOT match the requested signature
+    //value_type value() const { return value_type(); }
+    void value(value_type v) {}
+
+    ESTD_FN_HAS_METHOD(void, value, value_type);
+
+    template <class T> struct has_value_method_2 : estd::internal::has_member_base
+    {
+        ESTD_FN_HAS_METHOD_EXP(void, value, value_type);
+
+        static CONSTEXPR int sz = sizeof(test_has_value_<T>(nullptr));
+        static CONSTEXPR bool value = sizeof(test_has_value_<T>(nullptr)) == sizeof(yes);
+    };
+};
+
+
 using namespace estd::internal;
 
 
@@ -127,6 +159,13 @@ TEST_CASE("utility")
         //typedef has_member_base::reallyHas<fn_2_type, &test_class_2::test_fn1> has_1;
         //typedef reallyHas2<fn_2_type, &test_class_2::test_fn1> has_1;
         typedef has_member_base::reallyHas<fn_2_type, &test_class_2::test_fn2> has_2;
+
+        int sz_no = sizeof(estd::internal::has_member_base::no);
+        int sz_yes = sizeof(estd::internal::has_member_base::yes);
+
+        // NOTE: Odd side effects caused sz_yes to become 2 sometimes
+        REQUIRE(sz_no == 2);
+        REQUIRE(sz_yes == 1);
     }
     SECTION("class 1")
     {
@@ -188,9 +227,18 @@ TEST_CASE("utility")
     {
         test_impl<> test;
 
-        // FIX: Not working yet
         test.require_fn1();
         test.require_fn2();
+    }
+    SECTION("overload")
+    {
+        typedef test_overload t;
+
+        //REQUIRE(t::has_value_method<t>::value);
+
+        int sz = t::has_value_method_2<t>::sz;
+        //REQUIRE(sz == 2);
+        REQUIRE(t::has_value_method_2<t>::value);
     }
     SECTION("swap")
     {
