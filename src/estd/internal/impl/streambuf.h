@@ -274,15 +274,20 @@ protected:
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
-template <class T, std::ptrdiff_t Extent = -1,
+template <class T,
+        class TCharTraits =  std::char_traits<T>,
+        std::ptrdiff_t Extent = -1,
         class TBase = experimental::instance_provider<estd::span<T, Extent> > >
 struct in_span_streambuf : TBase
 {
     typedef TBase base_type;
+
+    typedef TCharTraits traits_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
 
-    span_type& in() { return base_type::value(); }
+    // FIX: dropping const on returned span_type, not recommended
+    span_type& in() const { return (span_type&) base_type::value(); }
 
     size_t pos;
 
@@ -295,9 +300,21 @@ struct in_span_streambuf : TBase
 
     }
 
-    char_type* eback() const { return static_cast<char_type*>(in().data()); }
+    char_type* eback() const { return reinterpret_cast<char_type*>(in().data()); }
     char_type* gptr() const { return eback() + pos; }
     char_type* egptr() const { return eback() + in().size_bytes(); }
+
+private:
+    streamsize remaining() { return in().size_bytes() - pos; }
+
+protected:
+    streamsize xsgetn(char_type* s, streamsize count)
+    {
+        // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
+        streamsize c = estd::min(count, remaining());
+        estd::copy_n(gptr(), c, s);
+        return c;
+    }
 };
 
 

@@ -359,6 +359,19 @@ TEST_CASE("iostreams")
             REQUIRE(out.rdbuf()->value().size() == 32);
         }
     }
+    SECTION("in_span_streambuf")
+    {
+        char buf[128];
+
+        typedef estd::internal::impl::in_span_streambuf<char> sb_impl_type;
+        typedef estd::internal::streambuf<sb_impl_type> sb_type;
+
+        sb_type sb(raw_str);
+
+        estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));
+
+        REQUIRE(sb.eback() == raw_str);
+    }
     SECTION("spitting out various strings")
     {
         experimental::ostringstream<256> out;
