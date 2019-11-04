@@ -132,6 +132,21 @@ public:
     streambuf(stream_type&& move_from) : stream(std::move(move_from)) {}
 #endif */
 
+
+    template <class T = this_type>
+    typename enable_if<has_underflow_method<T>::value, int_type>::type
+    underflow(int_type ch = traits_type::eof())
+    {
+        return base_type::underflow();
+    }
+
+    template <class T = this_type>
+    typename enable_if<!has_underflow_method<T>::value, int_type>::type
+    underflow(int_type = traits_type::eof())
+    {
+        return traits_type::eof();
+    }
+
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls
     streamsize sgetn(char_type *s, streamsize count)
