@@ -380,6 +380,10 @@ TEST_CASE("iostreams")
             REQUIRE(sb.sbumpc() == raw_str[1]);
             REQUIRE(sb.sbumpc() == raw_str[2]);
         }
+        SECTION("pubseekoff")
+        {
+            //sb.pubseekoff(5, ios_base::cur);
+        }
     }
     SECTION("spitting out various strings")
     {

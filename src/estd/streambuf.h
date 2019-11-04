@@ -36,13 +36,13 @@ public:
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
+    typedef typename traits_type::pos_type pos_type;
 
     // FIX: would use conditional to set these up, but conditional
     // always compile-time peers into both classes, so these are dormant right now
     ESTD_FN_HAS_TYPEDEF_EXP(pos_type)
     ESTD_FN_HAS_TYPEDEF_EXP(off_type)
 
-    typedef int_type pos_type;
     typedef int_type off_type;
 
     // custom estd nonblocking variants
@@ -69,6 +69,9 @@ public:
     ESTD_FN_HAS_METHOD(void, gbump, int)
 
     ESTD_FN_HAS_METHOD(streamsize, showmanyc,);
+
+    // TODO: Make a way to do this for overloaded versions of a function
+    ESTD_FN_HAS_METHOD(void, pos, pos_type);
 
 protected:
 
@@ -323,7 +326,9 @@ public:
     template <class T = this_type>
     typename enable_if<
             !has_seekoff_method<T>::value &&
-            !has_pbump_method<T>::value, pos_type>::type
+            !has_gbump_method<T>::value &&
+            !has_pbump_method<T>::value &&
+            !has_pos_method<T>::value, pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return -1;
@@ -332,12 +337,42 @@ public:
     template <class T = this_type>
     typename enable_if<
             !has_seekoff_method<T>::value &&
-            has_pbump_method<T>::value, pos_type>::type
+            has_pbump_method<T>::value &&
+            !has_pos_method<T>::value, pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         // TODO: assert that dir = cur and which = ios_base::out
         this->pbump(off);
         return -1;
+    }
+
+    // clunky method which only works for in-only pos-based
+    // streambufs to auto-generate pubseekoff
+    template <class T = this_type>
+    typename enable_if<
+            !has_seekoff_method<T>::value &&
+            has_gbump_method<T>::value &&
+            !has_pbump_method<T>::value &&
+            has_pos_method<T>::value, pos_type>::type
+    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        if(!(which & ios_base::in)) return -1;
+
+        switch(way)
+        {
+            case ios_base::cur:
+                this->gbump(off);
+                break;
+
+            case ios_base::beg:
+                pos(off);
+                break;
+
+            case ios_base::end:
+                // UNTESTED
+                this->pos(this->eback() - this->pos());
+                break;
+        }
     }
 
     template <class T = this_type>
