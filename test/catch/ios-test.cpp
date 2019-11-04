@@ -368,6 +368,11 @@ TEST_CASE("iostreams")
 
         sb_type sb(raw_str);
 
+        SECTION("has methods")
+        {
+            REQUIRE(sb_type::has_gbump_method<sb_type>::value);
+            REQUIRE(sb_type::has_pos_method<sb_type>::value);
+        }
         SECTION("sgetn")
         {
             estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));

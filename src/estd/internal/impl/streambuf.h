@@ -188,10 +188,10 @@ protected:
     void pos(pos_type p) { _pos = p; }
 };
 
-template <typename TPos>
-struct in_pos_streambuf_base : pos_streambuf_base<TPos>
+template <typename TCharTraits>
+struct in_pos_streambuf_base : pos_streambuf_base<typename TCharTraits::pos_type>
 {
-    typedef pos_streambuf_base<TPos> base_type;
+    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
     typedef typename base_type::pos_type pos_type;
 
     in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
@@ -320,10 +320,10 @@ template <class TChar,
         std::ptrdiff_t Extent = -1,
         class TBase = experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
-        in_pos_streambuf_base<int>,
+        in_pos_streambuf_base<TCharTraits>,
         TBase
 {
-    typedef in_pos_streambuf_base<int> base_pos_type;
+    typedef in_pos_streambuf_base<TCharTraits> base_pos_type;
     typedef TBase base_type;
 
     typedef TCharTraits traits_type;
@@ -354,6 +354,9 @@ private:
     streamsize remaining() const { return in().size() - pos(); }
 
 protected:
+    // NOTE: Needed for has_pos_method to work
+    void pos(pos_type p) { base_pos_type::pos(p); }
+
     streamsize showmanyc() const
     {
         streamsize r = remaining();
@@ -367,7 +370,7 @@ protected:
         // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
         streamsize c = estd::min(count, remaining());
         estd::copy_n(gptr(), c, s);
-        gbump(c);
+        this->gbump(c);
         return c;
     }
 

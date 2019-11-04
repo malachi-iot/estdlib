@@ -338,7 +338,9 @@ public:
     typename enable_if<
             !has_seekoff_method<T>::value &&
             has_pbump_method<T>::value &&
-            !has_pos_method<T>::value, pos_type>::type
+            !has_gbump_method<T>::value &&
+            !has_pos_method<T>::value,
+            pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         // TODO: assert that dir = cur and which = ios_base::out
