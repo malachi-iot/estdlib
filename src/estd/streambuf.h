@@ -193,7 +193,7 @@ public:
     typename enable_if<!has_sputc_method<T>::value && !has_spostc_method<T>::value, int_type>::type
     sputc(char_type ch)
     {
-        bool success = sputn(&ch, sizeof(ch)) == sizeof(ch);
+        bool success = sputn(&ch, 1) == 1;
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
@@ -227,7 +227,7 @@ public:
     {
         char_type ch;
 
-        bool success = sgetn(&ch, sizeof(ch)) == sizeof(ch);
+        bool success = sgetn(&ch, 1) == 1;
 
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }

@@ -286,6 +286,7 @@ struct in_span_streambuf : TBase
     typedef TCharTraits traits_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
+    typedef typename traits_type::int_type int_type;
 
     const span_type& in() const { return base_type::value(); }
 
@@ -331,6 +332,32 @@ protected:
         estd::copy_n(gptr(), c, s);
         gbump(c);
         return c;
+    }
+
+public:
+    // NOTE: This would preferably not be in impl part
+    int_type sgetc()
+    {
+        // NOTE: non-span versions would call onto underflow here
+        // however, for a span, underflow never will fetch a new buffer so
+        // we don't do it
+        if(remaining() == 0) return traits_type::eof();
+
+        int_type ch = traits_type::to_int_type(*gptr());
+
+        return ch;
+    }
+
+    // NOTE: This would preferably not be in impl part
+    int_type sbumpc()
+    {
+        int_type ch = sgetc();
+
+        if(ch == traits_type::eof()) return traits_type::eof();
+
+        pos++;
+
+        return ch;
     }
 };
 

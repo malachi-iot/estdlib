@@ -368,9 +368,18 @@ TEST_CASE("iostreams")
 
         sb_type sb(raw_str);
 
-        estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));
+        SECTION("sgetn")
+        {
+            estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));
 
-        REQUIRE(sb.eback() == raw_str);
+            REQUIRE(sb.eback() == raw_str);
+        }
+        SECTION("sbumpc")
+        {
+            REQUIRE(sb.sbumpc() == raw_str[0]);
+            REQUIRE(sb.sbumpc() == raw_str[1]);
+            REQUIRE(sb.sbumpc() == raw_str[2]);
+        }
     }
     SECTION("spitting out various strings")
     {
