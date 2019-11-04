@@ -173,6 +173,46 @@ struct basic_stringbuf :
     char_type* gptr() { return base_type::_str.data() + get_pos; }
 };
 
+template <typename TPos>
+struct pos_streambuf_base
+{
+    typedef TPos pos_type;
+
+    pos_type _pos;
+
+    pos_streambuf_base(pos_type pos) : _pos(pos) {}
+
+    pos_type pos() const { return _pos; }
+
+protected:
+    void pos(pos_type p) { _pos = p; }
+};
+
+template <typename TPos>
+struct in_pos_streambuf_base : pos_streambuf_base<TPos>
+{
+    typedef pos_streambuf_base<TPos> base_type;
+    typedef typename base_type::pos_type pos_type;
+
+    in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+
+protected:
+    void gbump(int count) { this->_pos += count; }
+};
+
+
+template <typename TPos>
+struct out_pos_streambuf_base : pos_streambuf_base<TPos>
+{
+    typedef pos_streambuf_base<TPos> base_type;
+    typedef typename base_type::pos_type pos_type;
+
+    out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+
+protected:
+    void pbump(int count) { this->pos += count; }
+};
+
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
@@ -275,28 +315,30 @@ protected:
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
-template <class T,
-        class TCharTraits =  std::char_traits<T>,
+template <class TChar,
+        class TCharTraits =  std::char_traits<TChar>,
         std::ptrdiff_t Extent = -1,
-        class TBase = experimental::instance_provider<estd::span<T, Extent> > >
-struct in_span_streambuf : TBase
+        class TBase = experimental::instance_provider<estd::span<TChar, Extent> > >
+struct in_span_streambuf :
+        in_pos_streambuf_base<int>,
+        TBase
 {
+    typedef in_pos_streambuf_base<int> base_pos_type;
     typedef TBase base_type;
 
     typedef TCharTraits traits_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
     typedef typename traits_type::int_type int_type;
+    typedef typename base_pos_type::pos_type pos_type;
+    typedef TChar char_type;
 
     const span_type& in() const { return base_type::value(); }
 
-    size_t pos;
+    pos_type pos() const { return base_pos_type::pos(); }
 
-    typedef char char_type;
-
-    in_span_streambuf(const estd::span<T, Extent>& copy_from) :
-        base_type(copy_from),
-        pos(0)
+    in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
+        base_type(copy_from)
     {
 
     }
@@ -305,18 +347,13 @@ struct in_span_streambuf : TBase
     char_type* eback() const
     { return reinterpret_cast<char_type*>(((span_type&) in()).data()); }
 
-    char_type* gptr() const { return eback() + pos; }
+    char_type* gptr() const { return eback() + pos(); }
     char_type* egptr() const { return eback() + in().size(); }
 
 private:
-    streamsize remaining() const { return in().size() - pos; }
+    streamsize remaining() const { return in().size() - pos(); }
 
 protected:
-    void gbump(int count)
-    {
-        pos += count;
-    }
-
     streamsize showmanyc() const
     {
         streamsize r = remaining();
@@ -355,7 +392,7 @@ public:
 
         if(ch == traits_type::eof()) return traits_type::eof();
 
-        pos++;
+        this->gbump(1);
 
         return ch;
     }
