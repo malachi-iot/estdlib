@@ -8,10 +8,9 @@
 
 namespace estd {
 
-// C++ spec actually defines streamsize as signed to accomodate some streambuf operations
-// which we don't support, so I'm gonna make them unsigned
-typedef uint16_t streamoff;
-typedef uint16_t streamsize;
+// TODO: use specific 16/32/64 bit versions depending on architecture
+typedef int streamoff;
+typedef int streamsize;
 
 class ios_base
 {
