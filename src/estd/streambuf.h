@@ -70,8 +70,8 @@ public:
 
     ESTD_FN_HAS_METHOD(streamsize, showmanyc,);
 
-    // TODO: Make a way to do this for overloaded versions of a function
-    ESTD_FN_HAS_METHOD(void, pos, pos_type);
+    // FIX: Make a way to do this for overloaded versions of a function, and use just pos()
+    ESTD_FN_HAS_METHOD(pos_type, get_pos,);
 
 protected:
 
@@ -328,7 +328,7 @@ public:
             !has_seekoff_method<T>::value &&
             !has_gbump_method<T>::value &&
             !has_pbump_method<T>::value &&
-            !has_pos_method<T>::value, pos_type>::type
+            !has_get_pos_method<T>::value, pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return -1;
@@ -339,7 +339,7 @@ public:
             !has_seekoff_method<T>::value &&
             has_pbump_method<T>::value &&
             !has_gbump_method<T>::value &&
-            !has_pos_method<T>::value,
+            !has_get_pos_method<T>::value,
             pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
     {
@@ -355,7 +355,7 @@ public:
             !has_seekoff_method<T>::value &&
             has_gbump_method<T>::value &&
             !has_pbump_method<T>::value &&
-            has_pos_method<T>::value, pos_type>::type
+            has_get_pos_method<T>::value, pos_type>::type
     pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         if(!(which & ios_base::in)) return -1;
@@ -367,14 +367,17 @@ public:
                 break;
 
             case ios_base::beg:
-                pos(off);
+                this->pos(off);
                 break;
 
             case ios_base::end:
                 // UNTESTED
-                this->pos(this->eback() - this->pos());
+                pos_type buffer_size = this->egptr() - this->eback();
+                this->pos(buffer_size - off);
                 break;
         }
+
+        return this->pos();
     }
 
     template <class T = this_type>

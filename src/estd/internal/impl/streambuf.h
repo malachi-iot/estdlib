@@ -184,6 +184,9 @@ struct pos_streambuf_base
 
     pos_type pos() const { return _pos; }
 
+    // FIX: Need this because ESTD_FN_HAS_METHOD falls on its face for detecting overloaded methods
+    pos_type get_pos() const { return pos(); }
+
 protected:
     void pos(pos_type p) { _pos = p; }
 };

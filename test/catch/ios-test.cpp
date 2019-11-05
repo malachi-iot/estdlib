@@ -371,7 +371,7 @@ TEST_CASE("iostreams")
         SECTION("has methods")
         {
             REQUIRE(sb_type::has_gbump_method<sb_type>::value);
-            //REQUIRE(sb_type::has_pos_method<sb_type>::value);
+            REQUIRE(sb_type::has_get_pos_method<sb_type>::value);
         }
         SECTION("sgetn")
         {
@@ -387,7 +387,13 @@ TEST_CASE("iostreams")
         }
         SECTION("pubseekoff")
         {
-            //sb.pubseekoff(5, ios_base::cur);
+            int new_pos;
+
+            new_pos = sb.pubseekoff(5, ios_base::cur);
+            REQUIRE(new_pos == 5);
+            new_pos = sb.pubseekoff(5, ios_base::cur);
+            REQUIRE(new_pos == 10);
+            REQUIRE(sb.sgetc() == raw_str[new_pos]);
         }
     }
     SECTION("spitting out various strings")
