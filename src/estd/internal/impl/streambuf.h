@@ -39,6 +39,48 @@ struct layer1_queue_policy
     typedef estd::layer1::deque<T, N> queue_type;
 };
 
+template <typename TPos>
+struct pos_streambuf_base
+{
+    typedef TPos pos_type;
+
+    pos_type _pos;
+
+    pos_streambuf_base(pos_type pos) : _pos(pos) {}
+
+    pos_type pos() const { return _pos; }
+
+    // FIX: Need this because ESTD_FN_HAS_METHOD falls on its face for detecting overloaded methods
+    pos_type get_pos() const { return pos(); }
+
+protected:
+    void pos(pos_type p) { _pos = p; }
+};
+
+template <typename TCharTraits>
+struct in_pos_streambuf_base : pos_streambuf_base<typename TCharTraits::pos_type>
+{
+    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
+    typedef typename base_type::pos_type pos_type;
+
+    in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+
+protected:
+    void gbump(int count) { this->_pos += count; }
+};
+
+
+template <typename TPos>
+struct out_pos_streambuf_base : pos_streambuf_base<TPos>
+{
+    typedef pos_streambuf_base<TPos> base_type;
+    typedef typename base_type::pos_type pos_type;
+
+    out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+
+protected:
+    void pbump(int count) { this->pos += count; }
+};
 
 // EXPERIMENTAL
 // but I don't expect API to change once it's settled, so not marking as experimental
@@ -171,50 +213,10 @@ struct basic_stringbuf :
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
     char_type* gptr() { return base_type::_str.data() + get_pos; }
+
+    void gbump(int n) { get_pos += n; }
 };
 
-template <typename TPos>
-struct pos_streambuf_base
-{
-    typedef TPos pos_type;
-
-    pos_type _pos;
-
-    pos_streambuf_base(pos_type pos) : _pos(pos) {}
-
-    pos_type pos() const { return _pos; }
-
-    // FIX: Need this because ESTD_FN_HAS_METHOD falls on its face for detecting overloaded methods
-    pos_type get_pos() const { return pos(); }
-
-protected:
-    void pos(pos_type p) { _pos = p; }
-};
-
-template <typename TCharTraits>
-struct in_pos_streambuf_base : pos_streambuf_base<typename TCharTraits::pos_type>
-{
-    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
-    typedef typename base_type::pos_type pos_type;
-
-    in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
-
-protected:
-    void gbump(int count) { this->_pos += count; }
-};
-
-
-template <typename TPos>
-struct out_pos_streambuf_base : pos_streambuf_base<TPos>
-{
-    typedef pos_streambuf_base<TPos> base_type;
-    typedef typename base_type::pos_type pos_type;
-
-    out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
-
-protected:
-    void pbump(int count) { this->pos += count; }
-};
 
 
 // just the fundamental pieces, overflow/sync device handling will have to
@@ -387,18 +389,6 @@ public:
         if(remaining() == 0) return traits_type::eof();
 
         int_type ch = traits_type::to_int_type(*gptr());
-
-        return ch;
-    }
-
-    // NOTE: This would preferably not be in impl part
-    int_type sbumpc()
-    {
-        int_type ch = sgetc();
-
-        if(ch == traits_type::eof()) return traits_type::eof();
-
-        this->gbump(1);
 
         return ch;
     }

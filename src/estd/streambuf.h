@@ -215,7 +215,7 @@ public:
 
 
     // Do SFINAE and call TImpl version if present
-    template <class T = base_type>
+    template <class T = this_type>
     typename enable_if<has_sbumpc_method<T>::value, int_type>::type
     sbumpc()
     {
@@ -224,8 +224,11 @@ public:
 
     // TODO: *possibly* implement underflow, if I like it...
     // Don't think I made this one quite right...
-    template <class T = base_type>
-    typename enable_if<!has_sbumpc_method<T>::value, int_type>::type
+    template <class T = this_type>
+    typename enable_if<
+            !has_sbumpc_method<T>::value &&
+            !has_sgetc_method<T>::value,
+            int_type>::type
     sbumpc()
     {
         char_type ch;
@@ -233,6 +236,24 @@ public:
         bool success = sgetn(&ch, 1) == 1;
 
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
+    }
+
+    // TODO: *possibly* implement underflow, if I like it...
+    // Don't think I made this one quite right...
+    template <class T = this_type>
+    typename enable_if<
+            !has_sbumpc_method<T>::value &&
+            has_sgetc_method<T>::value,
+            int_type>::type
+    sbumpc()
+    {
+        int_type ch = this->sgetc();
+
+        if(ch == traits_type::eof()) return traits_type::eof();
+
+        this->gbump(1);
+
+        return ch;
     }
 
     // TODO: sgetc is actually more of a wrapper around underflow, who
