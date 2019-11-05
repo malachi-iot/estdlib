@@ -393,8 +393,8 @@ public:
 
             case ios_base::end:
                 // UNTESTED
-                pos_type buffer_size = this->egptr() - this->eback();
-                this->pos(buffer_size - off);
+                off_type buffer_size = this->egptr() - this->eback();
+                this->pos(buffer_size + off);
                 break;
         }
 
