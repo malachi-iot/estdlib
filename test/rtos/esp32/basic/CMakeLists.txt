@@ -8,11 +8,11 @@ cmake_minimum_required(VERSION 3.5)
 
 set(EXTRA_COMPONENT_DIRS "components-esp-idf-3.3")
 
-set(_ESTDLIB_DIR ../../../..)
-get_filename_component(__ESTDLIB_DIR ${_ESTDLIB_DIR} ABSOLUTE)
+set(ESTDLIB_DIR ../../../..)
+get_filename_component(__ESTDLIB_DIR ${ESTDLIB_DIR} ABSOLUTE)
 set(ENV{ESTDLIB_DIR} ${__ESTDLIB_DIR})
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-include($ENV{ESTDLIB_DIR}/tools/esp-idf/version_finder.cmake)
+include(${ESTDLIB_DIR}/tools/esp-idf/version_finder.cmake)
 
 project(basic)
