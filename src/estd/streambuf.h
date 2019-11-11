@@ -250,9 +250,7 @@ public:
     {
         int_type ch = this->sgetc();
 
-        if(ch == traits_type::eof()) return traits_type::eof();
-
-        this->gbump(1);
+        if(ch != traits_type::eof()) this->gbump(1);
 
         return ch;
     }

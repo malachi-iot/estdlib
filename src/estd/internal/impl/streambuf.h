@@ -123,6 +123,7 @@ struct stringbuf_base
     stringbuf_base() {}
 };
 
+// TODO: utilize out_pos_streambuf/in_pos_streambuf
 template <class TString>
 struct out_stringbuf : stringbuf_base<TString>
 {
@@ -221,6 +222,7 @@ struct basic_stringbuf :
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
+// TODO: Do char_traits the same between this and in_span_streambuf
 template <class T, std::ptrdiff_t Extent = -1,
           class TBase = experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
@@ -269,10 +271,7 @@ struct out_span_streambuf :
 
     char_type* pbase() const
     {
-        // FIX: naughty, dropping const here, because underlying instance
-        // provider is set to track instance not pointer
-        T* data = (T*)out().data();
-        return reinterpret_cast<char_type*>(data);
+        return const_cast<char_type*>(out().data());
     }
 
     char_type* pptr() const { return pbase() + base_out_type::pos(); }
@@ -339,7 +338,6 @@ struct in_span_streambuf :
     const span_type& in() const { return base_type::value(); }
 
     pos_type pos() const { return base_pos_type::pos(); }
-    // NOTE: Needed for has_pos_method to work
     void pos(pos_type p) { base_pos_type::pos(p); }
 
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
@@ -350,7 +348,7 @@ struct in_span_streambuf :
 
     // FIX: dropping const on returned span_type, not recommended
     char_type* eback() const
-    { return reinterpret_cast<char_type*>(((span_type&) in()).data()); }
+    { return const_cast<char_type*>(in().data()); }
 
     char_type* gptr() const { return eback() + pos(); }
     char_type* egptr() const { return eback() + in().size(); }
@@ -359,6 +357,10 @@ private:
     streamsize remaining() const { return in().size() - pos(); }
 
 protected:
+    // EXPERIMENTAL - counts on the idea that underflow would *only*
+    // be called when gptr() == egptr().  This may or may not really
+    // be correct
+    int_type underflow() { return traits_type::eof(); }
 
     streamsize showmanyc() const
     {
@@ -384,7 +386,9 @@ public:
         // NOTE: non-span versions would call onto underflow here
         // however, for a span, underflow never will fetch a new buffer so
         // we don't do it
-        if(remaining() == 0) return traits_type::eof();
+        if(remaining() == 0)
+            //return traits_type::eof();
+            return underflow(); // EXPERIMENTAL - always returns eof() for this class
 
         int_type ch = traits_type::to_int_type(*gptr());
 
