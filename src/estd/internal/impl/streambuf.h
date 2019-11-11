@@ -223,25 +223,24 @@ struct basic_stringbuf :
 // be implemented in a derived class
 template <class T, std::ptrdiff_t Extent = -1,
           class TBase = experimental::instance_provider<estd::span<T, Extent> > >
-struct out_span_streambuf : TBase
+struct out_span_streambuf :
+        out_pos_streambuf_base<std::char_traits<T> >,
+        TBase
 {
     typedef TBase base_type;
+    typedef T char_type;
+    typedef std::char_traits<char_type> traits_type;
+    typedef out_pos_streambuf_base<std::char_traits<T> > base_out_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
-    typedef int off_type;
-    typedef int pos_type;
+    typedef typename traits_type::off_type off_type;
+    typedef typename traits_type::pos_type pos_type;
 
     span_type& out() { return base_type::value(); }
     const span_type& out() const { return base_type::value(); }
 
-    size_type pos;
-
-    typedef char char_type;
-    typedef std::char_traits<char_type> traits_type;
-
     out_span_streambuf(T* buf, size_type size) :
-        base_type(span_type(buf, size)),
-        pos(0)
+        base_type(span_type(buf, size))
     {
 
     }
@@ -250,15 +249,20 @@ struct out_span_streambuf : TBase
     // where Extent == -1
     template <std::size_t N>
     out_span_streambuf(T (&array)[N]) :
-        base_type(array),
-        pos(0)
+        base_type(array)
     {
 
     }
 
     out_span_streambuf(const estd::span<T, Extent>& copy_from) :
-        base_type(copy_from),
-        pos(0)
+        base_type(copy_from)
+    {
+
+    }
+
+
+    out_span_streambuf(char_type* data, pos_type count) :
+            base_type(data, count)
     {
 
     }
@@ -270,14 +274,15 @@ struct out_span_streambuf : TBase
         T* data = (T*)out().data();
         return reinterpret_cast<char_type*>(data);
     }
-    char_type* pptr() const { return pbase() + pos; }
+
+    char_type* pptr() const { return pbase() + base_out_type::pos(); }
     char_type* epptr() const { return pbase() + out().size_bytes(); }
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
         // TODO: do proper bounds checking here
         memcpy(pptr(), s, count);
-        pos += count;
+        this->pbump(count);
         return count;
     }
 
@@ -293,27 +298,20 @@ protected:
         switch(way)
         {
             case ios_base::cur:
-                pos += off;
+                this->pbump(off);
                 break;
 
             case ios_base::beg:
-                pos = off;
+                base_out_type::pos(off);
                 break;
 
             case ios_base::end:
                 // UNTESTED
-                pos = out().size_bytes() + off;
+                base_out_type::pos(out().size_bytes() + off);
                 break;
         }
 
-        return pos;
-    }
-
-    // NOTE: could be useful in constructing an automatic pubseekoff, if an explicit one
-    // isn't available
-    void pbump(int count)
-    {
-        pos += count;
+        return base_out_type::pos();
     }
 };
 

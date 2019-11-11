@@ -37,13 +37,14 @@ public:
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::off_type off_type;
 
     // FIX: would use conditional to set these up, but conditional
     // always compile-time peers into both classes, so these are dormant right now
     ESTD_FN_HAS_TYPEDEF_EXP(pos_type)
     ESTD_FN_HAS_TYPEDEF_EXP(off_type)
 
-    typedef int_type off_type;
+    //typedef int_type off_type;
 
     // custom estd nonblocking variants
     // TODO: Determine if spostc should kick off a kind of soft/async overflow
