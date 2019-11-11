@@ -70,16 +70,16 @@ protected:
 };
 
 
-template <typename TPos>
-struct out_pos_streambuf_base : pos_streambuf_base<TPos>
+template <typename TCharTraits>
+struct out_pos_streambuf_base : pos_streambuf_base<typename TCharTraits::pos_type>
 {
-    typedef pos_streambuf_base<TPos> base_type;
+    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
     typedef typename base_type::pos_type pos_type;
 
     out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
 
 protected:
-    void pbump(int count) { this->pos += count; }
+    void pbump(int count) { this->_pos += count; }
 };
 
 // EXPERIMENTAL
