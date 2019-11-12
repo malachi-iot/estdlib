@@ -123,6 +123,18 @@ public:
     }
 
     // UNTESTED
+    __istream_type& unget()
+    {
+#ifdef FEATURE_ESTD_IOS_GCOUNT
+        _gcount = 0;
+#endif
+        if(this->rdbuf()->sungetc() == traits_type::eof())
+            this->setstate(ios_base::badbit);
+
+        return *this;
+    }
+
+    // UNTESTED
     __istream_type& seekg(off_type off, ios_base::seekdir dir)
     {
         this->unsetstate(ios_base::failbit);

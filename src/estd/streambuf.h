@@ -65,6 +65,7 @@ public:
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
     ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
     ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
+    ESTD_FN_HAS_METHOD(int_type, pbackfail, int_type);
 
     ESTD_FN_HAS_METHOD(void, pbump, int)
     ESTD_FN_HAS_METHOD(void, gbump, int)
@@ -89,6 +90,31 @@ protected:
     {
         return base_type::xsgetn(s, count);
     } */
+
+    template <class T=this_type>
+    typename enable_if<has_pbackfail_method<T>::value, int_type>::type
+    pbackfail(int_type c = traits_type::eof())
+    {
+        return base_type::pbackfail(c);
+    }
+
+    template <class T=this_type>
+    typename enable_if<!has_pbackfail_method<T>::value, int_type>::type
+    pbackfail(int_type c = traits_type::eof())
+    {
+        return traits_type::eof();
+    }
+
+    int_type sungetc()
+    {
+        if(this->gptr() > this->eback())
+        {
+            this->gbump(-1);
+            return traits_type::to_int_type(*this->gptr());
+        }
+
+        return pbackfail();
+    }
 
     // not yet used overflow helpers
     // overflow() without parameter looks loosely similar to sync, but
