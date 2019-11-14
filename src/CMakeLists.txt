@@ -122,7 +122,10 @@ set(SOURCE_FILES
         estd/type_traits.h
         estd/utility.h
         estd/vector.h
-        estd/exp/heap.h)
+
+        estd/exp/heap.h
+        estd/exp/streambuf-traits.h
+        )
 
 add_library(estd_lib ${SOURCE_FILES})
 

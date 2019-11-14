@@ -8,6 +8,7 @@
 #include <estd/exp/memory_pool.h>
 #include <estd/memory.h>
 #include <estd/functional.h>
+#include "estd/streambuf.h"
 
 struct TestA {};
 
@@ -463,6 +464,25 @@ TEST_CASE("experimental tests")
             instance_wrapper<test::NonCopyable> a;
 
             a.construct();
+        }
+    }
+    SECTION("streambuf")
+    {
+        SECTION("streambuf-traits")
+        {
+            char buf[] = "Hello";
+            estd::span<char> span = buf;
+            typedef char char_type;
+            typedef estd::internal::streambuf<
+                    estd::internal::impl::in_span_streambuf<char_type >> streambuf_type;
+            typedef estd::experimental::streambuf_traits<streambuf_type> streambuf_traits;
+
+            streambuf_type sb(span);
+
+            estd::span<char> same_span = streambuf_traits::gdata(sb);
+
+            REQUIRE(span.size() == same_span.size());
+            REQUIRE(same_span[0] == buf[0]);
         }
     }
 }
