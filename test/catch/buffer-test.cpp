@@ -86,11 +86,25 @@ TEST_CASE("buffers")
         }
         SECTION("as bytes")
         {
-            int buf[32];
+            constexpr int sz = 32;
+            int buf[sz];
 
-            estd::span<int, 32> s(buf);
+            estd::span<int, sz> s(buf);
 
-            //auto s2 = estd::as_bytes(s);
+            auto s2 = estd::as_bytes(s);
+
+            REQUIRE(s2.size() == sizeof(int) * sz);
+        }
+        SECTION("as bytes (dynamic)")
+        {
+            constexpr int sz = 32;
+            int buf[sz];
+
+            estd::span<int> s(buf);
+
+            auto s2 = estd::as_bytes(s);
+
+            REQUIRE(s2.size() == sizeof(int) * sz);
         }
     }
 }

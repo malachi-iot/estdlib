@@ -60,13 +60,14 @@ public:
 #endif
     span(const base_t& clone_from) : base_t(clone_from) {}
 
-    span<T, -1> subspan(ptrdiff_t offset, ptrdiff_t count = -1)
+
+    span<element_type, -1> subspan(ptrdiff_t offset, ptrdiff_t count = -1)
     {
         if(count == -1) count = base_t::size();
 
         pointer data = base_t::data();
 
-        return span<T, -1>(data + offset, count);
+        return span<element_type, -1>(data + offset, count);
     }
 };
 
@@ -75,11 +76,39 @@ public:
 typedef span<const uint8_t> const_buffer;
 typedef span<uint8_t> mutable_buffer;
 
-// FIX: Doesn't work yet
-template <class T, ptrdiff_t N, ptrdiff_t S = N == -1 ? -1 : N * sizeof(T) >
-span<const byte, S> as_bytes(span<T, N> s) noexcept
+template <class T, ptrdiff_t N, ptrdiff_t S>
+span<const byte, S> as_bytes(span<T, N> s) noexcept;
+
+template <class T>
+span<const byte, -1> as_bytes(span<T, -1> s) noexcept
 {
-    return span<const byte, S>(reinterpret_cast<const byte*>(s.data()), s.size_bytes());
+    return span<const byte, -1>(reinterpret_cast<const byte*>(s.data()), s.size_bytes());
+}
+
+
+template <class T, ptrdiff_t N>
+span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) noexcept
+{
+    return span<const byte, N * sizeof(T)>(reinterpret_cast<const byte*>(s.data()));
+}
+
+
+// UNTESTED
+template <class T, ptrdiff_t N, ptrdiff_t S>
+span<const byte, S> as_writable_bytes(span<T, N> s) noexcept;
+
+
+template <class T>
+span<byte, -1> as_writable_bytes(span<T, -1> s) noexcept
+{
+    return span<byte, -1>(reinterpret_cast<byte*>(s.data()), s.size_bytes());
+}
+
+
+template <class T, ptrdiff_t N>
+span<byte, N * sizeof(T)> as_writable_bytes(span<T, N> s) noexcept
+{
+    return span<byte, N * sizeof(T)>(reinterpret_cast<byte*>(s.data()));
 }
 
 }
