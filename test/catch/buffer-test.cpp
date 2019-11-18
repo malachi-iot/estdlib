@@ -89,11 +89,23 @@ TEST_CASE("buffers")
             constexpr int sz = 32;
             int buf[sz];
 
+            buf[0] = 0;
+            buf[1] = -1;
+
             estd::span<int, sz> s(buf);
 
             auto s2 = estd::as_bytes(s);
 
             REQUIRE(s2.size() == sizeof(int) * sz);
+
+            estd::byte ch = s2[4];
+
+            REQUIRE(estd::to_integer<int>(ch) == 0xFF);
+
+            SECTION("interact with our special const_buffer")
+            {
+                //estd::const_buffer b(s2);
+            }
         }
         SECTION("as bytes (dynamic)")
         {

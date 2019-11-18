@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     array-test.cpp
     buffer-test.cpp
     chrono-test.cpp
+	cstddef-test.cpp
     experimental-test.cpp
     functional-test.cpp
     ios-test.cpp
@@ -32,7 +33,9 @@ add_executable(${PROJECT_NAME} "main.cpp"
     tuple-test.cpp
     vector-test.cpp
     priority-queue-test.cpp
-    utility-test.cpp algorithm-test.cpp)
+    utility-test.cpp
+	algorithm-test.cpp
+	)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 # TODO: Instead, filter by presence of GCC
