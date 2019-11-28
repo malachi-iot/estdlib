@@ -130,6 +130,8 @@ struct out_stringbuf : stringbuf_base<TString>
     typedef typename remove_reference<TString>::type string_type;
     typedef typename string_type::value_type char_type;
     typedef typename string_type::traits_type traits_type;
+    typedef typename traits_type::off_type off_type;
+    typedef typename traits_type::pos_type pos_type;
 
     TString _str;
 
@@ -150,6 +152,12 @@ struct out_stringbuf : stringbuf_base<TString>
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
     const string_type& str() const { return _str; }
+
+    pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
+    {
+        // TODO: check to make sure which contains ios_base::out
+        return _str.size();
+    }
 };
 
 

@@ -282,6 +282,17 @@ TEST_CASE("iostreams")
             // treated as a character
             REQUIRE(s == "hi2u");
         }
+        SECTION("tellp")
+        {
+            experimental::ostringstream<32> out;
+            int value = 2;
+
+            out << "hi" << value++ << 'u';
+
+            int tellp = out.tellp();
+
+            REQUIRE(tellp == 4);
+        }
     }
     SECTION("layer2")
     {

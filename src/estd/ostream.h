@@ -171,6 +171,16 @@ public:
         return *this;
     }
 
+    // NOTE: Our tellp will indeed return an offset output position indicator
+    // on streambufs that can handle it, such as string, span and netbuf - they are not
+    // fully implemented for that yet however (just string)
+    pos_type tellp()
+    {
+        if(this->fail() == true) return pos_type(-1);
+
+        return this->rdbuf()->pubseekoff(0, ios_base::cur, ios_base::out);
+    }
+
     //friend basic_ostream& operator<<(basic_ostream& (*__pf)(basic_ostream&));
 
     __ostream_type& operator<<(__ostream_type& (*__pf)(__ostream_type&))
