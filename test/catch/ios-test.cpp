@@ -37,7 +37,7 @@ typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;
 
 TEST_CASE("iostreams")
 {
-    char raw_str[] = "raw 'traditional' output\n";
+    const char raw_str[] = "raw 'traditional' output\n";
     CONSTEXPR int raw_str_len = sizeof(raw_str) - 1;
 
     SECTION("SFINAE tests")
@@ -396,7 +396,7 @@ TEST_CASE("iostreams")
     {
         char buf[128];
 
-        typedef estd::internal::impl::in_span_streambuf<char> sb_impl_type;
+        typedef estd::internal::impl::in_span_streambuf<const char> sb_impl_type;
         typedef estd::internal::streambuf<sb_impl_type> sb_type;
 
         sb_type sb(raw_str);

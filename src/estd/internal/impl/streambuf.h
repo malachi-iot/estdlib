@@ -342,6 +342,7 @@ struct in_span_streambuf :
     typedef typename traits_type::int_type int_type;
     typedef typename base_pos_type::pos_type pos_type;
     typedef TChar char_type;
+    typedef typename remove_const<char_type>::type nonconst_char_type;
 
     const span_type& in() const { return base_type::value(); }
 
@@ -378,7 +379,7 @@ protected:
         return r > 0 ? r : -1;
     }
 
-    streamsize xsgetn(char_type* s, streamsize count)
+    streamsize xsgetn(nonconst_char_type* s, streamsize count)
     {
         // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
         streamsize c = estd::min(count, remaining());

@@ -38,6 +38,7 @@ public:
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
+    typedef typename remove_const<char_type>::type nonconst_char_type;
 
     // FIX: would use conditional to set these up, but conditional
     // always compile-time peers into both classes, so these are dormant right now
@@ -181,7 +182,7 @@ public:
 
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls
-    streamsize sgetn(char_type *s, streamsize count)
+    streamsize sgetn(nonconst_char_type* s, streamsize count)
     {
         return this->xsgetn(s, count);
     }
