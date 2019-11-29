@@ -309,6 +309,23 @@ TEST_CASE("iostreams")
 
         val[0] = 0;
 
+        SECTION("initialization")
+        {
+            typedef estd::internal::impl::out_span_streambuf<uint8_t> streambuf_impl_type;
+            typedef estd::internal::streambuf<streambuf_impl_type> streambuf_type;
+
+            SECTION("array init")
+            {
+                uint8_t buffer[32];
+
+                streambuf_type streambuf(buffer);
+
+                streambuf.sputn((uint8_t*)"abc", 3);
+
+                REQUIRE(streambuf.pos() == 3);
+                REQUIRE(buffer[0] == 'a');
+            }
+        }
         SECTION("full (non impl) version")
         {
             // 'test' actually sits dormant and does nothing.  artifact of previous test

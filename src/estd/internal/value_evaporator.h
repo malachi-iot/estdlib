@@ -168,7 +168,7 @@ struct instance_provider
 #ifdef FEATURE_CPP_VARIADIC
     // basically an emplace type operation
     template <class ...TArgs>
-    instance_provider(TArgs...args) :
+    instance_provider(TArgs&&...args) :
         _value(std::forward<TArgs>(args)...)
     {}
 #endif
