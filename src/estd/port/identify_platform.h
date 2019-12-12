@@ -11,6 +11,9 @@
 #define ESTD_MACOS
 #elif (defined (__unix__) || defined(__linux__))
 #define ESTD_UNIX
+#else
+// investigate, see if we're stm32
+#include "arch/stm32.h"
 #endif
 
 #if defined(ESTD_UNIX) || defined(ESTD_MACOS)

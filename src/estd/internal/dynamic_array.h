@@ -10,7 +10,7 @@
 namespace estd {
 
 namespace experimental {
-#ifdef UNUSED
+#ifdef UNUSED_CODE
 template <class T, class TAllocator>
 class unique_handle : protected typed_handle<T, TAllocator>
 {
