@@ -305,13 +305,16 @@ TEST_CASE("iostreams")
     {
         // FIX: Not quite there because span constructor won't switch between Extent and
         // non Extent version for explicit buffer just yet
-        uint32_t val[32];
+        constexpr int val_size = 32;
+        uint32_t val[val_size];
+        uint8_t test1[] = { 0, 1, 2, 3 };
 
         val[0] = 0;
 
+        typedef estd::internal::impl::out_span_streambuf<uint8_t> streambuf_impl_type;
+
         SECTION("initialization")
         {
-            typedef estd::internal::impl::out_span_streambuf<uint8_t> streambuf_impl_type;
             typedef estd::internal::streambuf<streambuf_impl_type> streambuf_type;
 
             SECTION("array init")
@@ -334,6 +337,8 @@ TEST_CASE("iostreams")
 
             // NOTE: Wanted to do a ref version here but not sure if I actually
             // want that to be a supported technique
+            // NOTE: This and many other of the '32' used around here are wrong, since
+            // that's the uint32_t-oriented size
             estd::internal::streambuf<decltype(test)> sb((uint8_t*)&val[0], 32);
 
             sb.sputc(0);
@@ -354,9 +359,7 @@ TEST_CASE("iostreams")
         }
         SECTION("non-constexpr size version")
         {
-            typedef estd::internal::impl::out_span_streambuf<uint8_t> sb_impl_type;
-
-            estd::internal::streambuf<sb_impl_type> sb((uint8_t*)&val[0], 32);
+            estd::internal::streambuf<streambuf_impl_type> sb((uint8_t*)&val[0], 32);
 
             sb.sputc(0);
             sb.sputc(1);
@@ -390,6 +393,29 @@ TEST_CASE("iostreams")
             estd::internal::basic_ostream<sb_type> out(val, 32);
 
             REQUIRE(out.rdbuf()->value().size() == 32);
+        }
+        SECTION("experimental")
+        {
+            SECTION("setbuf")
+            {
+                streambuf_impl_type sb((uint8_t*)&val[0], val_size);
+
+                uint8_t* data = sb.pptr();
+
+                // 32-bit 0 will not match 8-bit 0, 1, 2, 3 on 2nd byte
+                // regardless of endianess (unless we have some flavor of
+                // the double-swap little endian looking like 1, 0, 3, 2)
+                REQUIRE(data[1] != test1[1]);
+
+                sb.setbuf_experimental(test1, sizeof test1);
+
+                data = sb.pptr();
+
+                REQUIRE(data[0] == test1[0]);
+                REQUIRE(data[1] == test1[1]);
+                REQUIRE(data[2] == test1[2]);
+                REQUIRE(data[3] == test1[3]);
+            }
         }
     }
     SECTION("in_span_streambuf")

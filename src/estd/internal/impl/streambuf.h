@@ -320,6 +320,13 @@ protected:
 
         return base_out_type::pos();
     }
+
+public:
+    void setbuf_experimental(char_type* s, streamsize n)
+    {
+        base_out_type::pos(0);
+        base_type::value(span<char_type>(s, n));
+    }
 };
 
 
