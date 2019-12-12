@@ -22,7 +22,7 @@ namespace estd {
 
 namespace internal {
 
-#ifdef UNUSED
+#ifdef UNUSED_CODE
 // lifted directly from https://jguegant.github.io/blogs/tech/sfinae-introduction.html
 template <class T> struct hasSerialize : has_member_base
 {

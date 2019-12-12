@@ -94,7 +94,8 @@ template<> char* toString(char* output, char input)
 
 
 #if defined(__AVR__) or defined(__SAMD21G18A__) or \
-    (defined(ESP8266) and defined(ARDUINO)) or defined(ESP32)
+    (defined(ESP8266) and defined(ARDUINO)) or defined(ESP32) or \
+    defined(__ARM_EABI__)
 #define STDLIB_NONISO
 #define STDLIB_NONISO_ITOA
 #define STDLIB_NONISO_UTOA
@@ -183,6 +184,9 @@ template<> char* toString(char* output, float input)
     dtostrf(input, len, len / 2, output);
     return output;
 }
+#elif defined(ESTD_STM)
+// TODO: stm32 *sometimes* has float-to-string conversion ability.  Use that if 
+// we can detect it's present
 #else
 #include <stdio.h>
 template<> char* toString(char* output, float input)
