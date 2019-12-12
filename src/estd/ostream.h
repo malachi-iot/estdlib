@@ -235,9 +235,9 @@ template <class TStreambuf, class T,
           class enabled = typename enable_if<(N > 1)>::type >
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
-    char buffer[N];
+    char buffer[N + 1];
 
-    internal::toString(buffer, value, sizeof(buffer) - 1);
+    internal::toString(buffer, value, N);
 
     return out << buffer;
 }
