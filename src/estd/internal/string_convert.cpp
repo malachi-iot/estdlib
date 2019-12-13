@@ -1,13 +1,8 @@
-//#include "fact/c_types.h"
 #include "string_convert.h"
 
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-
-#ifndef ESTD_ARDUINO
-#define PROGMEM
-#endif
 
 #if defined(USING_SPRINTF) || defined(ESTD_POSIX)
 #include <inttypes.h>

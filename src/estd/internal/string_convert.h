@@ -6,6 +6,8 @@
 
 #ifdef ESTD_ARDUINO
 #include <Arduino.h>
+#else
+#include "../port/arch/noduino.h"
 #endif
 
 namespace estd {
@@ -58,7 +60,7 @@ template<> inline unsigned short fromString(const char* input)
     return (unsigned short) strtoul(input, NULL, 10);
 }
 
-// EXCLUDING null termination but room for a - sign
+// EXCLUDES null termination but room for a - sign
 // a value of 0 indicates type not supported
 template<class T>
 inline CONSTEXPR uint8_t maxStringLength() { return 0; }
@@ -82,12 +84,6 @@ extern const char VALIDATE_FORMAT_ERROR[];
 
 extern const char TYPENAME_INT[];
 extern const char TYPENAME_CHARPTR[];
-
-#ifndef ARDUINO
-// FIX: need a mini-noduino.h...
-#undef PGM_P
-#define PGM_P const char*
-#endif
 
 template<class T> PGM_P validateString(const char* input);
 template<class T, class TChar> char* toString(TChar* output, T input);
