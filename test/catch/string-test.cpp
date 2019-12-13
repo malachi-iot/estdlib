@@ -536,6 +536,20 @@ TEST_CASE("string tests")
 
         REQUIRE(value == 1234);
     }
+    SECTION("internal")
+    {
+        using namespace estd::internal;
+
+        SECTION("maxStringLength")
+        {
+            REQUIRE(maxStringLength<uint8_t>() == 3);
+            REQUIRE(maxStringLength<int8_t>() == 4);
+            REQUIRE(maxStringLength<float>() == 32);
+
+            // Unsupported == 0
+            REQUIRE(maxStringLength<estd::layer2::const_string>() == 0);
+        }
+    }
 }
 
 #pragma GCC diagnostic pop

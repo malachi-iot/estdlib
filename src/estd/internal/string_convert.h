@@ -60,7 +60,8 @@ template<> inline unsigned short fromString(const char* input)
 
 // EXCLUDING null termination but room for a - sign
 // a value of 0 indicates type not supported
-template<class T> CONSTEXPR uint8_t maxStringLength();
+template<class T>
+inline CONSTEXPR uint8_t maxStringLength() { return 0; }
 
 template<> inline CONSTEXPR uint8_t maxStringLength<char>() { return 1; }
 template<> inline CONSTEXPR uint8_t maxStringLength<uint8_t>() { return 3; }
@@ -73,10 +74,6 @@ template<> inline CONSTEXPR uint8_t maxStringLength<uint64_t>() { return 21;}
 template<> inline CONSTEXPR uint8_t maxStringLength<int64_t>() { return 20;}
 template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
 template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
-
-// not supported, we can't tell how long these are
-template<> inline CONSTEXPR uint8_t maxStringLength<char*>() { return 0; }
-template<> inline CONSTEXPR uint8_t maxStringLength<const char*>() { return 0; }
 
 
 extern const char VALIDATE_NULLSTR_ERROR[];

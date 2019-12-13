@@ -237,6 +237,7 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 {
     char buffer[N + 1];
 
+
     internal::toString(buffer, value, N);
 
     return out << buffer;
