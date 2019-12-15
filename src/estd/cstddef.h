@@ -13,7 +13,11 @@ typedef unsigned char byte;
 // TODO: Only allow overloads which conform to is_integral, as per spec
 
 template <class IntegerType>
+//#if defined(FEATURE_CPP_DEDUCE_RETURN) and defined(FEATURE_CPP_CONSTEXPR)
+//constexpr auto to_integer(byte b) noexcept -> is_integral<IntegerType>::
+//#else
 CONSTEXPR IntegerType to_integer(byte b) noexcept
+//#endif
 {
     //is_integral<IntegerType>::value;
     return IntegerType(b);
