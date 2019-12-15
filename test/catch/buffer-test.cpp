@@ -27,14 +27,14 @@ TEST_CASE("buffers")
     }
     SECTION("A")
     {
-        estd::mutable_buffer b(estd::test::octet_data);
+        estd::span<uint8_t> b(estd::test::octet_data);
 
         REQUIRE(sizeof(b) == sizeof(uint8_t*) + sizeof(size_t));
     }
     SECTION("mutable_buffer")
     {
         uint8_t buf[128];
-        estd::mutable_buffer mb(buf);
+        estd::span<uint8_t> mb(buf);
 
         REQUIRE(mb.size() == 128);
     }

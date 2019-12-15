@@ -72,7 +72,7 @@ public:
 };
 
 
-
+/// @deprecated - use span instead
 typedef span<const uint8_t> const_buffer;
 typedef span<uint8_t> mutable_buffer;
 

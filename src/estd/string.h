@@ -565,7 +565,7 @@ public:
     // uneventfully between unsigned char and char
     // note it's a little bit bad because of the distant possibility of a
     // byte != unsigned char != uint8_t
-    const_string(const estd::const_buffer& cast_from) :
+    const_string(const estd::span<const uint8_t>& cast_from) :
         base_t(reinterpret_cast<const char*>(cast_from.data()), cast_from.size(), true) {}
 };
 

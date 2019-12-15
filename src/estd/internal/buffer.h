@@ -36,6 +36,10 @@ public:
 
 namespace layer2 {
 
+/**
+ * @tparam size
+ * @deprecated - use span instead
+ */
 template <size_t size>
 class mutable_buffer : public estd::layer2::array<uint8_t, size>
 {
