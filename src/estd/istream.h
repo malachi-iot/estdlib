@@ -47,12 +47,14 @@ class basic_istream : public
 {
     typedef TBase base_t;
 
+public:
     typedef typename base_t::char_type char_type;
-    typedef typename remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename base_t::streambuf_type streambuf_type;
     typedef typename streambuf_type::off_type off_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
 
+private:
     inline int_type standard_peek()
     {
 #ifdef FEATURE_ESTD_IOS_GCOUNT

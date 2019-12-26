@@ -162,7 +162,7 @@ template <class TStreambuf>
 class basic_ios_base<TStreambuf, true> : public ios_base
 {
 protected:
-    typedef TStreambuf streambuf_type;
+    typedef typename remove_reference<TStreambuf>::type streambuf_type;
     streambuf_type* _rdbuf;
 
     streambuf_type* rdbuf() const { return _rdbuf; }

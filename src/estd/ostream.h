@@ -46,10 +46,14 @@ class basic_ostream :
         public TBase
 {
     typedef TBase base_t;
+
+public:
     typedef typename base_t::streambuf_type streambuf_type;
     typedef typename TBase::char_type char_type;
     typedef typename streambuf_type::pos_type pos_type;
     typedef typename streambuf_type::off_type off_type;
+
+private:
     //typedef experimental::ios_policy policy_type;
     typedef int policy_type;
 
