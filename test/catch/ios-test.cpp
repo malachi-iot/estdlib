@@ -476,6 +476,31 @@ TEST_CASE("iostreams")
             REQUIRE(out.rdbuf()->str().size() == 4);
         }
     }
+    SECTION("convenience typedefs for span streaming")
+    {
+        char buf[128];
+        estd::span<char> span(buf);
+
+        SECTION("in")
+        {
+            strcpy(buf, "hello\r\n");
+            estd::layer1::string<32> s;
+
+            estd::experimental::ispanstream in(span);
+
+            in >> s;
+
+            REQUIRE(s.starts_with("hello"));
+        }
+        SECTION("out")
+        {
+            estd::experimental::ospanstream out(span);
+
+            out << "hi2u";
+
+            REQUIRE(out.tellp() == 4);
+        }
+    }
 }
 
 #pragma GCC diagnostic pop

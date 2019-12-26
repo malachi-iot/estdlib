@@ -367,6 +367,14 @@ using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
 //typedef posix_ostream<char> ostream;
 #endif
 
+// Experimental because:
+// - naming I'm 90% on, not 100%
+// - spans prefer to be uint8_t, streams prefer char
+namespace experimental {
+typedef estd::internal::streambuf<estd::internal::impl::out_span_streambuf<char> > ospanbuf;
+
+typedef estd::internal::basic_ostream<ospanbuf> ospanstream;
+}
 
 }
 
