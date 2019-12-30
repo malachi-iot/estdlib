@@ -43,25 +43,30 @@ struct smalL_dequeue_policy
 };
 
 
-template <class T, size_t N>
 struct normal_array_policy
 {
-    typedef array<T, N> container_type;
+    template <class T, size_t N>
+    struct Array
+    {
+        typedef array<T, N> container_type;
 
-    // TODO: Make special iterator for dequeue which does the rollover/rollunder
-    // and checks that you only move back and forth within one 'session' of
-    // elements
-    typedef typename container_type::iterator iterator;
+        // TODO: Make special iterator for dequeue which does the rollover/rollunder
+        // and checks that you only move back and forth within one 'session' of
+        // elements
+        typedef typename container_type::iterator iterator;
+    };
 };
 
 #ifdef FEATURE_CPP_ALIGN
-// TODO: Combine this with aligned_storage_array
-template <class T, size_t N>
 struct aligned_storage_array_policy
 {
-    typedef aligned_storage_array<T, N> container_type;
+    template <class T, size_t N>
+    struct Array
+    {
+        typedef aligned_storage_array<T, N> container_type;
 
-    typedef typename container_type::iterator iterator;
+        typedef typename container_type::iterator iterator;
+    };
 };
 #endif
 
@@ -81,12 +86,13 @@ namespace layer1 {
 // TODO: Likely we'll want to mate this to a layer1::stack implementation, right
 // now it seems they differ only in that stack has more of a constant m_front
 // TODO: Use the nifty modulo approach Alex showed me
-template <class T, size_t N, class TPolicy = experimental::normal_array_policy<T, N> >
+template <class T, size_t N, class TPolicy = experimental::normal_array_policy >
 class deque : protected TPolicy
 {
     typedef TPolicy policy_type;
-    typedef typename policy_type::container_type container_type;
-    typedef typename policy_type::iterator array_iterator;
+    typedef typename policy_type::template Array<T, N> array_policy;
+    typedef typename array_policy::container_type container_type;
+    typedef typename array_policy::iterator array_iterator;
 
     container_type m_array;
 
