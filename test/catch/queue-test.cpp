@@ -57,6 +57,14 @@ TEST_CASE("queue-test")
             queue.pop();
         }
     }
+    SECTION("layer1 circular queue + aligned storage")
+    {
+        queue<int, layer1::deque<int, 4, experimental::aligned_storage_array_policy<int, 4> > > queue;
+
+        queue.push(5);
+        REQUIRE(queue.front() == 5);
+        REQUIRE(queue.pop());
+    }
     SECTION("dequeue pointers")
     {
         layer1::deque<const int*, 10> queue;

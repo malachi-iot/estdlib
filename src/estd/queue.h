@@ -43,10 +43,27 @@ struct smalL_dequeue_policy
 };
 
 
-struct fast_dequeue_policy
+template <class T, size_t N>
+struct normal_array_policy
 {
+    typedef array<T, N> container_type;
 
+    // TODO: Make special iterator for dequeue which does the rollover/rollunder
+    // and checks that you only move back and forth within one 'session' of
+    // elements
+    typedef typename container_type::iterator iterator;
 };
+
+#ifdef FEATURE_CPP_ALIGN
+// TODO: Combine this with aligned_storage_array
+template <class T, size_t N>
+struct aligned_storage_array_policy
+{
+    typedef aligned_storage_array<T, N> container_type;
+
+    typedef typename container_type::iterator iterator;
+};
+#endif
 
 }
 
@@ -63,18 +80,16 @@ namespace layer1 {
 // operations would merely compile-time fail [as they should] for fixed allocations
 // TODO: Likely we'll want to mate this to a layer1::stack implementation, right
 // now it seems they differ only in that stack has more of a constant m_front
-template <class T, size_t N, class TPolicy = experimental::fast_dequeue_policy >
+// TODO: Use the nifty modulo approach Alex showed me
+template <class T, size_t N, class TPolicy = experimental::normal_array_policy<T, N> >
 class deque : protected TPolicy
 {
-    typedef array<T, N> array_t;
-    typedef array_t container_type;
+    typedef TPolicy policy_type;
+    typedef typename policy_type::container_type container_type;
+    typedef typename policy_type::iterator array_iterator;
 
-    array_t m_array;
+    container_type m_array;
 
-    // TODO: Make special iterator for dequeue which does the rollover/rollunder
-    // and checks that you only move back and forth within one 'session' of
-    // elements
-    typedef typename array_t::iterator array_iterator;
 
     // front aka head aka 'leftmost' part of array,
     //   where items are traditionally retrieved

@@ -299,7 +299,9 @@ struct aligned_storage_array
     typedef T value_type;
     typedef value_type& reference;
     typedef value_type* pointer;
+    typedef const value_type* const_pointer;
     typedef pointer iterator;
+    typedef const_pointer const_iterator;
     typedef size_t size_type;
 
 private:
@@ -309,6 +311,11 @@ public:
     pointer data()
     {
         return reinterpret_cast<pointer>(array);
+    }
+
+    const_pointer data() const
+    {
+        return reinterpret_cast<const_pointer>(array);
     }
 
     operator pointer()
@@ -325,6 +332,9 @@ public:
 
     iterator begin() { return data(); }
     iterator end() { return data() + array_len; }
+
+    const_iterator begin() const { return data(); }
+    const_iterator end() const { return data() + array_len; }
 };
 #endif
 }
