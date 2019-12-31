@@ -30,7 +30,7 @@ namespace estd {
 // fixed allocators
 template<
     class CharT,
-    class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+    class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
 #ifdef FEATURE_STD_MEMORY
     class Allocator = std::allocator<CharT>,
     class StringPolicy = experimental::sized_string_policy<Traits>

@@ -234,13 +234,13 @@ struct basic_stringbuf :
 template <class T, std::ptrdiff_t Extent = -1,
           class TBase = experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
-        out_pos_streambuf_base<std::char_traits<T> >,
+        out_pos_streambuf_base<estd::char_traits<T> >,
         TBase
 {
     typedef TBase base_type;
     typedef T char_type;
-    typedef std::char_traits<char_type> traits_type;
-    typedef out_pos_streambuf_base<std::char_traits<T> > base_out_type;
+    typedef estd::char_traits<char_type> traits_type;
+    typedef out_pos_streambuf_base<estd::char_traits<T> > base_out_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
     typedef typename traits_type::off_type off_type;
@@ -333,7 +333,7 @@ public:
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
 template <class TChar,
-        class TCharTraits =  std::char_traits<TChar>,
+        class TCharTraits =  estd::char_traits<TChar>,
         std::ptrdiff_t Extent = -1,
         class TBase = experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
