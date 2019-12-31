@@ -2,12 +2,28 @@
 
 #include "internal/platform.h"
 
+#ifdef FEATURE_STD_CSTDDEF
+#include <cstddef>
+#else
+namespace std {
+
+typedef ::ptrdiff_t ptrdiff_t;
+
+}
+#endif
+
 namespace estd {
 
 #ifdef FEATURE_CPP_ENUM_CLASS
 enum class byte : unsigned char {};
 #else
-typedef unsigned char byte;
+// non-member operator overloads want a full struct or enum
+struct byte
+{
+    unsigned char value;
+
+    operator unsigned char() const { return value; }
+};
 #endif
 
 // TODO: Only allow overloads which conform to is_integral, as per spec
@@ -16,7 +32,7 @@ template <class IntegerType>
 //#if defined(FEATURE_CPP_DEDUCE_RETURN) and defined(FEATURE_CPP_CONSTEXPR)
 //constexpr auto to_integer(byte b) noexcept -> is_integral<IntegerType>::
 //#else
-CONSTEXPR IntegerType to_integer(byte b) noexcept
+CONSTEXPR IntegerType to_integer(byte b) NOEXCEPT
 //#endif
 {
     //is_integral<IntegerType>::value;
@@ -28,21 +44,21 @@ CONSTEXPR IntegerType to_integer(byte b) noexcept
 // Because most of us aren't running C++17 yet with relaxed rules to do the
 // canonical byte v={0} or similar, so do this in the meantime
 template <class IntegerType>
-CONSTEXPR byte to_byte(IntegerType value) noexcept
+CONSTEXPR byte to_byte(IntegerType value) NOEXCEPT
 {
     return (byte) value;
 }
 
 
 template <class IntegerType>
-CONSTEXPR byte operator <<(byte b, IntegerType shift) noexcept
+CONSTEXPR byte operator <<(byte b, IntegerType shift) NOEXCEPT
 {
     return (byte)((unsigned char)b << shift);
     //return b;
 }
 
 template <class IntegerType>
-CONSTEXPR byte& operator >>=(byte& b, IntegerType shift) noexcept
+CONSTEXPR byte& operator >>=(byte& b, IntegerType shift) NOEXCEPT
 {
     //return ((unsigned char&)b) >>= shift;
     return b = (byte)(((unsigned char)b) >> shift);
@@ -51,7 +67,7 @@ CONSTEXPR byte& operator >>=(byte& b, IntegerType shift) noexcept
 
 
 template <class IntegerType>
-CONSTEXPR byte& operator <<=(byte& b, IntegerType shift) noexcept
+CONSTEXPR byte& operator <<=(byte& b, IntegerType shift) NOEXCEPT
 {
     return b = b << shift;
     //return b = (byte)(((unsigned char)b) << shift);
@@ -59,7 +75,7 @@ CONSTEXPR byte& operator <<=(byte& b, IntegerType shift) noexcept
 }
 
 
-inline CONSTEXPR byte operator|(byte l, byte r) noexcept
+inline CONSTEXPR byte operator|(byte l, byte r) NOEXCEPT
 {
     return to_byte(static_cast<unsigned int>(l) | static_cast<unsigned int>(r));
 }
@@ -70,7 +86,7 @@ constexpr
 #else
 const
 #endif
-byte& operator|=(byte& l, byte r) noexcept
+byte& operator|=(byte& l, byte r) NOEXCEPT
 {
     return l = l | r;
 }

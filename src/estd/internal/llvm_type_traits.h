@@ -7,7 +7,7 @@
 
 namespace estd {
 
-#if !defined(_LIBCPP_CXX03_LANG)
+#if !defined(_LIBCPP_CXX03_LANG) && defined(FEATURE_CPP_MOVESEMANTIC)
 template <class _Tp> _Tp* addressof(const _Tp&&) noexcept = delete;
 #endif
 

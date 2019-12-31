@@ -31,7 +31,7 @@ public:
     typedef typename base_t::size_type index_type;
     typedef typename estd::remove_cv<T>::type value_type;
 
-    constexpr index_type size_bytes() const
+    CONSTEXPR index_type size_bytes() const
     { return base_t::size() * sizeof(element_type); }
 
 #ifdef FEATURE_CPP_CONSTEXPR
@@ -77,17 +77,17 @@ typedef span<const uint8_t> const_buffer;
 typedef span<uint8_t> mutable_buffer;
 
 template <class T, ptrdiff_t N, ptrdiff_t S>
-span<const byte, S> as_bytes(span<T, N> s) noexcept;
+span<const byte, S> as_bytes(span<T, N> s) NOEXCEPT;
 
 template <class T>
-span<const byte, -1> as_bytes(span<T, -1> s) noexcept
+span<const byte, -1> as_bytes(span<T, -1> s) NOEXCEPT
 {
     return span<const byte, -1>(reinterpret_cast<const byte*>(s.data()), s.size_bytes());
 }
 
 
 template <class T, ptrdiff_t N>
-span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) noexcept
+span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) NOEXCEPT
 {
     return span<const byte, N * sizeof(T)>(reinterpret_cast<const byte*>(s.data()));
 }
@@ -95,18 +95,18 @@ span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) noexcept
 
 // UNTESTED
 template <class T, ptrdiff_t N, ptrdiff_t S>
-span<const byte, S> as_writable_bytes(span<T, N> s) noexcept;
+span<const byte, S> as_writable_bytes(span<T, N> s) NOEXCEPT;
 
 
 template <class T>
-span<byte, -1> as_writable_bytes(span<T, -1> s) noexcept
+span<byte, -1> as_writable_bytes(span<T, -1> s) NOEXCEPT
 {
     return span<byte, -1>(reinterpret_cast<byte*>(s.data()), s.size_bytes());
 }
 
 
 template <class T, ptrdiff_t N>
-span<byte, N * sizeof(T)> as_writable_bytes(span<T, N> s) noexcept
+span<byte, N * sizeof(T)> as_writable_bytes(span<T, N> s) NOEXCEPT
 {
     return span<byte, N * sizeof(T)>(reinterpret_cast<byte*>(s.data()));
 }
