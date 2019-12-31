@@ -96,6 +96,12 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
     static CONSTEXPR uint32_t max() { return UINT32_MAX; }
 };
 
+#ifdef __ADSPBLACKFIN__
+// ?? thought this would be covered by uint32_t, guess not
+template <>
+struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
+#endif
+
 #ifdef INT64_MAX
 
 template <>
