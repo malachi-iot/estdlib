@@ -26,6 +26,7 @@ MainThread::Run()
     {
         // TODO - Put the thread's "main" body HERE
 		do_span_stuff();
+		do_string_stuff();
         // Use a "break" instruction to exit the "while (1)" loop
     }
 

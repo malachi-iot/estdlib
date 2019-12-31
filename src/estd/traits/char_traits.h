@@ -61,7 +61,7 @@ template <class TChar>
 struct char_traits;
 
 template <>
-struct char_traits<char> : std::char_traits;
+struct char_traits<char> : std::char_traits {};
 #else
 using std::char_traits;
 #endif

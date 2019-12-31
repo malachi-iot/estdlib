@@ -18,6 +18,7 @@
 #pragma diag(pop)
 
 void do_span_stuff();
+void do_string_stuff();
 
 class MainThread : public VDK::Thread 
 {

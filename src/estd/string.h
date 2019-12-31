@@ -227,7 +227,7 @@ typedef basic_string<char> string;
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT >,
+template<class CharT, size_t N, bool null_terminated = true, class Traits = estd::char_traits<CharT >,
         class StringPolicy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type
@@ -318,10 +318,10 @@ public:
 namespace layer2 {
 
 template<class CharT, size_t N, bool null_terminated = true,
-         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class StringPolicy = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
+                estd::experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
+                estd::experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
 class basic_string
         : public estd::basic_string<
                 CharT,
@@ -437,7 +437,7 @@ basic_string<char, N, true> make_string(char (&buffer)[N], int n = -1)
 namespace layer3 {
 
 template<class CharT, bool null_terminated = true,
-         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class Policy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
@@ -668,8 +668,9 @@ inline CONSTEXPR uint8_t maxStringLength<estd::internal::no_max_string_length_ta
 }
 }
 
-#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+#if defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
 
+// FIX: this just doesn't feel natural putting in string.h, move it... somewhere
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Allocator, class StringTraits,
           class Traits,
