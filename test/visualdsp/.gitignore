@@ -1,0 +1,5 @@
+Debug/
+
+*.pcf
+
+vdsp_bak_*.ldf
