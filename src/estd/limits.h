@@ -3,12 +3,16 @@
 #include "internal/platform.h"
 #include "cstdint.h"
 
+#ifdef FEATURE_STD_CLIMITS
+#include <climits>
+#else
 // NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
 // these limits.h reflect that and focus on 8-bit-boundary computing
 
 // TODO: this actually should be from a climits/climits.h
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
+#endif
 #endif
 
 namespace estd {

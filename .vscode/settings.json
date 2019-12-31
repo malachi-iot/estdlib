@@ -5,6 +5,7 @@
         "regex": "cpp",
         "sstream": "cpp",
         "identify_platform.h": "c",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "iosfwd": "cpp"
     }
 }

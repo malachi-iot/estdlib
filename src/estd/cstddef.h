@@ -22,6 +22,8 @@ struct byte
 {
     unsigned char value;
 
+    byte(unsigned char value) : value(value) {}
+
     operator unsigned char() const { return value; }
 };
 #endif
@@ -46,7 +48,11 @@ CONSTEXPR IntegerType to_integer(byte b) NOEXCEPT
 template <class IntegerType>
 CONSTEXPR byte to_byte(IntegerType value) NOEXCEPT
 {
+#ifdef FEATURE_CPP_ENUM_CLASS
     return (byte) value;
+#else
+    return byte(value);
+#endif
 }
 
 
