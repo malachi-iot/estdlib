@@ -11,8 +11,33 @@
 #include <new>
 #include <stdio.h>
 
+// NOTE: Necessary before including unity.h
+#include <math.h>
+#include "unity.h"
+
 #pragma file_attr("OS_Component=Threads")
 #pragma file_attr("Threads")
+
+// NOTE: Just for proof of concepting dumping
+// it all with C linkage.  Still not finding setUp
+// and tearDown
+extern "C" {
+	
+void test_Basic()
+{
+	TEST_ASSERT(true);
+}
+
+void tests()
+{
+    UNITY_BEGIN();
+    
+    RUN_TEST(test_Basic);
+
+    UNITY_END();
+}	
+
+}
 
 /******************************************************************************
  *  MainThread Run Function (MainThread's main{})
@@ -22,8 +47,8 @@ void
 MainThread::Run()
 {
     // TODO - Put the thread's "main" Initialization HERE
-
-    while (1)
+    
+    //while (1)
     {
 		// spits out stuff to VisualDSP debug console, sweet!
 		// (in emulator)
@@ -37,7 +62,7 @@ MainThread::Run()
 		VDK::Sleep(2);
         // Use a "break" instruction to exit the "while (1)" loop
     }
-
+    
     // TODO - Put the thread's exit from "main" HERE
 	// A thread is automatically Destroyed when it exits its run function
 }
