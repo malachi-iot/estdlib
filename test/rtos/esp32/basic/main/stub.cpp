@@ -4,6 +4,8 @@
 
 //using namespace estd;
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
@@ -15,5 +17,7 @@ extern "C" void test_task(void* pv)
 {
     for(;;)
     {
+        // Mainly so WDT doesn't get upset
+        vTaskDelay(1);
     }
 }

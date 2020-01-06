@@ -3,7 +3,7 @@
 #include "chrono.h"
 #include "../../functional.h"
 
-#ifdef ESP32
+#ifdef ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #else
@@ -15,6 +15,15 @@ namespace estd {
 
 class thread
 {
+public:
+    typedef TaskHandle_t native_handle_type;
+    // this will map to xTaskNumber from xTASK_STATUS
+    // turns out this is only available from debug call to vTaskGetInfo
+    //typedef UBaseType_t id;
+    typedef native_handle_type id;
+
+private:
+#ifdef FEATURE_ESTD_EXP_FREERTOS_THREAD
     union
     {
         TaskHandle_t th;    // new task
@@ -35,7 +44,7 @@ class thread
 
         // As per https://www.freertos.org/RTOS-task-notifications.html, this is the recommended way for
         // lightweight notifications
-        xNotifyGive(hostTask);
+        xTaskNotifyGive(hostTask);
 
         bound_inline.operator ()();
     }
@@ -75,12 +84,6 @@ public:
     }
     
 
-    typedef TaskHandle_t native_handle_type;
-    // this will map to xTaskNumber from xTASK_STATUS
-    // turns out this is only available from debug call to vTaskGetInfo
-    //typedef UBaseType_t id;
-    typedef native_handle_type id;
-
     native_handle_type native_handle()
     {
         return th;
@@ -90,6 +93,7 @@ public:
     {
         return th;
     }
+#endif
 };
 
 namespace this_thread {
