@@ -23,6 +23,7 @@ void test_Basic()
 
 
 void test_cstddef();
+void test_string();
 
 
 extern "C" {
@@ -55,6 +56,7 @@ MainThread::Run()
     	RUN_TEST(test_Basic);
     	
     	test_cstddef();
+    	test_string();
     	
         // Use a "break" instruction to exit the "while (1)" loop
         break;
