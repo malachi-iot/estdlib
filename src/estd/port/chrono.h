@@ -16,7 +16,6 @@
 #endif
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
-// FIX: Not proven that these preserve 'functional' #defines, prove this
 #pragma push_macro("abs")
 #pragma push_macro("max")
 #pragma push_macro("min")
