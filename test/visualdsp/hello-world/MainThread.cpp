@@ -9,6 +9,7 @@
 
 #include "MainThread.h"
 #include <new>
+#include <stdio.h>
 
 #pragma file_attr("OS_Component=Threads")
 #pragma file_attr("Threads")
@@ -24,9 +25,16 @@ MainThread::Run()
 
     while (1)
     {
-        // TODO - Put the thread's "main" body HERE
+		// spits out stuff to VisualDSP debug console, sweet!
+		// (in emulator)
+		printf("hi\n");
+	
 		do_span_stuff();
 		do_string_stuff();
+		// Odd that 2 ends up being 2s, when tick resolution
+		// says it's 0.1ms resolution.  Probably artifact of
+		// emulator
+		VDK::Sleep(2);
         // Use a "break" instruction to exit the "while (1)" loop
     }
 
