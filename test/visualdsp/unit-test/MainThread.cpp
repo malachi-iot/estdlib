@@ -10,9 +10,7 @@
 #include "MainThread.h"
 #include <new>
 
-// NOTE: math.h is necessary before including unity.h
-#include <math.h>
-#include "unity.h"
+#include "unit-test.h"
 
 
 #pragma file_attr("OS_Component=Threads")
@@ -22,6 +20,9 @@ void test_Basic()
 {
 	TEST_ASSERT(true);
 }
+
+
+void test_cstddef();
 
 
 extern "C" {
@@ -52,6 +53,8 @@ MainThread::Run()
         // TODO - Put the thread's "main" body HERE
 
     	RUN_TEST(test_Basic);
+    	
+    	test_cstddef();
     	
         // Use a "break" instruction to exit the "while (1)" loop
         break;
