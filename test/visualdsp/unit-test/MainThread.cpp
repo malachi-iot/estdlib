@@ -9,10 +9,32 @@
 
 #include "MainThread.h"
 #include <new>
-#include <stdio.h>
+
+// NOTE: math.h is necessary before including unity.h
+#include <math.h>
+#include "unity.h"
+
 
 #pragma file_attr("OS_Component=Threads")
 #pragma file_attr("Threads")
+
+void test_Basic()
+{
+	TEST_ASSERT(true);
+}
+
+
+extern "C" {
+	
+// as per
+// https://github.com/ThrowTheSwitch/Unity/blob/master/docs/UnityGettingStartedGuide.md
+// Other systems don't seem to need this, but we do	
+	
+void setUp() {}
+
+void tearDown() {}
+	
+}
 
 /******************************************************************************
  *  MainThread Run Function (MainThread's main{})
@@ -22,24 +44,22 @@ void
 MainThread::Run()
 {
     // TODO - Put the thread's "main" Initialization HERE
+
+    UNITY_BEGIN();
     
     while (1)
     {
-		// spits out stuff to VisualDSP debug console, sweet!
-		// (in emulator)
-		printf("hi\n");
-	
-		do_span_stuff();
-		do_string_stuff();
-		// Odd that 2 ends up being 2s, when tick resolution
-		// says it's 0.1ms resolution.  Probably artifact of
-		// emulator
-		VDK::Sleep(2);
+        // TODO - Put the thread's "main" body HERE
+
+    	RUN_TEST(test_Basic);
+    	
         // Use a "break" instruction to exit the "while (1)" loop
+        break;
     }
-    
+
     // TODO - Put the thread's exit from "main" HERE
 	// A thread is automatically Destroyed when it exits its run function
+    UNITY_END();
 }
 
 /******************************************************************************
