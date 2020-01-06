@@ -15,6 +15,17 @@
 #include <chrono>
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+// FIX: Not proven that these preserve 'functional' #defines, prove this
+#pragma push_macro("abs")
+#pragma push_macro("max")
+#pragma push_macro("min")
+#undef abs
+#undef max
+#undef min
+#endif
+
+
 namespace estd {
 
 namespace internal {
@@ -349,5 +360,11 @@ constexpr chrono::seconds operator "" ms(unsigned long long ms)
 }
 
 #include "chrono.hpp"
+
+#if defined(__GNUC__) || defined(_MSC_VER)
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#pragma pop_macro("abs")
+#endif
 
 #endif // FEATURE_ESTD_CHRONO

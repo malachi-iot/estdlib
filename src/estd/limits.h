@@ -11,6 +11,14 @@
 #define CHAR_BIT 8
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+// FIX: Not proven that these preserve 'functional' #defines, prove this
+#pragma push_macro("max")
+#pragma push_macro("min")
+#undef max
+#undef min
+#endif
+
 namespace estd {
 
 // FIX: I implemented this wrong, numeric_limits should be a specializing type, not a namespace
@@ -113,3 +121,8 @@ struct numeric_limits<uint64_t> :  internal::integer_limits<uint64_t, false>
 #endif
 
 }
+
+#if defined(__GNUC__) || defined(_MSC_VER)
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif

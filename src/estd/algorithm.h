@@ -119,12 +119,12 @@ template<class InputIt1, class InputIt2>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
 constexpr
 #endif
-std::pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+estd::pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
 {
     while (first1 != last1 && *first1 == *first2) {
         ++first1, ++first2;
     }
-    return std::make_pair(first1, first2);
+    return estd::make_pair(first1, first2);
 }
 
 }
