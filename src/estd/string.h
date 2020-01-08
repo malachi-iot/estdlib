@@ -1,3 +1,7 @@
+/**
+ * @file
+ * NOTE: data() implementation sticks to <= c++11 form in which does not need to be null terminated
+ */
 #pragma once
 
 #include "memory.h"
@@ -300,7 +304,7 @@ using string = basic_string<char, N, null_terminated>;
 template <size_t N, bool null_terminated = true>
 class string : public basic_string<char, N, null_terminated>
 {
-    typedef basic_string<char, N> base_t;
+    typedef basic_string<char, N, null_terminated> base_t;
 
 public:
     string() {}
