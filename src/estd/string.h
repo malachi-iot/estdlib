@@ -369,13 +369,21 @@ public:
         base_t::impl().size(n);
     }
 
+    template <size_type IncomingN>
+    basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
+    {
+#ifdef FEATURE_CPP_STATIC_ASSERT
+        static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+#endif
+    }
+
     // See 'n' documentation above
     // FIX: above constructor greedily consumes this one's chance at running.
     // Before, I was using const CharT* to differenciate it but technically
     // a const CharT* is just incorrect as the underlying layer2::basic_string
     // isn't intrinsically const
     template <size_type IncomingN>
-    basic_string(CharT (&buffer) [IncomingN], int n = -1) : base_t(&buffer[0])
+    basic_string(CharT (&buffer) [IncomingN], int n) : base_t(&buffer[0])
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");

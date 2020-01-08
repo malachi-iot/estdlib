@@ -60,6 +60,13 @@ TEST_CASE("string tests")
         REQUIRE(buf[3] == 'l');
         REQUIRE(buf[4] == 'o');
     }
+    SECTION("layer 1")
+    {
+        SECTION("string literal assignment")
+        {
+            layer1::string<32> s = "hi2u";
+        }
+    }
     SECTION("layer 1 null terminated")
     {
         // FIX: Does not appear to properly initialize
