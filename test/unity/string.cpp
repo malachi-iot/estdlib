@@ -8,12 +8,7 @@
 template <class TString>
 void _test_string_assignment()
 {
-    const char* test_str = TEST_STR;
-
-    // NOTE: Not able to specify TEST_STR here due to 
-    // basic_string(CharT (&buffer) [IncomingN], int n = -1)
-    // constructor (see comments there)
-    TString s = test_str;
+    TString s = TEST_STR;
 
     TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, s.size());
 
@@ -32,16 +27,13 @@ void _test_string_assignment()
         data[s.size()] = 0;
     }
 
-    TEST_ASSERT_EQUAL_STRING(test_str, data);
+    TEST_ASSERT_EQUAL_STRING(TEST_STR, data);
 }
 
 
 template <class TString>
 void test_string_concat()
 {
-    const char* test_str = "hi2u";
-    const char* test_str2 = "hi2me";
-
     TString s;
 
     s += TEST_STR;
