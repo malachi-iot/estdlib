@@ -11,6 +11,8 @@
 #define ESTD_MACOS
 #elif (defined (__unix__) || defined(__linux__))
 #define ESTD_UNIX
+#elif (defined (__ADSPBLACKFIN__))
+#define ESTD_MCU_BLACKFIN
 #else
 // investigate, see if we're stm32
 #include "arch/stm32.h"
