@@ -10,6 +10,9 @@ void _test_string_assignment()
 {
     const char* test_str = TEST_STR;
 
+    // NOTE: Not able to specify TEST_STR here due to 
+    // basic_string(CharT (&buffer) [IncomingN], int n = -1)
+    // constructor (see comments there)
     TString s = test_str;
 
     TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, s.size());

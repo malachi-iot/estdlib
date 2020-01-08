@@ -377,8 +377,15 @@ public:
     template <size_type IncomingN>
     basic_string(CharT (&buffer) [IncomingN], int n = -1) : base_t(&buffer[0])
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+#endif
 
+        // FIX: for scenarios where:
+        // a) C++03/98 is in effect and
+        // b) policy size_equals_capacity is in effect,
+        // this fails (i.e. assignment to string literal) as compiler attempts to compile/run
+        // this even though n == -1
         if(n >= 0) base_t::impl().size(n);
     }
 
