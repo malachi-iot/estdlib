@@ -414,7 +414,7 @@ public:
 
 
 // this represents traditional std::basic_streambuf implementations
-template <class TChar, class TCharTraits = ::std::char_traits<TChar> >
+template <class TChar, class TCharTraits = estd::char_traits<TChar> >
 struct basic_streambuf
 {
     typedef TChar char_type;

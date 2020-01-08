@@ -46,7 +46,7 @@ VDK.h VDK.cpp hello-world.rbld :$(VDSP)/blackfin/vdk/VDK.cpp.tf $(VDSP)/blackfin
 	@echo ".\hello-world.vdk"
 	$(VDSP)/Blackfin\vdk\vdkgen.exe .\hello-world.vdk -proc ADSP-BF537 -MM
 
-Debug/MainThread.doj :MainThread.cpp MainThread.h VDK.h $(VDSP)/Blackfin/include/defBF537.h $(VDSP)/Blackfin/include/def_LPBlackfin.h $(VDSP)/Blackfin/include/defBF534.h $(VDSP)/Blackfin/include/VDK_Public.h $(VDSP)/Blackfin/include/limits.h $(VDSP)/Blackfin/include/yvals.h $(VDSP)/Blackfin/include/stddef.h $(VDSP)/Blackfin/include/assert.h $(VDSP)/Blackfin/include/sys/platform.h $(VDSP)/Blackfin/include/sys/_adi_platform.h $(VDSP)/Blackfin/include/cdefBF537.h $(VDSP)/Blackfin/include/cdefBF534.h $(VDSP)/Blackfin/include/cdef_LPBlackfin.h $(VDSP)/Blackfin/include/cplus/new $(VDSP)/Blackfin/include/cplus/exception $(VDSP)/Blackfin/include/cplus/xstddef $(VDSP)/Blackfin/include/xsyslock.h $(VDSP)/Blackfin/include/sys/adi_rtl_sync.h $(VDSP)/Blackfin/include/stdbool.h $(VDSP)/Blackfin/include/stdint.h $(VDSP)/Blackfin/include/cplus/cstdlib $(VDSP)/Blackfin/include/stdlib.h $(VDSP)/Blackfin/include/stdlib_bf.h $(VDSP)/Blackfin/include/cplus/cstddef $(VDSP)/Blackfin/include/string.h $(VDSP)/Blackfin/include/stdio.h 
+./Debug/MainThread.doj :MainThread.cpp MainThread.h VDK.h $(VDSP)/Blackfin/include/defBF537.h $(VDSP)/Blackfin/include/def_LPBlackfin.h $(VDSP)/Blackfin/include/defBF534.h $(VDSP)/Blackfin/include/VDK_Public.h $(VDSP)/Blackfin/include/limits.h $(VDSP)/Blackfin/include/yvals.h $(VDSP)/Blackfin/include/stddef.h $(VDSP)/Blackfin/include/assert.h $(VDSP)/Blackfin/include/sys/platform.h $(VDSP)/Blackfin/include/sys/_adi_platform.h $(VDSP)/Blackfin/include/cdefBF537.h $(VDSP)/Blackfin/include/cdefBF534.h $(VDSP)/Blackfin/include/cdef_LPBlackfin.h $(VDSP)/Blackfin/include/cplus/new $(VDSP)/Blackfin/include/cplus/exception $(VDSP)/Blackfin/include/cplus/xstddef $(VDSP)/Blackfin/include/xsyslock.h $(VDSP)/Blackfin/include/sys/adi_rtl_sync.h $(VDSP)/Blackfin/include/stdbool.h $(VDSP)/Blackfin/include/stdint.h $(VDSP)/Blackfin/include/cplus/cstdlib $(VDSP)/Blackfin/include/stdlib.h $(VDSP)/Blackfin/include/stdlib_bf.h $(VDSP)/Blackfin/include/cplus/cstddef $(VDSP)/Blackfin/include/string.h $(VDSP)/Blackfin/include/stdio.h 
 	@echo ".\MainThread.cpp"
 	$(VDSP)/ccblkfn.exe -c .\MainThread.cpp -c++ -g -structs-do-not-overlap -no-multiline -I ../../../src -double-size-32 -decls-strong -warn-protos -threads -Wsuppress 0001,0815 -proc ADSP-BF537 -o .\Debug\MainThread.doj -MM
 
@@ -72,7 +72,7 @@ ifeq ($(MAKECMDGOALS),hello-world_Debug_clean)
 
 hello-world_Debug_clean:
 	-$(RM) ".\Debug\ExceptionHandler-BF537.doj"
-	-$(RM) "Debug\MainThread.doj"
+	-$(RM) ".\Debug\MainThread.doj"
 	-$(RM) "Debug\SpanTest.doj"
 	-$(RM) "Debug\StringTest.doj"
 	-$(RM) "Debug\VDK.doj"
