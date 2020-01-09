@@ -35,7 +35,9 @@ endif()
 
 if (NOT CMAKE_SCRIPT_MODE_FILE)
     message(STATUS "** v${IDF_VER_MAJOR}.${IDF_VER_MINOR}.${IDF_VER_PATCH} (${IDF_VER_TAG}) **")
-    add_definitions(
+    # Not add_definitions or add_compile_definitions, as per
+    # https://github.com/espressif/esp-idf/issues/4607
+    add_compile_options(
         -DESTD_IDF_VER_MAJOR=${IDF_VER_MAJOR}
         -DESTD_IDF_VER_MINOR=${IDF_VER_MINOR}
         -DESTD_IDF_VER_PATCH=${IDF_VER_PATCH}
