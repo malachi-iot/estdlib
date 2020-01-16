@@ -3,8 +3,11 @@
 #include <estd/array.h>
 #include <estd/span.h>
 #include <estd/string_view.h>
-#include <estd/ostream.h>
+// streambuf and friends still need C++11 mainly due to ESTD_HAS_FN behavior
+//#include <estd/ostream.h>
 #include <estd/optional.h>
+
+#include <stdio.h>
 
 void test()
 {

@@ -22,6 +22,8 @@ struct byte
 {
     unsigned char value;
 
+    byte() {}
+
     byte(unsigned char value) : value(value) {}
 
     operator unsigned char() const { return value; }
