@@ -402,13 +402,21 @@ public:
 
     template <class TDeleter2>
     shared_ptr(TDeleter2 d) :
+#ifdef FEATURE_CPP_INITIALIZER_LIST
         base_type(d, deleter_tag{})
+#else
+        base_type(d, deleter_tag())
+#endif
     {}
 
 
     template <class TDeleter2, class TContext>
     shared_ptr(TDeleter2 d, TContext& context) :
+#ifdef FEATURE_CPP_INITIALIZER_LIST
         base_type(d, context, deleter_tag{})
+#else
+        base_type(d, context, deleter_tag())
+#endif
     {}
 
     // non-standard call to initialize raw T
@@ -588,6 +596,7 @@ public:
         return *this;
     } */
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
     void swap(shared_ptr& r) NOEXCEPT
     {
         /*
@@ -598,6 +607,7 @@ public:
 
         r._value = estd::exchange(this->_value, r._value);
     }
+#endif
 };
 
 

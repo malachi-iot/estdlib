@@ -66,8 +66,13 @@ struct reference_evaporator<T, false>
     typedef value_type ref_type_exp;
     typedef value_type const_ref_type_exp;
 
+#ifdef FEATURE_CPP_INITIALIZER_LIST
     value_type value() { return value_type{}; }
     const value_type value() const { return value_type{}; }
+#else
+    value_type value() { return value_type(); }
+    const value_type value() const { return value_type(); }
+#endif
 
     reference_evaporator(reference) {}
 

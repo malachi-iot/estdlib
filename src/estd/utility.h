@@ -31,7 +31,11 @@ constexpr
 #endif
 pair<T1, T2> make_pair(T1 t, T2 u)
 {
+#ifdef FEATURE_CPP_INITIALIZER_LIST
     return pair<T1, T2> { t, u };
+#else
+    return pair<T1, T2>(t, u);
+#endif
 }
 
 /*
