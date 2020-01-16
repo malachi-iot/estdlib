@@ -1,6 +1,7 @@
 #include "unit-test.h"
 
 #include <estd/thread.h>
+#include <estd/mutex.h>
 
 void test_thread_get_id()
 {
@@ -12,7 +13,15 @@ void test_thread_get_id()
 }
 
 
+void test_lock_guard()
+{
+    estd::mutex m;
+    estd::lock_guard<estd::mutex> _m(m);
+}
+
+
 void test_thread()
 {
     RUN_TEST(test_thread_get_id);
+    RUN_TEST(test_lock_guard);
 }

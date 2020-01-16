@@ -1,6 +1,9 @@
 #pragma once
 
-// NOTE: This is rife with C++11 features, but hasn't been gaurded yet
+// NOTE: This is rife with C++11 features, so this is a general guard
+// TODO: would really like to enable a basic < C++11 capability since chrono
+// depends on this
+#ifdef FEATURE_CPP_VARIADIC
 
 // mainly just for tooltips, normally you don't include internal/common_type directly
 #include "../type_traits.h"
@@ -67,3 +70,5 @@ template< class... T >
 using common_type_t = typename common_type<T...>::type;
 #endif
 }
+
+#endif // FEATURE_CPP_VARIADIC
