@@ -79,18 +79,30 @@ public:
   typedef T type;
 
   // construct/copy/destroy
-  reference_wrapper(T& ref) noexcept : _ptr(estd::addressof(ref)) {}
+  reference_wrapper(T& ref) NOEXCEPT : _ptr(estd::addressof(ref)) {}
 #ifdef FEATURE_CPP_MOVESEMANTIC
   reference_wrapper(T&&) = delete;
 #endif
-  reference_wrapper(const reference_wrapper&) noexcept = default;
+#ifdef FEATURE_CPP_DEFAULT_CTOR
+  reference_wrapper(const reference_wrapper&) NOEXCEPT = default;
 
   // assignment
-  reference_wrapper& operator=(const reference_wrapper& x) noexcept = default;
+  reference_wrapper& operator=(const reference_wrapper& x) NOEXCEPT = default;
+#else
+  reference_wrapper(const reference_wrapper& copy_from) NOEXCEPT :
+    _ptr(copy_from._ptr)
+  {};
+
+  // assignment
+  reference_wrapper& operator=(const reference_wrapper& copy_from) NOEXCEPT
+  {
+    _ptr = copy_from._ptr;
+  }
+#endif
 
   // access
-  operator T& () const noexcept { return *_ptr; }
-  T& get() const noexcept { return *_ptr; }
+  operator T& () const NOEXCEPT { return *_ptr; }
+  T& get() const NOEXCEPT { return *_ptr; }
 
   /*
   template< class... ArgTypes >
@@ -111,13 +123,13 @@ reference_wrapper(reference_wrapper<T>) -> reference_wrapper<T>;
 #endif
 
 template <class T>
-reference_wrapper<T> ref(T& t) noexcept
+reference_wrapper<T> ref(T& t) NOEXCEPT
 {
     return reference_wrapper<T>(t);
 }
 
 template <class T>
-reference_wrapper<T> cref(const T& t) noexcept
+reference_wrapper<T> cref(const T& t) NOEXCEPT
 {
     return reference_wrapper<T>(t);
 }

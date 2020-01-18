@@ -3,12 +3,16 @@
 #include "internal/platform.h"
 #include "cstdint.h"
 
+#ifdef FEATURE_STD_CLIMITS
+#include <climits>
+#else
 // NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
 // these limits.h reflect that and focus on 8-bit-boundary computing
 
 // TODO: this actually should be from a climits/climits.h
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
+#endif
 #endif
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
@@ -98,6 +102,12 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
     static CONSTEXPR uint32_t min() { return 0; }
     static CONSTEXPR uint32_t max() { return UINT32_MAX; }
 };
+
+#ifdef __ADSPBLACKFIN__
+// ?? thought this would be covered by uint32_t, guess not
+template <>
+struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
+#endif
 
 #ifdef INT64_MAX
 

@@ -12,4 +12,8 @@
 #include "arduino/thread.h"
 #elif defined(ESTD_POSIX)
 #include "posix/thread.h"
+#elif defined(ESTD_MCU_BLACKFIN)
+#include "vdk/thread.h"
+#else
+#warning Couldn't find supported platform for threading
 #endif

@@ -39,6 +39,7 @@ struct less;
 
 namespace experimental {
 
+#ifdef FEATURE_CPP_ALIGN
 // kind of a blend of reference_wrapper and aligned_storage
 // experimental, but very useful (abusing raw_instance_provider for this right now)
 // NOTE: This in theory could be 1:1 with a fixed allocator, who should be using aligned_storage too
@@ -100,7 +101,7 @@ public:
         return value();
     }
 };
-
+#endif
 
 }
 

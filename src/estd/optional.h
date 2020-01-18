@@ -91,7 +91,11 @@ inline
 #elif defined(FEATURE_CPP_INLINE_STATIC)
 static
 #endif
+#ifdef FEATURE_CPP_INITIALIZER_LIST
 CONSTEXPR nullopt_t nullopt{0};
+#else
+CONSTEXPR nullopt_t nullopt(0);
+#endif
 
 // Non-standard workaround for my own failing move semantic
 // however, it will come in handy for pre move semantic compilations as well
@@ -352,6 +356,7 @@ public:
         return *this;
     }
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
     //template <class U = T>
     //optional& operator=(U&& value)
     optional& operator=(value_type&& value)
@@ -359,6 +364,7 @@ public:
         base_type::operator=(std::move(value));
         return *this;
     }
+#endif
 
 #ifdef FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
     // FIX: spec doesn't have this, but I think my lack of class U = T

@@ -31,7 +31,11 @@ constexpr
 #endif
 pair<T1, T2> make_pair(T1 t, T2 u)
 {
+#ifdef FEATURE_CPP_INITIALIZER_LIST
     return pair<T1, T2> { t, u };
+#else
+    return pair<T1, T2>(t, u);
+#endif
 }
 
 /*
@@ -140,6 +144,7 @@ template<typename _Tp>
 
 namespace estd {
 
+#ifdef FEATURE_CPP_MOVESEMANTIC
 template<class T, class U = T>
 T exchange(T& obj, U&& new_value)
 {
@@ -147,6 +152,7 @@ T exchange(T& obj, U&& new_value)
     obj = std::forward<U>(new_value);
     return old_value;
 }
+#endif
 
 template <class T>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD

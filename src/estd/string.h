@@ -1,3 +1,7 @@
+/**
+ * @file
+ * NOTE: data() implementation sticks to <= c++11 form in which does not need to be null terminated
+ */
 #pragma once
 
 #include "memory.h"
@@ -30,7 +34,7 @@ namespace estd {
 // fixed allocators
 template<
     class CharT,
-    class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+    class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
 #ifdef FEATURE_STD_MEMORY
     class Allocator = std::allocator<CharT>,
     class StringPolicy = experimental::sized_string_policy<Traits>
@@ -69,7 +73,7 @@ public:
 
     typedef typename allocator_type::handle_type handle_type;
 
-    static CONSTEXPR size_type npos = -1;
+    static CONSTEXPR size_type npos = (size_type) -1;
 
     size_type length() const { return base_t::size(); }
 
@@ -227,7 +231,7 @@ typedef basic_string<char> string;
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = std::char_traits<CharT >,
+template<class CharT, size_t N, bool null_terminated = true, class Traits = estd::char_traits<CharT >,
         class StringPolicy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type
@@ -300,7 +304,7 @@ using string = basic_string<char, N, null_terminated>;
 template <size_t N, bool null_terminated = true>
 class string : public basic_string<char, N, null_terminated>
 {
-    typedef basic_string<char, N> base_t;
+    typedef basic_string<char, N, null_terminated> base_t;
 
 public:
     string() {}
@@ -318,10 +322,10 @@ public:
 namespace layer2 {
 
 template<class CharT, size_t N, bool null_terminated = true,
-         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class StringPolicy = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
+                estd::experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
+                estd::experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
 class basic_string
         : public estd::basic_string<
                 CharT,
@@ -365,16 +369,31 @@ public:
         base_t::impl().size(n);
     }
 
+    template <size_type IncomingN>
+    basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
+    {
+#ifdef FEATURE_CPP_STATIC_ASSERT
+        static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+#endif
+    }
+
     // See 'n' documentation above
     // FIX: above constructor greedily consumes this one's chance at running.
     // Before, I was using const CharT* to differenciate it but technically
     // a const CharT* is just incorrect as the underlying layer2::basic_string
     // isn't intrinsically const
     template <size_type IncomingN>
-    basic_string(CharT (&buffer) [IncomingN], int n = -1) : base_t(&buffer[0])
+    basic_string(CharT (&buffer) [IncomingN], int n) : base_t(&buffer[0])
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
+#endif
 
+        // FIX: for scenarios where:
+        // a) C++03/98 is in effect and
+        // b) policy size_equals_capacity is in effect,
+        // this fails (i.e. assignment to string literal) as compiler attempts to compile/run
+        // this even though n == -1
         if(n >= 0) base_t::impl().size(n);
     }
 
@@ -437,7 +456,7 @@ basic_string<char, N, true> make_string(char (&buffer)[N], int n = -1)
 namespace layer3 {
 
 template<class CharT, bool null_terminated = true,
-         class Traits = std::char_traits<typename estd::remove_const<CharT>::type >,
+         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class Policy = typename estd::conditional<null_terminated,
                 experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
@@ -668,8 +687,9 @@ inline CONSTEXPR uint8_t maxStringLength<estd::internal::no_max_string_length_ta
 }
 }
 
-#ifdef FEATURE_ESTD_IOSTREAM_NATIVE
+#if defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
 
+// FIX: this just doesn't feel natural putting in string.h, move it... somewhere
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Allocator, class StringTraits,
           class Traits,

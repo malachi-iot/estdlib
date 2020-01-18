@@ -51,3 +51,19 @@ struct char_traits<char>
 #else
 #include <string>
 #endif
+
+namespace estd {
+
+#if __ADSPBLACKFIN__
+// Naughty ADI didn't make theirs compatible
+// They omitted the template argument, so recreate it here
+template <class TChar>
+struct char_traits;
+
+template <>
+struct char_traits<char> : std::char_traits {};
+#else
+using std::char_traits;
+#endif
+
+}

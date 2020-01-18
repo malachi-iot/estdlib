@@ -1,0 +1,80 @@
+[Version]
+VdkFileVersion=5.0
+[System Data]
+System.Name=System
+System.Clock Frequency (MHz)=270
+System.Tick Period (ms)=0.1
+System.History Buffer Size=256
+System.Maximum Running Threads=10
+System.Instrumentation Level=Full Instrumentation
+System.Timer Interrupt=EVT_IVTMR
+System.Maximum Active Memory Pools=0
+System.Maximum Active Semaphores=0
+System.Maximum Messages=0
+System.Maximum Active Device Flags=0
+System.Maximum I/O Objects=0
+System.Semaphores Heap=system_heap
+System.Device Flags Heap=system_heap
+System.Messages Heap=system_heap
+System.I/O Objects Heap=system_heap
+System.Number of Nodes=1
+[Idle Thread]
+Count=1
+IdleThread0.System Defined=true
+IdleThread0.Name=IdleThread
+IdleThread0.Stack Size=256
+IdleThread0.Heap=system_heap
+[Thread Types]
+Count=1
+ThreadType0.System Defined=false
+ThreadType0.Name=MainThread
+ThreadType0.Priority=5
+ThreadType0.Message Enabled=false
+ThreadType0.Thread Structure Heap=system_heap
+ThreadType0.Stack Heap=system_heap
+ThreadType0.Stack Size=255
+ThreadType0.Source File=MainThread.cpp
+ThreadType0.Header File=MainThread.h
+[Boot Threads]
+Count=1
+BootThread0.System Defined=false
+BootThread0.Name=BootThread
+BootThread0.Thread Type=MainThread
+BootThread0.Initializer=0
+[Priorities]
+Count=0
+[Semaphores]
+Count=0
+[Events]
+Count=0
+[Event Bits]
+Count=0
+[Interrupts]
+Count=0
+[Device Drivers]
+Count=0
+[I/O Objects]
+Count=0
+[Device Flags]
+Count=0
+[Memory Pools]
+Count=0
+[Multiprocessor Info]
+Count=1
+MultiProcInfo0.System Defined=true
+MultiProcInfo0.Name=MultiprocessorInfo
+MultiProcInfo0.Multiprocessor Messages Allowed=false
+MultiProcInfo0.Local Processor ID=0
+[Marshalled Message Types]
+Count=0
+[Imports]
+Count=0
+[Routing Threads]
+Count=0
+[Routing Nodes]
+Count=1
+RoutingNode0.System Defined=true
+RoutingNode0.Name=RoutingNode0
+RoutingNode0.Routing Thread=0
+[Heaps]
+Count=0

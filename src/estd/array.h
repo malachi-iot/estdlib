@@ -432,6 +432,7 @@ public:
     const_iterator end() const { return iterator((T* const)&base_t::data()[size()]); }
 };
 
+#ifdef FEATURE_CPP_DEFAULT_TARGS
 template <class T, ptrdiff_t N,
           class size_t = typename internal::deduce_fixed_size_t<N>::size_type>
 ///
@@ -442,6 +443,7 @@ estd::layer3::array<T, size_t> make_array(T (&a)[N])
 {
     return estd::layer3::array<T, size_t>(a);
 }
+#endif
 
 
 }

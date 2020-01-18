@@ -35,6 +35,7 @@
 #define FEATURE_CPP_LAMBDA
 #define FEATURE_CPP_RANGED_FORLOOP
 #define FEATURE_CPP_INITIALIZER_LIST
+#define FEATURE_CPP_DEFAULT_CTOR
 #define FEATURE_CPP_DELETE_CTOR
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #define FEATURE_CPP_DEFAULT_TARGS   // default template arguments for a function template
@@ -115,6 +116,7 @@
 #  if __GNUC_PREREQ(4,4)
 #define FEATURE_CPP_ENUM_CLASS
 #define FEATURE_CPP_AUTO
+#define FEATURE_CPP_DEFAULT_CTOR
 #define FEATURE_CPP_DELETE_CTOR
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #  endif
@@ -158,6 +160,9 @@
 #if !defined(ARDUINO) || defined(ESP8266)
 #define FEATURE_STD_ALGORITHM
 #define FEATURE_STD_CSTDDEF
+#if __ADSPBLACKFIN__
+#define FEATURE_STD_CLIMITS
+#endif
 #if __cplusplus >= 201103L
 // https://stackoverflow.com/questions/13642827/cstdint-vs-stdint-h indicates it's a c++11 feature, as
 // corroborated by https://en.cppreference.com/w/cpp/types/integer.  stackoverflow also indicates it's
