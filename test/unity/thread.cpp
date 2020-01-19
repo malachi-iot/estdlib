@@ -20,7 +20,11 @@ void test_lock_guard()
 }
 
 
+#ifdef ESP_PLATFORM
+TEST_CASE("thread tests", "[thread]")
+#else
 void test_thread()
+#endif
 {
     RUN_TEST(test_thread_get_id);
     RUN_TEST(test_lock_guard);

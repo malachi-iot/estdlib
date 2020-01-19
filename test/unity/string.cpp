@@ -57,6 +57,7 @@ void test_layer1_string()
 
 void test_layer2_string()
 {
+    // FIX: Causes exception on line 27
     _test_string_assignment<estd::layer2::const_string>();
 }
 
@@ -68,7 +69,12 @@ void test_layer3_string()
 }
 
 
+// FIX: See comment in test_layer2_string
+#ifdef DISABLED_ESP_PLATFORM
+TEST_CASE("string tests", "[string]")
+#else
 void test_string()
+#endif
 {
     RUN_TEST(test_layer1_string);
     RUN_TEST(test_layer2_string);
