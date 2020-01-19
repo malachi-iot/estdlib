@@ -2,7 +2,7 @@
 
 extern "C" {
 
-#ifdef ESP32
+#if defined(IDF_VER)
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #else

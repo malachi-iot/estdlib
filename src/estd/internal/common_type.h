@@ -1,5 +1,7 @@
 #pragma once
 
+#include "platform.h"
+
 // NOTE: This is rife with C++11 features, so this is a general guard
 // TODO: would really like to enable a basic < C++11 capability since chrono
 // depends on this
