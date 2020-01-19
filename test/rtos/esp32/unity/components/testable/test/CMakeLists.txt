@@ -4,12 +4,12 @@
 #                    REQUIRES unity testable)
 
 
-#set(UNITY_SRCDIR "../../../../../../unity")
-set(UNITY_SRCDIR "")
+set(UNITY_SRCDIR "../../../../../../unity")
+#set(UNITY_SRCDIR "")
 
 set(COMPONENT_SRCDIRS "." ${UNITY_SRCDIR})
 set(COMPONENT_ADD_INCLUDEDIRS ".")
 
-set(COMPONENT_REQUIRES unity testable)
+set(COMPONENT_REQUIRES estdlib unity testable)
 
 register_component()
