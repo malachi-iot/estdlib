@@ -84,4 +84,8 @@ public:
 
 
 }
+
+// NOTE: Be warned, still experimental IF you do binary sem vs mutex
+typedef experimental::mutex mutex;
+
 }
