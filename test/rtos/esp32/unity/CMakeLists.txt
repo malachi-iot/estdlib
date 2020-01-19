@@ -6,6 +6,13 @@ cmake_minimum_required(VERSION 3.5)
 # Does not work, halts CMake process
 #target_compile_definitions(${COMPONENT_TARGET} PUBLIC "-DESP32")
 
+# Set the components to include the tests for.
+# This can be overriden from CMake cache:
+# - when invoking CMake directly: cmake -D TEST_COMPONENTS="xxxxx" ..
+# - when using idf.py: idf.py build -T xxxxx
+#
+set(TEST_COMPONENTS "testable" CACHE STRING "List of components to test")
+
 set(ESTDLIB_DIR ../../../..)
 
 include(${ESTDLIB_DIR}/tools/esp-idf/project.cmake)
