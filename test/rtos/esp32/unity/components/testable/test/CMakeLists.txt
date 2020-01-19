@@ -3,7 +3,11 @@
 #                    INCLUDE_DIRS "."
 #                    REQUIRES unity testable)
 
-set(COMPONENT_SRCDIRS ".")
+
+#set(UNITY_SRCDIR "../../../../../../unity")
+set(UNITY_SRCDIR "")
+
+set(COMPONENT_SRCDIRS "." ${UNITY_SRCDIR})
 set(COMPONENT_ADD_INCLUDEDIRS ".")
 
 set(COMPONENT_REQUIRES unity testable)
