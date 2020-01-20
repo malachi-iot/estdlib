@@ -1,20 +1,7 @@
 #include <Arduino.h>
 
-// FIX: Fix some platforms have the std headers inbuilt and some don't
-// Arduino presence automatically assumes NOT but that was incorrect
-// so temporarily disabling ARDUINO for this example so that we properly
-// heed existing std headers
-#ifdef ESP8266
-#undef ARDUINO
-#endif
-
 #include <estd/type_traits.h>
 #include <estd/string.h>
-
-// FIX: Now re-enabling to avoid any further issues
-#ifndef ARDUINO
-#define ARDUINO
-#endif
 
 #define ACTIVATED
 #ifdef ACTIVATED
@@ -23,7 +10,8 @@
 template<class TImpl> inline Print &operator <<(
     Print &obj, const estd::internal::dynamic_array<TImpl>& arg) 
 {
-    obj.write(arg.clock(), arg.size());
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(arg.clock());
+    obj.write(data, arg.size());
     arg.cunlock();
     return obj;
 }
