@@ -13,6 +13,10 @@ void test_thread_get_id()
 }
 
 
+// TODO: Do a simplistic timed mutex scenario so that we are reasonably
+// sure we wait for one before doing the other
+// NOTE: This is *not* in reference to timed_mutex
+// https://en.cppreference.com/w/cpp/thread/timed_mutex
 void test_lock_guard()
 {
     estd::mutex m;

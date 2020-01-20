@@ -14,20 +14,11 @@ void _test_string_assignment()
 
     //typedef typename TString::value_type char_type;
     //typedef typename TString::pointer pointer_type;
-    // NOTE: Only doing this in the safe confines of our unit test, knowing that
-    // underlying strings passed into this test can in fact be safely modified
-    // (needed for const_string flavor)
-    char* data = const_cast<char*>(s.data());
+    const char* data = s.data();
 
-    //if(!estd::is_const<char_type>::value)
-    {
-        // NOTE: Brute forcing, so that further asserts work:
-        // a) null-terminated already has this
-        // b) non-null-terminated must have space for this
-        data[s.size()] = 0;
-    }
-
-    TEST_ASSERT_EQUAL_STRING(TEST_STR, data);
+    // Don't fiddle with null termination since it may or may not be available
+    // depending on flavor of TString
+    TEST_ASSERT_EQUAL_INT8_ARRAY(TEST_STR, data, s.size());
 }
 
 
@@ -48,7 +39,6 @@ void test_string_concat()
 void test_layer1_string()
 {
     _test_string_assignment<estd::layer1::string<32, true> >();
-    // FIX: non-null-terminated has an issue
     _test_string_assignment<estd::layer1::string<32, false> >();
 
     test_string_concat<estd::layer1::string<32, true> >();
@@ -69,8 +59,7 @@ void test_layer3_string()
 }
 
 
-// FIX: See comment in test_layer2_string
-#ifdef DISABLED_ESP_PLATFORM
+#ifdef ESP_PLATFORM
 TEST_CASE("string tests", "[string]")
 #else
 void test_string()
