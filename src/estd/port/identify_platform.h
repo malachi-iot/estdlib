@@ -3,6 +3,11 @@
 // https://stackoverflow.com/questions/2166483/which-macro-to-wrap-mac-os-x-specific-code-in-c-c
 // https://sourceforge.net/p/predef/wiki/OperatingSystems/
 
+// Put little-to-no-dependency type code here, used for discovering platform
+// and registering fundamental types/defines associated with said platform
+// Included at the beginning of the platform.h feature discovery chain
+// For more complex "always on" platform behaviors, utilize support_platform.h
+
 #if defined(ARDUINO)
 #define ESTD_ARDUINO
 #include "arch/arduino.h"

@@ -177,3 +177,7 @@
 #define FEATURE_STD_TYPE_TRAITS
 #define FEATURE_STD_UTILITY
 #endif
+
+// Now with all the capabilities set up, do more complex platform support,
+// if necessary
+#include "../port/support_platform.h"

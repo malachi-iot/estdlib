@@ -1,6 +1,6 @@
 #pragma once
 
-// For all Arduino scenarios, we print_handler_tag around
+// For all Arduino scenarios, we want print_handler_tag around
 #include <Arduino.h>
 
 namespace estd { namespace internal {
