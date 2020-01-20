@@ -2,16 +2,6 @@
 
 #include "internal/platform.h"
 
-#ifdef FEATURE_STD_CSTDDEF
-#include <cstddef>
-#else
-namespace std {
-
-typedef ::ptrdiff_t ptrdiff_t;
-
-}
-#endif
-
 namespace estd {
 
 #ifdef FEATURE_CPP_ENUM_CLASS
@@ -106,6 +96,7 @@ byte& operator|=(byte& l, byte r) NOEXCEPT
 #include <cstddef>
 #else
 #include <stddef.h>
+
 namespace std {
 
 typedef ::size_t size_t;

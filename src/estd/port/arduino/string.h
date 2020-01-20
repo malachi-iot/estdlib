@@ -2,7 +2,16 @@
 
 #include <Arduino.h>
 
-//namespace estd {
+
+template<class TImpl> inline Print &operator <<(
+    Print &obj, const estd::internal::dynamic_array<TImpl>& arg) 
+{
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(arg.clock());
+    obj.write(data, arg.size());
+    arg.cunlock();
+    return obj;
+}
+
 
 template< class CharT, class Traits, class Alloc, class Policy >
     estd::basic_string<CharT,Traits,Alloc,Policy>&
@@ -28,4 +37,4 @@ operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,
 }
 
 
-//}
+

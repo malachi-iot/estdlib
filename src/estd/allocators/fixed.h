@@ -10,6 +10,14 @@
 #include <assert.h>
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+#pragma push_macro("max")
+#pragma push_macro("min")
+#undef max
+#undef min
+#endif
+
+
 namespace estd {
 
 namespace internal {
@@ -523,3 +531,8 @@ struct handle_descriptor<layer3::allocator<T, TSize>, TTraits >
 
 
 }
+
+#if defined(__GNUC__) || defined(_MSC_VER)
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
