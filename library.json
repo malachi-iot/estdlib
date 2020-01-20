@@ -30,6 +30,9 @@
             "ext"
         ]
     },
+    "examples": [
+        "examples/pio/**/*.cpp"
+    ],
     "version": "0.1.4",
     "frameworks": [
         "arduino",
