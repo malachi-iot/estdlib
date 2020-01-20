@@ -18,7 +18,11 @@ struct no_max_string_length_tag {};
 // which pushes the boundaries of what allocated even really means
 // importantly, this allocated_array doesn't provide for growing/shrinking the array
 template <class TImpl>
-class allocated_array : no_max_string_length_tag
+class allocated_array : 
+#ifdef ARDUINO
+    public print_handler_tag,
+#endif
+    public no_max_string_length_tag
 {
 public:
     typedef TImpl impl_type;

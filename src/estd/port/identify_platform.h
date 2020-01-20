@@ -5,6 +5,7 @@
 
 #if defined(ARDUINO)
 #define ESTD_ARDUINO
+#include "arch/arduino.h"
 #elif defined(FREERTOS)
 #define ESTD_FREERTOS
 #elif (defined (__APPLE__) && defined(__MACH__))
