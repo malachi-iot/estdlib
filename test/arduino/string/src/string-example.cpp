@@ -10,12 +10,10 @@ void setup()
 
     name = "Mickey";
 
-    // these seem to irritate the compiler actually
-    Serial << F("Hello: ");
     Serial.println(F("hi"));
     
     Serial << "Hello: ";
-    Serial << name;
+    Serial << name << F(" Mouse");
 }
 
 
