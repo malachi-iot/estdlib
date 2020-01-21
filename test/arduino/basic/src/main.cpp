@@ -6,6 +6,9 @@
 #include <estd/thread.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
+// 1/20/2020: No longer the case:
+//            32u4 compiles 92 bytes larger :(
+//            attiny85 compiles 32 bytes larger :(
 #define TEST_CHRONO
 
 using namespace estd::chrono;
