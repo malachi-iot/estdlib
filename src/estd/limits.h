@@ -103,10 +103,19 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
     static CONSTEXPR uint32_t max() { return UINT32_MAX; }
 };
 
+// TODO: Look into why all the above uint flavors don't cover these embedded
+// targets
 #ifdef __ADSPBLACKFIN__
 // ?? thought this would be covered by uint32_t, guess not
 template <>
 struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
+#elif defined(__arm__)
+// http://www.keil.com/support/man/docs/armcc/armcc_chr1359125009502.htm
+// https://stackoverflow.com/questions/23934862/what-predefined-macro-can-i-use-to-detect-the-target-architecture-in-clang/41666292
+template <>
+struct numeric_limits<int> : numeric_limits<int32_t> {};
+template <>
+struct numeric_limits<unsigned int> : numeric_limits<uint32_t> {};
 #endif
 
 #ifdef INT64_MAX
