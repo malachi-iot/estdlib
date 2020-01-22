@@ -1,5 +1,12 @@
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
+# For some reason, these 'sets' won't propagate upward even with NO_POLICY_SCOPE
+#set(ESTDLIB_DIR ${ROOT_DIR})
+
+#message("ESTDLIB building: ${ESTDLIB_DIR}")
+
+#set(TESTESTD "hi2u2")
+
 set(COMPONENT_ADD_INCLUDEDIRS 
     ${ROOT_DIR}/src)
 
