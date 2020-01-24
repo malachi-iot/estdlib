@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pio test --without-upload --without-test
+pio test --without-upload --without-test $1 $2
