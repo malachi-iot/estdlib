@@ -2,6 +2,7 @@
 
 #include <unity.h>
 
+// FIX: we have a circular dependency of sorts in port/arduino/Print.h
 #include <estd/cstddef.h>
 
 void test_byte_to_integer()
