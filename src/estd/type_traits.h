@@ -3,7 +3,7 @@
 #include "internal/platform.h"
 #include "internal/type_traits.h"
 
-#include "cstddef.h"
+#include "internal/raw/cstddef.h"
 
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
