@@ -1,0 +1,3 @@
+#!/bin/sh
+
+pio test --without-upload --without-test
