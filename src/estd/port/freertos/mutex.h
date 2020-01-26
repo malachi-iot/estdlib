@@ -2,7 +2,7 @@
 
 extern "C" {
 
-#if defined(IDF_VER)
+#if ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #else

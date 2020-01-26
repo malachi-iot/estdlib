@@ -24,7 +24,7 @@ void test_lock_guard()
 }
 
 
-#ifdef ESP_PLATFORM
+#ifdef ESP_IDF_TESTING
 TEST_CASE("thread tests", "[thread]")
 #else
 void test_thread()

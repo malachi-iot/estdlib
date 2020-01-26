@@ -120,6 +120,9 @@
 #define FEATURE_CPP_DELETE_CTOR
 #define FEATURE_CPP_DEFAULT_FUNCDEF
 #  endif
+#  if __GNUC_PREREQ(4,2)
+#define FEATURE_CPP_TYPEOF
+#  endif
 
 #endif
 

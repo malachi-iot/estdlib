@@ -59,7 +59,7 @@ void test_layer3_string()
 }
 
 
-#ifdef ESP_PLATFORM
+#ifdef ESP_IDF_TESTING
 TEST_CASE("string tests", "[string]")
 #else
 void test_string()

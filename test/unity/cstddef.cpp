@@ -12,7 +12,7 @@ static void test_byte_shift()
 }
 
 
-#ifdef ESP_PLATFORM
+#ifdef ESP_IDF_TESTING
 TEST_CASE("cstddef tests", "[cstddef]")
 #else
 void test_cstddef()

@@ -28,12 +28,24 @@
 #define ESTD_POSIX
 #endif
 
-// ESP_PLATFORM always does freeRTOS for esp-idf
-#if defined(ESP_PLATFORM) && defined(IDF_VER)
+// ESP_PLATFORM always assumes FreeRTOS.  Bare metal not supported
+// at this time (no impediment, just haven't idendified a good way
+// to specify bare metal or not)
+#if defined(ESP_PLATFORM)
+
+#define ESTD_MCU_ESPRESSIF
+
+#if defined(IDF_VER)    // native esp-idf rtos sdk sets this
 #include "arch/esp-idf.h"
+#elif defined(ESP32)    // platformio does not set IDV_VER, but does set this
+#include "arch/esp-idf.h"
+#endif
+
 #if !defined(ESTD_FREERTOS)
 #define ESTD_FREERTOS
 #endif
+
+
 #endif
 
 #ifdef ESTD_FREERTOS

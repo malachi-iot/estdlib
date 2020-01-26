@@ -6,6 +6,7 @@
         "sstream": "cpp",
         "identify_platform.h": "c",
         "system_error": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "esp-idf.h": "c"
     }
 }

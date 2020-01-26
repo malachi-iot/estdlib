@@ -5,7 +5,7 @@
  * Testing inbuilt compiler features platform by platform.  Not actually estdlib specific
  */
 
-#if defined(__GNUC__)
+#if defined(FEATURE_CPP_TYPEOF)
 static int test_typeof_value;
 
 // typeof is GCC predecessor for decltype

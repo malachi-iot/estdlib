@@ -1,10 +1,17 @@
+/**
+ * @file
+ * chrono is rather platform specific at times, so dispatch out here
+ * NOTE: When FreeRTOS is in play, it supercedes other bare metal and/or
+ *       Arduino time API
+ * TODO: Move all this into port/chrono.h
+ */
 #pragma once
 
 #include "internal/platform.h"
 #include "port/chrono.h"
 
 // esp-idf native version coexists with the others
-#if defined(ESTD_IDF_VER)
+#if defined(ESTD_SDK_IDF)
 #include "port/esp-idf/chrono.h"
 #endif
 
@@ -20,14 +27,14 @@
 
 // alias out steady_clock depending on system settings
 namespace estd { namespace chrono {
-#ifdef ATMEL_ASF
-#include "port/asf/chrono.h"
 #ifdef FEATURE_ESTD_FREERTOS_CHRONO
 typedef freertos_clock steady_clock;
 #else
+#ifdef ATMEL_ASF
+#include "port/asf/chrono.h"
 typedef asf_clock steady_clock;
-#endif
 #elif defined(ESTD_ARDUINO) // finish from ATMEL_ASF
 typedef arduino_clock steady_clock;
+#endif
 #endif
 } }
