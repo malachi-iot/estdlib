@@ -55,6 +55,10 @@ set(SOURCE_FILES
         estd/internal/platform.h
         estd/internal/priority_queue.h
         estd/internal/promoted_type.h
+
+        estd/internal/raw/cstddef.h
+        estd/internal/raw/type_traits.h
+
         estd/internal/reverse_list.h
         estd/internal/runtime_array.h
         estd/internal/string_convert.h
