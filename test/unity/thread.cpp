@@ -3,6 +3,8 @@
 #include <estd/thread.h>
 #include <estd/mutex.h>
 
+#ifdef FEATURE_ESTD_THREADING
+
 void test_thread_get_id()
 {
     estd::thread::id id = estd::this_thread::get_id();
@@ -33,3 +35,10 @@ void test_thread()
     RUN_TEST(test_thread_get_id);
     RUN_TEST(test_lock_guard);
 }
+
+#else
+void test_thread()
+{
+    
+}
+#endif

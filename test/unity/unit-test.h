@@ -10,3 +10,8 @@
 #if defined(ESP_PLATFORM) && !defined(ARDUINO)
 #define ESP_IDF_TESTING
 #endif
+
+void test_chrono();
+void test_cstddef();
+void test_string();
+void test_thread();
