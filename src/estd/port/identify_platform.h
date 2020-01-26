@@ -17,12 +17,20 @@
 #define ESTD_MACOS
 #elif (defined (__unix__) || defined(__linux__))
 #define ESTD_UNIX
-#elif (defined (__ADSPBLACKFIN__))
+#endif
+
+#if defined (__ADSPBLACKFIN__)
 #define ESTD_MCU_BLACKFIN
 #else
 // investigate, see if we're stm32
 #include "arch/stm32.h"
+
+#ifndef ESTD_MCU_STM32
+// TODO: Next up look for Atmel/Microchip ARM
 #endif
+
+#endif
+
 
 #if defined(ESTD_UNIX) || defined(ESTD_MACOS)
 #define ESTD_POSIX
