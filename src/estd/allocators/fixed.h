@@ -6,6 +6,7 @@
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"
+#include "../limits.h"
 #ifdef FEATURE_CPP_STATIC_ASSERT
 #include <assert.h>
 #endif

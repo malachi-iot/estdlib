@@ -9,3 +9,7 @@ Place where implementation of certain headers go, sans predicating
 We need this for a small number of internal support headers which themselves
 are called by platform discovery and thus can't call the main estd/xxx.h
 since it would #pragma filter it away
+
+## TODO: Consider `#include "platform.h"` in each
+
+So that tooltips etc resolve more.  #pragmas will keep it safe 

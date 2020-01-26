@@ -118,6 +118,16 @@ template <>
 struct numeric_limits<unsigned int> : numeric_limits<uint32_t> {};
 #endif
 
+// FIX: CLang not playing nice here, yet
+#ifdef ULONG_MAX
+template <>
+struct numeric_limits<unsigned long> : internal::integer_limits<unsigned long, false>
+{
+    static CONSTEXPR unsigned long min() { return 0; }
+    static CONSTEXPR unsigned long max() { return ULONG_MAX; }
+};
+#endif
+
 #ifdef INT64_MAX
 
 template <>
