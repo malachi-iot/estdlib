@@ -2,10 +2,15 @@
 
 #include "internal/platform.h"
 #include "cstdint.h"
+#include "cstddef.h"
 
 #ifdef FEATURE_STD_CLIMITS
 #include <climits>
 #else
+// NOTE: Keep an eye on this, make sure we are pulling in proper standard limits.h
+// -- and in fact, our filename probably should be climits.h
+#include <limits.h>
+
 // NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
 // these limits.h reflect that and focus on 8-bit-boundary computing
 
@@ -40,6 +45,16 @@ inline CONSTEXPR uint8_t max<uint8_t>()
 { return 255; }
 
 }
+
+// size in 8-bit bytes
+#define SIZEOF_INTEGER(max) \
+    (max == INT64_MAX ? 8 : \
+    (max == INT32_MAX ? 4 : 2))
+
+#define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
+#define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
+#define SIZOEF_INT      SIZEOF_INTEGER(INT_MAX)
+#define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
 
 namespace internal {
 
@@ -105,6 +120,7 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
 
 // TODO: Look into why all the above uint flavors don't cover these embedded
 // targets
+// TODO: Use SIZEOF_xxx here instead of MCU specific flavors
 #ifdef __ADSPBLACKFIN__
 // ?? thought this would be covered by uint32_t, guess not
 template <>
@@ -136,6 +152,23 @@ struct numeric_limits<uint64_t> :  internal::integer_limits<uint64_t, false>
     static CONSTEXPR uint64_t max() { return UINT64_MAX; }
 };
 
+#endif
+
+/*
+// Experimental for x64 CLang
+template <>
+struct numeric_limits<std::size_t>
+{
+    static CONSTEXPR std::size_t min() { return 0; }
+    static CONSTEXPR std::size_t max() { return SIZE_MAX; }
+}; */
+
+#if SIZEOF_LONG == 8
+template <> struct numeric_limits<long> : numeric_limits<int64_t> {};
+template <> struct numeric_limits<unsigned long> : numeric_limits<uint64_t> {};
+#else
+template <> struct numeric_limits<long> : numeric_limits<int32_t> {};
+template <> struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
 #endif
 
 }
