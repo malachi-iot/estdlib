@@ -13,6 +13,12 @@
 //#pragma message "Version: " STRINGIZE(ESTD_IDF_VER_MAJOR) " suffix: " STRINGIZE(ESTD_IDF_VER_SUFFIX)
 #pragma message "Version: " STRINGIZE(ESTD_IDF_VER)
 
+#ifndef ESTD_IDF_VER
+#error "Failed IDF version building sanity check"
+#endif
+
+
+
 extern "C" void test_task(void* pv)
 {
     for(;;)
