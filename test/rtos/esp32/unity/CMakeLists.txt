@@ -15,7 +15,9 @@ set(TEST_COMPONENTS "testable" CACHE STRING "List of components to test")
 
 set(ESTDLIB_DIR ../../../..)
 
-include(${ESTDLIB_DIR}/tools/esp-idf/project.cmake)
+include(${ESTDLIB_DIR}/tools/esp-idf/project.cmake NO_POLICY_SCOPE)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+
+message("MAIN: ${ESTDLIB_DIR}")
 
 project(unity)
