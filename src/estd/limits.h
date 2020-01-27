@@ -16,10 +16,10 @@
 // -- and in fact, our filename probably should be climits.h
 #include <limits.h>
 
-// TODO: this actually should be from a climits/climits.h
-#ifndef CHAR_BIT
-#define CHAR_BIT 8
 #endif
+
+#if CHAR_BIT != 8
+#error "Only 8 bit-wide bytes supported"
 #endif
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
