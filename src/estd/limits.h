@@ -1,3 +1,8 @@
+/**
+ * @file
+ * NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
+ * these limits.h reflect that and focus on 8-bit-boundary computing
+ */
 #pragma once
 
 #include "internal/platform.h"
@@ -10,9 +15,6 @@
 // NOTE: Keep an eye on this, make sure we are pulling in proper standard limits.h
 // -- and in fact, our filename probably should be climits.h
 #include <limits.h>
-
-// NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
-// these limits.h reflect that and focus on 8-bit-boundary computing
 
 // TODO: this actually should be from a climits/climits.h
 #ifndef CHAR_BIT
@@ -49,12 +51,14 @@ inline CONSTEXPR uint8_t max<uint8_t>()
 // size in 8-bit bytes
 #define SIZEOF_INTEGER(max) \
     (max == INT64_MAX ? 8 : \
-    (max == INT32_MAX ? 4 : 2))
+    (max == INT32_MAX ? 4 : \
+    (max == INT16_MAX ? 2 : 1)))
 
 #define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
 #define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
-#define SIZOEF_INT      SIZEOF_INTEGER(INT_MAX)
+#define SIZEOF_INT      SIZEOF_INTEGER(INT_MAX)
 #define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
+#define SIZEOF_CHAR     SIZEOF_INTEGER(CHAR_MAX)
 
 namespace internal {
 
@@ -66,7 +70,6 @@ struct integer_limits
     static CONSTEXPR int digits = (sizeof(T) * 8) - (is_signed ? 1 : 0);
 };
 
-}
 
 template <class T> struct numeric_limits;
 
@@ -118,24 +121,6 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
     static CONSTEXPR uint32_t max() { return UINT32_MAX; }
 };
 
-// TODO: Look into why all the above uint flavors don't cover these embedded
-// targets
-// TODO: Use SIZEOF_xxx here instead of MCU specific flavors
-#ifdef __ADSPBLACKFIN__
-// ?? thought this would be covered by uint32_t, guess not
-template <>
-struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
-#elif defined(__arm__)
-// http://www.keil.com/support/man/docs/armcc/armcc_chr1359125009502.htm
-// https://stackoverflow.com/questions/23934862/what-predefined-macro-can-i-use-to-detect-the-target-architecture-in-clang/41666292
-template <>
-struct numeric_limits<int> : numeric_limits<int32_t> {};
-template <>
-struct numeric_limits<unsigned int> : numeric_limits<uint32_t> {};
-#endif
-
-#ifdef INT64_MAX
-
 template <>
 struct numeric_limits<int64_t> : internal::integer_limits<int64_t, true>
 {
@@ -152,24 +137,70 @@ struct numeric_limits<uint64_t> :  internal::integer_limits<uint64_t, false>
     static CONSTEXPR uint64_t max() { return UINT64_MAX; }
 };
 
+// NOTE: Just discovered the __SIZEOF_xxx__ paradigm, see if I can pare down my own version
+// Basically experimental
+#ifdef __SIZEOF_INT128__
+template <>
+struct numeric_limits<__int128> :  internal::integer_limits<__int128, true>
+{
+    static CONSTEXPR int digits10 = 19; // FIX: this is wrong, represents 64-bit size
+    static CONSTEXPR uint64_t min() { return 0; }
+    // FIX: the following is just an approximation for now
+    static CONSTEXPR uint64_t max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
+};
 #endif
 
-/*
-// Experimental for x64 CLang
-template <>
-struct numeric_limits<std::size_t>
-{
-    static CONSTEXPR std::size_t min() { return 0; }
-    static CONSTEXPR std::size_t max() { return SIZE_MAX; }
-}; */
+
+}
+
+template <class T> struct numeric_limits;
+
+
+#if SIZEOF_CHAR == 16
+template <> struct numeric_limits<signed char> : internal::numeric_limits<int16_t> {};
+template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint16_t> {};
+#else
+template <> struct numeric_limits<signed char> : internal::numeric_limits<int8_t> {};
+template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint8_t> {};
+#endif
+
+#if SIZEOF_SHORT == 4
+template <> struct numeric_limits<short> : internal::numeric_limits<int32_t> {};
+template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uint32_t> {};
+#else
+template <> struct numeric_limits<short> : internal::numeric_limits<int16_t> {};
+template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uint16_t> {};
+#endif
+
+
+#if SIZEOF_INT == 8
+template <> struct numeric_limits<int> : internal::numeric_limits<int64_t> {};
+template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint64_t> {};
+#elif SIZEOF_INT == 4
+template <> struct numeric_limits<int> : internal::numeric_limits<int32_t> {};
+template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint32_t> {};
+#else
+template <> struct numeric_limits<int> : internal::numeric_limits<int16_t> {};
+template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint16_t> {};
+#endif
+
 
 #if SIZEOF_LONG == 8
-template <> struct numeric_limits<long> : numeric_limits<int64_t> {};
-template <> struct numeric_limits<unsigned long> : numeric_limits<uint64_t> {};
+template <> struct numeric_limits<long> : internal::numeric_limits<int64_t> {};
+template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint64_t> {};
 #else
-template <> struct numeric_limits<long> : numeric_limits<int32_t> {};
-template <> struct numeric_limits<unsigned long> : numeric_limits<uint32_t> {};
+template <> struct numeric_limits<long> : internal::numeric_limits<int32_t> {};
+template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint32_t> {};
 #endif
+
+#if SIZEOF_LLONG == 8
+template <> struct numeric_limits<long long> : internal::numeric_limits<int64_t> {};
+template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint64_t> {};
+#else
+template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t> {};
+template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
+#endif
+
 
 }
 
