@@ -6,6 +6,9 @@ set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 # components are handled as a specially isolated module in esp-idf
 #set(ESTDLIB_DIR ${ROOT_DIR})
 
+set(COMPONENT_SRCS 
+    ${ROOT_DIR}/src/estd/internal/string_convert.cpp)
+
 set(COMPONENT_ADD_INCLUDEDIRS 
     ${ROOT_DIR}/src)
 
