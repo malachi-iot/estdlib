@@ -109,6 +109,9 @@ set(SOURCE_FILES
         estd/port/string.h
         estd/port/thread.h
 
+        estd/port/toolchain/gnuc.h
+        estd/port/toolchain/msvc.h
+
         estd/queue.h
         estd/ratio.h
         estd/span.h

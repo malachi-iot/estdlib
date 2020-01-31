@@ -5,19 +5,11 @@
 #include "../port/identify_platform.h"
 
 #if defined(__GNUC__)
-#if defined(__linux__)
-#include <features.h>
-#else
-// Only a linux thing
-// https://stackoverflow.com/questions/259248/how-to-test-the-current-version-of-gcc-at-compile-time
-#ifndef __GNUC_PREREQ
-#define __GNUC_PREREQ(major, minor) (__GNUC__ > major || (__GNUC__ == major && __GNUC__MINOR__ >= minor))
-#endif
-#endif
+#include "../port/toolchain/gnuc.h"
 #endif
 
 #if defined(_MSC_VER)
-#define __alignof__(T) __alignof(T)
+#include "../port/toolchain/msvc.h"
 #endif
 
 // TODO: consider utilizing
