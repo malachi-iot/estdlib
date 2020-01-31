@@ -3,14 +3,7 @@
 // FIX: eventually do this as <estd/opts.h> so users can override it
 #include "opts.h"
 #include "../port/identify_platform.h"
-
-#if defined(__GNUC__)
-#include "../port/toolchain/gnuc.h"
-#endif
-
-#if defined(_MSC_VER)
-#include "../port/toolchain/msvc.h"
-#endif
+#include "../port/toolchain.h"
 
 // TODO: consider utilizing
 // http://en.cppreference.com/w/User:D41D8CD98F/feature_testing_macros and
