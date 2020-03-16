@@ -565,10 +565,24 @@ TEST_CASE("string tests")
         {
             std::size_t len;
             estd::layer2::const_string val = "-1234";
-            long value = estd::stoi(val, &len);
+            int value = estd::stoi(val, &len);
 
             REQUIRE(value == -1234);
             REQUIRE(len == 5);
+        }
+        SECTION("stoi [unsupported non-null-terminated]")
+        {
+            // FIX:
+            // layer2::string ends up using a length_helper_t of type dynamic_array_length
+            // which is a runtime length tracker rather than compile time.  And,
+            // not surprisingly, it doesn't have length 4 but rather value of 0 -
+            // and that might be accidental/undefined.
+            estd::layer2::string<4, false> val = "1234";
+            /*
+            char buf[128];
+            val.copy(buf, sizeof(buf));
+            estd::layer2::string<> val2(buf);
+            int value = estd::stoi(val2); */
         }
     }
     SECTION("internal")
