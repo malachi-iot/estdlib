@@ -536,12 +536,31 @@ TEST_CASE("string tests")
 
         REQUIRE(sv4 == "es");
     }
-    SECTION("stol")
+    SECTION("conversion")
     {
-        estd::layer2::const_string val = "1234";
-        long value = estd::stol(val);
+        SECTION("stol")
+        {
+            estd::layer2::const_string val = "1234";
+            long value = estd::stol(val);
 
-        REQUIRE(value == 1234);
+            REQUIRE(value == 1234);
+
+            estd::layer2::const_string val2 = "4321";
+            std::size_t len;
+            value = estd::stol(val2, &len);
+
+            REQUIRE(value == 4321);
+            REQUIRE(len == 4);
+        }
+        SECTION("stoul")
+        {
+            std::size_t len;
+            estd::layer2::const_string val = "1234";
+            long value = estd::stoul(val, &len);
+
+            REQUIRE(value == 1234);
+            REQUIRE(len == 4);
+        }
     }
     SECTION("internal")
     {

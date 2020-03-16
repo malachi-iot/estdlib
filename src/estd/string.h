@@ -656,7 +656,7 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 template <class TChar, class Traits, class Alloc, class TStringTraits>
 long stol(
         const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
-        size_t pos = 0, int base = 10)
+        size_t* pos = 0, int base = 10)
 {
     // FIX: very clunky way to ensure we're looking at a null terminated string
     // somehow I never expose null_termination indicators on the string itself
@@ -666,8 +666,43 @@ long stol(
     typename estd::remove_const<TChar>::type* end;
     long result = strtol(data, &end, base);
     str.cunlock();
+    if(pos != NULLPTR)
+        *pos = end - data;
+
     return result;
 }
+
+template <class TChar, class Traits, class Alloc, class TStringTraits>
+unsigned long stoul(
+        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        size_t* pos = 0, int base = 10
+        )
+{
+    // FIX: very clunky way to ensure we're looking at a null terminated string
+    // somehow I never expose null_termination indicators on the string itself
+    TStringTraits::is_null_termination(0);
+
+    const TChar* data = str.clock();
+    typename estd::remove_const<TChar>::type* end;
+    unsigned long result = strtoul(data, &end, base);
+    str.cunlock();
+    if(pos != NULLPTR)
+        *pos = end - data;
+
+    return result;
+}
+
+
+// TODO: Utilized optimized version for int precision only
+// NOTE: Interestingly, spec calls for stoi to call strtol or wcstol
+template <class TChar, class Traits, class Alloc, class TStringTraits>
+int stoi(
+        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        size_t* pos = 0, int base = 10)
+{
+    return (int) stol(str, pos, base);
+}
+
 
 }
 
