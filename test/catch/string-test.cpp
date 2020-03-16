@@ -561,6 +561,15 @@ TEST_CASE("string tests")
             REQUIRE(value == 1234);
             REQUIRE(len == 4);
         }
+        SECTION("stoi")
+        {
+            std::size_t len;
+            estd::layer2::const_string val = "-1234";
+            long value = estd::stoi(val, &len);
+
+            REQUIRE(value == -1234);
+            REQUIRE(len == 5);
+        }
     }
     SECTION("internal")
     {

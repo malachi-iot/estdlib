@@ -32,6 +32,7 @@ namespace estd {
 // thinking a) would be a good layer2 string and b) would be a good layer3
 // We can start switching 'layer' version of string to derive from basic_string itself by using
 // fixed allocators
+// TODO: Document why it's necessary to remove_const for char_traits CharT
 template<
     class CharT,
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
@@ -653,6 +654,9 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 
 // FIX: This doesn't account for conversion errors, but should.  std version
 // throws exceptions
+// NOTE: Retains TChar rather than deducing from Traits because Traits always
+// removes const, while TChar can be const.  Will create complexities if and when
+// wchar needs to be supported
 template <class TChar, class Traits, class Alloc, class TStringTraits>
 long stol(
         const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
@@ -694,7 +698,9 @@ unsigned long stoul(
 
 
 // TODO: Utilized optimized version for int precision only
-// NOTE: Interestingly, spec calls for stoi to call strtol or wcstol
+// NOTE: Interestingly, spec calls for stoi to call strtol or wcstol.
+// TODO: This is  an optimization opportunity, to call something like atoi
+// for lower-precision conversion
 template <class TChar, class Traits, class Alloc, class TStringTraits>
 int stoi(
         const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
