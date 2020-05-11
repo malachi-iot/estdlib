@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include "cstddef.h"
+
 namespace estd {
 
 template <class T> struct remove_cv;
@@ -62,6 +64,11 @@ struct add_cv { typedef const volatile T type; };
 
 template< class T> struct add_const { typedef const T type; };
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class T >
+using add_const_t = typename add_const<T>::type;
+#endif
+
 template< class T> struct add_volatile { typedef volatile T type; };
 
 template<class T> struct is_const          : false_type {};
@@ -102,5 +109,35 @@ struct enable_if {};
 
 template<class T>
 struct enable_if<true, T> { typedef T type; };
+
+
+template<class T>
+struct is_array : false_type {};
+
+template<class T>
+struct is_array<T[]> : true_type {};
+
+template<class T, std::size_t N>
+struct is_array<T[N]> : true_type {};
+
+template<class T>
+struct remove_extent { typedef T type; };
+
+template<class T>
+struct remove_extent<T[]> { typedef T type; };
+
+template<class T, std::size_t N>
+struct remove_extent<T[N]> { typedef T type; };
+
+
+#ifdef FEATURE_CPP_ALIGN
+template<std::size_t Len, std::size_t Align /* default alignment not implemented */>
+struct aligned_storage {
+    struct type {
+        alignas(Align) byte data[Len];
+    };
+};
+#endif
+
 
 }

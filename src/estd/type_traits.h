@@ -26,15 +26,6 @@ template< bool B, class T = void >
 class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
-#ifdef FEATURE_CPP_ALIGN
-template<std::size_t Len, std::size_t Align /* default alignment not implemented */>
-struct aligned_storage {
-    struct type {
-        alignas(Align) byte data[Len];
-    };
-};
-#endif
-
 
 namespace internal {
 
@@ -122,24 +113,6 @@ struct add_pointer : detail::add_pointer<T, estd::is_function<T>::value> {};
 
 #endif
 
-template<class T>
-struct is_array : false_type {};
-
-template<class T>
-struct is_array<T[]> : true_type {};
-
-template<class T, std::size_t N>
-struct is_array<T[N]> : true_type {};
-
-template<class T>
-struct remove_extent { typedef T type; };
-
-template<class T>
-struct remove_extent<T[]> { typedef T type; };
-
-template<class T, std::size_t N>
-struct remove_extent<T[N]> { typedef T type; };
-
 #ifdef FEATURE_CPP_ENUM_CLASS
 // Obviously a simplistic implementation, but it's a start
 enum class endian
@@ -154,11 +127,6 @@ enum class endian
     native = __BYTE_ORDER__
 #endif
 };
-#endif
-
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template< class T >
-using add_const_t    = typename add_const<T>::type;
 #endif
 
 // because is_function requires variadic
