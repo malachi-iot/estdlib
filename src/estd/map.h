@@ -78,7 +78,11 @@ public:
 }
 
 
-
+// DEBT: only if full C++ dynamic allocation support is not present in the first place
+// do we present our stripped-down and experimental dynamic map.  We don't have a full
+// standalone replacement for std::allocator quite yet, and eventually we'll want to
+// splice in a memory-pool flavor of that here
+#ifdef FEATURE_STD_MEMORY
 template <class Key, class T,
           class Compare = estd::less<Key>,
           template <class> class Allocator = std::allocator>
@@ -111,6 +115,7 @@ public:
         base_t(init, comp) {}
 #endif
 };
+#endif
 
 namespace layer1 {
 
