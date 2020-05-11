@@ -1,9 +1,13 @@
 #pragma once
 
+// Explicit inclusion of platform.h helpful here to avoid dependency issues in Arduino mode
+#include "internal/platform.h"
+
 #include "utility.h"
 #include "functional.h"
 #include "array.h"
 #include "vector.h"
+#include "memory.h"
 
 // so far not liking this mapping of map
 // prefer the mc-memory-lib approach
