@@ -13,6 +13,7 @@ void setup()
     test_cstddef();
     test_string();
     test_thread();
+    test_map();
 
     UNITY_END();
 }

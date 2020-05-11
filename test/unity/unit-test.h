@@ -15,3 +15,4 @@ void test_chrono();
 void test_cstddef();
 void test_string();
 void test_thread();
+void test_map();
