@@ -14,6 +14,12 @@
 #endif
 
 
+// First, see if we need to explicitly include any of the stuff in
+// GLIBC's (or similar, like newlib) features.h
+#if !defined(__GNUC_PREREQ)
+// If so, try to get it
+// Generally, __GLIBC__ is actually defined *inside* features.h so this might
+// be a partially broken test
 #if defined(__linux__) || defined(__GLIBC__)
 // Only a linux/glibc thing:
 // https://stackoverflow.com/questions/259248/how-to-test-the-current-version-of-gcc-at-compile-time
@@ -21,10 +27,10 @@
 // http://web.mit.edu/freebsd/head/contrib/wpa/src/utils/common.h
 #include <features.h>
 #else
-#ifndef __GNUC_PREREQ
 #define __GNUC_PREREQ(major, minor) (__GNUC__ > major || (__GNUC__ == major && __GNUC__MINOR__ >= minor))
 #endif
 #endif
+
 
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
