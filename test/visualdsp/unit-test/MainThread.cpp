@@ -9,6 +9,7 @@
 
 #include "MainThread.h"
 #include <new>
+#include <iostream>
 
 #include "unit-test.h"
 
@@ -50,6 +51,10 @@ MainThread::Run()
     // TODO - Put the thread's "main" Initialization HERE
 
     UNITY_BEGIN();
+
+#ifndef __BYTE_ORDER__
+#error Expecting __BYTE_ORDER__ present (is toolchain.h evaluating?)
+#endif
     
     while (1)
     {
