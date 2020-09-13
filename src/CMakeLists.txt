@@ -9,6 +9,7 @@ set(SOURCE_FILES
         estd/allocators/generic.h
         estd/allocators/handle_desc.h
         estd/array.h
+        estd/charconv.h
         estd/cstdint.h
         estd/cstddef.h
         estd/chrono.h
@@ -120,6 +121,7 @@ set(SOURCE_FILES
         estd/streambuf.h
         estd/string.h
         estd/string_view.h
+        estd/system_error.h
         estd/thread.h
         estd/traits/char_traits.h
         estd/traits/list_node.h

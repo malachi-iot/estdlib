@@ -596,6 +596,34 @@ TEST_CASE("string tests")
     }
     SECTION("from_chars")
     {
+        long output;
+
+        SECTION("good")
+        {
+            estd::layer2::const_string val = "1234";
+            estd::from_chars_result result = estd::from_chars(
+                    val.data(), val.data() + val.size(), output);
+
+            REQUIRE(result.ec == 0);
+            REQUIRE(output == 1234);
+        }
+        SECTION("good 2")
+        {
+            estd::layer2::const_string val = "12a34";
+            estd::from_chars_result result = estd::from_chars(
+                    val.data(), val.data() + val.size(), output);
+
+            REQUIRE(result.ec == 0);
+            REQUIRE(output == 12);
+        }
+        SECTION("bad")
+        {
+            estd::layer2::const_string val = test_str;
+            estd::from_chars_result result = estd::from_chars(
+                    val.data(), val.data() + val.size(), output);
+
+            REQUIRE(result.ec == estd::errc::invalid_argument);
+        }
     }
     SECTION("internal")
     {

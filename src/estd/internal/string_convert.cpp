@@ -1,4 +1,6 @@
 #include "string_convert.h"
+#include "../charconv.h"
+#include "../type_traits.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -205,3 +207,22 @@ template<> PGM_P getTypeName<int>()
 }
 
 }}
+
+namespace estd {
+
+from_chars_result from_chars(const char* first, const char* last,
+                             long& value, int base)
+{
+    char** str_end = const_cast<char**>(&last);
+    // DEBT: strtol permits + and 0x prefixes, from_chars is not
+    // supposed to
+    // DEBT: If we do this manually, will go faster
+    value = std::strtol(first, str_end, base);
+    if(first == last)
+        return from_chars_result { first, errc(errc::invalid_argument) };
+    else
+        return from_chars_result { last, errc(errno) };
+}
+
+
+}

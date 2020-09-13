@@ -13,6 +13,9 @@ namespace estd {
 typedef std::errc errc;
 
 #else
+
+#include <errno.h>
+
 namespace estd {
 
 namespace internal {
@@ -32,6 +35,11 @@ public:
     typedef typename TEnumClass::values values;
 
     bool operator == (values compare_to) const
+    {
+        return value == compare_to;
+    }
+
+    bool operator == (TValue compare_to) const
     {
         return value == compare_to;
     }
