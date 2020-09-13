@@ -1,6 +1,7 @@
 #include "unit-test.h"
 
 #include <estd/string.h>
+#include <estd/charconv.h>
 
 #define TEST_STR "hi2u"
 #define TEST_STR2 "hi2me"
