@@ -1,6 +1,7 @@
 #include <estd/string.h>
 #include <estd/string_view.h>
 #include <estd/vector.h>
+#include <estd/charconv.h>
 #include <cstdlib>
 #include <ostream>
 
@@ -584,6 +585,17 @@ TEST_CASE("string tests")
             estd::layer2::string<> val2(buf);
             int value = estd::stoi(val2); */
         }
+    }
+    SECTION("errc")
+    {
+        // TODO: Move this error eval code elsewhere
+        estd::errc error(estd::errc::invalid_argument);
+
+        REQUIRE(error == errc::invalid_argument);
+        REQUIRE(error != errc::result_out_of_range);
+    }
+    SECTION("from_chars")
+    {
     }
     SECTION("internal")
     {
