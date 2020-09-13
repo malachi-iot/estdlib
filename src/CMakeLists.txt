@@ -36,8 +36,9 @@ set(SOURCE_FILES
         estd/internal/common_type.h
         estd/internal/deduce_fixed_size.h
         estd/internal/dynamic_array.h
-        estd/internal/handle_with_offset.h
+        estd/internal/enum.h
         estd/internal/functional.h
+        estd/internal/handle_with_offset.h
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
