@@ -219,9 +219,9 @@ from_chars_result from_chars(const char* first, const char* last,
     // DEBT: If we do this manually, will go faster
     value = std::strtol(first, str_end, base);
     if(first == last)
-        return from_chars_result { first, errc(errc::invalid_argument) };
+        return from_chars_result { first, errc::invalid_argument };
     else
-        return from_chars_result { last, errc(errno) };
+        return from_chars_result { last, errc{ errno } };
 }
 
 

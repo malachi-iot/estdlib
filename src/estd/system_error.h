@@ -24,15 +24,17 @@ namespace internal {
 // TEnumClass must always contain an enum called 'values'
 // TODO: Move this enum_helper elsewhere for easier discovery
 template <class TEnumClass, class TValue = int>
-struct enum_helper : TEnumClass
+struct enum_class : TEnumClass
 {
 protected:
     TValue value;
 
 public:
-    explicit enum_helper(TValue value) : value(value) {}
+    explicit enum_class(TValue value) : value(value) {}
 
     typedef typename TEnumClass::values values;
+
+    enum_class(values value) : value(value) {}
 
     bool operator == (values compare_to) const
     {
@@ -63,13 +65,7 @@ struct errc_enum
 
 }
 
-class errc : public internal::enum_helper<internal::errc_enum>
-{
-public:
-    explicit errc(int value) :
-        internal::enum_helper<internal::errc_enum>(value) {}
-    
-};
+typedef internal::enum_class<internal::errc_enum> errc;
 
 #endif
 
