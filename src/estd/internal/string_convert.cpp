@@ -90,9 +90,9 @@ template<> char* toString(char* output, char input)
 }
 
 
-#if defined(__AVR__) or defined(__SAMD21G18A__) or \
-    (defined(ESP8266) and defined(ARDUINO)) or \
-    (defined(ESP32) or defined(ESP_IDF) or defined(IDF_VER)) or \
+#if defined(__AVR__) || defined(__SAMD21G18A__) || \
+    (defined(ESP8266) && defined(ARDUINO)) || \
+    (defined(ESP32) || defined(ESP_IDF) || defined(IDF_VER)) || \
     defined(__ARM_EABI__)
 #define STDLIB_NONISO
 #define STDLIB_NONISO_ITOA
@@ -160,6 +160,8 @@ template<> char* toString(char* output, uint16_t input)
 }
 
 
+// DEBT: Need a more precise way of determining PRIu32 presence
+#ifndef __ADSPBLACKFIN__
 template<> char* toString(char* output, uint32_t input)
 {
     sprintf(output, "%" PRIu32, input);
@@ -171,6 +173,7 @@ template<> char* toString(char* output, int32_t input)
 {
     sprintf(output, "%" PRIi32, input);
 } */
+#endif
 
 #endif
 
@@ -217,12 +220,13 @@ from_chars_result from_chars(const char* first, const char* last,
     // DEBT: strtol permits + and 0x prefixes, from_chars is not
     // supposed to
     // DEBT: If we do this manually, will go faster
-    value = std::strtol(first, str_end, base);
+    value = 
+    	//std::
+    	strtol(first, str_end, base);
     if(first == last)
         return from_chars_result { first, errc::invalid_argument };
     else
         return from_chars_result { last, errc{ errno } };
 }
-
 
 }
