@@ -223,10 +223,17 @@ from_chars_result from_chars(const char* first, const char* last,
     value = 
     	//std::
     	strtol(first, str_end, base);
+#if __cplusplus >= 201103L
     if(first == last)
         return from_chars_result { first, errc::invalid_argument };
     else
         return from_chars_result { last, errc{ errno } };
+#else
+    if(first == last)
+        return from_chars_result(first, errc::invalid_argument);
+    else
+        return from_chars_result(last, errc(errno));
+#endif
 }
 
 }

@@ -65,9 +65,11 @@ void test_from_chars()
     estd::layer2::const_string s = "1234";
     long value;
 
-    /* Does not link just yet
     estd::from_chars_result result = 
-        estd::from_chars(s.data(), s.data() + s.size(), value); */
+        estd::from_chars(s.data(), s.data() + s.size(), value);
+
+    TEST_ASSERT(result.ec == 0);
+    TEST_ASSERT_EQUAL_INT32(1234, value);
 }
 
 
