@@ -21,16 +21,13 @@ namespace estd {
 
 namespace internal {
 
-#ifdef E2BIG
-#define FEATURE_POSIX_ERRNO
-#endif
 
 // manual "enum class", enum itself must always be called 'values'
 struct errc
 {
     enum values
     {
-#ifdef  FEATURE_POSIX_ERRNO
+#if     _POSIX_C_SOURCE >= 199606L
         address_family_not_supported = EAFNOSUPPORT,
         bad_address = EFAULT,
         invalid_argument = EINVAL,
@@ -38,12 +35,13 @@ struct errc
         not_supported = ENOTSUP,
 #else
         invalid_argument = EDOM + 10,
+        not_supported = EDOM + 20,
 #endif
         result_out_of_range = ERANGE,
-#ifdef  FEATURE_POSIX_ERRNO
+#if     _POSIX_C_SOURCE >= 199606L
         timed_out = ETIMEDOUT
 #else
-        timed_out = EDOM + 11
+        timed_out = EDOM + 30
 #endif
     };
 };
