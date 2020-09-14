@@ -19,9 +19,8 @@
     {
         "srcFilter":
         [
-            "-<*>",
-            "+<src/>",
-            "-<src/.idea>"
+            "+<*>",
+            "-<.idea>"
         ]
     },
     "export": {
