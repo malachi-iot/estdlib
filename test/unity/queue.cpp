@@ -1,25 +1,14 @@
 #include "unit-test.h"
 
 #include <estd/queue.h>
-#include <estd/mutex.h>
 
 using namespace estd;
 
 CONSTEXPR int test_value_1 = 5;
 CONSTEXPR int test_value_2 = 10;
 
-struct TestStruct
-{
-    int value;
 
-    TestStruct(int value) : value(value) {}
-
-    // DEBT: Necessary to participate in layer1::queue due to incomplete implementation of
-    // whatever that value-holder type was
-    TestStruct() {}
-};
-
-static void test_queue_1()
+static void test_queue_int()
 {
     layer1::queue<int, 10> q;
 
@@ -37,7 +26,7 @@ static void test_queue_1()
 }
 
 
-static void test_queue_2()
+static void test_queue_struct()
 {
     layer1::queue<TestStruct, 10> q;
 
@@ -52,6 +41,6 @@ TEST_CASE("queue tests", "[queue]")
 void test_queue()
 #endif
 {
-    RUN_TEST(test_queue_1);
-    RUN_TEST(test_queue_2);
+    RUN_TEST(test_queue_int);
+    RUN_TEST(test_queue_struct);
 }
