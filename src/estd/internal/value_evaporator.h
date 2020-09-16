@@ -176,6 +176,9 @@ struct instance_provider
     instance_provider(TArgs&&...args) :
         _value(std::forward<TArgs>(args)...)
     {}
+#else
+    // Handles only simplistic "undefined" initialization
+    instance_provider() {}
 #endif
 };
 
