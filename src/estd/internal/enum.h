@@ -10,13 +10,14 @@ namespace estd { namespace internal {
 template <class TEnumClass, class TValue = int>
 struct enum_class : TEnumClass
 {
+    typedef typename TEnumClass::values values;
+
 protected:
-    TValue value;
+    values value;
 
 public:
-    explicit enum_class(TValue value) : value(value) {}
-
-    typedef typename TEnumClass::values values;
+    // DEBT: We need to do a safer typecast here
+    explicit enum_class(TValue value) : value((values)value) {}
 
     enum_class(values value) : value(value) {}
 

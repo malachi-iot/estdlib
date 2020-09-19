@@ -217,6 +217,7 @@ from_chars_result from_chars(const char* first, const char* last,
                              long& value, int base)
 {
     char** str_end = const_cast<char**>(&last);
+    errno = 0;  // seems clang demands this
     // DEBT: strtol permits + and 0x prefixes, from_chars is not
     // supposed to
     // DEBT: If we do this manually, will go faster

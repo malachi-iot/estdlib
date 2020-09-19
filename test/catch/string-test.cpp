@@ -593,6 +593,8 @@ TEST_CASE("string tests")
 
         REQUIRE(error == errc::invalid_argument);
         REQUIRE(error != errc::result_out_of_range);
+
+        REQUIRE(error == EINVAL);
     }
     SECTION("from_chars")
     {
