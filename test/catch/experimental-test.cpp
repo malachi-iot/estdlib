@@ -77,6 +77,46 @@ inline bool is_in_base(char c, int base)
     return '0' <= c && c <= ('0' + (base - 1));
 }
 
+/// @brief Represents char-to-base-n conversion traits
+/// @param T
+template <int base, class TEnable = estd::internal::Range<true>>
+struct char_base_traits;
+
+template <int base>
+struct char_base_traits<base, estd::internal::Range<base <= 10>>
+{
+    static inline bool is_in_base(char c, int _base = base)
+    {
+        return '0' <= c && c <= ('0' + (_base - 1));
+    }
+
+    static inline int8_t from_char(char c)
+    {
+        return c - '0';
+    }
+};
+
+
+template <int base>
+struct char_base_traits<base, estd::internal::Range<(base > 10 && base <= 26)>>
+{
+    static inline bool is_in_base(char c, int _base = base)
+    {
+        return ('0' <= c && c <= '9') ||
+            ('A' <= c && c <= ('A' + (_base - 11)));
+    }
+
+    static inline int8_t from_char(char c)
+    {
+        if(c <= '9')
+            return c - '0';
+        else
+            return c - 'A' + 10;
+    }
+};
+
+
+
 // GNU equivelant uses reference on first and increments it instead of current
 template <class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
@@ -565,6 +605,28 @@ TEST_CASE("experimental tests")
     {
         STATIC_ASSERT(true);
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
+    }
+    SECTION("char_base_traits")
+    {
+        SECTION("decimal")
+        {
+            typedef char_base_traits<10> cbt;
+
+            REQUIRE(cbt::is_in_base('9') == true);
+            REQUIRE(cbt::is_in_base('F') == false);
+
+            REQUIRE(cbt::from_char('9') == 9);
+        }
+        SECTION("hexadecimal")
+        {
+            typedef char_base_traits<16> cbt;
+
+            REQUIRE(cbt::is_in_base('F') == true);
+            REQUIRE(cbt::is_in_base('G') == false);
+
+            REQUIRE(cbt::from_char('9') == 9);
+            REQUIRE(cbt::from_char('B') == 11);
+        }
     }
 }
 
