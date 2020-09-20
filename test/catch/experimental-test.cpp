@@ -9,6 +9,7 @@
 #include <estd/memory.h>
 #include <estd/functional.h>
 #include "estd/streambuf.h"
+#include <estd/charconv.h>
 
 struct TestA {};
 
@@ -51,6 +52,61 @@ estd::layer1::string<128> provider_string;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+// trying this
+// https://stackoverflow.com/questions/2831934/how-to-use-if-inside-define-in-the-c-preprocessor
+#define _STATIC_ASSERT(expr) STATIC_ASSERT_##expr
+#define STATIC_ASSERT(expr) _STATIC_ASSERT(expr)
+#define STATIC_ASSERT_true
+#define STATIC_ASSERT_false #error Assert Failed
+
+// lifted from GNUC
+template<typename _Tp>
+bool
+raise_and_add(_Tp& __val, int __base, unsigned char __c)
+{
+    if (__builtin_mul_overflow(__val, __base, &__val)
+        || __builtin_add_overflow(__val, __c, &__val))
+        return false;
+    return true;
+}
+
+// lifted from GNUC
+inline bool is_in_base(char c, int base)
+{
+    return '0' <= c && c <= ('0' + (base - 1));
+}
+
+// GNU equivelant uses reference on first and increments it instead of current
+template <class T>
+estd::from_chars_result from_chars_integer(const char* first, const char* last,
+                                     T& value, int base)
+{
+    static_assert(estd::is_integral<T>::value, "implementation bug");
+    //static_assert(estd::is_unsigned<T>::value, "implementation bug");
+
+    const char* current = first;
+
+    estd::from_chars_result result { last, estd::errc(0) };
+
+    // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
+    while(current != last)
+    {
+        if(is_in_base(*current, base))
+        {
+            bool success = raise_and_add(value, base, *current - '0');
+            if (!success)
+            {
+                result.ec = estd::errc::result_out_of_range;
+                return result;
+            }
+        }
+        current++;
+    }
+
+    return result;
+}
+
 
 TEST_CASE("experimental tests")
 {
@@ -484,6 +540,31 @@ TEST_CASE("experimental tests")
             REQUIRE(span.size() == same_span.size());
             REQUIRE(same_span[0] == buf[0]);
         }
+    }
+    SECTION("from_char prototypes")
+    {
+        SECTION("base 2")
+        {
+            const char *src = "1010";
+
+            short value = 0;
+            from_chars_integer(src, src + 4, value, 2);
+
+            REQUIRE(value == 10);
+        }
+        SECTION("base 10")
+        {
+            const char *src = "1234";
+            int value = 0;
+            from_chars_integer(src, src + 4, value, 10);
+
+            REQUIRE(value == 1234);
+        }
+    }
+    SECTION("STATIC_ASSERT")
+    {
+        STATIC_ASSERT(true);
+        //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 }
 
