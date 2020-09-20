@@ -10,6 +10,9 @@
 #include <estd/functional.h>
 #include "estd/streambuf.h"
 #include <estd/charconv.h>
+// TODO: Make a cctype.h to include simpler isspace
+//#include <estd/locale.h>
+
 
 struct TestA {};
 
@@ -131,6 +134,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     estd::from_chars_result result { last, estd::errc(0) };
 
+    // TODO: make and use cctype's isspace
+    while(*current == ' ')
+        current++;
+
     if(estd::is_signed<T>::value)
     {
         if(negate = (*current == '-'))
@@ -157,7 +164,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         }
         else
         {
-            // FIX: Probably need to do the skip code here too like above
+            result.ptr = current;
+            return result;
         }
         current++;
     }
@@ -631,6 +639,20 @@ TEST_CASE("experimental tests")
                 from_chars_integer<char_base_traits<10> >(src, src + 5, value);
 
                 REQUIRE(value == -1234);
+            }
+            SECTION("extra stuff")
+            {
+                estd::layer2::const_string src = "1234 hello";
+
+                int value = 0;
+                estd::from_chars_result result =
+                        from_chars_integer<char_base_traits<10> >(
+                                src.data(),
+                          src.data() + src.size(), value);
+
+                REQUIRE(result.ec == 0);
+                REQUIRE(value == 1234);
+                REQUIRE(estd::layer2::const_string(result.ptr) == " hello");
             }
         }
         SECTION("base 16")
