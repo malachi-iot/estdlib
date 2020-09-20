@@ -71,11 +71,6 @@ raise_and_add(_Tp& __val, int __base, unsigned char __c)
     return true;
 }
 
-// lifted from GNUC
-inline bool is_in_base(char c, int base)
-{
-    return '0' <= c && c <= ('0' + (base - 1));
-}
 
 /// @brief Represents char-to-base-n conversion traits
 /// @tparam b numeric base indicator
@@ -87,7 +82,9 @@ template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<b <= 10>>
 {
     static inline unsigned base() { return b; }
-    static inline bool is_in_base(char c, int _base = b)
+
+    // adapted from GNUC
+    static inline bool is_in_base(char c, const int _base = b)
     {
         return '0' <= c && c <= ('0' + (_base - 1));
     }
@@ -103,7 +100,7 @@ template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
 {
     static inline unsigned base() { return b; }
-    static inline bool is_in_base(char c, int _base = b)
+    static inline bool is_in_base(char c, const int _base = b)
     {
         return ('0' <= c && c <= '9') ||
             ('A' <= c && c <= ('A' + (_base - 11)));
@@ -130,8 +127,15 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     //static_assert(estd::is_unsigned<T>::value, "implementation bug");
 
     const char* current = first;
+    bool negate = false;
 
     estd::from_chars_result result { last, estd::errc(0) };
+
+    if(estd::is_signed<T>::value)
+    {
+        if(negate = (*current == '-'))
+            current++;
+    }
 
     // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
     while(current != last)
@@ -142,12 +146,25 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
             bool success = raise_and_add(value, base, val);
             if (!success)
             {
+                // UNTESTED
+                // skip to either end or next spot which isn't a number
+                while(current++ != last && traits::is_in_base(*current)) {}
+
+                result.ptr = current;
                 result.ec = estd::errc::result_out_of_range;
                 return result;
             }
         }
+        else
+        {
+            // FIX: Probably need to do the skip code here too like above
+        }
         current++;
     }
+
+    // prepend with constexpr so we can optimize out non-signed flavors
+    if(estd::is_signed<T>::value && negate)
+        value = -value;
 
     return result;
 }
@@ -599,11 +616,22 @@ TEST_CASE("experimental tests")
         }
         SECTION("base 10")
         {
-            const char *src = "1234";
-            int value = 0;
-            from_chars_integer<char_base_traits<10> >(src, src + 4, value, 10);
+            SECTION("positive")
+            {
+                const char* src = "1234";
+                int value = 0;
+                from_chars_integer<char_base_traits<10> >(src, src + 4, value, 10);
 
-            REQUIRE(value == 1234);
+                REQUIRE(value == 1234);
+            }
+            SECTION("negative")
+            {
+                const char* src = "-1234";
+                int value = 0;
+                from_chars_integer<char_base_traits<10> >(src, src + 5, value);
+
+                REQUIRE(value == -1234);
+            }
         }
         SECTION("base 16")
         {
