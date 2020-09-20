@@ -78,14 +78,16 @@ inline bool is_in_base(char c, int base)
 }
 
 /// @brief Represents char-to-base-n conversion traits
-/// @param T
-template <int base, class TEnable = estd::internal::Range<true>>
+/// @tparam b numeric base indicator
+/// @tparam TEnable for internal use
+template <unsigned b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
-template <int base>
-struct char_base_traits<base, estd::internal::Range<base <= 10>>
+template <unsigned b>
+struct char_base_traits<b, estd::internal::Range<b <= 10>>
 {
-    static inline bool is_in_base(char c, int _base = base)
+    static inline unsigned base() { return b; }
+    static inline bool is_in_base(char c, int _base = b)
     {
         return '0' <= c && c <= ('0' + (_base - 1));
     }
@@ -97,10 +99,11 @@ struct char_base_traits<base, estd::internal::Range<base <= 10>>
 };
 
 
-template <int base>
-struct char_base_traits<base, estd::internal::Range<(base > 10 && base <= 26)>>
+template <unsigned b>
+struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
 {
-    static inline bool is_in_base(char c, int _base = base)
+    static inline unsigned base() { return b; }
+    static inline bool is_in_base(char c, int _base = b)
     {
         return ('0' <= c && c <= '9') ||
             ('A' <= c && c <= ('A' + (_base - 11)));
@@ -118,10 +121,11 @@ struct char_base_traits<base, estd::internal::Range<(base > 10 && base <= 26)>>
 
 
 // GNU equivelant uses reference on first and increments it instead of current
-template <class T>
+template <class TCharBaseTraits, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
-                                     T& value, int base)
+                                     T& value, int base = TCharBaseTraits::base())
 {
+    typedef TCharBaseTraits traits;
     static_assert(estd::is_integral<T>::value, "implementation bug");
     //static_assert(estd::is_unsigned<T>::value, "implementation bug");
 
@@ -132,9 +136,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
     while(current != last)
     {
-        if(is_in_base(*current, base))
+        if(traits::is_in_base(*current, base))
         {
-            bool success = raise_and_add(value, base, *current - '0');
+            int8_t val = traits::from_char(*current);
+            bool success = raise_and_add(value, base, val);
             if (!success)
             {
                 result.ec = estd::errc::result_out_of_range;
@@ -588,7 +593,7 @@ TEST_CASE("experimental tests")
             const char *src = "1010";
 
             short value = 0;
-            from_chars_integer(src, src + 4, value, 2);
+            from_chars_integer<char_base_traits<2> >(src, src + 4, value, 2);
 
             REQUIRE(value == 10);
         }
@@ -596,9 +601,17 @@ TEST_CASE("experimental tests")
         {
             const char *src = "1234";
             int value = 0;
-            from_chars_integer(src, src + 4, value, 10);
+            from_chars_integer<char_base_traits<10> >(src, src + 4, value, 10);
 
             REQUIRE(value == 1234);
+        }
+        SECTION("base 16")
+        {
+            const char *src = "FF";
+            int value = 0;
+            from_chars_integer<char_base_traits<16> >(src, src + 4, value);
+
+            REQUIRE(value == 255);
         }
     }
     SECTION("STATIC_ASSERT")
