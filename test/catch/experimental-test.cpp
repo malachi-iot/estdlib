@@ -582,6 +582,18 @@ TEST_CASE("experimental tests")
             REQUIRE(result.ec == 0);
             REQUIRE(value == 1234);
         }
+        SECTION("lazy")
+        {
+            const char s[128] = "1234";
+
+            unsigned value;
+
+            estd::from_chars_result result =
+                    estd::experimental::from_chars(s, &s[0] + sizeof(s), value);
+
+            REQUIRE(result.ec == 0);
+            REQUIRE(value == 1234);
+        }
     }
     SECTION("STATIC_ASSERT")
     {
