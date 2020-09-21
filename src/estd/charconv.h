@@ -20,10 +20,12 @@ struct from_chars_result {
 #endif
 };
 
+namespace legacy {
 from_chars_result from_chars(const char* first, const char* last,
                              long& value, int base = 10);
+}
 
-namespace experimental {
+namespace internal {
 
 // adapted from GNUC
 template<typename _Tp>
@@ -50,7 +52,7 @@ raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 /// @brief Represents char-to-base-n conversion traits
 /// @tparam b numeric base indicator
 /// @tparam TEnable for internal use
-template <unsigned short b, class TEnable = estd::internal::Range<true>>
+template<unsigned short b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
 struct char_base_traits_base
@@ -61,7 +63,7 @@ struct char_base_traits_base
 };
 
 /// (Maybe) Requires ASCII
-template <unsigned short b>
+template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<b <= 10>> :
         char_base_traits_base
 {
@@ -80,14 +82,14 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>> :
 
     static inline int_type from_char_with_test(char c, const int _base = b)
     {
-        if(is_in_base(c, _base)) return from_char(c);
+        if (is_in_base(c, _base)) return from_char(c);
 
         return eol();
     }
 };
 
 /// (Maybe) Requires ASCII
-template <unsigned short b>
+template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
         char_base_traits_base
 {
@@ -102,6 +104,7 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
     }
 
     static inline unsigned base() { return b; }
+
     static inline bool is_in_base(char c, const unsigned short _base = b)
     {
         return estd::isdigit(c) ||
@@ -111,18 +114,18 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
 
     static inline int_type from_char_with_test(char c, const unsigned short _base = b)
     {
-        if(estd::isdigit(c)) return c - '0';
+        if (estd::isdigit(c)) return c - '0';
 
-        if(isupper(c, _base)) return c - 'A' + 10;
+        if (isupper(c, _base)) return c - 'A' + 10;
 
-        if(islower(c, _base)) return c - 'a' + 10;
+        if (islower(c, _base)) return c - 'a' + 10;
 
         return eol();
     }
 
     static inline int_type from_char(char c)
     {
-        if(c <= '9')
+        if (c <= '9')
             return c - '0';
         else if (c <= 'Z')
             return c - 'A' + 10;
@@ -132,8 +135,7 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
 };
 
 
-
-template <class TCharBaseTraits, class T>
+template<class TCharBaseTraits, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            T& value,
                                            const unsigned short base = TCharBaseTraits::base())
@@ -152,29 +154,29 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // the matched characters is not representable in the type of value, value is unmodified,"
     T local_value = 0;
 
-    estd::from_chars_result result { last, estd::errc(0) };
+    estd::from_chars_result result{last, estd::errc(0)};
 
-    while(estd::isspace(*current))
+    while (estd::isspace(*current))
         current++;
 
-    if(estd::is_signed<T>::value)
+    if (estd::is_signed<T>::value)
     {
         negate = *current == '-';
 
-        if(negate)  current++;
+        if (negate) current++;
     }
 
-    while(current != last)
+    while (current != last)
     {
         const int_type digit =
                 traits::from_char_with_test(*current, base);
-        if(digit != traits::eol())
+        if (digit != traits::eol())
         {
             bool success = raise_and_add(local_value, base, digit);
             if (!success)
             {
                 // skip to either end or next spot which isn't a number
-                while(current++ != last && traits::is_in_base(*current)) {}
+                while (current++ != last && traits::is_in_base(*current)) {}
 
                 result.ptr = current;
                 result.ec = estd::errc::result_out_of_range;
@@ -185,17 +187,21 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         {
             value = local_value;
             result.ptr = current;
+            if(current == first)
+                result.ec = errc::invalid_argument;
             return result;
         }
         current++;
     }
 
     // prepend with constexpr so we can optimize out non-signed flavors
-    if(estd::is_signed<T>::value && negate)
+    if (estd::is_signed<T>::value && negate)
         local_value = -local_value;
 
     value = local_value;
     return result;
+}
+
 }
 
 template <class TInt>
@@ -205,11 +211,9 @@ estd::from_chars_result from_chars(const char* first,
                                                 const int base = 10)
 {
     if(base > 10)
-        return from_chars_integer<char_base_traits<36>>(first, last, value, base);
+        return internal::from_chars_integer<internal::char_base_traits<36>>(first, last, value, base);
     else
-        return from_chars_integer<char_base_traits<10>>(first, last, value, base);
-}
-
+        return internal::from_chars_integer<internal::char_base_traits<10>>(first, last, value, base);
 }
 
 }

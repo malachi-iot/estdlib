@@ -212,6 +212,7 @@ template<> PGM_P getTypeName<int>()
 }}
 
 namespace estd {
+namespace legacy {
 
 from_chars_result from_chars(const char* first, const char* last,
                              long& value, int base)
@@ -237,4 +238,4 @@ from_chars_result from_chars(const char* first, const char* last,
 #endif
 }
 
-}
+}}

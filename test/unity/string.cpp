@@ -60,6 +60,19 @@ void test_layer3_string()
 }
 
 
+void test_from_chars_legacy()
+{
+    estd::layer2::const_string s = "1234";
+    long value;
+
+    estd::from_chars_result result = 
+        estd::legacy::from_chars(s.data(), s.data() + s.size(), value);
+
+    TEST_ASSERT(result.ec == 0);
+    TEST_ASSERT_EQUAL_INT32(1234, value);
+}
+
+
 void test_from_chars()
 {
     estd::layer2::const_string s = "1234";
@@ -67,19 +80,6 @@ void test_from_chars()
 
     estd::from_chars_result result = 
         estd::from_chars(s.data(), s.data() + s.size(), value);
-
-    TEST_ASSERT(result.ec == 0);
-    TEST_ASSERT_EQUAL_INT32(1234, value);
-}
-
-
-void test_from_chars_experimental()
-{
-    estd::layer2::const_string s = "1234";
-    long value;
-
-    estd::from_chars_result result = 
-        estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
 
     TEST_ASSERT_EQUAL_INT32(0, (int)result.ec);
     TEST_ASSERT_EQUAL_INT32(1234, value);
@@ -94,6 +94,6 @@ void test_string()
 {
     RUN_TEST(test_layer1_string);
     RUN_TEST(test_layer2_string);
+    RUN_TEST(test_from_chars_legacy);
     RUN_TEST(test_from_chars);
-    RUN_TEST(test_from_chars_experimental);
 }

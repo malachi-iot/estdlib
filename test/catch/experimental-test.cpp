@@ -505,7 +505,8 @@ TEST_CASE("experimental tests")
     }
     SECTION("internal from_char prototypes")
     {
-        using namespace estd::experimental;
+        // TODO: Move out of experimental area, concept is proven
+        using namespace estd::internal;
 
         SECTION("base 2")
         {
@@ -560,13 +561,15 @@ TEST_CASE("experimental tests")
     }
     SECTION("from_char prototypes")
     {
+        // TODO: Move out of experimental area, concept is proven
+
         SECTION("long")
         {
             estd::layer2::const_string s = "1234";
             long value;
 
             estd::from_chars_result result =
-                    estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
+                    estd::from_chars(s.data(), s.data() + s.size(), value);
 
             REQUIRE(result.ec == 0);
             REQUIRE(value == 1234);
@@ -577,7 +580,7 @@ TEST_CASE("experimental tests")
             unsigned value;
 
             estd::from_chars_result result =
-                    estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
+                    estd::from_chars(s.data(), s.data() + s.size(), value);
 
             REQUIRE(result.ec == 0);
             REQUIRE(value == 1234);
@@ -589,7 +592,7 @@ TEST_CASE("experimental tests")
             unsigned value;
 
             estd::from_chars_result result =
-                    estd::experimental::from_chars(s, &s[0] + sizeof(s), value);
+                    estd::from_chars(s, &s[0] + sizeof(s), value);
 
             REQUIRE(result.ec == 0);
             REQUIRE(value == 1234);
@@ -602,7 +605,8 @@ TEST_CASE("experimental tests")
     }
     SECTION("char_base_traits")
     {
-        using namespace estd::experimental;
+        // TODO: Move out of experimental area, concept is proven
+        using namespace estd::internal;
 
         SECTION("decimal")
         {
