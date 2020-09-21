@@ -35,6 +35,11 @@ public:
     {
         return value != compare_to;
     }
+
+    explicit operator TValue () const
+    {
+        return static_cast<TValue>(value);
+    }
 };
 
 }}

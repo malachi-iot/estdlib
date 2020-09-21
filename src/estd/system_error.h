@@ -40,6 +40,7 @@ struct errc
         bad_address = EFAULT,
         device_or_resource_busy = EBUSY,
         invalid_argument = EINVAL,
+        no_such_file_or_directory = ENOENT,
         no_such_process = ESRCH,
         not_enough_memory = ENOMEM,
         not_supported = ENOTSUP,

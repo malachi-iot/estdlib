@@ -503,7 +503,7 @@ TEST_CASE("experimental tests")
             REQUIRE(same_span[0] == buf[0]);
         }
     }
-    SECTION("from_char prototypes")
+    SECTION("internal from_char prototypes")
     {
         using namespace estd::experimental;
 
@@ -556,6 +556,20 @@ TEST_CASE("experimental tests")
             from_chars_integer<char_base_traits<16> >(src, src + 4, value);
 
             REQUIRE(value == 255);
+        }
+    }
+    SECTION("from_char prototypes")
+    {
+        SECTION("long")
+        {
+            estd::layer2::const_string s = "1234";
+            long value;
+
+            estd::from_chars_result result =
+                    estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
+
+            REQUIRE(result.ec == 0);
+            REQUIRE(value == 1234);
         }
     }
     SECTION("STATIC_ASSERT")
