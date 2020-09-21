@@ -9,6 +9,7 @@ set(SOURCE_FILES
         estd/allocators/generic.h
         estd/allocators/handle_desc.h
         estd/array.h
+        estd/cctype.h
         estd/charconv.h
         estd/cstdint.h
         estd/cstddef.h

@@ -10,7 +10,7 @@
 #include <estd/functional.h>
 #include "estd/streambuf.h"
 #include <estd/charconv.h>
-// TODO: Make a cctype.h to include simpler isspace
+#include <estd/cctype.h>
 //#include <estd/locale.h>
 
 
@@ -66,7 +66,7 @@ estd::layer1::string<128> provider_string;
 // lifted from GNUC
 template<typename _Tp>
 bool
-raise_and_add(_Tp& __val, int __base, unsigned char __c)
+raise_and_add(_Tp& __val, const unsigned __base, unsigned char __c)
 {
     if (__builtin_mul_overflow(__val, __base, &__val)
         || __builtin_add_overflow(__val, __c, &__val))
@@ -81,6 +81,7 @@ raise_and_add(_Tp& __val, int __base, unsigned char __c)
 template <unsigned b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
+/// Requires ASCII
 template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<b <= 10>>
 {
@@ -98,32 +99,35 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>>
     }
 };
 
-
+/// Requires ASCII
 template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
 {
     static inline unsigned base() { return b; }
     static inline bool is_in_base(char c, const int _base = b)
     {
-        return ('0' <= c && c <= '9') ||
-            ('A' <= c && c <= ('A' + (_base - 11)));
+        return estd::isdigit(c) ||
+            ('A' <= c && c <= ('A' + (_base - 11))) ||
+            ('a' <= c && c <= ('a' + (_base - 11)));
     }
 
     static inline int8_t from_char(char c)
     {
         if(c <= '9')
             return c - '0';
-        else
+        else if (c <= 'Z')
             return c - 'A' + 10;
+        else
+            return c - 'a' + 10;
     }
 };
 
 
 
-// GNU equivelant uses reference on first and increments it instead of current
 template <class TCharBaseTraits, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
-                                     T& value, int base = TCharBaseTraits::base())
+                                     T& value,
+                                     const int base = TCharBaseTraits::base())
 {
     typedef TCharBaseTraits traits;
     static_assert(estd::is_integral<T>::value, "implementation bug");
@@ -134,8 +138,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     estd::from_chars_result result { last, estd::errc(0) };
 
-    // TODO: make and use cctype's isspace
-    while(*current == ' ')
+    while(estd::isspace(*current))
         current++;
 
     if(estd::is_signed<T>::value)
@@ -177,6 +180,17 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     return result;
 }
 
+template <class TInt>
+estd::from_chars_result from_chars_experimental(const char* first,
+    const char* last,
+    TInt& value,
+    const int base = 10)
+{
+    if(base > 10)
+        return from_chars_integer<char_base_traits<36>>(first, last, value, base);
+    else
+        return from_chars_integer<char_base_traits<10>>(first, last, value, base);
+}
 
 TEST_CASE("experimental tests")
 {
