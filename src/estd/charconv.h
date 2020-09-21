@@ -78,7 +78,7 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>> :
 
 /// (Maybe) Requires ASCII
 template <unsigned b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>> :
+struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
         char_base_traits_base
 {
     static inline bool isupper(char c, const int _base = b)
@@ -129,6 +129,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            const int base = TCharBaseTraits::base())
 {
     typedef TCharBaseTraits traits;
+    typedef typename traits::int_type int_type;
 #ifdef __cpp_static_assert
     static_assert(estd::is_integral<T>::value, "implementation bug");
 #endif
@@ -143,13 +144,14 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     if(estd::is_signed<T>::value)
     {
-        if(negate = (*current == '-'))
-            current++;
+        negate = *current == '-';
+
+        if(negate)  current++;
     }
 
     while(current != last)
     {
-        const typename traits::int_type digit =
+        const int_type digit =
                 traits::from_char_with_test(*current, base);
         if(digit != traits::eol())
         {

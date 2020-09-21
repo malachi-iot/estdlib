@@ -7,6 +7,17 @@
         "identify_platform.h": "c",
         "system_error": "cpp",
         "iosfwd": "cpp",
-        "esp-idf.h": "c"
+        "esp-idf.h": "c",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "variant": "cpp"
     }
 }

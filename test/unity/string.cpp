@@ -73,6 +73,19 @@ void test_from_chars()
 }
 
 
+void test_from_chars_experimental()
+{
+    estd::layer2::const_string s = "1234";
+    long value;
+
+    estd::from_chars_result result = 
+        estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
+
+    TEST_ASSERT(result.ec == 0);
+    TEST_ASSERT_EQUAL_INT32(1234, value);
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("string tests", "[string]")
 #else
@@ -82,4 +95,5 @@ void test_string()
     RUN_TEST(test_layer1_string);
     RUN_TEST(test_layer2_string);
     RUN_TEST(test_from_chars);
+    RUN_TEST(test_from_chars_experimental);
 }
