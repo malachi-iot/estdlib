@@ -14,7 +14,7 @@ struct from_chars_result {
     const char* ptr;
     estd::errc  ec;
 
-#if __cplusplus < 201103L
+#ifndef FEATURE_CPP_INITIALIZER_LIST
     from_chars_result(const char* ptr, estd::errc ec) :
         ptr(ptr), ec(ec) {}
 #endif
@@ -154,8 +154,6 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // the matched characters is not representable in the type of value, value is unmodified,"
     T local_value = 0;
 
-    estd::from_chars_result result{last, estd::errc(0)};
-
     while (estd::isspace(*current))
         current++;
 
@@ -178,18 +176,23 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                 // skip to either end or next spot which isn't a number
                 while (current++ != last && traits::is_in_base(*current)) {}
 
-                result.ptr = current;
-                result.ec = estd::errc::result_out_of_range;
-                return result;
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+                return from_chars_result{current, estd::errc::result_out_of_range};
+#else
+                return from_chars_result(current, estd::errc::result_out_of_range);
+#endif
             }
         }
         else
         {
             value = local_value;
-            result.ptr = current;
-            if(current == first)
-                result.ec = errc::invalid_argument;
-            return result;
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+            return from_chars_result{current,
+                 current==first ? estd::errc::invalid_argument : estd::errc(0)};
+#else
+            return from_chars_result(current,
+                 current==first ? estd::errc::invalid_argument : estd::errc(0));
+#endif
         }
         current++;
     }
@@ -199,7 +202,11 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         local_value = -local_value;
 
     value = local_value;
-    return result;
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    return from_chars_result{last,estd::errc(0)};
+#else
+    return from_chars_result(last,estd::errc(0));
+#endif
 }
 
 }

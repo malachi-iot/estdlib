@@ -108,7 +108,11 @@
 #  if __GNUC_PREREQ(4,2)
 #define FEATURE_CPP_TYPEOF
 #  endif
+#else
 
+#ifdef __cpp_initializer_lists
+#define FEATURE_CPP_INITIALIZER_LIST
+#endif
 #endif
 
 

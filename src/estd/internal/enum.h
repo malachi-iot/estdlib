@@ -17,8 +17,14 @@ protected:
 
 public:
     // DEBT: We need to do a safer typecast here
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
     explicit enum_class(TValue value) : value((values)value) {}
 
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
     enum_class(values value) : value(value) {}
 
     bool operator == (values compare_to) const
