@@ -136,6 +136,9 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     const char* current = first;
     bool negate;
+    // "If no characters match the pattern or if the value obtained by parsing
+    // the matched characters is not representable in the type of value, value is unmodified,"
+    T local_value = 0;
 
     estd::from_chars_result result { last, estd::errc(0) };
 
@@ -155,7 +158,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                 traits::from_char_with_test(*current, base);
         if(digit != traits::eol())
         {
-            bool success = raise_and_add(value, base, digit);
+            bool success = raise_and_add(local_value, base, digit);
             if (!success)
             {
                 // skip to either end or next spot which isn't a number
@@ -168,6 +171,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         }
         else
         {
+            value = local_value;
             result.ptr = current;
             return result;
         }
@@ -176,8 +180,9 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     // prepend with constexpr so we can optimize out non-signed flavors
     if(estd::is_signed<T>::value && negate)
-        value = -value;
+        local_value = -local_value;
 
+    value = local_value;
     return result;
 }
 
