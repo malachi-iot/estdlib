@@ -172,11 +172,12 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                      const int base = TCharBaseTraits::base())
 {
     typedef TCharBaseTraits traits;
+#ifdef __cpp_static_assert
     static_assert(estd::is_integral<T>::value, "implementation bug");
-    //static_assert(estd::is_unsigned<T>::value, "implementation bug");
+#endif
 
     const char* current = first;
-    bool negate = false;
+    bool negate;
 
     estd::from_chars_result result { last, estd::errc(0) };
 
@@ -189,7 +190,6 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
             current++;
     }
 
-    // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
     while(current != last)
     {
         const typename traits::int_type digit =
