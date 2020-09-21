@@ -52,7 +52,7 @@ raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 /// @brief Represents char-to-base-n conversion traits
 /// @tparam b numeric base indicator
 /// @tparam TEnable for internal use
-template<unsigned short b, class TEnable = estd::internal::Range<true>>
+template<unsigned short b, class TEnable = estd::internal::Range<true> >
 struct char_base_traits;
 
 struct char_base_traits_base
@@ -64,7 +64,7 @@ struct char_base_traits_base
 
 /// (Maybe) Requires ASCII
 template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<b <= 10>> :
+struct char_base_traits<b, estd::internal::Range<b <= 10> > :
         char_base_traits_base
 {
     static inline unsigned base() { return b; }
@@ -90,7 +90,7 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>> :
 
 /// (Maybe) Requires ASCII
 template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
+struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
         char_base_traits_base
 {
     static inline bool isupper(char c, const unsigned short _base = b)
@@ -218,9 +218,9 @@ estd::from_chars_result from_chars(const char* first,
                                                 const int base = 10)
 {
     if(base > 10)
-        return internal::from_chars_integer<internal::char_base_traits<36>>(first, last, value, base);
+        return internal::from_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
     else
-        return internal::from_chars_integer<internal::char_base_traits<10>>(first, last, value, base);
+        return internal::from_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
 }
 
 }

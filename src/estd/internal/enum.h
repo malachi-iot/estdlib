@@ -42,7 +42,10 @@ public:
         return value != compare_to;
     }
 
-    explicit operator TValue () const
+#if __cplusplus >= 201103L
+    explicit
+#endif    
+    operator TValue () const
     {
         return static_cast<TValue>(value);
     }
