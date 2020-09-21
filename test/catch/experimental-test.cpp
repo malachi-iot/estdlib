@@ -81,9 +81,17 @@ raise_and_add(_Tp& __val, const unsigned __base, unsigned char __c)
 template <unsigned b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
+struct char_base_traits_base
+{
+    typedef int8_t int_type;
+
+    inline static int_type eol() { return -1; }
+};
+
 /// (Maybe) Requires ASCII
 template <unsigned b>
-struct char_base_traits<b, estd::internal::Range<b <= 10>>
+struct char_base_traits<b, estd::internal::Range<b <= 10>> :
+        char_base_traits_base
 {
     static inline unsigned base() { return b; }
 
@@ -93,22 +101,23 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>>
         return '0' <= c && c <= ('0' + (_base - 1));
     }
 
-    static inline int8_t from_char(char c)
+    static inline int_type from_char(char c)
     {
         return c - '0';
     }
 
-    static inline int8_t from_char_with_test(char c, const int _base = b)
+    static inline int_type from_char_with_test(char c, const int _base = b)
     {
         if(is_in_base(c, _base)) return from_char(c);
 
-        return -1;
+        return eol();
     }
 };
 
 /// (Maybe) Requires ASCII
 template <unsigned b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
+struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>> :
+        char_base_traits_base
 {
     static inline bool isupper(char c, const int _base = b)
     {
@@ -128,7 +137,7 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
             islower(c, _base);
     }
 
-    static inline int8_t from_char_with_test(char c, const int _base = b)
+    static inline int_type from_char_with_test(char c, const int _base = b)
     {
         if(estd::isdigit(c)) return c - '0';
 
@@ -136,10 +145,10 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
 
         if(islower(c, _base)) return c - 'a' + 10;
 
-        return -1;
+        return eol();
     }
 
-    static inline int8_t from_char(char c)
+    static inline int_type from_char(char c)
     {
         if(c <= '9')
             return c - '0';
@@ -178,13 +187,13 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
     while(current != last)
     {
-        const int8_t digit = traits::from_char_with_test(*current, base);
-        if(digit != -1)
+        const typename traits::int_type digit =
+                traits::from_char_with_test(*current, base);
+        if(digit != traits::eol())
         {
             bool success = raise_and_add(value, base, digit);
             if (!success)
             {
-                // UNTESTED
                 // skip to either end or next spot which isn't a number
                 while(current++ != last && traits::is_in_base(*current)) {}
 
