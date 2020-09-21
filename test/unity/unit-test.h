@@ -13,8 +13,21 @@
 #define ESP_IDF_TESTING
 #endif
 
+void test_align();
 void test_chrono();
 void test_cstddef();
+void test_queue();
 void test_string();
 void test_thread();
 void test_map();
+
+struct TestStruct
+{
+    int value;
+
+    TestStruct(int value) : value(value) {}
+
+    // DEBT: Necessary to participate in layer1::queue due to incomplete implementation of
+    // aligned_storage
+    TestStruct() {}
+};

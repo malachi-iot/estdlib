@@ -62,8 +62,10 @@ MainThread::Run()
 
     	RUN_TEST(test_Basic);
     	
+        test_align();
     	test_cpp();
     	test_cstddef();
+        test_queue();
     	test_string();
     	test_thread();
     	

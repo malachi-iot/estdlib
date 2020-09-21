@@ -137,6 +137,15 @@ struct aligned_storage {
         alignas(Align) byte data[Len];
     };
 };
+#else
+template<std::size_t Len, std::size_t Align>
+struct aligned_storage {
+    struct type {
+        // FIX: Without alignas, we're gonna have problems.  Consider this experimental
+        // FIX: Also gonna report wrong size from data, though that's rarely gonna be an issue
+        byte data[Align];
+    };
+};
 #endif
 
 
