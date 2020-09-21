@@ -63,6 +63,11 @@ estd::layer1::string<128> provider_string;
 #define STATIC_ASSERT_true
 #define STATIC_ASSERT_false #error Assert Failed
 
+// UNTESTED, UNFINISHED
+#if !defined(__cpp_static_assert)
+#define static_assert(expr, message) STATIC_ASSERT(expr)
+#endif
+
 // lifted from GNUC
 template<typename _Tp>
 bool
