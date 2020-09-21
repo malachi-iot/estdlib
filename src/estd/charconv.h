@@ -27,6 +27,7 @@ from_chars_result from_chars(const char* first, const char* last,
 
 namespace internal {
 
+#ifdef __has_builtin
 // adapted from GNUC
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
@@ -48,6 +49,16 @@ raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
         return false;
     return true;
 }
+#else
+// DEBT: Only to get things to compile.  Overflow goes unnoticed
+template <typename T>
+bool raise_and_add(T& val, const unsigned short base, unsigned char c)
+{
+    val *= base;
+    val += c;
+    return true;
+}
+#endif
 
 /// @brief Represents char-to-base-n conversion traits
 /// @tparam b numeric base indicator

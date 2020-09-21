@@ -177,9 +177,6 @@
 
 #endif
 
-#ifndef __has_builtin
-#define __has_builtin(builtin_feature)  0
-#endif
 
 
 // Now with all the capabilities set up, do more complex platform support,

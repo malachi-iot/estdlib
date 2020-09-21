@@ -16,10 +16,11 @@ void test_typeof_keyword()
 }
 #endif
 
-#if __has_builtin(__builtin_add_overflow)
+#if defined(__has_builtin)
 // more gcc testing
 static void test_overflows()
 {
+#if __has_builtin(__builtin_add_overflow)
     int math_result = 0;
     bool result;
 
@@ -32,6 +33,7 @@ static void test_overflows()
 
     TEST_ASSERT(result == false);
     TEST_ASSERT_EQUAL_INT(40, math_result);
+#endif
 }
 #endif
 
@@ -40,7 +42,7 @@ static void test_gcc_cpp()
 #if defined(FEATURE_CPP_TYPEOF)
     RUN_TEST(test_typeof_keyword);
 #endif
-#if __has_builtin(__builtin_add_overflow)
+#if defined(__has_builtin)
     RUN_TEST(test_overflows);
 #endif
 }
