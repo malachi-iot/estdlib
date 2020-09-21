@@ -571,6 +571,17 @@ TEST_CASE("experimental tests")
             REQUIRE(result.ec == 0);
             REQUIRE(value == 1234);
         }
+        SECTION("unsigned")
+        {
+            estd::layer2::const_string s = "1234";
+            unsigned value;
+
+            estd::from_chars_result result =
+                    estd::experimental::from_chars(s.data(), s.data() + s.size(), value);
+
+            REQUIRE(result.ec == 0);
+            REQUIRE(value == 1234);
+        }
     }
     SECTION("STATIC_ASSERT")
     {

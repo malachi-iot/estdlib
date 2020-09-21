@@ -25,10 +25,10 @@ from_chars_result from_chars(const char* first, const char* last,
 
 namespace experimental {
 
-// lifted from GNUC
+// adapted from GNUC
 template<typename _Tp>
-bool
-raise_and_add(_Tp& __val, const unsigned __base, unsigned char __c)
+typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
+raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 {
     if (__builtin_mul_overflow(__val, __base, &__val)
         || __builtin_add_overflow(__val, __c, &__val))
@@ -37,10 +37,20 @@ raise_and_add(_Tp& __val, const unsigned __base, unsigned char __c)
 }
 
 
+template<typename _Tp>
+typename estd::enable_if<!estd::is_signed<_Tp>::value, bool>::type
+raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
+{
+    if (__builtin_umul_overflow(__val, __base, &__val)
+        || __builtin_uadd_overflow(__val, __c, &__val))
+        return false;
+    return true;
+}
+
 /// @brief Represents char-to-base-n conversion traits
 /// @tparam b numeric base indicator
 /// @tparam TEnable for internal use
-template <unsigned b, class TEnable = estd::internal::Range<true>>
+template <unsigned short b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
 struct char_base_traits_base
@@ -51,7 +61,7 @@ struct char_base_traits_base
 };
 
 /// (Maybe) Requires ASCII
-template <unsigned b>
+template <unsigned short b>
 struct char_base_traits<b, estd::internal::Range<b <= 10>> :
         char_base_traits_base
 {
@@ -77,29 +87,29 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>> :
 };
 
 /// (Maybe) Requires ASCII
-template <unsigned b>
+template <unsigned short b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
         char_base_traits_base
 {
-    static inline bool isupper(char c, const int _base = b)
+    static inline bool isupper(char c, const unsigned short _base = b)
     {
         return 'A' <= c && c <= ('A' + (_base - 11));
     }
 
-    static inline bool islower(char c, const int _base = b)
+    static inline bool islower(char c, const unsigned short _base = b)
     {
         return 'a' <= c && c <= ('a' + (_base - 11));
     }
 
     static inline unsigned base() { return b; }
-    static inline bool is_in_base(char c, const int _base = b)
+    static inline bool is_in_base(char c, const unsigned short _base = b)
     {
         return estd::isdigit(c) ||
                isupper(c, _base) ||
                islower(c, _base);
     }
 
-    static inline int_type from_char_with_test(char c, const int _base = b)
+    static inline int_type from_char_with_test(char c, const unsigned short _base = b)
     {
         if(estd::isdigit(c)) return c - '0';
 
@@ -126,12 +136,14 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)>> :
 template <class TCharBaseTraits, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            T& value,
-                                           const int base = TCharBaseTraits::base())
+                                           const unsigned short base = TCharBaseTraits::base())
 {
     typedef TCharBaseTraits traits;
     typedef typename traits::int_type int_type;
 #ifdef __cpp_static_assert
-    static_assert(estd::is_integral<T>::value, "implementation bug");
+    // DEBT: Expand this to allow any numeric type, we'll have to make specialized
+    // versions of raise_and_add to account for that
+    static_assert(estd::is_integral<T>::value, "T must be integral type");
 #endif
 
     const char* current = first;
