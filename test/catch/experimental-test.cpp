@@ -81,7 +81,7 @@ raise_and_add(_Tp& __val, const unsigned __base, unsigned char __c)
 template <unsigned b, class TEnable = estd::internal::Range<true>>
 struct char_base_traits;
 
-/// Requires ASCII
+/// (Maybe) Requires ASCII
 template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<b <= 10>>
 {
@@ -97,18 +97,46 @@ struct char_base_traits<b, estd::internal::Range<b <= 10>>
     {
         return c - '0';
     }
+
+    static inline int8_t from_char_with_test(char c, const int _base = b)
+    {
+        if(is_in_base(c, _base)) return from_char(c);
+
+        return -1;
+    }
 };
 
-/// Requires ASCII
+/// (Maybe) Requires ASCII
 template <unsigned b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 26)>>
 {
+    static inline bool isupper(char c, const int _base = b)
+    {
+        return 'A' <= c && c <= ('A' + (_base - 11));
+    }
+
+    static inline bool islower(char c, const int _base = b)
+    {
+        return 'a' <= c && c <= ('a' + (_base - 11));
+    }
+
     static inline unsigned base() { return b; }
     static inline bool is_in_base(char c, const int _base = b)
     {
         return estd::isdigit(c) ||
-            ('A' <= c && c <= ('A' + (_base - 11))) ||
-            ('a' <= c && c <= ('a' + (_base - 11)));
+            isupper(c, _base) ||
+            islower(c, _base);
+    }
+
+    static inline int8_t from_char_with_test(char c, const int _base = b)
+    {
+        if(estd::isdigit(c)) return c - '0';
+
+        if(isupper(c, _base)) return c - 'A' + 10;
+
+        if(islower(c, _base)) return c - 'a' + 10;
+
+        return -1;
     }
 
     static inline int8_t from_char(char c)
@@ -150,10 +178,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // FIX: Check 0/1 condition exclusive/inclusive think I get it wrong here
     while(current != last)
     {
-        if(traits::is_in_base(*current, base))
+        const int8_t digit = traits::from_char_with_test(*current, base);
+        if(digit != -1)
         {
-            int8_t val = traits::from_char(*current);
-            bool success = raise_and_add(value, base, val);
+            bool success = raise_and_add(value, base, digit);
             if (!success)
             {
                 // UNTESTED
