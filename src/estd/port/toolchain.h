@@ -1,5 +1,7 @@
 #pragma once
 
+#include "toolchain/gnuc-flavor.h"
+
 // TODO: Put in CLang handler also
 
 #if defined(__GNUC__)
@@ -15,6 +17,3 @@
 #if defined(__ADSPBLACKFIN__)
 #include "toolchain/visualdsp.h"
 #endif
-
-#include "toolchain/gnuc-flavor.h"
-
