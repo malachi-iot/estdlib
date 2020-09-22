@@ -16,3 +16,5 @@
 #include "toolchain/visualdsp.h"
 #endif
 
+#include "toolchain/gnuc-flavor.h"
+
