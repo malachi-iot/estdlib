@@ -503,7 +503,12 @@ TEST_CASE("iostreams")
     }
     SECTION("pubsync - method finding")
     {
-        struct pubsync_only_streambuf
+        struct streambuf_base_impl
+        {
+            int sync() const { return 0; }
+        };
+
+        struct pubsync_only_streambuf_impl : streambuf_base_impl
         {
             typedef char char_type;
             typedef estd::char_traits<char_type> traits_type;
@@ -513,7 +518,7 @@ TEST_CASE("iostreams")
 
         layer1::stringbuf<32> sb1;
 
-        internal::streambuf<pubsync_only_streambuf> sb2;
+        internal::streambuf<pubsync_only_streambuf_impl> sb2;
 
         REQUIRE(sb1.pubsync() == 0);
         REQUIRE(sb2.pubsync() == 7);
