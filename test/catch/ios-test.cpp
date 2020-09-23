@@ -501,6 +501,23 @@ TEST_CASE("iostreams")
             REQUIRE(out.tellp() == 4);
         }
     }
+    SECTION("pubsync - method finding")
+    {
+        struct pubsync_only_streambuf
+        {
+            typedef char char_type;
+            typedef estd::char_traits<char_type> traits_type;
+
+            int sync() const { return 7; }
+        };
+
+        layer1::stringbuf<32> sb1;
+
+        internal::streambuf<pubsync_only_streambuf> sb2;
+
+        REQUIRE(sb1.pubsync() == 0);
+        REQUIRE(sb2.pubsync() == 7);
+    }
 }
 
 #pragma GCC diagnostic pop

@@ -17,6 +17,13 @@ namespace estd {
 
 namespace internal {
 
+// all the noop/defaults which we expect to hide/overload (not override specifically,
+// since we're not making these virtual here)
+struct streambuf_baseline
+{
+
+};
+
 // TODO: TPolicy shall specify modes:
 // 1. never blocking
 // 2. blocking with timeout (including infinite timeout)
@@ -24,7 +31,9 @@ namespace internal {
 // Note that consuming istream/ostream may independently implement its own timeout code
 // in which case 'never blocking' mode may be utilized for streambuf
 template<class TImpl, class TPolicy = void>
-class streambuf : public TImpl
+class streambuf :
+        public streambuf_baseline,
+        public TImpl
 {
     typedef TImpl base_type;
     typedef streambuf<TImpl, TPolicy> this_type;
