@@ -334,17 +334,7 @@ public:
 
     // NOTE: this deviates from spec in that it won't wait for CR, for example,
     // to reflect characters are available
-    //streamsize in_avail();
-    template <class T = this_type>
-    typename enable_if<!has_showmanyc_method<T>::value, streamsize>::type
-    in_avail()
-    {
-        return 0;
-    }
-
-    template <class T = this_type>
-    typename enable_if<has_showmanyc_method<T>::value, streamsize>::type
-    in_avail()
+    inline streamsize in_avail()
     {
         return base_type::showmanyc();
     }
