@@ -136,6 +136,7 @@ protected:
     // consider a traits_type::pending() or similar to indicate a nonblocking
     // async activity (counterpart to traits_type::nodata() ).  That said,
     // maybe eof() can do that job albeit in a less informative way
+    /*
     template <class T = base_type>
     typename enable_if<has_overflow_method<T>::value, int_type>::type
     overflow(int_type ch = traits_type::eof())
@@ -148,7 +149,7 @@ protected:
     overflow(int_type = traits_type::eof())
     {
         return traits_type::eof();
-    }
+    } */
 
 public:
     // some streambufs don't need any initialization at the base level
@@ -174,21 +175,6 @@ public:
     streambuf(stream_type&& move_from) : stream(std::move(move_from)) {}
 #endif */
 
-
-    template <class T = this_type>
-    typename enable_if<has_underflow_method<T>::value, int_type>::type
-    underflow(int_type ch = traits_type::eof())
-    {
-        return base_type::underflow();
-    }
-
-    template <class T = this_type>
-    typename enable_if<!has_underflow_method<T>::value, int_type>::type
-    underflow(int_type = traits_type::eof())
-    {
-        return traits_type::eof();
-    }
-
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls
     streamsize sgetn(nonconst_char_type* s, streamsize count)
@@ -206,7 +192,7 @@ public:
         {
             s += written;
 
-            if(overflow(*s) != traits_type::eof())
+            if(this->overflow(*s) != traits_type::eof())
             {
                 // getting here means one more character was placed into put area
                 count -= ++written;
@@ -471,11 +457,10 @@ protected:
         return _rdbuf.pubsync();
     }
 
-    /*
     virtual int_type overflow(int_type ch = traits_type::eof()) OVERRIDE
     {
         return _rdbuf.overflow();
-    } */
+    }
 
 public:
     template <class TParam1>

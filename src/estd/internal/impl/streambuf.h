@@ -7,6 +7,9 @@
 
 namespace estd { namespace internal { namespace impl {
 
+template <class TChar, class TCharTraits = estd::char_traits<TChar> >
+struct basic_streambuf;
+
 /// @brief contains base noop-ish implementation, suitable for hiding (think override,
 // but without the virtual since we're all templated)
 template <class TTraits>
@@ -14,6 +17,7 @@ struct streambuf_base
 {
     typedef TTraits traits_type;
     typedef typename traits_type::char_type char_type;
+    typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
 
@@ -30,6 +34,16 @@ protected:
     {
         return pos_type(off_type(-1));
     };
+
+    inline static int_type underflow() { return traits_type::eof(); }
+
+public:
+    // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
+    // that way at the moment
+    inline static int_type overflow(int_type ch = traits_type::eof())
+    {
+        return traits_type::eof();
+    }
 };
 
 
@@ -444,15 +458,18 @@ public:
 
 
 // this represents traditional std::basic_streambuf implementations
-template <class TChar, class TCharTraits = estd::char_traits<TChar> >
+template <class TChar, class TCharTraits>
 struct basic_streambuf
 {
     typedef TChar char_type;
     typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
 
+    // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
+    // that way at the moment
+    virtual int_type overflow(int_type ch) = 0;
+
 protected:
-    //virtual int_type overflow(int_type ch) = 0;
     virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
     virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
     virtual int sync() = 0;
