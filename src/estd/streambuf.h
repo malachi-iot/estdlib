@@ -21,7 +21,7 @@ namespace internal {
 // 1. never blocking
 // 2. blocking with timeout (including infinite timeout)
 // 3. blocking
-// Note that consuming istream/ostream may independely implement its own timeout code
+// Note that consuming istream/ostream may independently implement its own timeout code
 // in which case 'never blocking' mode may be utilized for streambuf
 template<class TImpl, class TPolicy = void>
 class streambuf : public TImpl
