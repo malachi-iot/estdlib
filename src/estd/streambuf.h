@@ -101,20 +101,6 @@ protected:
         return base_type::xsgetn(s, count);
     } */
 
-    template <class T=this_type>
-    typename enable_if<has_pbackfail_method<T>::value, int_type>::type
-    pbackfail(int_type c = traits_type::eof())
-    {
-        return base_type::pbackfail(c);
-    }
-
-    template <class T=this_type>
-    typename enable_if<!has_pbackfail_method<T>::value, int_type>::type
-    pbackfail(int_type c = traits_type::eof())
-    {
-        return traits_type::eof();
-    }
-
     int_type sungetc()
     {
         if(this->gptr() > this->eback())
@@ -123,7 +109,7 @@ protected:
             return traits_type::to_int_type(*this->gptr());
         }
 
-        return pbackfail();
+        return this->pbackfail();
     }
 
     // not yet used overflow helpers

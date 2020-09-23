@@ -37,6 +37,11 @@ protected:
 
     inline static int_type underflow() { return traits_type::eof(); }
 
+    inline static int_type pbackfail(int_type c = traits_type::eof())
+    {
+        return traits_type::eof();
+    }
+
 public:
     // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
     // that way at the moment
