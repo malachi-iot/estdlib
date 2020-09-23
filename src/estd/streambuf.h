@@ -345,16 +345,7 @@ public:
         return this->sync();
     }
 
-    template <class T = this_type>
-    typename enable_if<!has_seekpos_method<T>::value, int_type>::type
-    pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
-    {
-        return -1;
-    }
-
-    template <class T = this_type>
-    typename enable_if<has_seekpos_method<T>::value, int_type>::type
-    pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
+    inline pos_type pubseekpos(int_type pos, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return this->seekpos(pos, which);
     }

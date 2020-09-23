@@ -15,10 +15,21 @@ struct streambuf_base
     typedef TTraits traits_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::off_type off_type;
 
 protected:
     inline static int sync() { return 0; }
     inline static streamsize showmanyc() { return 0; }
+    inline static pos_type seekpos(pos_type, ios_base::openmode)
+    {
+        return pos_type(off_type(-1));
+    };
+
+    // NOTE: Not yet used
+    inline static pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
+    {
+        return pos_type(off_type(-1));
+    };
 };
 
 
