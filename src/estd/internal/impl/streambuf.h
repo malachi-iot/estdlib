@@ -7,13 +7,21 @@
 
 namespace estd { namespace internal { namespace impl {
 
+/// @brief contains base noop-ish implementation, suitable for hiding (think override,
+// but without the virtual since we're all templated)
+struct streambuf_base
+{
+    inline static int sync() { return 0; }
+};
+
+
 // NOTE: Temporarily making a 'complete' type, but plan is to make this always specialized
 template <class TChar, class TStream, class TCharTraits >
 struct native_streambuf;
 
 // Expect most native stream implementations can use this helper base impl
 template <class TChar, class TStream, class TCharTraits >
-struct native_streambuf_base
+struct native_streambuf_base : streambuf_base
 {
     // NOTE: we'll need to revisit this if we want a proper pointer in here
     typedef typename estd::remove_reference<TStream>::type stream_type;
@@ -40,7 +48,7 @@ struct layer1_queue_policy
 };
 
 template <typename TPos>
-struct pos_streambuf_base
+struct pos_streambuf_base : streambuf_base
 {
     typedef TPos pos_type;
 
@@ -118,7 +126,7 @@ public:
 
 // TODO: decouple all these stringbufs so we can have a standalone in_stringbuf
 template <class TString>
-struct stringbuf_base
+struct stringbuf_base : streambuf_base
 {
     stringbuf_base() {}
 };

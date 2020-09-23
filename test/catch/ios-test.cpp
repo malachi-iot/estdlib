@@ -23,7 +23,7 @@ using namespace estd;
 
 //#define TEST_COUT
 
-struct dummy_streambuf_impl
+struct dummy_streambuf_impl : internal::impl::streambuf_base
 {
     typedef char char_type;
     typedef int int_type;
@@ -503,12 +503,7 @@ TEST_CASE("iostreams")
     }
     SECTION("pubsync - method finding")
     {
-        struct streambuf_base_impl
-        {
-            int sync() const { return 0; }
-        };
-
-        struct pubsync_only_streambuf_impl : streambuf_base_impl
+        struct pubsync_only_streambuf_impl : internal::impl::streambuf_base
         {
             typedef char char_type;
             typedef estd::char_traits<char_type> traits_type;

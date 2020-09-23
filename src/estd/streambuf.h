@@ -350,16 +350,7 @@ public:
     }
 
 
-    template <class T = this_type>
-    typename enable_if<!has_sync_method<T>::value, int>::type
-    pubsync()
-    {
-        return 0;
-    }
-
-    template <class T = this_type>
-    typename enable_if<has_sync_method<T>::value, int>::type
-    pubsync()
+    inline int pubsync()
     {
         return this->sync();
     }
