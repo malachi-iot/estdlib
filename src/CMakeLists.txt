@@ -43,6 +43,9 @@ set(SOURCE_FILES
         estd/internal/impl/allocated_array.h
         estd/internal/impl/dynamic_array.h
         estd/internal/impl/handle_desc.h
+        estd/internal/impl/streambuf/pos.h
+        estd/internal/impl/streambuf/span.h
+        estd/internal/impl/streambuf/string.h
         estd/internal/impl/streambuf.h
         estd/internal/invoke_result.h
         estd/internal/ios.h

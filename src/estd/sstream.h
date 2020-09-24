@@ -3,6 +3,7 @@
 #include "ostream.h"
 #include "istream.h"
 #include "string.h"
+#include "internal/impl/streambuf/string.h"
 
 namespace estd {
 
