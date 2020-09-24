@@ -30,5 +30,14 @@ typename TStreambuf::int_type sputc(TStreambuf* sb, typename TStreambuf::int_typ
     return sb->overflow(ch);
 }
 
+template <class TStreambuf>
+typename TStreambuf::pos_type seekoff_cur(TStreambuf* sb, int off, ios_base::openmode which)
+{
+    if(which & ios_base::in)
+        sb->gbump(off);
+    if(which & ios_base::out)
+        sb->pbump(off);
+}
+
 
 }}}}
