@@ -26,6 +26,7 @@ void test_Basic()
 void test_cstddef();
 void test_string();
 void test_cpp();
+void test_streambuf();
 void test_thread();
 
 
@@ -66,6 +67,7 @@ MainThread::Run()
     	test_cpp();
     	test_cstddef();
         test_queue();
+        test_streambuf();
     	test_string();
     	test_thread();
     	

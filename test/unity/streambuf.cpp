@@ -4,6 +4,11 @@
  * Current ESTD_FN_HAS_METHOD + function default template param approach a no go
  */
 
+// DEBT: Not quite C++03 compatible, but isn't hard -- just need to move
+// variable initializer
+#define FEATURE_ESTD_IOS_GCOUNT 0
+
+
 #include "unit-test.h"
 
 #include <estd/streambuf.h>

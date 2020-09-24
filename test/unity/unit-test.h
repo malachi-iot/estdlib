@@ -17,6 +17,7 @@ void test_align();
 void test_chrono();
 void test_cstddef();
 void test_queue();
+void test_streambuf();;
 void test_string();
 void test_thread();
 void test_map();

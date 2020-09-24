@@ -75,15 +75,15 @@ public:
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
     ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
     ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
-    ESTD_FN_HAS_METHOD(int_type, pbackfail, int_type);
+    ESTD_FN_HAS_METHOD(int_type, pbackfail, int_type)
 
     ESTD_FN_HAS_METHOD(void, pbump, int)
     ESTD_FN_HAS_METHOD(void, gbump, int)
 
-    ESTD_FN_HAS_METHOD(streamsize, showmanyc,);
+    ESTD_FN_HAS_METHOD(streamsize, showmanyc,)
 
     // FIX: Make a way to do this for overloaded versions of a function, and use just pos()
-    ESTD_FN_HAS_METHOD(pos_type, get_pos,);
+    ESTD_FN_HAS_METHOD(pos_type, get_pos,)
 
 protected:
 
