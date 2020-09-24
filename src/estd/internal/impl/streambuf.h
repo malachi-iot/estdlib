@@ -35,7 +35,6 @@ protected:
         return pos_type(off_type(-1));
     };
 
-    // NOTE: Not yet used
     inline static pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
     {
         return pos_type(off_type(-1));

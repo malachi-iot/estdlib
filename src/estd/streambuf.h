@@ -49,57 +49,7 @@ public:
     typedef typename traits_type::off_type off_type;
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
-    // FIX: would use conditional to set these up, but conditional
-    // always compile-time peers into both classes, so these are dormant right now
-    ESTD_FN_HAS_TYPEDEF_EXP(pos_type)
-    ESTD_FN_HAS_TYPEDEF_EXP(off_type)
-
-    //typedef int_type off_type;
-
-    // custom estd nonblocking variants
-    // TODO: Determine if spostc should kick off a kind of soft/async overflow
-    ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
-    ESTD_FN_HAS_METHOD(int_type, speekc,)
-
-    ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
-    ESTD_FN_HAS_METHOD(int_type, sgetc,)
-    ESTD_FN_HAS_METHOD(int_type, sbumpc,)
-    ESTD_FN_HAS_METHOD(int, sync,)
-    ESTD_FN_HAS_METHOD(char_type*, eback,)
-    ESTD_FN_HAS_METHOD(char_type*, gptr,)
-    ESTD_FN_HAS_METHOD(char_type*, egptr,)
-    ESTD_FN_HAS_METHOD(char_type*, pbase,)
-    ESTD_FN_HAS_METHOD(char_type*, pptr,)
-    ESTD_FN_HAS_METHOD(char_type*, epptr,)
-    ESTD_FN_HAS_METHOD(int_type, underflow,)
-    ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
-    ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
-    ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
-    ESTD_FN_HAS_METHOD(int_type, pbackfail, int_type)
-
-    ESTD_FN_HAS_METHOD(void, pbump, int)
-    ESTD_FN_HAS_METHOD(void, gbump, int)
-
-    ESTD_FN_HAS_METHOD(streamsize, showmanyc,)
-
-    // FIX: Make a way to do this for overloaded versions of a function, and use just pos()
-    ESTD_FN_HAS_METHOD(pos_type, get_pos,)
-
 protected:
-
-    static CONSTEXPR bool has_overflow_method_ = has_overflow_method<base_type>::value;
-
-    /*
-     * Not doing these because I bet polymorphism breaks if you do
-    streamsize xsputn(const char_type *s, streamsize count)
-    {
-        return base_type::xsputn(s, count);
-    }
-
-    streamsize xsgetn(char_type *s, streamsize count)
-    {
-        return base_type::xsgetn(s, count);
-    } */
 
     int_type sungetc()
     {
