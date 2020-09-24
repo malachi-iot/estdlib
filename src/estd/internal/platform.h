@@ -177,6 +177,10 @@
 
 #endif
 
+#if __STDC_VERSION__ >= 199901L || __cplusplus >= 201103L
+#define FEATURE_STD_INTTYPES
+#endif
+
 
 
 // Now with all the capabilities set up, do more complex platform support,

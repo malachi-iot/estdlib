@@ -246,9 +246,11 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.put(ch);
 }
 
+#ifdef FEATURE_STD_INTTYPES
 // explicit prototype here to avoid pulling in collision-happy stdio
 // watch out for linker errors if your environment doesn't have this call
 int snprintf( char* buffer, std::size_t buf_size, const char* format, ... );
+#endif
 
 template <class TStreambuf>
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, void* addr)
@@ -257,8 +259,10 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 
 #ifdef ESP_OPEN_RTOS
     __utoa((uint32_t)addr, buffer, 16);
-#else
+#elif defined(FEATURE_STD_INTTYPES)
     snprintf(buffer, sizeof(buffer), "%" PRIXPTR, (uintptr_t)addr);
+#else
+#error Not implemented
 #endif
     return out << buffer;
 }
