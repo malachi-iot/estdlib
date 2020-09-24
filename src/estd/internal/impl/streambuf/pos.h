@@ -66,15 +66,15 @@ struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits>
 protected:
     void gbump(int count) { this->_pos += count; }
 
-    /* Almost works, not quite ready
     inline pos_type seekoff(off_type off, ios_base::seekdir way,
                             ios_base::openmode which = ios_base::in | ios_base::out)
     {
-        if(which != ios_base::in) return pos_type(off_type(-1));
+        // NOTE: We are permissive here to maintain compatibility with the spirit of
+        // std library.  Otherwise, we would do which == ios_base::in
+        if(which & ios_base::in) return base_type::seekoff(off, way);
 
-        return base_type::seekoff(off, way);
+        return pos_type(off_type(-1));
     }
-     */
 };
 
 
@@ -90,6 +90,16 @@ struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits>
 
 protected:
     void pbump(int count) { this->_pos += count; }
+
+    inline pos_type seekoff(off_type off, ios_base::seekdir way,
+                            ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        // NOTE: We are permissive here to maintain compatibility with the spirit of
+        // std library.  Otherwise, we would do which == ios_base::in
+        if(which & ios_base::out) return base_type::seekoff(off, way);
+
+        return pos_type(off_type(-1));
+    }
 };
 
 }}}
