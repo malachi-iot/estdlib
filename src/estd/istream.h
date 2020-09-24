@@ -94,9 +94,6 @@ private:
     }
 #endif
 
-#if FEATURE_ESTD_IOS_GCOUNT
-    streamsize _gcount = 0;
-
     typedef basic_istream<TStreambuf, TBase> __istream_type;
 
     // just a formality for now, to prep for if we ever want a real sentry
@@ -112,6 +109,9 @@ private:
             return is.good();
         }
     };
+
+#if FEATURE_ESTD_IOS_GCOUNT
+    streamsize _gcount = 0;
 
 public:
     streamsize gcount() const { return _gcount; }
