@@ -246,7 +246,9 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.put(ch);
 }
 
-#ifdef FEATURE_STD_INTTYPES
+// Somehow, blackfin has the PRIXPTR and friends even though it doesn't have
+// inttypes.h or cinttypes.  
+#if defined(FEATURE_STD_INTTYPES) || defined(__ADSPBLACKFIN__)
 // explicit prototype here to avoid pulling in collision-happy stdio
 // watch out for linker errors if your environment doesn't have this call
 int snprintf( char* buffer, std::size_t buf_size, const char* format, ... );
@@ -259,7 +261,7 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 
 #ifdef ESP_OPEN_RTOS
     __utoa((uint32_t)addr, buffer, 16);
-#elif defined(FEATURE_STD_INTTYPES)
+#elif defined(FEATURE_STD_INTTYPES) || defined(__ADSPBLACKFIN__)
     snprintf(buffer, sizeof(buffer), "%" PRIXPTR, (uintptr_t)addr);
 #else
 #error Not implemented
