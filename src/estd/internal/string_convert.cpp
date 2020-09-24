@@ -6,12 +6,14 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#if defined(USING_SPRINTF) || defined(ESTD_POSIX)
-#include <inttypes.h>
-#endif
-
 // TODO: Make all these toStrings return actual number of bytes used
 // TODO: Make all these toStrings take a maximum length parameter
+
+#if __STDC_VERSION__ >= 199901L
+// Introduced with C99
+// https://en.wikipedia.org/wiki/C_data_types#inttypes.h
+#include <inttypes.h>
+#endif
 
 
 namespace estd { namespace internal {
@@ -160,8 +162,8 @@ template<> char* toString(char* output, uint16_t input)
 }
 
 
-// DEBT: Need a more precise way of determining PRIu32 presence
-#ifndef __ADSPBLACKFIN__
+// PRIu32 lives in inttypes.h, only available in C99 onward
+#if __STDC_VERSION__ >= 199901L
 template<> char* toString(char* output, uint32_t input)
 {
     sprintf(output, "%" PRIu32, input);

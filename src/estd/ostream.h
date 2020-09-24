@@ -1,13 +1,6 @@
 #ifndef UTIL_EMBEDDED_OSTREAM_H
 #define UTIL_EMBEDDED_OSTREAM_H
 
-#if defined(ESP_OPEN_RTOS)
-#else
-// ESP_OPEN_RTOS has some non-sprintf ways to convert numeric to strings
-// DEBT: This name is sure to cause a collision
-#define USING_SPRINTF
-#endif
-
 #if __cplusplus >= 201103L
 // NOTE: Requirements manual enable because it's a fragile feature still
 // (steady_clock isn't automatically available everywhere)
@@ -16,17 +9,6 @@
 // highly c++11 dependent
 //#define FEATURE_ESTD_OSTREAM_TIMEOUT
 #endif
-
-extern "C" {
-
-// DEBT: Gotta be a better way to check for POSIX-supplied inttypes.h
-#if defined(__ADSPBLACKFIN__)
-#include <stdint.h>
-#elif defined(USING_SPRINTF) || defined(ESTD_POSIX)
-#include <inttypes.h>
-#endif
-
-}
 
 #include "streambuf.h"
 #include "ios.h"
