@@ -15,12 +15,20 @@
 #include <estd/istream.h>
 #include <estd/ostream.h>
 
+using namespace estd;
+
 static void test_ospanbuf()
 {
     char buf[128];
     estd::span<char> span(buf);
 
     estd::experimental::ospanbuf os(span);
+
+    os.sputc('a');
+    os.sputn(" test 567", 9);
+
+    TEST_ASSERT_EQUAL_INT(10, os.pos());
+    TEST_ASSERT_EQUAL_INT(10, os.pubseekoff(0, ios_base::cur));
 }
 
 
@@ -30,6 +38,21 @@ static void test_ispanbuf()
     estd::span<char> span(buf);
     
     estd::experimental::ispanbuf os(span);
+
+    char c = os.sbumpc();
+
+    TEST_ASSERT_EQUAL_CHAR(buf[0], c);
+
+    char buf2[64];
+
+    streamsize sz = os.sgetn(buf2, sizeof(buf2) - 1);
+
+    // DEBT: Get this one working just right -- it's there, I'm just out of time
+    //TEST_ASSERT_EQUAL_INT(sz, strlen(buf) - 1);
+
+    buf2[sz] = 0;
+
+    TEST_ASSERT_EQUAL_CHAR_ARRAY(&buf[1], buf2, sz);
 }
 
 
@@ -40,5 +63,6 @@ TEST_CASE("streambuf", "[streambuf]")
 void test_streambuf()
 #endif
 {
+    RUN_TEST(test_ispanbuf);
     RUN_TEST(test_ospanbuf);
 }

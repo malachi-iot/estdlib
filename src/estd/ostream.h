@@ -4,6 +4,7 @@
 #if defined(ESP_OPEN_RTOS)
 #else
 // ESP_OPEN_RTOS has some non-sprintf ways to convert numeric to strings
+// DEBT: This name is sure to cause a collision
 #define USING_SPRINTF
 #endif
 
@@ -18,7 +19,10 @@
 
 extern "C" {
 
-#if defined(USING_SPRINTF) || defined(ESTD_POSIX)
+// DEBT: Gotta be a better way to check for POSIX-supplied inttypes.h
+#if defined(__ADSPBLACKFIN__)
+#include <stdint.h>
+#elif defined(USING_SPRINTF) || defined(ESTD_POSIX)
 #include <inttypes.h>
 #endif
 
@@ -232,6 +236,9 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 }
 
 
+// DEBT: Brute forcing this via a C++ version check, but I bet we can get this
+// functional with more finesse on earlier C++
+#if __cplusplus >= 201103L
 // FIX: SFINAE works, but targets who aren't available for maxStringLength seem to be generating
 // warnings here
 template <class TStreambuf, class T,
@@ -246,6 +253,7 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 
     return out << buffer;
 }
+#endif
 
 
 
