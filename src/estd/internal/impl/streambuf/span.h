@@ -22,6 +22,7 @@ struct out_span_streambuf :
     typedef typename span_type::size_type size_type;
     typedef typename traits_type::off_type off_type;
     typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::int_type int_type;
 
     span_type& out() { return base_type::value(); }
     const span_type& out() const { return base_type::value(); }
@@ -68,6 +69,13 @@ struct out_span_streambuf :
         memcpy(pptr(), s, count);
         this->pbump(count);
         return count;
+    }
+
+    int_type sputc(char_type ch)
+    {
+        *(pptr()) = ch;
+        this->pbump(1);
+        return traits_type::to_int_type(ch);
     }
 
 protected:

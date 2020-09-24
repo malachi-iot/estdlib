@@ -138,10 +138,6 @@ protected:
     } */
 
 public:
-    // some streambufs don't need any initialization at the base level
-    streambuf() {}
-
-
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     template <class ...TArgs>
 #ifdef FEATURE_CPP_CONSTEXPR
@@ -151,6 +147,9 @@ public:
         base_type(std::forward<TArgs>(args)...)
     {}
 #else
+    // some streambufs don't need any initialization at the base level
+    streambuf() {}
+
     template <class Param1>
     streambuf(Param1& p1) : base_type(p1)
     {}
@@ -168,13 +167,15 @@ public:
         return this->xsgetn(s, count);
     }
 
+    // NOTE: Deviation from spec, as xsputn itself is expected to do all the
+    // overflow trickery
     streamsize sputn(const char_type *s, streamsize count)
     {
         streamsize written = this->xsputn(s, count);
 
-        // only interact with overflow method if it's really present
-        // a little extra gauruntee for optimization
-        if(has_overflow_method_ && written < count)
+        // TODO: Consider a non-function-present flavor of optimizing to know if
+        // overflow is even implemented so as to optimize this portion
+        if(written < count)
         {
             s += written;
 
@@ -192,6 +193,7 @@ public:
         return written;
     }
 
+    /*
     // Do SFINAE and call TImpl version if present
     template <class T = base_type>
     typename enable_if<has_sputc_method<T>::value, int_type>::type
@@ -220,47 +222,20 @@ public:
             return this->overflow(ch);
         else
             return traits_type::to_int_type(ch);
-    }
+    } */
 
 
-    // Do SFINAE and call TImpl version if present
-    template <class T = this_type>
-    typename enable_if<has_sbumpc_method<T>::value, int_type>::type
-    sbumpc()
-    {
-        return base_type::sbumpc();
-    }
-
-    // TODO: *possibly* implement underflow, if I like it...
-    // Don't think I made this one quite right...
-    template <class T = this_type>
-    typename enable_if<
-            !has_sbumpc_method<T>::value &&
-            !has_sgetc_method<T>::value,
-            int_type>::type
-    sbumpc()
-    {
-        char_type ch;
-
-        bool success = sgetn(&ch, 1) == 1;
-
-        return success ? traits_type::to_int_type(ch) : traits_type::eof();
-    }
-
-    // TODO: *possibly* implement underflow, if I like it...
-    // Don't think I made this one quite right...
-    template <class T = this_type>
-    typename enable_if<
-            !has_sbumpc_method<T>::value &&
-            has_sgetc_method<T>::value,
-            int_type>::type
-    sbumpc()
+    int_type sbumpc()
     {
         int_type ch = this->sgetc();
 
-        if(ch != traits_type::eof()) this->gbump(1);
-
-        return ch;
+        if(ch != traits_type::eof())
+        {
+            this->gbump(1);
+            return ch;
+        }
+        else
+            return this->uflow();
     }
 
     // TODO: sgetc is actually more of a wrapper around underflow, who

@@ -20,6 +20,7 @@ struct out_stringbuf : stringbuf_base<TString>
     typedef typename string_type::traits_type traits_type;
     typedef typename traits_type::off_type off_type;
     typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::int_type int_type;
 
     TString _str;
 
@@ -35,6 +36,12 @@ struct out_stringbuf : stringbuf_base<TString>
         // facility
         _str.append(s, count);
         return count;
+    }
+
+    int_type sputc(char_type ch)
+    {
+        _str += ch;
+        return traits_type::to_int_type(ch);
     }
 
     // deviates from spec in that this is NOT a copy, but rather a direct reference

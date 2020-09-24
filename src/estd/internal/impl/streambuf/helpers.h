@@ -23,4 +23,12 @@ typename TStreambuf::int_type seekoff(TStreambuf* sb)
     return 0;
 }
 
+
+template <class TStreambuf>
+typename TStreambuf::int_type sputc(TStreambuf* sb, typename TStreambuf::int_type ch)
+{
+    return sb->overflow(ch);
+}
+
+
 }}}}

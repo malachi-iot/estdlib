@@ -11,7 +11,13 @@ template <class TChar, class TCharTraits = estd::char_traits<TChar> >
 struct basic_streambuf;
 
 /// @brief contains base noop-ish implementation, suitable for hiding (think override,
-// but without the virtual since we're all templated)
+/// but without the virtual since we're all templated)
+/// Derived classes are expected to implement:
+/// - sgetc
+/// - sputc
+/// - xsgetn
+/// - xsputn
+/// - gbump
 template <class TTraits>
 struct streambuf_base
 {
@@ -36,6 +42,7 @@ protected:
     };
 
     inline static int_type underflow() { return traits_type::eof(); }
+    inline static int_type uflow() { return traits_type::eof(); }
 
     inline static int_type pbackfail(int_type c = traits_type::eof())
     {
