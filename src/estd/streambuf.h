@@ -298,66 +298,7 @@ public:
     }
 
 
-    template <class T = this_type>
-    typename enable_if<
-            !has_seekoff_method<T>::value &&
-            !has_gbump_method<T>::value &&
-            !has_pbump_method<T>::value &&
-            !has_get_pos_method<T>::value, pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
-    {
-        return -1;
-    }
-
-    template <class T = this_type>
-    typename enable_if<
-            !has_seekoff_method<T>::value &&
-            has_pbump_method<T>::value &&
-            !has_gbump_method<T>::value &&
-            !has_get_pos_method<T>::value,
-            pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which = ios_base::in | ios_base::out)
-    {
-        // TODO: assert that dir = cur and which = ios_base::out
-        this->pbump(off);
-        return -1;
-    }
-
-    // clunky method which only works for in-only pos-based
-    // streambufs to auto-generate pubseekoff
-    template <class T = this_type>
-    typename enable_if<
-            !has_seekoff_method<T>::value &&
-            has_gbump_method<T>::value &&
-            !has_pbump_method<T>::value &&
-            has_get_pos_method<T>::value, pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
-    {
-        if(!(which & ios_base::in)) return -1;
-
-        switch(way)
-        {
-            case ios_base::cur:
-                this->gbump(off);
-                break;
-
-            case ios_base::beg:
-                this->pos(off);
-                break;
-
-            case ios_base::end:
-                // UNTESTED
-                off_type buffer_size = this->egptr() - this->eback();
-                this->pos(buffer_size + off);
-                break;
-        }
-
-        return this->pos();
-    }
-
-    template <class T = this_type>
-    typename enable_if<has_seekoff_method<T>::value, pos_type>::type
-    pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
+    pos_type pubseekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::out)
     {
         return this->seekoff(off, way, which);
     }

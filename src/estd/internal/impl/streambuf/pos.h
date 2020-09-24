@@ -5,12 +5,12 @@
 
 namespace estd { namespace internal { namespace impl {
 
-template <typename TPos>
-struct pos_streambuf_base
+template <typename TCharTraits>
+struct pos_streambuf_base : streambuf_base<TCharTraits>
 {
-    typedef TPos pos_type;
-    // DEBT: Will likely need to distinguish this at some point
-    typedef pos_type off_type;
+    typedef TCharTraits traits_type;
+    typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::off_type off_type;
 
     pos_type _pos;
 
@@ -31,11 +31,12 @@ protected:
         return _pos;
     }
 
-    // DEBT: This is an underlying call, notice the lack of ios_base::openmode.  This in
+    // DEBT: This is an underlying call, notice the lack of inspection of 'openmode'.  This in
     // it of itself is just fine.  However, further derived classes are responsible for
     // creating the dual-mode version.  We like this single-mode version since in embedded
     // scenarios it's nice to have a dedicated in/out positional streambuf
-    inline pos_type seekoff(off_type off, ios_base::seekdir way)
+    inline pos_type seekoff(off_type off, ios_base::seekdir way,
+                            ios_base::openmode = ios_base::in | ios_base::out)
     {
         switch(way)
         {
@@ -53,28 +54,34 @@ protected:
 };
 
 template <typename TCharTraits>
-struct in_pos_streambuf_base :
-        pos_streambuf_base<typename TCharTraits::pos_type>,
-        streambuf_base<TCharTraits>
+struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
+    typedef pos_streambuf_base<traits_type> base_type;
     typedef typename traits_type::pos_type pos_type;
-    typedef pos_streambuf_base<pos_type> base_type;
     typedef typename traits_type::off_type off_type;
 
     in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
+
+    /* Almost works, not quite ready
+    inline pos_type seekoff(off_type off, ios_base::seekdir way,
+                            ios_base::openmode which = ios_base::in | ios_base::out)
+    {
+        if(which != ios_base::in) return pos_type(off_type(-1));
+
+        return base_type::seekoff(off, way);
+    }
+     */
 };
 
 
 template <typename TCharTraits>
-struct out_pos_streambuf_base :
-        pos_streambuf_base<typename TCharTraits::pos_type>,
-        streambuf_base<TCharTraits>
+struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits>
 {
-    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
+    typedef pos_streambuf_base<TCharTraits> base_type;
     typedef TCharTraits traits_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
