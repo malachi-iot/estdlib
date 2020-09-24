@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../streambuf.h"
+#include "helpers.h"
 
 namespace estd { namespace internal { namespace impl {
 
@@ -8,6 +9,8 @@ template <typename TPos>
 struct pos_streambuf_base
 {
     typedef TPos pos_type;
+    // DEBT: Will likely need to distinguish this at some point
+    typedef pos_type off_type;
 
     pos_type _pos;
 
@@ -22,10 +25,30 @@ protected:
     // DEBT: This is obsolete, seekpos is the standard way
     void pos(pos_type p) { _pos = p; }
 
-    inline pos_type seekpos(pos_type p, ios_base::openmode = ios_base::in | ios_base::out)
+    inline pos_type seekpos(pos_type p)
     {
         _pos = p;
         return _pos;
+    }
+
+    // DEBT: This is an underlying call, notice the lack of ios_base::openmode.  This in
+    // it of itself is just fine.  However, further derived classes are responsible for
+    // creating the dual-mode version.  We like this single-mode version since in embedded
+    // scenarios it's nice to have a dedicated in/out positional streambuf
+    inline pos_type seekoff(off_type off, ios_base::seekdir way)
+    {
+        switch(way)
+        {
+            case ios_base::beg:
+                return seekpos(off);
+
+            case ios_base::cur:
+                _pos += off;
+                return pos();
+
+            default:
+                return pos_type(off_type(-1));
+        }
     }
 };
 
@@ -34,22 +57,15 @@ struct in_pos_streambuf_base :
         pos_streambuf_base<typename TCharTraits::pos_type>,
         streambuf_base<TCharTraits>
 {
-    typedef pos_streambuf_base<typename TCharTraits::pos_type> base_type;
     typedef TCharTraits traits_type;
-    typedef typename base_type::pos_type pos_type;
+    typedef typename traits_type::pos_type pos_type;
+    typedef pos_streambuf_base<pos_type> base_type;
     typedef typename traits_type::off_type off_type;
 
     in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
-
-    inline pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
-    {
-        // DEBT: Assert that and openmode = in
-        // TODO: Put actual switch and movement in here
-        return pos_type(off_type(-1));
-    };
 };
 
 
@@ -67,13 +83,6 @@ struct out_pos_streambuf_base :
 
 protected:
     void pbump(int count) { this->_pos += count; }
-
-    inline pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
-    {
-        // DEBT: Assert that openmode = out
-        // TODO: Put actual switch and movement in here
-        return pos_type(off_type(-1));
-    };
 };
 
 }}}

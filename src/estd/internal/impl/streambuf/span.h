@@ -9,7 +9,7 @@ namespace estd { namespace internal { namespace impl {
 // be implemented in a derived class
 // TODO: Do char_traits the same between this and in_span_streambuf
 template <class T, std::ptrdiff_t Extent = -1,
-        class TBase = experimental::instance_provider<estd::span<T, Extent> > >
+        class TBase = estd::experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
         out_pos_streambuf_base<estd::char_traits<T> >,
         TBase
@@ -120,7 +120,7 @@ public:
 template <class TChar,
         class TCharTraits =  estd::char_traits<TChar>,
         std::ptrdiff_t Extent = -1,
-        class TBase = experimental::instance_provider<estd::span<TChar, Extent> > >
+        class TBase = estd::experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,
         TBase
