@@ -48,16 +48,11 @@ protected:
         return traits_type::eof();
     }
 
-public:
-    // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
-    // that way at the moment
     inline static int_type overflow(int_type ch = traits_type::eof())
     {
         return traits_type::eof();
     }
 
-    // DEBT: Underflow works pretty well as protected, but in our embedded+non-blocking
-    // world, public access to this is desirable to avoid minor overhead of an sgetc call
     inline static int_type underflow() { return traits_type::eof(); }
 };
 
@@ -141,11 +136,13 @@ struct basic_streambuf
     typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
 
-    // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
-    // that way at the moment
+protected:
     virtual int_type overflow(int_type ch) = 0;
 
-protected:
+    // DEBT: Needs to be abstract virtual here
+    virtual int_type underflow() { return traits_type::eof(); }
+
+
     virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
     virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
     virtual int sync() = 0;

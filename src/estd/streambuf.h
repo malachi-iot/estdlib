@@ -302,6 +302,15 @@ public:
     {
         return this->seekoff(off, way, which);
     }
+
+
+    // DEBT: Overflow is supposed to be protected, but our wrapper can't easily reach it
+    // that way at the moment
+    using base_type::overflow;
+
+    // Underflow works pretty well as protected, but in our embedded+non-blocking
+    // world, public access to this is desirable to avoid minor overhead of an sgetc call
+    using base_type::underflow;
 };
 
 template<class TChar, class TStream, class Traits = ::estd::char_traits <TChar> >
