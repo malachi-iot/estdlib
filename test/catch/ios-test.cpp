@@ -40,6 +40,8 @@ TEST_CASE("iostreams")
     const char raw_str[] = "raw 'traditional' output\n";
     CONSTEXPR int raw_str_len = sizeof(raw_str) - 1;
 
+    /* This old cute and clever function-detector method no longer employed.
+     * Ended up being more complicated than not using it in the end
     SECTION("SFINAE tests")
     {
         //typedef estd::internal::impl::native_streambuf<char, estd::internal::posix_stream_t, std::char_traits<char> >
@@ -49,7 +51,7 @@ TEST_CASE("iostreams")
         bool has_method = streambuf_type::has_sputc_method<streambuf_impl_type>::value;
 
         REQUIRE(has_method);
-    }
+    } */
     SECTION("experimental tests")
     {
         internal::basic_ostream<dummy_streambuf> _cout;
@@ -427,11 +429,6 @@ TEST_CASE("iostreams")
 
         sb_type sb(raw_str);
 
-        SECTION("has methods")
-        {
-            REQUIRE(sb_type::has_gbump_method<sb_type>::value);
-            REQUIRE(sb_type::has_get_pos_method<sb_type>::value);
-        }
         SECTION("sgetn")
         {
             estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));
