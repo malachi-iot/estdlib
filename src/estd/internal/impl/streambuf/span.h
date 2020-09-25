@@ -158,11 +158,6 @@ private:
     streamsize remaining() const { return in().size() - pos(); }
 
 protected:
-    // EXPERIMENTAL - counts on the idea that underflow would *only*
-    // be called when gptr() == egptr().  This may or may not really
-    // be correct
-    int_type underflow() { return traits_type::eof(); }
-
     streamsize showmanyc() const
     {
         streamsize r = remaining();
@@ -188,8 +183,7 @@ public:
         // however, for a span, underflow never will fetch a new buffer so
         // we don't do it
         if(remaining() == 0)
-            //return traits_type::eof();
-            return underflow(); // EXPERIMENTAL - always returns eof() for this class
+            return this->underflow(); // always returns eof() for this class
 
         int_type ch = traits_type::to_int_type(*gptr());
 

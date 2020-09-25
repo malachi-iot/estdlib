@@ -41,7 +41,6 @@ protected:
         return pos_type(off_type(-1));
     };
 
-    inline static int_type underflow() { return traits_type::eof(); }
     inline static int_type uflow() { return traits_type::eof(); }
 
     inline static int_type pbackfail(int_type c = traits_type::eof())
@@ -56,6 +55,10 @@ public:
     {
         return traits_type::eof();
     }
+
+    // DEBT: Underflow works pretty well as protected, but in our embedded+non-blocking
+    // world, public access to this is desirable to avoid minor overhead of an sgetc call
+    inline static int_type underflow() { return traits_type::eof(); }
 };
 
 
