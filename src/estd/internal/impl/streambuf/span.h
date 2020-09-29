@@ -94,12 +94,12 @@ protected:
                 break;
 
             case ios_base::beg:
-                base_out_type::pos(off);
+                base_out_type::seekpos(off);
                 break;
 
             case ios_base::end:
                 // UNTESTED
-                base_out_type::pos(out().size_bytes() + off);
+                base_out_type::seekpos(out().size_bytes() + off);
                 break;
         }
 
@@ -109,7 +109,7 @@ protected:
 public:
     void setbuf_experimental(char_type* s, streamsize n)
     {
-        base_out_type::pos(0);
+        base_out_type::seekpos(0);
         base_type::value(span<char_type>(s, n));
     }
 };

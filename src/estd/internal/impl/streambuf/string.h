@@ -57,9 +57,13 @@ struct out_stringbuf : stringbuf_base<TString>
 
 
 template <class TString>
-struct in_stringbuf
+struct in_stringbuf : in_pos_streambuf_base<typename TString::traits_type>
 {
+    typedef in_pos_streambuf_base<typename TString::traits_type> base_type;
 
+    typedef typename base_type::traits_type traits_type;
+    typedef typename traits_type::pos_type pos_type;
+    typedef typename traits_type::off_type off_type;
 };
 
 template <class TString>
@@ -68,36 +72,35 @@ struct basic_stringbuf :
         in_stringbuf<TString>
 {
     typedef out_stringbuf<TString> base_type;
+    typedef in_stringbuf<TString> in_base_type;
     typedef typename base_type::traits_type traits_type;
     typedef typename base_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
     typedef typename base_type::string_type string_type;
     typedef typename string_type::size_type size_type;
 
-    size_type get_pos;
-
-    basic_stringbuf() : get_pos(0) {}
+    basic_stringbuf() {}
 
     template <class TParam1>
     basic_stringbuf(TParam1& p) :
-            base_type(p),
-            get_pos(0) {}
+            base_type(p)
+    {}
 
     streamsize xsgetn(char_type* s, streamsize count)
     {
         streamsize orig_count = count;
-        const char_type* src = base_type::_str.clock(get_pos, count);
+        const char_type* src = base_type::_str.clock(in_base_type::pos(), count);
 
         while(count--) *s++ = *src++;
 
         base_type::_str.unlock();
-        get_pos += orig_count;
+        in_base_type::gbump(orig_count);
         return orig_count;
     }
 
     streamsize showmanyc() const
     {
-        size_type len = this->_str.length() - get_pos;
+        size_type len = this->_str.length() - in_base_type::pos();
         return len > 0 ? len : -1;
     }
 
@@ -105,10 +108,10 @@ struct basic_stringbuf :
     {
         // no 'underflow' for a basic string.  no more chars means no more chars, plain
         // and simple
-        if(get_pos == base_type::_str.length())
+        if(in_base_type::pos() == base_type::_str.length())
             return traits_type::eof();
 
-        const char_type ch = *base_type::_str.clock(get_pos, 1);
+        const char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
         base_type::_str.cunlock();
         return ch;
     }
@@ -116,9 +119,7 @@ struct basic_stringbuf :
     // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
-    char_type* gptr() { return base_type::_str.data() + get_pos; }
-
-    void gbump(int n) { get_pos += n; }
+    char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
 };
 
 }}}

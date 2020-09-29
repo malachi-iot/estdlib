@@ -12,18 +12,10 @@ struct pos_streambuf_base : streambuf_base<TCharTraits>
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
 
+protected:
     pos_type _pos;
 
     pos_streambuf_base(pos_type pos) : _pos(pos) {}
-
-    pos_type pos() const { return _pos; }
-
-    // FIX: Need this because ESTD_FN_HAS_METHOD falls on its face for detecting overloaded methods
-    pos_type get_pos() const { return pos(); }
-
-protected:
-    // DEBT: This is obsolete, seekpos is the standard way
-    void pos(pos_type p) { _pos = p; }
 
     inline pos_type seekpos(pos_type p)
     {
@@ -51,6 +43,9 @@ protected:
                 return pos_type(off_type(-1));
         }
     }
+
+public:
+    pos_type pos() const { return _pos; }
 };
 
 template <typename TCharTraits>
