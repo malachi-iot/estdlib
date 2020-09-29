@@ -95,9 +95,14 @@ struct basic_stringbuf :
         return count_copied;
     }
 
+    size_type remaining() const
+    {
+        return this->_str.length() - in_base_type::pos();
+    }
+
     streamsize showmanyc() const
     {
-        size_type len = this->_str.length() - in_base_type::pos();
+        size_type len = remaining();
         return len > 0 ? len : -1;
     }
 
@@ -105,7 +110,7 @@ struct basic_stringbuf :
     {
         // no 'underflow' for a basic string.  no more chars means no more chars, plain
         // and simple
-        if(in_base_type::pos() == base_type::_str.length())
+        if(remaining() == 0)
             return traits_type::eof();
 
         const char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
