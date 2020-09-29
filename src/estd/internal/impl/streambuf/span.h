@@ -155,12 +155,12 @@ struct in_span_streambuf :
     char_type* egptr() const { return eback() + in().size(); }
 
 private:
-    streamsize remaining() const { return in().size() - pos(); }
+    streamsize xin_avail() const { return in().size() - pos(); }
 
 protected:
     streamsize showmanyc() const
     {
-        streamsize r = remaining();
+        streamsize r = xin_avail();
 
         // there is never a time we are unsure if more characters remain in this type of span buffer
         return r > 0 ? r : -1;
@@ -169,11 +169,13 @@ protected:
     streamsize xsgetn(nonconst_char_type* s, streamsize count)
     {
         // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
-        streamsize c = estd::min(count, remaining());
+        streamsize c = estd::min(count, xin_avail());
         estd::copy_n(gptr(), c, s);
         this->gbump(c);
         return c;
     }
+
+    char_type& xsgetc() const { return *gptr(); }
 
 public:
     // NOTE: This would preferably not be in impl part
@@ -182,10 +184,10 @@ public:
         // NOTE: non-span versions would call onto underflow here
         // however, for a span, underflow never will fetch a new buffer so
         // we don't do it
-        if(remaining() == 0)
+        if(xin_avail() == 0)
             return this->underflow(); // always returns eof() for this class
 
-        int_type ch = traits_type::to_int_type(*gptr());
+        int_type ch = traits_type::to_int_type(xsgetc());
 
         return ch;
     }

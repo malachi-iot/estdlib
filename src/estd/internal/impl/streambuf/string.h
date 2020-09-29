@@ -87,33 +87,39 @@ struct basic_stringbuf :
         return count_copied;
     }
 
-    size_type remaining() const
+    size_type xin_avail() const
     {
         return this->_str.length() - in_base_type::pos();
     }
 
     streamsize showmanyc() const
     {
-        size_type len = remaining();
+        size_type len = xin_avail();
         return len > 0 ? len : -1;
+    }
+
+    char_type xsgetc() const
+    {
+        char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
+        base_type::_str.cunlock();
+        return ch;
     }
 
     int_type sgetc()
     {
         // no 'underflow' for a basic string.  no more chars means no more chars, plain
         // and simple
-        if(remaining() == 0)
+        if(xin_avail() == 0)
             return traits_type::eof();
 
-        const char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
-        base_type::_str.cunlock();
-        return ch;
+        return xsgetc();
     }
 
     // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
     char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
+
 
     // UNTESTED
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)

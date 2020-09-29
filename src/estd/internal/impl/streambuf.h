@@ -53,6 +53,11 @@ protected:
     }
 
     inline static int_type underflow() { return traits_type::eof(); }
+
+    // Non-standard helper for showmanyc/in_avail
+    // Only reports on available or not, does not take any guesses
+    // as to what might come if the buffer is filled
+    inline static int_type xin_avail() { return 0; }
 };
 
 
