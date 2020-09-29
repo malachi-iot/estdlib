@@ -105,16 +105,6 @@ struct basic_stringbuf :
         return ch;
     }
 
-    int_type sgetc()
-    {
-        // no 'underflow' for a basic string.  no more chars means no more chars, plain
-        // and simple
-        if(xin_avail() == 0)
-            return traits_type::eof();
-
-        return xsgetc();
-    }
-
     // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)

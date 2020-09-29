@@ -139,7 +139,6 @@ struct in_span_streambuf :
     const span_type& in() const { return base_type::value(); }
 
     pos_type pos() const { return base_pos_type::pos(); }
-    void pos(pos_type p) { base_pos_type::pos(p); }
 
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
             base_type(copy_from)
@@ -154,10 +153,9 @@ struct in_span_streambuf :
     char_type* gptr() const { return eback() + pos(); }
     char_type* egptr() const { return eback() + in().size(); }
 
-private:
+protected:
     streamsize xin_avail() const { return in().size() - pos(); }
 
-protected:
     streamsize showmanyc() const
     {
         streamsize r = xin_avail();
@@ -176,21 +174,6 @@ protected:
     }
 
     char_type& xsgetc() const { return *gptr(); }
-
-public:
-    // NOTE: This would preferably not be in impl part
-    int_type sgetc()
-    {
-        // NOTE: non-span versions would call onto underflow here
-        // however, for a span, underflow never will fetch a new buffer so
-        // we don't do it
-        if(xin_avail() == 0)
-            return this->underflow(); // always returns eof() for this class
-
-        int_type ch = traits_type::to_int_type(xsgetc());
-
-        return ch;
-    }
 };
 
 

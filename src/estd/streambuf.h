@@ -156,6 +156,16 @@ public:
             return this->uflow();
     }
 
+    int_type sgetc()
+    {
+        if(base_type::xin_avail() == 0)
+            return base_type::underflow();
+
+        int_type ch = traits_type::to_int_type(base_type::xsgetc());
+
+        return ch;
+    }
+
     // sgetc implies nonblocking, but in fact typically does block in std environments
     // speekc gauruntees nonblocking.  however, since we strive to make sgetc nonblocking
     // speekc might be considered superfluous and a deviation from spec, so for now it's
