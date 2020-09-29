@@ -2,16 +2,16 @@
 
 #include "../streambuf.h"
 
+// Since strings always have an "out" component (track how many characters are written to
+// it) we don't have a distinct "in" string buf.
 namespace estd { namespace internal { namespace impl {
 
-// TODO: decouple all these stringbufs so we can have a standalone in_stringbuf
 template <class TString>
 struct stringbuf_base : streambuf_base<typename TString::traits_type>
 {
     stringbuf_base() {}
 };
 
-// TODO: utilize out_pos_streambuf/in_pos_streambuf
 template <class TString>
 struct out_stringbuf : stringbuf_base<TString>
 {
@@ -56,24 +56,15 @@ struct out_stringbuf : stringbuf_base<TString>
 };
 
 
-template <class TString>
-struct in_stringbuf : in_pos_streambuf_base<typename TString::traits_type>
-{
-    typedef in_pos_streambuf_base<typename TString::traits_type> base_type;
-
-    typedef typename base_type::traits_type traits_type;
-    typedef typename traits_type::pos_type pos_type;
-    typedef typename traits_type::off_type off_type;
-};
-
+// DEBT: Need a proper seekoff implementation
 template <class TString>
 struct basic_stringbuf :
         out_stringbuf<TString>,
-        in_stringbuf<TString>
+        in_pos_streambuf_base<typename TString::traits_type>
 {
     typedef out_stringbuf<TString> base_type;
-    typedef in_stringbuf<TString> in_base_type;
     typedef typename base_type::traits_type traits_type;
+    typedef in_pos_streambuf_base<traits_type> in_base_type;
     typedef typename base_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
     typedef typename base_type::string_type string_type;

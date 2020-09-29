@@ -41,7 +41,6 @@ class streambuf :
 public:
     typedef TPolicy policy_type;
 
-    // estd::internal::impl::native_streambuf<TChar, TStream, Traits
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
@@ -143,37 +142,6 @@ public:
         return written;
     }
 
-    /*
-    // Do SFINAE and call TImpl version if present
-    template <class T = base_type>
-    typename enable_if<has_sputc_method<T>::value, int_type>::type
-    sputc(char_type ch)
-    {
-        return base_type::sputc(ch);
-    }
-
-    // if TImpl doesn't have one, use a generic one-size-fits all version
-    template <class T = base_type>
-    typename enable_if<!has_sputc_method<T>::value && !has_spostc_method<T>::value, int_type>::type
-    sputc(char_type ch)
-    {
-        bool success = sputn(&ch, 1) == 1;
-        return success ? traits_type::to_int_type(ch) : traits_type::eof();
-    }
-
-
-    // if an spostc IS specified, but not sputc is present, we can generate an sputc
-    // note that we depend on overflow presence for this specialization
-    template <class T = base_type>
-    typename enable_if<!has_sputc_method<T>::value && has_spostc_method<T>::value, int_type>::type
-    sputc(char_type ch)
-    {
-        if(this->spostc(ch) == traits_type::eof())
-            return this->overflow(ch);
-        else
-            return traits_type::to_int_type(ch);
-    } */
-
 
     int_type sbumpc()
     {
@@ -187,39 +155,6 @@ public:
         else
             return this->uflow();
     }
-
-    // TODO: sgetc is actually more of a wrapper around underflow, who
-    // mainly interacts with buffers otherwise so consider implementing
-    // underflow instead for our low level character acquisition.  Note though,
-    // clumsily, underflow is technically also responsible for then
-    // producing (not just populating) a new gptr with
-    // data - if any
-
-    /*
-     *  Reasonable code, but enabling this disables any existing sgetc
-     *
-    template <class T = base_type>
-    typename enable_if<has_underflow_method<T>::value, int_type>::type
-    sgetc()
-    {
-        return this->underflow();
-    } */
-
-    /* NOTE: implementation of sgetc is kind of specific, so we can't make
-     * a generic handler like the others [reading a char without advancing]
-    template <class T = base_type>
-    typename enable_if<has_sgetc_method<T>::value, int_type>::type
-    sgetc()
-    {
-        return base_type::sgetc();
-    }
-
-    template <class T = base_type>
-    typename enable_if<!has_sgetc_method<T>::value, int_type>::type
-    sgetc()
-    {
-        return -1;
-    } */
 
     // sgetc implies nonblocking, but in fact typically does block in std environments
     // speekc gauruntees nonblocking.  however, since we strive to make sgetc nonblocking
