@@ -56,7 +56,6 @@ struct out_stringbuf : stringbuf_base<TString>
 };
 
 
-// DEBT: Need a proper seekoff implementation
 template <class TString>
 struct basic_stringbuf :
         out_stringbuf<TString>,
@@ -69,6 +68,8 @@ struct basic_stringbuf :
     typedef typename traits_type::int_type int_type;
     typedef typename base_type::string_type string_type;
     typedef typename string_type::size_type size_type;
+    typedef typename base_type::off_type off_type;
+    typedef typename base_type::pos_type pos_type;
 
     basic_stringbuf() {}
 
@@ -113,6 +114,30 @@ struct basic_stringbuf :
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
     char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
+
+    // UNTESTED
+    pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
+    {
+        switch(dir)
+        {
+            case ios_base::beg:
+                if(which & ios_base::in)
+                    return in_base_type::seekpos(off);
+                break;
+
+            case ios_base::cur:
+                if(which & ios_base::in)
+                    in_base_type::gbump(off);
+                break;
+
+            case ios_base::end:
+                if(which & ios_base::in)
+                    return in_base_type::seekpos(this->_str.length() + off);
+                break;
+        }
+
+        return pos_type(off_type(-1));
+    }
 };
 
 }}}
