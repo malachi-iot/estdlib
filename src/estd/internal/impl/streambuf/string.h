@@ -88,14 +88,11 @@ struct basic_stringbuf :
 
     streamsize xsgetn(char_type* s, streamsize count)
     {
-        streamsize orig_count = count;
-        const char_type* src = base_type::_str.clock(in_base_type::pos(), count);
+        size_type count_copied = base_type::str().copy(s, count, in_base_type::pos());
 
-        while(count--) *s++ = *src++;
+        in_base_type::gbump(count_copied);
 
-        base_type::_str.unlock();
-        in_base_type::gbump(orig_count);
-        return orig_count;
+        return count_copied;
     }
 
     streamsize showmanyc() const

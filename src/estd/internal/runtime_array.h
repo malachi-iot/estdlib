@@ -7,6 +7,8 @@
 #include "../initializer_list.h"
 #include "../iterator.h"
 
+#include <string.h>     // for access to memcpy
+
 namespace estd { namespace internal {
 
 // experimental and not good
@@ -375,7 +377,7 @@ public:
     size_type copy(typename estd::remove_const<value_type>::type* dest,
                    size_type count, size_type pos = 0) const
     {
-        const value_type* src = clock();
+        const value_type* src = clock(pos, count);
 
         // TODO: since we aren't gonna throw an exception, determine what to do if
         // pos > size()
@@ -385,7 +387,7 @@ public:
 
         // TODO: Do the m_impl.copy_from here
 
-        memcpy(dest, src + pos, count * sizeof(value_type));
+        memcpy(dest, src, count * sizeof(value_type));
 
         cunlock();
 
