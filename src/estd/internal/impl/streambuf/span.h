@@ -17,7 +17,7 @@ struct out_span_streambuf :
     typedef TBase base_type;
     typedef T char_type;
     typedef estd::char_traits<char_type> traits_type;
-    typedef out_pos_streambuf_base<estd::char_traits<T> > base_out_type;
+    typedef out_pos_streambuf_base<traits_type> base_out_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
     typedef typename traits_type::off_type off_type;
@@ -73,6 +73,12 @@ struct out_span_streambuf :
 
     int_type sputc(char_type ch)
     {
+        // DEBT: pos_type somehow becomes signed / std::streamoff here
+        unsigned pos = base_out_type::pos();
+        //if(base_out_type::pos() >= out().size_bytes())
+        if(pos >= out().size_bytes())
+            return base_out_type::overflow();
+
         *(pptr()) = ch;
         this->pbump(1);
         return traits_type::to_int_type(ch);

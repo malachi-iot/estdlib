@@ -2,6 +2,7 @@
 
 #include <estd/type_traits.h>
 #include <estd/limits.h>
+#include <estd/string.h>
 
 using namespace estd;
 
@@ -44,6 +45,24 @@ TEST_CASE("type traits tests")
         REQUIRE(_digit == value);
         REQUIRE(digit == value);
         REQUIRE(digit_copy == value * 2);
+    }
+    SECTION("char_traits")
+    {
+        SECTION("char")
+        {
+            REQUIRE(is_signed<char_traits<char>::off_type>::value);
+            REQUIRE(!is_signed<char_traits<char>::pos_type>::value);
+        }
+        SECTION("const char")
+        {
+            REQUIRE(is_signed<char_traits<const char>::off_type>::value);
+            REQUIRE(!is_signed<char_traits<const char>::pos_type>::value);
+        }
+        SECTION("uint8_t")
+        {
+            REQUIRE(is_signed<char_traits<uint8_t>::off_type>::value);
+            REQUIRE(!is_signed<char_traits<uint8_t>::pos_type>::value);
+        }
     }
 }
 
