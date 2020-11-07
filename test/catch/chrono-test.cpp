@@ -303,12 +303,28 @@ TEST_CASE("chrono tests")
     }
     SECTION("subtraction")
     {
-        estd::chrono::seconds s(10);
-        estd::chrono::minutes m(2);
+        using namespace estd::chrono;
+
+        seconds s(10);
+        minutes m(2);
 
         auto d = m - s;
 
+        typedef typename estd::common_type<minutes, seconds>::type CT;
+
+        REQUIRE(CT::std_period_type::num == 60);
+        REQUIRE(CT::std_period_type::den == 1);
+
+        REQUIRE(seconds::std_period_type::num == 1);
+        REQUIRE(seconds::std_period_type::den == 1);
+
+        auto __s = CT(s);
+        auto _s = __s.count();
+        auto _m = CT(m).count();
+
         // FIX: Bugged
         //REQUIRE(d.count() == 110);
+
+        auto _d = CT(_m - _s);
     }
 }
