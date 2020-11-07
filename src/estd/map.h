@@ -31,7 +31,7 @@ struct kvp_traits
 
 
 template <class TValue>
-struct kvp_traits<estd::pair<const int, TValue>>
+struct kvp_traits<estd::pair<const int, TValue> >
 {
     static CONSTEXPR const int invalid_key() { return -1; }
 };
@@ -86,10 +86,10 @@ public:
 template <class Key, class T,
           class Compare = estd::less<Key>,
           template <class> class Allocator = std::allocator>
-class map : public internal::map_base<estd::vector<pair<const Key, T>>, Compare>
+class map : public internal::map_base<estd::vector<pair<const Key, T> >, Compare>
 {
 protected:
-    typedef internal::map_base<estd::vector<pair<const Key, T>>, Compare> base_t;
+    typedef internal::map_base<estd::vector<pair<const Key, T> >, Compare> base_t;
 
 public:
     typedef Key key_type;
