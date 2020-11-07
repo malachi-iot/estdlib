@@ -131,7 +131,7 @@ public:
     const value_type& value() const { return base_type::value(); }
 
     // --- constructors
-
+    // FIX: This needs to initialize to not have a value, as per spec
     optional() {}
 
 #ifdef FEATURE_CPP_CONSTEXPR
