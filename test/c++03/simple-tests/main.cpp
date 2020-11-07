@@ -3,6 +3,8 @@
 #include <estd/string.h>
 #include <estd/ratio.h>
 
+#include <unity.h>
+
 using namespace std;
 
 typedef estd::ratio<1, 100> ratio1;

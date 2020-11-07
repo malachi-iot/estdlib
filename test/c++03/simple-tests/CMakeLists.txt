@@ -11,8 +11,13 @@ add_executable(${PROJECT_NAME}
     tuple-test.cpp
     )
 
+set(UNITY_DIR ../../../ext/Unity)
 set(ESTDLIB_DIR ../../../src)
 
 add_subdirectory(${ESTDLIB_DIR} estdlib)
+add_subdirectory(${UNITY_DIR} unity)
+
 include_directories(${ESTDLIB_DIR})
+
+target_link_libraries(${PROJECT_NAME} unity)
 
