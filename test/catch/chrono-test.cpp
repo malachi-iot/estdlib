@@ -301,4 +301,14 @@ TEST_CASE("chrono tests")
         // FIX: Here is the problem, silent precision loss
         //REQUIRE(t1 == t2);
     }
+    SECTION("subtraction")
+    {
+        estd::chrono::seconds s(10);
+        estd::chrono::minutes m(2);
+
+        auto d = m - s;
+
+        // FIX: Bugged
+        //REQUIRE(d.count() == 110);
+    }
 }
