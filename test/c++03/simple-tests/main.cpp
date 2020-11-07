@@ -41,6 +41,7 @@ int main()
     test_align();
     test_cstddef();
     test_queue();
+    test_streambuf();
     test_string();
     UNITY_END();
 

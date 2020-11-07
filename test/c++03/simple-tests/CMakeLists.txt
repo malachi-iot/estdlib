@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_STANDARD 98)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+
+# DEBT: This is not always true for C++98 scenarios, but implicitly true for ADSPBFIN (inttypes.h isn't
+# available, but it seems to have those defs)
+add_compile_definitions(FEATURE_STD_INTTYPES)
 
 project(simple-tests)
 
@@ -21,11 +24,11 @@ set(TESTSRC
         ${TESTSRC_DIR}/cpp.cpp
         ${TESTSRC_DIR}/cstddef.cpp
         ${TESTSRC_DIR}/queue.cpp
+        ${TESTSRC_DIR}/streambuf.cpp
         ${TESTSRC_DIR}/string.cpp
         )
 
 #   ${TESTSRC_DIR}/map.cpp
-#   ${TESTSRC_DIR}/streambuf.cpp
 #   ${TESTSRC_DIR}/thread.cpp
 
 add_executable(${PROJECT_NAME}
