@@ -3,12 +3,44 @@
 #include <estd/optional.h>
 
 
+static void test_optional_default()
+{
+    estd::optional<const char*> o;
+
+    TEST_ASSERT_EQUAL(false, o.has_value());
+}
+
+
+static void test_optional_charptr()
+{
+    estd::optional<const char*> o = "hello";
+
+    TEST_ASSERT(o.has_value());
+}
+
+
+static void test_optional_layer1()
+{
+    estd::layer1::optional<int, -5> o;
+
+    TEST_ASSERT(!o.has_value());
+    TEST_ASSERT_EQUAL(-5, o.value());
+
+    o = 10;
+
+    TEST_ASSERT(o.has_value());
+    TEST_ASSERT_EQUAL(10, o.value());
+}
+
+
+
 #ifdef ESP_IDF_TESTING
-TEST_CASE("queue tests", "[queue]")
+TEST_CASE("estd::optional", "[optional]")
 #else
 void test_optional()
 #endif
 {
-    estd::optional<const char*> d2;
-
+    RUN_TEST(test_optional_default);
+    RUN_TEST(test_optional_charptr);
+    RUN_TEST(test_optional_layer1);
 }
