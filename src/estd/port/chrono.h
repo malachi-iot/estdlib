@@ -11,7 +11,9 @@
 #include "../ratio.h"
 #include "../limits.h"
 
-#if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO)
+#if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
+// DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
+#define FEATURE_CPP_CHRONO
 #include <chrono>
 #endif
 
@@ -83,7 +85,7 @@ protected:
     template <class Rep2, class Period2>
     static CONSTEXPR Rep convert_from(const duration<Rep2, Period2>& d);
 
-#ifdef ESTD_POSIX
+#ifdef FEATURE_CPP_CHRONO
     template <class Rep2, class Period2>
     static CONSTEXPR Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
@@ -119,7 +121,7 @@ public:
 #endif
     duration(const duration<Rep2, Period2>& d);
 
-#ifdef ESTD_POSIX
+#ifdef FEATURE_CPP_CHRONO
     template <class Rep2, class Period2>
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
@@ -176,7 +178,7 @@ public:
 template <class ToDuration, class Rep, class Period>
 ToDuration duration_cast(const duration<Rep, Period>& d);
 
-#ifdef ESTD_POSIX
+#ifdef FEATURE_CPP_CHRONO
 template <class ToDuration, class Rep, class Period>
 inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
 {

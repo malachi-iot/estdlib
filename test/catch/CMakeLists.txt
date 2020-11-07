@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project("estdlib-unit-tests")
 
-#set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_CXX_STANDARD 11)
 
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
