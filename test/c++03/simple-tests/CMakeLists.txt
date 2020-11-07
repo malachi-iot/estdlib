@@ -20,7 +20,13 @@ set(TESTSRC
         ${TESTSRC_DIR}/chrono.cpp
         ${TESTSRC_DIR}/cpp.cpp
         ${TESTSRC_DIR}/cstddef.cpp
+        ${TESTSRC_DIR}/queue.cpp
+        ${TESTSRC_DIR}/string.cpp
         )
+
+#   ${TESTSRC_DIR}/map.cpp
+#   ${TESTSRC_DIR}/streambuf.cpp
+#   ${TESTSRC_DIR}/thread.cpp
 
 add_executable(${PROJECT_NAME}
         chrono-test.cpp
@@ -30,5 +36,5 @@ add_executable(${PROJECT_NAME}
         ${TESTSRC}
         )
 
-target_link_libraries(${PROJECT_NAME} unity)
+target_link_libraries(${PROJECT_NAME} unity estd_lib)
 

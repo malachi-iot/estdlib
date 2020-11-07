@@ -40,6 +40,8 @@ int main()
     UNITY_BEGIN();
     test_align();
     test_cstddef();
+    test_queue();
+    test_string();
     UNITY_END();
 
     return 0;
