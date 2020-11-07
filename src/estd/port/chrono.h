@@ -13,7 +13,7 @@
 
 #if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
 // DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
-#define FEATURE_CPP_CHRONO
+#define FEATURE_STD_CHRONO
 #include <chrono>
 #endif
 
@@ -85,7 +85,7 @@ protected:
     template <class Rep2, class Period2>
     static CONSTEXPR Rep convert_from(const duration<Rep2, Period2>& d);
 
-#ifdef FEATURE_CPP_CHRONO
+#ifdef FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
     static CONSTEXPR Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
@@ -121,7 +121,7 @@ public:
 #endif
     duration(const duration<Rep2, Period2>& d);
 
-#ifdef FEATURE_CPP_CHRONO
+#ifdef FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
@@ -178,7 +178,7 @@ public:
 template <class ToDuration, class Rep, class Period>
 ToDuration duration_cast(const duration<Rep, Period>& d);
 
-#ifdef FEATURE_CPP_CHRONO
+#ifdef FEATURE_STD_CHRONO
 template <class ToDuration, class Rep, class Period>
 inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
 {
@@ -241,11 +241,11 @@ typedef internal::estd_chrono::duration<internal::nano_rep, nano> nanoseconds;
 typedef internal::estd_chrono::duration<internal::micro_rep, micro> microseconds;
 typedef internal::estd_chrono::duration<internal::milli_rep, milli> milliseconds;
 typedef internal::estd_chrono::duration<internal::seconds_rep> seconds;
-typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60>> minutes;
-typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600>> hours;
+typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60> > minutes;
+typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600> > hours;
 // NOTE: AVR compiler requires this long typecast.  Doesn't hurt anything (though it's
 // a bit ugly)
-typedef internal::estd_chrono::duration<internal::days_rep, ratio<(long)3600 * 24>> days;
+typedef internal::estd_chrono::duration<internal::days_rep, ratio<(long)3600 * 24> > days;
 
 #ifdef FEATURE_ESTD_CHRONO
 

@@ -2,16 +2,17 @@
 
 #include "platform.h"
 
-// NOTE: This is rife with C++11 features, so this is a general guard
-// TODO: would really like to enable a basic < C++11 capability since chrono
-// depends on this
-#ifdef FEATURE_CPP_VARIADIC
-
 // mainly just for tooltips, normally you don't include internal/common_type directly
 #include "../type_traits.h"
 #include "../utility.h"
 
+
+
 namespace estd {
+// NOTE: This is rife with C++11 features, so this is a general guard
+// TODO: would really like to enable a basic < C++11 capability since chrono
+// depends on this
+#ifdef FEATURE_CPP_VARIADIC
 
 // lifted from https://en.cppreference.com/w/cpp/types/common_type
 
@@ -71,6 +72,15 @@ struct common_type<T1, T2, R...>
 template< class... T >
 using common_type_t = typename common_type<T...>::type;
 #endif
-}
+
+#else  // FEATURE_CPP_VARIADIC
+
+// C++98 mode currently experimental
+
+template <class T1, class T2>
+struct common_type;
+
 
 #endif // FEATURE_CPP_VARIADIC
+}
+

@@ -31,7 +31,7 @@ CONSTEXPR Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>&
     return d.count() * rd::num / rd::den;
 }
 
-#ifdef ESTD_POSIX
+#ifdef FEATURE_STD_CHRONO
 template<
         class Rep,
         class Period
@@ -78,12 +78,12 @@ ToDuration duration_cast(const duration<Rep, Period>& d)
 
 // NOTE: Not well tested for operations across different duration types
 template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs )
 {
     typedef typename common_type<duration<Rep1, Period1>,
-            duration<Rep2, Period2>>::type CT;
+            duration<Rep2, Period2> >::type CT;
 
     return CT(CT(lhs).count() - CT(rhs).count());
 }
@@ -91,12 +91,12 @@ typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
 
 
 template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2>>::type
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
 CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
                      const duration<Rep2,Period2>& rhs )
 {
     typedef typename common_type<duration<Rep1, Period1>,
-            duration<Rep2, Period2>>::type CT;
+            duration<Rep2, Period2> >::type CT;
 
     return CT(CT(lhs).count() + CT(rhs).count());
 }
@@ -108,7 +108,7 @@ CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
 {
     typedef typename estd::common_type<estd::chrono::duration<Rep1, Period1>,
-                             estd::chrono::duration<Rep2, Period2>>::type CT;
+                             estd::chrono::duration<Rep2, Period2> >::type CT;
 
     return CT(lhs).count() > CT(rhs).count();
 }
@@ -118,7 +118,7 @@ CONSTEXPR bool operator<(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
 {
     typedef typename estd::common_type<estd::chrono::duration<Rep1, Period1>,
-                             estd::chrono::duration<Rep2, Period2>>::type CT;
+                             estd::chrono::duration<Rep2, Period2> >::type CT;
 
     return CT(lhs).count() < CT(rhs).count();
 }
@@ -144,7 +144,7 @@ CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs)
 {
     typedef typename estd::common_type<estd::chrono::duration<Rep1, Period1>,
-                             estd::chrono::duration<Rep2, Period2>>::type CT;
+                             estd::chrono::duration<Rep2, Period2> >::type CT;
 
     return CT(lhs).count() == CT(rhs).count();
 }
@@ -185,7 +185,7 @@ CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
 // lifted from https://en.cppreference.com/w/cpp/chrono/duration/abs
 // FIX: Not going to work until we implement min() and zero()
 template <class Rep, class Period, class = estd::enable_if_t<
-   duration<Rep, Period>::min() < duration<Rep, Period>::zero()>>
+   duration<Rep, Period>::min() < duration<Rep, Period>::zero()> >
 CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
 {
     return d >= d.zero() ? d : -d;
