@@ -345,10 +345,12 @@ public:
 
 
 #ifdef ESTD_POSIX
+#ifdef __cpp_alias_templates
 template<class TChar, class Traits = std::char_traits<TChar> >
 using posix_istream = internal::basic_istream< posix_streambuf<TChar, Traits> >;
 
 typedef posix_istream<char> istream;
+#endif
 #endif
 
 

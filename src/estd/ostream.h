@@ -361,10 +361,12 @@ inline internal::basic_ostream<TStreambuf>& hex(internal::basic_ostream<TStreamb
 
 // TODO: Put this in layer1/layer2 since it isn't the traditional/fully virtual-capable version
 #ifdef ESTD_POSIX
+#ifdef __cpp_alias_templates
 template<class TChar, class Traits = std::char_traits<TChar> >
 using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
 
 //typedef posix_ostream<char> ostream;
+#endif
 #endif
 
 // Experimental because:
