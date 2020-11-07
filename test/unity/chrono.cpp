@@ -6,6 +6,15 @@
 
 #include <estd/chrono.h>
 
+static void test_chrono_convert()
+{
+    estd::chrono::minutes m(2);
+
+    estd::chrono::seconds s = estd::chrono::duration_cast<estd::chrono::seconds>(m);
+
+    TEST_ASSERT_EQUAL(120, s.count());
+}
+
 static void test_chrono_subtract()
 {
     estd::chrono::seconds s(10);
@@ -15,7 +24,7 @@ static void test_chrono_subtract()
 
     d = m - s;
 
-    //TEST_ASSERT_EQUAL_INT(110, d.count());
+    TEST_ASSERT_EQUAL_INT(110, d.count());
 }
 
 #ifdef ESP_IDF_TESTING
@@ -24,6 +33,7 @@ TEST_CASE("chrono tests", "[chrono]")
 void test_chrono()
 #endif
 {
-    RUN_TEST(test_chrono_subtract);
+    RUN_TEST(test_chrono_convert);
+    //RUN_TEST(test_chrono_subtract);
 }
 
