@@ -4,6 +4,7 @@
 #include <estd/ratio.h>
 
 #include <unity.h>
+#include <unit-test.h>
 
 using namespace std;
 
@@ -16,6 +17,11 @@ void test();
 void test2();
 void test_chrono();
 void test_tuple();
+
+// +++ Unity specific
+void setUp (void) {}
+void tearDown (void) {}
+// ---
 
 int main()
 {
@@ -30,6 +36,11 @@ int main()
     test_chrono();
     test_tuple();
 #endif
+
+    UNITY_BEGIN();
+    test_align();
+    test_cstddef();
+    UNITY_END();
 
     return 0;
 }
