@@ -40,6 +40,7 @@ int main()
     UNITY_BEGIN();
     test_align();
     test_cstddef();
+    test_optional();
     test_queue();
     test_streambuf();
     test_string();

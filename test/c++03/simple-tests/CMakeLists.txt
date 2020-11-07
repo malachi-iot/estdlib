@@ -23,6 +23,7 @@ set(TESTSRC
         ${TESTSRC_DIR}/chrono.cpp
         ${TESTSRC_DIR}/cpp.cpp
         ${TESTSRC_DIR}/cstddef.cpp
+        ${TESTSRC_DIR}/optional.cpp
         ${TESTSRC_DIR}/queue.cpp
         ${TESTSRC_DIR}/streambuf.cpp
         ${TESTSRC_DIR}/string.cpp
