@@ -14,7 +14,6 @@ typedef estd::ratio<1, 30> ratio2;
 typedef estd::ratio_divide<ratio1, ratio2> divided;
 
 void test();
-void test2();
 void test_chrono();
 void test_tuple();
 
@@ -31,7 +30,6 @@ int main()
     cout << "Ratio: " << divided::num << '/' << divided::den << endl;
 
     test();
-    test2();
 #if defined(FEATURE_CPP_VARIADIC)
     test_chrono();
     test_tuple();
