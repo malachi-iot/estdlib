@@ -37,6 +37,7 @@ int main()
 
     UNITY_BEGIN();
     test_align();
+    test_chrono();
     test_cstddef();
     test_optional();
     test_queue();

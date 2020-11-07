@@ -182,6 +182,7 @@ CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
 }
 
 
+#if __cpp_constexpr
 // lifted from https://en.cppreference.com/w/cpp/chrono/duration/abs
 // FIX: Not going to work until we implement min() and zero()
 template <class Rep, class Period, class = estd::enable_if_t<
@@ -190,6 +191,7 @@ CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
 {
     return d >= d.zero() ? d : -d;
 }
+#endif
 
 }}
 

@@ -4,6 +4,8 @@
 
 #include <estd/chrono.h>
 
+#ifdef FEATURE_STD_CHRONO
+
 namespace estd {
 
 namespace chrono {
@@ -17,3 +19,5 @@ typedef std::chrono::steady_clock steady_clock;
 }
 
 }
+
+#endif
