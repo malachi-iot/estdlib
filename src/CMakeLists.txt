@@ -85,6 +85,8 @@ set(SOURCE_FILES
         estd/memory.h
         estd/mutex.h
 
+        estd/numeric.h
+
         estd/optional.h
         estd/ostream.h
 

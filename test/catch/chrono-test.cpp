@@ -301,6 +301,20 @@ TEST_CASE("chrono tests")
         // FIX: Here is the problem, silent precision loss
         //REQUIRE(t1 == t2);
     }
+    SECTION("compile-time match")
+    {
+        SECTION("gcd")
+        {
+            constexpr int v1 = estd::internal::gcd<24, 18>::value;
+            REQUIRE(v1 == 6);
+        }
+        SECTION("lcm")
+        {
+            constexpr int v1 = estd::internal::lcm<4, 5>::value;
+
+            REQUIRE(v1 == 20);
+        }
+    }
     SECTION("subtraction")
     {
         using namespace estd::chrono;

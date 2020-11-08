@@ -50,6 +50,16 @@ struct gcd<a, 0>
     static CONSTEXPR std::intmax_t value = a;
 };
 
+// https://www.variadic.xyz/2012/01/07/c-template-metaprogramming/
+template<int One, int Two>
+struct lcm
+{
+    enum
+    {
+        value = One * Two / gcd<One, Two>::value
+    };
+};
+
 
 }
 
