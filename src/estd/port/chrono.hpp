@@ -245,12 +245,15 @@ private:
     // aggressive about promoting and almost always adds bits - otherwise we'd use it
     typedef typename promoted_type<Dur1Int, Dur2Int>::type common_int_type;
 
+    // Old bugged code
+#if LEGACY
     // greatest common divisor of denominator
     static CONSTEXPR std::intmax_t gcd_den = internal::gcd<Denom2, Denom1>::value;
     //static CONSTEXPR int gcd_num = internal::gcd<Num1, Num2>::value;
     static CONSTEXPR std::intmax_t NewDenom = Denom1 * Denom2;
     static CONSTEXPR std::intmax_t NewNum = Num1 * Num2 * gcd_den;
     static CONSTEXPR std::intmax_t gcd = internal::gcd<NewDenom, NewNum>::value;
+#endif
 
     static CONSTEXPR std::intmax_t gcd_num = internal::gcd<Num1, Num2>::value;
     static CONSTEXPR std::intmax_t lcm_den = internal::lcm<Denom1, Denom2>::value;
@@ -258,7 +261,9 @@ private:
 public:
     typedef estd::ratio<gcd_num, lcm_den> ratio_type;
 
-    //typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
+#if LEGACY
+    typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
+#endif
     typedef chrono::duration<common_int_type, ratio_type > type;
 };
 

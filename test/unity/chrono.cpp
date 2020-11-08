@@ -25,6 +25,12 @@ static void test_chrono_subtract()
     d = m - s;
 
     TEST_ASSERT_EQUAL_INT(110, d.count());
+
+    estd::chrono::milliseconds ms(100);
+
+    ms = d - ms;
+
+    TEST_ASSERT_EQUAL_INT(110000 - 100,ms.count());
 }
 
 #ifdef ESP_IDF_TESTING
@@ -34,6 +40,6 @@ void test_chrono()
 #endif
 {
     RUN_TEST(test_chrono_convert);
-    //RUN_TEST(test_chrono_subtract);
+    RUN_TEST(test_chrono_subtract);
 }
 
