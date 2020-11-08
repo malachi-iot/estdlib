@@ -336,6 +336,11 @@ public:
     basic_istream(streambuf_type&& streambuf) :
         base_t(std::move(streambuf)) {}
 #endif
+
+    template<class T1>
+    basic_istream(T1& param1) :
+        base_t(param1) {}
+
     basic_istream(streambuf_type& streambuf) : 
         base_t(streambuf) {}
 #endif

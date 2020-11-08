@@ -15,6 +15,8 @@
 #include <estd/istream.h>
 #include <estd/ostream.h>
 
+#include <estd/string.h>
+
 using namespace estd;
 
 static void test_ospanbuf()
@@ -62,6 +64,46 @@ static void test_ispanbuf()
 #endif
 }
 
+static void test_ospanstream()
+{
+    char buf[128];
+    estd::span<char> span(buf);
+
+    estd::experimental::ospanstream os(span);
+
+    os << "hi2u";
+
+    TEST_ASSERT_EQUAL_INT(4, os.tellp());
+    TEST_ASSERT_EQUAL('h', *os.rdbuf()->pbase());
+}
+
+
+// DEBT: Clumsy
+#include <estd/internal/istream_runtimearray.hpp>
+
+
+static void test_ispanstream()
+{
+    char buf[] = "hi2u 1234";
+    // DEBT: make const char span operable
+    estd::span<char> span(buf);
+
+    estd::experimental::ispanstream is(span);
+
+    estd::layer1::string<64> s;
+
+    // Only extraction operator supported at this time is for string
+    is >> s;
+
+    TEST_ASSERT_EQUAL_INT(4, s.length());
+    TEST_ASSERT_EQUAL('h', s[0]);
+
+    is >> s;
+
+    TEST_ASSERT_EQUAL_INT(4, s.length());
+    TEST_ASSERT_EQUAL('1', s[0]);
+}
+
 
 
 #ifdef ESP_IDF_TESTING
@@ -72,4 +114,6 @@ void test_streambuf()
 {
     RUN_TEST(test_ispanbuf);
     RUN_TEST(test_ospanbuf);
+    RUN_TEST(test_ispanstream);
+    RUN_TEST(test_ospanstream);
 }
