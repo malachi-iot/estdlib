@@ -324,13 +324,19 @@ TEST_CASE("chrono tests")
 
         auto d = m - s;
 
-        typedef typename estd::common_type<minutes, seconds>::type CT;
+        typedef estd::common_type<minutes, seconds> _CT;
+        typedef typename _CT::type CT;
 
         REQUIRE(CT::std_period_type::num == 60);
         REQUIRE(CT::std_period_type::den == 1);
 
         REQUIRE(seconds::std_period_type::num == 1);
         REQUIRE(seconds::std_period_type::den == 1);
+
+        constexpr int gcd_num = _CT::gcd_num;
+        constexpr int lcm_den = _CT::lcm_den;
+        REQUIRE(gcd_num == 1);
+        REQUIRE(lcm_den == 1);
 
         auto __s = CT(s);
         auto _s = __s.count();
