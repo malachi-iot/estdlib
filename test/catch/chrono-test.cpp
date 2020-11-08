@@ -310,21 +310,23 @@ TEST_CASE("chrono tests")
 
         auto d = m - s;
 
+        typedef estd::common_type<minutes, seconds> _CT;
+
+        REQUIRE(_CT::Num1Exp() == 60);
+        REQUIRE(_CT::Num2Exp() == 1);
+        REQUIRE(_CT::NewDenomExp() == 1);
+        REQUIRE(_CT::NewNumExp() == 60);
+        REQUIRE(_CT::gcdExp() == 1);
+
         typedef typename estd::common_type<minutes, seconds>::type CT;
 
-        REQUIRE(CT::std_period_type::num == 60);
+        REQUIRE(CT::std_period_type::num == 1);
         REQUIRE(CT::std_period_type::den == 1);
 
         REQUIRE(seconds::std_period_type::num == 1);
         REQUIRE(seconds::std_period_type::den == 1);
 
-        auto __s = CT(s);
-        auto _s = __s.count();
-        auto _m = CT(m).count();
-
         // FIX: Bugged
-        //REQUIRE(d.count() == 110);
-
-        auto _d = CT(_m - _s);
+        REQUIRE(d.count() == 110);
     }
 }

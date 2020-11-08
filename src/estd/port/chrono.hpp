@@ -240,7 +240,9 @@ struct common_type<
         chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
         chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
 {
-private:
+// DEBT: Re-enable this once passing unit tests
+//private:
+
     // gracefully promote (or not) types used.  non-specialized common_type is very
     // aggressive about promoting and almost always adds bits - otherwise we'd use it
     typedef typename promoted_type<Dur1Int, Dur2Int>::type common_int_type;
@@ -251,6 +253,15 @@ private:
     static CONSTEXPR std::intmax_t NewDenom = Denom1 * Denom2;
     static CONSTEXPR std::intmax_t NewNum = Num1 * Num2 * gcd_den;
     static CONSTEXPR std::intmax_t gcd = internal::gcd<NewDenom, NewNum>::value;
+
+    // NOTE: Currently just for unit test diagnostic
+    static CONSTEXPR std::intmax_t NewDenomExp() { return Denom1 * Denom2; }
+    static CONSTEXPR std::intmax_t NewNumExp() { return Num1 * Num2 * gcd_den; }
+    static CONSTEXPR std::intmax_t Denom1Exp() { return Denom1; }
+    static CONSTEXPR std::intmax_t Denom2Exp() { return Denom2; }
+    static CONSTEXPR std::intmax_t Num1Exp() { return Num1; }
+    static CONSTEXPR std::intmax_t Num2Exp() { return Num2; }
+    static CONSTEXPR std::intmax_t gcdExp() { return gcd; }
 
 public:
     typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
