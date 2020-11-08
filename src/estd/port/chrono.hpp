@@ -252,11 +252,14 @@ private:
     static CONSTEXPR std::intmax_t NewNum = Num1 * Num2 * gcd_den;
     static CONSTEXPR std::intmax_t gcd = internal::gcd<NewDenom, NewNum>::value;
 
-public:
     static CONSTEXPR std::intmax_t gcd_num = internal::gcd<Num1, Num2>::value;
     static CONSTEXPR std::intmax_t lcm_den = internal::lcm<Denom1, Denom2>::value;
 
-    typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
+public:
+    typedef estd::ratio<gcd_num, lcm_den> ratio_type;
+
+    //typedef chrono::duration<common_int_type, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
+    typedef chrono::duration<common_int_type, ratio_type > type;
 };
 
 #endif

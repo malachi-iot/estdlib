@@ -51,7 +51,7 @@ struct gcd<a, 0>
 };
 
 // https://www.variadic.xyz/2012/01/07/c-template-metaprogramming/
-template<int One, int Two>
+template<std::intmax_t One, std::intmax_t Two>
 struct lcm
 {
     enum

@@ -106,7 +106,7 @@ TEST_CASE("chrono tests")
         typedef common2::period period2;
         num = period2::num;
         den = period2::den;
-        REQUIRE(num == 60);
+        REQUIRE(num == 1);
         REQUIRE(den == 1);
 
         typedef estd::common_type<fake_clock::duration, estd::chrono::seconds>::type common3;
@@ -301,7 +301,7 @@ TEST_CASE("chrono tests")
         // FIX: Here is the problem, silent precision loss
         //REQUIRE(t1 == t2);
     }
-    SECTION("compile-time match")
+    SECTION("compile-time math and utility")
     {
         SECTION("gcd")
         {
@@ -314,6 +314,42 @@ TEST_CASE("chrono tests")
 
             REQUIRE(v1 == 20);
         }
+        SECTION("chrono::common_type")
+        {
+            using namespace estd::chrono;
+
+            SECTION("minutes and seconds")
+            {
+                typedef estd::common_type<minutes, seconds> _CT;
+
+                REQUIRE((int) _CT::ratio_type::num == 1);
+                REQUIRE((int) _CT::ratio_type::den == 1);
+            }
+            SECTION("microseconds and milliseconds")
+            {
+                typedef estd::common_type<microseconds, milliseconds> _CT;
+
+                REQUIRE((int) _CT::ratio_type::num == 1);
+                REQUIRE((int) _CT::ratio_type::den == 1000000);
+            }
+            SECTION("fake and hours")
+            {
+                typedef estd::common_type<fake_clock::duration, hours> _CT;
+
+                REQUIRE((int) _CT::ratio_type::num == 1);
+                REQUIRE((int) _CT::ratio_type::den == 15);
+            }
+            SECTION("oddball 1/7 and 4/3 times")
+            {
+                typedef duration<int, estd::ratio<1, 7> > d1;
+                typedef duration<int, estd::ratio<4, 3> > d2;
+
+                typedef estd::common_type<d1, d2> _CT;
+
+                REQUIRE((int) _CT::ratio_type::num == 1);
+                REQUIRE((int) _CT::ratio_type::den == 21);
+            }
+        }
     }
     SECTION("subtraction")
     {
@@ -324,27 +360,6 @@ TEST_CASE("chrono tests")
 
         auto d = m - s;
 
-        typedef estd::common_type<minutes, seconds> _CT;
-        typedef typename _CT::type CT;
-
-        REQUIRE(CT::std_period_type::num == 60);
-        REQUIRE(CT::std_period_type::den == 1);
-
-        REQUIRE(seconds::std_period_type::num == 1);
-        REQUIRE(seconds::std_period_type::den == 1);
-
-        constexpr int gcd_num = _CT::gcd_num;
-        constexpr int lcm_den = _CT::lcm_den;
-        REQUIRE(gcd_num == 1);
-        REQUIRE(lcm_den == 1);
-
-        auto __s = CT(s);
-        auto _s = __s.count();
-        auto _m = CT(m).count();
-
-        // FIX: Bugged
-        //REQUIRE(d.count() == 110);
-
-        auto _d = CT(_m - _s);
+        REQUIRE(d.count() == 110);
     }
 }
