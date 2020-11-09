@@ -429,7 +429,7 @@ public:
     // NOTE: I don't like how C++ std implies 'past the end' on an array here,
     // pretty sure though we can fake it out with a NULL later on
     iterator end() { return iterator(&base_t::data()[size()]); }
-    const_iterator end() const { return iterator((T* const)&base_t::data()[size()]); }
+    const_iterator end() const { return iterator(&base_t::data()[size()]); }
 };
 
 #ifdef FEATURE_CPP_DEFAULT_TARGS
