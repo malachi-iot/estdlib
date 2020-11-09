@@ -20,6 +20,7 @@ include_directories(${TESTSRC_DIR})
 
 set(TESTSRC
         ${TESTSRC_DIR}/align.cpp
+        ${TESTSRC_DIR}/array.cpp
         ${TESTSRC_DIR}/chrono.cpp
         ${TESTSRC_DIR}/cpp.cpp
         ${TESTSRC_DIR}/cstddef.cpp

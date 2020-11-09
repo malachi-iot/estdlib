@@ -14,6 +14,7 @@
 #endif
 
 void test_align();
+void test_array();
 void test_chrono();
 void test_cstddef();
 void test_optional();
