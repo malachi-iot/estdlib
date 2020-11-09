@@ -152,7 +152,7 @@ public:
 
     __ostream_type& put(char_type ch, bool bypass_sentry = false)
     {
-        if(this->rdbuf()->sputc(ch) == std::char_traits<char_type>::eof())
+        if(this->rdbuf()->sputc(ch) == estd::char_traits<char_type>::eof())
             this->setstate(base_t::eofbit);
 
         if(!bypass_sentry)
@@ -273,7 +273,7 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 }
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template <class TChar, class CharTraits = std::char_traits<TChar> >
+template <class TChar, class CharTraits = estd::char_traits<TChar> >
 using basic_ostream = internal::basic_ostream<
     basic_streambuf<TChar, CharTraits>,
     internal::basic_ios<basic_streambuf<TChar, CharTraits>, true> >;
