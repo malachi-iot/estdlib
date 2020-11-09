@@ -10,8 +10,6 @@
 
 namespace estd {
 // NOTE: This is rife with C++11 features, so this is a general guard
-// TODO: would really like to enable a basic < C++11 capability since chrono
-// depends on this
 #ifdef FEATURE_CPP_VARIADIC
 
 // lifted from https://en.cppreference.com/w/cpp/types/common_type
