@@ -111,10 +111,12 @@ private:
     };
 
 #if FEATURE_ESTD_IOS_GCOUNT
-    streamsize _gcount = 0;
-
+    streamsize _gcount;
+    void gcount(streamsize value) { _gcount = value; }
 public:
     streamsize gcount() const { return _gcount; }
+#else
+    void gcount(streamsize value) {}
 #endif
 
 public:
@@ -331,18 +333,30 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     template <class ... TArgs>
     basic_istream(TArgs&&...args) :
-        base_t(std::forward<TArgs>(args)...) {}
+        base_t(std::forward<TArgs>(args)...)
+    {
+        gcount(0);
+    }
 
     basic_istream(streambuf_type&& streambuf) :
-        base_t(std::move(streambuf)) {}
+        base_t(std::move(streambuf))
+    {
+        gcount(0);
+    }
 #endif
 
     template<class T1>
     basic_istream(T1& param1) :
-        base_t(param1) {}
+        base_t(param1)
+    {
+        gcount(0);
+    }
 
     basic_istream(streambuf_type& streambuf) : 
-        base_t(streambuf) {}
+        base_t(streambuf)
+    {
+        gcount(0);
+    }
 #endif
 };
 
