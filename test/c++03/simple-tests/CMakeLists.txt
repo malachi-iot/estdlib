@@ -15,7 +15,6 @@ set(TESTSRC_DIR ../../../test/unity)
 add_subdirectory(${ESTDLIB_DIR} estdlib)
 add_subdirectory(${UNITY_DIR} unity)
 
-include_directories(${ESTDLIB_DIR})
 include_directories(${TESTSRC_DIR})
 
 set(TESTSRC
@@ -26,6 +25,7 @@ set(TESTSRC
         ${TESTSRC_DIR}/cstddef.cpp
         ${TESTSRC_DIR}/optional.cpp
         ${TESTSRC_DIR}/queue.cpp
+        ${TESTSRC_DIR}/ratio.cpp
         ${TESTSRC_DIR}/streambuf.cpp
         ${TESTSRC_DIR}/string.cpp
         )
@@ -34,7 +34,6 @@ set(TESTSRC
 #   ${TESTSRC_DIR}/thread.cpp
 
 add_executable(${PROJECT_NAME}
-        chrono-test.cpp
         "main.cpp"
         misc.cpp
         tuple-test.cpp

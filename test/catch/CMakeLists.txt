@@ -8,7 +8,6 @@ INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
 set(ESTDLIB_DIR ../../src)
 
 add_subdirectory(${ESTDLIB_DIR} estdlib)
-include_directories(${ESTDLIB_DIR})
 
 add_executable(${PROJECT_NAME} "main.cpp"
     allocator-test.cpp

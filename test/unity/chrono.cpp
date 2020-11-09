@@ -33,6 +33,16 @@ static void test_chrono_subtract()
     TEST_ASSERT_EQUAL_INT(110000 - 100,ms.count());
 }
 
+
+#ifdef FEATURE_STD_CHRONO
+static void test_steady_clock()
+{
+    estd::chrono::steady_clock c;
+
+    estd::chrono::steady_clock::time_point n = c.now();
+}
+#endif
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("chrono tests", "[chrono]")
 #else
@@ -41,5 +51,8 @@ void test_chrono()
 {
     RUN_TEST(test_chrono_convert);
     RUN_TEST(test_chrono_subtract);
+#ifdef FEATURE_STD_CHRONO
+    RUN_TEST(test_steady_clock);
+#endif
 }
 

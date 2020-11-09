@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-project(estd)
+project(estd VERSION 0.1.7 LANGUAGES CXX)
 
 set(SOURCE_FILES
         dummy.cpp
@@ -144,6 +144,8 @@ set(SOURCE_FILES
         )
 
 add_library(estd_lib ${SOURCE_FILES})
+
+target_include_directories(estd_lib PUBLIC .)
 
 target_compile_options(estd_lib PRIVATE -Wall -Werror=return-type)
 
