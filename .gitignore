@@ -54,3 +54,6 @@ test/**/packages/
 
 # Visual Studio code specific
 .vscode/ipch
+
+# Manual build stuff
+build/
