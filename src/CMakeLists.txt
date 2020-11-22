@@ -143,9 +143,9 @@ set(SOURCE_FILES
         estd/exp/streambuf-traits.h
         )
 
-add_library(estd_lib ${SOURCE_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(estd_lib PUBLIC .)
+target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_compile_options(estd_lib PRIVATE -Wall -Werror=return-type)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 
