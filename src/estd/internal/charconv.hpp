@@ -198,4 +198,31 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 #endif
 }
 
+
+template <class TCharBaseTraits, class TInt>
+to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
+{
+    while(first != last)
+    {
+        *first = '0' + value % base;
+        value /= base;
+
+        first++;
+
+        if(value == 0)
+        {
+#ifdef __cpp_initializer_lists
+            return to_chars_result{first, estd::errc(0)};
+#else
+            return to_chars_result(first, estd::errc(0));
+#endif
+        }
+    }
+
+#ifdef __cpp_initializer_lists
+    return to_chars_result{first, estd::errc::value_too_large};
+#else
+#endif
+}
+
 }}
