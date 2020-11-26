@@ -89,14 +89,16 @@ void test_to_chars()
 {
     estd::layer1::string<32> s;
 
-    estd::to_chars_result result = estd::to_chars(s.data(), s.data() + 32, 77);
+    estd::to_chars_result result = estd::to_chars(s.data(), s.data() + 32, 771);
 
     TEST_ASSERT_EQUAL('7', s[0]);
     TEST_ASSERT_EQUAL('7', s[1]);
+    TEST_ASSERT_EQUAL('1', s[2]);
 
     result = estd::to_chars_opt(s.data(), s.data() + s.max_size(), 0xF0, 16);
 
-    TEST_ASSERT_EQUAL('F', s[30]);
+    TEST_ASSERT_EQUAL(result.ptr, s.data() + 30);
+    TEST_ASSERT_EQUAL('f', s[30]);
     TEST_ASSERT_EQUAL('0', s[31]);
 }
 
