@@ -50,10 +50,11 @@ struct errc
 #endif
         result_out_of_range = ERANGE,
 #if     FEATURE_STD_FULL_ERRNO
-        timed_out = ETIMEDOUT
+        timed_out = ETIMEDOUT,
 #else
-        timed_out = EDOM + 30
+        timed_out = EDOM + 30,
 #endif
+        value_too_large = EOVERFLOW
     };
 };
 

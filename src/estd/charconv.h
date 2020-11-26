@@ -20,6 +20,16 @@ struct from_chars_result {
 #endif
 };
 
+struct to_chars_result {
+    char* ptr;
+    estd::errc  ec;
+
+#ifndef __cpp_initializer_lists
+    from_chars_result(const char* ptr, estd::errc ec) :
+        ptr(ptr), ec(ec) {}
+#endif
+};
+
 namespace legacy {
 from_chars_result from_chars(const char* first, const char* last,
                              long& value, int base = 10);
@@ -232,6 +242,33 @@ estd::from_chars_result from_chars(const char* first,
         return internal::from_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
     else
         return internal::from_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+}
+
+// TODO: Not done yet, need to handle > base 10 properly
+template <class TInt>
+to_chars_result to_chars(char* first, char* last, TInt value, const int base = 10)
+{
+    while(first != last)
+    {
+        *first = '0' + value % base;
+        value /= base;
+
+        first++;
+
+        if(value == 0)
+        {
+#ifdef __cpp_initializer_lists
+            return to_chars_result{first, estd::errc(0)};
+#else
+            return to_chars_result(first, estd::errc(0));
+#endif
+        }
+    }
+
+#ifdef __cpp_initializer_lists
+    return to_chars_result{first, estd::errc::value_too_large};
+#else
+#endif
 }
 
 }

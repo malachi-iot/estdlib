@@ -627,6 +627,18 @@ TEST_CASE("string tests")
             REQUIRE(result.ec == estd::errc::invalid_argument);
         }
     }
+    SECTION("to_chars")
+    {
+        char buffer[128];
+
+        estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], 77);
+
+        REQUIRE(result.ec == 0);
+
+        *result.ptr = 0;
+
+        REQUIRE(std::string(buffer) == "77");
+    }
     SECTION("internal")
     {
         using namespace estd::internal;
