@@ -34,6 +34,8 @@ set(SOURCE_FILES
 
         estd/internal/accessor.h
         estd/internal/buffer.h
+        estd/internal/charconv.h
+        estd/internal/charconv.hpp
         estd/internal/common_type.h
         estd/internal/deduce_fixed_size.h
         estd/internal/dynamic_array.h
