@@ -1,7 +1,6 @@
 #pragma once
 
 #include "charconv.h"
-#include "deduce_fixed_size.h"
 
 namespace estd { namespace internal {
 
@@ -38,19 +37,6 @@ bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 }
 #endif
 
-/// @brief Represents char-to-base-n conversion traits
-/// @tparam b numeric base indicator
-/// @tparam TEnable for internal use
-template<unsigned short b, class TEnable = estd::internal::Range<true> >
-struct char_base_traits;
-
-struct char_base_traits_base
-{
-    typedef int8_t int_type;
-
-    inline static int_type eol() { return -1; }
-};
-
 /// (Maybe) Requires ASCII
 template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<b <= 10> > :
@@ -59,14 +45,19 @@ struct char_base_traits<b, estd::internal::Range<b <= 10> > :
     static inline unsigned base() { return b; }
 
     // adapted from GNUC
-    static inline bool is_in_base(char c, const int _base = b)
+    static inline CONSTEXPR bool is_in_base(char c, const int _base = b)
     {
         return '0' <= c && c <= ('0' + (_base - 1));
     }
 
-    static inline int_type from_char(char c)
+    static inline CONSTEXPR int_type from_char(char c)
     {
         return c - '0';
+    }
+
+    static inline CONSTEXPR char_type to_char(int_type v)
+    {
+        return '0' + v;
     }
 
     static inline int_type from_char_with_test(char c, const int _base = b)
@@ -120,6 +111,12 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
             return c - 'A' + 10;
         else
             return c - 'a' + 10;
+    }
+
+    // FIX: Not yet ready
+    static inline char_type to_char(int_type v)
+    {
+        return 0;
     }
 };
 
@@ -202,9 +199,11 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 template <class TCharBaseTraits, class TInt>
 to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
 {
+    typedef TCharBaseTraits traits;
+
     while(first != last)
     {
-        *first = '0' + value % base;
+        *first = traits::to_char(value % base);
         value /= base;
 
         first++;
