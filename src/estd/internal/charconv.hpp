@@ -42,15 +42,15 @@ template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<b <= 10> > :
         char_base_traits_base
 {
-    static inline unsigned base() { return b; }
+    static inline CONSTEXPR unsigned base() { return b; }
 
     // adapted from GNUC
-    static inline CONSTEXPR bool is_in_base(char c, const int _base = b)
+    static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
     {
         return '0' <= c && c <= ('0' + (_base - 1));
     }
 
-    static inline CONSTEXPR int_type from_char(char c)
+    static inline CONSTEXPR int_type from_char(char_type c)
     {
         return c - '0';
     }
@@ -60,7 +60,7 @@ struct char_base_traits<b, estd::internal::Range<b <= 10> > :
         return '0' + v;
     }
 
-    static inline int_type from_char_with_test(char c, const int _base = b)
+    static inline CONSTEXPR int_type from_char_with_test(char_type c, const int _base = b)
     {
         if (is_in_base(c, _base)) return from_char(c);
 
@@ -73,26 +73,26 @@ template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
         char_base_traits_base
 {
-    static inline bool isupper(char c, const unsigned short _base = b)
+    static inline CONSTEXPR bool isupper(char c, const unsigned short _base = b)
     {
         return 'A' <= c && c <= ('A' + (_base - 11));
     }
 
-    static inline bool islower(char c, const unsigned short _base = b)
+    static inline CONSTEXPR bool islower(char c, const unsigned short _base = b)
     {
         return 'a' <= c && c <= ('a' + (_base - 11));
     }
 
-    static inline unsigned base() { return b; }
+    static inline CONSTEXPR unsigned base() { return b; }
 
-    static inline bool is_in_base(char c, const unsigned short _base = b)
+    static inline CONSTEXPR bool is_in_base(char_type c, const unsigned short _base = b)
     {
         return estd::isdigit(c) ||
                isupper(c, _base) ||
                islower(c, _base);
     }
 
-    static inline int_type from_char_with_test(char c, const unsigned short _base = b)
+    static inline int_type from_char_with_test(char_type c, const unsigned short _base = b)
     {
         if (estd::isdigit(c)) return c - '0';
 
@@ -103,7 +103,7 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
         return eol();
     }
 
-    static inline int_type from_char(char c)
+    static inline CONSTEXPR int_type from_char(char_type c)
     {
         if (c <= '9')
             return c - '0';
@@ -113,10 +113,12 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
             return c - 'a' + 10;
     }
 
-    // FIX: Not yet ready
-    static inline char_type to_char(int_type v)
+    static inline CONSTEXPR char_type to_char(int_type v)
     {
-        return 0;
+        if (v <= 10)
+            return '0' + v;
+        else
+            return 'a' + (v - 10);
     }
 };
 
@@ -201,6 +203,7 @@ to_chars_result to_chars_integer(char* first, char* last, TInt value, const int 
 {
     typedef TCharBaseTraits traits;
 
+    // FIX: This converts things backwards
     while(first != last)
     {
         *first = traits::to_char(value % base);
