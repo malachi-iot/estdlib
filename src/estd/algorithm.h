@@ -2,6 +2,7 @@
 
 #include "internal/platform.h"
 #include "internal/functional.h"
+#include "utility.h"
 
 // mainly to fill in gaps for pre C++11 compatibility
 namespace estd {

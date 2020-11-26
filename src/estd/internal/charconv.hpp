@@ -198,33 +198,41 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 }
 
 
+/// Performs to_chars slightly differently than stock.  returned 'ptr' is beginning
+/// of converted integer rather than end, since the algorithm likes to do it that way
+/// \tparam TCharBaseTraits
+/// \tparam TInt
+/// \param first
+/// \param last
+/// \param value
+/// \param base
+/// \return
 template <class TCharBaseTraits, class TInt>
-to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
+to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
 {
     typedef TCharBaseTraits traits;
 
-    // FIX: This converts things backwards
     while(first != last)
     {
-        *first = traits::to_char(value % base);
+        *last = traits::to_char(value % base);
         value /= base;
-
-        first++;
 
         if(value == 0)
         {
 #ifdef __cpp_initializer_lists
-            return to_chars_result{first, estd::errc(0)};
+            return to_chars_result{last, estd::errc(0)};
 #else
-            return to_chars_result(first, estd::errc(0));
+            return to_chars_result(last, estd::errc(0));
 #endif
         }
+
+        last--;
     }
 
 #ifdef __cpp_initializer_lists
-    return to_chars_result{first, estd::errc::value_too_large};
+    return to_chars_result{last, estd::errc::value_too_large};
 #else
-    return to_chars_result(first, estd::errc::value_too_large);
+    return to_chars_result(last, estd::errc::value_too_large);
 #endif
 }
 
