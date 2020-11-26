@@ -85,6 +85,16 @@ void test_from_chars()
     TEST_ASSERT_EQUAL_INT32(1234, value);
 }
 
+void test_to_chars()
+{
+    estd::layer1::string<32> s;
+
+    estd::to_chars_result result = estd::to_chars(s.data(), s.data() + 32, 77);
+
+    TEST_ASSERT_EQUAL('7', s[0]);
+    TEST_ASSERT_EQUAL('7', s[1]);
+}
+
 
 #ifdef ESP_IDF_TESTING
 TEST_CASE("string tests", "[string]")
@@ -96,4 +106,5 @@ void test_string()
     RUN_TEST(test_layer2_string);
     RUN_TEST(test_from_chars_legacy);
     RUN_TEST(test_from_chars);
+    RUN_TEST(test_to_chars);
 }

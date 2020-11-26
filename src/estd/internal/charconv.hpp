@@ -222,6 +222,7 @@ to_chars_result to_chars_integer(char* first, char* last, TInt value, const int 
 #ifdef __cpp_initializer_lists
     return to_chars_result{first, estd::errc::value_too_large};
 #else
+    return to_chars_result(first, estd::errc::value_too_large);
 #endif
 }
 
