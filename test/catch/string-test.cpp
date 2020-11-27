@@ -457,7 +457,7 @@ TEST_CASE("string tests")
             REQUIRE(s == s2);
         }
     }
-    SECTION("to_string int")
+    SECTION("to_string")
     {
         char buf[128];
         layer2::string<> s(buf, 0);
@@ -465,9 +465,29 @@ TEST_CASE("string tests")
         REQUIRE(s.size() == 0);
 
         s += "The value is ";
-        s += to_string(123);
 
-        REQUIRE(s == "The value is 123");
+        SECTION("int")
+        {
+            s += to_string(123);
+
+            REQUIRE(s == "The value is 123");
+        }
+        SECTION("unsigned")
+        {
+            unsigned v = 123;
+
+            s += to_string(v);
+
+            REQUIRE(s == "The value is 123");
+        }
+        SECTION("int16_t")
+        {
+            int16_t v = -1000;
+
+            s += to_string(v);
+
+            REQUIRE(s == "The value is -1000");
+        }
     }
     SECTION("starts_with")
     {
