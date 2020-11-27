@@ -231,7 +231,13 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 {
     char buffer[N + 1];
 
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value);
+    estd::ios_base::fmtflags flags = out.flags();
+    // DEBT: Handle octal too. That will require a rework of maxStringLength.  hex
+    // could use it too - we're safe since hex is always a smaller conversion than
+    // dec but that's still an inefficiency/debt
+    int base = flags & estd::ios_base::hex ? 16 : 10;
+
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
 
     // DEBT: Check result for conversion failure
 

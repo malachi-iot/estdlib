@@ -274,15 +274,31 @@ TEST_CASE("iostreams")
         SECTION("numeric test")
         {
             experimental::ostringstream<32> out;
-            int value = 2;
 
-            out << "hi" << value++ << 'u';
+            SECTION("base 10")
+            {
+                int value = 2;
 
-            auto& s = out.rdbuf()->str();
+                out << "hi" << value++ << 'u';
 
-            // NOTE: Works here but in ASF/Atmel land the 'value' gets
-            // treated as a character
-            REQUIRE(s == "hi2u");
+                auto& s = out.rdbuf()->str();
+
+                // NOTE: Works here but in ASF/Atmel land the 'value' gets
+                // treated as a character
+                REQUIRE(s == "hi2u");
+            }
+            SECTION("base 16")
+            {
+                out << hex;
+
+                out << "hi" << 15 << 'u';
+
+                auto& s = out.rdbuf()->str();
+
+                // NOTE: Works here but in ASF/Atmel land the 'value' gets
+                // treated as a character
+                REQUIRE(s == "hifu");
+            }
         }
         SECTION("tellp")
         {
