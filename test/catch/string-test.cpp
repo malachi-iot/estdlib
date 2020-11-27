@@ -488,6 +488,24 @@ TEST_CASE("string tests")
 
             REQUIRE(s == "The value is -1000");
         }
+        SECTION("unsigned long long")
+        {
+            uint64_t v = 999999999999999;
+
+            s += to_string(v);
+
+            REQUIRE(s == "The value is 999999999999999");
+        }
+        /* Can't yet do because internal::maxStringLength<int128_t> is
+         * slightly tricky
+        SECTION("unsigned long long")
+        {
+            unsigned long long v = 999999999999999;
+
+            s += to_string(v);
+
+            REQUIRE(s == "The value is 999999999999999");
+        }*/
     }
     SECTION("starts_with")
     {

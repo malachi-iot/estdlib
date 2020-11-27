@@ -197,6 +197,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 #endif
 }
 
+// DEBT: to_chars bounds checking here is quite weak
 
 /// Performs to_chars slightly differently than stock.  returned 'ptr' is beginning
 /// of converted integer rather than end, since the algorithm likes to do it that way
@@ -211,6 +212,10 @@ template <class TCharBaseTraits, class TInt>
 to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
 {
     typedef TCharBaseTraits traits;
+    typedef estd::numeric_limits<TInt> numeric_limits;
+    const bool negative = numeric_limits::is_signed && value < 0;
+
+    if(negative) value *= -1;
 
     while(first != last)
     {
@@ -219,6 +224,9 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 
         if(value == 0)
         {
+            if(numeric_limits::is_signed && negative)
+                *--last = '-';
+
 #ifdef __cpp_initializer_lists
             return to_chars_result{last, estd::errc(0)};
 #else
@@ -242,6 +250,12 @@ to_chars_result to_chars_integer(char* first, char* last, TInt value, const int 
 {
     typedef TCharBaseTraits traits;
     typedef typename traits::char_type char_type;
+
+    if(estd::numeric_limits<TInt>::is_signed && value < 0)
+    {
+        *first++ = '-';
+        value *= -1;
+    }
 
     char_type* current = first;
 
