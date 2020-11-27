@@ -33,4 +33,12 @@ TEST_CASE("algorithm tests")
 
         REQUIRE(estd::equal(buf1, &buf1[3], buf2));
     }
+    SECTION("reverse")
+    {
+        char buf[] = "1234";
+
+        estd::reverse(&buf[0], &buf[4]);
+
+        REQUIRE(std::string(buf) == "4321");
+    }
 }

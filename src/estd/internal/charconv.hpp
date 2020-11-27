@@ -62,9 +62,9 @@ struct char_base_traits<b, estd::internal::Range<b <= 10> > :
 
     static inline CONSTEXPR int_type from_char_with_test(char_type c, const int _base = b)
     {
-        if (is_in_base(c, _base)) return from_char(c);
-
-        return eol();
+        return is_in_base(c, _base) ?
+            from_char(c) :
+            eol();
     }
 };
 
@@ -103,7 +103,7 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
         return eol();
     }
 
-    static inline CONSTEXPR int_type from_char(char_type c)
+    static inline int_type from_char(char_type c)
     {
         if (c <= '9')
             return c - '0';
@@ -115,10 +115,9 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     static inline CONSTEXPR char_type to_char(int_type v)
     {
-        if (v <= 10)
-            return '0' + v;
-        else
-            return 'a' + (v - 10);
+        return v <= 10 ?
+            ('0' + v) :
+            'a' + (v - 10);
     }
 };
 

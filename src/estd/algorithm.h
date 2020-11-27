@@ -128,4 +128,23 @@ estd::pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt
     return estd::make_pair(first1, first2);
 }
 
+template<class ForwardIt1, class ForwardIt2>
+#if __cpp_constexpr >= 201304
+constexpr
+#endif
+void iter_swap(ForwardIt1 a, ForwardIt2 b)
+{
+    swap(*a, *b);
+}
+
+template<class BidirIt>
+#if __cpp_constexpr >= 201304
+constexpr
+#endif
+void reverse(BidirIt first, BidirIt last)
+{
+    while ((first != last) && (first != --last))
+        iter_swap(first++, last);
+}
+
 }
