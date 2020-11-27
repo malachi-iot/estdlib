@@ -12,6 +12,7 @@
 
 #include "streambuf.h"
 #include "ios.h"
+#include "charconv.h"
 #include "internal/string_convert.h"
 #include "traits/char_traits.h"
 #ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
@@ -230,10 +231,15 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 {
     char buffer[N + 1];
 
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value);
 
-    internal::toString(buffer, value, N);
+    // DEBT: Check result for conversion failure
 
-    return out << buffer;
+    // remember, opt flavor specifies 'ptr' as beginning and we must manually
+    // null terminate the end (ala standard to_chars operation)
+    buffer[N] = 0;
+
+    return out << result.ptr;
 }
 #endif
 

@@ -94,12 +94,6 @@ extern const char TYPENAME_CHARPTR[];
 template<class T> PGM_P validateString(const char* input);
 template<class T, class TChar> char* toString(TChar* output, T input);
 
-// TODO: route this to actual snprintfs etc.
-template<class T, class TChar> char* toString(TChar* output, T input, size_t max_size)
-{
-    return toString(output, input);
-}
-
 template<class T> PGM_P getTypeName();
 
 #ifdef VALIDATE_FEATURE_NULLCHECK

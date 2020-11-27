@@ -97,65 +97,12 @@ template<> char* toString(char* output, char input)
 #endif
 
 #ifdef STDLIB_NONISO
-#include <stdlib.h>
-
-template<> char* toString(char* output, int input)
-{
-    return itoa(input, output, 10);
-}
-
-template<> char* toString(char* output, unsigned int input)
-{
-    return utoa(input, output, 10);
-}
-
-#ifdef ESP32
-template<> char* toString(char* output, int16_t input)
-{
-    return itoa(input, output, 10);
-}
-
-template<> char* toString(char* output, uint16_t input)
-{
-    return utoa(input, output, 10);
-}
-#endif
 
 #elif defined(ESP_OPEN_RTOS)
-// ESP RTOS has its own flavor of stdlib calls
-// ALL THESE UNTESTED, but worked well when embedded in ostream
-template<> char* toString(char* output, int input)
-{
-  return __itoa(input, output, 10);
-}
 
-
-template<> char* toString(char* output, unsigned int input)
-{
-  return __utoa(input, output, 10);
-}
 #else
+
 #include <stdio.h>
-
-template<> char* toString(char* output, int input)
-{
-    sprintf(output, "%d", input);
-    return output;
-}
-
-template<> char* toString(char* output, uint8_t input)
-{
-  sprintf(output, "%u", input);
-  return output;
-}
-
-
-template<> char* toString(char* output, uint16_t input)
-{
-  sprintf(output, "%u", input);
-  return output;
-}
-
 
 // PRIu32 lives in inttypes.h, only available in C99 onward
 #if __STDC_VERSION__ >= 199901L
