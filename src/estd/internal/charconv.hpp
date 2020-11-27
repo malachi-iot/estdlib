@@ -1,6 +1,7 @@
 #pragma once
 
 #include "charconv.h"
+#include "../algorithm.h"
 
 namespace estd { namespace internal {
 
@@ -234,5 +235,40 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
     return to_chars_result(last, estd::errc::value_too_large);
 #endif
 }
+
+// This one operates exactly according to spec, but slightly slower than above
+template <class TCharBaseTraits, class TInt>
+to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
+{
+    typedef TCharBaseTraits traits;
+    typedef typename traits::char_type char_type;
+
+    char_type* current = first;
+
+    while(current != last)
+    {
+        *current = traits::to_char(value % base);
+        value /= base;
+
+        current++;
+
+        if(value == 0)
+        {
+            reverse(first, current);
+#ifdef __cpp_initializer_lists
+            return to_chars_result{current, estd::errc(0)};
+#else
+            return to_chars_result(current, estd::errc(0));
+#endif
+        }
+    }
+
+#ifdef __cpp_initializer_lists
+    return to_chars_result{current, estd::errc::value_too_large};
+#else
+    return to_chars_result(current, estd::errc::value_too_large);
+#endif
+}
+
 
 }}

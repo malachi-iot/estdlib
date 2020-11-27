@@ -57,4 +57,14 @@ to_chars_result to_chars(char* first, char* last, TInt value, const int base = 1
     return opt_result;
 }
 
+template <class TInt>
+to_chars_result to_chars_exp(char* first, char* last, TInt value, const int base = 10)
+{
+    if(base > 10)
+        return internal::to_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
+    else
+        return internal::to_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+}
+
+
 }

@@ -631,13 +631,26 @@ TEST_CASE("string tests")
     {
         char buffer[128];
 
-        estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], 77);
+        SECTION("standard")
+        {
+            estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], 771);
 
-        REQUIRE(result.ec == 0);
+            REQUIRE(result.ec == 0);
 
-        *result.ptr = 0;
+            *result.ptr = 0;
 
-        REQUIRE(std::string(buffer) == "77");
+            REQUIRE(std::string(buffer) == "771");
+        }
+        SECTION("reverse method")
+        {
+            estd::to_chars_result result = estd::to_chars_exp(&buffer[0], &buffer[127], 255);
+
+            REQUIRE(result.ec == 0);
+
+            *result.ptr = 0;
+
+            REQUIRE(std::string(buffer) == "255");
+        }
     }
     SECTION("internal")
     {
