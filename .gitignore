@@ -30,12 +30,14 @@
 *.exe
 *.out
 *.app
+build/
 
 # CLion specific
 cmake-build-*/
 build-catch-*/
 **/.idea/workspace.xml
 **/.idea/vcs.xml
+**/.idea/deployment.xml
 
 # Qt specific
 src/build/
