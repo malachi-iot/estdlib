@@ -46,4 +46,4 @@ endif()
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
 
-target_link_libraries(${PROJECT_NAME} estd_lib)
+target_link_libraries(${PROJECT_NAME} estd)

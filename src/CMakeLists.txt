@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 project(estd VERSION 0.1.7 LANGUAGES CXX)
 
 set(SOURCE_FILES
-        dummy.cpp
         estd/algorithm.h
         estd/allocators/fixed.h
         estd/allocators/generic.h
