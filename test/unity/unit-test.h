@@ -17,6 +17,7 @@ void test_align();
 void test_array();
 void test_chrono();
 void test_cstddef();
+void test_limits();
 void test_optional();
 void test_queue();
 void test_ratio();
