@@ -372,7 +372,7 @@ public:
 namespace layer1 {
 
 template <class T, size_t len>
-struct allocator : internal::single_fixedbuf_allocator<T, len>
+struct allocator : estd::internal::single_fixedbuf_allocator<T, len>
 {
 
 };
@@ -382,9 +382,9 @@ struct allocator : internal::single_fixedbuf_allocator<T, len>
 namespace layer2 {
 
 template <class T, size_t len>
-struct allocator : internal::single_fixedbuf_allocator<T, len, T*>
+struct allocator : estd::internal::single_fixedbuf_allocator<T, len, T*>
 {
-    typedef internal::single_fixedbuf_allocator<T, len, T*> base_t;
+    typedef estd::internal::single_fixedbuf_allocator<T, len, T*> base_t;
 
     allocator(T* buf) : base_t(buf) {}
 
@@ -404,9 +404,9 @@ namespace layer3 {
 // move and size can be adjusted.  Generally speaking you don't want this, but
 // special cases like basic_string_view benefit from this adjustability
 template <class T, class TSize = std::size_t, bool malleable = false>
-struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
+struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 {
-    typedef internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
+    typedef estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
     typedef typename base_t::size_type size_type;
@@ -453,7 +453,7 @@ struct allocator : internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 #if !defined(FEATURE_CPP_CONSTEXPR) && !defined(FEATURE_ESTD_STRICT_DYNAMIC_ARRAY)
 template <class T, size_t N, class TBuffer, class TSize, class TTraits>
 struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>, TTraits >
-        : internal::handle_descriptor_base<
+        : estd::internal::handle_descriptor_base<
                 internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
                 true,
                 true,
@@ -461,8 +461,8 @@ struct handle_descriptor<internal::single_fixedbuf_allocator<T, N, TBuffer, TSiz
                 true>
 
 {
-    typedef internal::handle_descriptor_base<
-            internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
+    typedef estd::internal::handle_descriptor_base<
+            estd::internal::single_fixedbuf_allocator<T, N, TBuffer, TSize>,
             true,
             true,
             true,
