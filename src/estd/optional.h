@@ -256,6 +256,12 @@ public:
     }
 #endif
 
+#if __cpp_constexpr >= 201304
+    constexpr
+#endif
+#if __cplusplus >= 201103
+    explicit
+#endif
     operator bool() const { return base_type::has_value(); }
 
     value_type& operator*() { return value(); }
