@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     ios-test.cpp
     list-test.cpp
     limits-test.cpp
+	locale-test.cpp
     map-test.cpp
     memory-test.cpp
     optional-test.cpp
