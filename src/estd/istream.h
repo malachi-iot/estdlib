@@ -47,14 +47,16 @@ class basic_istream : public
 #endif
         TBase
 {
-    typedef TBase base_t;
+    typedef TBase base_type;
 
 public:
-    typedef typename base_t::char_type char_type;
-    typedef typename base_t::streambuf_type streambuf_type;
+    typedef typename base_type::char_type char_type;
+    typedef typename base_type::streambuf_type streambuf_type;
     typedef typename streambuf_type::off_type off_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
+
+    typedef typename base_type::locale_type locale_type;
 
 private:
     inline int_type standard_peek()
@@ -171,7 +173,7 @@ public:
         // all over the place
         if(this->rdbuf()->sgetn(s, n) != n)
             // TODO: Consider setting _gcount here to what *was* returned
-            this->setstate(base_t::eofbit);
+            this->setstate(base_type::eofbit);
 
 #if FEATURE_ESTD_IOS_GCOUNT
         _gcount = n;
@@ -195,13 +197,13 @@ public:
 
             if(traits_type::eq(c, traits_type::eof()))
             {
-                this->setstate(base_t::eofbit);
+                this->setstate(base_type::eofbit);
                 break;
             }
 
             if(!count-- || traits_type::eq(c, delim))
             {
-                this->setstate(base_t::failbit);
+                this->setstate(base_type::failbit);
                 break;
             }
 
@@ -314,7 +316,7 @@ public:
     basic_istream& sync()
     {
         if(this->rdbuf()->pubsync() == -1)
-            this->setstate(base_t::badbit);
+            this->setstate(base_type::badbit);
 
         return *this;
     }
@@ -333,13 +335,13 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     template <class ... TArgs>
     basic_istream(TArgs&&...args) :
-        base_t(std::forward<TArgs>(args)...)
+        base_type(std::forward<TArgs>(args)...)
     {
         gcount(0);
     }
 
     basic_istream(streambuf_type&& streambuf) :
-        base_t(std::move(streambuf))
+        base_type(std::move(streambuf))
     {
         gcount(0);
     }
@@ -347,13 +349,13 @@ public:
 
     template<class T1>
     basic_istream(T1& param1) :
-        base_t(param1)
+        base_type(param1)
     {
         gcount(0);
     }
 
-    basic_istream(streambuf_type& streambuf) : 
-        base_t(streambuf)
+    basic_istream(streambuf_type& streambuf) :
+        base_type(streambuf)
     {
         gcount(0);
     }
@@ -403,7 +405,9 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
 template <class TStreambuf>
 inline internal::basic_istream<TStreambuf>& ws(internal::basic_istream<TStreambuf>& __is)
 {
-    experimental::locale loc = __is.getloc();
+    typedef typename internal::basic_istream<TStreambuf>::locale_type locale_type;
+
+    locale_type loc = __is.getloc();
 
     // isspace will automatically fall out if it's an EOF (or nodata)
     for(;;)

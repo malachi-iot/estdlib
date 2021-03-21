@@ -122,6 +122,7 @@ inline ios_base& nounitbuf(ios_base& s)
 
 namespace experimental {
 
+// 21MAR21 TODO: Revisit this and combine with new ios_base_policy
 struct ios_policy
 {
     // whether to do timeouts at all
@@ -152,6 +153,11 @@ struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_
 }
 
 namespace internal {
+
+struct ios_base_policy
+{
+    typedef experimental::locale locale_type;
+};
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
 // value of streambuf itself
@@ -225,7 +231,7 @@ public:
 
 
 //template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf, bool use_pointer = false>
+template<class TStreambuf, bool use_pointer = false, class TPolicy = ios_base_policy>
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>
 {
 public:
@@ -233,6 +239,9 @@ public:
     typedef typename base_type::streambuf_type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
+
+    typedef TPolicy policy_type;
+    typedef typename policy_type::locale_type locale_type;
 
 protected:
     basic_ios() {}
@@ -261,14 +270,15 @@ public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
     // here so that it can reach into streambuf to grab it.  A slight but notable
     // deviation from standard C++
-    experimental::locale getloc() const
+    locale_type getloc() const
     {
-        experimental::locale l;
+        locale_type l;
         return l;
     }
 
     char_type widen(char c) const
     {
+        return experimental::use_facet<experimental::ctype<char_type> >(getloc()).widen(c);
         experimental::ctype<char_type> ctype;
         return ctype.widen(c);
     }

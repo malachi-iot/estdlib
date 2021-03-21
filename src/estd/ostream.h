@@ -32,17 +32,18 @@ class basic_ostream :
 #endif
         public TBase
 {
-    typedef TBase base_t;
+    typedef TBase base_type;
 
 public:
-    typedef typename base_t::streambuf_type streambuf_type;
+    typedef typename base_type::streambuf_type streambuf_type;
     typedef typename TBase::char_type char_type;
     typedef typename streambuf_type::pos_type pos_type;
     typedef typename streambuf_type::off_type off_type;
 
 private:
     //typedef experimental::ios_policy policy_type;
-    typedef int policy_type;
+    //typedef int policy_type;
+    typedef typename base_type::policy_type policy_type;
 
 #ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
     policy_type get_policy() { return policy_type{}; }
@@ -99,7 +100,7 @@ private:
         streamsize written = this->rdbuf()->sputn(s, n);
 
         if(written != n)
-            base_t::setstate(ios_base::failbit);
+            base_type::setstate(ios_base::failbit);
     }
 
 public:
@@ -131,7 +132,7 @@ public:
     __ostream_type& flush()
     {
         if(this->rdbuf()->pubsync() == -1)
-            this->setstate(base_t::badbit);
+            this->setstate(base_type::badbit);
 
         return *this;
     }
@@ -154,7 +155,7 @@ public:
     __ostream_type& put(char_type ch, bool bypass_sentry = false)
     {
         if(this->rdbuf()->sputc(ch) == estd::char_traits<char_type>::eof())
-            this->setstate(base_t::eofbit);
+            this->setstate(base_type::eofbit);
 
         if(!bypass_sentry)
             sentry::destroy(*this);
@@ -192,19 +193,19 @@ public:
 
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     template <class ...TArgs>
-    basic_ostream(TArgs&&...args) : base_t(std::forward<TArgs>(args)...) {}
+    basic_ostream(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
 
     basic_ostream(streambuf_type&& streambuf) :
-        base_t(std::move(streambuf)) {}
+        base_type(std::move(streambuf)) {}
 #endif
     basic_ostream(streambuf_type& streambuf) :
-        base_t(streambuf) {}
+        base_type(streambuf) {}
 
     template <class TParam1>
-    basic_ostream(TParam1& p1) : base_t(p1) {}
+    basic_ostream(TParam1& p1) : base_type(p1) {}
 
     template <class TParam1>
-    basic_ostream(TParam1* p1) : base_t(p1) {}
+    basic_ostream(TParam1* p1) : base_type(p1) {}
 #endif
 
 };
