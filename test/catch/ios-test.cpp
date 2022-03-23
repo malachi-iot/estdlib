@@ -35,7 +35,7 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 
 typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;
 
-TEST_CASE("iostreams")
+TEST_CASE("ios")
 {
     const char raw_str[] = "raw 'traditional' output\n";
     CONSTEXPR int raw_str_len = sizeof(raw_str) - 1;

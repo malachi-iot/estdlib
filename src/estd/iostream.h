@@ -9,12 +9,11 @@
 #include "istream.h"
 #include "ostream.h"
 
-namespace FactUtilEmbedded { namespace std
-{
+namespace estd {
 
 
 #ifdef FEATURE_IOS_STREAMBUF_FULL
-template <class TChar, class traits = char_traits<TChar>>
+template <class TChar, class traits = estd::char_traits<TChar>>
 class basic_iostream :
         public basic_ostream<TChar, traits>,
         public basic_istream<TChar, traits>
@@ -24,7 +23,7 @@ class basic_iostream :
 #else
 // don't use virtual inheritance and instead manually redefine basic_istream behaviors
 // creates some visual code slop, but ends up compiling smaller (and maybe faster)
-template <class TChar, class traits = char_traits<TChar>>
+template <class TChar, class traits = estd::char_traits<TChar>>
 class basic_iostream :
         public basic_ostream<TChar, traits>
 {
@@ -34,24 +33,10 @@ class basic_iostream :
 
 
 
-} }
+}
 
-#ifdef OBSOLETE
-#ifdef ESP_OPEN_RTOS
-#include "streams/iostream_esp8266.h"
-#elif defined(__POSIX__)
-#include "streams/iostream_posix.h"
-#elif defined(__MBED__)
-#include "streams/iostream_mbed.h"
-#elif defined(ARDUINO)
-#include "streams/iostream_arduino.h"
-#else
-#warning "Unknown architecture"
-#endif
-#endif
+namespace estd {
 
-namespace FactUtilEmbedded { namespace std
-{
 typedef basic_streambuf<char> streambuf;
 
 
@@ -88,6 +73,10 @@ __ostream_type& operator<<(__ostream_type& (*__pf)(__ostream_type&))
     return __pf(*this);
 }*/
 
+// DEBT: Inactive.  Currently they are set up for rdbuf-assignability
+// (see basic_ios_base use_pointer)
+// Explore  a way to hard-wire what the streambuf *should* be for these to potentially avoid
+// the rdbuf assignability and associated virtual function requirements
 extern ostream cout;
 extern istream cin;
 extern ostream& clog;
@@ -109,4 +98,4 @@ extern ostream& cerr;
 #endif
 #endif
 
-} }
+}

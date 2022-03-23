@@ -1,3 +1,8 @@
 [*.{c,C,cpp,CPP,h,H}]
 indent_style = space
 indent_size = 4
+
+[CMakeLists.txt]
+indent_style = space
+indent_size = 4
+
