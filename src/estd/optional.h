@@ -388,6 +388,7 @@ public:
         return *this;
     }
 
+    operator bool() const { return base_type::has_value(); }
 };
 
 }
