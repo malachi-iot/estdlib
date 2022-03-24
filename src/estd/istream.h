@@ -142,11 +142,11 @@ public:
         return *this;
     }
 
-    // UNTESTED
     __istream_type& seekg(off_type off, ios_base::seekdir dir)
     {
         this->unsetstate(ios_base::failbit);
         this->rdbuf()->pubseekoff(off, dir, ios_base::in);
+        return *this;
     }
 
 

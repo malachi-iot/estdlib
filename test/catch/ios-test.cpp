@@ -127,17 +127,25 @@ TEST_CASE("ios")
             REQUIRE(_cin.get() == '!');
             //_cin >> localbuf;
         }
-        SECTION("istream readsome")
+        SECTION("istream")
         {
-            char localbuf[128];
             layer1::string<32> str = "hi2u";
 
             internal::basic_istream<streambuf_type> _cin(str);
 
-            estd::streamsize read_back = _cin.readsome(localbuf, str.length());
+            SECTION("readsome")
+            {
+                char localbuf[128];
+                estd::streamsize read_back = _cin.readsome(localbuf, str.length());
 
-            REQUIRE(read_back == str.length());
-            REQUIRE(localbuf[0] == str[0]);
+                REQUIRE(read_back == str.length());
+                REQUIRE(localbuf[0] == str[0]);
+            }
+            SECTION("seekg")
+            {
+                _cin.seekg(1, estd::ios_base::cur);
+                REQUIRE('i' == _cin.get());
+            }
         }
         SECTION("whitespace on input")
         {
