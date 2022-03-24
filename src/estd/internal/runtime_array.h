@@ -317,6 +317,16 @@ public:
         return iterator(get_allocator(), offset(0));
     }
 
+    const_iterator cbegin() const
+    {
+        return iterator(get_allocator(), offset(0));
+    }
+
+    const_iterator begin() const
+    {
+        return cbegin();
+    }
+
     iterator end()
     {
         handle_with_offset o = offset(size());
