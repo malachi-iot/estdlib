@@ -70,4 +70,18 @@ struct iterator_traits<T*>
 
 // TODO: Might need a specialization for our accessor-related things. we'll see
 
+namespace experimental {
+
+template<class TStreambuf>
+class istreambuf_iterator
+{
+public:
+    typedef typename TStreambuf::char_type char_type;
+    typedef typename TStreambuf::traits_type traits_type;
+
+    typedef TStreambuf streambuf_type;
+};
+
+}
+
 }

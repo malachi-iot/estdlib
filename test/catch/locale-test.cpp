@@ -14,6 +14,15 @@ TEST_CASE("locale")
     }
     SECTION("use_facet")
     {
+        SECTION("ctype")
+        {
+            constexpr char c = 'a';
+            char result = experimental::use_facet<experimental::ctype<char> >(l).widen(c);
+            REQUIRE(result == c);
+        }
+        SECTION("get_num")
+        {
 
+        }
     }
 }

@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     functional-test.cpp
     ios-test.cpp
     iostream-test.cpp
+    iterator-test.cpp
     list-test.cpp
     limits-test.cpp
 	locale-test.cpp
