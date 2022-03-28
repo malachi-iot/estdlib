@@ -57,6 +57,7 @@ set(SOURCE_FILES
         estd/internal/istream.h
         estd/internal/istream_runtimearray.hpp
         estd/internal/list_node.h
+        estd/internal/locale.h
         estd/internal/opts.h
         estd/internal/ostream.h
         estd/internal/ostream_basic_string.hpp

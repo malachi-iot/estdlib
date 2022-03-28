@@ -1,6 +1,9 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/locale.h"
+#include "iterator.h"
+#include "internal/ios.h"
 
 extern "C" {
 #include <stdint.h>
@@ -135,9 +138,6 @@ public:
 }
 
 template <class TFacet>
-const TFacet& use_facet(const locale& loc);
-
-template <class TFacet>
 bool has_facet(const locale& loc);
 
 template<>
@@ -159,5 +159,37 @@ inline bool isspace(TChar ch, const locale& loc)
 {
     return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
 }
+
+template <class TChar, class InputIt>
+class num_get
+{
+public:
+    typedef TChar char_type;
+    typedef InputIt iter_type;
+
+    template <typename T>
+    iter_type get(iter_type in, iter_type end,
+        estd::ios_base::iostate& err,
+        estd::ios_base& str,
+        T& v) const;
+
+    iter_type get(iter_type in, iter_type end,
+        estd::ios_base::iostate& err, estd::ios_base& str, long& v) const
+    {
+        return in;
+    }
+};
+
+/*
+ * Can't remember if this is possible / how to do it
+template <class TChar, class InputIt>
+template <>
+inline typename num_get<TChar, InputIt>::iter_type num_get<TChar, InputIt>::get<long>(
+    iter_type in,
+    iter_type end, estd::ios_base::iostate& err, long& v) const
+{
+    return in;
+}
+ */
 
 }}

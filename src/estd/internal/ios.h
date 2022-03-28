@@ -3,7 +3,7 @@
 // just for IDE really - in production code, this file is always included by estd/ios.h
 //#include "../ios.h"
 #include "../type_traits.h"
-#include "../locale.h"
+#include "locale.h"
 #include <stdint.h>
 
 namespace estd {
