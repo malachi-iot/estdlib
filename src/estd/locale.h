@@ -167,6 +167,77 @@ public:
     typedef TChar char_type;
     typedef InputIt iter_type;
 
+private:
+    // Lifted from
+    // https://stackoverflow.com/questions/221001/performance-question-fastest-way-to-convert-hexadecimal-char-to-its-number-valu
+    template <class T>
+    void get_integer_ascii_hexadecimal(iter_type i, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
+    {
+        v = 0;
+
+        for(; i < (end - 1); ++i)
+        {
+            char_type c = *i;
+
+            c|=0x20;
+
+            c = c<='9'? c+0xD0 : c+0xA9;
+
+            v <<= 1;
+            v += c;
+        }
+
+        err |= ios_base::eofbit;
+    }
+
+    template <class T>
+    void get_unsigned_integer_ascii_decimal(iter_type i, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
+    {
+        v = 0;
+
+        for(; i < (end - 1); ++i)
+        {
+            const char_type c = *i;
+            // DEBT: Need to cleverly use a signed integer whose width matches char_type
+            const int16_t b = c - '0';
+
+            if(b >= 0 && b <= 9)
+            {
+                v *= 10;
+                v += b;
+            }
+            else
+            {
+                err |= ios_base::failbit;
+                return;
+            }
+        }
+
+        err |= ios_base::eofbit;
+    }
+
+    template <class T>
+    void get_signed_integer_ascii_decimal(iter_type i, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
+    {
+        bool negative = false;
+
+        // TODO: Might be able to merely copy this iterator and to this evaluation
+        // at the end.  Perhaps do a specialization for this based on policy
+        if(*i == '-')
+        {
+            negative = true;
+            ++i;
+        }
+
+        get_unsigned_integer_ascii_decimal(i, end, err, str, v);
+
+        if(negative) v = -v;
+    }
+
+public:
     template <typename T>
     iter_type get(iter_type in, iter_type end,
         estd::ios_base::iostate& err,
@@ -181,35 +252,11 @@ public:
 
         if(basefield == estd::ios_base::dec)
         {
-            v = 0;
-
-            iter_type i = in;
-            bool negative = false;
-
-            if(*in == '-')
-            {
-                negative = true;
-                ++in;
-            }
-
-            for(; i < (end - 1); ++i)
-            {
-                const TChar c = *i;
-                const int8_t b = c - '0';
-
-                if(b >= 0 && b <= 9)
-                {
-                    v *= 10;
-                    v += b;
-                }
-                else
-                {
-                    err |= ios_base::failbit;
-                    return in;
-                }
-            }
-
-            if(negative) v = -v;
+            get_signed_integer_ascii_decimal(in, end, err, str, v);
+        }
+        else if(basefield == estd::ios_base::hex)
+        {
+            get_integer_ascii_hexadecimal(in, end, err, str, v);
         }
 
         return in;

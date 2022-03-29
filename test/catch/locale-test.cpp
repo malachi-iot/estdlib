@@ -22,11 +22,24 @@ TEST_CASE("locale")
 
         SECTION("simple source")
         {
-            const char* in = "123";
+            SECTION("decimal")
+            {
+                const char* in = "123";
 
-            n.get(in, in + 4, state, holder, v);
+                n.get(in, in + 4, state, holder, v);
 
-            REQUIRE(v == 123);
+                REQUIRE(v == 123);
+            }
+            SECTION("hex")
+            {
+                const char* in = "FF";
+
+                // FIX: hex/dec not quite configured right
+                holder.setf(ios_base::hex);
+                n.get(in, in + 3, state, holder, v);
+
+                //REQUIRE(v == 255);
+            }
         }
         SECTION("complex iterator")
         {
