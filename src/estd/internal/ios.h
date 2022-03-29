@@ -19,6 +19,7 @@ public:
 
     static CONSTEXPR fmtflags dec = 0x01;
     static CONSTEXPR fmtflags hex = 0x02;
+    static CONSTEXPR fmtflags oct = 0x03;
     static CONSTEXPR fmtflags basefield = dec | hex;
 
     static CONSTEXPR fmtflags left = 0x08;
@@ -68,6 +69,14 @@ public:
 
     fmtflags setf(fmtflags flags)
     { fmtflags prior = fmtfl; fmtfl |= flags; return prior; }
+
+    fmtflags setf(fmtflags flags, fmtflags mask)
+    {
+        fmtflags prior = fmtfl;
+        fmtfl &= ~mask;
+        fmtfl |= flags;
+        return prior;
+    }
 
     fmtflags unsetf(fmtflags flags)
     { fmtflags prior = fmtfl; fmtfl &= ~flags; return prior; }

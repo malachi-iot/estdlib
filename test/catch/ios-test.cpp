@@ -285,6 +285,8 @@ TEST_CASE("ios")
 
             SECTION("base 10")
             {
+                out << dec; // NOTE: This is default, but we want to be thorough
+
                 int value = 2;
 
                 out << "hi" << value++ << 'u';
