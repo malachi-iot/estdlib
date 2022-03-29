@@ -25,7 +25,8 @@ public:
     static CONSTEXPR fmtflags right = 0x10;
     static CONSTEXPR fmtflags adjustfield = left | right;
 
-    static CONSTEXPR fmtflags unitbuf = 0x20;
+    static CONSTEXPR fmtflags boolalpha = 0x20;
+    static CONSTEXPR fmtflags unitbuf = 0x40;
 
 
     typedef uint8_t openmode;

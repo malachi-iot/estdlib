@@ -174,8 +174,44 @@ public:
         T& v) const;
 
     iter_type get(iter_type in, iter_type end,
-        estd::ios_base::iostate& err, estd::ios_base& str, long& v) const
+        ios_base::iostate& err, ios_base& str, long& v) const
     {
+        ios_base::fmtflags basefield = str.flags() && estd::ios_base::basefield;
+        ios_base::fmtflags boolalpha = str.flags() && estd::ios_base::boolalpha;
+
+        if(basefield == estd::ios_base::dec)
+        {
+            v = 0;
+
+            iter_type i = in;
+            bool negative = false;
+
+            if(*in == '-')
+            {
+                negative = true;
+                ++in;
+            }
+
+            for(; i < (end - 1); ++i)
+            {
+                const TChar c = *i;
+                const int8_t b = c - '0';
+
+                if(b >= 0 && b <= 9)
+                {
+                    v *= 10;
+                    v += b;
+                }
+                else
+                {
+                    err |= ios_base::failbit;
+                    return in;
+                }
+            }
+
+            if(negative) v = -v;
+        }
+
         return in;
     }
 };
