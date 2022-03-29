@@ -11,4 +11,26 @@ TEST_CASE("iterator")
         //estd::layer3::stringbuf in;
         estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it;
     }
+    SECTION("filter_iterator")
+    {
+        auto it = estd::experimental::make_filter_iterator(
+            [](char c)
+            {
+                return c == '/' ? 0 : c;
+            },
+            "hi2u/");
+
+        //estd::layer1::string<32>(it, 0);
+        estd::layer1::string<32> s;
+
+        while(*it != 0)
+        {
+            s += *it++;
+        }
+
+        REQUIRE(s == "hi2u");
+
+
+        //estd::experimental::filter_iterator
+    }
 }
