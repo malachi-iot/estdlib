@@ -34,11 +34,10 @@ TEST_CASE("locale")
             {
                 const char* in = "FF";
 
-                // FIX: hex/dec not quite configured right
-                holder.setf(ios_base::hex);
+                holder.setf(ios_base::hex, ios_base::basefield);
                 n.get(in, in + 3, state, holder, v);
 
-                //REQUIRE(v == 255);
+                REQUIRE(v == 255);
             }
         }
         SECTION("complex iterator")

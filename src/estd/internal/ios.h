@@ -17,6 +17,11 @@ class ios_base
 public:
     typedef uint8_t fmtflags;
 
+    // NOTE: Spec appears to conflict with itself.
+    // https://en.cppreference.com/w/cpp/io/ios_base/fmtflags suggests we have carte blanche
+    // do make these any values we wish, but
+    // https://en.cppreference.com/w/cpp/locale/num_get/get strongly implies that 'dec'
+    // is expected to be zero
     static CONSTEXPR fmtflags dec = 0x01;
     static CONSTEXPR fmtflags hex = 0x02;
     static CONSTEXPR fmtflags oct = 0x03;

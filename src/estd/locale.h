@@ -160,6 +160,8 @@ inline bool isspace(TChar ch, const locale& loc)
     return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
 }
 
+
+// DEBT: Consolidate all this with char_base_traits
 template <class TChar, class InputIt>
 class num_get
 {
@@ -168,8 +170,13 @@ public:
     typedef InputIt iter_type;
 
 private:
-    // Lifted from
-    // https://stackoverflow.com/questions/221001/performance-question-fastest-way-to-convert-hexadecimal-char-to-its-number-valu
+
+    // TODO: Do a LUT since bounds checking to detect invalid hex chars likely is fastest.  See:
+    // https://stackoverflow.com/questions/34365746/whats-the-fastest-way-to-convert-hex-to-integer-in-c
+    // Also consider a cut-down one with only maybe 64 characters instead of 128 or 256, because unless
+    // we do 256 we have to do bounds checking anyway
+
+
     template <class T>
     void get_integer_ascii_hexadecimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
@@ -180,11 +187,55 @@ private:
         {
             char_type c = *i;
 
+            v <<= 4;
+
+            if(c >= '0' && c <= '9')
+            {
+                v += c - '0';
+            }
+            else if(c >= 'A' && c <= 'F')
+            {
+                v += 10;
+                v += c - 'A';
+            }
+            else if(c >= 'a' && c <= 'f')
+            {
+                v += 10;
+                v += c - 'a';
+            }
+            else
+            {
+                // DEBT: We may not have to do this, 'v' may be acceptable as undefined
+                // if we reach failbit
+                v >>= 4;
+
+                err |= ios_base::failbit;
+                return;
+            }
+        }
+
+        err |= ios_base::eofbit;
+    }
+
+    // Lifted from
+    // https://stackoverflow.com/questions/221001/performance-question-fastest-way-to-convert-hexadecimal-char-to-its-number-valu
+    template <class T>
+    void get_integer_ascii_hexadecimal_unchecked(iter_type i, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
+    {
+        v = 0;
+
+        // Doesn't detect errors
+
+        for(; i < (end - 1); ++i)
+        {
+            char_type c = *i;
+
             c|=0x20;
 
             c = c<='9'? c+0xD0 : c+0xA9;
 
-            v <<= 1;
+            v <<= 4;
             v += c;
         }
 
@@ -244,11 +295,11 @@ public:
         estd::ios_base& str,
         T& v) const;
 
-    iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, long& v) const
+    template <typename T>
+    iter_type get_integer_ascii(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
     {
-        ios_base::fmtflags basefield = str.flags() && estd::ios_base::basefield;
-        ios_base::fmtflags boolalpha = str.flags() && estd::ios_base::boolalpha;
+        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
         if(basefield == estd::ios_base::dec)
         {
@@ -260,6 +311,58 @@ public:
         }
 
         return in;
+    }
+
+
+    template <typename T>
+    iter_type get_unsigned_ascii(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, T& v) const
+    {
+        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
+
+        if(basefield == estd::ios_base::dec)
+        {
+            get_unsigned_integer_ascii_decimal(in, end, err, str, v);
+        }
+        else if(basefield == estd::ios_base::hex)
+        {
+            get_integer_ascii_hexadecimal(in, end, err, str, v);
+        }
+
+        return in;
+    }
+
+    iter_type get(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, unsigned& v) const
+    {
+        return get_integer_ascii(in, end, err, str, v);
+    }
+
+
+    iter_type get(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, unsigned short& v) const
+    {
+        return get_integer_ascii(in, end, err, str, v);
+    }
+
+    iter_type get(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, short& v) const
+    {
+        return get_integer_ascii(in, end, err, str, v);
+    }
+
+
+
+    iter_type get(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, int& v) const
+    {
+        return get_integer_ascii(in, end, err, str, v);
+    }
+
+    iter_type get(iter_type in, iter_type end,
+        ios_base::iostate& err, ios_base& str, long& v) const
+    {
+        return get_integer_ascii(in, end, err, str, v);
     }
 };
 

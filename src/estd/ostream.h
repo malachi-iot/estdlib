@@ -356,18 +356,18 @@ inline internal::basic_ostream<TStreambuf, TBase>& endl(
     return os;
 }
 
-
+// We have this out here rather than ios_base because of our deviation from virtual methods
 template <class TStreambuf>
 inline internal::basic_ostream<TStreambuf>& dec(internal::basic_ostream<TStreambuf>& __os)
 {
-    __os.flags((__os.flags() & ~ios_base::basefield) | ios_base::dec);
+    __os.setf(ios_base::dec, ios_base::basefield);
     return __os;
 }
 
 template <class TStreambuf>
 inline internal::basic_ostream<TStreambuf>& hex(internal::basic_ostream<TStreambuf>& __os)
 {
-    __os.flags((__os.flags() & ~ios_base::basefield) | ios_base::hex);
+    __os.setf(ios_base::hex, ios_base::basefield);
     return __os;
 }
 
