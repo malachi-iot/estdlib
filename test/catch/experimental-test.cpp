@@ -12,6 +12,7 @@
 #include <estd/charconv.h>
 #include <estd/cctype.h>
 //#include <estd/locale.h>
+#include "estd/exp/memory_pool2.h"
 
 
 struct TestA {};
@@ -454,6 +455,21 @@ TEST_CASE("experimental tests")
             // NOTE: almost works - as expected, traits are different for this particular
             // node type.  I think we can specialize here
             //list.push_front(item);
+        }
+        SECTION("v2")
+        {
+            using namespace estd;
+            using namespace estd::experimental;
+
+            typedef array<byte, 32> value_type;
+
+            v2::memory_pool<value_type, 10, v2::pool_types::linked_list> pool;
+
+            REQUIRE(pool.count_free() == 10);
+            value_type* v = pool.allocate();
+            REQUIRE(pool.count_free() == 9);
+            pool.deallocate(v);
+            REQUIRE(pool.count_free() == 10);
         }
     }
     SECTION("instance wrapper")

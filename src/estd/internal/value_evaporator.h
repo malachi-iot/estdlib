@@ -184,6 +184,11 @@ struct instance_provider
 
 
 // FIX: pretty sure std C++ has a thing akin to this
+/**
+ * Useful for scenarios where one can't do RAII pattern
+ * @tparam T
+ * @tparam size
+ */
 template <class T, std::ptrdiff_t size = sizeof(T)>
 struct raw_instance_provider
 {
