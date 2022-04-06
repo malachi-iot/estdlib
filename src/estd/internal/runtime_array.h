@@ -5,7 +5,7 @@
 #include "../internal/accessor.h"
 #include "../algorithm.h"
 #include "../initializer_list.h"
-#include "../iterator.h"
+#include "iterator_standalone.h"
 
 #include <string.h>     // for access to memcpy
 

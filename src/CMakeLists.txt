@@ -51,6 +51,7 @@ set(SOURCE_FILES
         estd/internal/impl/streambuf/string.h
         estd/internal/impl/streambuf.h
         estd/internal/invoke_result.h
+        estd/internal/iterator_standalone.h
         estd/internal/ios.h
         estd/internal/iostream.h
         estd/internal/is_base_of.h

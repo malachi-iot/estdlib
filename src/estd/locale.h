@@ -2,7 +2,7 @@
 
 #include "internal/platform.h"
 #include "internal/locale.h"
-#include "iterator.h"
+#include "internal/iterator_standalone.h"
 #include "internal/ios.h"
 
 extern "C" {

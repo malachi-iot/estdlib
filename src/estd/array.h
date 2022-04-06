@@ -4,7 +4,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "iterator.h"
+#include "internal/iterator_standalone.h"
 #include "internal/runtime_array.h"
 #include "internal/impl/allocated_array.h"
 #include "allocators/fixed.h"

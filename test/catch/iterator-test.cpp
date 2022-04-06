@@ -9,7 +9,15 @@ TEST_CASE("iterator")
     {
         // FIX: layer3::stringbuf has a compilation error in/around 'size_type'
         //estd::layer3::stringbuf in;
-        estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it;
+
+        SECTION("end-of-stream")
+        {
+            estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it;
+        }
+        SECTION("from istream")
+        {
+            
+        }
     }
     SECTION("filter_iterator")
     {

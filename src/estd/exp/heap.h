@@ -4,7 +4,7 @@
 #pragma once
 
 #include "../algorithm.h"
-#include "../iterator.h"
+#include "../internal/iterator_standalone.h"
 #include "../functional.h"
 
 namespace estd { namespace experimental {
