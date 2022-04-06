@@ -24,10 +24,20 @@ struct out_stringbuf : stringbuf_base<TString>
 
     TString _str;
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    out_stringbuf(TArgs&&...args) :
+        _str(std::forward<TArgs>(args)...)
+    {}
+#else
     out_stringbuf() {}
 
     template <class TParam1>
     out_stringbuf(TParam1& p) : _str(p) {}
+#endif
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
@@ -71,12 +81,22 @@ struct basic_stringbuf :
     typedef typename base_type::off_type off_type;
     typedef typename base_type::pos_type pos_type;
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+    template <class ...TArgs>
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
+    basic_stringbuf(TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...)
+    {}
+#else
     basic_stringbuf() {}
 
     template <class TParam1>
     basic_stringbuf(TParam1& p) :
             base_type(p)
     {}
+#endif
 
     streamsize xsgetn(char_type* s, streamsize count)
     {

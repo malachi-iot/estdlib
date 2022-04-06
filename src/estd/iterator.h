@@ -17,9 +17,14 @@ public:
     typedef typename TStreambuf::traits_type traits_type;
 
     typedef TStreambuf streambuf_type;
+
+    typedef istreambuf_iterator iterator;
+    typedef char_type value_type;
+
 private:
 
     streambuf_type* const rdbuf;
+    char_type ch;
 
 public:
     istreambuf_iterator() :
@@ -31,6 +36,35 @@ public:
     istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
         rdbuf(is.rdbuf())
     {
+        ch = rdbuf->sgetc();
+    }
+
+    istreambuf_iterator(streambuf_type* s) :
+        rdbuf(s)
+    {
+        ch = rdbuf->sgetc();
+    }
+
+    // prefix version
+    iterator& operator++()
+    {
+        ch = rdbuf->snextc();
+
+        return *this;
+    }
+
+    // postfix version
+    iterator operator++(int)
+    {
+        ch = rdbuf->sbumpc();
+
+        return *this;
+    }
+
+
+    value_type operator*() const
+    {
+        return ch;
     }
 };
 

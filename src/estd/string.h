@@ -486,8 +486,10 @@ class basic_string
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::impl_type helper_type;
 
-protected:
+public:
     typedef typename base_t::size_type size_type;
+
+protected:
     typedef typename allocator_type::InitParam init_t;
 
     // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial

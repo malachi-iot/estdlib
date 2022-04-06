@@ -156,6 +156,16 @@ public:
             return this->uflow();
     }
 
+    int_type snextc()
+    {
+        int_type ch = this->sbumpc();
+
+        if(ch == traits_type::eof())
+            return traits_type::eof();
+        else
+            return this->sgetc();
+    }
+
     int_type sgetc()
     {
         if(base_type::xin_avail() == 0)
