@@ -33,15 +33,17 @@ TEST_CASE("iterator")
         }
         SECTION("ostream")
         {
-            estd::experimental::ostreambuf_iterator<estd::layer1::stringbuf<128>> it;
+            estd::layer1::stringbuf<128> sb;
+            estd::experimental::ostreambuf_iterator<estd::layer1::stringbuf<128>> it(&sb);
 
-            /* segfaults
             it++ = 'h';
             it++ = 'e';
             it++ = 'l';
-            it++ = 'l';
-            it = 'o';
-            ++it; */
+            it = 'l';
+            ++it = 'o'; // ostreambuf_iterator treats ++ as a no-op, so this will work
+            ++it;
+
+            REQUIRE(sb.str() == "hello");
         }
     }
     SECTION("filter_iterator")

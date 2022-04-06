@@ -2,6 +2,7 @@
 
 #include "internal/iterator_standalone.h"
 #include "istream.h"
+#include "ostream.h"
 
 
 
@@ -86,6 +87,7 @@ public:
     int_type last_written;
 
     ostreambuf_iterator() :
+        rdbuf(NULLPTR),
         last_written(traits_type::eof())
     {
 
@@ -97,9 +99,17 @@ public:
 
     }
 
+    template <class TBase>
+    ostreambuf_iterator(estd::internal::basic_ostream<TStreambuf, TBase>& stream) :
+        rdbuf(stream.rdbuf())
+    {
+
+    }
+
     ostreambuf_iterator& operator=(char_type c)
     {
-        last_written = rdbuf->sputc(c);
+        if(rdbuf)
+            last_written = rdbuf->sputc(c);
 
         return *this;
     }
