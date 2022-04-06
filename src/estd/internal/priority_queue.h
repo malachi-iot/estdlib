@@ -43,7 +43,9 @@ class priority_queue
 protected:
     Container c;
 
-    Compare get_compare() { return Compare(); }
+    //Compare get_compare() { return Compare(); }
+    Compare compare;
+    Compare& get_compare() { return compare; }
 
 public:
     typedef Container container_type;
@@ -51,6 +53,12 @@ public:
     typedef typename Container::size_type size_type;
     typedef typename container_type::accessor accessor;
     typedef Compare value_compare;
+
+    priority_queue() = default;
+
+    priority_queue(const Compare& compare) :
+        compare(compare)
+    {}
 
     bool empty() const { return c.empty(); }
 
@@ -112,8 +120,15 @@ template <class T, size_t len, class Compare = less<T> >
 class priority_queue :
     public estd::priority_queue<T, layer1::vector<T, len>, Compare >
 {
-public:
+    typedef estd::priority_queue<T, layer1::vector<T, len>, Compare > base_type;
 
+public:
+    priority_queue() = default;
+
+    priority_queue(const Compare& compare) : base_type(compare)
+    {
+
+    }
 };
 
 }

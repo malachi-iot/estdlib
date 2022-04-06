@@ -9,6 +9,11 @@
 
 using namespace estd::test;
 
+inline static bool compare(const Dummy& lhs, const Dummy& rhs)
+{
+    return lhs.val1 < rhs.val1;
+}
+
 inline bool operator <(const Dummy& lhs, const Dummy& rhs)
 {
     return lhs.val1 < rhs.val1;
@@ -16,7 +21,6 @@ inline bool operator <(const Dummy& lhs, const Dummy& rhs)
 
 #include <estd/queue.h>
 #include <queue>
-
 
 
 TEST_CASE("priority-queue-test")
@@ -81,6 +85,13 @@ TEST_CASE("priority-queue-test")
         pq.pop();
 
         REQUIRE(pq.top() == 5);
+    }
+    SECTION("priority queue, custom compare")
+    {
+        estd::layer1::priority_queue<Dummy, 10, decltype(&compare)> pq(compare);
+
+        pq.push(Dummy(5, "val5"));
+        pq.push(Dummy(9, "val9"));
     }
     SECTION("priorty queue, emplacement")
     {
