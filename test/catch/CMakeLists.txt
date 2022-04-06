@@ -36,7 +36,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     priority-queue-test.cpp
     utility-test.cpp
 	algorithm-test.cpp
-	)
+        internal-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 # TODO: Instead, filter by presence of GCC
