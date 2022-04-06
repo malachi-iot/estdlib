@@ -70,6 +70,59 @@ public:
     }
 };
 
+template <class TStreambuf>
+class ostreambuf_iterator
+{
+public:
+    typedef std::output_iterator_tag iterator_category;
+    typedef void value_type;
+
+    typedef TStreambuf streambuf_type;
+    typedef typename streambuf_type::char_type char_type;
+    typedef typename streambuf_type::traits_type traits_type;
+    typedef typename traits_type::int_type int_type;
+
+    streambuf_type* rdbuf;
+    int_type last_written;
+
+    ostreambuf_iterator() :
+        last_written(traits_type::eof())
+    {
+
+    }
+
+    ostreambuf_iterator(streambuf_type* rdbuf) :
+        rdbuf(rdbuf)
+    {
+
+    }
+
+    ostreambuf_iterator& operator=(char_type c)
+    {
+        last_written = rdbuf->sputc(c);
+
+        return *this;
+    }
+
+    // prefix version
+    ostreambuf_iterator& operator++()
+    {
+        return *this;
+    }
+
+    // postfix version
+    ostreambuf_iterator operator++(int)
+    {
+        return *this;
+    }
+
+
+    bool failed() const
+    {
+        return last_written != traits_type::eof();
+    }
+};
+
 // Similar to boost's version, but we don't use a functor (maybe we should?)
 // https://www.boost.org/doc/libs/1_67_0/libs/iterator/doc/html/iterator/specialized/filter.html
 template <class TPredicate, class TBaseIterator>

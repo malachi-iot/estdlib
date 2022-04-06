@@ -31,6 +31,18 @@ TEST_CASE("iterator")
             REQUIRE(*it++ == ' ');
             REQUIRE(*it++ == 'w');
         }
+        SECTION("ostream")
+        {
+            estd::experimental::ostreambuf_iterator<estd::layer1::stringbuf<128>> it;
+
+            /* segfaults
+            it++ = 'h';
+            it++ = 'e';
+            it++ = 'l';
+            it++ = 'l';
+            it = 'o';
+            ++it; */
+        }
     }
     SECTION("filter_iterator")
     {
