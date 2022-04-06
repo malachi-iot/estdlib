@@ -11,8 +11,8 @@ TEST_CASE("iterator")
         // - better const awareness
         // -- maybe a specialization replacing layer3::const_string into layer3::basic_string<const char>
         //estd::layer3::stringbuf in("hello");
-        estd::layer3::stringbuf::size_type sz = 5;
-        estd::layer3::stringbuf in((char*)"hello", 5, sz);
+        estd::layer3::stringbuf::size_type sz = 11;
+        estd::layer3::stringbuf in((char*)"hello world", sz, sz);
 
         SECTION("end-of-stream")
         {
@@ -27,6 +27,9 @@ TEST_CASE("iterator")
             REQUIRE(*it++ == 'l');
             REQUIRE(*it == 'l');
             REQUIRE(*++it == 'o');
+            REQUIRE(*++it == ' ');
+            REQUIRE(*it++ == ' ');
+            REQUIRE(*it++ == 'w');
         }
     }
     SECTION("filter_iterator")

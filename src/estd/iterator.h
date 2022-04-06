@@ -45,6 +45,8 @@ public:
         ch = rdbuf->sgetc();
     }
 
+    istreambuf_iterator(const istreambuf_iterator& copy_from) = default;
+
     // prefix version
     iterator& operator++()
     {
