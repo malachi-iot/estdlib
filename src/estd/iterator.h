@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internal/platform.h"
+//#include "istream.h"
 #include "type_traits.h"
 
 #ifdef FEATURE_STD_ITERATOR
@@ -80,6 +81,22 @@ public:
     typedef typename TStreambuf::traits_type traits_type;
 
     typedef TStreambuf streambuf_type;
+private:
+
+    streambuf_type* const rdbuf;
+
+public:
+    istreambuf_iterator() :
+        rdbuf(NULLPTR)
+    {
+    }
+
+    /*
+    template <class TIstreamBase>
+    istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
+        rdbuf(is.rdbuf())
+    {
+    } */
 };
 
 // Similar to boost's version, but we don't use a functor (maybe we should?)
