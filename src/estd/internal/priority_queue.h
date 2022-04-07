@@ -38,28 +38,23 @@ template <
 #endif
         class Compare = less<typename Container::value_type>,
         class THelper = internal::priority_queue_helper<Container, Compare> >
-class priority_queue //: protected estd::internal::struct_evaporator<Compare>
+class priority_queue : protected estd::internal::struct_evaporator<Compare>
 {
     typedef estd::internal::struct_evaporator<Compare> compare_provider_type;
 
 protected:
     Container c;
 
-    //Compare get_compare() { return Compare(); }
-    Compare compare;
-    Compare& get_compare() { return compare; }
-
 public:
     typedef Container container_type;
     typedef typename Container::value_type value_type;
     typedef typename Container::size_type size_type;
     typedef typename container_type::accessor accessor;
-    typedef Compare value_compare;
 
     priority_queue() = default;
 
     priority_queue(const Compare& compare) :
-        compare(compare)
+        compare_provider_type(compare)
     {}
 
     bool empty() const { return c.empty(); }
@@ -74,14 +69,14 @@ public:
     void push(const value_type& value)
     {
         c.push_back(value);
-        std::push_heap(c.begin(), c.end(), get_compare());
+        std::push_heap(c.begin(), c.end(), compare_provider_type::value());
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push(value_type&& value)
     {
         c.push_back(std::move(value));
-        std::push_heap(c.begin(), c.end(), get_compare());
+        std::push_heap(c.begin(), c.end(), compare_provider_type::value());
     }
 
     priority_queue& operator =(priority_queue&& move_from)
@@ -99,7 +94,7 @@ public:
 
     void pop()
     {
-        std::pop_heap(c.begin(), c.end(), get_compare());
+        std::pop_heap(c.begin(), c.end(), compare_provider_type::value());
         c.pop_back();
     }
 

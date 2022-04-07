@@ -92,8 +92,16 @@ TEST_CASE("priority-queue-test")
 
         pq.push(Dummy(5, "val5"));
         pq.push(Dummy(9, "val9"));
+        pq.push(Dummy(3, "val3"));
+        Dummy d7(7, "val7");
+        pq.push(d7);
+
+        REQUIRE(pq.top().lock().val1 == 9);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 7);
+        pq.pop();
     }
-    SECTION("priorty queue, emplacement")
+    SECTION("priority queue, emplacement")
     {
         estd::layer1::priority_queue<Dummy, 10> pq;
 
