@@ -130,6 +130,10 @@ TEST_CASE("functional")
             REQUIRE(int_value == 5);
         }
     }
+    SECTION("function")
+    {
+        //estd::function<int()> f = []() { return 5; };
+    }
     SECTION("bind")
     {
         auto b = estd::bind(do_something, "hello");

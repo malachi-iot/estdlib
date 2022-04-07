@@ -12,12 +12,58 @@
 
 namespace estd {
 
+template <class T>
+class reference_wrapper {
+public:
+    // types
+    typedef T type;
+
+    // construct/copy/destroy
+    reference_wrapper(T& ref) NOEXCEPT : _ptr(estd::addressof(ref)) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    reference_wrapper(T&&) = delete;
+#endif
+#ifdef FEATURE_CPP_DEFAULT_CTOR
+    reference_wrapper(const reference_wrapper&) NOEXCEPT = default;
+
+    // assignment
+    reference_wrapper& operator=(const reference_wrapper& x) NOEXCEPT = default;
+#else
+    reference_wrapper(const reference_wrapper& copy_from) NOEXCEPT :
+    _ptr(copy_from._ptr)
+  {};
+
+  // assignment
+  reference_wrapper& operator=(const reference_wrapper& copy_from) NOEXCEPT
+  {
+    _ptr = copy_from._ptr;
+  }
+#endif
+
+    // access
+    operator T& () const NOEXCEPT { return *_ptr; }
+    T& get() const NOEXCEPT { return *_ptr; }
+
+    /*
+    template< class... ArgTypes >
+    estd::invoke_result_t<T&, ArgTypes...>
+      operator() ( ArgTypes&&... args ) const {
+      return estd::invoke(get(), std::forward<ArgTypes>(args)...);
+    } */
+
+private:
+    T* _ptr;
+};
+
+
 #if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
 
 template <class F>
 struct function
 {
     F f;
+
+    function() NOEXCEPT = default;
 
     template <class F2>
     function(F2 f) : f(f) {}
@@ -31,6 +77,19 @@ struct function
     auto operator()(TArgs&&...args) -> decltype (f(args...))
     {
         return f(std::forward<TArgs>(args)...);
+    }
+
+    // UNTESTED
+    function& operator=(F&& f)
+    {
+        this->f = std::move(f);
+        return *this;
+    }
+
+    function& operator=(reference_wrapper<F> f) NOEXCEPT
+    {
+        this->f = f;
+        return *this;
     }
 };
 
@@ -72,48 +131,7 @@ auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
 
 #endif
 
-template <class T>
-class reference_wrapper {
-public:
-  // types
-  typedef T type;
 
-  // construct/copy/destroy
-  reference_wrapper(T& ref) NOEXCEPT : _ptr(estd::addressof(ref)) {}
-#ifdef FEATURE_CPP_MOVESEMANTIC
-  reference_wrapper(T&&) = delete;
-#endif
-#ifdef FEATURE_CPP_DEFAULT_CTOR
-  reference_wrapper(const reference_wrapper&) NOEXCEPT = default;
-
-  // assignment
-  reference_wrapper& operator=(const reference_wrapper& x) NOEXCEPT = default;
-#else
-  reference_wrapper(const reference_wrapper& copy_from) NOEXCEPT :
-    _ptr(copy_from._ptr)
-  {};
-
-  // assignment
-  reference_wrapper& operator=(const reference_wrapper& copy_from) NOEXCEPT
-  {
-    _ptr = copy_from._ptr;
-  }
-#endif
-
-  // access
-  operator T& () const NOEXCEPT { return *_ptr; }
-  T& get() const NOEXCEPT { return *_ptr; }
-
-  /*
-  template< class... ArgTypes >
-  estd::invoke_result_t<T&, ArgTypes...>
-    operator() ( ArgTypes&&... args ) const {
-    return estd::invoke(get(), std::forward<ArgTypes>(args)...);
-  } */
-
-private:
-  T* _ptr;
-};
 
 
 #ifdef FEATURE_CPP_DEDUCTION_GUIDES
