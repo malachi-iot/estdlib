@@ -158,7 +158,7 @@ namespace experimental {
 // Guidance from
 // https://stackoverflow.com/questions/14936539/how-stdfunction-works
 
-template <typename T>
+template <typename T, class TAllocator = void>
 class function;
 
 template <typename TResult, typename... TArgs>
@@ -197,8 +197,8 @@ public:
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 };
 
-template <typename TResult, typename... TArgs>
-class function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
+template <typename TResult, typename... TArgs, class TAllocator>
+class function<TResult(TArgs...), TAllocator> : public function_base<TResult, TArgs...>
 {
     typedef function_base<TResult, TArgs...> base_type;
     typedef typename base_type::concept concept;
@@ -221,6 +221,20 @@ class function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
         }
     };
 
+    /*
+    template <typename F, typename TAllocator>
+    struct model_with_allocator : model<F>
+    {
+        TAllocator& alloc;
+
+        model_with_allocator(F&& f, TAllocator& alloc) :
+            model<F>(std::forward<F>(f)),
+            alloc(alloc)
+        {
+
+        }
+    }; */
+
 private:
     void reset()
     {
@@ -240,6 +254,21 @@ public:
         auto m = new model_type(std::forward<T>(t));
         base_type::m = m;
     }
+
+    /*
+     * Aborting this, thinking estd::function itself is better off taking TAllocator
+     * so that 'delete' free operation takes place at 'function' level as it should
+     * rather than model level which could be problematic if for example a subclass
+     * needed to do more things on destruction.  It also puts off the need for a
+     * virtual destructor
+    template <typename F, typename TAllocator>
+    function(F&& f, TAllocator& alloc)
+    {
+        typedef estd::allocator_traits<TAllocator> allocator_traits;
+        typedef model_with_allocator<typename std::decay<F>::type, TAllocator> model_type;
+
+        auto h = allocator_traits::allocate(alloc, sizeof(model_type));
+    } */
 
     function(const function& other) = default;
 
