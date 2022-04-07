@@ -180,11 +180,12 @@ template <class TAllocator>
 class accessor : public accessor_shared<TAllocator, true >
 {
     typedef accessor_shared<TAllocator, true > base_t;
-    typedef typename base_t::allocator_type allocator_type;
     typedef accessor this_t;
-    typedef typename base_t::value_type value_type;
 
 public:
+    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_t::value_type value_type;
+
     accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
         base_t(a, h) {}
 
