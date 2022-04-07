@@ -62,7 +62,7 @@ public:
  * @tparam T
  * @tparam is_present
  */
-template <class T, bool is_present>
+template <class T, bool is_present = !estd::is_empty<T>::value>
 struct struct_evaporator;
 
 template <class T>

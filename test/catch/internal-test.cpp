@@ -18,6 +18,12 @@ struct Evaporator : estd::internal::struct_evaporator<EvaporatorBase, false>
     uint16_t placeholder;
 };
 
+template <class TEval>
+struct Evaporator2 : estd::internal::struct_evaporator<TEval>
+{
+    uint16_t placeholder;
+};
+
 TEST_CASE("Internal tests", "[internal]")
 {
     SECTION("value_evaporator")
@@ -39,13 +45,34 @@ TEST_CASE("Internal tests", "[internal]")
             }
             SECTION("inherited")
             {
-                // inheritance is where the optimization magic happens
-                Evaporator value;
+                SECTION("basic")
+                {
+                    // inheritance is where the optimization magic happens
+                    Evaporator value;
 
-                // Is only the size of Evaporator's "placeholder"
-                REQUIRE(sizeof(value) == sizeof(uint16_t));
+                    // Is only the size of Evaporator's "placeholder"
+                    REQUIRE(sizeof(value) == sizeof(uint16_t));
 
-                REQUIRE(value.value().val1 == 5);
+                    REQUIRE(value.value().val1 == 5);
+                }
+                SECTION("template type infused")
+                {
+                    SECTION("empty base")
+                    {
+                        Evaporator2<EmptyClass> ev2;
+
+                        REQUIRE(ev2.is_evaporated);
+                        REQUIRE(sizeof(ev2) == sizeof(uint16_t));
+                    }
+                    SECTION("actual base")
+                    {
+                        Evaporator2<Dummy> ev2;
+
+                        REQUIRE(!ev2.is_evaporated);
+                        // Not doing == because padding can bulk it up
+                        REQUIRE(sizeof(ev2) > sizeof(uint16_t) + sizeof(Dummy));
+                    }
+                }
             }
         }
         SECTION("present")

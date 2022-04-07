@@ -38,8 +38,10 @@ template <
 #endif
         class Compare = less<typename Container::value_type>,
         class THelper = internal::priority_queue_helper<Container, Compare> >
-class priority_queue
+class priority_queue //: protected estd::internal::struct_evaporator<Compare>
 {
+    typedef estd::internal::struct_evaporator<Compare> compare_provider_type;
+
 protected:
     Container c;
 
