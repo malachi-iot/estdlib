@@ -158,17 +158,34 @@ namespace experimental {
 // Guidance from
 // https://stackoverflow.com/questions/14936539/how-stdfunction-works
 
+template <typename T>
+class function;
+
 template <typename TResult, typename... TArgs>
 class function_base
 {
-    typedef TResult (*function_type)(TArgs...);
+    typedef TResult (*function_type)(void*, TArgs...);
 
-    function_type const f;
+protected:
+    function_type f;
+    void* m;
+
+protected:
+    function_base() : f(NULLPTR), m(NULLPTR) {}
+    function_base(function_type f) : f(f) {}
+
+public:
+    TResult operator()(TArgs... args)
+    {
+        return (*f)(this, std::forward<TArgs>(args)...);
+    }
 };
 
 template <typename TResult, typename... TArgs>
-class function : public function_base<TResult, TArgs...>
+class function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
 {
+    typedef function_base<TResult, TArgs...> base_type;
+
     template <typename T>
     struct model
     {
@@ -176,7 +193,54 @@ class function : public function_base<TResult, TArgs...>
         model(U&& u) : t(std::forward<U>(u)) {}
 
         T t;
+
+        TResult exec(TArgs...args) const
+        {
+            return t(std::forward<TArgs>(args)...);
+        }
+
+        static TResult exec(void* _this, TArgs...args)
+        {
+            return ((model*)_this)->exec(std::forward<TArgs>(args)...);
+        }
     };
+
+public:
+    template <typename T>
+    function(T&& t)
+    {
+        //m = allocator_traits<model<T>>::
+        typedef typename std::decay<T>::type incoming_function_type;
+        typedef model<incoming_function_type> model_type;
+        // FIX: Don't want to dynamically allocate memory quite this way
+        auto m = new model_type(std::forward<T>(t));
+        base_type::m = m;
+        base_type::f = &model_type::exec;
+    }
+
+    function(const function& other) = default;
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    function(function&& other) NOEXCEPT
+    {
+        *this = std::move(other);
+    }
+#endif
+
+    ~function()
+    {
+        // FIX: Don't want to dynamically allocate memory quite this way, and delete void*
+        // rightly gives us complaints and warnings
+        delete base_type::m;
+    }
+
+    template <typename T>
+    function& operator=(T&& t)
+    {
+        //m = new model<typename std::decay<T>::type >(std::forward<T>(t));
+        new (this) function(std::move(t));
+        return *this;
+    }
 };
 
 }

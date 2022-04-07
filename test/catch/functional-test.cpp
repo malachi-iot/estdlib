@@ -133,6 +133,15 @@ TEST_CASE("functional")
     SECTION("function")
     {
         //estd::function<int()> f = []() { return 5; };
+
+        SECTION("experimental")
+        {
+            estd::experimental::function<int()> f = []() { return 5; };
+
+            int val = f();
+
+            REQUIRE(val == 5);
+        }
     }
     SECTION("bind")
     {
