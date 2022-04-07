@@ -198,6 +198,12 @@ public:
     {
         return base_t::template assign<accessor>(assign_from);
     }
+
+    accessor& operator=(const accessor& assign_from)
+    {
+        new (this) accessor (assign_from);
+        return *this;
+    }
 };
 
 
