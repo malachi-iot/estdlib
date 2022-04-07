@@ -153,4 +153,32 @@ reference_wrapper<T> cref(const T& t) NOEXCEPT
 }
 
 
+namespace experimental {
+
+// Guidance from
+// https://stackoverflow.com/questions/14936539/how-stdfunction-works
+
+template <typename TResult, typename... TArgs>
+class function_base
+{
+    typedef TResult (*function_type)(TArgs...);
+
+    function_type const f;
+};
+
+template <typename TResult, typename... TArgs>
+class function : public function_base<TResult, TArgs...>
+{
+    template <typename T>
+    struct model
+    {
+        template <typename U>
+        model(U&& u) : t(std::forward<U>(u)) {}
+
+        T t;
+    };
+};
+
+}
+
 }
