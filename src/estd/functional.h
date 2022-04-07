@@ -164,44 +164,60 @@ class function;
 template <typename TResult, typename... TArgs>
 class function_base
 {
-    typedef TResult (*function_type)(void*, TArgs...);
+protected:
+    // function pointer approach works, but if we have to add in a virtual destructor
+    // (which is likely) then we are faced with incurring that overhead anyway so might
+    // switch over to virtual operator() in that case
+    struct concept
+    {
+        typedef TResult (concept::*function_type)(TArgs...);
+
+        function_type const f;
+
+        concept(function_type f) : f(f) {}
+    };
+
+    concept* m;
 
 protected:
-    function_type f;
-    void* m;
-
-protected:
-    function_base() : f(NULLPTR), m(NULLPTR) {}
-    function_base(function_type f) : f(f) {}
+    function_base() : m(NULLPTR) {}
+    //function_base(function_type f) : f(f) {}
 
 public:
     TResult operator()(TArgs... args)
     {
-        return (*f)(this, std::forward<TArgs>(args)...);
+        // a little complicated.  Some guidance from:
+        // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
+        // the first portion m->* indicates that a method function pointer call is happening
+        // and to load in 'm' to the 'this' pointer.  The (m->f) portion actually retrieves
+        // the function pointer itself
+        return (m->*(m->f))(std::forward<TArgs>(args)...);
     }
+
+    explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 };
 
 template <typename TResult, typename... TArgs>
 class function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
 {
     typedef function_base<TResult, TArgs...> base_type;
+    typedef typename base_type::concept concept;
 
     template <typename T>
-    struct model
+    struct model : concept
     {
         template <typename U>
-        model(U&& u) : t(std::forward<U>(u)) {}
+        model(U&& u) :
+            concept(static_cast<typename concept::function_type>(&model::exec)),
+            t(std::forward<U>(u))
+        {
+        }
 
         T t;
 
-        TResult exec(TArgs...args) const
+        TResult exec(TArgs...args)
         {
             return t(std::forward<TArgs>(args)...);
-        }
-
-        static TResult exec(void* _this, TArgs...args)
-        {
-            return ((model*)_this)->exec(std::forward<TArgs>(args)...);
         }
     };
 
@@ -215,7 +231,6 @@ public:
         // FIX: Don't want to dynamically allocate memory quite this way
         auto m = new model_type(std::forward<T>(t));
         base_type::m = m;
-        base_type::f = &model_type::exec;
     }
 
     function(const function& other) = default;
@@ -223,7 +238,7 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     function(function&& other) NOEXCEPT
     {
-        *this = std::move(other);
+        // TODO
     }
 #endif
 
@@ -234,11 +249,11 @@ public:
         delete base_type::m;
     }
 
-    template <typename T>
-    function& operator=(T&& t)
+    template <typename F>
+    function& operator=(F&& f)
     {
         //m = new model<typename std::decay<T>::type >(std::forward<T>(t));
-        new (this) function(std::move(t));
+        new (this) function(std::move(f));
         return *this;
     }
 };
