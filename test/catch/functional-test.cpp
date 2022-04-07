@@ -136,11 +136,27 @@ TEST_CASE("functional")
 
         SECTION("experimental")
         {
-            estd::experimental::function<int()> f = []() { return 5; };
+            SECTION("simplest lambda")
+            {
+                estd::experimental::function<int()> f = []() { return 5; };
 
-            int val = f();
+                int val = f();
 
-            REQUIRE(val == 5);
+                REQUIRE(val == 5);
+            }
+            SECTION("ref capture lambda")
+            {
+                int val2 = 5;
+                int val3 = 0;
+
+                estd::experimental::function<int(int)> f = [&val2](int x) { return val2++; };
+
+                REQUIRE(f(0) == 5);
+                f = [&](int x) { ++val3; return val2++; };
+                REQUIRE(f(1) == 6);
+                REQUIRE(val2 == 7);
+                REQUIRE(val3 == 1);
+            }
         }
     }
     SECTION("bind")

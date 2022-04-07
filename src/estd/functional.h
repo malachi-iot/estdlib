@@ -203,23 +203,31 @@ class function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
     typedef function_base<TResult, TArgs...> base_type;
     typedef typename base_type::concept concept;
 
-    template <typename T>
+    template <typename F>
     struct model : concept
     {
         template <typename U>
         model(U&& u) :
             concept(static_cast<typename concept::function_type>(&model::exec)),
-            t(std::forward<U>(u))
+            f(std::forward<U>(u))
         {
         }
 
-        T t;
+        F f;
 
         TResult exec(TArgs...args)
         {
-            return t(std::forward<TArgs>(args)...);
+            return f(std::forward<TArgs>(args)...);
         }
     };
+
+private:
+    void reset()
+    {
+        // FIX: Don't want to dynamically allocate memory quite this way, and delete void*
+        // rightly gives us complaints and warnings
+        delete base_type::m;
+    }
 
 public:
     template <typename T>
@@ -244,15 +252,13 @@ public:
 
     ~function()
     {
-        // FIX: Don't want to dynamically allocate memory quite this way, and delete void*
-        // rightly gives us complaints and warnings
-        delete base_type::m;
+        reset();
     }
 
     template <typename F>
     function& operator=(F&& f)
     {
-        //m = new model<typename std::decay<T>::type >(std::forward<T>(t));
+        reset();
         new (this) function(std::move(f));
         return *this;
     }
