@@ -8,8 +8,11 @@ namespace estd { namespace internal {
 
 // utility class using specialization to eliminate a stored value from memory if the consuming
 // class does not require it and can instead always rely on a default value
-// NOTE: beware, https://stackoverflow.com/questions/5687540/non-type-template-parameters
-// and my own findings indicate TEvaporated can't be a class/struct value
+// NOTE: beware,
+// https://stackoverflow.com/questions/5687540/non-type-template-parameters
+// https://stackoverflow.com/questions/50231306/why-is-this-code-complaining-about-a-non-type-template-parameter-cannot-have-ty
+// https://en.cppreference.com/w/cpp/language/template_parameters
+// and my own findings indicate TEvaporated can't be a class/struct value.  Use struct_evaporator for that
 // FIX: Looking like is_present logic here is backwards
 template <class TValue, bool is_present, class TEvaporated = TValue, TEvaporated default_value = TEvaporated()>
 class value_evaporator;
@@ -50,6 +53,60 @@ public:
 
     value_evaporator(const TValue& v) : m_value(v) {}
     value_evaporator() {}
+};
+
+
+/**
+ * Similar to value_evaporator, but lacking the clever default_value since that's
+ * incompatible with structs
+ * @tparam T
+ * @tparam is_present
+ */
+template <class T, bool is_present>
+struct struct_evaporator;
+
+template <class T>
+class struct_evaporator<T, false>
+{
+public:
+    typedef T value_type;
+
+    value_type value() const { return value_type(); }
+
+    struct_evaporator() = default;
+    struct_evaporator(value_type) {}
+
+    static CONSTEXPR bool is_evaporated = true;
+};
+
+
+template <class T>
+class struct_evaporator<T, true>
+{
+public:
+    typedef T value_type;
+
+private:
+    value_type value_;
+
+public:
+    value_type& value() { return value_; }
+    const value_type& value() const { return value_; }
+
+    struct_evaporator() = default;
+    struct_evaporator(const value_type& value) :
+        value_(value)
+    {
+
+    }
+
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    struct_evaporator(value_type&& value) :
+        value_(std::move(value))
+    {}
+#endif
+
+    static CONSTEXPR bool is_evaporated = false;
 };
 
 
