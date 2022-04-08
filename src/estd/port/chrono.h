@@ -43,16 +43,18 @@ typedef int16_t minutes_rep;
 typedef int16_t hours_rep;
 typedef int16_t days_rep;
 typedef int8_t weeks_rep;
+typedef int8_t months_rep;
 typedef int8_t years_rep;
 #else
 typedef int64_t nano_rep;
 typedef int64_t micro_rep;
-typedef int32_t milli_rep;
-typedef int32_t seconds_rep;
+typedef int64_t milli_rep;
+typedef int64_t seconds_rep;
 typedef int32_t minutes_rep;
 typedef int32_t hours_rep;
 typedef int32_t days_rep;
-typedef int16_t weeks_rep;
+typedef int32_t weeks_rep;
+typedef int32_t months_rep;
 typedef int16_t years_rep;
 #endif
 
@@ -227,9 +229,11 @@ namespace internal {
 #ifdef FEATURE_ESTD_CHRONO
 namespace estd_ratio = estd;
 namespace estd_chrono = estd::chrono;
-#else
+#elif FEATURE_STD_CHRONO
 namespace estd_ratio = std;
 namespace estd_chrono = std::chrono;
+#else
+#warning Invalid configuration, neither std or estd chrono fully activated
 #endif
 
 }
