@@ -148,7 +148,7 @@ set(SOURCE_FILES
 
         estd/exp/heap.h
         estd/exp/streambuf-traits.h
-        )
+        estd/exp/memory_resource.h)
 
 add_library(estd_lib ${SOURCE_FILES})
 
