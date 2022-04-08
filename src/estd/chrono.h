@@ -13,6 +13,7 @@
 // esp-idf native version coexists with the others
 #if defined(ESTD_SDK_IDF)
 #include "port/esp-idf/chrono.h"
+#include "port/posix/chrono.h"
 #endif
 
 #if defined(ESTD_FREERTOS)
@@ -24,6 +25,9 @@
 #else
 #error Unsupported platform
 #endif
+
+// if we don't already have a std::chrono::steady_clock aliased...
+#ifndef FEATURE_STD_CHRONO
 
 // alias out steady_clock depending on system settings
 namespace estd { namespace chrono {
@@ -37,4 +41,7 @@ typedef asf_clock steady_clock;
 typedef arduino_clock steady_clock;
 #endif
 #endif
+
 } }
+
+#endif  // FEATURE_STD_CHRONO

@@ -304,6 +304,11 @@ public:
         m_time_since_epoch -= d;
         return *this;
     }
+
+    static inline CONSTEXPR time_point min() NOEXCEPT
+    {
+        return time_point(duration::min());
+    }
 };
 
 

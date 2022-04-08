@@ -33,43 +33,46 @@ static void test_chrono_subtract()
     TEST_ASSERT_EQUAL_INT(110000 - 100,ms.count());
 }
 
-
-#ifdef FEATURE_STD_CHRONO
-static void test_steady_clock()
+template <class TClock>
+void test_clock()
 {
-    typedef estd::chrono::steady_clock clock_type;
-    typedef clock_type::time_point time_point;
+    typedef TClock clock_type;
+    typedef typename clock_type::time_point time_point;
 
     clock_type c;
 
-    //time_point min = time_point::min();
+    time_point min = time_point::min();
     time_point n = c.now();
-    /*
-    estd::chrono::milliseconds n2 = 
-        // DEBT: Ferret out proper estd version of this
-        estd::chrono::duration_cast<estd::chrono::milliseconds>(n); */
+
+    TEST_ASSERT(n > min);
+}
+
+
+// NOTE: Right now we aggressively alias our own _clock into steady_clock
+// so this test at the moment overlaps with others, except for robust environments
+// like esp-idf which have a proper std::chrono::steady_clock implementation
+#ifdef FEATURE_STD_CHRONO
+static void test_steady_clock()
+{
+    test_clock<std::chrono::steady_clock>();
+    test_clock<estd::chrono::steady_clock>();
 }
 #endif
 
 #ifdef ESTD_FREERTOS
 static void test_freertos_clock()
 {
-    estd::chrono::freertos_clock c;
-
-    estd::chrono::freertos_clock::time_point n = c.now();
+    test_clock<estd::chrono::freertos_clock>();
 }
 #endif
 
 #ifdef ESTD_SDK_IDF
 static void test_esp_idf_clock()
 {
-    estd::chrono::esp_clock c;
-
-    estd::chrono::esp_clock::time_point n = c.now();
+    test_clock<estd::chrono::esp_clock>();
 }
 #endif
 
-#include <chrono>
 
 #ifdef ESP_IDF_TESTING
 TEST_CASE("chrono tests", "[chrono]")
@@ -88,7 +91,5 @@ void test_chrono()
 #ifdef ESTD_SDK_IDF
     RUN_TEST(test_esp_idf_clock);
 #endif
-
-    std::chrono::steady_clock c;
 }
 
