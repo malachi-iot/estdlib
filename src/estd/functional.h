@@ -2,9 +2,11 @@
 
 #include "internal/platform.h"
 #include "internal/functional.h"
+#include "internal/value_evaporator.h"
 
 #include "tuple.h"
 #include "type_traits.h"
+#include "traits/allocator_traits.h"
 
 #include "internal/invoke.h"
 
@@ -158,7 +160,13 @@ namespace experimental {
 // Guidance from
 // https://stackoverflow.com/questions/14936539/how-stdfunction-works
 
-template <typename T, class TAllocator = void>
+// since 'void' doesn't play nice with reference_evaporator
+struct empty_type
+{
+
+};
+
+template <typename T, class TAllocator = empty_type>
 class function;
 
 template <typename TResult, typename... TArgs>
@@ -198,10 +206,15 @@ public:
 };
 
 template <typename TResult, typename... TArgs, class TAllocator>
-class function<TResult(TArgs...), TAllocator> : public function_base<TResult, TArgs...>
+class function<TResult(TArgs...), TAllocator> :
+    public function_base<TResult, TArgs...>,
+    public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
 {
     typedef function_base<TResult, TArgs...> base_type;
     typedef typename base_type::concept concept;
+
+    typedef estd::internal::reference_evaporator <TAllocator, false> allocator_provider_type;
+    typedef estd::allocator_traits<TAllocator> allocator_traits;
 
     template <typename F>
     struct model : concept
@@ -245,12 +258,21 @@ private:
 
 public:
     template <typename T>
-    function(T&& t)
+    function(T&& t) : allocator_provider_type(TAllocator())
     {
-        //m = allocator_traits<model<T>>::
         typedef typename std::decay<T>::type incoming_function_type;
         typedef model<incoming_function_type> model_type;
+        //allocator_traits::rebind_alloc<model_type>
         // FIX: Don't want to dynamically allocate memory quite this way
+        auto m = new model_type(std::forward<T>(t));
+        base_type::m = m;
+    }
+
+    template <typename T>
+    function(T&& t, TAllocator& allocator) : allocator_provider_type(allocator)
+    {
+        typedef typename std::decay<T>::type incoming_function_type;
+        typedef model<incoming_function_type> model_type;
         auto m = new model_type(std::forward<T>(t));
         base_type::m = m;
     }
@@ -273,7 +295,8 @@ public:
     function(const function& other) = default;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    function(function&& other) NOEXCEPT
+    function(function&& other) NOEXCEPT :
+        allocator_provider_type(std::move(other.value()))
     {
         // TODO
     }
