@@ -9,8 +9,14 @@ template <typename TCharTraits>
 struct pos_streambuf_base : streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
+    typedef typename traits_type::int_type int_type;
+#if defined(__AVR__)
+    typedef int_type pos_type;
+    typedef int_type off_type;
+#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
+#endif
 
 protected:
     pos_type _pos;
@@ -53,8 +59,8 @@ struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
     typedef pos_streambuf_base<traits_type> base_type;
-    typedef typename traits_type::pos_type pos_type;
-    typedef typename traits_type::off_type off_type;
+    typedef typename base_type::pos_type pos_type;
+    typedef typename base_type::off_type off_type;
 
     in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
 
@@ -79,7 +85,7 @@ struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits>
     typedef pos_streambuf_base<TCharTraits> base_type;
     typedef TCharTraits traits_type;
     typedef typename base_type::pos_type pos_type;
-    typedef typename traits_type::off_type off_type;
+    typedef typename base_type::off_type off_type;
 
     out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
 

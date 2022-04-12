@@ -115,6 +115,10 @@
 #endif
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+#define FEATURE_CPP_PUSH_MACRO 1
+#endif
+
 
 #ifdef FEATURE_CPP_OVERRIDE
 #define OVERRIDE override

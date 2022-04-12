@@ -2,6 +2,9 @@
 
 #include <estd/limits.h>
 
+#undef min
+#undef max
+
 static void test_limits_1()
 {
     TEST_ASSERT(estd::numeric_limits<int8_t>::is_signed);

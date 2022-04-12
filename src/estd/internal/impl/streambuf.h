@@ -24,8 +24,13 @@ struct streambuf_base
     typedef TTraits traits_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
+#if defined(__AVR__)
+    typedef int_type pos_type;
+    typedef int_type off_type;
+#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
+#endif
 
 protected:
     inline static int sync() { return 0; }

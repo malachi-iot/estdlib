@@ -21,6 +21,8 @@
 
 #if defined (__ADSPBLACKFIN__)
 #define ESTD_MCU_BLACKFIN
+#elif defined (__AVR__)
+#include "arch/avr.h"
 #else
 // investigate, see if we're stm32
 #include "arch/stm32.h"

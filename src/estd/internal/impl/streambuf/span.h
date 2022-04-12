@@ -20,8 +20,8 @@ struct out_span_streambuf :
     typedef out_pos_streambuf_base<traits_type> base_out_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
-    typedef typename traits_type::off_type off_type;
-    typedef typename traits_type::pos_type pos_type;
+    typedef typename base_out_type::off_type off_type;
+    typedef typename base_out_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
 
     span_type& out() { return base_type::value(); }

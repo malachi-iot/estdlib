@@ -5,7 +5,8 @@
 
 namespace estd { namespace internal {
 
-#if defined(__has_builtin) && __has_builtin(__builtin_mul_overflow)
+// AVR compiler appears to have incomplete implementation of __has_builtin
+#if defined(__has_builtin) && !defined(__AVR__)
 // adapted from GNUC
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type

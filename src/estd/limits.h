@@ -27,7 +27,7 @@
 #error "Only 8 bit-wide bytes supported"
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+#if FEATURE_CPP_PUSH_MACRO
 #pragma push_macro("max")
 #pragma push_macro("min")
 #undef max
@@ -209,7 +209,7 @@ template <> struct numeric_limits<unsigned long long> : internal::numeric_limits
 
 }
 
-#if defined(__GNUC__) || defined(_MSC_VER)
+#if FEATURE_CPP_PUSH_MACRO
 #pragma pop_macro("min")
 #pragma pop_macro("max")
 #endif

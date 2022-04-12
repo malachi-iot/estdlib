@@ -6,6 +6,9 @@
 
 #include <estd/chrono.h>
 
+#undef min
+#undef max
+
 static void test_chrono_convert()
 {
     estd::chrono::minutes m(2);
