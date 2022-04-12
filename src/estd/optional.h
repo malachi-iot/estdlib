@@ -5,6 +5,7 @@
 
 #include "utility.h"
 #include "memory.h"
+#include "new.h"
 
 namespace estd {
 

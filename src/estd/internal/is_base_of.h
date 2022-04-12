@@ -30,4 +30,9 @@ struct is_base_of :
         estd::false_type
     > { };
 
+#if __cplusplus >= 201703L
+template <typename Base, typename Derived>
+inline constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+#endif
+
 }

@@ -16,7 +16,7 @@ constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
 template <class T, class Type, class T1, class... Args>
 decltype(auto) INVOKE(Type T::* f, T1&& t1, Args&&... args)
 {
-    if constexpr (estd::is_member_function_pointer_v<decltype(f)>) {
+    if constexpr (std::is_member_function_pointer_v<decltype(f)>) {
         if constexpr (estd::is_base_of_v<T, std::decay_t<T1>>)
             return (std::forward<T1>(t1).*f)(std::forward<Args>(args)...);
         else if constexpr (is_reference_wrapper_v<std::decay_t<T1>>)
@@ -24,7 +24,7 @@ decltype(auto) INVOKE(Type T::* f, T1&& t1, Args&&... args)
         else
             return ((*std::forward<T1>(t1)).*f)(std::forward<Args>(args)...);
     } else {
-        static_assert(estd::is_member_object_pointer_v<decltype(f)>);
+        static_assert(std::is_member_object_pointer_v<decltype(f)>);
         static_assert(sizeof...(args) == 0);
         if constexpr (estd::is_base_of_v<T, estd::decay_t<T1>>)
             return std::forward<T1>(t1).*f;

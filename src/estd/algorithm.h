@@ -106,7 +106,7 @@ const T& clamp( const T& v, const T& lo, const T& hi )
 
 
 template<class T, class Compare>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
+#if defined(FEATURE_CPP_CONSTEXPR_METHOD) && !defined(ESP8266)
 constexpr
 #endif
 const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )

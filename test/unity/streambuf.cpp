@@ -9,7 +9,6 @@
 #include <estd/streambuf.h>
 #include <estd/istream.h>
 #include <estd/ostream.h>
-
 #include <estd/string.h>
 
 using namespace estd;

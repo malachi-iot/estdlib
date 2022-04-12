@@ -6,6 +6,7 @@
 
 #include "../initializer_list.h"
 #include "../utility.h"
+#include "../new.h"
 
 namespace estd {
 

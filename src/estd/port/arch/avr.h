@@ -13,5 +13,4 @@
  */
 #pragma once
 
-inline void* operator new(unsigned, void* p) {return p; }
-inline void* operator new[](unsigned, void *p) { return p; }
+// Used to have new operators, but now we've put them out into new.h

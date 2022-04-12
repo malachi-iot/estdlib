@@ -151,6 +151,12 @@
 #endif
 #endif
 
+// DEBT: More than likely this is an artifact of an old G++, not AVR/SAMD specific
+#if !defined(__AVR__) && !defined(__SAMD21G18A__)
+#define FEATURE_STD_NEW
+#define FEATURE_STD_STRING_FULL_CHAR_TRAITS
+#endif
+
 // some platforms have c++98 onward but don't have STL headers.  Explicitly state when we *do*
 // have them
 #if !defined(ARDUINO) || defined(ESP8266) || \
