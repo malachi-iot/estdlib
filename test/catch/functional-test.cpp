@@ -157,6 +157,16 @@ TEST_CASE("functional")
                 REQUIRE(val2 == 7);
                 REQUIRE(val3 == 1);
             }
+            SECTION("make_inline")
+            {
+                auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
+
+                REQUIRE(i.exec(1) == 2);
+
+                estd::experimental::function_base<int, int> f(&i);
+
+                REQUIRE(f.operator()(1) == 2);
+            }
         }
     }
     SECTION("bind")

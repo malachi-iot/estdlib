@@ -166,6 +166,12 @@ struct empty_type
 
 };
 
+template <typename F, typename TResult, typename... TArgs>
+struct model_base
+{
+
+};
+
 template <typename T, class TAllocator = empty_type>
 class function;
 
@@ -211,6 +217,8 @@ protected:
     //function_base(function_type f) : f(f) {}
 
 public:
+    function_base(concept* m) : m(m) {}
+
     TResult operator()(TArgs... args)
     {
         // a little complicated.  Some guidance from:
@@ -222,6 +230,12 @@ public:
     }
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
+
+    template <typename F>
+    static model<F> make_inline(F&& f)
+    {
+        return model<F>(std::move(f));
+    }
 };
 
 template <typename TResult, typename... TArgs, class TAllocator>
@@ -316,6 +330,16 @@ public:
         return *this;
     }
 };
+
+template <typename F>
+class inline_function;
+
+/*
+template <typename TResult, typename... TArgs>
+class inline_function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
+{
+public:
+};*/
 
 }
 
