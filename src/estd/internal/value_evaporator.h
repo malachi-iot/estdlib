@@ -70,8 +70,9 @@ class struct_evaporator<T, false>
 {
 public:
     typedef T value_type;
+    typedef const value_type reference;
 
-    value_type value() const { return value_type(); }
+    reference value() const { return value_type(); }
 
     struct_evaporator() = default;
     struct_evaporator(value_type) {}
@@ -85,13 +86,14 @@ class struct_evaporator<T, true>
 {
 public:
     typedef T value_type;
+    typedef value_type& reference;
 
 private:
     value_type value_;
 
 public:
-    value_type& value() { return value_; }
-    const value_type& value() const { return value_; }
+    reference value() { return value_; }
+    const reference value() const { return value_; }
 
     struct_evaporator() = default;
     struct_evaporator(const value_type& value) :
