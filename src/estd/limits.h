@@ -18,6 +18,11 @@
 
 #endif
 
+#ifndef CHAR_BIT
+#warning CHAR_BIT not set, defaulting to 8 bits
+#define CHAR_BIT 8
+#endif
+
 #if CHAR_BIT != 8
 #error "Only 8 bit-wide bytes supported"
 #endif

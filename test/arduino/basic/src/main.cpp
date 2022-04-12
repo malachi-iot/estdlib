@@ -37,13 +37,13 @@ void loop()
 #ifdef TEST_CHRONO
     steady_clock::time_point now = steady_clock::now();
 
-    auto count = duration_cast<milliseconds>(now - start).count();
+    long count = duration_cast<milliseconds>(now - start).count();
 
     estd::this_thread::sleep_for(milliseconds(1000));
 #else
     uint32_t now_ms = millis();
 
-    auto count = now_ms - start_ms;
+    long count = now_ms - start_ms;
 
     delay(1000);
 #endif

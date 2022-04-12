@@ -275,7 +275,7 @@ public:
     template <typename T>
     function(T&& t) : allocator_provider_type(TAllocator())
     {
-        typedef typename std::decay<T>::type incoming_function_type;
+        typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
         //allocator_traits::rebind_alloc<model_type>
         // FIX: Don't want to dynamically allocate memory quite this way
@@ -286,7 +286,7 @@ public:
     template <typename T>
     function(T&& t, TAllocator& allocator) : allocator_provider_type(allocator)
     {
-        typedef typename std::decay<T>::type incoming_function_type;
+        typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
         auto m = new model_type(std::forward<T>(t));
         base_type::m = m;

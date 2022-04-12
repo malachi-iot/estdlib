@@ -393,8 +393,4 @@ typedef estd::internal::basic_ostream<ospanbuf> ospanstream;
 
 }
 
-#ifdef ARDUINO
-#include "streams/ostream_arduino.h"
-#endif
-
 #endif //UTIL_EMBEDDED_OSTREAM_H

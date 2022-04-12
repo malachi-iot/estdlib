@@ -5,7 +5,7 @@
 
 namespace estd { namespace internal {
 
-#ifdef __has_builtin
+#if defined(__has_builtin) && __has_builtin(__builtin_mul_overflow)
 // adapted from GNUC
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
