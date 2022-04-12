@@ -311,7 +311,7 @@ public:
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     function(function&& other) NOEXCEPT :
-        allocator_provider_type(std::move(other.value()))
+        allocator_provider_type(std::move(other))
     {
         // TODO
     }

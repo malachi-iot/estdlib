@@ -63,7 +63,7 @@ TEST_CASE("Internal tests", "[internal]")
                     SECTION("empty base")
                     {
                         Evaporator2<EmptyClass> ev2;
-                        typedef decltype(ev2)::base_type::reference reference;
+                        typedef decltype(ev2)::base_type::evaporated_type reference;
 
                         REQUIRE(ev2.is_evaporated);
                         REQUIRE(sizeof(ev2) == sizeof(uint16_t));
@@ -75,7 +75,7 @@ TEST_CASE("Internal tests", "[internal]")
                     SECTION("actual base")
                     {
                         Evaporator2<Dummy> ev2;
-                        typedef decltype(ev2)::base_type::reference reference;
+                        typedef decltype(ev2)::base_type::evaporated_type reference;
 
                         REQUIRE(!ev2.is_evaporated);
                         // Not doing == because padding can bulk it up

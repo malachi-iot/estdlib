@@ -70,9 +70,9 @@ class struct_evaporator<T, false>
 {
 public:
     typedef T value_type;
-    typedef const value_type reference;
+    typedef const value_type evaporated_type;
 
-    reference value() const { return value_type(); }
+    evaporated_type value() const { return value_type(); }
 
     struct_evaporator() = default;
     struct_evaporator(value_type) {}
@@ -86,14 +86,14 @@ class struct_evaporator<T, true>
 {
 public:
     typedef T value_type;
-    typedef value_type& reference;
+    typedef value_type& evaporated_type;
 
 private:
     value_type value_;
 
 public:
-    reference value() { return value_; }
-    const reference value() const { return value_; }
+    evaporated_type value() { return value_; }
+    const evaporated_type value() const { return value_; }
 
     struct_evaporator() = default;
     struct_evaporator(const value_type& value) :
@@ -119,21 +119,21 @@ template <class T>
 struct reference_evaporator<T, false>
 {
     typedef typename estd::remove_reference<T>::type value_type;
-    typedef T& reference;
+    typedef const value_type evaporated_type;
     // FIX: Get proper name for this, this will be a value or ref depending on how things
     // got evaporated
     typedef value_type ref_type_exp;
     typedef value_type const_ref_type_exp;
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-    value_type value() { return value_type{}; }
-    const value_type value() const { return value_type{}; }
+    //value_type value() { return value_type{}; }
+    evaporated_type value() const { return value_type{}; }
 #else
-    value_type value() { return value_type(); }
-    const value_type value() const { return value_type(); }
+    //value_type value() { return value_type(); }
+    evaporated_type value() const { return value_type(); }
 #endif
 
-    reference_evaporator(reference) {}
+    reference_evaporator(const value_type&) {}
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     reference_evaporator(value_type&&) {}
@@ -151,6 +151,7 @@ struct reference_evaporator<T, true>
     // got evaporated
     typedef reference ref_type_exp;
     typedef const_reference const_ref_type_exp;
+    typedef reference evaporated_type;
 
     reference m_value;
 
