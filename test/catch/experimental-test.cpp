@@ -539,7 +539,9 @@ TEST_CASE("experimental tests")
         }
         SECTION("v3")
         {
-            v3::virtual_memory<1024> v;
+            typedef v3::virtual_memory<1024> vm_type;
+
+            vm_type v;
 
             SECTION("fresh")
             {
@@ -560,6 +562,21 @@ TEST_CASE("experimental tests")
                     data[0] = 'h';
 
                     REQUIRE(data.size() == 128);
+                }
+                SECTION("reallocate")
+                {
+                    auto data = v.lock_span(handle);
+                    auto data_ptr = data.data();
+
+                    auto i = (vm_type::allocated_item*) v.find(handle);
+                    auto i_free = v.first_free();
+
+                    v.reallocate_forward(i, i_free);
+
+                    auto new_data = v.lock_span(handle);
+                    auto new_data_ptr = data.data();
+
+                    //REQUIRE(new_data_ptr > data_ptr);
                 }
             }
         }

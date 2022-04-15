@@ -399,6 +399,8 @@ class virtual_memory
 
     byte_type pool[N];
 
+public: // Just for unit tests, otherwise this would be private
+
     struct flags
     {
         uint16_t handle : 6;
@@ -474,6 +476,16 @@ class virtual_memory
         return reinterpret_cast<const item*>(pool);
     }
 
+    free_item* first_free()
+    {
+        for (item* i = first(); i != NULLPTR; i = i->next)
+        {
+            if(i->flags_.is_allocated == 0) return (free_item*)i;
+        }
+
+        return NULLPTR;
+    }
+
     ///
     /// \param i - updates next with new memory block between end of 'i' and beginning of old 'i->next'
     /// \param size
@@ -507,6 +519,20 @@ class virtual_memory
         return NULLPTR;
     }
 
+    item* find_prev(item* _i)
+    {
+        item* i = first();
+
+        if(_i == i) return NULLPTR;
+
+        for(; i != NULLPTR; i = i->next)
+        {
+            if(i->next == _i) return i;
+        }
+
+        return NULLPTR;
+    }
+
     handle_type find_lowest_new_handle_number()
     {
         std::bitset<64> available(0xFF); // matches up to handles : 6 bit field
@@ -523,6 +549,40 @@ class virtual_memory
         }
 
         return bad_handle();
+    }
+
+    void reallocate_backward(allocated_item* source, free_item* target)
+    {
+    }
+
+    // more or less swaps allocated and unallocated blocks,
+    // and updates preceding pointers
+    void reallocate_forward(
+        item* prev_source,
+        item* prev_target,
+        allocated_item* source, free_item* target)
+    {
+        item* old_source_next = source->next;
+        item* old_target_next = target->next;
+
+        pointer move_to = ((allocated_item*)target)->data;
+        size_type size = block_size(source);
+
+        std::swap(source->flags_, target->flags_);
+        std::move(source->data, source->data + size, move_to);
+
+        /*
+        if(prev_source != NULLPTR)
+            prev_source->next = target;
+
+        if(prev_target != NULLPTR)
+            prev_target->next = source; */
+    }
+
+    void reallocate_forward(
+        allocated_item* source, free_item* target)
+    {
+        reallocate_forward(find_prev(source), find_prev(target), source, target);
     }
 
 public:
