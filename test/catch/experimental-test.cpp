@@ -568,15 +568,31 @@ TEST_CASE("experimental tests")
                     auto data = v.lock_span(handle);
                     auto data_ptr = data.data();
 
+                    // DEBT: layer2::string won't auto terminate, because it considers
+                    // that you might be initializing it with an existing string.  Would
+                    // be useful to have a constructor which auto terminates for null terminated
+                    // strings
+                    data_ptr[0] = 0;
+
+                    // DEBT: This will actually call the 'n' length initializer, putting a null
+                    // termination confusingly at position 1 (true = 1)
+                    //estd::layer2::string<127> s((char*)data_ptr, true);
+                    estd::layer2::string<127> s((char*)data_ptr, true);
+
+                    s += "hi2u";
+
                     auto i = (vm_type::allocated_item*) v.find(handle);
                     auto i_free = v.first_free();
 
                     v.reallocate_forward(i, i_free);
 
                     auto new_data = v.lock_span(handle);
-                    auto new_data_ptr = data.data();
+                    auto new_data_ptr = new_data.data();
 
-                    //REQUIRE(new_data_ptr > data_ptr);
+                    estd::layer2::string<127> s2((char*)new_data_ptr);
+
+                    REQUIRE(new_data_ptr > data_ptr);
+                    REQUIRE(s == s2);
                 }
             }
         }

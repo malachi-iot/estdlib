@@ -551,38 +551,25 @@ public: // Just for unit tests, otherwise this would be private
         return bad_handle();
     }
 
-    void reallocate_backward(allocated_item* source, free_item* target)
+    void reallocate_backward(allocated_item* alloc_i, free_item* free_i)
     {
+        pointer move_to = ((allocated_item*)free_i)->data;
+        size_type size = block_size(alloc_i);
+
+        std::swap(alloc_i->flags_, free_i->flags_);
+        std::move_backward(alloc_i->data, alloc_i->data + size, move_to);
     }
 
     // more or less swaps allocated and unallocated blocks,
     // and updates preceding pointers
     void reallocate_forward(
-        item* prev_source,
-        item* prev_target,
-        allocated_item* source, free_item* target)
+        allocated_item* alloc_i, free_item* free_i)
     {
-        item* old_source_next = source->next;
-        item* old_target_next = target->next;
+        pointer move_to = ((allocated_item*)free_i)->data;
+        size_type size = block_size(alloc_i);
 
-        pointer move_to = ((allocated_item*)target)->data;
-        size_type size = block_size(source);
-
-        std::swap(source->flags_, target->flags_);
-        std::move(source->data, source->data + size, move_to);
-
-        /*
-        if(prev_source != NULLPTR)
-            prev_source->next = target;
-
-        if(prev_target != NULLPTR)
-            prev_target->next = source; */
-    }
-
-    void reallocate_forward(
-        allocated_item* source, free_item* target)
-    {
-        reallocate_forward(find_prev(source), find_prev(target), source, target);
+        std::swap(alloc_i->flags_, free_i->flags_);
+        std::move(alloc_i->data, alloc_i->data + size, move_to);
     }
 
 public:
