@@ -540,6 +540,7 @@ TEST_CASE("experimental tests")
         SECTION("v3")
         {
             typedef v3::virtual_memory<1024> vm_type;
+            constexpr const char* test_str = "hi2u";
 
             vm_type v;
 
@@ -553,6 +554,12 @@ TEST_CASE("experimental tests")
                 int handle = v.allocate(128);
                 REQUIRE(v.available() == 1024 - 128 - (v.item_size() * 2));
 
+                SECTION("free")
+                {
+                    v.free(handle);
+
+                    REQUIRE(v.available() == 1024 - v.item_size());
+                }
                 SECTION("span retrieval")
                 {
                     // FIX: This can't last, because default span isn't lock compatible.
@@ -593,6 +600,24 @@ TEST_CASE("experimental tests")
 
                     REQUIRE(new_data_ptr > data_ptr);
                     REQUIRE(s == s2);
+                }
+                SECTION("defrag1")
+                {
+                    auto h1 = v.allocate(128);
+                    auto h2 = v.allocate(32);
+
+                    REQUIRE(v.available() == 1024 - 128 - 128 - 32 - 4*v.item_size());
+
+                    v.free(h1); // creates a fragmented scenario
+
+                    auto data = v.lock_span(h1);
+                    auto data_ptr = data.data();
+
+                    estd::layer2::string<32> s((char*)data_ptr, 0);
+
+                    s += test_str;
+
+                    v.defrag1(16, 256);
                 }
             }
         }

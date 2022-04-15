@@ -420,6 +420,8 @@ public: // Just for unit tests, otherwise this would be private
         flags flags_;
 
         handle_type handle() const { return flags_.handle; }
+
+        bool is_allocated() const { return flags_.is_allocated; }
     };
 
     struct allocated_item : item
@@ -504,6 +506,109 @@ public: // Just for unit tests, otherwise this would be private
         i->next = i->next->next;
     }
 
+    void opportunistic_merge(item* i)
+    {
+        item* root = i;
+
+        while(i->next != NULLPTR && !i->next->is_allocated())
+        {
+            i = i->next;
+        }
+
+        root->next = i;
+    }
+
+    void defrag1(size_type min_, size_type max_)
+    {
+        item* i = first();
+
+        item* preceding = NULLPTR;
+        allocated_item* fragment = NULLPTR;
+
+        for(; i != NULLPTR; preceding = i, i = i->next)
+        {
+            if(preceding != NULLPTR && !preceding->is_allocated())
+            {
+                if(i->is_allocated())
+                {
+                    if(i->next != NULLPTR && !i->next->is_allocated())
+                    {
+                        // we have a possible fragment, a free-allocated-free pattern
+
+                        size_type bs = block_size(i);
+
+                        if(bs >= min_ && bs <= max_)
+                        {
+                            min_ = bs;
+                            fragment = (allocated_item*)i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(fragment == NULLPTR) return;
+
+        free_item* free_closest_to_min = NULLPTR;
+        free_item* free_closest_to_max = NULLPTR;
+        //allocated_item* alloc_closest_to_min = NULLPTR;
+        //allocated_item* alloc_closest_to_max = NULLPTR;
+
+        i = first();
+
+        for(; i != NULLPTR; i = i->next)
+        {
+            size_type bs = block_size(i);
+
+            if(i->is_allocated())
+            {
+                /*
+                if(alloc_closest_to_max == NULLPTR)
+                {
+                    alloc_closest_to_min = i;
+                    alloc_closest_to_max = i;
+                }
+                else
+                {
+                    if(bs < max_ && bs > block_size(alloc_closest_to_max))
+                        alloc_closest_to_max = i;
+                    if(bs > min_ && bs < block_size(alloc_closest_to_min))
+                        alloc_closest_to_min = i;
+                } */
+            }
+            else
+            {
+                if(free_closest_to_max == NULLPTR)
+                {
+                    free_closest_to_min = (free_item*)i;
+                    free_closest_to_max = (free_item*)i;
+                }
+                else
+                {
+                    if(bs < max_ && bs > block_size(free_closest_to_max))
+                        free_closest_to_max = (free_item*)i;
+                    if(bs > min_ && bs < block_size(free_closest_to_min))
+                        free_closest_to_min = (free_item*)i;
+                }
+            }
+        }
+
+        if(free_closest_to_min != NULLPTR)
+        {
+            // consider moving fragment to this free block
+            if((pointer)free_closest_to_min > (pointer)fragment)
+                reallocate_forward(fragment, free_closest_to_min);
+            else
+                reallocate_backward(fragment, free_closest_to_min);
+
+            // careful, because fragment and free_closest_to_min now point to swapped and therefore
+            // somewhat invalid data.
+            if(!free_closest_to_min->next->is_allocated())
+                opportunistic_merge(free_closest_to_min->next);
+        }
+    }
+
     CONSTEXPR static handle_type bad_handle()
     {
         return estd::numeric_limits<handle_type>::max();
@@ -558,6 +663,8 @@ public: // Just for unit tests, otherwise this would be private
 
         std::swap(alloc_i->flags_, free_i->flags_);
         std::move_backward(alloc_i->data, alloc_i->data + size, move_to);
+
+        // TODO: Need to do a split operation here against free_i
     }
 
     // more or less swaps allocated and unallocated blocks,
@@ -570,6 +677,8 @@ public: // Just for unit tests, otherwise this would be private
 
         std::swap(alloc_i->flags_, free_i->flags_);
         std::move(alloc_i->data, alloc_i->data + size, move_to);
+
+        // TODO: Need to do a split operation here against free_i
     }
 
 public:
@@ -601,9 +710,13 @@ public:
 
     void free(handle_type h)
     {
-        for(item* i = first(); i != NULLPTR; i = i->next)
-        {
+        // FIX: Undefined behavior if handle invalid
+        free_item* i = (free_item*)find(h);
 
+        i->flags_.is_allocated = 0;
+        if(i->next != NULLPTR && !i->next->is_allocated())
+        {
+            merge_next(i);
         }
     }
 
