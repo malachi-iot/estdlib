@@ -370,6 +370,18 @@ public:
         base_t::impl().size(n);
     }
 
+    /// Alternate initializer, explicitly demanding whether to initialize string
+    /// \param str_buffer
+    /// \param null_terminate_init
+    basic_string(CharT* str_buffer, bool null_terminate_init) : base_t(str_buffer)
+    {
+        if(!null_terminated)
+            static_assert("Constructor only valid for null terminated strings");
+        
+        if(null_terminate_init)
+            str_buffer[0] = 0;
+    }
+
     template <size_type IncomingN>
     basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
     {
