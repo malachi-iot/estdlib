@@ -375,9 +375,11 @@ public:
     /// \param null_terminate_init
     basic_string(CharT* str_buffer, bool null_terminate_init) : base_t(str_buffer)
     {
+#ifdef FEATURE_CPP_STATIC_ASSERT
         if(!null_terminated)
             static_assert("Constructor only valid for null terminated strings");
-        
+#endif
+
         if(null_terminate_init)
             str_buffer[0] = 0;
     }
