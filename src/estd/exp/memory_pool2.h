@@ -6,6 +6,7 @@
 #include "../memory.h"  // for platform + raw_instance_provider
 #include "../array.h"
 #include "../algorithm.h"
+#include <bitset>
 
 namespace estd { namespace experimental {
 
@@ -381,6 +382,226 @@ struct virtual_memory
                 mode = maintenance_mode::uninitialized;
                 break;
         }
+    }
+};
+
+}
+
+namespace v3 {
+
+template <std::size_t N>
+class virtual_memory
+{
+    typedef unsigned char byte_type;
+    typedef byte_type* pointer;
+    typedef unsigned size_type;
+    typedef uint8_t handle_type;
+
+    byte_type pool[N];
+
+    struct flags
+    {
+        uint16_t handle : 6;
+        uint16_t lock_counter : 4;
+        uint16_t is_allocated : 1;
+
+        // number of 'extra' bytes padded on the end of this block
+        uint16_t padding: 4;
+
+        // locked during maintenance tasks which touch this particular item
+        uint16_t system_locked : 1;
+    };
+
+    struct item
+    {
+        item* next;
+        flags flags_;
+
+        handle_type handle() const { return flags_.handle; }
+    };
+
+    struct allocated_item : item
+    {
+        byte_type data[];
+
+        allocated_item()
+        {
+            this->flags_.is_allocated = 1;
+            this->flags_.lock_counter = 0;
+        }
+
+        allocated_item(handle_type h)
+        {
+            this->flags_.is_allocated = 1;
+            this->flags_.lock_counter = 0;
+            this->flags_.handle = h;
+        }
+    };
+
+    struct free_item : item
+    {
+        free_item()
+        {
+            this->flags_.is_allocated = 0;
+        }
+    };
+
+    // We compute size of tracked memory block based on next pointer
+    // Also we subtract out overhead of item metadata
+    size_type block_size(const item* i) const
+    {
+        size_type diff;
+        if(i->next)
+            diff = (byte_type*)i->next - (byte_type*)i;
+        else
+            diff = &pool[N] - (byte_type*)i;
+
+        return diff - sizeof(item);
+    }
+
+    estd::span<byte_type> block(const allocated_item* i)
+    {
+        return estd::span<byte_type>(i->data, block_size(i));
+    }
+
+    item* first()
+    {
+        return reinterpret_cast<item*>(pool);
+    }
+
+    const item* first() const
+    {
+        return reinterpret_cast<const item*>(pool);
+    }
+
+    ///
+    /// \param i - updates next with new memory block between end of 'i' and beginning of old 'i->next'
+    /// \param size
+    /// \return
+    free_item* split(item* i, size_type size)
+    {
+        free_item* new_split_item = new ((pointer) i + size + sizeof(item)) free_item();
+
+        new_split_item->next = i->next;
+        i->next = new_split_item;
+        return new_split_item;
+    }
+
+    void merge_next(item* i)
+    {
+        i->next = i->next->next;
+    }
+
+    CONSTEXPR static handle_type bad_handle()
+    {
+        return estd::numeric_limits<handle_type>::max();
+    }
+
+    item* find(handle_type h)
+    {
+        for(item* i = first(); i != NULLPTR; i = i->next)
+        {
+            if(i->handle() == h) return i;
+        }
+
+        return NULLPTR;
+    }
+
+    handle_type find_lowest_new_handle_number()
+    {
+        std::bitset<64> available(0xFF); // matches up to handles : 6 bit field
+
+        for(item* i = first(); i != NULLPTR; i = i->next)
+        {
+            available[i->flags_.handle] = 0;
+        }
+
+        for(handle_type i = 0; i < 64; i++)
+        {
+            if(available.test(i))
+                return i;
+        }
+
+        return bad_handle();
+    }
+
+public:
+    // Overhead of a memory chunk, mainly used for testing purposes
+    static CONSTEXPR size_type item_size() { return sizeof(item); }
+
+    virtual_memory()
+    {
+        free_item* i = new (pool) free_item();
+
+        i->flags_.handle = 0;
+        i->next = NULLPTR;
+    }
+
+    size_type available() const
+    {
+        const item* i = first();
+        size_type free_space = 0;
+
+        do
+        {
+            if(!i->flags_.is_allocated)
+                free_space += block_size(i);
+        }
+        while((i = i->next) != NULLPTR);
+
+        return free_space;
+    }
+
+    void free(handle_type h)
+    {
+        for(item* i = first(); i != NULLPTR; i = i->next)
+        {
+
+        }
+    }
+
+    handle_type allocate(size_type size)
+    {
+        for(item* i = first(); i != NULLPTR; i = i->next)
+        {
+            size_type block_size_ = block_size(i);
+            if(!i->flags_.is_allocated && block_size_ >= size)
+            {
+                ((free_item*)i)->~free_item();
+
+                // handle itself is carried over from when it was a free block
+                // so be careful not to blast that in ~free_item
+                new (i) allocated_item();
+
+                // If there's enough space to split off a new free memory block, do
+                // so.  Otherwise, there will be lingering unused bytes less than
+                // the size of an item as a kind of padding.  That might end up being
+                // a baked-in fragmentation that we don't want, perhaps obviating this
+                // technique
+                if(block_size_ > size + sizeof(item))
+                {
+                    item* split_ = split(i, size);
+                    split_->flags_.handle = find_lowest_new_handle_number();
+                }
+                else
+                {
+                    // FIX: Do actual calcuation here.  This is just placeholder code
+                    i->flags_.padding = 1;
+                }
+
+                return i->handle();
+            }
+        }
+
+        return estd::numeric_limits<handle_type>::max();
+    }
+
+    estd::span<byte_type> lock_span(handle_type h)
+    {
+        item* i = find(h);
+
+        // FIX: Undefined behavior if h points to an unallocated block
+        return estd::span<byte_type>(((allocated_item*)i)->data, block_size(i));
     }
 };
 

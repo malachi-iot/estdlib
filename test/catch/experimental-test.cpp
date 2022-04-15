@@ -537,6 +537,32 @@ TEST_CASE("experimental tests")
                 }
             }
         }
+        SECTION("v3")
+        {
+            v3::virtual_memory<1024> v;
+
+            SECTION("fresh")
+            {
+                // Fresh instantiation has one empty block set up
+                REQUIRE(v.available() == 1024 - v.item_size());
+            }
+            SECTION("128 byte allocation")
+            {
+                int handle = v.allocate(128);
+                REQUIRE(v.available() == 1024 - 128 - (v.item_size() * 2));
+
+                SECTION("span retrieval")
+                {
+                    // FIX: This can't last, because default span isn't lock compatible.
+                    // However, a lot of work was put into prepping its code base for locking handles
+                    auto data = v.lock_span(handle);
+
+                    data[0] = 'h';
+
+                    REQUIRE(data.size() == 128);
+                }
+            }
+        }
     }
     SECTION("instance wrapper")
     {
