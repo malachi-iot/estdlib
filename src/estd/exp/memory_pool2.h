@@ -450,6 +450,82 @@ public: // Just for unit tests, otherwise this would be private
         }
     };
 
+    struct item_iterator
+    {
+        typedef item value_type;
+        typedef item* pointer;
+        typedef item_iterator iterator;
+
+        item* current;
+
+        item_iterator(item* current) : current(current) {}
+
+
+        iterator& operator++()
+        {
+            current = current->next;
+            return *this;
+        }
+
+        value_type& operator*() const
+        {
+            return *current;
+        }
+
+        pointer operator->() const
+        {
+            return current;
+        }
+    };
+
+    struct free_iterator
+    {
+        typedef free_item value_type;
+        typedef free_item* pointer;
+        typedef free_iterator iterator;
+
+        pointer current;
+
+        free_iterator(pointer current) : current(current) {}
+
+
+        iterator& operator++()
+        {
+            item* i = current;
+
+            while(i != NULLPTR && !i->is_allocated())
+            {
+                i = i->next;
+            }
+
+            current = (pointer)i;
+
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            iterator i(current);
+            this->operator++();
+            return i;
+        }
+
+        value_type& operator*() const
+        {
+            return *current;
+        }
+
+        pointer operator->() const
+        {
+            return current;
+        }
+
+        bool operator !=(const iterator& compare_to) const
+        {
+            return current != compare_to.current;
+        }
+    };
+
     // We compute size of tracked memory block based on next pointer
     // Also we subtract out overhead of item metadata
     size_type block_size(const item* i) const
@@ -466,6 +542,11 @@ public: // Just for unit tests, otherwise this would be private
     estd::span<byte_type> block(const allocated_item* i)
     {
         return estd::span<byte_type>(i->data, block_size(i));
+    }
+
+    item_iterator first_iterator()
+    {
+        return item_iterator(first);
     }
 
     item* first()
@@ -486,6 +567,34 @@ public: // Just for unit tests, otherwise this would be private
         }
 
         return NULLPTR;
+    }
+
+    const free_item* first_free() const
+    {
+        for (const item* i = first(); i != NULLPTR; i = i->next)
+        {
+            if(i->flags_.is_allocated == 0) return (const free_item*)i;
+        }
+
+        return NULLPTR;
+    }
+
+    const free_iterator end() const
+    {
+        return free_iterator(NULLPTR);
+    }
+
+    size_type free_count() //const
+    {
+        free_iterator i(first_free());
+        size_type counter = 0;
+
+        while(i++ != end())
+        {
+            ++counter;
+        }
+
+        return counter;
     }
 
     ///

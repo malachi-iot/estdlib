@@ -558,10 +558,13 @@ TEST_CASE("experimental tests")
 
                 REQUIRE(v.check_integrity());
 
+                REQUIRE(v.free_count() == 1);
+
                 SECTION("free")
                 {
                     v.free(handle);
 
+                    REQUIRE(v.free_count() == 1);
                     REQUIRE(v.check_integrity());
 
                     REQUIRE(v.available() == 1024 - v.item_size());
@@ -611,6 +614,23 @@ TEST_CASE("experimental tests")
                     REQUIRE(new_data_ptr > data_ptr);
                     REQUIRE(s == s2);
                 }
+                SECTION("opportunistic free merge")
+                {
+                    auto h1 = v.allocate(128);
+                    auto h2 = v.allocate(32);
+
+                    REQUIRE(v.check_integrity());
+
+                    v.free(h1);
+                    v.free(h2);
+
+                    REQUIRE(v.check_integrity());
+                    REQUIRE(v.free_count() == 1);
+
+                    v.opportunistic_merge(v.first_free());
+
+                    REQUIRE(v.check_integrity());
+                }
                 SECTION("defrag1")
                 {
                     auto h1 = v.allocate(128);
@@ -625,6 +645,9 @@ TEST_CASE("experimental tests")
 
                     v.free(h1); // creates a fragmented scenario
 
+                    // FIX: Right here free_count flips out, implying an integrity check failure
+                    //REQUIRE(v.free_count() == 1);
+
                     REQUIRE(v.check_integrity());
 
                     auto data = v.lock_span(h1);
@@ -637,6 +660,7 @@ TEST_CASE("experimental tests")
                     v.defrag1(16, 256);
 
                     //REQUIRE(v.check_integrity());
+                    //REQUIRE(v.free_count() == 1);
 
                     //REQUIRE(v.available() == 1024 - 128 - 32 - 3*v.item_size());
                 }
