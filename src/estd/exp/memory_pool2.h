@@ -622,9 +622,9 @@ public: // Just for unit tests, otherwise this would be private
 
     void opportunistic_merge(item* i)
     {
-        item* root = i;
+        item* root = i->next;
 
-        while(i->next != NULLPTR && !i->next->is_allocated())
+        while(i != NULLPTR && !i->is_allocated())
         {
             i = i->next;
         }
@@ -802,7 +802,7 @@ public: // Just for unit tests, otherwise this would be private
         {
             if(i->next != NULLPTR)
             {
-                if(i->next < i)
+                if(i->next <= i)
                     return false;
             }
         }
