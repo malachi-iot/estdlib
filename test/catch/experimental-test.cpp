@@ -544,6 +544,8 @@ TEST_CASE("experimental tests")
 
             vm_type v;
 
+            REQUIRE(v.check_integrity());
+
             SECTION("fresh")
             {
                 // Fresh instantiation has one empty block set up
@@ -554,9 +556,13 @@ TEST_CASE("experimental tests")
                 int handle = v.allocate(128);
                 REQUIRE(v.available() == 1024 - 128 - (v.item_size() * 2));
 
+                REQUIRE(v.check_integrity());
+
                 SECTION("free")
                 {
                     v.free(handle);
+
+                    REQUIRE(v.check_integrity());
 
                     REQUIRE(v.available() == 1024 - v.item_size());
                 }
@@ -591,7 +597,11 @@ TEST_CASE("experimental tests")
                     auto i = (vm_type::allocated_item*) v.find(handle);
                     auto i_free = v.first_free();
 
+                    REQUIRE(v.check_integrity());
+
                     v.reallocate_forward(i, i_free);
+
+                    REQUIRE(v.check_integrity());
 
                     auto new_data = v.lock_span(handle);
                     auto new_data_ptr = new_data.data();
@@ -604,11 +614,18 @@ TEST_CASE("experimental tests")
                 SECTION("defrag1")
                 {
                     auto h1 = v.allocate(128);
+
+                    REQUIRE(v.check_integrity());
+
                     auto h2 = v.allocate(32);
 
                     REQUIRE(v.available() == 1024 - 128 - 128 - 32 - 4*v.item_size());
 
+                    REQUIRE(v.check_integrity());
+
                     v.free(h1); // creates a fragmented scenario
+
+                    REQUIRE(v.check_integrity());
 
                     auto data = v.lock_span(h1);
                     auto data_ptr = data.data();
@@ -618,6 +635,10 @@ TEST_CASE("experimental tests")
                     s += test_str;
 
                     v.defrag1(16, 256);
+
+                    //REQUIRE(v.check_integrity());
+
+                    //REQUIRE(v.available() == 1024 - 128 - 32 - 3*v.item_size());
                 }
             }
         }

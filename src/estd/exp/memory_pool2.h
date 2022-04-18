@@ -681,6 +681,20 @@ public: // Just for unit tests, otherwise this would be private
         // TODO: Need to do a split operation here against free_i
     }
 
+    bool check_integrity() const
+    {
+        for(const item* i = first(); i != NULLPTR; i = i->next)
+        {
+            if(i->next != NULLPTR)
+            {
+                if(i->next < i)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
 public:
     // Overhead of a memory chunk, mainly used for testing purposes
     static CONSTEXPR size_type item_size() { return sizeof(item); }
