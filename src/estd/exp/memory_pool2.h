@@ -493,9 +493,14 @@ public: // Just for unit tests, otherwise this would be private
         {
             item* i = current;
 
-            while(i != NULLPTR && !i->is_allocated())
+            if(i != NULLPTR)
             {
-                i = i->next;
+                // keep going as long as we are not at the end and
+                // we've got an allocated node
+                do
+                {
+                    i = i->next;
+                } while (i != NULLPTR && i->is_allocated());
             }
 
             current = (pointer)i;
@@ -838,6 +843,7 @@ public:
         free_item* i = (free_item*)find(h);
 
         i->flags_.is_allocated = 0;
+
         if(i->next != NULLPTR && !i->next->is_allocated())
         {
             merge_next(i);

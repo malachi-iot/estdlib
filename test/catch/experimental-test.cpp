@@ -624,7 +624,7 @@ TEST_CASE("experimental tests")
                     v.free(h1);
 
                     // FIX: Right here free_count flips out, implying an integrity check failure
-                    //REQUIRE(v.free_count() == 1);
+                    REQUIRE(v.free_count() == 2);
 
                     v.free(h2);
 
