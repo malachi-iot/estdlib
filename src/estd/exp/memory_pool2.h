@@ -790,6 +790,7 @@ public: // Just for unit tests, otherwise this would be private
         // TODO: Need to do a split operation here against free_i
     }
 
+    // NOTE: Won't catch instances where i jumps around and a later i precedes a former i in some cases
     bool check_integrity() const
     {
         for(const item* i = first(); i != NULLPTR; i = i->next)
