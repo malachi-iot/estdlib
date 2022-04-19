@@ -11,6 +11,8 @@
 // relies on std::push_heap
 #ifdef FEATURE_STD_ALGORITHM
 
+#define FEATURE_ESTD_PRIORITY_QUEUE 1
+
 #include "../vector.h"
 #include "../functional.h"
 
