@@ -43,9 +43,10 @@ static void test_priority_queue()
 
     q.push(7);
     q.push(3);
+    q.push(8);
     q.push(4);
 
-    TEST_ASSERT_EQUAL_INT(3, q.top());
+    TEST_ASSERT_EQUAL_INT(8, q.top());
 #endif
 }
 
