@@ -89,7 +89,7 @@ void test_to_chars()
 {
     estd::layer1::string<32> s;
 
-    estd::to_chars_result result = estd::to_chars(s.data(), s.data() + 32, 771);
+    estd::to_chars_result result = estd::to_chars(s.data(), s.data() + s.max_size(), 771);
 
     TEST_ASSERT_EQUAL('7', s[0]);
     TEST_ASSERT_EQUAL('7', s[1]);

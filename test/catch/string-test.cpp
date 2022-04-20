@@ -703,6 +703,21 @@ TEST_CASE("string tests")
 
             REQUIRE(std::string(buffer) == "255");
         }
+        SECTION("into layer1 string")
+        {
+            estd::layer1::string<32> s;
+
+            estd::to_chars_result result = estd::to_chars(s.data(), s.data() + 32, 771);
+
+            auto i = s[0];
+
+            REQUIRE(i == '7');
+            REQUIRE(s[1] == '7');
+            REQUIRE(s[2] == '1');
+
+            // DEBT: errc needs work, needs a default constructor and ability to == and friends
+            //REQUIRE(result.ec == estd::errc(0));
+        }
     }
     SECTION("internal")
     {
