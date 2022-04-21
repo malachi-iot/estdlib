@@ -187,33 +187,102 @@ protected:
     // function pointer approach works, but if we have to add in a virtual destructor
     // (which is likely) then we are faced with incurring that overhead anyway so might
     // switch over to virtual operator() in that case
-    struct concept
+    struct concept_fnptr1
     {
-        typedef TResult (concept::*function_type)(TArgs...);
+        typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
 
         function_type const f;
 
-        concept(function_type f) : f(f) {}
+        concept_fnptr1(function_type f) : f(f) {}
+
+        inline TResult _exec(TArgs&&...args)
+        {
+            return (this->*f)(std::forward<TArgs>(args)...);
+        }
     };
 
 
     template <typename F>
-    struct model : concept
+    struct model_fnptr1 : concept_fnptr1
     {
-        template <typename U>
-        model(U&& u) :
-            concept(static_cast<typename concept::function_type>(&model::exec)),
-            f(std::forward<U>(u))
+        typedef concept_fnptr1 base_type;
+
+        //template <typename U>
+        model_fnptr1(F&& u) :
+            base_type(static_cast<typename base_type::function_type>(&model_fnptr1::exec)),
+            f(std::forward<F>(u))
         {
         }
 
         F f;
 
-        TResult exec(TArgs...args)
+        TResult exec(TArgs&&...args)
         {
             return f(std::forward<TArgs>(args)...);
         }
     };
+
+    // this is a slightly less fancy more brute force approach to try to diagose esp32
+    // woes
+    struct concept_fnptr2
+    {
+        typedef TResult (*function_type)(void*, TArgs&&...);
+
+        function_type const f;
+
+        concept_fnptr2(function_type f) : f(f) {}
+
+        inline TResult _exec(TArgs&&...args)
+        {
+            return f(this, std::forward<TArgs>(args)...);
+        }
+    };
+
+    template <typename F>
+    struct model_fnptr2 : concept_fnptr2
+    {
+        typedef concept_fnptr2 base_type;
+
+        model_fnptr2(F&& u) :
+            base_type(static_cast<typename base_type::function_type>(&model_fnptr2::exec)),
+            f(std::forward<F>(u))
+        {
+        }
+
+        F f;
+
+        static TResult exec(void* _this, TArgs&&...args)
+        {
+            auto __this = ((model_fnptr2*)_this);
+
+            return __this->f(std::forward<TArgs>(args)...);
+        }
+    };
+
+    struct concept_virtual
+    {
+        virtual TResult _exec(TArgs&&...args) = 0;
+    };
+
+    template <class F>
+    struct model_virtual : concept_virtual
+    {
+        model_virtual(F&& u) :
+            f(std::forward<F>(u))
+        {
+        }
+
+        F f;
+
+        virtual TResult _exec(TArgs&&...args) override
+        {
+            return f(std::forward<TArgs>(args)...);
+        }
+    };
+
+    typedef concept_fnptr1 concept;
+    template <class F>
+    using model = model_fnptr1<F>;
 
     concept* m;
 
@@ -225,14 +294,18 @@ public:
 
     function_base(concept* m) : m(m) {}
 
-    TResult operator()(TArgs... args)
+    TResult operator()(TArgs&&... args)
     {
         // a little complicated.  Some guidance from:
         // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
         // the first portion m->* indicates that a method function pointer call is happening
         // and to load in 'm' to the 'this' pointer.  The (m->f) portion actually retrieves
         // the function pointer itself
-        return (m->*(m->f))(std::forward<TArgs>(args)...);
+        //return (m->*(m->f))(std::forward<TArgs>(args)...);
+
+        // DEBT: Prefer lower overhead of above mess, but while we diagnose ESP32 failures
+        // let's make our lives easier
+        return m->_exec(std::forward<TArgs>(args)...);
     }
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
