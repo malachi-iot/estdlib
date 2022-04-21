@@ -176,7 +176,11 @@ template <typename T, class TAllocator = empty_type>
 class function;
 
 template <typename TResult, typename... TArgs>
-class function_base
+class function_base;
+
+
+template <typename TResult, typename... TArgs>
+class function_base<TResult(TArgs...)>
 {
 protected:
     // function pointer approach works, but if we have to add in a virtual destructor
@@ -213,10 +217,11 @@ protected:
     concept* m;
 
 protected:
-    function_base() : m(NULLPTR) {}
     //function_base(function_type f) : f(f) {}
 
 public:
+    function_base() : m(NULLPTR) {}
+
     function_base(concept* m) : m(m) {}
 
     TResult operator()(TArgs... args)
@@ -238,12 +243,16 @@ public:
     }
 };
 
+template <class TFunc, typename F>
+class inline_function;
+
+
 template <typename TResult, typename... TArgs, class TAllocator>
 class function<TResult(TArgs...), TAllocator> :
-    public function_base<TResult, TArgs...>,
+    public function_base<TResult(TArgs...)>,
     public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
 {
-    typedef function_base<TResult, TArgs...> base_type;
+    typedef function_base<TResult(TArgs...)> base_type;
     typedef typename base_type::concept concept;
 
     typedef estd::internal::reference_evaporator <TAllocator, false> allocator_provider_type;
@@ -329,17 +338,37 @@ public:
         new (this) function(std::move(f));
         return *this;
     }
+
+    template <typename F>
+    static inline_function<F, TResult(TArgs...)> make_inline2(F&& f)
+    {
+        return inline_function<F, TResult(TArgs...)>(std::move(f));
+    }
 };
 
-template <typename F>
-class inline_function;
 
-/*
-template <typename TResult, typename... TArgs>
-class inline_function<TResult(TArgs...)> : public function_base<TResult, TArgs...>
+template <class TFunc, typename TResult, typename... TArgs>
+class inline_function<TFunc, TResult(TArgs...)> : public function_base<TResult(TArgs...)>
 {
+    typedef function_base<TResult(TArgs...)> base_type;
+    typedef typename base_type::template model<TFunc> model_type;
+
+    model_type m;
+
 public:
-};*/
+    inline_function(TFunc&& f) :
+        base_type(&m),
+        m(std::move(f))
+    {
+
+    }
+};
+
+template <class TFunc, typename F>
+inline_function<TFunc, F> make_inline_function(F&& f)
+{
+    return inline_function<TFunc, F>();
+}
 
 }
 

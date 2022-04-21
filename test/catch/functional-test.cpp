@@ -163,9 +163,28 @@ TEST_CASE("functional")
 
                 REQUIRE(i.exec(1) == 2);
 
-                estd::experimental::function_base<int, int> f(&i);
+                estd::experimental::function_base<int(int)> f(&i);
 
                 REQUIRE(f.operator()(1) == 2);
+
+                int outside_scope_value = 5;
+                auto l = [&](int x) { return x + outside_scope_value; };
+
+                estd::experimental::inline_function<decltype(l), int(int)> _if(std::move(l));
+                /*
+                auto _if2 =
+                    estd::experimental::make_inline_function<decltype(l), int(int)>(std::move(l)); */
+
+                REQUIRE(_if(5) == 10);
+
+                auto _if3 = estd::experimental::function<int(int)>::make_inline2(
+                    [&](int x) { return x * outside_scope_value; });
+
+                REQUIRE(_if3(5) == 25);
+
+                estd::experimental::function_base<int(int)> fb1(_if3);
+
+                REQUIRE(fb1(5) == 25);
             }
         }
     }
