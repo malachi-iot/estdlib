@@ -157,6 +157,26 @@ TEST_CASE("functional")
                 REQUIRE(val2 == 7);
                 REQUIRE(val3 == 1);
             }
+            SECTION("complex parameter lambda")
+            {
+                int val2 = 5;
+                int val3 = 0;
+
+                estd::experimental::function<int(int*, int)> f = [&val2](int* dest, int x) { return ++val2 + x; };
+
+                REQUIRE(f(&val3, 1) == 7);
+
+                int _dest = 0;
+
+                auto f2 = estd::experimental::function<void(int*, int)>::make_inline2(
+                    [&](int* dest, int x)
+                {
+                    *dest += x;
+                });
+
+                f2(&_dest, 1);
+                REQUIRE(_dest == 1);
+            }
             SECTION("make_inline")
             {
                 auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
