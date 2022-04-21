@@ -9,8 +9,11 @@ static void test_inline_function()
 
     auto f = estd::experimental::function<void()>::make_inline2([&](){++counter;});
 
-    // This fails
-    //f();
+    // ESP32 This fails for 2/3 conditions.  For:
+    // concept_fnptr1 - hard crash
+    // concept_fnptr2 - does not appear to execute
+    // concept_virtual - works OK
+    f();
 
     TEST_ASSERT_EQUAL(1, counter);
 }

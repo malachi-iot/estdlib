@@ -244,14 +244,21 @@ protected:
         typedef concept_fnptr2 base_type;
 
         model_fnptr2(F&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model_fnptr2::exec)),
+            base_type(static_cast<typename base_type::function_type>(&model_fnptr2::__exec)),
             f(std::forward<F>(u))
         {
         }
 
         F f;
 
-        static TResult exec(void* _this, TArgs&&...args)
+        // TODO: Consolidate different models down to a model_base since they
+        // all need this exec function
+        TResult exec(TArgs&&...args)
+        {
+            return f(std::forward<TArgs>(args)...);
+        }
+
+        static TResult __exec(void* _this, TArgs&&...args)
         {
             auto __this = ((model_fnptr2*)_this);
 
@@ -278,11 +285,26 @@ protected:
         {
             return f(std::forward<TArgs>(args)...);
         }
+
+        inline TResult exec(TArgs&&...args)
+        {
+            return f(std::forward<TArgs>(args)...);
+        }
     };
 
+    /*
     typedef concept_fnptr1 concept;
     template <class F>
-    using model = model_fnptr1<F>;
+    using model = model_fnptr1<F>; */
+
+    typedef concept_fnptr2 concept;
+    template <class F>
+    using model = model_fnptr2<F>;
+
+    /*
+    typedef concept_virtual concept;
+    template <class F>
+    using model = model_virtual<F>; */
 
     concept* m;
 
