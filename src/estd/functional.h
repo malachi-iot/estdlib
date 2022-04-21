@@ -228,12 +228,17 @@ protected:
     {
         typedef TResult (*function_type)(void*, TArgs&&...);
 
-        function_type const _f;
+        const function_type _f;
 
         concept_fnptr2(function_type f) : _f(f) {}
 
         concept_fnptr2(const concept_fnptr2& copy_from) = default;
-        concept_fnptr2(concept_fnptr2&& move_from) = default;
+        // DEBT: For some reason ESP32's default move constructor
+        // doesn't initialize _f
+        //concept_fnptr2(concept_fnptr2&& move_from) = default;
+        concept_fnptr2(concept_fnptr2&& move_from) :
+            _f(std::move(move_from._f))
+        {}
 
         inline TResult _exec(TArgs&&...args)
         {
@@ -252,8 +257,13 @@ protected:
         {
         }
 
+        /*
         model_fnptr2(const model_fnptr2& copy_from) = default;
-        model_fnptr2(model_fnptr2&& move_from) = default;
+        //model_fnptr2(model_fnptr2&& move_from) = default;
+        model_fnptr2(model_fnptr2&& move_from) :
+            base_type(std::move(move_from)),
+            f(std::move(move_from.f))
+        {} */
 
         F f;
 
@@ -312,7 +322,9 @@ protected:
     template <class F>
     using model = model_virtual<F>; */
 
-    concept* const m;
+    // DEBT: 'function' constructors need this to not be const, for now
+    //concept* const m;
+    concept* m;
 
 protected:
     //function_base(function_type f) : f(f) {}
@@ -322,8 +334,13 @@ public:
 
     function_base(concept* m) : m(m) {}
 
+    /*
     function_base(const function_base& copy_from) = default;
-    function_base(function_base&& move_from) = default;
+    function_base(function_base&& move_from) :
+        m(move_from.m)
+    {
+
+    } */
 
     TResult operator()(TArgs&&... args)
     {
@@ -468,8 +485,14 @@ public:
 
     }
 
+    /*
     inline_function(const inline_function& copy_from) = default;
-    inline_function(inline_function&& move_from) = default;
+    inline_function(inline_function&& move_from) :
+        base_type(std::move(move_from)),
+        m(std::move(move_from.m))
+    {
+
+    } */
 };
 
 template <class TFunc, typename F>

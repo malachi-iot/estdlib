@@ -43,7 +43,7 @@ static void test_inline_function()
     // concept_virtual - works OK
     // esp-idf ESP32 we get a hard error (upgraded from a warning) -
     // this call is using uninitialized '_f'
-    //f();
+    f();
 
     TEST_ASSERT_EQUAL(3, counter);
 }
