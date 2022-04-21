@@ -228,13 +228,16 @@ protected:
     {
         typedef TResult (*function_type)(void*, TArgs&&...);
 
-        function_type const f;
+        function_type const _f;
 
-        concept_fnptr2(function_type f) : f(f) {}
+        concept_fnptr2(function_type f) : _f(f) {}
+
+        concept_fnptr2(const concept_fnptr2& copy_from) = default;
+        concept_fnptr2(concept_fnptr2&& move_from) = default;
 
         inline TResult _exec(TArgs&&...args)
         {
-            return f(this, std::forward<TArgs>(args)...);
+            return _f(this, std::forward<TArgs>(args)...);
         }
     };
 
@@ -248,6 +251,9 @@ protected:
             f(std::forward<F>(u))
         {
         }
+
+        model_fnptr2(const model_fnptr2& copy_from) = default;
+        model_fnptr2(model_fnptr2&& move_from) = default;
 
         F f;
 
@@ -306,7 +312,7 @@ protected:
     template <class F>
     using model = model_virtual<F>; */
 
-    concept* m;
+    concept* const m;
 
 protected:
     //function_base(function_type f) : f(f) {}
@@ -315,6 +321,9 @@ public:
     function_base() : m(NULLPTR) {}
 
     function_base(concept* m) : m(m) {}
+
+    function_base(const function_base& copy_from) = default;
+    function_base(function_base&& move_from) = default;
 
     TResult operator()(TArgs&&... args)
     {
@@ -458,6 +467,9 @@ public:
     {
 
     }
+
+    inline_function(const inline_function& copy_from) = default;
+    inline_function(inline_function&& move_from) = default;
 };
 
 template <class TFunc, typename F>
