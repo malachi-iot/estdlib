@@ -191,9 +191,17 @@ protected:
     {
         typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
 
-        function_type const f;
+        const function_type f;
 
         concept_fnptr1(function_type f) : f(f) {}
+
+        concept_fnptr1(const concept_fnptr1& copy_from) = default;
+        // just like concept_fnptr2, default move constructor somehow
+        // results in make_inline2 leaving f uninitialized
+        //concept_fnptr1(concept_fnptr1&& move_from) = default;
+        concept_fnptr1(concept_fnptr1&& move_from) :
+            f(move_from.f)
+        {}
 
         inline TResult _exec(TArgs&&...args)
         {
@@ -308,14 +316,14 @@ protected:
         }
     };
 
-    /*
     typedef concept_fnptr1 concept;
     template <class F>
-    using model = model_fnptr1<F>; */
+    using model = model_fnptr1<F>;
 
+    /*
     typedef concept_fnptr2 concept;
     template <class F>
-    using model = model_fnptr2<F>;
+    using model = model_fnptr2<F>; */
 
     /*
     typedef concept_virtual concept;
