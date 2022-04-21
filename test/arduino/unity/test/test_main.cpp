@@ -26,6 +26,7 @@ void setup()
     test_chrono();
     test_cpp();
     test_cstddef();
+    test_functional();
     test_limits();
     test_map();
     test_optional();
