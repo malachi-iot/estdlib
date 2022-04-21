@@ -364,6 +364,13 @@ public:
         return m->_exec(std::forward<TArgs>(args)...);
     }
 
+    // FIX: Unsure why we need both this and && version, but somehow forwarding an
+    // lvalue with TArgs&& in this context makes it mad
+    TResult operator()(TArgs... args)
+    {
+        return m->_exec(std::forward<TArgs>(args)...);
+    }
+
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
     template <typename F>
