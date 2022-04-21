@@ -154,6 +154,7 @@ reference_wrapper<T> cref(const T& t) NOEXCEPT
     return reference_wrapper<T>(t);
 }
 
+#if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
 
 namespace experimental {
 
@@ -371,5 +372,7 @@ inline_function<TFunc, F> make_inline_function(F&& f)
 }
 
 }
+
+#endif  // VARIADIC + MOVE SEMANTIC
 
 }
