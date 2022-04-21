@@ -350,6 +350,7 @@ public:
 
     } */
 
+#if __cplusplus >= 201402L
     TResult operator()(TArgs&&... args)
     {
         // a little complicated.  Some guidance from:
@@ -363,6 +364,7 @@ public:
         // let's make our lives easier
         return m->_exec(std::forward<TArgs>(args)...);
     }
+#endif
 
     // FIX: Unsure why we need both this and && version, but somehow forwarding an
     // lvalue with TArgs&& in this context makes it mad

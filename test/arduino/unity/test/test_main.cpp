@@ -5,7 +5,7 @@
 #include <estd/cstddef.h>
 #include "unity/unit-test.h"
 
-CONSTEXPR static unsigned LED_PIN = 13;
+CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
 
 
 void setup()
