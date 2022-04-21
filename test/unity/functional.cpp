@@ -25,7 +25,14 @@ static void test_inline_function()
 
     _if();
 
+    // testing copy/move operator/constructor
+    auto _if2 = _if;
+
     TEST_ASSERT_EQUAL(1, counter);
+
+    _if2();
+
+    TEST_ASSERT_EQUAL(2, counter);
 
     // FIX: Something about the way we wrap up things causes issues.  RVO bug?
     auto f = estd::experimental::function<void()>::make_inline2([&](){++counter;});
@@ -38,7 +45,7 @@ static void test_inline_function()
     // this call is using uninitialized '_f'
     //f();
 
-    TEST_ASSERT_EQUAL(2, counter);
+    TEST_ASSERT_EQUAL(3, counter);
 }
 #else
 static void test_inline_function()
