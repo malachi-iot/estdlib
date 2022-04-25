@@ -181,12 +181,14 @@ private:
 
 
     template <class T>
-    void get_integer_ascii_hexadecimal(iter_type i, iter_type end,
+    iter_type get_integer_ascii_hexadecimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
         v = 0;
 
-        for(; i != end; ++i)
+        bool good = false;
+
+        for(; i != end; ++i, good = true)
         {
             char_type c = *i;
 
@@ -208,16 +210,19 @@ private:
             }
             else
             {
-                // DEBT: We may not have to do this, 'v' may be acceptable as undefined
-                // if we reach failbit
-                v >>= 4;
+                if(good)
+                    // DEBT: We may not have to do this, 'v' may be acceptable as undefined
+                    // if we reach failbit
+                    v >>= 4;
+                else
+                    err |= ios_base::failbit;
 
-                err |= ios_base::failbit;
-                return;
+                return i;
             }
         }
 
         err |= ios_base::eofbit;
+        return i;
     }
 
     // Lifted from
@@ -246,12 +251,13 @@ private:
     }
 
     template <class T>
-    void get_unsigned_integer_ascii_decimal(iter_type i, iter_type end,
+    iter_type get_unsigned_integer_ascii_decimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
         v = 0;
+        bool good = false;
 
-        for(; i != end; ++i)
+        for(; i != end; ++i, good = true)
         {
             const char_type c = *i;
             // DEBT: Need to cleverly use a signed integer whose width matches char_type
@@ -264,16 +270,19 @@ private:
             }
             else
             {
-                err |= ios_base::failbit;
-                return;
+                if(!good)
+                    err |= ios_base::failbit;
+
+                return i;
             }
         }
 
         err |= ios_base::eofbit;
+        return i;
     }
 
     template <class T>
-    void get_signed_integer_ascii_decimal(iter_type i, iter_type end,
+    iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
         bool negative = false;
@@ -286,9 +295,11 @@ private:
             ++i;
         }
 
-        get_unsigned_integer_ascii_decimal(i, end, err, str, v);
+        i = get_unsigned_integer_ascii_decimal(i, end, err, str, v);
 
         if(negative) v = -v;
+
+        return i;
     }
 
 public:
@@ -307,11 +318,11 @@ public:
 
         if(basefield == estd::ios_base::dec)
         {
-            get_signed_integer_ascii_decimal(in, end, err, str, v);
+            return get_signed_integer_ascii_decimal(in, end, err, str, v);
         }
         else if(basefield == estd::ios_base::hex)
         {
-            get_integer_ascii_hexadecimal(in, end, err, str, v);
+            return get_integer_ascii_hexadecimal(in, end, err, str, v);
         }
 
         return in;

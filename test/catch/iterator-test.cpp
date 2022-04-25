@@ -16,14 +16,16 @@ TEST_CASE("iterator")
 
         SECTION("end-of-stream")
         {
-            estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it;
+            estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it, end;
+
+            REQUIRE(it == end);
         }
-        SECTION("from istream")
+        SECTION("misc stringbuf")
         {
+            estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+
             SECTION("characters")
             {
-                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
-
                 REQUIRE(*it++ == 'h');
                 REQUIRE(*it++ == 'e');
                 REQUIRE(*it++ == 'l');
@@ -37,7 +39,6 @@ TEST_CASE("iterator")
             {
                 estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
-                // TBD
                 for(int i = sz; i >= 0; --i)
                     ++it;
 
