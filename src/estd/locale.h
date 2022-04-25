@@ -186,7 +186,7 @@ private:
     {
         v = 0;
 
-        for(; i < (end - 1); ++i)
+        for(; i != end; ++i)
         {
             char_type c = *i;
 
@@ -251,7 +251,7 @@ private:
     {
         v = 0;
 
-        for(; i < (end - 1); ++i)
+        for(; i != end; ++i)
         {
             const char_type c = *i;
             // DEBT: Need to cleverly use a signed integer whose width matches char_type

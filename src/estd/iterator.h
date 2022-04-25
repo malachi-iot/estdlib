@@ -33,6 +33,11 @@ public:
     {
     }
 
+    istreambuf_iterator(streambuf_type& s) : rdbuf(&s)
+    {
+        ch = rdbuf->sgetc();
+    }
+
     template <class TIstreamBase>
     istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
         rdbuf(is.rdbuf())
@@ -68,6 +73,14 @@ public:
     value_type operator*() const
     {
         return ch;
+    }
+
+    // EXPERIMENTAL
+    // since streambufs are generally a forward only creature, and cross-streambuf comparison's
+    // aren't really viable, this mainly exists to compare against a NULL (end) iterator
+    bool operator!=(const iterator& compare_to) const
+    {
+        return rdbuf != compare_to.rdbuf;
     }
 };
 
