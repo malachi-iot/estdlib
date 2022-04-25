@@ -35,9 +35,13 @@ TEST_CASE("iterator")
             }
             SECTION("eol")
             {
-                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
                 // TBD
+                for(int i = sz; i >= 0; --i)
+                    ++it;
+
+                REQUIRE(it == end);
             }
         }
         SECTION("ostream")

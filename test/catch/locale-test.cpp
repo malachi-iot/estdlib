@@ -78,7 +78,7 @@ TEST_CASE("locale")
                 auto result = n.get(it, end, fmt, state, v);
 
                 // FIX: Getting unfortunate linker errors here
-                //REQUIRE(state == goodbit);
+                REQUIRE(state == goodbit);
                 REQUIRE(v == test::uint1);
             }
         }
