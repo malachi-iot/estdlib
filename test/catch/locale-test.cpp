@@ -30,14 +30,36 @@ TEST_CASE("locale")
         {
             experimental::num_get<char, const char*> n;
 
-            SECTION("decimal")
+            SECTION("dec")
             {
-                const char* in = "123";
+                SECTION("basic")
+                {
+                    const char* in = "123";
 
-                n.get(in, in + 3, fmt, state, v);
+                    n.get(in, in + 3, fmt, state, v);
 
-                REQUIRE(state == eofbit);
-                REQUIRE(v == 123);
+                    REQUIRE(state == eofbit);
+                    REQUIRE(v == 123);
+                }
+                SECTION("signed")
+                {
+                    const char* in = "-123";
+
+                    n.get(in, in + 4, fmt, state, v);
+
+                    REQUIRE(state == eofbit);
+                    REQUIRE(v == -123);
+                }
+                SECTION("unsigned")
+                {
+                    const char* in = "123";
+                    unsigned _v;
+
+                    n.get(in, in + 3, fmt, state, _v);
+
+                    REQUIRE(state == eofbit);
+                    REQUIRE(_v == 123);
+                }
             }
             SECTION("hex")
             {

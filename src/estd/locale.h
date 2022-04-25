@@ -181,43 +181,6 @@ private:
     // we do 256 we have to do bounds checking anyway
 
 
-    // DEBT: Looks like we can consolidate this and the unsigned decimal code
-    // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
-    //       though it being locale-bound may affect that down the line
-    template <class T>
-    iter_type get_integer_ascii_hexadecimal(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        typedef estd::internal::char_base_traits<16> char_base_traits;
-        typedef typename char_base_traits::int_type int_type;
-
-        v = 0;
-
-        // Since we are using forward-only iterators, we can't retain an
-        // old 'i' to compare against
-        bool good = false;
-
-        for(; i != end; ++i, good = true)
-        {
-            int_type n = char_base_traits::from_char_with_test(*i);
-
-            if(n != char_base_traits::eol())
-            {
-                estd::internal::raise_and_add(v, char_base_traits::base(), n);
-            }
-            else
-            {
-                if(!good)
-                    err |= ios_base::failbit;
-
-                return i;
-            }
-        }
-
-        err |= ios_base::eofbit;
-        return i;
-    }
-
     // Lifted from
     // https://stackoverflow.com/questions/221001/performance-question-fastest-way-to-convert-hexadecimal-char-to-its-number-valu
     template <class T>
@@ -243,14 +206,19 @@ private:
         err |= ios_base::eofbit;
     }
 
-    template <class T>
-    iter_type get_unsigned_integer_ascii_decimal(iter_type i, iter_type end,
+
+    // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
+    //       though it being locale-bound may affect that down the line
+    template <unsigned base, class T>
+    iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
-        typedef estd::internal::char_base_traits<10> char_base_traits;
+        typedef estd::internal::char_base_traits<base> char_base_traits;
         typedef typename char_base_traits::int_type int_type;
 
         v = 0;
+        // Since we are using forward-only iterators, we can't retain an
+        // old 'i' to compare against
         bool good = false;
 
         for(; i != end; ++i, good = true)
@@ -288,7 +256,7 @@ private:
             ++i;
         }
 
-        i = get_unsigned_integer_ascii_decimal(i, end, err, str, v);
+        i = get_unsigned_integer_ascii<10>(i, end, err, str, v);
 
         if(negative) v = -v;
 
@@ -315,7 +283,9 @@ public:
         }
         else if(basefield == estd::ios_base::hex)
         {
-            return get_integer_ascii_hexadecimal(in, end, err, str, v);
+            // No real negative in hex, so presume caller knows this and passed in a
+            // signed type for their own convenience
+            return get_unsigned_integer_ascii<16>(in, end, err, str, v);
         }
 
         return in;
@@ -330,11 +300,11 @@ public:
 
         if(basefield == estd::ios_base::dec)
         {
-            get_unsigned_integer_ascii_decimal(in, end, err, str, v);
+            get_unsigned_integer_ascii<10>(in, end, err, str, v);
         }
         else if(basefield == estd::ios_base::hex)
         {
-            get_integer_ascii_hexadecimal(in, end, err, str, v);
+            get_unsigned_integer_ascii<16>(in, end, err, str, v);
         }
 
         return in;
@@ -343,14 +313,14 @@ public:
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, unsigned& v) const
     {
-        return get_integer_ascii(in, end, err, str, v);
+        return get_unsigned_ascii(in, end, err, str, v);
     }
 
 
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, unsigned short& v) const
     {
-        return get_integer_ascii(in, end, err, str, v);
+        return get_unsigned_ascii(in, end, err, str, v);
     }
 
     iter_type get(iter_type in, iter_type end,
