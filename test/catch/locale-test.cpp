@@ -11,7 +11,8 @@ using namespace estd;
 
 TEST_CASE("locale")
 {
-    experimental::locale l;
+    experimental::locale<experimental::locale_code::en_US,
+        internal::encodings::UTF8> l;
 
     SECTION("isspace")
     {
@@ -120,7 +121,9 @@ TEST_CASE("locale")
         SECTION("ctype")
         {
             constexpr char c = 'a';
-            char result = experimental::use_facet<experimental::ctype<char> >(l).widen(c);
+            typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char>
+                ctype_type;
+            char result = experimental::use_facet<ctype_type>(l).widen(c);
             REQUIRE(result == c);
         }
     }

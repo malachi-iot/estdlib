@@ -17,12 +17,13 @@ internal::basic_istream<TStreambuf, TBase>& operator >>(
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
+    typedef typename istream_type::locale_type locale_type;
 
     in >> ws;
 
     //char_type* dest = value.lock();
 
-    experimental::locale loc = in.getloc();
+    locale_type loc = in.getloc();
 
     value.clear();
 

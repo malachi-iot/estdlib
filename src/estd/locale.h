@@ -29,7 +29,7 @@ struct ctype_base
 };
 
 
-template <class TChar>
+template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
 class ctype : public ctype_base
 {
 #ifdef ENABLE_LOCALE_MULTI
@@ -47,6 +47,7 @@ public:
     TChar tolower(TChar ch) { return do_tolower(ch); }
 };
 
+template <locale_code::values locale_code, internal::encodings::values encoding>
 struct locale
 {
 #ifdef ENABLE_LOCALE_MULTI
@@ -84,7 +85,7 @@ struct locale
     // TODO: deviates in that standard version uses a std::string
     // I want my own std::string (beginnings of which are in experimental::layer3::string)
     // but does memory allocation out of our own GC-pool
-    const char* name() const { return "*"; }
+    const char* name() const { return locale_name<locale_code, encoding>(); }
 };
 
 
@@ -95,8 +96,8 @@ struct locale
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <>
-class ctype<char> : public ctype_base, public locale::facet
+template <locale_code_enum locale_code, internal::encodings::values encoding>
+class ctype<locale_code, encoding, char> : public ctype_base, public locale<locale_code, encoding>::facet
 {
 public:
     //static locale::id id;
@@ -141,11 +142,12 @@ public:
 
 }
 
-template <class TFacet>
-bool has_facet(const locale& loc);
+//template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
+//bool has_facet(const locale<locale_code, encoding>& loc);
 
-template<>
-inline bool has_facet<ctype<char> >(const locale&)
+/*
+template<locale_code_enum locale_code, internal::encodings::values encoding>
+inline bool has_facet<ctype<locale_code, encoding, char> >(const locale<locale_code, encoding>&)
 {
     return true;
 }
@@ -156,12 +158,24 @@ inline const ctype<char>& use_facet(const locale&)
     static ctype<char> facet;
 
     return facet;
-}
+} */
 
-template <class TChar>
-inline bool isspace(TChar ch, const locale& loc)
+// FIX: Just to get things compiling, hardcoding these
+template <class TFacet, class TLocale>
+inline bool has_facet(const TLocale&) { return true; }
+
+
+
+template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
+inline TFacet use_facet(const locale<locale_code, encoding>&) { return TFacet(); }
+//template <class TFacet, class TLocale>
+//inline TFacet use_facet(TLocale) { return TFacet(); }
+
+template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
+inline bool isspace(TChar ch, const locale<locale_code, encoding>& loc)
 {
-    return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
+    typedef ctype<locale_code, encoding, TChar> ctype_type;
+    return use_facet<ctype_type>(loc).is(ctype_base::space, ch);
 }
 
 

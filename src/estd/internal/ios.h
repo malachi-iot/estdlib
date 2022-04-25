@@ -171,7 +171,9 @@ namespace internal {
 
 struct ios_base_policy
 {
-    typedef experimental::locale locale_type;
+    // DEBT: Clearly we don't want this unconfigurable and always set to en_US.UTF-8
+    typedef experimental::locale<experimental::locale_code::en_US, encodings::UTF8>
+        locale_type;
 };
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
@@ -293,8 +295,10 @@ public:
 
     char_type widen(char c) const
     {
-        return experimental::use_facet<experimental::ctype<char_type> >(getloc()).widen(c);
-        experimental::ctype<char_type> ctype;
+        typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char_type>
+            ctype_type;
+        return experimental::use_facet<ctype_type>(getloc()).widen(c);
+        ctype_type ctype;
         return ctype.widen(c);
     }
 

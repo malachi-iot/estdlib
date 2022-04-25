@@ -35,12 +35,13 @@ namespace internal {
 template<unsigned short b, class TEnable = estd::internal::Range<true> >
 struct char_base_traits;
 
-// due to FEATURE_CPP_ENUM_CLASS no available everywhere
+// due to FEATURE_CPP_ENUM_CLASS not available everywhere
 struct encodings
 {
     enum values
     {
         ASCII,
+        ISO8859_1,
         UTF8,
         UTF16
     };
