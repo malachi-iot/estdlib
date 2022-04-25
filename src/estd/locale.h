@@ -292,11 +292,12 @@ private:
     }
 
 public:
+    /*
     template <typename T>
     iter_type get(iter_type in, iter_type end,
-        estd::ios_base::iostate& err,
         estd::ios_base& str,
-        T& v) const;
+        estd::ios_base::iostate& err,
+        T& v) const; */
 
     template <typename T>
     iter_type get_integer_ascii(iter_type in, iter_type end,
@@ -336,20 +337,20 @@ public:
     }
 
     iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, unsigned& v) const
+        ios_base& str, ios_base::iostate& err, unsigned& v) const
     {
         return get_integer_ascii(in, end, err, str, v);
     }
 
 
     iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, unsigned short& v) const
+        ios_base& str, ios_base::iostate& err, unsigned short& v) const
     {
         return get_integer_ascii(in, end, err, str, v);
     }
 
     iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, short& v) const
+        ios_base& str, ios_base::iostate& err, short& v) const
     {
         return get_integer_ascii(in, end, err, str, v);
     }
@@ -357,13 +358,13 @@ public:
 
 
     iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, int& v) const
+        ios_base& str, ios_base::iostate& err, int& v) const
     {
         return get_integer_ascii(in, end, err, str, v);
     }
 
     iter_type get(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, long& v) const
+        ios_base& str, ios_base::iostate& err, long& v) const
     {
         return get_integer_ascii(in, end, err, str, v);
     }
