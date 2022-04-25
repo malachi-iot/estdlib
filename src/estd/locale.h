@@ -4,6 +4,7 @@
 #include "internal/locale.h"
 #include "internal/iterator_standalone.h"
 #include "internal/ios.h"
+#include "internal/charconv.hpp"
 
 extern "C" {
 #include <stdint.h>
@@ -180,41 +181,33 @@ private:
     // we do 256 we have to do bounds checking anyway
 
 
+    // DEBT: Looks like we can consolidate this and the unsigned decimal code
+    // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
+    //       though it being locale-bound may affect that down the line
     template <class T>
     iter_type get_integer_ascii_hexadecimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
+        typedef estd::internal::char_base_traits<16> char_base_traits;
+        typedef typename char_base_traits::int_type int_type;
+
         v = 0;
 
+        // Since we are using forward-only iterators, we can't retain an
+        // old 'i' to compare against
         bool good = false;
 
         for(; i != end; ++i, good = true)
         {
-            char_type c = *i;
+            int_type n = char_base_traits::from_char_with_test(*i);
 
-            v <<= 4;
-
-            if(c >= '0' && c <= '9')
+            if(n != char_base_traits::eol())
             {
-                v += c - '0';
-            }
-            else if(c >= 'A' && c <= 'F')
-            {
-                v += 10;
-                v += c - 'A';
-            }
-            else if(c >= 'a' && c <= 'f')
-            {
-                v += 10;
-                v += c - 'a';
+                estd::internal::raise_and_add(v, char_base_traits::base(), n);
             }
             else
             {
-                if(good)
-                    // DEBT: We may not have to do this, 'v' may be acceptable as undefined
-                    // if we reach failbit
-                    v >>= 4;
-                else
+                if(!good)
                     err |= ios_base::failbit;
 
                 return i;
@@ -254,19 +247,19 @@ private:
     iter_type get_unsigned_integer_ascii_decimal(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
+        typedef estd::internal::char_base_traits<10> char_base_traits;
+        typedef typename char_base_traits::int_type int_type;
+
         v = 0;
         bool good = false;
 
         for(; i != end; ++i, good = true)
         {
-            const char_type c = *i;
-            // DEBT: Need to cleverly use a signed integer whose width matches char_type
-            const int16_t b = c - '0';
+            int_type n = char_base_traits::from_char_with_test(*i);
 
-            if(b >= 0 && b <= 9)
+            if(n != char_base_traits::eol())
             {
-                v *= 10;
-                v += b;
+                estd::internal::raise_and_add(v, char_base_traits::base(), n);
             }
             else
             {
