@@ -19,6 +19,8 @@ TEST_CASE("locale")
     }
     SECTION("num_get")
     {
+        auto goodbit = ios_base::goodbit;
+        auto failbit = ios_base::failbit;
         ios_base::iostate state = ios_base::goodbit;
         ios_base fmt;
         long v = -1;
@@ -76,7 +78,7 @@ TEST_CASE("locale")
                 auto result = n.get(it, end, fmt, state, v);
 
                 // FIX: Getting unfortunate linker errors here
-                //REQUIRE(state == ios_base::goodbit);
+                //REQUIRE(state == goodbit);
                 REQUIRE(v == test::uint1);
             }
         }

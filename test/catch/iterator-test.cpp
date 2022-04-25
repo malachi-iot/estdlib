@@ -20,16 +20,25 @@ TEST_CASE("iterator")
         }
         SECTION("from istream")
         {
-            estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+            SECTION("characters")
+            {
+                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
 
-            REQUIRE(*it++ == 'h');
-            REQUIRE(*it++ == 'e');
-            REQUIRE(*it++ == 'l');
-            REQUIRE(*it == 'l');
-            REQUIRE(*++it == 'o');
-            REQUIRE(*++it == ' ');
-            REQUIRE(*it++ == ' ');
-            REQUIRE(*it++ == 'w');
+                REQUIRE(*it++ == 'h');
+                REQUIRE(*it++ == 'e');
+                REQUIRE(*it++ == 'l');
+                REQUIRE(*it == 'l');
+                REQUIRE(*++it == 'o');
+                REQUIRE(*++it == ' ');
+                REQUIRE(*it++ == ' ');
+                REQUIRE(*it++ == 'w');
+            }
+            SECTION("eol")
+            {
+                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+
+                // TBD
+            }
         }
         SECTION("ostream")
         {
