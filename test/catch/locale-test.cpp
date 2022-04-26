@@ -118,13 +118,29 @@ TEST_CASE("locale")
     }
     SECTION("use_facet")
     {
-        SECTION("ctype")
+        constexpr char c = 'a';
+        SECTION("ctype 1")
         {
-            constexpr char c = 'a';
             typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char>
                 ctype_type;
             char result = experimental::use_facet<ctype_type>(l).widen(c);
             REQUIRE(result == c);
+        }
+        SECTION("ctype 2")
+        {
+            auto _c = experimental::use_facet_ctype<char>(l);
+
+            REQUIRE(_c.widen(c) == c);
+            REQUIRE(!_c.is(estd::experimental::ctype_base::digit, c));
+        }
+        SECTION("ctype3 ")
+        {
+            auto f =
+                experimental::use_facet3<experimental::ctype_test<char>>(l);
+
+            REQUIRE(!f.is(estd::experimental::ctype_base::digit, c));
+            // Not yet implemented
+            //REQUIRE(f.is(estd::experimental::ctype_base::alpha, c));
         }
     }
 }

@@ -51,7 +51,10 @@ const char* locale_name<locale_code::en_US, internal::encodings::UTF8>()
 template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
 TFacet use_facet(const locale<locale_code, encoding>& loc);
 
-//template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-//TFacet use_facet2(const locale<locale_code, encoding>& loc);
+template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
+void use_facet2(const locale<locale_code, encoding>& loc);
+
+template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
+struct use_facet_helper;
 
 }}

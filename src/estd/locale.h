@@ -96,10 +96,14 @@ struct locale
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <locale_code_enum locale_code, internal::encodings::values encoding>
-class ctype<locale_code, encoding, char> : public ctype_base, public locale<locale_code, encoding>::facet
+template <locale_code_enum locale_code>
+class ctype<locale_code, estd::internal::encodings::ASCII, char> :
+    public ctype_base,
+    public locale<locale_code, estd::internal::encodings::ASCII>::facet
 {
 public:
+    typedef char char_type;
+
     //static locale::id id;
 
     char widen(char c) const { return c; }
@@ -127,6 +131,10 @@ public:
         return false;
     }
 };
+
+template <locale_code_enum locale_code>
+class ctype<locale_code, estd::internal::encodings::UTF8, char> :
+    public ctype<locale_code, estd::internal::encodings::ASCII, char> {};
 
 
 template <class TChar>
@@ -183,6 +191,43 @@ inline ctype<locale_code, encoding, TChar> use_facet2<ctype_test<TChar>>(const l
 {
     return ctype<locale_code, encoding, TChar>();
 } */
+
+template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
+inline ctype<locale_code, encoding, TChar> use_facet_ctype(const locale<locale_code, encoding>&)
+{
+    return ctype<locale_code, encoding, TChar>();
+}
+
+template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
+struct use_facet_helper<ctype_test<TChar>, locale_code, encoding>
+{
+    typedef ctype<locale_code, encoding, TChar> value_type;
+
+    static value_type use_facet(const locale<locale_code, encoding>&)
+    {
+        return value_type();
+    }
+};
+
+template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
+inline typename use_facet_helper<TFacet, locale_code, encoding>::value_type
+    use_facet3(const locale<locale_code, encoding>& loc)
+{
+    typedef use_facet_helper<TFacet, locale_code, encoding> helper_type;
+
+    return helper_type::use_facet(loc);
+}
+
+/*
+template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
+inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, encoding>& loc)
+{
+    //typedef use_facet_helper<ctype_test<TChar>> helper_type;
+
+    //helper_type::use_facet(loc);
+    return ctype<locale_code, encoding, TChar>();
+} */
+
 
 template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
 inline bool isspace(TChar ch, const locale<locale_code, encoding>& loc)
