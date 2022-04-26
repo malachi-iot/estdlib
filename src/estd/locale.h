@@ -129,6 +129,10 @@ public:
 };
 
 
+template <class TChar>
+class ctype_test;
+
+
 namespace layer5
 {
 
@@ -170,6 +174,15 @@ template <class TFacet, locale_code_enum locale_code, internal::encodings::value
 inline TFacet use_facet(const locale<locale_code, encoding>&) { return TFacet(); }
 //template <class TFacet, class TLocale>
 //inline TFacet use_facet(TLocale) { return TFacet(); }
+
+/*
+ * TODO: Try use_facet_ctype, which is not standard, but may be the best we can do without going
+ * full trailing/auto return type
+template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
+inline ctype<locale_code, encoding, TChar> use_facet2<ctype_test<TChar>>(const locale<locale_code, encoding>&)
+{
+    return ctype<locale_code, encoding, TChar>();
+} */
 
 template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
 inline bool isspace(TChar ch, const locale<locale_code, encoding>& loc)
