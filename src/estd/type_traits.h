@@ -188,6 +188,19 @@ struct is_empty
 #elif 0 // LLVM
 #endif
 
+#if defined(FEATURE_CPP_CONSTEXPR)
+#if defined(FEATURE_CPP_INLINE_VARIABLES)
+template <class T>
+inline constexpr bool is_empty_v = is_empty<T>::value;
+#endif
+/// Non-standard function deviation of is_empty_v for pre-C++17 scenarios
+/// Somewhat experimental
+/// \tparam T
+/// \return
+template <class T>
+inline constexpr bool is_empty_f() { return is_empty<T>::value; }
+#endif
+
 }
 
 #include "internal/llvm_type_traits.h"
