@@ -34,7 +34,10 @@ struct streambuf_base
 
 protected:
     inline static int sync() { return 0; }
+
+    // 0 = "unsure if there are characters available in the associated sequence".
     inline static streamsize showmanyc() { return 0; }
+
     inline static pos_type seekpos(pos_type, ios_base::openmode)
     {
         return pos_type(off_type(-1));

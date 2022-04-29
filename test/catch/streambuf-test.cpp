@@ -11,6 +11,8 @@
 
 using namespace estd;
 
+using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
+
 TEST_CASE("streambuf")
 {
     const char raw_str[] = "raw 'traditional' output\n";
@@ -183,8 +185,7 @@ TEST_CASE("streambuf")
     }
     SECTION("pubsync - method finding")
     {
-        struct pubsync_only_streambuf_impl :
-                internal::impl::streambuf_base<estd::char_traits<char> >
+        struct pubsync_only_streambuf_impl : synthetic_streambuf_base
         {
             int sync() const { return 7; }
         };
@@ -195,5 +196,16 @@ TEST_CASE("streambuf")
 
         REQUIRE(sb1.pubsync() == 0);
         REQUIRE(sb2.pubsync() == 7);
+    }
+    SECTION("ambiguous character availability")
+    {
+        struct synthetic_unavail_streambuf_impl : synthetic_streambuf_base
+        {
+            typedef synthetic_streambuf_base base_type;
+        };
+
+        internal::streambuf<synthetic_unavail_streambuf_impl> sb;
+
+        REQUIRE(sb.in_avail() == 0);
     }
 }
