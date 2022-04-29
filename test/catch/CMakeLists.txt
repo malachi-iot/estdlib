@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     optional-test.cpp
     queue-test.cpp
     stack-test.cpp
+	streambuf-test.cpp
     string-test.cpp
     test-data.h
     type-traits-test.cpp
