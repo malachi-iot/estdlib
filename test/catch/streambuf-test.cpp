@@ -160,8 +160,9 @@ TEST_CASE("streambuf")
             estd::streamsize read_back = sb.sgetn(buf, sizeof(buf));
 
             REQUIRE(sb.eback() == raw_str);
-            // FIX: It looks like we return one too many in read_back
-            //REQUIRE(read_back == raw_str_len);
+            // Remember, span streambuf is not a string streambuf, so we get the null
+            // termination back also
+            REQUIRE(read_back == raw_str_len + 1);
         }
         SECTION("sbumpc")
         {
