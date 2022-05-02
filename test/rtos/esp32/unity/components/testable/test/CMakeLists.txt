@@ -21,3 +21,5 @@ set(COMPONENT_ADD_INCLUDEDIRS ".")
 set(COMPONENT_REQUIRES estdlib unity testable)
 
 register_component()
+
+component_compile_options("-Wstack-usage=128")
