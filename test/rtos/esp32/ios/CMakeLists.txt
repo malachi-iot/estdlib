@@ -6,4 +6,4 @@ set(ESTDLIB_DIR ../../../..)
 include(${ESTDLIB_DIR}/tools/esp-idf/project.cmake)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(basic)
+project(ios)
