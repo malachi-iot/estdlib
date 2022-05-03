@@ -1,8 +1,13 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 
+//#define FEATURE_ESTD_CHARTRAITS 1
+
 #include <estd/istream.h>
 #include <estd/string.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 // FIX: Explicit include is too hard to get wrong
 #include <estd/internal/istream_runtimearray.hpp>
@@ -10,6 +15,8 @@
 // FIX: 160 bytes used in this method (144 before ESP_LOGI)
 void test1()
 {
+    //typedef estd::char_traits<char> traits_type;
+
     static const char* TAG = "test1";
 
     static char buf[] = "hi2u hru";
@@ -40,5 +47,10 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "Startup");
 
-    test1();
+    for(;;)
+    {
+        test1();
+
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+    }
 }

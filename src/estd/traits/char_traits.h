@@ -2,23 +2,27 @@
 
 #include "../internal/platform.h"
 
-// Only for scenarios where system has no std::char_traits to lean on
-#ifndef FEATURE_STD_STRING
+#include "../internal/fpos.h"
+#include "../iosfwd.h"
 
-namespace std {
+#include <stdint.h>
 
-template<class CharT> class char_traits;
+// FEATURE_STD_STRING: Scenarios where system has no std::char_traits
+// FEATURE_ESTD_CHARTRAITS: System has std::char_traits, but we prefer ours
+#if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
+
+namespace estd {
 
 template<>
 struct char_traits<char>
 {
     typedef char char_type;
 
-#ifdef __MBED__
     typedef int16_t int_type;
-#else
-    typedef int int_type;
-#endif
+
+    // DEBT: Use fpos instead
+    typedef streampos pos_type;
+    typedef int off_type;
 
     static CONSTEXPR char_type to_char_type(int_type ch) { return ch; }
     static CONSTEXPR int_type to_int_type(const char ch) { return ch; }
@@ -35,9 +39,20 @@ struct char_traits<char>
         return NULLPTR;
     }
 
-    static CONSTEXPR size_t length(const char_type* s)
+    // DEBT: Almost certainly there are some platform-specific
+    // optimizations available for this.  We may prefer to reach
+    // out to standard strlen
+    static
+#if __cpp_constexpr > 201304L
+        constexpr
+#endif
+        size_t length(const char_type* s)
     {
-        return strlen(s);
+        const char_type* i = s;
+
+        for(; *i != 0; ++i);
+
+        return i - s;
     }
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_TRAIT_NODATA
@@ -62,7 +77,7 @@ struct char_traits;
 
 template <>
 struct char_traits<char> : std::char_traits {};
-#else
+#elif FEATURE_ESTD_CHARTRAITS == 0
 using std::char_traits;
 #endif
 

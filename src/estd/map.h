@@ -33,7 +33,7 @@ struct kvp_traits
 template <class TValue>
 struct kvp_traits<estd::pair<const int, TValue> >
 {
-    static CONSTEXPR const int invalid_key() { return -1; }
+    static CONSTEXPR int invalid_key() { return -1; }
 };
 
 }

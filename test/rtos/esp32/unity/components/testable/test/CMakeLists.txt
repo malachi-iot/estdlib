@@ -24,5 +24,8 @@ register_component()
 
 component_compile_options("-Wstack-usage=128")
 
+# FEATURE_ESTD_CHARTRAITS nearly works, one unit test fails
+#component_compile_options("-Wstack-usage=128" "-DFEATURE_ESTD_CHARTRAITS=1")
+
 # Won't compile, only for diagnostic
 #component_compile_options("-Wstack-usage=128" "-S")
