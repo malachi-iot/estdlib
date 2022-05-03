@@ -23,3 +23,6 @@ set(COMPONENT_REQUIRES estdlib unity testable)
 register_component()
 
 component_compile_options("-Wstack-usage=128")
+
+# Won't compile, only for diagnostic
+#component_compile_options("-Wstack-usage=128" "-S")
