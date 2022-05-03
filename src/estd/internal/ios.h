@@ -5,12 +5,9 @@
 #include "../type_traits.h"
 #include "locale.h"
 #include <stdint.h>
+#include "../iosfwd.h"
 
 namespace estd {
-
-// TODO: use specific 16/32/64 bit versions depending on architecture
-typedef int streamoff;
-typedef int streamsize;
 
 class ios_base
 {

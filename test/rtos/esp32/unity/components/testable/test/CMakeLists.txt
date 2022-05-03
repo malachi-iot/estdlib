@@ -24,7 +24,8 @@ register_component()
 
 component_compile_options("-Wstack-usage=128")
 
-# FEATURE_ESTD_CHARTRAITS nearly works, one unit test fails
+# FEATURE_ESTD_CHARTRAITS works well.  Leaving it off in pursuit of getting to the
+# bottom of std::char_traits bloat
 #component_compile_options("-Wstack-usage=128" "-DFEATURE_ESTD_CHARTRAITS=1")
 
 # Won't compile, only for diagnostic
