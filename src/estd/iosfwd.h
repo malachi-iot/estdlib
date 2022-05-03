@@ -2,7 +2,7 @@
 
 namespace estd {
 
-#if FEATURE_ESTD_CHARTRAITS
+#if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
 template <class TChar>
 class char_traits;
 #endif

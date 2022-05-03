@@ -5,11 +5,11 @@
 #include "../internal/fpos.h"
 #include "../iosfwd.h"
 
-#include <stdint.h>
-
 // FEATURE_STD_STRING: Scenarios where system has no std::char_traits
 // FEATURE_ESTD_CHARTRAITS: System has std::char_traits, but we prefer ours
 #if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
+
+#include <stdint.h>
 
 namespace estd {
 
@@ -77,7 +77,7 @@ struct char_traits;
 
 template <>
 struct char_traits<char> : std::char_traits {};
-#elif FEATURE_ESTD_CHARTRAITS == 0
+#elif defined(FEATURE_STD_STRING) && FEATURE_ESTD_CHARTRAITS == 0
 using std::char_traits;
 #endif
 
