@@ -238,6 +238,8 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
     // dec but that's still an inefficiency/debt
     int base = flags & estd::ios_base::hex ? 16 : 10;
 
+    // TODO: When num_get is more fleshed out, use that instead of this since num_get
+    // needs no intermediate 'buffer'
     to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
 
     // DEBT: Check result for conversion failure
