@@ -7,9 +7,11 @@
 // FIX: Explicit include is too hard to get wrong
 #include <estd/internal/istream_runtimearray.hpp>
 
-// FIX: 144 bytes used in this method
+// FIX: 160 bytes used in this method (144 before ESP_LOGI)
 void test1()
 {
+    static const char* TAG = "test1";
+
     static char buf[] = "hi2u hru";
     estd::layer1::string<16> s;
 
@@ -18,11 +20,15 @@ void test1()
 
     // FIX: 544 bytes used in this operator overload
     is >> s;
+
+    ESP_LOGI(TAG, "sizes buf=%u, s=%u, span=%u, is=%u",
+        sizeof(buf), sizeof(s), sizeof(span), sizeof(is));
+    ESP_LOGI(TAG, "s=%s", s.data());
 }
 
 extern "C" void app_main(void)
 {
-    static const char *TAG = "app_main";
+    static const char* TAG = "app_main";
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
