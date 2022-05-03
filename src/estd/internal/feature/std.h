@@ -5,8 +5,6 @@
 // DEBT: More than likely this is an artifact of an old G++, not AVR/SAMD specific
 #if !defined(__AVR__) //&& !defined(__SAMD21G18A__)
 #define FEATURE_STD_NEW
-// TODO: Phase this out and instead use our estd::char_traits on platforms which need it
-#define FEATURE_STD_STRING_FULL_CHAR_TRAITS
 #endif
 
 // some platforms have c++98 onward but don't have STL headers.  Explicitly state when we *do*

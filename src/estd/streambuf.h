@@ -44,13 +44,8 @@ public:
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
-#if !defined(FEATURE_STD_STRING_FULL_CHAR_TRAITS)
-    typedef int_type pos_type;
-    typedef int_type off_type;
-#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
-#endif
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
 protected:
