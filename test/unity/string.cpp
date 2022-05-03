@@ -110,6 +110,9 @@ static void test_char_traits()
     typedef estd::char_traits<char> traits_type;
 
     TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, traits_type::length(TEST_STR));
+
+    TEST_ASSERT_EQUAL(0, traits_type::compare(TEST_STR, TEST_STR2, 3));
+    TEST_ASSERT_EQUAL(1, traits_type::compare(TEST_STR, TEST_STR2, 5));
 }
 
 

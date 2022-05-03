@@ -55,6 +55,21 @@ struct char_traits<char>
         return i - s;
     }
 
+    static
+#if __cpp_constexpr > 201304L
+        constexpr
+#endif
+        int compare(const char_type* s1, const char_type* s2, size_t count)
+    {
+        for(;count != 0; --count, ++s1, ++s2)
+        {
+            if(*s1 < *s2) return -1;
+            if(*s1 > *s2) return 1;
+        }
+
+        return 0;
+    }
+
 #ifdef FEATURE_IOS_EXPERIMENTAL_TRAIT_NODATA
     // Non-standard timeout/data unavailable return value, since eof() suggests no more data EVER
     // we want a different error code
