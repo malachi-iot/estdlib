@@ -49,7 +49,7 @@ struct out_span_streambuf :
     }
 
 
-    out_span_streambuf(char_type* data, pos_type count) :
+    out_span_streambuf(char_type* data, const pos_type& count) :
             base_type(data, count)
     {
 
@@ -73,9 +73,7 @@ struct out_span_streambuf :
 
     int_type sputc(char_type ch)
     {
-        // DEBT: pos_type somehow becomes signed / std::streamoff here
-        unsigned pos = base_out_type::pos();
-        //if(base_out_type::pos() >= out().size_bytes())
+        const pos_type& pos = base_out_type::pos();
         if(pos >= out().size_bytes())
             return base_out_type::overflow();
 
@@ -142,10 +140,12 @@ struct in_span_streambuf :
     typedef TChar char_type;
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
+protected:
     const span_type& in() const { return base_type::value(); }
 
-    pos_type pos() const { return base_pos_type::pos(); }
+    const pos_type& pos() const { return base_pos_type::pos(); }
 
+public:
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
             base_type(copy_from)
     {
