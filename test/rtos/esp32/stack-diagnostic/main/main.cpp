@@ -37,12 +37,11 @@ void test2()
 {
     static const char* TAG = "test2";
 
-    // FIX: Ok mystery man, why are we not showing stack usage here
-    estd::layer1::vector<uint8_t, 128> v;
+    estd::layer1::vector<uint8_t, 64> v;
 
     v.push_back(5);
 
-    ESP_LOGI(TAG, "sizeof(v)=%u", sizeof(v));
+    ESP_LOGI(TAG, "sizeof(v)=%u, v[0]=%u", sizeof(v), (unsigned)v[0]);
 }
 
 extern "C" void app_main(void)
