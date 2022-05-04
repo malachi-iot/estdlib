@@ -33,6 +33,9 @@ void test1()
 }
 
 
+// 128 bytes here too.  Inspecting assembly reveals ~80bytes used
+// Unclear where that extra space is going.  Bumping v up to 80
+// bumps stack usage to 144
 void test2()
 {
     static const char* TAG = "test2";
@@ -41,7 +44,8 @@ void test2()
 
     v.push_back(5);
 
-    ESP_LOGI(TAG, "sizeof(v)=%u, v[0]=%u", sizeof(v), (unsigned)v[0]);
+    ESP_LOGI(TAG, "sizeof(v)=%u, v[0]=%u, v.size()=%u",
+        sizeof(v), (unsigned)v[0], v.size());
 }
 
 extern "C" void app_main(void)

@@ -5,4 +5,4 @@ register_component()
 
 component_compile_options("-Wstack-usage=64")
 # For diagnostic only - will break compilation
-#component_compile_options("-Wstack-usage=32" "-S")
+component_compile_options("-Wstack-usage=64" "-S")
