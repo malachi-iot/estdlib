@@ -9,10 +9,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-// FIX: Explicit include is too hard to get wrong
+// FIX: Explicit include is too hard - easy to get wrong
 #include <estd/internal/istream_runtimearray.hpp>
 
-// FIX: 160 bytes used in this method (144 before ESP_LOGI)
+// FIX: 128 bytes used in this method
 void test1()
 {
     //typedef estd::char_traits<char> traits_type;
@@ -25,12 +25,24 @@ void test1()
     estd::span<char> span(buf);
     estd::experimental::ispanstream is(span);
 
-    // FIX: 544 bytes used in this operator overload
     is >> s;
 
     ESP_LOGI(TAG, "sizes buf=%u, s=%u, span=%u, is=%u",
         sizeof(buf), sizeof(s), sizeof(span), sizeof(is));
     ESP_LOGI(TAG, "s=%s", s.data());
+}
+
+
+void test2()
+{
+    static const char* TAG = "test2";
+
+    // FIX: Ok mystery man, why are we not showing stack usage here
+    estd::layer1::vector<uint8_t, 128> v;
+
+    v.push_back(5);
+
+    ESP_LOGI(TAG, "sizeof(v)=%u", sizeof(v));
 }
 
 extern "C" void app_main(void)
@@ -50,6 +62,7 @@ extern "C" void app_main(void)
     for(;;)
     {
         test1();
+        test2();
 
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
