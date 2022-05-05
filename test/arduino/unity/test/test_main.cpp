@@ -31,6 +31,8 @@ void setup()
     test_map();
     test_optional();
     test_queue();
+    test_ratio();
+    test_span();
     test_streambuf();
     test_string();
     test_thread();
