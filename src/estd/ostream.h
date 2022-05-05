@@ -230,7 +230,10 @@ template <class TStreambuf, class T,
           class enabled = typename enable_if<(N > 1)>::type >
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
-    char buffer[N + 1];
+    /*
+    TStreambuf* rdbuf = out.rdbuf();
+    typedef typename TStreambuf::char_type char_type;
+    char_type* pptr = rdbuf->pptr(); */
 
     estd::ios_base::fmtflags flags = out.flags();
     // DEBT: Handle octal too. That will require a rework of maxStringLength.  hex
@@ -238,17 +241,30 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
     // dec but that's still an inefficiency/debt
     int base = flags & estd::ios_base::hex ? 16 : 10;
 
-    // TODO: When num_get is more fleshed out, use that instead of this since num_get
-    // needs no intermediate 'buffer'
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+    /*
+     * impl::out_streambuf doesn't have ppbtr, pbase, etc due to abstract support
+     * for locking memory
+    if(rdbuf->epptr() - pptr >= N)
+    {
+        to_chars_result result = to_chars(pptr, pptr + N, value, base);
 
-    // DEBT: Check result for conversion failure
+        int size = result.ptr - pptr;
+        rdbuf->pbump(size);
+    }
+    else */
+    {
+        char buffer[N + 1];
 
-    // remember, opt flavor specifies 'ptr' as beginning and we must manually
-    // null terminate the end (ala standard to_chars operation)
-    buffer[N] = 0;
+        to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
 
-    return out << result.ptr;
+        // DEBT: Check result for conversion failure
+
+        // remember, opt flavor specifies 'ptr' as beginning and we must manually
+        // null terminate the end (ala standard to_chars operation)
+        buffer[N] = 0;
+
+        return out << result.ptr;
+    }
 }
 #endif
 

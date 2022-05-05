@@ -778,15 +778,35 @@ TEST_CASE("string tests")
     {
         char buffer[128];
 
+        int inputs[] { 771, 5, 0, -100 };
+        const char* outputs[] { "771", "5", "0", "-100" };
+        constexpr int sz = sizeof(inputs) / sizeof(int);
+
         SECTION("standard")
         {
-            estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], 771);
+            for(int i = 0; i < sz; ++i)
+            {
+                estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], inputs[i]);
 
-            REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == 0);
 
-            *result.ptr = 0;
+                *result.ptr = 0;
 
-            REQUIRE(std::string(buffer) == "771");
+                REQUIRE(std::string(buffer) == outputs[i]);
+            }
+        }
+        SECTION("opt")
+        {
+            for(int i = 0; i < sz; ++i)
+            {
+                estd::to_chars_result result = estd::to_chars_opt(&buffer[0], &buffer[127], inputs[i]);
+
+                REQUIRE(result.ec == 0);
+
+                buffer[128] = 0;
+
+                REQUIRE(std::string(result.ptr) == outputs[i]);
+            }
         }
         SECTION("reverse method")
         {
