@@ -5,6 +5,9 @@
 #include <estd/queue.h>
 #include <estd/thread.h>
 
+#include <estd/port/arduino/streambuf.h>
+#include <estd/ostream.h>
+
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 // 1/20/2020: No longer the case:
 //            32u4 compiles 92 bytes larger :(
@@ -17,6 +20,8 @@ steady_clock::time_point start;
 uint32_t start_ms;
 
 estd::layer1::queue<uint8_t, 16> test_queue;
+
+typedef estd::internal::basic_ostream<estd::arduino_streambuf> ostream;
 
 void setup() 
 {
@@ -34,6 +39,10 @@ void setup()
 
 void loop() 
 {
+    ostream cout(&Serial);
+
+    cout << "Hi2u estd" << estd::endl;
+
 #ifdef TEST_CHRONO
     steady_clock::time_point now = steady_clock::now();
 

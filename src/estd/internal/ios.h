@@ -268,15 +268,15 @@ protected:
 
     basic_ios(streambuf_type&& streambuf) :
         base_type(std::move(streambuf)) {}
-#endif
-    basic_ios(streambuf_type& streambuf) :
-        base_type(streambuf) {}
-
+#else
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
 
     template <class TParam1>
     basic_ios(TParam1* p) : base_type(p) {}
+#endif
+    basic_ios(streambuf_type& streambuf) :
+        base_type(streambuf) {}
 
 public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
