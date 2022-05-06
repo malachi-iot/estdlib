@@ -12,14 +12,14 @@ class arduino_streambuf : public streambuf_base<TTraits>
 {
     typedef streambuf_base<TTraits> base_type;
 
-    Print* print;
+    Print* const print;
 
 public:
     typedef typename base_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
 
-    arduino_streambuf(Print* print) : print(print) {}
+    arduino_streambuf(Print& print) : print(&print) {}
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
