@@ -7,6 +7,12 @@
 ## Quality Updates
 
 * Vastly reduced stack usage in relationn to `pos_type`
+* Finagled platformio package generation into behaving again
+* Maintenance to test code overall
+
+## Known Issues
+
+* platformio compilation of tests doesn't treat `estdlib` as a formal lib, instead referring to it as `src`
 
 # v0.2.0 - 20APR22
 
