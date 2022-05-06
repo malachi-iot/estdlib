@@ -1,12 +1,12 @@
-# vNEXT - DDMMM22
+# v0.2.1 - 06MAY22
 
-## Added features
+## Added Features
 
 * `estd::char_traits` can now optionally override `std::char_traits`
 
 ## Quality Updates
 
-* Vastly reduced stack usage in relationn to `pos_type`
+* Vastly reduced stack usage in relation to `pos_type`
 * Finagled platformio package generation into behaving again
 * Maintenance to test code overall
 
