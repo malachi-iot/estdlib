@@ -35,6 +35,7 @@ void setup()
 void loop() 
 {
     estd::arduino_ostream cout(Serial);
+    estd::arduino_istream cin(Serial);
 
 #ifdef TEST_CHRONO
     steady_clock::time_point now = steady_clock::now();
@@ -55,4 +56,6 @@ void loop()
 
     cout << (buffer += F(" world")) << '!' << estd::endl;
     cout << F("hi2u ") << count << estd::endl;
+
+    cin >> buffer;
 }

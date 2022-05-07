@@ -9,6 +9,7 @@
 
 #include "internal/istream.h"
 #include "internal/istream_runtimearray.hpp"
+#include "port/istream.h"
 
 //#include <cassert>
 

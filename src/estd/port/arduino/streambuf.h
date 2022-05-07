@@ -11,6 +11,8 @@ template <class TTraits, class TStream>
 class arduino_streambuf_base : public streambuf_base<TTraits>
 {
 protected:
+    typedef TStream stream_type;
+
     TStream* const print;
 
     arduino_streambuf_base(TStream* print) : print(print) {}
@@ -24,10 +26,11 @@ class arduino_ostreambuf : public TBase
 
 public:
     typedef typename base_type::traits_type traits_type;
+    typedef typename base_type::stream_type stream_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
 
-    arduino_ostreambuf(Print& print) : base_type(&print) {}
+    arduino_ostreambuf(stream_type& print) : base_type(&print) {}
 
     Print& underlying() const { return *this->print; }
 
@@ -65,19 +68,37 @@ public:
 
     int xin_avail() const
     {
-        return underlying().available;
+        return underlying().available();
+    }
+
+    int_type underflow() const
+    {
+        int_type ch = underlying().peek();
+        return ch == -1 ? traits_type::eof() : traits_type::to_char_type(ch);
+    }
+
+    int_type uflow() const
+    {
+        int_type ch = underlying().read();
+        return ch == -1 ? traits_type::eof() : traits_type::to_char_type(ch);
     }
 
     streamsize xsgetn(char_type* s, streamsize count)
     {
         return underlying().readBytes(s, count);
-        return -1;
     }
 
     char_type xsgetc() const
     {
-        int_type ch = underlying().read();
+        int_type ch = underlying().peek();
+        // DEBT: Caller 'sgetc' checks xin_avail() and underflow() to
+        // pretty much gauruntee we never get to a ch == -1 here
         return ch == -1 ? traits_type::eof() : traits_type::to_char_type(ch);
+    }
+
+    void gbump(int count)
+    {
+        while(count--) underlying().read();
     }
 };
 
