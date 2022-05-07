@@ -21,6 +21,8 @@ public:
 
     arduino_streambuf(Print& print) : print(&print) {}
 
+    Print& underlying() const { return *print; }
+
     streamsize xsputn(const char_type* s, streamsize count)
     {
         return print->write(s, count);

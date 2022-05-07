@@ -13,9 +13,7 @@ template<class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(
     basic_ostream<TStreambuf, TBase>& os, const __FlashStringHelper* rhs)
 {
-    int sz_rhs = strlen_P((const char*)rhs);
-
-    os.write((const char*) rhs, sz_rhs);
+    os.rdbuf()->underlying().print(rhs);
 
     return os;
 
@@ -27,13 +25,6 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(
 }
 
 
-}
-
-
-template<class TImpl> inline estd::arduino_ostream& PRINT_TEST(
-    estd::arduino_ostream& os, const __FlashStringHelper* rhs)
-{
-    return operator <<(os, (const char*) rhs);
 }
 
 

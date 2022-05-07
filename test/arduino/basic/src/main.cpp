@@ -24,8 +24,6 @@ using namespace estd::chrono;
 steady_clock::time_point start;
 uint32_t start_ms;
 
-estd::layer1::queue<uint8_t, 16> test_queue;
-
 void setup() 
 {
     // TODO: this is for 32u4 only.  Change this for other targets
@@ -61,10 +59,6 @@ void loop()
     // interestingly, code size varies along with this buffer size
     estd::layer1::string<128> buffer = "Hello";
 
-    buffer += F(" world");
-
-    cout << buffer;
-    // TODO: Need to call underlying Print.print which has the flashstringhelper overload
-    //cout << F("Hello world");
-    cout << '!' << count << estd::endl;
+    cout << (buffer += F(" world")) << '!' << estd::endl;
+    cout << F("hi2u ") << count << estd::endl;
 }
