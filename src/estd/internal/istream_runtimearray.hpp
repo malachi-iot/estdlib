@@ -1,7 +1,8 @@
 #pragma once
 
 #include "runtime_array.h"
-#include "../istream.h"
+#include "istream.h"
+#include "iosfwd.h"
 
 namespace estd {
 

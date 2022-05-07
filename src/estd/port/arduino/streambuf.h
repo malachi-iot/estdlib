@@ -25,7 +25,7 @@ public:
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
-        return print->write(s, count);
+        return print->write((const uint8_t*)s, count);
     }
 
     int_type sputc(char_type ch)
