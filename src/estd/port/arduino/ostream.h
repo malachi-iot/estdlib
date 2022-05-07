@@ -1,7 +1,7 @@
 #pragma once
 
 #include "streambuf.h"
-#include "../../ostream.h"
+#include "../../internal/ostream.h"
 
 namespace estd {
 

@@ -1,17 +1,9 @@
 #include <Arduino.h>
 
-#include <estd/string.h>
 #include <estd/chrono.h>
-#include <estd/queue.h>
-#include <estd/thread.h>
-
-// DEBT: Auto include this from estd/ostream.h
-#include <estd/port/arduino/ostream.h>
 #include <estd/ostream.h>
-
-// DEBT: Need to auto include this.  I remember we don't because it had some conflicts, so 
-// be mindful of that as I think we can get around those conflicts
-#include <estd/internal/ostream_basic_string.hpp>
+#include <estd/string.h>
+#include <estd/thread.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 // 1/20/2020: No longer the case:

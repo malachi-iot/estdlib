@@ -1,5 +1,3 @@
-// Pulled in from util.embedded, but not yet adapted to estd environment
-
 #pragma once
 
 #include "streambuf.h"
