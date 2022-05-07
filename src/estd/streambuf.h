@@ -143,6 +143,8 @@ public:
     }
 
 
+    template <class enabled = 
+        enable_if<is_base_of<TImpl, estd::experimental::streambuf_sbumpc_tag> >
     int_type sbumpc()
     {
         int_type ch = this->sgetc();
