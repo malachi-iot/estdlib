@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 #include <estd/chrono.h>
+//#include <estd/iostream.h>    // FIX: Still too sloppy for prime time
+#include <estd/istream.h>
 #include <estd/ostream.h>
 #include <estd/string.h>
 #include <estd/thread.h>
