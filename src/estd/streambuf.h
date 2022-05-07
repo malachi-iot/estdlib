@@ -10,6 +10,7 @@
 #include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
 #include "internal/impl/streambuf/tags.h"
+#include "internal/impl/streambuf/helpers.h"
 
 
 //#include "features.h"
@@ -38,10 +39,10 @@ class streambuf :
         public TImpl
 {
     typedef TImpl base_type;
-    typedef TImpl impl_type;
     typedef streambuf<TImpl, TPolicy> this_type;
 
 public:
+    typedef TImpl impl_type;
     typedef TPolicy policy_type;
 
     typedef typename TImpl::char_type char_type;
@@ -145,11 +146,16 @@ public:
         return written;
     }
 
+    int_type sbumpc()
+    {
+        return internal::impl::experimental::sbumpc_evaporated(this);
+    }
+
     /*
     enable_if_t<!is_base_of<
         estd::experimental::streambuf_sbumpc_tag, impl_type
         >::value, int_type> */
-    int_type sbumpc()
+    int_type sbumpc_legacy()
     {
         int_type ch = this->sgetc();
 

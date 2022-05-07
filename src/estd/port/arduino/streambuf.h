@@ -49,12 +49,18 @@ public:
     }
 };
 
+// NOTE: Looks like only ESP8266 has this feature
+#define FEATURE_ARDUINO_STREAM_PEEKBUFFER 0
+
 // To do input, we are able to include output stream smarts for zero cost.
 // Therefore, there is no need for arduino_istreambuf.  We can combine into
 // a std-natural normal i/o streambuf
 template <class TTraits>
 class arduino_streambuf : public arduino_ostreambuf<TTraits, 
     arduino_streambuf_base<TTraits, Stream> >,
+#if FEATURE_ARDUINO_STREAM_PEEKBUFFER
+    estd::experimental::streambuf_gptr_tag,
+#endif
     estd::experimental::streambuf_sbumpc_tag
 {
     typedef arduino_ostreambuf<TTraits, arduino_streambuf_base<TTraits, Stream> > base_type;
@@ -64,11 +70,13 @@ public:
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
 
+#if FEATURE_ARDUINO_STREAM_PEEKBUFFER
+#endif
+
     arduino_streambuf(Stream& stream) : base_type(stream) {}
 
     Stream& underlying() const { return *this->print; }
 
-    // NOTE: Not active yet
     int_type sbumpc()
     {
         int_type ch = underlying().read();
