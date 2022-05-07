@@ -9,6 +9,8 @@
 #include "internal/impl/streambuf.h"
 #include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
+#include "internal/impl/streambuf/tags.h"
+
 
 //#include "features.h"
 #include "locale.h"
@@ -36,6 +38,7 @@ class streambuf :
         public TImpl
 {
     typedef TImpl base_type;
+    typedef TImpl impl_type;
     typedef streambuf<TImpl, TPolicy> this_type;
 
 public:
@@ -142,9 +145,10 @@ public:
         return written;
     }
 
-
-    template <class enabled = 
-        enable_if<is_base_of<TImpl, estd::experimental::streambuf_sbumpc_tag> >
+    /*
+    enable_if_t<!is_base_of<
+        estd::experimental::streambuf_sbumpc_tag, impl_type
+        >::value, int_type> */
     int_type sbumpc()
     {
         int_type ch = this->sgetc();
