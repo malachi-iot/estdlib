@@ -63,7 +63,7 @@ public:
  * @tparam is_present
  */
 template <class T, bool is_present = !estd::is_empty<T>::value>
-struct struct_evaporator;
+class struct_evaporator;
 
 template <class T>
 class struct_evaporator<T, false>
@@ -87,13 +87,14 @@ class struct_evaporator<T, true>
 public:
     typedef T value_type;
     typedef value_type& evaporated_type;
+    typedef const value_type& const_evaporated_type;
 
 private:
     value_type value_;
 
 public:
     evaporated_type value() { return value_; }
-    const evaporated_type value() const { return value_; }
+    const_evaporated_type value() const { return value_; }
 
     struct_evaporator() = default;
     struct_evaporator(const value_type& value) :
