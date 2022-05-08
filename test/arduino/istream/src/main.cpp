@@ -9,6 +9,8 @@ uint32_t start_ms;
 void setup() 
 {
     Serial.begin(115200);
+
+    delay(1000);
 }
 
 void loop() 
@@ -19,8 +21,6 @@ void loop()
     uint32_t now_ms = millis();
 
     long count = now_ms - start_ms;
-
-    delay(1000);
 
     cout << F("Please input something: ");
 

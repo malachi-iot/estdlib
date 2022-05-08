@@ -51,13 +51,24 @@ void blocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
+    typedef typename istream_type::streambuf_type streambuf_type;
 
     experimental::locale loc = in.getloc();
+    streambuf_type* rdbuf = in.rdbuf();
 
     for(;;)
     {
-        int_type ch = in.get();
+        int_type ch;
 
+        // FIX: Was a bit of confusion because of seemingly redundant xin_avail
+        // and showmanyc
+        while(rdbuf->in_avail() == 0) // && rdbuf->sgetc() == -1)
+        {
+
+        }
+
+        ch = rdbuf->sbumpc();
+        
         // NOTE: If we enable this line, we get some kind of program fault.
         // That's because we never get an eof or space, and value.push_back
         // overflows
@@ -96,7 +107,7 @@ internal::basic_istream<TStreambuf, TBase>& operator >>(
 
     value.clear();
 
-    internal::nonblocking_input_helper(in, value);
+    internal::blocking_input_helper(in, value);
 
     return in;
 }

@@ -88,6 +88,12 @@ public:
         return underlying().available();
     }
 
+    // TODO: Document somewhere why we have xin_avail AND shomanyc
+    streamsize showmanyc() const
+    {
+        return underlying().available();
+    }
+
     int_type underflow() const
     {
         int_type ch = underlying().peek();
