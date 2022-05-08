@@ -29,22 +29,22 @@ struct streambuf_helper
     }
 
     template <class TStreambuf>
-    enable_if_t<!is_base_of<
-        estd::experimental::streambuf_sbumpc_tag, TStreambuf
-    >::value, typename TStreambuf::int_type>
-    static sbumpc_evaporated(TStreambuf* sb)
+    static enable_if_t<!is_base_of<
+            estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
+        typename TStreambuf::int_type>
+    sbumpc_evaporated(TStreambuf* sb)
     {
         return sbumpc(sb);
     }
 
     template <class TStreambuf>
-    enable_if_t<is_base_of<
-        estd::experimental::streambuf_sbumpc_tag, TStreambuf
-    >::value, typename TStreambuf::int_type>
-    static sbumpc_evaporated(TStreambuf* sb)
+    static enable_if_t<is_base_of<
+            estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
+        typename TStreambuf::int_type>
+    sbumpc_evaporated(TStreambuf* sb)
     {
-        typename TStreambuf::impl_type* sb_impl = sb;
-        return sb_impl->sbumpc();
+        typename TStreambuf::impl_type& sb_impl = *sb;
+        return sb_impl.sbumpc();
     }
 };
 

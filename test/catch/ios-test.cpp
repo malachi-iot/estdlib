@@ -18,7 +18,9 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#if __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
 
 
 using namespace estd;

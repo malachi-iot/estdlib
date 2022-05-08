@@ -11,6 +11,9 @@
 
 using namespace estd;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
 
 TEST_CASE("streambuf")
@@ -209,3 +212,5 @@ TEST_CASE("streambuf")
         REQUIRE(sb.in_avail() == 0);
     }
 }
+
+#pragma GCC diagnostic pop
