@@ -6,11 +6,10 @@
 
 namespace estd {
 
+namespace internal {
 
-// NOTE: This will work but doesn't filter specifically by string, which perhaps we want
 template <class TStreambuf, class TBase, class TStringImpl>
-internal::basic_istream<TStreambuf, TBase>& operator >>(
-        internal::basic_istream<TStreambuf, TBase>& in,
+void nonblocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
     typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
@@ -19,13 +18,7 @@ internal::basic_istream<TStreambuf, TBase>& operator >>(
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
 
-    in >> ws;
-
-    //char_type* dest = value.lock();
-
     experimental::locale loc = in.getloc();
-
-    value.clear();
 
     for(;;)
     {
@@ -46,8 +39,65 @@ internal::basic_istream<TStreambuf, TBase>& operator >>(
 
         in.get();
     }
+}
 
-    //value.unlock();
+
+template <class TStreambuf, class TBase, class TStringImpl>
+void blocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
+        internal::dynamic_array<TStringImpl>& value)
+{
+    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename estd::remove_reference<TStreambuf>::type impl_type;
+    typedef typename impl_type::traits_type traits_type;
+    typedef typename impl_type::char_type char_type;
+    typedef typename impl_type::int_type int_type;
+
+    experimental::locale loc = in.getloc();
+
+    for(;;)
+    {
+        int_type ch = in.get();
+
+        // NOTE: If we enable this line, we get some kind of program fault.
+        // That's because we never get an eof or space, and value.push_back
+        // overflows
+        //ch = 'h';
+
+        if(ch == traits_type::eof())
+        {
+            in.setstate(istream_type::failbit | istream_type::eofbit);
+            break;
+        }
+        else if(isspace((char_type)ch, loc)) break;
+
+        //*dest++ = ch;
+
+        // NOTE: += is defined and should have worked
+        value.push_back((char_type)ch);
+    }
+}
+
+}
+
+
+// NOTE: This will work but doesn't filter specifically by string, which perhaps we want
+template <class TStreambuf, class TBase, class TStringImpl>
+internal::basic_istream<TStreambuf, TBase>& operator >>(
+        internal::basic_istream<TStreambuf, TBase>& in,
+        internal::dynamic_array<TStringImpl>& value)
+{
+    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename estd::remove_reference<TStreambuf>::type impl_type;
+    typedef typename impl_type::traits_type traits_type;
+    typedef typename impl_type::char_type char_type;
+    typedef typename impl_type::int_type int_type;
+
+    in >> ws;
+
+    value.clear();
+
+    internal::nonblocking_input_helper(in, value);
+
     return in;
 }
 

@@ -46,6 +46,9 @@ public:
     static CONSTEXPR iostate failbit = 0x02;
     static CONSTEXPR iostate eofbit = 0x04;
 
+    // Non standard, experimental
+    static CONSTEXPR iostate nodatabit = 0x08;
+
     typedef uint8_t seekdir;
 
     static CONSTEXPR seekdir beg = 0x00;
@@ -55,6 +58,9 @@ public:
 private:
     fmtflags fmtfl;
     iostate _iostate;
+
+    // Experimental
+    bool blocking = false;
 
 protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
