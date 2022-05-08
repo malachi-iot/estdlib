@@ -3,41 +3,52 @@
 #include "../streambuf.h"
 #include "tags.h"
 
+// Helper area exists to:
+// 1. declutter estd::streambuf
+// 2. provide often-reused methods for impl::streambuf
+// 3. offer specializations and other template tricks for use by estd::streambuf
+
 namespace estd { namespace internal { namespace impl { namespace experimental {
 
-template <class TStreambuf>
-inline typename TStreambuf::int_type sbumpc(TStreambuf* sb)
+struct streambuf_helper
 {
-    typedef typename TStreambuf::traits_type traits_type;
-    typedef typename TStreambuf::int_type int_type;
-    int_type ch = sb->sgetc();
-
-    if(ch != traits_type::eof())
+    template <class TStreambuf>
+    static inline typename TStreambuf::int_type sbumpc(TStreambuf* sb)
     {
-        sb->gbump(1);
-        return ch;
+        typedef typename TStreambuf::traits_type traits_type;
+        typedef typename TStreambuf::int_type int_type;
+        int_type ch = sb->sgetc();
+
+        if(ch != traits_type::eof())
+        {
+            sb->gbump(1);
+            return ch;
+        }
+        else
+            return sb->uflow();
     }
-    else
-        return sb->uflow();
-}
 
-template <class TStreambuf>
-enable_if_t<!is_base_of<
-    estd::experimental::streambuf_sbumpc_tag, TStreambuf
->::value, typename TStreambuf::int_type>
-sbumpc_evaporated(TStreambuf* sb)
-{
-    return sb->sbumpc_legacy();
-}
+    template <class TStreambuf>
+    enable_if_t<!is_base_of<
+        estd::experimental::streambuf_sbumpc_tag, TStreambuf
+    >::value, typename TStreambuf::int_type>
+    static sbumpc_evaporated(TStreambuf* sb)
+    {
+        return sbumpc(sb);
+    }
 
-template <class TStreambuf>
-enable_if_t<is_base_of<
-    estd::experimental::streambuf_sbumpc_tag, TStreambuf
->::value, typename TStreambuf::int_type>
-sbumpc_evaporated(TStreambuf* sb)
-{
-    return ((typename TStreambuf::impl_type*)sb)->sbumpc();
-}
+    template <class TStreambuf>
+    enable_if_t<is_base_of<
+        estd::experimental::streambuf_sbumpc_tag, TStreambuf
+    >::value, typename TStreambuf::int_type>
+    static sbumpc_evaporated(TStreambuf* sb)
+    {
+        typename TStreambuf::impl_type* sb_impl = sb;
+        return sb_impl->sbumpc();
+    }
+};
+
+
 
 
 template <class TStreambuf>

@@ -52,6 +52,10 @@ public:
     typedef typename traits_type::off_type off_type;
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
+    typedef internal::impl::experimental::streambuf_helper helper_type;
+
+    friend helper_type;
+
 protected:
 
     int_type sungetc()
@@ -148,24 +152,7 @@ public:
 
     int_type sbumpc()
     {
-        return internal::impl::experimental::sbumpc_evaporated(this);
-    }
-
-    /*
-    enable_if_t<!is_base_of<
-        estd::experimental::streambuf_sbumpc_tag, impl_type
-        >::value, int_type> */
-    int_type sbumpc_legacy()
-    {
-        int_type ch = this->sgetc();
-
-        if(ch != traits_type::eof())
-        {
-            this->gbump(1);
-            return ch;
-        }
-        else
-            return this->uflow();
+        return helper_type::sbumpc_evaporated(this);
     }
 
     int_type snextc()
