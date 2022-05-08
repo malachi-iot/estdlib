@@ -83,11 +83,6 @@ public:
         return ch == -1 ? traits_type::eof() : traits_type::to_char_type(ch);
     }
 
-    int xin_avail() const
-    {
-        return underlying().available();
-    }
-
     // TODO: Document somewhere why we have xin_avail AND shomanyc
     streamsize showmanyc() const
     {
