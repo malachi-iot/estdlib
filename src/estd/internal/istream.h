@@ -19,6 +19,7 @@ public:
     typedef typename traits_type::int_type int_type;
 
     typedef typename base_type::locale_type locale_type;
+    typedef typename base_type::blocking_type blocking_type;
 
 private:
     inline int_type standard_peek()
@@ -26,7 +27,9 @@ private:
 #if FEATURE_ESTD_IOS_GCOUNT
         _gcount = 0;
 #endif
-        return this->good() ? this->rdbuf()->sgetc() : traits_type::eof();
+        return this->good() ?
+            blocking_type::sgetc(this->rdbuf()) :
+            traits_type::eof();
     }
 
     /**

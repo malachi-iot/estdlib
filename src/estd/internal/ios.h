@@ -6,6 +6,8 @@
 #include "locale.h"
 #include <stdint.h>
 #include "../iosfwd.h"
+#include "../variant.h"
+#include "../thread.h"
 
 namespace estd {
 
@@ -172,9 +174,47 @@ struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_
 
 namespace internal {
 
+template <class TStreambuf>
 struct ios_base_policy
 {
     typedef experimental::locale locale_type;
+    typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::traits_type traits_type;
+    typedef typename streambuf_type::int_type int_type;
+
+    struct nonblocking_type
+    {
+        static int_type sgetc(streambuf_type* rdbuf)
+        {
+            return rdbuf->sgetc();
+        }
+    };
+
+
+    struct do_blocking_type
+    {
+        static int_type sgetc(streambuf_type* rdbuf)
+        {
+            for(;;)
+            {
+                // DEBT: Need timeout logic here
+                estd::streamsize avail = rdbuf->in_avail();
+
+                if(avail == -1) return traits_type::eof();
+
+                if(avail == 0)
+                {
+                    estd::this_thread::yield();
+                }
+                else
+                {
+                    return rdbuf->sgetc();
+                }
+            }
+        }
+    };
+
+    typedef do_blocking_type blocking_type;
 };
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
@@ -249,7 +289,8 @@ public:
 
 
 //template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf, bool use_pointer = false, class TPolicy = ios_base_policy>
+template<class TStreambuf, bool use_pointer = false,
+    class TPolicy = ios_base_policy<TStreambuf> >
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>
 {
 public:
@@ -260,6 +301,7 @@ public:
 
     typedef TPolicy policy_type;
     typedef typename policy_type::locale_type locale_type;
+    typedef typename policy_type::blocking_type blocking_type;
 
 protected:
     basic_ios() {}
