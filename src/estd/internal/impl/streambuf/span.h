@@ -129,7 +129,6 @@ struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,
 
         estd::experimental::streambuf_gptr_tag,
-        estd::experimental::streambuf_xin_avail_tag,
 
         TBase
 {

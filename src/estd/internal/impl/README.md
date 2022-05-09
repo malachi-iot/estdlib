@@ -8,8 +8,9 @@ We add a few API to streambuf:
 
 ### streamsize xin_avail()
 
-Optional feeder for showmanyc.  Used in scenarios where we *always* know if more characters are available or not.
-Implies one single monolithic buffer.  Not yet ironed out for chained buffers (and similar) where multiple buffers are involved.
+Optional feeder for `showmanyc`, required feeder for `sgetc`.  
+Reveals the number of characters immediately available in the get area buffer.  Typically used in scenarios where
+we *always* know if more characters are available or not.  Implies one single monolithic buffer.
 
 Often produces result as if `egptr() - gptr()`
 
