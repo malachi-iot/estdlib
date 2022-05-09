@@ -11,6 +11,11 @@
 
 namespace estd {
 
+#ifndef FEATURE_ESTD_AGGRESIVE_BITFIELD
+#define FEATURE_ESTD_AGGRESIVE_BITFIELD 1
+#endif
+
+
 class ios_base
 {
 public:
@@ -48,7 +53,8 @@ public:
     static CONSTEXPR iostate failbit = 0x02;
     static CONSTEXPR iostate eofbit = 0x04;
 
-    // Non standard, experimental
+    // Non standard, experimental.  Reflects that we are in a wait state
+    // to see if there is any more data.  Maps to 'showmanyc' value of 0.
     static CONSTEXPR iostate nodatabit = 0x08;
 
     typedef uint8_t seekdir;
@@ -58,11 +64,17 @@ public:
     static CONSTEXPR seekdir cur = 0x02;
 
 private:
-    fmtflags fmtfl;
-    iostate _iostate;
+    struct
+    {
+#if FEATURE_ESTD_AGGRESIVE_BITFIELD
+        fmtflags fmtfl_ : 8;
+        iostate iostate_ : 4;
+#else
+        fmtflags fmtfl_;
+        iostate iostate_;
+#endif
 
-    // Experimental
-    bool blocking = false;
+    }   state_;
 
 protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
@@ -71,41 +83,47 @@ protected:
     // UNTESTED
     void unsetstate(iostate state)
     {
-        _iostate &= ~state;
+        state_.iostate_ &= ~state;
     }
 
 public:
-    ios_base() : fmtfl(dec), _iostate(goodbit) {}
+    // DEBT: Use initializer lists for compilers that have it
+    //ios_base() : fmtfl(dec), _iostate(goodbit) {}
+    ios_base()
+    {
+        state_.fmtfl_ = dec;
+        state_.iostate_ = goodbit;
+    }
 
     fmtflags setf(fmtflags flags)
-    { fmtflags prior = fmtfl; fmtfl |= flags; return prior; }
+    { fmtflags prior = state_.fmtfl_; state_.fmtfl_ |= flags; return prior; }
 
     fmtflags setf(fmtflags flags, fmtflags mask)
     {
-        fmtflags prior = fmtfl;
-        fmtfl &= ~mask;
-        fmtfl |= flags;
+        fmtflags prior = state_.fmtfl_;
+        state_.fmtfl_ &= ~mask;
+        state_.fmtfl_ |= flags;
         return prior;
     }
 
     fmtflags unsetf(fmtflags flags)
-    { fmtflags prior = fmtfl; fmtfl &= ~flags; return prior; }
+    { fmtflags prior = state_.fmtfl_; state_.fmtfl_ &= ~flags; return prior; }
 
     fmtflags flags() const
-    { return fmtfl; }
+    { return state_.fmtfl_; }
 
     fmtflags flags(fmtflags fmtfl)
-    { fmtflags prior = fmtfl; this->fmtfl = fmtfl; return prior; }
+    { fmtflags prior = state_.fmtfl_; state_.fmtfl_ = fmtfl; return prior; }
 
     iostate rdstate() const
-    { return _iostate; }
+    { return state_.iostate_; }
 
     void clear(iostate state = goodbit)
-    { _iostate = state; }
+    { state_.iostate_ = state; }
 
     void setstate(iostate state)
     {
-        _iostate |= state;
+        state_.iostate_ |= state;
     }
 
     bool good() const
@@ -122,7 +140,7 @@ public:
 
 protected:
     // internal call which we may make a layer0 version for optimization
-    bool is_unitbuf_set() const { return fmtfl & unitbuf; }
+    bool is_unitbuf_set() const { return state_.fmtfl_ & unitbuf; }
 
 };
 
