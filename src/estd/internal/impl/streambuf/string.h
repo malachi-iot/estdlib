@@ -117,11 +117,8 @@ struct basic_stringbuf :
         return this->_str.length() - pos();
     }
 
-    streamsize showmanyc() const
-    {
-        size_type len = xin_avail();
-        return len > 0 ? len : -1;
-    }
+    streamsize showmanyc() const { return in_base_type::showmanyc(xin_avail()); }
+
 
     char_type xsgetc() const
     {
@@ -164,7 +161,7 @@ struct basic_stringbuf :
 
     int_type sungetc()
     {
-        if(in_base_type::pos() == 0)
+        if(pos() == 0)
             return this->pbackfail();
         else
         {

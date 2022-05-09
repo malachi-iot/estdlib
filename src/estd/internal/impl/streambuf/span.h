@@ -165,13 +165,7 @@ public:
 protected:
     streamsize xin_avail() const { return in().size() - pos(); }
 
-    streamsize showmanyc() const
-    {
-        streamsize r = xin_avail();
-
-        // there is never a time we are unsure if more characters remain in this type of span buffer
-        return r > 0 ? r : -1;
-    }
+    streamsize showmanyc() const { return base_pos_type::showmanyc(xin_avail()); }
 
     streamsize xsgetn(nonconst_char_type* s, streamsize count)
     {

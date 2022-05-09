@@ -57,10 +57,22 @@ protected:
 
     inline static int_type underflow() { return traits_type::eof(); }
 
-    // Non-standard helper for showmanyc/in_avail
+    // Non-standard API feeder for showmanyc/in_avail
     // Only reports on available or not, does not take any guesses
     // as to what might come if the buffer is filled
     inline static int_type xin_avail() { return 0; }
+
+    // Helper to produce showmanyc-style return values from regular
+    // in avail style values.  Remember "0" for showmanyc means
+    // unknown character availabity
+    inline static streamsize showmanyc(int_type avail, bool eof = true)
+    {
+        if(eof)
+            // eof flag tells us whether there's any ambiguity about actually being end of buffer
+            return avail > 0 ? avail : -1;
+        else
+            return avail;
+    }
 };
 
 
