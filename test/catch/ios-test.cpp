@@ -63,10 +63,36 @@ TEST_CASE("ios")
     } */
     SECTION("experimental tests")
     {
-        internal::basic_ostream<dummy_streambuf> _cout;
+        SECTION("wrap/convert")
+        {
+            internal::basic_ostream<dummy_streambuf> _cout;
 
-        auto wrapped_out = experimental::convert(_cout);
-        ostream& out = wrapped_out;
+            auto wrapped_out = experimental::convert(_cout);
+            ostream& out = wrapped_out;
+        }
+        SECTION("flagged istream")
+        {
+            SECTION("implicit")
+            {
+                estd::experimental::flagged_istream<dummy_streambuf> _in;
+            }
+            SECTION("explicit")
+            {
+                SECTION("blocking")
+                {
+                    estd::experimental::flagged_istream<dummy_streambuf,
+                        estd::experimental::istream_flags::blocking> _in;
+                }
+                SECTION("combination")
+                {
+                    /*
+                    estd::experimental::flagged_istream<dummy_streambuf,
+                        estd::experimental::istream_flags::non_blocking |
+                        estd::experimental::istream_flags::traditional_rdbuf
+                        > _in; */
+                }
+            }
+        }
     }
     SECTION("internal basic_stringbuf test")
     {

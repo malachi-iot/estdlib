@@ -110,6 +110,57 @@ typedef estd::internal::streambuf<estd::internal::impl::in_span_streambuf<char> 
 typedef estd::internal::basic_istream<ispanbuf> ispanstream;
 }
 
+// Working out best way for consumers to really configure their istreams
+namespace experimental {
+#ifdef __cpp_alias_templates
+enum class istream_flags : unsigned
+{
+    // bits 0, 1
+    non_blocking = 0,
+    blocking = 1,
+    runtime_blocking = 2,
+    block_mask = 3,
+
+    // bit 2
+    inline_rdbuf = 0,
+    traditional_rdbuf = 4,
+    rdbuf_mask = 4,
+
+    _default = 0
+};
+
+// Copy/pasted from bitness deducer
+template<bool>
+struct Range;
+
+//template<class TStreambuf>
+//using flagged_istream = estd::internal::basic_istream< TStreambuf >;
+template <class TStreambuf, istream_flags flags = istream_flags::_default, typename = Range<true> >
+class flagged_istream;
+
+// Concept seems to work, though definitely fiddly.  Try:
+// https://softwareengineering.stackexchange.com/questions/194412/using-scoped-enums-for-bit-flags-in-c
+template <class TStreambuf, istream_flags flags>
+class flagged_istream<TStreambuf, flags, 
+    Range<((unsigned)flags & (unsigned)istream_flags::block_mask) == (unsigned)istream_flags::non_blocking> > : estd::internal::basic_istream
+    <TStreambuf, estd::internal::basic_ios
+        <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf> > >
+{
+
+};
+
+template <class TStreambuf>
+class flagged_istream<TStreambuf, istream_flags::blocking> : estd::internal::basic_istream
+    <TStreambuf, estd::internal::basic_ios
+        <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf> > >
+{
+
+};
+
+#endif
+
+}
+
 
 }
 #endif //UTIL_EMBEDDED_ISTREAM_H
