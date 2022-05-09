@@ -184,6 +184,7 @@ struct ios_base_policy
 
     struct nonblocking_type
     {
+        static bool CONSTEXPR is_blocking() { return false; }
         static int_type sgetc(streambuf_type* rdbuf)
         {
             return rdbuf->sgetc();
@@ -193,6 +194,7 @@ struct ios_base_policy
 
     struct do_blocking_type
     {
+        static bool CONSTEXPR is_blocking() { return true; }
         static int_type sgetc(streambuf_type* rdbuf)
         {
             for(;;)
@@ -215,6 +217,7 @@ struct ios_base_policy
     };
 
     typedef do_blocking_type blocking_type;
+    //typedef nonblocking_type blocking_type;
 };
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual

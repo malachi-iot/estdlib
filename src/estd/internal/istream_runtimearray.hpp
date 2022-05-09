@@ -9,7 +9,7 @@ namespace estd {
 namespace internal {
 
 template <class TStreambuf, class TBase, class TStringImpl>
-void nonblocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
+void do_input(internal::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
     typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
@@ -17,6 +17,7 @@ void nonblocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
+    typedef typename istream_type::blocking_type blocking_type;
 
     experimental::locale loc = in.getloc();
 
@@ -26,6 +27,13 @@ void nonblocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
 
         if(ch == traits_type::eof())
         {
+            if(!blocking_type::is_blocking() && in.rdbuf()->in_avail() == 0)
+            {
+                in.setstate(istream_type::nodatabit);
+                // TODO: Strongly consider a batch of sungetc's here so that nonblocking
+                // code can iterate and try again
+            }
+
             in.setstate(istream_type::failbit | istream_type::eofbit);
             break;
         }
@@ -41,7 +49,8 @@ void nonblocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
     }
 }
 
-
+// Since using block_type policy at ios level, peek now blocks in that context
+// so regular input code works
 template <class TStreambuf, class TBase, class TStringImpl>
 void blocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
@@ -97,17 +106,11 @@ internal::basic_istream<TStreambuf, TBase>& operator >>(
         internal::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
-    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
-    typedef typename estd::remove_reference<TStreambuf>::type impl_type;
-    typedef typename impl_type::traits_type traits_type;
-    typedef typename impl_type::char_type char_type;
-    typedef typename impl_type::int_type int_type;
-
     in >> ws;
 
     value.clear();
 
-    internal::blocking_input_helper(in, value);
+    internal::do_input(in, value);
 
     return in;
 }
