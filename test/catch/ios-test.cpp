@@ -75,21 +75,36 @@ TEST_CASE("ios")
             SECTION("implicit")
             {
                 estd::experimental::flagged_istream<dummy_streambuf> _in;
+                REQUIRE(decltype(_in)::policy_type::blocking() == false);
             }
             SECTION("explicit")
             {
+                // DEBT: Something odd about Catch is it has trouble doing a REQUIRE against
+                // struct member constexpr variables
+                unsigned _blocking = estd::experimental::istream_flags::blocking;
+                unsigned _runtime_blocking = estd::experimental::istream_flags::runtime_blocking;
+
                 SECTION("blocking")
                 {
                     estd::experimental::flagged_istream<dummy_streambuf,
                         estd::experimental::istream_flags::blocking> _in;
+                    REQUIRE(decltype(_in)::policy_type::blocking() == _blocking);
                 }
-                SECTION("combination")
+                SECTION("combination 1")
                 {
-                    /*
                     estd::experimental::flagged_istream<dummy_streambuf,
                         estd::experimental::istream_flags::non_blocking |
                         estd::experimental::istream_flags::traditional_rdbuf
-                        > _in; */
+                        > _in;
+                    REQUIRE(decltype(_in)::policy_type::blocking() == false);
+                }
+                SECTION("combination 2")
+                {
+                    estd::experimental::flagged_istream<dummy_streambuf,
+                        estd::experimental::istream_flags::runtime_blocking |
+                        estd::experimental::istream_flags::traditional_rdbuf
+                        > _in;
+                    REQUIRE(decltype(_in)::policy_type::blocking() == _runtime_blocking);
                 }
             }
         }

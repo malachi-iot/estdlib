@@ -8,12 +8,15 @@
 #include "../iosfwd.h"
 #include "../variant.h"
 #include "../thread.h"
+#include "ios_policy.h"
 
 namespace estd {
 
 #ifndef FEATURE_ESTD_AGGRESIVE_BITFIELD
 #define FEATURE_ESTD_AGGRESIVE_BITFIELD 1
 #endif
+
+
 
 
 class ios_base
@@ -192,13 +195,46 @@ struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_
 
 namespace internal {
 
+// Copy/pasted from bitness deducer
+template<bool>
+struct Range;
+
+template <class TStreambuf, estd::experimental::istream_flags::flag_type>
+struct ios_blocking_policy;
+
 template <class TStreambuf>
-struct ios_base_policy
+struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::non_blocking>
+{
+
+};
+
+template <class TStreambuf>
+struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::blocking>
+{
+
+};
+
+template <class TStreambuf>
+struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::runtime_blocking>
+{
+
+};
+
+
+template <class TStreambuf,
+    estd::experimental::istream_flags::flag_type flags = estd::experimental::istream_flags::_default>
+struct ios_base_policy : 
+    ios_blocking_policy<TStreambuf, flags & estd::experimental::istream_flags::block_mask>
 {
     typedef experimental::locale locale_type;
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename streambuf_type::int_type int_type;
+
+    static CONSTEXPR estd::experimental::istream_flags::flag_type blocking()
+    {
+        return flags & estd::experimental::istream_flags::block_mask;
+    }
 
     struct nonblocking_type
     {
