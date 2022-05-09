@@ -56,18 +56,12 @@ public:
 
     friend helper_type;
 
-protected:
-
     int_type sungetc()
     {
-        if(this->gptr() > this->eback())
-        {
-            this->gbump(-1);
-            return traits_type::to_int_type(*this->gptr());
-        }
-
-        return this->pbackfail();
+        return helper_type::sungetc(this);
     }
+
+protected:
 
     // not yet used overflow helpers
     // overflow() without parameter looks loosely similar to sync, but

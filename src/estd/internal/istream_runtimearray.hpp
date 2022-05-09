@@ -30,8 +30,12 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
             if(!blocking_type::is_blocking() && in.rdbuf()->in_avail() == 0)
             {
                 in.setstate(istream_type::nodatabit);
-                // TODO: Strongly consider a batch of sungetc's here so that nonblocking
-                // code can iterate and try again
+                // EXPERIMENTAL
+                // Back off the characters when in nonblocking mode so that one may attempt again
+                // DEBT: Consider doing a gbump as an optimization, remembering that it does no
+                // underflow checks
+                for(unsigned i = value.size(); i > 0; --i)
+                    in.rdbuf()->sungetc();
             }
 
             in.setstate(istream_type::failbit | istream_type::eofbit);

@@ -12,6 +12,21 @@ namespace estd { namespace internal { namespace impl { namespace experimental {
 
 struct streambuf_helper
 {
+    // Default sungetc which relies on gptr and eback
+    template <class TStreambuf>
+    static inline typename TStreambuf::int_type sungetc_full(TStreambuf* sb)
+    {
+        typedef typename TStreambuf::traits_type traits_type;
+
+        if(sb->gptr() > sb->eback())
+        {
+            sb->gbump(-1);
+            return traits_type::to_int_type(*sb->gptr());
+        }
+
+        return sb->pbackfail();
+    }
+
     template <class TStreambuf>
     static inline typename TStreambuf::int_type sbumpc(TStreambuf* sb)
     {
@@ -46,6 +61,26 @@ struct streambuf_helper
         typename TStreambuf::impl_type& sb_impl = *sb;
         return sb_impl.sbumpc();
     }
+
+    template <class TStreambuf>
+    static enable_if_t<is_base_of<
+        estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
+        typename TStreambuf::int_type>
+    sungetc(TStreambuf* sb)
+    {
+        return sungetc_full(sb);
+    }
+
+    template <class TStreambuf>
+    static enable_if_t<!is_base_of<
+        estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
+        typename TStreambuf::int_type>
+    sungetc(TStreambuf* sb)
+    {
+        typename TStreambuf::impl_type& sb_impl = *sb;
+        return sb_impl.sungetc();
+    }
+
 };
 
 

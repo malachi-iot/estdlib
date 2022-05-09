@@ -154,6 +154,19 @@ struct basic_stringbuf :
 
         return pos_type(off_type(-1));
     }
+
+    // UNTESTED
+    int_type sungetc()
+    {
+        if(this->_str.empty())
+            return this->pbackfail();
+        else
+        {
+            this->_str.pop_back();
+            // DEBT: This iterator probably not gonna be so efficient
+            return *(this->_str.end() - 1);
+        }
+    }
 };
 
 }}}
