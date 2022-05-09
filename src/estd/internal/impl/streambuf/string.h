@@ -98,9 +98,12 @@ struct basic_stringbuf :
     {}
 #endif
 
+    // See in_base_type::pos() for why we use ref here
+    const pos_type& pos() const { return in_base_type::pos(); }
+
     streamsize xsgetn(char_type* s, streamsize count)
     {
-        size_type count_copied = base_type::str().copy(s, count, in_base_type::pos());
+        size_type count_copied = base_type::str().copy(s, count, pos());
 
         in_base_type::gbump(count_copied);
 
@@ -109,7 +112,7 @@ struct basic_stringbuf :
 
     size_type xin_avail() const
     {
-        return this->_str.length() - in_base_type::pos();
+        return this->_str.length() - pos();
     }
 
     streamsize showmanyc() const
@@ -120,7 +123,9 @@ struct basic_stringbuf :
 
     char_type xsgetc() const
     {
-        char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
+        // DEBT: May be better off using standard string indexer here.  Its fancy iterator probably
+        // will optimize out
+        char_type ch = *base_type::_str.clock(pos(), 1);
         base_type::_str.cunlock();
         return ch;
     }
@@ -155,16 +160,14 @@ struct basic_stringbuf :
         return pos_type(off_type(-1));
     }
 
-    // UNTESTED
     int_type sungetc()
     {
-        if(this->_str.empty())
+        if(in_base_type::pos() == 0)
             return this->pbackfail();
         else
         {
-            this->_str.pop_back();
-            // DEBT: This iterator probably not gonna be so efficient
-            return *(this->_str.end() - 1);
+            in_base_type::gbump(-1);
+            return traits_type::to_int_type(xsgetc());
         }
     }
 };
