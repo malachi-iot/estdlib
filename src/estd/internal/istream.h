@@ -28,6 +28,8 @@ private:
         _gcount = 0;
 #endif
         return this->good() ?
+            // Alas, standard C++ has set the precedent where peek sometimes blocks.
+            // We can flip that behavior on and off at the istream level.
             blocking_type::sgetc(this->rdbuf()) :
             traits_type::eof();
     }

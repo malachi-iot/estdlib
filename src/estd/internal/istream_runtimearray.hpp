@@ -1,3 +1,8 @@
+/**
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/io/ios_base/iostate
+ */
 #pragma once
 
 #include "runtime_array.h"
@@ -15,7 +20,7 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
     typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
     typedef typename estd::remove_reference<TStreambuf>::type impl_type;
     typedef typename impl_type::traits_type traits_type;
-    typedef typename impl_type::char_type char_type;
+    //typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
     typedef typename istream_type::blocking_type blocking_type;
 
@@ -27,26 +32,27 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
 
         if(ch == traits_type::eof())
         {
+            // If we're non blocking variety, and rdbuf says "unsure if more characters
+            // are available", then do our special nodata processing
             if(!blocking_type::is_blocking() && in.rdbuf()->in_avail() == 0)
             {
-                in.setstate(istream_type::nodatabit);
-                // EXPERIMENTAL
-                // Back off the characters when in nonblocking mode so that one may attempt again
-                // DEBT: Consider doing a gbump as an optimization, remembering that it does no
-                // underflow checks
-                for(unsigned i = value.size(); i > 0; --i)
-                    in.rdbuf()->sungetc();
+                blocking_type::on_nodata(in, in.rdbuf(), value.size());
+            }
+            else
+            {
+                if(value.empty())
+                    // "if the function extracts no characters from the input stream." [1]
+                    in.setstate(istream_type::failbit);
+
+                in.setstate(istream_type::eofbit);
             }
 
-            in.setstate(istream_type::failbit | istream_type::eofbit);
             break;
         }
-        else if(isspace((char_type)ch, loc)) break;
-
-        //*dest++ = ch;
+        else if(isspace(traits_type::to_char_type(ch), loc)) break;
 
         // NOTE: += is defined and should have worked
-        value.push_back((char_type)ch);
+        value.push_back(traits_type::to_char_type(ch));
         //value += (char_type)ch;
 
         in.get();

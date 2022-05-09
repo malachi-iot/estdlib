@@ -189,12 +189,26 @@ struct ios_base_policy
         {
             return rdbuf->sgetc();
         }
+
+        static void on_nodata(ios_base& in, streambuf_type* rdbuf, unsigned sz)
+        {
+            in.setstate(ios_base::nodatabit);
+            // EXPERIMENTAL
+            // Back off the characters when in nonblocking mode so that one may attempt again
+            // DEBT: Consider doing a gbump as an optimization, remembering that it does no
+            // underflow checks
+            for(unsigned i = sz; i > 0; --i)
+                rdbuf->sungetc();
+        }
     };
 
 
     struct do_blocking_type
     {
         static bool CONSTEXPR is_blocking() { return true; }
+
+        static void on_nodata(ios_base& in, streambuf_type* rdbuf, unsigned sz) {}
+
         static int_type sgetc(streambuf_type* rdbuf)
         {
             for(;;)
