@@ -88,7 +88,7 @@ TEST_CASE("ios")
                 {
                     estd::experimental::flagged_istream<dummy_streambuf,
                         estd::experimental::istream_flags::blocking> _in;
-                    REQUIRE(decltype(_in)::policy_type::blocking() == _blocking);
+                    REQUIRE(_in.policy().blocking() == _blocking);
                 }
                 SECTION("combination 1")
                 {
@@ -96,7 +96,7 @@ TEST_CASE("ios")
                         estd::experimental::istream_flags::non_blocking |
                         estd::experimental::istream_flags::traditional_rdbuf
                         > _in;
-                    REQUIRE(decltype(_in)::policy_type::blocking() == false);
+                    REQUIRE(_in.policy().blocking() == false);
                 }
                 SECTION("combination 2")
                 {

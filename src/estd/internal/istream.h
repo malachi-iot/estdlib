@@ -30,7 +30,7 @@ private:
         return this->good() ?
             // Alas, standard C++ has set the precedent where peek sometimes blocks.
             // We can flip that behavior on and off at the istream level.
-            blocking_type::sgetc(this->rdbuf()) :
+            blocking_type::sgetc(*this, this->rdbuf()) :
             traits_type::eof();
     }
 

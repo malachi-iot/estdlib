@@ -205,41 +205,13 @@ struct ios_blocking_policy;
 template <class TStreambuf>
 struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::non_blocking>
 {
-
-};
-
-template <class TStreambuf>
-struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::blocking>
-{
-
-};
-
-template <class TStreambuf>
-struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::runtime_blocking>
-{
-
-};
-
-
-template <class TStreambuf,
-    estd::experimental::istream_flags::flag_type flags = estd::experimental::istream_flags::_default>
-struct ios_base_policy : 
-    ios_blocking_policy<TStreambuf, flags & estd::experimental::istream_flags::block_mask>
-{
-    typedef experimental::locale locale_type;
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename streambuf_type::int_type int_type;
 
-    static CONSTEXPR estd::experimental::istream_flags::flag_type blocking()
+    struct blocking_type
     {
-        return flags & estd::experimental::istream_flags::block_mask;
-    }
-
-    struct nonblocking_type
-    {
-        static bool CONSTEXPR is_blocking() { return false; }
-        static int_type sgetc(streambuf_type* rdbuf)
+        static int_type sgetc(const ios_base&, streambuf_type* rdbuf)
         {
             return rdbuf->sgetc();
         }
@@ -255,15 +227,20 @@ struct ios_base_policy :
                 rdbuf->sungetc();
         }
     };
+};
 
+template <class TStreambuf>
+struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::blocking>
+{
+    typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::traits_type traits_type;
+    typedef typename streambuf_type::int_type int_type;
 
-    struct do_blocking_type
+    struct blocking_type
     {
-        static bool CONSTEXPR is_blocking() { return true; }
-
         static void on_nodata(ios_base& in, streambuf_type* rdbuf, unsigned sz) {}
 
-        static int_type sgetc(streambuf_type* rdbuf)
+        static int_type sgetc(const ios_base&, streambuf_type* rdbuf)
         {
             for(;;)
             {
@@ -283,9 +260,45 @@ struct ios_base_policy :
             }
         }
     };
+};
 
-    typedef do_blocking_type blocking_type;
-    //typedef nonblocking_type blocking_type;
+template <class TStreambuf>
+struct ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::runtime_blocking>
+{
+    typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename streambuf_type::int_type int_type;
+    typedef ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::non_blocking> nonblocking_policy;
+    typedef ios_blocking_policy<TStreambuf, estd::experimental::istream_flags::blocking> blocking_policy;
+
+    // FIX: Need to interrogate 'in' to determine whether we're blocking or not blocking
+    struct blocking_type
+    {
+        static void on_nodata(ios_base& in, streambuf_type* rdbuf, unsigned sz)
+        {
+            blocking_policy::on_nodata(in, rdbuf, sz);
+        }
+
+        static int_type sgetc(const ios_base& in, streambuf_type* rdbuf)
+        {
+            return blocking_policy::sgetc(in, rdbuf);
+        }
+    };
+};
+
+
+template <class TStreambuf,
+    estd::experimental::istream_flags::flag_type flags =
+        estd::experimental::istream_flags::blocking> // FIX: Temporarily set to blocking as we code out feature
+        //estd::experimental::istream_flags::_default>
+struct ios_base_policy : 
+    ios_blocking_policy<TStreambuf, flags & estd::experimental::istream_flags::block_mask>
+{
+    typedef experimental::locale locale_type;
+
+    static CONSTEXPR estd::experimental::istream_flags::flag_type blocking()
+    {
+        return flags & estd::experimental::istream_flags::block_mask;
+    }
 };
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
@@ -362,7 +375,8 @@ public:
 //template<class TChar, class Traits = std::char_traits <TChar>>
 template<class TStreambuf, bool use_pointer = false,
     class TPolicy = ios_base_policy<TStreambuf> >
-class basic_ios : public basic_ios_base<TStreambuf, use_pointer>
+class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
+    estd::internal::struct_evaporator<TPolicy>
 {
 public:
     typedef basic_ios_base<TStreambuf, use_pointer> base_type;
@@ -373,6 +387,9 @@ public:
     typedef TPolicy policy_type;
     typedef typename policy_type::locale_type locale_type;
     typedef typename policy_type::blocking_type blocking_type;
+
+    typedef typename estd::internal::struct_evaporator<TPolicy> policy_provider_type;
+    typedef typename policy_provider_type::evaporated_type evaporated_policy_type;
 
 protected:
     basic_ios() {}
@@ -398,6 +415,8 @@ protected:
         base_type(streambuf) {}
 
 public:
+    evaporated_policy_type policy() const { return policy_provider_type::value(); }
+    
     // NOTE: spec calls for this actually in ios_base, but for now putting it
     // here so that it can reach into streambuf to grab it.  A slight but notable
     // deviation from standard C++

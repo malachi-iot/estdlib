@@ -22,6 +22,7 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
     typedef typename impl_type::traits_type traits_type;
     //typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
+    typedef typename istream_type::policy_type policy_type;
     typedef typename istream_type::blocking_type blocking_type;
 
     experimental::locale loc = in.getloc();
@@ -34,7 +35,7 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
         {
             // If we're non blocking variety, and rdbuf says "unsure if more characters
             // are available", then do our special nodata processing
-            if(!blocking_type::is_blocking() && in.rdbuf()->in_avail() == 0)
+            if((policy_type::blocking() == false) && in.rdbuf()->in_avail() == 0)
             {
                 blocking_type::on_nodata(in, in.rdbuf(), value.size());
             }
