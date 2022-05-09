@@ -69,7 +69,10 @@ struct out_stringbuf : stringbuf_base<TString>
 template <class TString>
 struct basic_stringbuf :
         out_stringbuf<TString>,
-        in_pos_streambuf_base<typename TString::traits_type>
+        in_pos_streambuf_base<typename TString::traits_type>,
+
+        estd::experimental::streambuf_sungetc_tag,
+        estd::experimental::streambuf_xin_avail_tag
 {
     typedef out_stringbuf<TString> base_type;
     typedef typename base_type::traits_type traits_type;

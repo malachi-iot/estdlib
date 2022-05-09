@@ -127,7 +127,10 @@ template <class TChar,
         class TBase = estd::experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,
+
         estd::experimental::streambuf_gptr_tag,
+        estd::experimental::streambuf_xin_avail_tag,
+
         TBase
 {
     typedef in_pos_streambuf_base<TCharTraits> base_pos_type;
@@ -180,7 +183,7 @@ protected:
         return c;
     }
 
-    char_type& xsgetc() const { return *gptr(); }
+    const char_type& xsgetc() const { return *gptr(); }
 };
 
 

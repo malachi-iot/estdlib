@@ -12,4 +12,10 @@ struct streambuf_sbumpc_tag {};
 // Indicates streambuf impl provides gptr and egptr
 struct streambuf_gptr_tag {};
 
+// Indicates streambuf impl provides sungetc
+struct streambuf_sungetc_tag {};
+
+// Indicates streambuf impl provides xin_avail
+struct streambuf_xin_avail_tag {};
+
 }}
