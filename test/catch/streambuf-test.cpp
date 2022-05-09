@@ -157,6 +157,7 @@ TEST_CASE("streambuf")
 
         typedef estd::internal::impl::in_span_streambuf<const char> sb_impl_type;
         typedef estd::internal::streambuf<sb_impl_type> sb_type;
+        typedef typename sb_type::traits_type traits_type;
 
         sb_type sb(raw_str);
 
@@ -184,6 +185,16 @@ TEST_CASE("streambuf")
             new_pos = sb.pubseekoff(5, ios_base::cur);
             REQUIRE(new_pos == 10);
             REQUIRE(sb.sgetc() == raw_str[new_pos]);
+        }
+        SECTION("sungetc")
+        {
+            sb.sbumpc();
+            sb.sbumpc();
+            sb.sbumpc();
+            REQUIRE(sb.sungetc() == raw_str[2]);
+            REQUIRE(sb.sungetc() == raw_str[1]);
+            REQUIRE(sb.sungetc() == raw_str[0]);
+            REQUIRE(sb.sungetc() == traits_type::eof());
         }
     }
     SECTION("pubsync - method finding")

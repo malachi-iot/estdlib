@@ -72,7 +72,9 @@ TEST_CASE("ios")
     {
         typedef internal::impl::basic_stringbuf<layer1::string<32> > impl_type;
         typedef internal::streambuf<impl_type> streambuf_type;
+        typedef typename streambuf_type::traits_type traits_type;
 
+        // TODO: Move the raw stringbuf portion out to streambuf-test
         SECTION("impl")
         {
             impl_type sb;
@@ -88,6 +90,18 @@ TEST_CASE("ios")
             sb.sputn(raw_str, sizeof (raw_str) - 1);
 
             REQUIRE(sb.str() == raw_str);
+        }
+        SECTION("sungetc")
+        {
+            streambuf_type sb = raw_str;
+
+            sb.sbumpc();
+            sb.sbumpc();
+            sb.sbumpc();
+            REQUIRE(sb.sungetc() == raw_str[2]);
+            REQUIRE(sb.sungetc() == raw_str[1]);
+            REQUIRE(sb.sungetc() == raw_str[0]);
+            REQUIRE(sb.sungetc() == traits_type::eof());
         }
         SECTION("ostream / istream")
         {
