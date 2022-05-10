@@ -52,7 +52,7 @@ public:
     typedef typename traits_type::off_type off_type;
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
-    typedef internal::impl::experimental::streambuf_helper helper_type;
+    typedef internal::impl::streambuf_helper helper_type;
 
     friend helper_type;
 

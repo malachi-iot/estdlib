@@ -71,7 +71,7 @@ struct basic_stringbuf :
         out_stringbuf<TString>,
         in_pos_streambuf_base<typename TString::traits_type>,
 
-        estd::experimental::streambuf_sungetc_tag
+        streambuf_sungetc_tag
 {
     typedef out_stringbuf<TString> base_type;
     typedef typename base_type::traits_type traits_type;
@@ -132,7 +132,7 @@ struct basic_stringbuf :
     // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
-    char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
+    //char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
 
 
     // UNTESTED

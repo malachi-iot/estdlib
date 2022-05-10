@@ -1,3 +1,26 @@
+# vNEXT - DDMMMYY
+
+## Added Features
+
+* `internal::basic_istream` can be configured in blocking or non blocking mode via `TPolicy`
+* `internal::flagged_istream` now available to make `TPolicy` interaction easier
+* istream and ostream wrappers for Arduino's `Stream` and `Print` classes
+
+## Quality Updates
+
+* C++0x compatibility, especially where streambuf/iostreams are involved
+
+## Known Issues
+
+* Blocking support is new and is likely to have deficiencies
+* Arduino istream wrapper *only* works in blocking mode
+
+## Additional Notes
+
+Although istreams can now be configured as blocking or nonblocking, underlying streambufs continue
+to be nonblocking.  At some point we'll probably need a blocking streambuf paradigm as well, but so
+far we've avoided it.
+
 # v0.2.1 - 06MAY22
 
 ## Added Features

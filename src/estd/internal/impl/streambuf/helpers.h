@@ -8,8 +8,9 @@
 // 2. provide often-reused methods for impl::streambuf
 // 3. offer specializations and other template tricks for use by estd::streambuf
 
-namespace estd { namespace internal { namespace impl { namespace experimental {
+namespace estd { namespace internal { namespace impl { 
 
+// DEBT: Lousy name
 struct streambuf_helper
 {
     // Default sungetc which relies on gptr and eback
@@ -45,7 +46,7 @@ struct streambuf_helper
 
     template <class TStreambuf>
     static typename enable_if<!is_base_of<
-            estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
+            streambuf_sbumpc_tag, TStreambuf>::value,
         typename TStreambuf::int_type>::type
     sbumpc_evaporated(TStreambuf* sb)
     {
@@ -54,7 +55,7 @@ struct streambuf_helper
 
     template <class TStreambuf>
     static typename enable_if<is_base_of<
-            estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
+            streambuf_sbumpc_tag, TStreambuf>::value,
         typename TStreambuf::int_type>::type
     sbumpc_evaporated(TStreambuf* sb)
     {
@@ -64,7 +65,7 @@ struct streambuf_helper
 
     template <class TStreambuf>
     static typename enable_if<is_base_of<
-        estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
+        streambuf_gptr_tag, TStreambuf>::value,
         typename TStreambuf::int_type>::type
     sungetc(TStreambuf* sb)
     {
@@ -73,7 +74,7 @@ struct streambuf_helper
 
     template <class TStreambuf>
     static typename enable_if<!is_base_of<
-        estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
+        streambuf_gptr_tag, TStreambuf>::value,
         typename TStreambuf::int_type>::type
     sungetc(TStreambuf* sb)
     {
@@ -122,4 +123,4 @@ typename TStreambuf::pos_type seekoff_cur(TStreambuf* sb, int off, ios_base::ope
 }
 
 
-}}}}
+}}}

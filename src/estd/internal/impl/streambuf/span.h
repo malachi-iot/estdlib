@@ -128,7 +128,7 @@ template <class TChar,
 struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,
 
-        estd::experimental::streambuf_gptr_tag,
+        streambuf_gptr_tag,
 
         TBase
 {

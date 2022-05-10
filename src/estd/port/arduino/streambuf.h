@@ -59,9 +59,9 @@ template <class TTraits>
 class arduino_streambuf : public arduino_ostreambuf<TTraits, 
     arduino_streambuf_base<TTraits, Stream> >,
 #if FEATURE_ARDUINO_STREAM_PEEKBUFFER
-    estd::experimental::streambuf_gptr_tag,
+    streambuf_gptr_tag,
 #endif
-    estd::experimental::streambuf_sbumpc_tag
+    streambuf_sbumpc_tag
 {
     typedef arduino_ostreambuf<TTraits, arduino_streambuf_base<TTraits, Stream> > base_type;
 

@@ -2,7 +2,7 @@
 
 // because ESTD_FN_HAS_METHOD was a bust, trying out explicit tagging instead
 
-namespace estd { namespace experimental {
+namespace estd { namespace internal {
 
 // Indicates streambuf impl provides its own sbumpc.  This is useful in
 // scnearios when wrapping another API which itself provides a 'getch' and
