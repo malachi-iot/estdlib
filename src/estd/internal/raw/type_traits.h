@@ -149,5 +149,10 @@ struct aligned_storage {
 };
 #endif
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class... >
+using void_t = void;
+#endif
+
 
 }

@@ -112,6 +112,7 @@
 #endif
 
 
+// NOTE: Only applies to empty constructor.  You're on your own for the "more complex" varieties
 #ifdef FEATURE_CPP_DEFAULT_CTOR
 #define ESTD_CPP_DEFAULT_CTOR(class_name)   constexpr class_name() = default;
 #else

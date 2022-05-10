@@ -149,10 +149,6 @@ public:
 #endif
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template< class... >
-using void_t = void;
-
-
 template< class T >
 using decay_t = typename decay<T>::type;
 #endif
@@ -204,9 +200,9 @@ inline constexpr bool is_empty_f() { return is_empty<T>::value; }
 }
 
 #include "internal/llvm_type_traits.h"
+#include "internal/is_base_of.h"
 
 #ifdef FEATURE_CPP_VARIADIC
-#include "internal/is_base_of.h"
 #include "internal/invoke_result.h"
 #endif
 

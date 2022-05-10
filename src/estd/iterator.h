@@ -54,7 +54,9 @@ public:
         ch = rdbuf->sgetc();
     }
 
+#ifdef FEATURE_CPP_DEFAULT_CTOR
     istreambuf_iterator(const istreambuf_iterator& copy_from) = default;
+#endif
 
     // prefix version
     iterator& operator++()
