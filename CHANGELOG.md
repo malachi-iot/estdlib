@@ -13,9 +13,9 @@
 ## Known Issues
 
 * istream:
-** Blocking support is new and is likely to have deficiencies
-** Arduino wrapper *only* works in blocking mode
-** extraction operator only supports strings
+    * Blocking support is new and is likely to have deficiencies
+    * Arduino wrapper *only* works in blocking mode
+    * extraction operator only supports strings
 
 ## Additional Notes
 
