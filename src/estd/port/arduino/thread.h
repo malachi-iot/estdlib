@@ -17,7 +17,7 @@ void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
     delay(count);
 }
 
-void yield()
+inline void yield()
 {
     ::yield();
 }

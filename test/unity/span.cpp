@@ -13,7 +13,7 @@ static void test_span_1()
     TEST_ASSERT_EQUAL_CHAR('A', span[0]);
 #endif
 
-    TEST_ASSERT_LESS_OR_EQUAL(sizeof(int) * 2, sizeof(span));
+    TEST_ASSERT_LESS_OR_EQUAL(sizeof(char*) * 2, sizeof(span));
 }
 
 #ifdef ESP_IDF_TESTING
