@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ios_policy.h"
+
 namespace estd { namespace internal {
 
 template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
@@ -328,5 +330,24 @@ public:
     }
 #endif
 };
+
+template <class TStreambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
+#if defined(FEATURE_CPP_ALIASTEMPLATE)
+using flagged_istream = basic_istream<TStreambuf,
+            estd::internal::basic_ios<TStreambuf, false,
+                estd::internal::ios_base_policy<TStreambuf, flags> > >;
+#else
+class flagged_istream : public estd::internal::basic_istream
+        <TStreambuf, estd::internal::basic_ios
+            <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > >
+{
+    typedef estd::internal::basic_istream
+        <TStreambuf, estd::internal::basic_ios
+            <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > > base_type;
+
+public:
+    ESTD_CPP_FORWARDING_CTOR(flagged_istream)
+};
+#endif
 
 }}

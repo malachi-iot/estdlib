@@ -70,11 +70,12 @@ TEST_CASE("ios")
             auto wrapped_out = experimental::convert(_cout);
             ostream& out = wrapped_out;
         }
+        // TODO: Has made it past experimental phase, move out of experimental area
         SECTION("flagged istream")
         {
             SECTION("implicit")
             {
-                estd::experimental::flagged_istream<dummy_streambuf> _in;
+                estd::internal::flagged_istream<dummy_streambuf> _in;
                 REQUIRE(decltype(_in)::policy_type::blocking() == false);
             }
             SECTION("explicit")
@@ -86,13 +87,13 @@ TEST_CASE("ios")
 
                 SECTION("blocking")
                 {
-                    estd::experimental::flagged_istream<dummy_streambuf,
+                    estd::internal::flagged_istream<dummy_streambuf,
                         estd::internal::istream_flags::blocking> _in;
                     REQUIRE(_in.policy().blocking() == _blocking);
                 }
                 SECTION("combination 1")
                 {
-                    estd::experimental::flagged_istream<dummy_streambuf,
+                    estd::internal::flagged_istream<dummy_streambuf,
                         estd::internal::istream_flags::non_blocking |
                         estd::internal::istream_flags::traditional_rdbuf
                         > _in;
@@ -100,7 +101,7 @@ TEST_CASE("ios")
                 }
                 SECTION("combination 2")
                 {
-                    estd::experimental::flagged_istream<dummy_streambuf,
+                    estd::internal::flagged_istream<dummy_streambuf,
                         estd::internal::istream_flags::runtime_blocking |
                         estd::internal::istream_flags::traditional_rdbuf
                         > _in;

@@ -9,7 +9,8 @@ namespace internal {
 
 // NOTE: May have to make a bunch of duplicate #defines for pre C++0x compilers
 
-struct istream_flags
+// flags applying to both istream and ostream
+struct stream_flags
 {
     typedef unsigned flag_type;
 
@@ -19,20 +20,26 @@ struct istream_flags
         runtime_blocking = 2,
         block_mask = 3,
 
-    // bit 2
+        // bit 2
         inline_rdbuf = 0,
         traditional_rdbuf = 4,
         rdbuf_mask = 4,
 
+        _end = 4,
         _default = 0;
+};
+
+// istream specific flags
+struct istream_flags : stream_flags
+{
 };
 
 
 template <class TStreambuf, estd::internal::istream_flags::flag_type>
-struct ios_blocking_policy;
+struct istream_blocking_policy;
 
 template <class TStreambuf>
-struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::non_blocking>
+struct istream_blocking_policy<TStreambuf, estd::internal::istream_flags::non_blocking>
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
@@ -59,7 +66,7 @@ struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::non_blocki
 };
 
 template <class TStreambuf>
-struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::blocking>
+struct istream_blocking_policy<TStreambuf, estd::internal::istream_flags::blocking>
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
@@ -92,12 +99,12 @@ struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::blocking>
 };
 
 template <class TStreambuf>
-struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::runtime_blocking>
+struct istream_blocking_policy<TStreambuf, estd::internal::istream_flags::runtime_blocking>
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
     typedef typename streambuf_type::int_type int_type;
-    typedef ios_blocking_policy<TStreambuf, estd::internal::istream_flags::non_blocking> nonblocking_policy;
-    typedef ios_blocking_policy<TStreambuf, estd::internal::istream_flags::blocking> blocking_policy;
+    typedef istream_blocking_policy<TStreambuf, estd::internal::istream_flags::non_blocking> nonblocking_policy;
+    typedef istream_blocking_policy<TStreambuf, estd::internal::istream_flags::blocking> blocking_policy;
 
     // FIX: Need to interrogate 'in' to determine whether we're blocking or not blocking
     struct blocking_type
@@ -116,17 +123,15 @@ struct ios_blocking_policy<TStreambuf, estd::internal::istream_flags::runtime_bl
 
 
 template <class TStreambuf,
-    estd::internal::istream_flags::flag_type flags =
-        estd::internal::istream_flags::blocking> // FIX: Temporarily set to blocking as we code out feature
-        //estd::experimental::istream_flags::_default>
+    estd::internal::stream_flags::flag_type flags = estd::internal::stream_flags::_default>
 struct ios_base_policy : 
-    ios_blocking_policy<TStreambuf, flags & estd::internal::istream_flags::block_mask>
+    istream_blocking_policy<TStreambuf, flags & estd::internal::istream_flags::block_mask>
 {
     typedef experimental::locale locale_type;
 
-    static CONSTEXPR estd::internal::istream_flags::flag_type blocking()
+    static CONSTEXPR estd::internal::stream_flags::flag_type blocking()
     {
-        return flags & estd::internal::istream_flags::block_mask;
+        return flags & estd::internal::stream_flags::block_mask;
     }
 };
 

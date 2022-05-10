@@ -5,7 +5,8 @@
 
 namespace estd {
     
-typedef estd::internal::basic_istream<estd::arduino_streambuf> arduino_istream;
+typedef estd::internal::flagged_istream<estd::arduino_streambuf,
+    estd::internal::istream_flags::blocking> arduino_istream;
 
 namespace internal {
 
