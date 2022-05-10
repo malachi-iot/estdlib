@@ -44,18 +44,18 @@ struct streambuf_helper
     }
 
     template <class TStreambuf>
-    static enable_if_t<!is_base_of<
+    static typename enable_if<!is_base_of<
             estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
-        typename TStreambuf::int_type>
+        typename TStreambuf::int_type>::type
     sbumpc_evaporated(TStreambuf* sb)
     {
         return sbumpc(sb);
     }
 
     template <class TStreambuf>
-    static enable_if_t<is_base_of<
+    static typename enable_if<is_base_of<
             estd::experimental::streambuf_sbumpc_tag, TStreambuf>::value,
-        typename TStreambuf::int_type>
+        typename TStreambuf::int_type>::type
     sbumpc_evaporated(TStreambuf* sb)
     {
         typename TStreambuf::impl_type& sb_impl = *sb;
@@ -63,18 +63,18 @@ struct streambuf_helper
     }
 
     template <class TStreambuf>
-    static enable_if_t<is_base_of<
+    static typename enable_if<is_base_of<
         estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
-        typename TStreambuf::int_type>
+        typename TStreambuf::int_type>::type
     sungetc(TStreambuf* sb)
     {
         return sungetc_full(sb);
     }
 
     template <class TStreambuf>
-    static enable_if_t<!is_base_of<
+    static typename enable_if<!is_base_of<
         estd::experimental::streambuf_gptr_tag, TStreambuf>::value,
-        typename TStreambuf::int_type>
+        typename TStreambuf::int_type>::type
     sungetc(TStreambuf* sb)
     {
         typename TStreambuf::impl_type& sb_impl = *sb;

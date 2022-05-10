@@ -14,7 +14,7 @@ struct istream_flags
     typedef unsigned flag_type;
 
     // bits 0, 1
-    static constexpr flag_type non_blocking = 0,
+    static CONSTEXPR flag_type non_blocking = 0,
         blocking = 1,
         runtime_blocking = 2,
         block_mask = 3,

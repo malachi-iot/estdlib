@@ -74,7 +74,8 @@ public:
 
     evaporated_type value() const { return value_type(); }
 
-    struct_evaporator() = default;
+    ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
+
     struct_evaporator(value_type) {}
 
     static CONSTEXPR bool is_evaporated = true;
@@ -96,7 +97,7 @@ public:
     evaporated_type value() { return value_; }
     const_evaporated_type value() const { return value_; }
 
-    struct_evaporator() = default;
+    ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
     struct_evaporator(const value_type& value) :
         value_(value)
     {
