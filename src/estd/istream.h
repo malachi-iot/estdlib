@@ -142,7 +142,7 @@ class flagged_istream<TStreambuf, istream_flags::blocking> : public estd::intern
 {
 
 }; */
-template <class TStreambuf, istream_flags::flag_type flags = istream_flags::_default>
+template <class TStreambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
 class flagged_istream : public estd::internal::basic_istream
         <TStreambuf, estd::internal::basic_ios
             <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > >

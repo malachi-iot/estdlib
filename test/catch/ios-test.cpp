@@ -81,28 +81,28 @@ TEST_CASE("ios")
             {
                 // DEBT: Something odd about Catch is it has trouble doing a REQUIRE against
                 // struct member constexpr variables
-                unsigned _blocking = estd::experimental::istream_flags::blocking;
-                unsigned _runtime_blocking = estd::experimental::istream_flags::runtime_blocking;
+                unsigned _blocking = estd::internal::istream_flags::blocking;
+                unsigned _runtime_blocking = estd::internal::istream_flags::runtime_blocking;
 
                 SECTION("blocking")
                 {
                     estd::experimental::flagged_istream<dummy_streambuf,
-                        estd::experimental::istream_flags::blocking> _in;
+                        estd::internal::istream_flags::blocking> _in;
                     REQUIRE(_in.policy().blocking() == _blocking);
                 }
                 SECTION("combination 1")
                 {
                     estd::experimental::flagged_istream<dummy_streambuf,
-                        estd::experimental::istream_flags::non_blocking |
-                        estd::experimental::istream_flags::traditional_rdbuf
+                        estd::internal::istream_flags::non_blocking |
+                        estd::internal::istream_flags::traditional_rdbuf
                         > _in;
                     REQUIRE(_in.policy().blocking() == false);
                 }
                 SECTION("combination 2")
                 {
                     estd::experimental::flagged_istream<dummy_streambuf,
-                        estd::experimental::istream_flags::runtime_blocking |
-                        estd::experimental::istream_flags::traditional_rdbuf
+                        estd::internal::istream_flags::runtime_blocking |
+                        estd::internal::istream_flags::traditional_rdbuf
                         > _in;
                     REQUIRE(decltype(_in)::policy_type::blocking() == _runtime_blocking);
                 }
