@@ -23,9 +23,11 @@ estd::from_chars_result from_chars(const char* first,
                                                 const int base = 10)
 {
     if(base > 10)
-        return internal::from_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::from_chars_integer<
+                internal::char_base_traits<internal::encodings::UTF8, 36> >(first, last, value, base);
     else
-        return internal::from_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::from_chars_integer<
+                internal::char_base_traits<internal::encodings::UTF8, 10> >(first, last, value, base);
 }
 
 // TODO: Needs bounds check on to_chars
@@ -42,9 +44,11 @@ template <class TInt>
 inline to_chars_result to_chars_opt(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer_opt<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::to_chars_integer_opt<
+                internal::char_base_traits<internal::encodings::UTF8, 36> >(first, last, value, base);
     else
-        return internal::to_chars_integer_opt<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::to_chars_integer_opt<
+                internal::char_base_traits<internal::encodings::UTF8, 10> >(first, last, value, base);
 }
 
 template <class TInt>
@@ -61,9 +65,11 @@ template <class TInt>
 to_chars_result to_chars_exp(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::to_chars_integer<
+                internal::char_base_traits<internal::encodings::UTF8, 36> >(first, last, value, base);
     else
-        return internal::to_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::to_chars_integer<
+                internal::char_base_traits<internal::encodings::UTF8, 10> >(first, last, value, base);
 }
 
 

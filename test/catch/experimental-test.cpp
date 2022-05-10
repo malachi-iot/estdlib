@@ -597,7 +597,7 @@ TEST_CASE("experimental tests")
 
         SECTION("decimal")
         {
-            typedef char_base_traits<10> cbt;
+            typedef char_base_traits<estd::internal::encodings::UTF8, 10> cbt;
 
             REQUIRE(cbt::is_in_base('9') == true);
             REQUIRE(cbt::is_in_base('F') == false);
@@ -606,7 +606,7 @@ TEST_CASE("experimental tests")
         }
         SECTION("hexadecimal")
         {
-            typedef char_base_traits<16> cbt;
+            typedef char_base_traits<estd::internal::encodings::UTF8, 16> cbt;
 
             REQUIRE(cbt::is_in_base('F') == true);
             REQUIRE(cbt::is_in_base('G') == false);

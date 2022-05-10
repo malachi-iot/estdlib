@@ -29,11 +29,6 @@ struct to_chars_result
 
 
 namespace internal {
-/// @brief Represents char-to-base-n conversion traits
-/// @tparam b numeric base indicator
-/// @tparam TEnable for internal use
-template<unsigned short b, class TEnable = estd::internal::Range<true> >
-struct char_base_traits;
 
 // due to FEATURE_CPP_ENUM_CLASS no available everywhere
 struct encodings
@@ -45,6 +40,13 @@ struct encodings
         UTF16
     };
 };
+
+
+/// @brief Represents char-to-base-n conversion traits
+/// @tparam b numeric base indicator
+/// @tparam TEnable for internal use
+template<encodings::values encoding, unsigned short b, class TEnable = estd::internal::Range<true> >
+struct char_base_traits;
 
 template <encodings::values encoding>
 struct char_base_traits_base;

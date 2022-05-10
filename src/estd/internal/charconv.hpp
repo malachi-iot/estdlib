@@ -40,9 +40,8 @@ bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 }
 #endif
 
-/// (Maybe) Requires ASCII
 template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<b <= 10> > :
+struct char_base_traits<encodings::UTF8, b, estd::internal::Range<b <= 10> > :
         char_base_traits_base<encodings::UTF8>
 {
     static inline CONSTEXPR unsigned base() { return b; }
@@ -71,9 +70,8 @@ struct char_base_traits<b, estd::internal::Range<b <= 10> > :
     }
 };
 
-/// (Maybe) Requires ASCII
 template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
+struct char_base_traits<encodings::UTF8, b, estd::internal::Range<(b > 10 && b <= 36)> > :
         char_base_traits_base<encodings::UTF8>
 {
     static inline CONSTEXPR bool isupper(char c, const unsigned short _base = b)

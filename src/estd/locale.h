@@ -213,7 +213,7 @@ private:
     iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
         ios_base::iostate& err, ios_base& str, T& v) const
     {
-        typedef estd::internal::char_base_traits<base> char_base_traits;
+        typedef estd::internal::char_base_traits<internal::encodings::UTF8, base> char_base_traits;
         typedef typename char_base_traits::int_type int_type;
 
         v = 0;
