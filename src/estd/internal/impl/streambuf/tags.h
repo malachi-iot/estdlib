@@ -18,4 +18,8 @@ struct streambuf_sungetc_tag {};
 // Indicates streambuf impl provides showmanyc
 struct streambuf_showmanyc_tag {};
 
+// Indicates streambuf impl supports blocking
+// NOT YET USED
+struct streambuf_blocking_tag {};
+
 }}
