@@ -5,6 +5,7 @@
 #include <catch.hpp>
 
 #include <estd/istream.h>
+#include <estd/iterator.h>
 #include <estd/ostream.h>
 #include <estd/string.h>
 #include <estd/sstream.h>
@@ -43,6 +44,33 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 };
 
 typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;
+
+// NOTE: Works well, just needs more testing (and hopefully elevation of experimental::num_get
+// to non-experimental) before elevating to API level
+template <class TStreambuf, class TBase, class T>
+enable_if_t<is_arithmetic<T>::value, internal::basic_istream<TStreambuf, TBase>&> operator >>(
+        internal::basic_istream<TStreambuf, TBase>& in,
+        T& value)
+{
+    typedef internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename istream_type::streambuf_type streambuf_type;
+    typedef typename istream_type::traits_type traits_type;
+    typedef typename traits_type::char_type char_type;
+    typedef estd::experimental::istreambuf_iterator<streambuf_type> iterator_type;
+
+    in >> ws;
+
+    iterator_type it(in.rdbuf()), end;
+    ios_base::iostate err;
+
+    experimental::num_get<char_type, iterator_type> n;
+
+    n.get(it, end, in, err, value);
+
+    return in;
+}
+
+
 
 TEST_CASE("ios")
 {
@@ -426,6 +454,20 @@ TEST_CASE("ios")
 
             REQUIRE(out.tellp() == 4);
         }
+    }
+    SECTION("numeric parsing")
+    {
+        experimental::istringstream<32> in = "123 456";
+
+        int val;
+
+        in >> val;
+
+        REQUIRE(val == 123);
+
+        in >> val;
+
+        REQUIRE(val == 456);
     }
 }
 
