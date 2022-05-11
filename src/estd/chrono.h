@@ -8,6 +8,7 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "port/identify_platform.h"
 #include "port/chrono.h"
 
 // esp-idf native version coexists with the others

@@ -13,6 +13,7 @@
 #define ESTD_ARDUINO
 #include "arch/arduino.h"
 // DEBT: Arduino is not mutually exclusive to FreeRTOS
+// NOTE: esp-idf doesn't define FREERTOS flag.  See below
 #elif defined(FREERTOS)
 #define ESTD_FREERTOS   // deprecated, use ESTD_OS_FREERTOS
 #define ESTD_OS_FREERTOS
@@ -38,9 +39,6 @@
 
 #endif
 
-// Identify depth of POSIX support
-#include "posix.h"
-
 // ESP_PLATFORM always assumes FreeRTOS.  Bare metal not supported
 // at this time (no impediment, just haven't idendified a good way
 // to specify bare metal or not)
@@ -56,15 +54,19 @@
 
 #if !defined(ESTD_FREERTOS)
 #define ESTD_FREERTOS
+#define ESTD_OS_FREERTOS
 #endif
 
 
-#endif
+#endif  // defined(ESP_PLATFORM)
 
-#ifdef ESTD_FREERTOS
+#ifdef ESTD_OS_FREERTOS
 
 #ifndef FEATURE_ESTD_NATIVE_CHRONO
 #define FEATURE_ESTD_FREERTOS_CHRONO
 #endif
 
 #endif
+
+// Identify depth of POSIX support
+#include "posix.h"
