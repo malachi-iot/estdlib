@@ -4,6 +4,8 @@
 #include <estd/limits.h>
 #include <estd/string.h>
 
+#include "test-data.h"
+
 using namespace estd;
 
 #pragma GCC diagnostic push
@@ -62,6 +64,28 @@ TEST_CASE("type traits tests")
         {
             REQUIRE(is_signed<char_traits<uint8_t>::off_type>::value);
             REQUIRE(!is_signed<char_traits<uint8_t>::pos_type>::value);
+        }
+    }
+    SECTION("is_base_of")
+    {
+        struct Parent {};
+
+        SECTION("single inheritance")
+        {
+            struct Child : Parent {};
+
+            REQUIRE(is_base_of<Parent, Child>::value);
+        }
+        SECTION("multiple inheritance")
+        {
+            struct Parent2 {};
+            struct Parent3 {};
+
+            struct Child : Parent, Parent2, Parent3 {};
+
+            REQUIRE(is_base_of<Parent, Child>::value);
+            REQUIRE(is_base_of<Parent2, Child>::value);
+            REQUIRE(is_base_of<Parent3, Child>::value);
         }
     }
 }

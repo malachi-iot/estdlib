@@ -30,10 +30,13 @@ int main()
     test_align();
     test_array();
     test_chrono();
+    test_cpp();
     test_cstddef();
+    test_limits();
     test_optional();
     test_queue();
     test_ratio();
+    test_span();
     test_streambuf();
     test_string();
     UNITY_END();

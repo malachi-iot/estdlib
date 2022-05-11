@@ -25,6 +25,9 @@ static void test_ospanbuf()
 
     TEST_ASSERT_EQUAL_INT(10, os.pos());
     TEST_ASSERT_EQUAL_INT(10, os.pubseekoff(0, ios_base::cur));
+
+    // FIX: On esp-idf we expect ~12 but we get 24.
+    //TEST_ASSERT_LESS_OR_EQUAL(sizeof(span) + sizeof(int), sizeof(os));
 }
 
 

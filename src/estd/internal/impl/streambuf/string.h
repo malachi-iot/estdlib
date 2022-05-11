@@ -69,7 +69,9 @@ struct out_stringbuf : stringbuf_base<TString>
 template <class TString>
 struct basic_stringbuf :
         out_stringbuf<TString>,
-        in_pos_streambuf_base<typename TString::traits_type>
+        in_pos_streambuf_base<typename TString::traits_type>,
+
+        streambuf_sungetc_tag
 {
     typedef out_stringbuf<TString> base_type;
     typedef typename base_type::traits_type traits_type;
@@ -98,9 +100,12 @@ struct basic_stringbuf :
     {}
 #endif
 
+    // See in_base_type::pos() for why we use ref here
+    const pos_type& pos() const { return in_base_type::pos(); }
+
     streamsize xsgetn(char_type* s, streamsize count)
     {
-        size_type count_copied = base_type::str().copy(s, count, in_base_type::pos());
+        size_type count_copied = base_type::str().copy(s, count, pos());
 
         in_base_type::gbump(count_copied);
 
@@ -109,18 +114,17 @@ struct basic_stringbuf :
 
     size_type xin_avail() const
     {
-        return this->_str.length() - in_base_type::pos();
+        return this->_str.length() - pos();
     }
 
-    streamsize showmanyc() const
-    {
-        size_type len = xin_avail();
-        return len > 0 ? len : -1;
-    }
+    streamsize showmanyc() const { return in_base_type::showmanyc(xin_avail()); }
+
 
     char_type xsgetc() const
     {
-        char_type ch = *base_type::_str.clock(in_base_type::pos(), 1);
+        // DEBT: May be better off using standard string indexer here.  Its fancy iterator probably
+        // will optimize out
+        char_type ch = *base_type::_str.clock(pos(), 1);
         base_type::_str.cunlock();
         return ch;
     }
@@ -128,7 +132,7 @@ struct basic_stringbuf :
     // NOTE: This leaves things unlocked, so only enable this for layer1-layer3 strings
     // this implicitly is the case as we do not implement 'data()' except for scenarios
     // where locking/unlocking is a noop (or otherwise inconsequential)
-    char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
+    //char_type* gptr() { return base_type::_str.data() + in_base_type::pos(); }
 
 
     // UNTESTED
@@ -153,6 +157,17 @@ struct basic_stringbuf :
         }
 
         return pos_type(off_type(-1));
+    }
+
+    int_type sungetc()
+    {
+        if(pos() == 0)
+            return this->pbackfail();
+        else
+        {
+            in_base_type::gbump(-1);
+            return traits_type::to_int_type(xsgetc());
+        }
     }
 };
 

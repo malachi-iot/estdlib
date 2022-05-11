@@ -126,7 +126,7 @@ void sleep_until( const chrono::time_point<Clock,Duration>& sleep_time )
 
 inline void yield() { taskYIELD(); }
 
-thread::id get_id()
+inline thread::id get_id()
 {
     return xTaskGetCurrentTaskHandle();
 }

@@ -5,25 +5,23 @@
 
 namespace estd { namespace internal { namespace impl {
 
+// NOTE: In esp-idf, pos_type is big and doesn't seem to play well
+// with RVO - so returning/passing a "const pos_type&" rather than "pos_type"
+// makes a difference
 template <typename TCharTraits>
 struct pos_streambuf_base : streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
-#if !defined(FEATURE_STD_STRING_FULL_CHAR_TRAITS)
-    typedef int_type pos_type;
-    typedef int_type off_type;
-#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
-#endif
 
 protected:
     pos_type _pos;
 
-    pos_streambuf_base(pos_type pos) : _pos(pos) {}
+    pos_streambuf_base(const pos_type& pos) : _pos(pos) {}
 
-    inline pos_type seekpos(pos_type p)
+    inline pos_type seekpos(const pos_type& p)
     {
         _pos = p;
         return _pos;
@@ -51,7 +49,9 @@ protected:
     }
 
 public:
-    pos_type pos() const { return _pos; }
+    // This method in particular is sensitive to pos_type reference.  Stack usage goes
+    // sky high if we return a copy
+    const pos_type& pos() const { return _pos; }
 };
 
 template <typename TCharTraits>
@@ -62,7 +62,7 @@ struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits>
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
 
-    in_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+    in_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
@@ -87,7 +87,7 @@ struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits>
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
 
-    out_pos_streambuf_base(pos_type pos = 0) : base_type(pos) {}
+    out_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
 
 protected:
     void pbump(int count) { this->_pos += count; }

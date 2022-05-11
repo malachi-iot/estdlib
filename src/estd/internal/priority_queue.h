@@ -53,7 +53,7 @@ public:
     typedef typename Container::size_type size_type;
     typedef typename container_type::accessor accessor;
 
-    priority_queue() = default;
+    ESTD_CPP_DEFAULT_CTOR(priority_queue)
 
     priority_queue(const Compare& compare) :
         compare_provider_type(compare)
@@ -122,7 +122,7 @@ class priority_queue :
     typedef estd::priority_queue<T, layer1::vector<T, len>, Compare > base_type;
 
 public:
-    priority_queue() = default;
+    ESTD_CPP_DEFAULT_CTOR(priority_queue)
 
     priority_queue(const Compare& compare) : base_type(compare)
     {

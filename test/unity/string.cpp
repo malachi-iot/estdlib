@@ -24,7 +24,7 @@ void _test_string_assignment()
 
 
 template <class TString>
-void test_string_concat()
+static void test_string_concat()
 {
     TString s;
 
@@ -85,7 +85,7 @@ void test_from_chars()
     TEST_ASSERT_EQUAL_INT32(1234, value);
 }
 
-void test_to_chars()
+static void test_to_chars()
 {
     estd::layer1::string<32> s;
 
@@ -103,6 +103,19 @@ void test_to_chars()
 }
 
 
+// NOTE: Depending on feature flags, estd::char_traits is either our implementation
+// or an alias for std::char_traits
+static void test_char_traits()
+{
+    typedef estd::char_traits<char> traits_type;
+
+    TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, traits_type::length(TEST_STR));
+
+    TEST_ASSERT_EQUAL(0, traits_type::compare(TEST_STR, TEST_STR2, 3));
+    TEST_ASSERT_EQUAL(1, traits_type::compare(TEST_STR, TEST_STR2, 5));
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("string tests", "[string]")
 #else
@@ -114,4 +127,5 @@ void test_string()
     RUN_TEST(test_from_chars_legacy);
     RUN_TEST(test_from_chars);
     RUN_TEST(test_to_chars);
+    RUN_TEST(test_char_traits);
 }

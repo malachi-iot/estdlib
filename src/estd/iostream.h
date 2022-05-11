@@ -8,6 +8,7 @@
 #include "ios.h"
 #include "istream.h"
 #include "ostream.h"
+#include "port/iostream.h"
 
 namespace estd {
 

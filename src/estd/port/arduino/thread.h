@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include "chrono.h"
 
 namespace estd { namespace this_thread {
@@ -14,6 +15,11 @@ void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
             estd::chrono::duration_cast<chrono::arduino_clock::duration>(sleep_duration).count();
 
     delay(count);
+}
+
+inline void yield()
+{
+    ::yield();
 }
 
 }}

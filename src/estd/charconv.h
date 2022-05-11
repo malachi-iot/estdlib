@@ -39,7 +39,7 @@ estd::from_chars_result from_chars(const char* first,
 /// \param base
 /// \return
 template <class TInt>
-to_chars_result to_chars_opt(char* first, char* last, TInt value, const int base = 10)
+inline to_chars_result to_chars_opt(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
         return internal::to_chars_integer_opt<internal::char_base_traits<36> >(first, last, value, base);

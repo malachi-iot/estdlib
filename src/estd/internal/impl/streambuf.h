@@ -24,17 +24,15 @@ struct streambuf_base
     typedef TTraits traits_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
-#if !defined(FEATURE_STD_STRING_FULL_CHAR_TRAITS)
-    typedef int_type pos_type;
-    typedef int_type off_type;
-#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
-#endif
 
 protected:
     inline static int sync() { return 0; }
+
+    // 0 = "unsure if there are characters available in the associated sequence".
     inline static streamsize showmanyc() { return 0; }
+
     inline static pos_type seekpos(pos_type, ios_base::openmode)
     {
         return pos_type(off_type(-1));
@@ -59,10 +57,22 @@ protected:
 
     inline static int_type underflow() { return traits_type::eof(); }
 
-    // Non-standard helper for showmanyc/in_avail
+    // Non-standard API feeder for showmanyc/in_avail
     // Only reports on available or not, does not take any guesses
     // as to what might come if the buffer is filled
     inline static int_type xin_avail() { return 0; }
+
+    // Helper to produce showmanyc-style return values from regular
+    // in avail style values.  Remember "0" for showmanyc means
+    // unknown character availabity
+    inline static streamsize showmanyc(int_type avail, bool eof = true)
+    {
+        if(eof)
+            // eof flag tells us whether there's any ambiguity about actually being end of buffer
+            return avail > 0 ? avail : -1;
+        else
+            return avail;
+    }
 };
 
 

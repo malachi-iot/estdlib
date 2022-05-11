@@ -41,6 +41,7 @@ static void test_priority_queue()
 #if FEATURE_ESTD_PRIORITY_QUEUE
     layer1::priority_queue<int, 10> q;
 
+    // FIX: Each 'push' consumes an additional 32 bytes of stack on esp-idf
     q.push(7);
     q.push(3);
     q.push(8);
