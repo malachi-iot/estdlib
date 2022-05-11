@@ -38,7 +38,7 @@
 #endif
 
 
-#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS) ||
+#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS)
 #define ESTD_POSIX
 #define FEATURE_POSIX_CHRONO
 #define FEATURE_POSIX_ERRNO
