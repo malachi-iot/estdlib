@@ -18,8 +18,6 @@
 // According to https://opensource.apple.com/source/xnu/xnu-4570.41.2/bsd/sys/cdefs.h.auto.html
 // llvm/clang only defines _POSIX_C_SOURCE when one wishes to restrict API to only that
 // standard, which seems a little at odds with the GNU treatment
-// NOTE: Particularly usefor for VisualDSP which only implements the 3 described under "ISO C"
-// portion here https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/errno.h.html
 // DEBT: Pretty sure we never get here, just copy/pasting from our system_error.h
 #define FEATURE_POSIX_IOS
 #define FEATURE_POSIX_THREAD
