@@ -52,7 +52,7 @@
 #include "arch/esp-idf.h"
 #endif
 
-#if !defined(ESTD_FREERTOS)
+#if !defined(ESTD_OS_FREERTOS)
 #define ESTD_FREERTOS
 #define ESTD_OS_FREERTOS
 #endif

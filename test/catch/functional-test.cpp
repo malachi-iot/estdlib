@@ -57,9 +57,12 @@ TEST_CASE("functional")
     {
         auto tuple = estd::make_tuple(0, 1.0, 2);
 
+        // Size checks are very platform/toolchain dependent
+#ifdef ESTD_OS_UNIX
         int sz = sizeof(tuple);
 
         REQUIRE(sz == sizeof(long) * 2 + sizeof(double));
+#endif
 
         auto val1 = estd::get<0>(tuple);
 
