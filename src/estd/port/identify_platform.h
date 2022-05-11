@@ -9,14 +9,18 @@
 // For more complex "always on" platform behaviors, utilize support_platform.h
 
 #if defined(ARDUINO)
+// DEBT: Arduino is more of a framework than an OS
 #define ESTD_ARDUINO
 #include "arch/arduino.h"
+// DEBT: Arduino is not mutually exclusive to FreeRTOS
 #elif defined(FREERTOS)
-#define ESTD_FREERTOS
-#elif (defined (__APPLE__) && defined(__MACH__))
-#define ESTD_MACOS
-#elif (defined (__unix__) || defined(__linux__))
-#define ESTD_UNIX
+#define ESTD_OS_FREERTOS
+#elif (defined(__APPLE__) && defined(__MACH__))
+#define ESTD_OS_MACOS
+#elif (defined(__unix__) || defined(__linux__))
+#define ESTD_OS_UNIX
+#elif (defined(_WIN32) || defined(_WIN64))
+#define ESTD_OS_WINDOWS
 #endif
 
 #if defined (__ADSPBLACKFIN__)
@@ -34,7 +38,7 @@
 #endif
 
 
-#if defined(ESTD_UNIX) || defined(ESTD_MACOS)
+#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS) || defined(ESTD_OS_WINDOWS)
 #define ESTD_POSIX
 #endif
 
