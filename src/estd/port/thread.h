@@ -20,7 +20,7 @@
 #elif defined(ESTD_ARDUINO)
 #undef FEATURE_ESTD_THREADING
 #include "arduino/thread.h"
-#elif defined(ESTD_POSIX)
+#elif defined(FEATURE_POSIX_THREAD)
 #include "posix/thread.h"
 #elif defined(ESTD_MCU_BLACKFIN)
 #include "vdk/thread.h"

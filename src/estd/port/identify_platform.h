@@ -14,6 +14,7 @@
 #include "arch/arduino.h"
 // DEBT: Arduino is not mutually exclusive to FreeRTOS
 #elif defined(FREERTOS)
+#define ESTD_FREERTOS   // deprecated, use ESTD_OS_FREERTOS
 #define ESTD_OS_FREERTOS
 #elif (defined(__APPLE__) && defined(__MACH__))
 #define ESTD_OS_MACOS
@@ -37,15 +38,8 @@
 
 #endif
 
-
-#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS)
-#define ESTD_POSIX
-#define FEATURE_POSIX_CHRONO
-#define FEATURE_POSIX_ERRNO
-#elif defined(__MINGW32__)
-#define FEATURE_POSIX_CHRONO
-#define FEATURE_POSIX_ERRNO
-#endif
+// Identify depth of POSIX support
+#include "posix.h"
 
 // ESP_PLATFORM always assumes FreeRTOS.  Bare metal not supported
 // at this time (no impediment, just haven't idendified a good way

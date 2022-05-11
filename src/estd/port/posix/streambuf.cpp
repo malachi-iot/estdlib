@@ -1,6 +1,6 @@
 #include "../identify_platform.h"
 
-#if defined(ESTD_POSIX) || defined(ESP_OPEN_RTOS)
+#if defined(FEATURE_POSIX_IOS) || defined(ESP_OPEN_RTOS)
 
 #include "../../streambuf.h"
 #include "streambuf.h"

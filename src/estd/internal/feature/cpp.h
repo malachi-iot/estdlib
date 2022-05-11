@@ -133,3 +133,7 @@
     class_name(const TParam1& p1) :             \
         base_type(p1) {}
 #endif
+
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+#define FEATURE_PRAGMA_PUSH_MACRO
+#endif

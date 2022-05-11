@@ -78,10 +78,12 @@ __ostream_type& operator<<(__ostream_type& (*__pf)(__ostream_type&))
 // (see basic_ios_base use_pointer)
 // Explore  a way to hard-wire what the streambuf *should* be for these to potentially avoid
 // the rdbuf assignability and associated virtual function requirements
+/*
 extern ostream cout;
 extern istream cin;
 extern ostream& clog;
 extern ostream& cerr;
+*/
 
 // FIX: Not a great location for this, but has to live somewhere for now
 // based on C++ assert() macro specification, but a little wimpier

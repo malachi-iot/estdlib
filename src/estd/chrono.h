@@ -16,11 +16,11 @@
 #include "port/posix/chrono.h"
 #endif
 
-#if defined(ESTD_FREERTOS)
+#if defined(ESTD_OS_FREERTOS)
 #include "port/freertos/chrono.h"
 #elif defined(ESTD_ARDUINO)
 #include "port/arduino/chrono.h"
-#elif defined(ESTD_POSIX) || defined(WIN32)
+#elif defined(FEATURE_POSIX_CHRONO) || defined(WIN32)
 #include "port/posix/chrono.h"
 #else
 #error Unsupported platform

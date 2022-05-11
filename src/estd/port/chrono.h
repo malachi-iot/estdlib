@@ -11,13 +11,13 @@
 #include "../ratio.h"
 #include "../limits.h"
 
-#if (defined(ESTD_POSIX) || defined(ESTD_SDK_IDF)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
+#if (defined(FEATURE_POSIX_CHRONO) || defined(ESTD_SDK_IDF)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
 // DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
 #define FEATURE_STD_CHRONO
 #include <chrono>
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+#ifdef FEATURE_PRAGMA_PUSH_MACRO
 #pragma push_macro("abs")
 #pragma push_macro("max")
 #pragma push_macro("min")
@@ -371,7 +371,7 @@ constexpr chrono::seconds operator "" ms(unsigned long long ms)
 
 #include "chrono.hpp"
 
-#if defined(__GNUC__) || defined(_MSC_VER)
+#ifdef FEATURE_PRAGMA_PUSH_MACRO
 #pragma pop_macro("min")
 #pragma pop_macro("max")
 #pragma pop_macro("abs")

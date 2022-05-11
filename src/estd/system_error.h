@@ -22,13 +22,9 @@ namespace estd {
 namespace internal {
 
 #ifndef FEATURE_STD_FULL_ERRNO
-// According to https://opensource.apple.com/source/xnu/xnu-4570.41.2/bsd/sys/cdefs.h.auto.html
-// llvm/clang only defines _POSIX_C_SOURCE when one wishes to restrict API to only that
-// standard, which seems a little at odds with the GNU treatment
 // NOTE: Particularly usefor for VisualDSP which only implements the 3 described under "ISO C"
 // portion here https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/errno.h.html
-// DEBT: This feature flag actually belongs in our platform.h area
-#if     (_POSIX_C_SOURCE >= 199606L) || defined(_LIBCPP_CLANG_VER)
+#if     defined(FEATURE_POSIX_ERRNO)
 #define FEATURE_STD_FULL_ERRNO  1
 #endif
 #endif
