@@ -38,8 +38,13 @@
 #endif
 
 
-#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS) || defined(ESTD_OS_WINDOWS)
+#if defined(ESTD_OS_UNIX) || defined(ESTD_OS_MACOS) ||
 #define ESTD_POSIX
+#define FEATURE_POSIX_CHRONO
+#define FEATURE_POSIX_ERRNO
+#elif defined(__MINGW32__)
+#define FEATURE_POSIX_CHRONO
+#define FEATURE_POSIX_ERRNO
 #endif
 
 // ESP_PLATFORM always assumes FreeRTOS.  Bare metal not supported
