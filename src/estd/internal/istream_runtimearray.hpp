@@ -22,10 +22,11 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
     typedef typename impl_type::traits_type traits_type;
     //typedef typename impl_type::char_type char_type;
     typedef typename impl_type::int_type int_type;
+    typedef typename istream_type::locale_type locale_type;
     typedef typename istream_type::policy_type policy_type;
     typedef typename istream_type::blocking_type blocking_type;
 
-    experimental::locale loc = in.getloc();
+    locale_type loc = in.getloc();
 
     for(;;)
     {
