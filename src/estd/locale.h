@@ -6,6 +6,8 @@
 #include "internal/ios.h"
 #include "internal/charconv.hpp"
 
+#include "internal/iosfwd.h"
+
 extern "C" {
 #include <stdint.h>
 }
@@ -246,6 +248,12 @@ public:
     typedef InputIt iter_type;
 
 private:
+
+    template <class TStreambuf, class TBase>
+    struct helper
+    {
+        typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+    };
 
     // TODO: Do a LUT since bounds checking to detect invalid hex chars likely is fastest.  See:
     // https://stackoverflow.com/questions/34365746/whats-the-fastest-way-to-convert-hex-to-integer-in-c
