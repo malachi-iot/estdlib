@@ -348,6 +348,34 @@ private:
 
             return in;
         }
+
+        // Special thanks to
+        // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
+        // for the hybrid overload/SFINAE approach below
+
+        // types after 'v':
+        // 'true_type' = is integer
+        // 'false_type' = unsigned
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            ios_base::iostate& err, ios_base& str,
+            T& v,
+            estd::true_type, estd::false_type)
+        {
+            return get_unsigned_ascii(in, end, err, str, v);
+        }
+
+        // types after 'v':
+        // 'true_type' = is integer
+        // 'true_type' = signed
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            ios_base::iostate& err, ios_base& str,
+            T& v,
+            estd::true_type, estd::true_type)
+        {
+            return get_integer_ascii(in, end, err, str, v);
+        }
     };
 
     // TODO: Do a LUT since bounds checking to detect invalid hex chars likely is fastest.  See:
@@ -385,46 +413,12 @@ private:
 
 
 public:
-    /*
     template <typename T>
     iter_type get(iter_type in, iter_type end,
-        estd::ios_base& str,
-        estd::ios_base::iostate& err,
-        T& v) const; */
-
-
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, unsigned& v) const
+        ios_base& str, ios_base::iostate& err, T& v) const
     {
-        return helper::get_unsigned_ascii(in, end, err, str, v);
-    }
-
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, unsigned short& v) const
-    {
-        return helper::get_unsigned_ascii(in, end, err, str, v);
-    }
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, short& v) const
-    {
-        return helper::get_integer_ascii(in, end, err, str, v);
-    }
-
-
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, int& v) const
-    {
-        return helper::get_integer_ascii(in, end, err, str, v);
-    }
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, long& v) const
-    {
-        return helper::get_integer_ascii(in, end, err, str, v);
+        return helper::get(in, end, err, str, v,
+           estd::is_integral<T>(), estd::is_signed<T>());
     }
 };
 
