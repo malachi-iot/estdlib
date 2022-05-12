@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "facet.h"
 #include <estd/string.h>
 
 namespace estd { namespace experimental {
@@ -41,5 +42,14 @@ struct numpunct<char, locale<locale_code::fr_FR, internal::encodings::UTF8> > :
     static estd::layer2::const_string falsename() { return "faux"; }
 };
 
+
+template <class TChar, class TLocale>
+struct use_facet_helper4<numpunct<TChar, TLocale>, TLocale>
+{
+    inline static numpunct<TChar, TLocale> use_facet(TLocale)
+    {
+        return numpunct<TChar, TLocale>();
+    }
+};
 
 }}

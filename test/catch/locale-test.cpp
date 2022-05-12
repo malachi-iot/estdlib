@@ -186,5 +186,23 @@ TEST_CASE("locale")
             // Not yet implemented
             //REQUIRE(f.is(estd::experimental::ctype_base::alpha, c));
         }
+        SECTION("use_facet4")
+        {
+            using namespace estd::experimental;
+
+            SECTION("numpunct")
+            {
+                auto f = use_facet4<numpunct<char>>(l);
+
+                REQUIRE(f.truename() == "true");
+            }
+            SECTION("moneypunct")
+            {
+                /*
+                auto f = use_facet4<moneypunct<char, false>>(l);
+
+                REQUIRE(f.truename() == "true"); */
+            }
+        }
     }
 }

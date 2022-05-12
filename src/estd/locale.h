@@ -11,6 +11,7 @@
 #include "string.h"
 
 #include "internal/locale/ctype.h"
+#include "internal/locale/moneypunct.h"
 #include "internal/locale/num_get.h"
 #include "internal/locale/numpunct.h"
 
@@ -227,6 +228,8 @@ inline bool isspace(TChar ch, const locale<locale_code, encoding>& loc)
 }
 
 
+
+
 // DEBT: Consolidate all this with char_base_traits
 template <class TChar, class InputIt>
 class num_get
@@ -306,19 +309,20 @@ private:
         template <class TContainer, std::size_t N>
         static int chooser(const TContainer (&containers)[N], iter_type& in, iter_type end)
         {
-            bool good = false;
+            //bool good = false;
 
             int chosen = -1;
 
             for(int i = 0; in != end;
-                ++in, ++i, good = true)
+                ++in, ++i //, good = true
+                )
             {
                 char_type c = *in;
 
                 // Look through all the containers to try to find the first match
                 if(chosen == -1)
                 {
-                    for (int j = 0; j < N; ++j)
+                    for (unsigned j = 0; j < N; ++j)
                     {
                         const TContainer& container = containers[j];
 
