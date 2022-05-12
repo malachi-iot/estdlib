@@ -16,9 +16,6 @@ extern "C" {
 
 namespace estd { namespace experimental {
 
-template <class TChar>
-struct numpunct;
-
 struct ctype_base
 {
     typedef uint8_t mask;
@@ -95,6 +92,9 @@ struct locale
     const char* name() const { return locale_name<locale_code, encoding>(); }
 };
 
+template <class TChar, class TLocale = locale<locale_code::en_US, internal::encodings::UTF8>>
+struct numpunct;
+
 
 
 // specialization, deviating from standard in that locale is compile-time
@@ -162,8 +162,10 @@ public:
 }
 
 template <class TChar>
-struct numpunct
+struct numpunct<TChar, locale<locale_code::en_US, internal::encodings::UTF8> >
 {
+    typedef TChar char_type;
+
     static estd::layer2::const_string truename() { return "true"; }
     static estd::layer2::const_string falsename() { return "false"; }
 };
@@ -374,7 +376,7 @@ private:
             if(str.flags() & ios_base::boolalpha)
             {
                 locale_type locale = str.getloc();
-                numpunct<char> np;
+                numpunct<char_type, locale_type> np;
 
                 // tempted to get algorithmically fancy here, but with only two things to
                 // compare, brute force makes sense
