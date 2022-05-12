@@ -249,10 +249,105 @@ public:
 
 private:
 
-    template <class TStreambuf, class TBase>
+    //template <class TStreambuf, class TBase>
     struct helper
     {
-        typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+        //typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+
+        // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
+        //       though it being locale-bound may affect that down the line
+        template <unsigned base, class T>
+        static iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
+            ios_base::iostate& err, ios_base& str, T& v)
+        {
+            typedef estd::internal::char_base_traits<base> char_base_traits;
+            typedef typename char_base_traits::int_type int_type;
+
+            v = 0;
+            // Since we are using forward-only iterators, we can't retain an
+            // old 'i' to compare against
+            bool good = false;
+
+            for(; i != end; ++i, good = true)
+            {
+                int_type n = char_base_traits::from_char_with_test(*i);
+
+                if(n != char_base_traits::eol())
+                {
+                    estd::internal::raise_and_add(v, char_base_traits::base(), n);
+                }
+                else
+                {
+                    if(!good)
+                        err |= ios_base::failbit;
+
+                    return i;
+                }
+            }
+
+            err |= ios_base::eofbit;
+            return i;
+        }
+
+        template <class T>
+        static iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
+            ios_base::iostate& err, ios_base& str, T& v)
+        {
+            bool negative = false;
+
+            // TODO: Might be able to merely copy this iterator and to this evaluation
+            // at the end.  Perhaps do a specialization for this based on policy
+            if(*i == '-')
+            {
+                negative = true;
+                ++i;
+            }
+
+            i = get_unsigned_integer_ascii<10>(i, end, err, str, v);
+
+            if(negative) v = -v;
+
+            return i;
+        }
+
+        template <typename T>
+        static iter_type get_integer_ascii(iter_type in, iter_type end,
+            ios_base::iostate& err, ios_base& str, T& v)
+        {
+            const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
+
+            if(basefield == estd::ios_base::dec)
+            {
+                return get_signed_integer_ascii_decimal(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::hex)
+            {
+                // No real negative in hex, so presume caller knows this and passed in a
+                // signed type for their own convenience
+                return get_unsigned_integer_ascii<16>(in, end, err, str, v);
+            }
+
+            return in;
+        }
+
+
+        template <typename T>
+        static iter_type get_unsigned_ascii(iter_type in, iter_type end,
+            ios_base::iostate& err, ios_base& str, T& v)
+        {
+            const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
+
+            if(basefield == estd::ios_base::dec)
+            {
+                get_unsigned_integer_ascii<10>(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::hex)
+            {
+                get_unsigned_integer_ascii<16>(in, end, err, str, v);
+            }
+
+            return in;
+        }
     };
 
     // TODO: Do a LUT since bounds checking to detect invalid hex chars likely is fastest.  See:
@@ -287,61 +382,7 @@ private:
     }
 
 
-    // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
-    //       though it being locale-bound may affect that down the line
-    template <unsigned base, class T>
-    iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        typedef estd::internal::char_base_traits<base> char_base_traits;
-        typedef typename char_base_traits::int_type int_type;
 
-        v = 0;
-        // Since we are using forward-only iterators, we can't retain an
-        // old 'i' to compare against
-        bool good = false;
-
-        for(; i != end; ++i, good = true)
-        {
-            int_type n = char_base_traits::from_char_with_test(*i);
-
-            if(n != char_base_traits::eol())
-            {
-                estd::internal::raise_and_add(v, char_base_traits::base(), n);
-            }
-            else
-            {
-                if(!good)
-                    err |= ios_base::failbit;
-
-                return i;
-            }
-        }
-
-        err |= ios_base::eofbit;
-        return i;
-    }
-
-    template <class T>
-    iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        bool negative = false;
-
-        // TODO: Might be able to merely copy this iterator and to this evaluation
-        // at the end.  Perhaps do a specialization for this based on policy
-        if(*i == '-')
-        {
-            negative = true;
-            ++i;
-        }
-
-        i = get_unsigned_integer_ascii<10>(i, end, err, str, v);
-
-        if(negative) v = -v;
-
-        return i;
-    }
 
 public:
     /*
@@ -351,62 +392,25 @@ public:
         estd::ios_base::iostate& err,
         T& v) const; */
 
-    template <typename T>
-    iter_type get_integer_ascii(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
-        if(basefield == estd::ios_base::dec)
-        {
-            return get_signed_integer_ascii_decimal(in, end, err, str, v);
-        }
-        else if(basefield == estd::ios_base::hex)
-        {
-            // No real negative in hex, so presume caller knows this and passed in a
-            // signed type for their own convenience
-            return get_unsigned_integer_ascii<16>(in, end, err, str, v);
-        }
-
-        return in;
-    }
-
-
-    template <typename T>
-    iter_type get_unsigned_ascii(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
-
-        if(basefield == estd::ios_base::dec)
-        {
-            get_unsigned_integer_ascii<10>(in, end, err, str, v);
-        }
-        else if(basefield == estd::ios_base::hex)
-        {
-            get_unsigned_integer_ascii<16>(in, end, err, str, v);
-        }
-
-        return in;
-    }
 
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, unsigned& v) const
     {
-        return get_unsigned_ascii(in, end, err, str, v);
+        return helper::get_unsigned_ascii(in, end, err, str, v);
     }
 
 
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, unsigned short& v) const
     {
-        return get_unsigned_ascii(in, end, err, str, v);
+        return helper::get_unsigned_ascii(in, end, err, str, v);
     }
 
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, short& v) const
     {
-        return get_integer_ascii(in, end, err, str, v);
+        return helper::get_integer_ascii(in, end, err, str, v);
     }
 
 
@@ -414,13 +418,13 @@ public:
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, int& v) const
     {
-        return get_integer_ascii(in, end, err, str, v);
+        return helper::get_integer_ascii(in, end, err, str, v);
     }
 
     iter_type get(iter_type in, iter_type end,
         ios_base& str, ios_base::iostate& err, long& v) const
     {
-        return get_integer_ascii(in, end, err, str, v);
+        return helper::get_integer_ascii(in, end, err, str, v);
     }
 };
 
