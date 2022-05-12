@@ -323,6 +323,51 @@ private:
             return i;
         }
 
+        // DEBT: Works OK, but will get confused if names start with the same letters
+        // DEBT: Move this out to a more utility oriented location, and give it a better name
+        // Remember, we're limited how fancy we can get because we don't demand any kind of sorting
+        // of the containers on the way in
+        template <class TContainer, std::size_t N>
+        static int chooser(const TContainer (&containers)[N], iter_type& in, iter_type end)
+        {
+            bool good = false;
+
+            int chosen = -1;
+
+            for(int i = 0; in != end;
+                ++in, ++i, good = true)
+            {
+                char_type c = *in;
+
+                // Look through all the containers to try to find the first match
+                if(chosen == -1)
+                {
+                    for (int j = 0; j < N; ++j)
+                    {
+                        const TContainer& container = containers[j];
+
+                        if(container[i] == c)
+                        {
+                            chosen = j;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // DEBT: Consider doing this with a pointer instead
+                    const TContainer& container = containers[chosen];
+
+                    if(i == container.size())
+                        return chosen;
+                    else if(container[i] != c)
+                        return -1;
+                }
+            }
+
+            return chosen;
+        }
+
         static iter_type get_bool_ascii(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
         {
@@ -338,57 +383,18 @@ private:
                     np.falsename()
                 };
 
-                bool good = false;
-                int chosen = -1;
-                v = false;
+                int chosen = chooser(names, in, end);
 
-                // DEBT: const_iterator is broken here, we can't increment/decrement it
-                estd::layer2::const_string::iterator
-                    true_it = np.truename().begin(),
-                    true_end = np.truename().end(),
-                    false_it = np.falsename().begin(),
-                    false_end = np.falsename().end();
+                if(in == end)
+                    err |= ios_base::eofbit;
 
-                for(int i = 0; in != end;
-                    ++in, ++i, ++true_it, ++false_it, good = true)
+                if(chosen == -1)
                 {
-                    char_type c = *in;
-
-                    if(*true_it == c)
-                    {
-                        if(chosen == 1)
-                        {
-                            err |= ios_base::failbit;
-                            break;
-                        }
-                        // 'true' character detected
-                        chosen = 0;
-                        if(i == names[0].size() - 1)
-                        {
-                            v = true;
-                            break;
-                        }
-                    }
-                    else if(*false_it == c)
-                    {
-                        if(chosen == 0)
-                        {
-                            err |= ios_base::failbit;
-                            break;
-                        }
-                        // 'false' character detected
-                        chosen = 1;
-                        if(i == names[1].size() - 1)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        err |= ios_base::failbit;
-                        break;
-                    }
+                    v = false;
+                    err |= ios_base::failbit;
                 }
+                else
+                    v = chosen == 0;
             }
             else
             {

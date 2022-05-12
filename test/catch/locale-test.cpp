@@ -112,13 +112,34 @@ TEST_CASE("locale")
             SECTION("bool alpha")
             {
                 fmt.setf(ios_base::boolalpha);
-
-                const char* in = "true";
                 bool _v;
 
-                n.get(in, in + 4, fmt, state, _v);
-                REQUIRE(state == goodbit);
-                REQUIRE(_v == true);
+                SECTION("true")
+                {
+                    const char* in = "true ";
+
+                    n.get(in, in + 5, fmt, state, _v);
+                    REQUIRE(state == goodbit);
+                    REQUIRE(_v == true);
+                }
+                SECTION("false")
+                {
+                    const char* in = "false";
+
+                    n.get(in, in + 5, fmt, state, _v);
+                    REQUIRE(state == eofbit);
+                    REQUIRE(_v == false);
+                }
+                SECTION("error")
+                {
+                    const char* in = "faKse";
+                    const char* out = n.get(in, in + 5, fmt, state, _v);
+                    REQUIRE(state == failbit);
+                    REQUIRE(_v == false);
+
+                    // DEBT: Not quite sure if this is undefined, or even correct
+                    REQUIRE(out == in + 2);
+                }
             }
         }
         SECTION("complex iterator")
