@@ -25,8 +25,34 @@ struct numpunct_base<char>
 
 }
 
+template<bool>
+struct Range;
+
+// Can the presented encoding work with the core encoding?  If so we get a 'type'
+// of the presented encoding
+template<internal::encodings::values core_encoding, internal::encodings::values presented_encoding>
+struct is_compatible_encoding;
+
+// DEBT: Pretty sure this won't work in pre-C++11
+template<>
+struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8>
+{
+    static CONSTEXPR internal::encodings::values value = internal::encodings::UTF8;
+    static CONSTEXPR internal::encodings::values _value() { return internal::encodings::UTF8; }
+};
+
+
+
+//template <internal::encodings::values encoding>
 template <>
-struct numpunct<char, locale<locale_code::en_US, internal::encodings::UTF8> > :
+struct numpunct<char, 
+    locale<locale_code::en_US, 
+        /*
+        is_compatible_encoding<
+            internal::encodings::ASCII, encoding>
+            ::_value()> */
+            internal::encodings::UTF8>
+        > :
     _internal::numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "true"; }
@@ -53,5 +79,11 @@ struct use_facet_helper4<numpunct<TChar, void>, TLocale>
         return numpunct<TChar, TLocale>();
     }
 };
+
+/*
+template <class TChar, locale_code::values lc>
+struct use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::UTF8> >
+    : use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::ASCII> > {}; */
+
 
 }}

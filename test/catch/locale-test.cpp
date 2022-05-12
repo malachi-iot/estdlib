@@ -221,5 +221,13 @@ TEST_CASE("locale")
                 REQUIRE(f2.curr_symbol() == "USD ");
             }
         }
+        SECTION("compatible locale")
+        {
+            using namespace estd::experimental;
+
+            constexpr internal::encodings::values v = is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8>::value;
+
+            REQUIRE(v == internal::encodings::UTF8);
+        }
     }
 }
