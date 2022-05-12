@@ -122,7 +122,8 @@ public:
 template<class TStreambuf, bool use_pointer = false,
     class TPolicy = ios_base_policy<TStreambuf> >
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
-    estd::internal::struct_evaporator<TPolicy>
+    estd::internal::struct_evaporator<TPolicy>,
+    estd::internal::struct_evaporator<typename TPolicy::locale_type>
 {
 public:
     typedef basic_ios_base<TStreambuf, use_pointer> base_type;
@@ -136,6 +137,7 @@ public:
 
     typedef typename estd::internal::struct_evaporator<TPolicy> policy_provider_type;
     typedef typename policy_provider_type::evaporated_type evaporated_policy_type;
+    typedef typename estd::internal::struct_evaporator<locale_type> locale_provider_type;
 
 protected:
     basic_ios() {}
@@ -168,8 +170,7 @@ public:
     // deviation from standard C++
     locale_type getloc() const
     {
-        locale_type l;
-        return l;
+        return locale_provider_type::value();
     }
 
     char_type widen(char c) const
