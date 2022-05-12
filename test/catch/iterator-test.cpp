@@ -39,8 +39,7 @@ TEST_CASE("iterator")
             {
                 estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
-                for(int i = sz; i >= 0; --i)
-                    ++it;
+                for(int i = sz; i > 0; --i, ++it);
 
                 REQUIRE(it == end);
             }
