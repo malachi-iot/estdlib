@@ -20,7 +20,7 @@ struct moneypunct<char, true, locale<locale_code::en_US, internal::encodings::UT
 {
     static char decimal_point() { return '.'; }
 
-    static estd::layer2::const_string curr_symbol() { return "USD"; }
+    static estd::layer2::const_string curr_symbol() { return "USD "; }
 };
 
 

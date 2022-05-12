@@ -13,6 +13,8 @@ TEST_CASE("locale")
 {
     experimental::locale<experimental::locale_code::en_US,
         internal::encodings::UTF8> l;
+    experimental::locale<experimental::locale_code::fr_FR,
+        internal::encodings::UTF8> l_fr;
 
     SECTION("isspace")
     {
@@ -197,9 +199,16 @@ TEST_CASE("locale")
             }
             SECTION("numpunct")
             {
-                auto f = use_facet4<numpunct<char>>(l);
+                SECTION("en")
+                {
+                    auto f = use_facet4<numpunct<char>>(l);
 
-                REQUIRE(f.truename() == "true");
+                    REQUIRE(f.truename() == "true");
+                }
+                SECTION("fr")
+                {
+                   REQUIRE(use_facet4<numpunct<char>>(l_fr).truename() == "vrai");
+                }
             }
             SECTION("moneypunct")
             {
@@ -209,7 +218,7 @@ TEST_CASE("locale")
 
                 auto f2 = use_facet4<moneypunct<char, true>>(l);
 
-                REQUIRE(f2.curr_symbol() == "USD");
+                REQUIRE(f2.curr_symbol() == "USD ");
             }
         }
     }
