@@ -57,4 +57,7 @@ void use_facet2(const locale<locale_code, encoding>& loc);
 template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
 struct use_facet_helper;
 
+// For internal use
+typedef locale<locale_code::C, estd::internal::encodings::ASCII> classic_locale_type;
+
 }}
