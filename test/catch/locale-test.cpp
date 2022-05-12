@@ -9,6 +9,63 @@
 
 using namespace estd;
 
+template <internal::encodings::values encoding, bool enabled>
+struct test_fallthrough;
+
+template <internal::encodings::values encoding>
+struct test_fallthrough2;
+
+template <internal::encodings::values encoding>
+struct test_fallthrough<encoding, false> {};
+
+template <internal::encodings::values encoding, typename enabled = void>
+struct test_fallthrough3;
+
+/*
+template <internal::encodings::values encoding>
+struct test_fallthrough3<encoding, void> {}; */
+
+
+
+// "template argument ... involves template parameter" (it doesn't like pushing a value through)
+/*
+template <internal::encodings::values encoding>
+struct test_fallthrough<
+        experimental::is_compatible_encoding<internal::encodings::ASCII, encoding>::value
+        >
+{
+
+}; */
+
+/*
+template <internal::encodings::values encoding>
+struct test_fallthrough2<experimental::is_compatible_encoding2<encoding>::value> :
+
+{
+
+}; */
+
+/*
+ * This works, but I think I prefer our custom specialization below
+ */
+
+/*
+template <internal::encodings::values encoding>
+struct test_fallthrough3<encoding, estd::enable_if_t<encoding == estd::internal::encodings::ASCII> >
+{
+
+}; */
+
+template <internal::encodings::values encoding>
+struct test_fallthrough3<encoding,
+        typename experimental::is_compatible_encoding<
+            estd::internal::encodings::ASCII, encoding
+            >::type>
+{
+
+};
+
+
 TEST_CASE("locale")
 {
     experimental::locale<experimental::locale_code::en_US,
@@ -228,6 +285,14 @@ TEST_CASE("locale")
             constexpr internal::encodings::values v = is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8>::value;
 
             REQUIRE(v == internal::encodings::UTF8);
+
+            SECTION("fallthrough")
+            {
+                test_fallthrough3<internal::encodings::ASCII> ft1;
+                test_fallthrough3<internal::encodings::UTF8> ft2;
+                // Won't compile, and that's correct
+                //test_fallthrough3<internal::encodings::UTF16> ft3;
+            }
         }
     }
 }

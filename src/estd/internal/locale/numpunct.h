@@ -30,15 +30,39 @@ struct Range;
 
 // Can the presented encoding work with the core encoding?  If so we get a 'type'
 // of the presented encoding
-template<internal::encodings::values core_encoding, internal::encodings::values presented_encoding>
-struct is_compatible_encoding;
+template<internal::encodings::values core_encoding, internal::encodings::values presented_encoding,
+    class T = void>
+struct is_compatible_encoding {};
 
 // DEBT: Pretty sure this won't work in pre-C++11
-template<>
-struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8>
+template<class T>
+struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8, T>
 {
     static CONSTEXPR internal::encodings::values value = internal::encodings::UTF8;
     static CONSTEXPR internal::encodings::values _value() { return internal::encodings::UTF8; }
+
+    // Because specialization via non-type parameters is limited
+    typedef T type;
+};
+
+template<class T>
+struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::ASCII, T>
+{
+    // Because specialization via non-type parameters is limited
+    typedef T type;
+};
+
+
+template<internal::encodings::values core_encoding, typename = Range<true> >
+class is_compatible_encoding2
+{
+};
+
+template<internal::encodings::values presented_encoding>
+struct is_compatible_encoding2<internal::encodings::ASCII, Range<(presented_encoding == internal::encodings::ASCII)>>
+{
+    static CONSTEXPR internal::encodings::values value = presented_encoding;
+    //static CONSTEXPR internal::encodings::values _value() { return internal::encodings::UTF8; }
 };
 
 
