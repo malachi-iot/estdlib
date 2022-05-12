@@ -10,28 +10,15 @@
 
 #include "string.h"
 
+#include "internal/locale/ctype.h"
+#include "internal/locale/num_get.h"
+#include "internal/locale/numpunct.h"
+
 extern "C" {
 #include <stdint.h>
 }
 
 namespace estd { namespace experimental {
-
-struct ctype_base
-{
-    typedef uint8_t mask;
-
-    static CONSTEXPR mask space = 0x01;
-    static CONSTEXPR mask digit = 0x02;
-    static CONSTEXPR mask alpha = 0x04;
-    static CONSTEXPR mask punct = 0x08;
-    static CONSTEXPR mask upper = 0x10;
-    static CONSTEXPR mask lower = 0x20;
-    static CONSTEXPR mask xdigit = 0x40;
-
-    static CONSTEXPR mask alnum = alpha | digit;
-    static CONSTEXPR mask graph = alnum | punct;
-};
-
 
 template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
 class ctype : public ctype_base
@@ -91,10 +78,6 @@ struct locale
     // but does memory allocation out of our own GC-pool
     const char* name() const { return locale_name<locale_code, encoding>(); }
 };
-
-template <class TChar, class TLocale = locale<locale_code::en_US, internal::encodings::UTF8>>
-struct numpunct;
-
 
 
 // specialization, deviating from standard in that locale is compile-time
@@ -160,15 +143,6 @@ public:
 
 
 }
-
-template <class TChar>
-struct numpunct<TChar, locale<locale_code::en_US, internal::encodings::UTF8> >
-{
-    typedef TChar char_type;
-
-    static estd::layer2::const_string truename() { return "true"; }
-    static estd::layer2::const_string falsename() { return "false"; }
-};
 
 //template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
 //bool has_facet(const locale<locale_code, encoding>& loc);
