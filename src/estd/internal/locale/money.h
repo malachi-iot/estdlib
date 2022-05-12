@@ -6,9 +6,6 @@
 
 namespace estd { namespace experimental {
 
-template <class TChar, bool international, class TLocale>
-struct moneypunct;
-
 template <>
 struct moneypunct<char, false, locale<locale_code::en_US, internal::encodings::UTF8> >
 {
@@ -28,11 +25,13 @@ struct moneypunct<char, true, locale<locale_code::en_US, internal::encodings::UT
 
 
 template <class TChar, bool international, class TLocale>
-struct use_facet_helper4<moneypunct<TChar, international, TLocale>, TLocale>
+struct use_facet_helper4<moneypunct<TChar, international, void>, TLocale>
 {
-    inline static moneypunct<TChar, international, TLocale> use_facet(TLocale)
+    typedef moneypunct<TChar, international, TLocale> facet_type;
+
+    inline static facet_type use_facet(TLocale)
     {
-        return moneypunct<TChar, international, TLocale>();
+        return facet_type();
     }
 };
 

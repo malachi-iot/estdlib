@@ -44,8 +44,10 @@ struct numpunct<char, locale<locale_code::fr_FR, internal::encodings::UTF8> > :
 
 
 template <class TChar, class TLocale>
-struct use_facet_helper4<numpunct<TChar, TLocale>, TLocale>
+struct use_facet_helper4<numpunct<TChar, void>, TLocale>
 {
+    typedef numpunct<TChar, TLocale> facet_type;
+    
     inline static numpunct<TChar, TLocale> use_facet(TLocale)
     {
         return numpunct<TChar, TLocale>();

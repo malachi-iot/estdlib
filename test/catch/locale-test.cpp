@@ -190,6 +190,11 @@ TEST_CASE("locale")
         {
             using namespace estd::experimental;
 
+            SECTION("num_get")
+            {
+                auto f = use_facet4<num_get<char, const char*>>(l);
+
+            }
             SECTION("numpunct")
             {
                 auto f = use_facet4<numpunct<char>>(l);
@@ -198,10 +203,13 @@ TEST_CASE("locale")
             }
             SECTION("moneypunct")
             {
-                /*
-                auto f = use_facet4<moneypunct<char, false>>(l);
+                auto f = use_facet4<moneypunct<char>>(l);
 
-                REQUIRE(f.truename() == "true"); */
+                REQUIRE(f.curr_symbol() == "$");
+
+                auto f2 = use_facet4<moneypunct<char, true>>(l);
+
+                REQUIRE(f2.curr_symbol() == "USD");
             }
         }
     }
