@@ -21,6 +21,7 @@ public:
 
     typedef istreambuf_iterator iterator;
     typedef char_type value_type;
+    typedef typename traits_type::int_type int_type;
 
 private:
 
@@ -63,9 +64,12 @@ public:
     {
         if(!end())
         {
-            ch = rdbuf->snextc();
+            int_type _ch = rdbuf->snextc();
 
-            if (ch == traits_type::eof()) rdbuf = NULLPTR;
+            if (_ch == traits_type::eof())
+                rdbuf = NULLPTR;
+            else
+                ch = traits_type::to_char_type(_ch);
         }
 
         return *this;
