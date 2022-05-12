@@ -24,7 +24,10 @@ TEST_CASE("locale")
         auto failbit = ios_base::failbit;
         auto eofbit = ios_base::eofbit;
         ios_base::iostate state = ios_base::goodbit;
-        ios_base fmt;
+        //ios_base fmt;
+        // DEBT: Need to do this because we are basing on basic_ios, not ios_base, due
+        // to moved getloc().  Can be any estd istream here
+        estd::internal::basic_istream<layer1::stringbuf<32>> fmt;
         long v = -1;
 
         SECTION("simple source")
@@ -96,6 +99,26 @@ TEST_CASE("locale")
                 REQUIRE(state == goodbit);
                 REQUIRE(v == 123);
                 REQUIRE(*output_it == '/');
+            }
+            SECTION("bool numeric")
+            {
+                const char* in = "1";
+                bool _v;
+
+                n.get(in, in + 1, fmt, state, _v);
+                REQUIRE(state == eofbit);
+                REQUIRE(_v == true);
+            }
+            SECTION("bool alpha")
+            {
+                fmt.setf(ios_base::boolalpha);
+
+                const char* in = "true";
+                bool _v;
+
+                n.get(in, in + 4, fmt, state, _v);
+                REQUIRE(state == goodbit);
+                REQUIRE(_v == true);
             }
         }
         SECTION("complex iterator")

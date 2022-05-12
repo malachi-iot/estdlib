@@ -40,6 +40,7 @@ bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 }
 #endif
 
+// Can likely be combined with upcoming estd::ctype and locale-oriented isdigit
 /// (Maybe) Requires ASCII
 template<unsigned short b>
 struct char_base_traits<b, estd::internal::Range<b <= 10> > :

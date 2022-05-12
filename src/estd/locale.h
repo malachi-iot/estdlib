@@ -8,11 +8,16 @@
 
 #include "internal/iosfwd.h"
 
+#include "string.h"
+
 extern "C" {
 #include <stdint.h>
 }
 
 namespace estd { namespace experimental {
+
+template <class TChar>
+struct numpunct;
 
 struct ctype_base
 {
@@ -156,6 +161,13 @@ public:
 
 }
 
+template <class TChar>
+struct numpunct
+{
+    static estd::layer2::const_string truename() { return "true"; }
+    static estd::layer2::const_string falsename() { return "false"; }
+};
+
 //template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
 //bool has_facet(const locale<locale_code, encoding>& loc);
 
@@ -249,16 +261,17 @@ public:
 
 private:
 
-    //template <class TStreambuf, class TBase>
+    template <class TStreambuf, class TBase>
     struct helper
     {
-        //typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+        typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+        typedef typename istream_type::locale_type locale_type;
 
         // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
         //       though it being locale-bound may affect that down the line
         template <unsigned base, class T>
         static iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
-            ios_base::iostate& err, ios_base& str, T& v)
+            ios_base::iostate& err, istream_type& str, T& v)
         {
             typedef estd::internal::char_base_traits<base> char_base_traits;
             typedef typename char_base_traits::int_type int_type;
@@ -291,7 +304,7 @@ private:
 
         template <class T>
         static iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
-            ios_base::iostate& err, ios_base& str, T& v)
+            ios_base::iostate& err, istream_type& str, T& v)
         {
             bool negative = false;
 
@@ -310,9 +323,87 @@ private:
             return i;
         }
 
+        static iter_type get_bool_ascii(iter_type in, iter_type end,
+            ios_base::iostate& err, istream_type& str, bool& v)
+        {
+            if(str.flags() & ios_base::boolalpha)
+            {
+                locale_type locale = str.getloc();
+                numpunct<char> np;
+
+                // tempted to get algorithmically fancy here, but with only two things to
+                // compare, brute force makes sense
+                estd::layer2::const_string names[] {
+                    np.truename(),
+                    np.falsename()
+                };
+
+                bool good = false;
+                int chosen = -1;
+                v = false;
+
+                // DEBT: const_iterator is broken here, we can't increment/decrement it
+                estd::layer2::const_string::iterator
+                    true_it = np.truename().begin(),
+                    true_end = np.truename().end(),
+                    false_it = np.falsename().begin(),
+                    false_end = np.falsename().end();
+
+                for(int i = 0; in != end;
+                    ++in, ++i, ++true_it, ++false_it, good = true)
+                {
+                    char_type c = *in;
+
+                    if(*true_it == c)
+                    {
+                        if(chosen == 1)
+                        {
+                            err |= ios_base::failbit;
+                            break;
+                        }
+                        // 'true' character detected
+                        chosen = 0;
+                        if(i == names[0].size() - 1)
+                        {
+                            v = true;
+                            break;
+                        }
+                    }
+                    else if(*false_it == c)
+                    {
+                        if(chosen == 0)
+                        {
+                            err |= ios_base::failbit;
+                            break;
+                        }
+                        // 'false' character detected
+                        chosen = 1;
+                        if(i == names[1].size() - 1)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        err |= ios_base::failbit;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                unsigned temp;
+                in = get_unsigned_integer_ascii<2>(in, end, err, str, temp);
+                // DEBT: Try to avoid using temporary.
+                // No bounds check necessary here, since specifying base 2 already does that
+                v = temp == 1;
+            }
+            return in;
+        }
+
         template <typename T>
         static iter_type get_integer_ascii(iter_type in, iter_type end,
-            ios_base::iostate& err, ios_base& str, T& v)
+            ios_base::iostate& err, istream_type& str, T& v)
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
@@ -333,7 +424,7 @@ private:
 
         template <typename T>
         static iter_type get_unsigned_ascii(iter_type in, iter_type end,
-            ios_base::iostate& err, ios_base& str, T& v)
+            ios_base::iostate& err, istream_type& str, T& v)
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
@@ -358,7 +449,7 @@ private:
         // 'false_type' = unsigned
         template <class T>
         static iter_type get(iter_type in, iter_type end,
-            ios_base::iostate& err, ios_base& str,
+            ios_base::iostate& err, istream_type& str,
             T& v,
             estd::true_type, estd::false_type)
         {
@@ -370,11 +461,22 @@ private:
         // 'true_type' = signed
         template <class T>
         static iter_type get(iter_type in, iter_type end,
-            ios_base::iostate& err, ios_base& str,
+            ios_base::iostate& err, istream_type& str,
             T& v,
             estd::true_type, estd::true_type)
         {
             return get_integer_ascii(in, end, err, str, v);
+        }
+
+        // types after 'v':
+        // 'true_type' = is integer
+        // 'false_type' = unsigned
+        static iter_type get(iter_type in, iter_type end,
+            ios_base::iostate& err, istream_type& str,
+            bool& v,
+            estd::true_type, estd::false_type)
+        {
+            return get_bool_ascii(in, end, err, str, v);
         }
     };
 
@@ -413,11 +515,11 @@ private:
 
 
 public:
-    template <typename T>
+    template <typename T, class TStreambuf, class TBase>
     iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, T& v) const
+        estd::internal::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
     {
-        return helper::get(in, end, err, str, v,
+        return helper<TStreambuf, TBase>::get(in, end, err, str, v,
            estd::is_integral<T>(), estd::is_signed<T>());
     }
 };
