@@ -226,6 +226,15 @@ TEST_CASE("locale")
     }
     SECTION("cbase")
     {
+        SECTION("base 8")
+        {
+            using namespace estd::experimental;
+
+            cbase<char, 8, estd::experimental::classic_locale_type> facet;
+
+            REQUIRE(facet.from_char('7') == 7);
+            REQUIRE(facet.from_char('9') == -1);
+        }
         SECTION("base 10")
         {
             using namespace estd::experimental;
@@ -233,6 +242,7 @@ TEST_CASE("locale")
             cbase<char, 10, estd::experimental::classic_locale_type> facet;
 
             REQUIRE(facet.from_char('2') == 2);
+            REQUIRE(facet.from_char('A') == -1);
         }
         SECTION("base 16")
         {
@@ -241,6 +251,7 @@ TEST_CASE("locale")
             cbase<char, 16, estd::experimental::classic_locale_type> facet;
 
             REQUIRE(facet.from_char('A') == 10);
+            REQUIRE(facet.from_char('.') == -1);
         }
     }
     SECTION("use_facet")
