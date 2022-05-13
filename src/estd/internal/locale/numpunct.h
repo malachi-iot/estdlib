@@ -2,6 +2,7 @@
 
 #include "fwd.h"
 #include "facet.h"
+#include "utility.h"
 #include <estd/string.h>
 
 namespace estd { namespace experimental {
@@ -10,6 +11,7 @@ namespace estd { namespace experimental {
 // DEBT: Only to avoid confusion with regular internal not in experimental space
 // Classes will be moved around and this namespace will go away
 namespace _internal {
+
 
 template <typename TChar>
 struct numpunct_base;
@@ -23,60 +25,28 @@ struct numpunct_base<char>
     static estd::layer2::const_string grouping() { return ""; }
 };
 
-}
+template <typename TChar, class TLocale, class TEnabled = void>
+struct numpunct;
 
-template<bool>
-struct Range;
-
-// Can the presented encoding work with the core encoding?  If so we get a 'type'
-// of the presented encoding
-template<internal::encodings::values core_encoding, internal::encodings::values presented_encoding,
-    class T = void>
-struct is_compatible_encoding {};
-
-// DEBT: Pretty sure this won't work in pre-C++11
-template<class T>
-struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::UTF8, T>
-{
-    static CONSTEXPR internal::encodings::values value = internal::encodings::UTF8;
-    static CONSTEXPR internal::encodings::values _value() { return internal::encodings::UTF8; }
-
-    // Because specialization via non-type parameters is limited
-    typedef T type;
-};
-
-template<class T>
-struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::ASCII, T>
-{
-    // Because specialization via non-type parameters is limited
-    typedef T type;
-};
-
-
-template<internal::encodings::values core_encoding, typename = Range<true> >
-class is_compatible_encoding2
-{
-};
-
-template<internal::encodings::values presented_encoding>
-struct is_compatible_encoding2<internal::encodings::ASCII, Range<(presented_encoding == internal::encodings::ASCII)>>
-{
-    static CONSTEXPR internal::encodings::values value = presented_encoding;
-    //static CONSTEXPR internal::encodings::values _value() { return internal::encodings::UTF8; }
-};
-
-
-
-//template <internal::encodings::values encoding>
-template <>
+//template <locale_code::values lc, internal::encodings::values encoding>
+template <class TLocale>
 struct numpunct<char, 
-    locale<locale_code::en_US, 
-        /*
-        is_compatible_encoding<
-            internal::encodings::ASCII, encoding>
-            ::_value()> */
-            internal::encodings::UTF8>
-        > :
+    //locale<lc, encoding>,
+    TLocale,
+    // Almost works, but not quite
+    //typename is_compatible_with_classic_locale<TLocale>::type> :
+    typename estd::enable_if<
+
+        //(encoding == internal::encodings::ASCII || encoding == internal::encodings::UTF8) &&
+        //(lc == locale_code::en_US || lc == locale_code::en_GB)>
+
+        //is_compatible_encoding<internal::encodings::ASCII, encoding>::value &&
+        //is_compatible_locale_code<locale_code::en_US, lc>::value>
+
+        //is_compatible_with_classic_locale<locale<lc, encoding> >::value>
+        is_compatible_with_classic_locale<TLocale>::value>
+
+        ::type> :
     _internal::numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "true"; }
@@ -84,13 +54,31 @@ struct numpunct<char,
 };
 
 
-template <>
-struct numpunct<char, locale<locale_code::fr_FR, internal::encodings::UTF8> > :
+template <internal::encodings::values encoding>
+struct numpunct<char, 
+    locale<locale_code::fr_FR, encoding>,
+    typename is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
     _internal::numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "vrai"; }
     static estd::layer2::const_string falsename() { return "faux"; }
 };
+
+}
+
+
+// NOTE: All this wrapping is done to hide the 'TEnabled' template portion.
+// That may be of little consequence overall though.  If so, merely expose
+// the underlying numpunct and call it a day
+#ifdef FEATURE_CPP_ALIASTEMPLATExx
+// Conflicts with fwd declaration
+template <typename TChar, class TLocale = void>
+using numpunct = _internal::numpunct<TChar, TLocale>;
+#else
+template <typename TChar, class TLocale>
+struct numpunct : _internal::numpunct<TChar, TLocale> {};
+#endif
+
 
 
 template <class TChar, class TLocale>
@@ -103,6 +91,19 @@ struct use_facet_helper4<numpunct<TChar, void>, TLocale>
         return numpunct<TChar, TLocale>();
     }
 };
+
+/*
+template <class TChar, locale_code::values lc>
+struct use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::UTF8> >
+{
+    typedef locale<lc, internal::encodings::UTF8> locale_type;
+    typedef numpunct<TChar, locale_type> facet_type;
+    
+    inline static facet_type use_facet(locale_type)
+    {
+        return facet_type();
+    }
+}; */
 
 /*
 template <class TChar, locale_code::values lc>
