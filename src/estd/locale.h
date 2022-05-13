@@ -100,14 +100,13 @@ struct locale : internal::locale_base_base
     typedef internal::encodings::values encodings;
 
     template <iso iso_code, encodings encoding>
-    using text = internal::locale<iso_code, encoding>;
+    using type = internal::locale<iso_code, encoding>;
     /*
     struct text : internal::locale<iso_code, encoding> {}; */
 
-    inline static internal::classic_locale_type classic()
-    {
-        return internal::classic_locale_type();
-    }
+    typedef internal::locale<iso::C, encodings::ASCII> classic_type;
+
+    inline static classic_type classic() { return classic_type(); }
 };
 
 template <class TChar, class TLocale>

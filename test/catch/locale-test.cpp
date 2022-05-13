@@ -70,16 +70,16 @@ struct test_fallthrough3<encoding,
 
 TEST_CASE("locale")
 {
-    locale::text<locale::iso::en_US,
+    locale::type<locale::iso::en_US,
         locale::encodings::UTF8> l;
     internal::locale<internal::locale_code::fr_FR,
         internal::encodings::UTF8> l_fr;
     internal::locale<internal::locale_code::en_US,
             internal::encodings::ASCII> l_ASCII;
 
-    // DEBT: We want to get this 'classic' API rolling
-    //auto l_classic = experimental::locale_base::classic();
-    internal::classic_locale_type l_classic;
+    // Not truly necessary (classic_type is fully static) but we do have the API for those
+    // who want it
+    locale::classic_type l_classic = locale::classic();
 
     auto goodbit = ios_base::goodbit;
     auto failbit = ios_base::failbit;
@@ -235,21 +235,21 @@ TEST_CASE("locale")
 
         SECTION("base 8")
         {
-            cbase<char, 8, estd::internal::classic_locale_type> facet;
+            cbase<char, 8, locale::classic_type> facet;
 
             REQUIRE(*facet.from_char('7') == 7);
             REQUIRE(!facet.from_char('9').has_value());
         }
         SECTION("base 10")
         {
-            cbase<char, 10, estd::internal::classic_locale_type> facet;
+            cbase<char, 10, locale::classic_type> facet;
 
             REQUIRE(*facet.from_char('2') == 2);
             REQUIRE(facet.from_char('A').has_value() == false);
         }
         SECTION("base 16")
         {
-            cbase<char, 16, estd::internal::classic_locale_type> facet;
+            cbase<char, 16, locale::classic_type> facet;
 
             REQUIRE(*facet.from_char('A') == 10);
             REQUIRE(facet.from_char('.').has_value() == false);

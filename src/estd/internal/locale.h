@@ -84,10 +84,6 @@ struct locale_base_base
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale;
 
-
-typedef locale<locale_code::C, estd::internal::encodings::ASCII> classic_locale_type;
-
-
 }
 
 }
