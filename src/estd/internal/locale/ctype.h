@@ -64,6 +64,7 @@ class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
     typedef internal::char_base_traits<10> char_base10_traits;
     typedef internal::char_base_traits<16> char_base16_traits;
 
+public:
     static bool isspace(char ch)
     {
         // as per http://en.cppreference.com/w/cpp/string/byte/isspace
@@ -81,7 +82,6 @@ class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
         return false;
     }
 
-public:
     static bool isupper(char ch)
     {
         return 'A' <= ch && ch <= 'Z';

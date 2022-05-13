@@ -92,12 +92,13 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     static inline CONSTEXPR bool is_in_base(char_type c, const unsigned short _base = b)
     {
-        // DEBT: We really want to consider ctype's isdigit, toupper and islower here
+        // DEBT: We really want to consider ctype's isdigit here
         return estd::internal::ascii_isdigit(c) ||
                isupper(c, _base) ||
                islower(c, _base);
     }
 
+    // NOTE: Consider using estd::optional here instead
     static inline int_type from_char(char_type c, const unsigned short _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit, toupper and islower here
