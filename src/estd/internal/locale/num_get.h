@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "cbase.h"
 
 namespace estd { namespace experimental {
 
@@ -25,8 +26,9 @@ private:
         static iter_type get_unsigned_integer(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
-            typedef estd::internal::char_base_traits<base> char_base_traits;
-            typedef typename char_base_traits::int_type int_type;
+            // DEBT: Consider using use_facet, though really not necessary at this time
+            typedef cbase<char_type, base, locale_type> cbase_type;
+            typedef typename cbase_type::optional_type optional_type;
 
             v = 0;
             // Since we are using forward-only iterators, we can't retain an
@@ -35,11 +37,11 @@ private:
 
             for(; i != end; ++i, good = true)
             {
-                int_type n = char_base_traits::from_char_with_test(*i);
+                optional_type n = cbase_type::from_char(*i);
 
-                if(n != char_base_traits::eol())
+                if(n.has_value())
                 {
-                    estd::internal::raise_and_add(v, char_base_traits::base(), n);
+                    estd::internal::raise_and_add(v, base, *n);
                 }
                 else
                 {
@@ -54,8 +56,8 @@ private:
             return i;
         }
 
-        template <class T>
-        static iter_type get_signed_integer_decimal(iter_type i, iter_type end,
+        template <unsigned base, class T>
+        static iter_type get_signed_integer(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             bool negative = false;
@@ -76,7 +78,7 @@ private:
                 ++i;
             }
 
-            i = get_unsigned_integer<10>(i, end, err, str, v);
+            i = get_unsigned_integer<base>(i, end, err, str, v);
 
             if(negative) v = -v;
 
@@ -175,9 +177,13 @@ private:
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
-            if(basefield == estd::ios_base::dec)
+            if(basefield == estd::ios_base::oct)
             {
-                return get_signed_integer_decimal(in, end, err, str, v);
+                return get_signed_integer<8>(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::dec)
+            {
+                return get_signed_integer<10>(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::hex)
             {
@@ -196,7 +202,11 @@ private:
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
-            if(basefield == estd::ios_base::dec)
+            if(basefield == estd::ios_base::oct)
+            {
+                get_unsigned_integer<8>(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::dec)
             {
                 get_unsigned_integer<10>(in, end, err, str, v);
             }
