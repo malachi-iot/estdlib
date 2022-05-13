@@ -52,6 +52,13 @@ struct is_compatible_locale_code<locale_code::en_US, locale_code::en_US, T> :
 };
 
 
+template<class T>
+struct is_compatible_locale_code<locale_code::en_US, locale_code::C, T> :
+    estd::true_type
+{
+    typedef T type;
+};
+
 template<class TLocale, class T = void>
 struct is_compatible_with_classic_locale : estd::false_type {};
 

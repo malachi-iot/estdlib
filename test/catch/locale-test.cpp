@@ -74,6 +74,7 @@ TEST_CASE("locale")
         internal::encodings::UTF8> l_fr;
     experimental::locale<experimental::locale_code::en_US,
             internal::encodings::ASCII> l_ASCII;
+    auto l_classic = experimental::locale_base::classic();
 
     SECTION("isspace")
     {
@@ -271,6 +272,10 @@ TEST_CASE("locale")
                 SECTION("en")
                 {
                     REQUIRE(use_facet4<numpunct<char>>(l_ASCII).truename() == "true");
+                }
+                SECTION("classic")
+                {
+                    REQUIRE(use_facet4<numpunct<char>>(l_classic).truename() == "true");
                 }
             }
             SECTION("moneypunct")

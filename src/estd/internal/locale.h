@@ -15,7 +15,8 @@ struct locale_code
         POSIX,
         en_GB,
         en_US,
-        fr_FR
+        fr_FR,
+        ja_JP
     };
 };
 
