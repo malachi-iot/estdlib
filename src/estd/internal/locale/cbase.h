@@ -32,11 +32,11 @@ struct cbase_utf_base
 {
     typedef int16_t int_type;
 
-    typedef int_type optional_type;
+    //typedef int_type optional_type;
+    //inline static CONSTEXPR int_type eol() { return -1; }
 
-    inline static CONSTEXPR int_type eol() { return -1; }
-    //typedef estd::layer1::optional<int_type, -1> optional_type;
-    //inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
+    typedef estd::layer1::optional<int_type, -1> optional_type;
+    inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 
     static inline CONSTEXPR unsigned base() { return b; }
 };
@@ -117,8 +117,8 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
         if (islower(c, _base)) return c - 'a' + 10;
 
-        return base_type::eol();
-        //return estd::nullopt;
+        //return base_type::eol();
+        return estd::nullopt;
     }
 
     static inline int_type from_char_raw(char_type c)

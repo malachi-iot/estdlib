@@ -232,8 +232,8 @@ TEST_CASE("locale")
 
             cbase<char, 8, estd::experimental::classic_locale_type> facet;
 
-            REQUIRE(facet.from_char('7') == 7);
-            REQUIRE(facet.from_char('9') == -1);
+            REQUIRE(*facet.from_char('7') == 7);
+            REQUIRE(!facet.from_char('9').has_value());
         }
         SECTION("base 10")
         {
@@ -241,8 +241,8 @@ TEST_CASE("locale")
 
             cbase<char, 10, estd::experimental::classic_locale_type> facet;
 
-            REQUIRE(facet.from_char('2') == 2);
-            REQUIRE(facet.from_char('A') == -1);
+            REQUIRE(*facet.from_char('2') == 2);
+            REQUIRE(facet.from_char('A').has_value() == false);
         }
         SECTION("base 16")
         {
@@ -250,8 +250,8 @@ TEST_CASE("locale")
 
             cbase<char, 16, estd::experimental::classic_locale_type> facet;
 
-            REQUIRE(facet.from_char('A') == 10);
-            REQUIRE(facet.from_char('.') == -1);
+            REQUIRE(*facet.from_char('A') == 10);
+            REQUIRE(facet.from_char('.').has_value() == false);
         }
     }
     SECTION("use_facet")
