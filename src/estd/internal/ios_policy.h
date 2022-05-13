@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../port/thread.h"
 #include "ios_base.h"
 
 namespace estd {

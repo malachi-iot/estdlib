@@ -1,8 +1,8 @@
 #pragma once
 
 #include "internal/iterator_standalone.h"
-#include "istream.h"
-#include "ostream.h"
+#include "internal/iosfwd.h"
+#include "internal/ios_base.h"
 
 
 

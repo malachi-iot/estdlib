@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal/iosfwd.h"
+
 namespace estd {
 
 #if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
