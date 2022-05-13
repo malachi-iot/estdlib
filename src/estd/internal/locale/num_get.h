@@ -70,7 +70,7 @@ private:
                      *  Something feels wrong about letting an overflow pass by unnoticed, so I am
                      *  setting the fail bit here despite what they imply
                      */
-                    if(!estd::internal::raise_and_add(v, base, *n))
+                    if(!estd::internal::raise_and_add(v, base, n.value()))
                     {
                         err |= ios_base::failbit;
                         return i;

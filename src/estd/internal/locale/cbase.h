@@ -36,7 +36,7 @@ struct cbase_utf_base
     //typedef int_type optional_type;
     //inline static CONSTEXPR int_type eol() { return -1; }
 
-    typedef estd::layer1::optional<int_type, -1> optional_type;
+    typedef const estd::layer1::optional<int_type, -1> optional_type;
 
     inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 

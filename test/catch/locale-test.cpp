@@ -271,21 +271,58 @@ TEST_CASE("locale")
             }
             SECTION("num_get")
             {
-                auto f = use_facet<num_get<wchar_t, const wchar_t*>>(l);
+                SECTION("unusual input")
+                {
+                    // mirrors what happens in our unity test
+                    const char* input = "123 456/789";
 
-                const wchar_t* number = L"1234";
-                int value;
-                ios_base::iostate state = ios_base::goodbit;
+                    int val;
+                    ios_base::iostate err = ios_base::goodbit;
 
-                // DEBT: Only used for format and locale specification
-                estd::internal::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
+                    typedef experimental::istringstream<64> istream_type;
+                    //estd::internal::basic_istream<layer1::basic_stringbuf<char, 32>> istream(input);
+                    istream_type istream(input);
+                    typedef estd::experimental::istreambuf_iterator<decltype(istream)::streambuf_type>
+                        iterator_type;
+                    auto facet = use_facet<num_get<char, iterator_type> > (istream.getloc());
 
-                f.get(number, number + 4, fmt, state, value);
+                    iterator_type it(istream), end;
 
-                REQUIRE(state == eofbit);
-                // TODO: Works, but only because unicode comfortably narrows back down to regular
-                // char during char_base_traits usage
-                REQUIRE(value == 1234);
+                    it = facet.get(it, end, istream, err, val);
+
+                    REQUIRE(val == 123);
+                    REQUIRE(err == goodbit);
+
+                    // FIX: istreambuf_iterator is not yet up to this task, it's always in proxy mode
+                    // which means it doesn't pick up non-iterator movement through the streambuf
+                    //istream >> ws;
+                    // instead, we manually skip the space
+                    ++it;
+
+                    it = facet.get(it, end, istream, err, val);
+
+                    // FIX: Fail, we get 0
+                    REQUIRE(err == goodbit);
+                    REQUIRE(val == 456);
+                }
+                SECTION("wchar")
+                {
+                    auto f = use_facet<num_get<wchar_t, const wchar_t*>>(l);
+
+                    const wchar_t* number = L"1234";
+                    int value;
+                    ios_base::iostate state = ios_base::goodbit;
+
+                    // DEBT: Only used for format and locale specification
+                    estd::internal::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
+
+                    f.get(number, number + 4, fmt, state, value);
+
+                    REQUIRE(state == eofbit);
+                    // TODO: Works, but only because unicode comfortably narrows back down to regular
+                    // char during char_base_traits usage
+                    REQUIRE(value == 1234);
+                }
             }
             SECTION("numpunct")
             {

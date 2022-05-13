@@ -1,5 +1,6 @@
 #include "unit-test.h"
 
+#include <estd/istream.h>
 #include <estd/iterator.h>
 #include <estd/locale.h>
 #include <estd/sstream.h>
@@ -19,26 +20,58 @@ static void test_use_facet()
 #endif
 }
 
-static void test_num_get()
-{
-    const char* input = "123 456/789";
-    typedef experimental::istringstream<64> streambuf_type;
-    streambuf_type rdbuf(input);
-    typedef experimental::istreambuf_iterator<streambuf_type> iterator_type;
+static const char input[] = "123 456/789";
 
-    ios_base::iostate err;
+template <class TNumGet, class TStr>
+static void _test_num_get(TNumGet& facet, 
+    TStr& istream,
+    typename TNumGet::iter_type it,
+    typename TNumGet::iter_type end)
+{
+    ios_base::iostate err = ios_base::goodbit;
     unsigned val;
 
-    auto facet = use_facet<num_get<char, iterator_type> > (locale::classic());
-
-    // FIX: Dies trying compile sgetc call in iterator
-#if NOTREADY
-    iterator_type it(rdbuf), end;
-
-    it = facet.get(it, end, rdbuf, err, val);
+    it = facet.get(it, end, istream, err, val);
 
     TEST_ASSERT_EQUAL(123, val);
-#endif
+
+    // DEBT: Manually skip the space, because istreambuf_iterator needs work
+    // before >> ws works
+    //++it;
+    // Not doing that yet, because we found a parsing glitch so dealing with that first
+
+    it = facet.get(it, end, istream, err, val);
+
+    // FIX: Fail, we get goodbit and 1456 - should be failbit due to lingering space
+    // but somehow that's getting consumed as a '1'
+    TEST_ASSERT_EQUAL(ios_base::failbit, err);
+    TEST_ASSERT_EQUAL(456, val);
+
+    it = facet.get(it, end, istream, err, val);
+
+    TEST_ASSERT_EQUAL(789, val);
+}
+
+static void test_num_get()
+{
+    experimental::istringstream<64> istream;   // Just for locale
+    auto facet = use_facet<num_get<char, const char*> >(istream.getloc());
+
+    _test_num_get(facet, istream, input, input + sizeof(input) - 1);
+}
+
+static void test_num_get_istream()
+{
+    typedef experimental::istringstream<64> istream_type;
+    typedef typename istream_type::streambuf_type streambuf_type;
+    istream_type istream(input);
+    typedef experimental::istreambuf_iterator<streambuf_type> iterator_type;
+
+    auto facet = use_facet<num_get<char, iterator_type> >(istream.getloc());
+
+    iterator_type it(istream), end;
+
+    _test_num_get(facet, istream, it, end);
 }
 
 
@@ -50,4 +83,5 @@ void test_locale()
 {
     RUN_TEST(test_use_facet);
     RUN_TEST(test_num_get);
+    RUN_TEST(test_num_get_istream);
 }
