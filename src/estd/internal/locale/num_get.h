@@ -28,7 +28,7 @@ private:
         {
             // DEBT: Consider using use_facet, though really not necessary at this time
             typedef cbase<char_type, base, locale_type> cbase_type;
-            typedef typename cbase_type::optional_type optional_type;
+            //use_facet4<cbase<char_type, base> >(str.getloc()).from_char(*i);
 
             v = 0;
             // Since we are using forward-only iterators, we can't retain an
@@ -37,7 +37,7 @@ private:
 
             for(; i != end; ++i, good = true)
             {
-                optional_type n = cbase_type::from_char(*i);
+                typename cbase_type::optional_type n = cbase_type::from_char(*i);
 
                 if(n.has_value())
                 {
@@ -171,9 +171,46 @@ private:
             return in;
         }
 
-        template <typename T>
-        static iter_type get_integer(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str, T& v)
+
+        // Special thanks to
+        // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
+        // for the hybrid overload/SFINAE approach below
+
+        // types after 'v':
+        // 'true_type' = is integer
+        // 'false_type' = unsigned
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            istream_type& str, ios_base::iostate& err,
+            T& v,
+            estd::true_type, estd::false_type)
+        {
+            const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
+
+            if(basefield == estd::ios_base::oct)
+            {
+                get_unsigned_integer<8>(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::dec)
+            {
+                get_unsigned_integer<10>(in, end, err, str, v);
+            }
+            else if(basefield == estd::ios_base::hex)
+            {
+                get_unsigned_integer<16>(in, end, err, str, v);
+            }
+
+            return in;
+        }
+
+        // types after 'v':
+        // 'true_type' = is integer
+        // 'true_type' = signed
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            istream_type& str, ios_base::iostate& err,
+            T& v,
+            estd::true_type, estd::true_type)
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
@@ -195,62 +232,11 @@ private:
             return in;
         }
 
-
-        template <typename T>
-        static iter_type get_unsigned(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str, T& v)
-        {
-            const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
-
-            if(basefield == estd::ios_base::oct)
-            {
-                get_unsigned_integer<8>(in, end, err, str, v);
-            }
-            else if(basefield == estd::ios_base::dec)
-            {
-                get_unsigned_integer<10>(in, end, err, str, v);
-            }
-            else if(basefield == estd::ios_base::hex)
-            {
-                get_unsigned_integer<16>(in, end, err, str, v);
-            }
-
-            return in;
-        }
-
-        // Special thanks to
-        // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
-        // for the hybrid overload/SFINAE approach below
-
-        // types after 'v':
-        // 'true_type' = is integer
-        // 'false_type' = unsigned
-        template <class T>
-        static iter_type get(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str,
-            T& v,
-            estd::true_type, estd::false_type)
-        {
-            return get_unsigned(in, end, err, str, v);
-        }
-
-        // types after 'v':
-        // 'true_type' = is integer
-        // 'true_type' = signed
-        template <class T>
-        static iter_type get(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str,
-            T& v,
-            estd::true_type, estd::true_type)
-        {
-            return get_integer(in, end, err, str, v);
-        }
-
         // types after 'v':
         // 'true_type' = is integer
         // 'false_type' = unsigned
         static iter_type get(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str,
+            istream_type& str,ios_base::iostate& err,
             bool& v,
             estd::true_type, estd::false_type)
         {
@@ -297,7 +283,7 @@ public:
     iter_type get(iter_type in, iter_type end,
         estd::internal::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
     {
-        return helper<TStreambuf, TBase>::get(in, end, err, str, v,
+        return helper<TStreambuf, TBase>::get(in, end, str, err, v,
            estd::is_integral<T>(), estd::is_signed<T>());
     }
 };

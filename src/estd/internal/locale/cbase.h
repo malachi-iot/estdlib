@@ -155,7 +155,7 @@ struct cbase<TChar, b, locale<lc, encoding>,
 
 }
 
-template <typename TChar, unsigned b, class TLocale>
+template <typename TChar, unsigned b, class TLocale = void>
 using cbase = _internal::cbase<TChar, b, TLocale>;
 
 
