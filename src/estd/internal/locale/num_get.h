@@ -1,3 +1,9 @@
+/**
+ *
+ * References
+ *
+ * 1. https://en.cppreference.com/w/cpp/locale/num_get/get
+ */
 #pragma once
 
 #include "fwd.h"
@@ -41,7 +47,33 @@ private:
 
                 if(n.has_value())
                 {
-                    estd::internal::raise_and_add(v, base, *n);
+                    /**
+                     * "If the conversion function fails to convert the entire field, the value 0
+                     *  is stored in v
+                     *
+                     *  If the type of v is a signed integer type and the conversion
+                     *  function results in a positive or negative value too large to fit in it,
+                     *  the most positive or negative representable value is stored in v, respectively
+                     *
+                     *  If the type of v is an unsigned integer type and the conversion function results
+                     *  in a value that does not fit in it, the most positive representable value is
+                     *  stored in v." [1]
+                     *
+                     *  Beware that raise_and_add *might* clobber v in that condition.
+                     *  See documentation for that function
+                     *
+                     *  "In any case, if the conversion function fails std::ios_base::failbit is
+                     *   assigned to err" [1]
+                     *
+                     *  This *strongly implies* that the capped conversion is not considered a failure.
+                     *  Something feels wrong about letting an overflow pass by unnoticed, so I am
+                     *  setting the fail bit here despite what they imply
+                     */
+                    if(!estd::internal::raise_and_add(v, base, *n))
+                    {
+                        err |= ios_base::failbit;
+                        return i;
+                    }
                 }
                 else
                 {
