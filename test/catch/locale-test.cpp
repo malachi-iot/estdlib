@@ -252,6 +252,12 @@ TEST_CASE("locale")
         {
             using namespace estd::experimental;
 
+            SECTION("ctype")
+            {
+                SECTION("char")
+                {
+                }
+            }
             SECTION("num_get")
             {
                 auto f = use_facet4<num_get<char, const char*>>(l);

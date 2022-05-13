@@ -21,4 +21,69 @@ struct ctype_base
 };
 
 
+template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
+class ctype : public ctype_base
+{
+#ifdef ENABLE_LOCALE_MULTI
+    // TODO: determine if we want to roll with the virtual function do_is
+    // and friends or branch out into further templating
+#else
+    TChar do_tolower(TChar ch);
+    TChar do_toupper(TChar ch);
+#endif
+public:
+    bool is(mask m, TChar ch) const { return false; }
+    const TChar* is(const TChar* low, const TChar* high, mask* vec) const { return NULLPTR; }
+
+    TChar toupper(TChar ch) { return do_toupper(ch); }
+    TChar tolower(TChar ch) { return do_tolower(ch); }
+};
+
+
+// specialization, deviating from standard in that locale is compile-time
+// instead of runtime
+// This has a number of implications, but mainly we are hard-wired
+// to default-ASCII behaviors.  Ultimately this will be an issue but
+// we can build out ctype at that time
+// strongly implies a layer1 behavior
+template <locale_code_enum locale_code>
+class ctype<locale_code, estd::internal::encodings::ASCII, char> :
+    public ctype_base,
+    public locale<locale_code, estd::internal::encodings::ASCII>::facet
+{
+public:
+    typedef char char_type;
+
+    //static locale::id id;
+
+    char widen(char c) const { return c; }
+
+    bool is(mask m, char ch) const
+    {
+        if(m & space)
+        {
+            // as per http://en.cppreference.com/w/cpp/string/byte/isspace
+            switch(ch)
+            {
+                case ' ':
+                case 13:
+                case 10:
+                case '\f':
+                case '\t':
+                case '\v':
+                    return true;
+            }
+        }
+        if(m & digit)
+        {
+            if(ch >= '0' && ch <= '9') return true;
+        }
+        return false;
+    }
+};
+
+template <locale_code_enum locale_code>
+class ctype<locale_code, estd::internal::encodings::UTF8, char> :
+    public ctype<locale_code, estd::internal::encodings::ASCII, char> {};
+
 }}
