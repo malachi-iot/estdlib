@@ -55,14 +55,22 @@ private:
         }
 
         template <class T>
-        static iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
+        static iter_type get_signed_integer_decimal(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             bool negative = false;
 
+            // DEBT: We could possibly constexpr up and down the facet/locale chain which may
+            // more readily optimize this line.  That said, chances are it's already optimized
+            // to the max (i.e. hypen = '-')
+            // NOTE: spec strongly implies hyphen is *always* used to denote a negative number
+            // regardless of locale
+            const char hyphen =
+                use_facet4<ctype<char_type>>(str.getloc()).widen('-');
+
             // TODO: Might be able to merely copy this iterator and to this evaluation
             // at the end.  Perhaps do a specialization for this based on policy
-            if(*i == '-')
+            if(*i == hyphen)
             {
                 negative = true;
                 ++i;
@@ -162,14 +170,14 @@ private:
         }
 
         template <typename T>
-        static iter_type get_integer_ascii(iter_type in, iter_type end,
+        static iter_type get_integer(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
             if(basefield == estd::ios_base::dec)
             {
-                return get_signed_integer_ascii_decimal(in, end, err, str, v);
+                return get_signed_integer_decimal(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::hex)
             {
@@ -225,7 +233,7 @@ private:
             T& v,
             estd::true_type, estd::true_type)
         {
-            return get_integer_ascii(in, end, err, str, v);
+            return get_integer(in, end, err, str, v);
         }
 
         // types after 'v':

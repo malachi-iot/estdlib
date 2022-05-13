@@ -259,6 +259,10 @@ TEST_CASE("locale")
             {
                 SECTION("char")
                 {
+                    auto f = use_facet4<ctype<char>>(l);
+
+                    REQUIRE(f.is(ctype_base::upper, 'a') == false);
+                    REQUIRE(f.is(ctype_base::upper | ctype_base::lower | ctype_base::xdigit, 'A') == true);
                 }
             }
             SECTION("num_get")
