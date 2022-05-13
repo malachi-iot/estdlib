@@ -23,7 +23,6 @@ namespace estd { namespace experimental {
 // NOTE: Due to how we specialize, this class cannot be base class of our specialized locale
 struct locale_base : locale_base_base
 {
-    inline static classic_locale_type classic() { return classic_locale_type(); }
 };
 #endif
 
@@ -48,84 +47,7 @@ public:
 
 }
 
-//template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-//bool has_facet(const locale<locale_code, encoding>& loc);
 
-/*
-template<locale_code_enum locale_code, internal::encodings::values encoding>
-inline bool has_facet<ctype<locale_code, encoding, char> >(const locale<locale_code, encoding>&)
-{
-    return true;
-}
-
-template<>
-inline const ctype<char>& use_facet(const locale&)
-{
-    static ctype<char> facet;
-
-    return facet;
-} */
-
-// Outmoded experimental code.  Get rid of it on cleanup phase
-#if UNUSED
-// FIX: Just to get things compiling, hardcoding these
-template <class TFacet, class TLocale>
-inline bool has_facet(const TLocale&) { return true; }
-
-
-
-template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-inline TFacet use_facet(const locale<locale_code, encoding>&) { return TFacet(); }
-//template <class TFacet, class TLocale>
-//inline TFacet use_facet(TLocale) { return TFacet(); }
-
-/*
- * TODO: Try use_facet_ctype, which is not standard, but may be the best we can do without going
- * full trailing/auto return type
-template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
-inline ctype<locale_code, encoding, TChar> use_facet2<ctype_test<TChar>>(const locale<locale_code, encoding>&)
-{
-    return ctype<locale_code, encoding, TChar>();
-} */
-
-template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
-inline ctype<locale_code, encoding, TChar> use_facet_ctype(const locale<locale_code, encoding>&)
-{
-    return ctype<locale_code, encoding, TChar>();
-}
-
-template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
-struct use_facet_helper<ctype_test<TChar>, locale_code, encoding>
-{
-    typedef ctype<locale_code, encoding, TChar> value_type;
-
-    static value_type use_facet(const locale<locale_code, encoding>&)
-    {
-        return value_type();
-    }
-};
-
-template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-inline typename use_facet_helper<TFacet, locale_code, encoding>::value_type
-    use_facet3(const locale<locale_code, encoding>& loc)
-{
-    typedef use_facet_helper<TFacet, locale_code, encoding> helper_type;
-
-    return helper_type::use_facet(loc);
-}
-
-/*
-template <class TChar, locale_code_enum locale_code, internal::encodings::values encoding>
-inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, encoding>& loc)
-{
-    //typedef use_facet_helper<ctype_test<TChar>> helper_type;
-
-    //helper_type::use_facet(loc);
-    return ctype<locale_code, encoding, TChar>();
-} */
-
-
-#endif
 
 }
 
@@ -167,6 +89,21 @@ struct locale : locale_base_base
 };
 
 }
+
+struct locale : internal::locale_base_base
+{
+    // Maps closely to the GNU interpretation/combination of
+    // ISO 639-1 and ISO 3166 (i.e. en_US)
+    // https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html
+    // https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html
+    typedef internal::locale_code::values iso;
+    typedef internal::encodings::values encodings;
+
+    inline static internal::classic_locale_type classic()
+    {
+        return internal::classic_locale_type();
+    }
+};
 
 template <class TChar, class TLocale>
 inline bool isspace(TChar ch, const TLocale& loc)

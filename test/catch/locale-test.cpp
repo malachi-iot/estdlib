@@ -70,8 +70,8 @@ struct test_fallthrough3<encoding,
 
 TEST_CASE("locale")
 {
-    internal::locale<internal::locale_code::en_US,
-        internal::encodings::UTF8> l;
+    internal::locale<locale::iso::en_US,
+        locale::encodings::UTF8> l;
     internal::locale<internal::locale_code::fr_FR,
         internal::encodings::UTF8> l_fr;
     internal::locale<internal::locale_code::en_US,
@@ -255,35 +255,8 @@ TEST_CASE("locale")
             REQUIRE(facet.from_char('.').has_value() == false);
         }
     }
-    SECTION("use_facet")
+    SECTION("facet")
     {
-#if UNUSED
-        constexpr char c = 'a';
-        SECTION("ctype 1")
-        {
-            typedef experimental::ctype<char,
-                experimental::locale<experimental::locale_code::en_US, internal::encodings::UTF8>>
-                ctype_type;
-            char result = experimental::use_facet<ctype_type>(l).widen(c);
-            REQUIRE(result == c);
-        }
-        SECTION("ctype 2")
-        {
-            auto _c = experimental::use_facet_ctype<char>(l);
-
-            REQUIRE(_c.widen(c) == c);
-            REQUIRE(!_c.is(estd::experimental::ctype_base::digit, c));
-        }
-        SECTION("ctype3 ")
-        {
-            auto f =
-                experimental::use_facet3<experimental::ctype_test<char>>(l);
-
-            REQUIRE(!f.is(estd::experimental::ctype_base::digit, c));
-            // Not yet implemented
-            //REQUIRE(f.is(estd::experimental::ctype_base::alpha, c));
-        }
-#endif
         SECTION("use_facet")
         {
             SECTION("ctype")
