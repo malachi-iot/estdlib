@@ -246,6 +246,9 @@ TEST_CASE("locale")
 
             REQUIRE(*facet.from_char('2') == 2);
             REQUIRE(facet.from_char('A').has_value() == false);
+
+            REQUIRE(facet.is_in_base('9') == true);
+            REQUIRE(facet.is_in_base('F') == false);
         }
         SECTION("base 16")
         {
@@ -253,6 +256,9 @@ TEST_CASE("locale")
 
             REQUIRE(*facet.from_char('A') == 10);
             REQUIRE(facet.from_char('.').has_value() == false);
+
+            REQUIRE(facet.is_in_base('F') == true);
+            REQUIRE(facet.is_in_base('G') == false);
         }
     }
     SECTION("facet")
