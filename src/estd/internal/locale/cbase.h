@@ -1,11 +1,13 @@
 // Non-standard facet for character-to-numeric base conversion
 #pragma once
 
+//#include <estd/string.h>
+#include <estd/optional.h>
+
 #include "fwd.h"
 #include "facet.h"
 #include "utility.h"
 #include "../deduce_fixed_size.h"
-#include <estd/string.h>
 
 // TODO: A future task.  Japanese character set has 3 different (at least) sets of numerals:
 // 1.  Regular ASCII style
@@ -30,7 +32,11 @@ struct cbase_utf_base
 {
     typedef int16_t int_type;
 
-    inline static int_type eol() { return -1; }
+    typedef int_type optional_type;
+
+    inline static CONSTEXPR int_type eol() { return -1; }
+    //typedef estd::layer1::optional<int_type, -1> optional_type;
+    //inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 
     static inline CONSTEXPR unsigned base() { return b; }
 };
@@ -63,10 +69,12 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
         return '0' + v;
     }
 
-    static inline CONSTEXPR int_type from_char(char_type c, const int _base = b)
+    static inline CONSTEXPR typename base_type::optional_type
+        from_char(char_type c, const int _base = b)
     {
         return is_in_base(c, _base) ?
                from_char_raw(c) :
+               //typename base_type::optional_type::null_value();
                base_type::eol();
     }
 };
@@ -99,7 +107,8 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
     }
 
     // NOTE: Consider using estd::optional here instead
-    static inline int_type from_char(char_type c, const unsigned short _base = b)
+    static inline typename base_type::optional_type
+        from_char(char_type c, const unsigned short _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit, toupper and islower here
         if (estd::internal::ascii_isdigit(c)) return c - '0';
@@ -109,6 +118,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
         if (islower(c, _base)) return c - 'a' + 10;
 
         return base_type::eol();
+        //return estd::nullopt;
     }
 
     static inline int_type from_char_raw(char_type c)
