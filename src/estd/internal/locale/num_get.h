@@ -126,9 +126,8 @@ private:
         {
             if(str.flags() & ios_base::boolalpha)
             {
-                locale_type locale = str.getloc();
-                // DEBT: Use 'use_facet' here
-                numpunct<char_type, locale_type> np;
+                numpunct<char_type, locale_type> np =
+                        use_facet4<numpunct<char_type>>(str.getloc());
 
                 // tempted to get algorithmically fancy here, but with only two things to
                 // compare, brute force makes sense

@@ -1,7 +1,16 @@
+/**
+ *
+ * References:
+ *
+ * 1. cplusplus.com/reference/locale/ctype
+ *
+ */
 #pragma once
 
 #include "fwd.h"
 #include "facet.h"
+
+#include "../charconv.hpp"
 
 namespace estd { namespace experimental {
 
@@ -52,32 +61,67 @@ class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
     public ctype_base,
     public locale<locale_code, estd::internal::encodings::ASCII>::facet
 {
+    typedef internal::char_base_traits<10> char_base10_traits;
+    typedef internal::char_base_traits<16> char_base16_traits;
+
+    static bool isspace(char ch)
+    {
+        // as per http://en.cppreference.com/w/cpp/string/byte/isspace
+        switch(ch)
+        {
+            case ' ':
+            case 13:
+            case 10:
+            case '\f':
+            case '\t':
+            case '\v':
+                return true;
+        }
+
+        return false;
+    }
+
 public:
+    static bool isupper(char ch)
+    {
+        return 'A' <= ch && ch <= 'Z';
+    }
+
+    static bool islower(char ch)
+    {
+        return 'a' <= ch && ch <= 'a';
+    }
+
     typedef char char_type;
 
     //static locale::id id;
 
     char widen(char c) const { return c; }
 
-    bool is(mask m, char ch) const
+    // "returns whether c belongs to any of the categories specified in bitmask m" [1]
+    static bool is(mask m, char ch)
     {
         if(m & space)
         {
-            // as per http://en.cppreference.com/w/cpp/string/byte/isspace
-            switch(ch)
-            {
-                case ' ':
-                case 13:
-                case 10:
-                case '\f':
-                case '\t':
-                case '\v':
-                    return true;
-            }
+            if(isspace(ch)) return true;
         }
-        if(m & digit)
+        if(m & xdigit)
         {
-            if(ch >= '0' && ch <= '9') return true;
+            if(internal::char_base_traits<16>::is_in_base(ch))
+                return true;
+        }
+        else if(m & digit)
+        {
+            if(internal::char_base_traits<10>::is_in_base(ch))
+                return true;
+        }
+        if(m & upper)
+        {
+            if(isupper(ch)) return true;
+        }
+        else if(m & lower)
+        {
+            if(islower(ch)) return true;
         }
         return false;
     }

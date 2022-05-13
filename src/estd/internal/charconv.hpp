@@ -2,8 +2,10 @@
 
 #include "charconv.h"
 #include "../algorithm.h"
-#include "../cctype.h"
-#include "locale/ctype.h"
+#include "cctype.h"
+
+// Actually it goes the other way around
+//#include "locale/ctype.h"
 
 namespace estd { namespace internal {
 
@@ -92,14 +94,15 @@ struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     static inline CONSTEXPR bool is_in_base(char_type c, const unsigned short _base = b)
     {
-        return estd::isdigit(c) ||
+        // DEBT: We really want to consider ctype's isdigit here
+        return estd::internal::ascii_isdigit(c) ||
                isupper(c, _base) ||
                islower(c, _base);
     }
 
     static inline int_type from_char_with_test(char_type c, const unsigned short _base = b)
     {
-        if (estd::isdigit(c)) return c - '0';
+        if (estd::internal::ascii_isdigit(c)) return c - '0';
 
         if (isupper(c, _base)) return c - 'A' + 10;
 
@@ -146,7 +149,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // the matched characters is not representable in the type of value, value is unmodified,"
     T local_value = 0;
 
-    while (estd::isspace(*current))
+    while (estd::internal::ascii_isspace(*current))
         current++;
 
     if (estd::is_signed<T>::value)
