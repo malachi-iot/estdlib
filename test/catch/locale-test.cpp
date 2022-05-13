@@ -70,7 +70,7 @@ struct test_fallthrough3<encoding,
 
 TEST_CASE("locale")
 {
-    internal::locale<locale::iso::en_US,
+    locale::text<locale::iso::en_US,
         locale::encodings::UTF8> l;
     internal::locale<internal::locale_code::fr_FR,
         internal::encodings::UTF8> l_fr;

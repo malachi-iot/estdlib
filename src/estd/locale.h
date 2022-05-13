@@ -99,6 +99,11 @@ struct locale : internal::locale_base_base
     typedef internal::locale_code::values iso;
     typedef internal::encodings::values encodings;
 
+    template <iso iso_code, encodings encoding>
+    using text = internal::locale<iso_code, encoding>;
+    /*
+    struct text : internal::locale<iso_code, encoding> {}; */
+
     inline static internal::classic_locale_type classic()
     {
         return internal::classic_locale_type();
