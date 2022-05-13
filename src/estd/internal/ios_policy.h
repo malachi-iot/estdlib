@@ -129,7 +129,7 @@ struct ios_base_policy :
     istream_blocking_policy<TStreambuf, flags & estd::internal::istream_flags::block_mask>
 {
     // DEBT: Clearly we don't want this unconfigurable and always set to en_US.UTF-8
-    typedef experimental::locale<experimental::locale_code::en_US, encodings::UTF8>
+    typedef locale<internal::locale_code::en_US, encodings::UTF8>
         locale_type;
 
     static CONSTEXPR estd::internal::stream_flags::flag_type blocking()

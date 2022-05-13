@@ -12,7 +12,7 @@
 
 #include "../charconv.hpp"
 
-namespace estd { namespace experimental {
+namespace estd {
 
 struct ctype_base
 {
@@ -56,7 +56,7 @@ public:
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <locale_code_enum locale_code>
+template <internal::locale_code_enum locale_code>
 class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
     public ctype_base,
     public locale<locale_code, estd::internal::encodings::ASCII>::facet
@@ -135,12 +135,14 @@ public:
 };
 
 
-template <locale_code_enum locale_code>
+template <internal::locale_code_enum locale_code>
 class ctype<char, locale<locale_code, estd::internal::encodings::UTF8>> :
     public ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> {};
 
+namespace internal {
+
 template <class TChar, class TLocale>
-struct use_facet_helper4<ctype<TChar, void>, TLocale>
+struct use_facet_helper<ctype<TChar, void>, TLocale>
 {
     typedef ctype<TChar, TLocale> facet_type;
     
@@ -150,5 +152,6 @@ struct use_facet_helper4<ctype<TChar, void>, TLocale>
     }
 };
 
+}
 
-}}
+}

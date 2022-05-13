@@ -12,6 +12,7 @@
 #include "port/istream.h"
 
 #include "iterator.h"
+#include "locale.h"
 
 //#include <cassert>
 
@@ -123,7 +124,7 @@ operator >>(
     iterator_type it(in.rdbuf()), end;
     ios_base::iostate err;
 
-    experimental::num_get<char_type, iterator_type> n;
+    num_get<char_type, iterator_type> n;
 
     n.get(it, end, in, err, value);
 

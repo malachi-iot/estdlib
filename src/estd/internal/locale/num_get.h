@@ -3,7 +3,7 @@
 #include "fwd.h"
 #include "cbase.h"
 
-namespace estd { namespace experimental {
+namespace estd {
 
 template <class TChar, class InputIt>
 class num_get
@@ -27,7 +27,7 @@ private:
             ios_base::iostate& err, istream_type& str, T& v)
         {
             // DEBT: Consider using use_facet, though really not necessary at this time
-            typedef cbase<char_type, base, locale_type> cbase_type;
+            typedef experimental::cbase<char_type, base, locale_type> cbase_type;
             //use_facet4<cbase<char_type, base> >(str.getloc()).from_char(*i);
 
             v = 0;
@@ -288,13 +288,16 @@ public:
     }
 };
 
+namespace internal {
 
 template <typename TChar, typename TInputIt, class TLocale>
-struct use_facet_helper4<num_get<TChar, TInputIt>, TLocale>
+struct use_facet_helper<num_get<TChar, TInputIt>, TLocale>
 {
     typedef num_get<TChar, TInputIt> facet_type;
 
     static facet_type use_facet(TLocale) { return facet_type(); }
 };
 
-}}
+}
+
+}

@@ -17,51 +17,7 @@ extern "C" {
 
 namespace estd { namespace experimental {
 
-struct locale_base_base
-{
-    typedef int category;
-
-    static CONSTEXPR category none = 0x0000;
-    static CONSTEXPR category ctype = 0x0001;
-    static CONSTEXPR category numeric = 0x0002;
-};
-
-template <locale_code::values locale_code, internal::encodings::values encoding>
-struct locale : locale_base_base
-{
-#ifdef ENABLE_LOCALE_MULTI
-    struct facet
-    {
-
-    };
-
-    typedef int id;
-
-    // FIX: 40 arbitrary number, could be more or less
-    // NOTE: seems kind of like a fake-rtti system a bit
-    facet* facets[40];
-
-    locale(const locale& other);
-    explicit locale(const char* std_name);
-#else
-    struct facet
-    {
-
-    };
-
-    struct id
-    {
-
-    };
-#endif
-
-    // TODO: deviates in that standard version uses a std::string
-    // I want my own std::string (beginnings of which are in experimental::layer3::string)
-    // but does memory allocation out of our own GC-pool
-    const char* name() const { return locale_name<locale_code, encoding>(); }
-};
-
-
+#if UNUSED
 // DEBT: Need to move this out to regular estd and rename to 'locale'
 // so that calls like 'classic' have a std-like signature
 // NOTE: Due to how we specialize, this class cannot be base class of our specialized locale
@@ -69,6 +25,7 @@ struct locale_base : locale_base_base
 {
     inline static classic_locale_type classic() { return classic_locale_type(); }
 };
+#endif
 
 
 
@@ -170,11 +127,47 @@ inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, 
 
 #endif
 
+}
+
+template <internal::locale_code::values locale_code, internal::encodings::values encoding>
+struct locale : locale_base_base
+{
+#ifdef ENABLE_LOCALE_MULTI
+    struct facet
+    {
+
+    };
+
+    typedef int id;
+
+    // FIX: 40 arbitrary number, could be more or less
+    // NOTE: seems kind of like a fake-rtti system a bit
+    facet* facets[40];
+
+    locale(const locale& other);
+    explicit locale(const char* std_name);
+#else
+    struct facet
+    {
+
+    };
+
+    struct id
+    {
+
+    };
+#endif
+
+    // TODO: deviates in that standard version uses a std::string
+    // I want my own std::string (beginnings of which are in experimental::layer3::string)
+    // but does memory allocation out of our own GC-pool
+    const char* name() const { return internal::locale_name<locale_code, encoding>(); }
+};
+
 template <class TChar, class TLocale>
 inline bool isspace(TChar ch, const TLocale& loc)
 {
     return use_facet<ctype<TChar>>(loc).is(ctype_base::space, ch);
 }
 
-
-}}
+}

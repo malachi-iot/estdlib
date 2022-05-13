@@ -179,11 +179,7 @@ public:
 
     char_type widen(char c) const
     {
-        //typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char_type>
-            //ctype_type;
-        return use_facet<experimental::ctype<char_type> >(getloc()).widen(c);
-        //ctype_type ctype;
-        //return ctype.widen(c);
+        return use_facet<ctype<char_type> >(getloc()).widen(c);
     }
 
     char narrow(char_type c, char /* default */)

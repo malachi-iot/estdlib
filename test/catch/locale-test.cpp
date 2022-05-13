@@ -60,7 +60,7 @@ struct test_fallthrough3<encoding, estd::enable_if_t<encoding == estd::internal:
 
 template <internal::encodings::values encoding>
 struct test_fallthrough3<encoding,
-        typename experimental::_internal::is_compatible_encoding<
+        typename internal::_internal::is_compatible_encoding<
             estd::internal::encodings::ASCII, encoding
             >::type>
 {
@@ -70,20 +70,24 @@ struct test_fallthrough3<encoding,
 
 TEST_CASE("locale")
 {
-    experimental::locale<experimental::locale_code::en_US,
+    locale<internal::locale_code::en_US,
         internal::encodings::UTF8> l;
-    experimental::locale<experimental::locale_code::fr_FR,
+    locale<internal::locale_code::fr_FR,
         internal::encodings::UTF8> l_fr;
-    experimental::locale<experimental::locale_code::en_US,
+    locale<internal::locale_code::en_US,
             internal::encodings::ASCII> l_ASCII;
-    auto l_classic = experimental::locale_base::classic();
+
+    // DEBT: We want to get this 'classic' API rolling
+    //auto l_classic = experimental::locale_base::classic();
+    internal::classic_locale_type l_classic;
+
     auto goodbit = ios_base::goodbit;
     auto failbit = ios_base::failbit;
     auto eofbit = ios_base::eofbit;
 
     SECTION("isspace")
     {
-        REQUIRE(experimental::isspace(' ', l));
+        REQUIRE(isspace(' ', l));
     }
     SECTION("num_get")
     {
@@ -96,7 +100,7 @@ TEST_CASE("locale")
 
         SECTION("simple source")
         {
-            experimental::num_get<char, const char*> n;
+            num_get<char, const char*> n;
 
             SECTION("dec")
             {
@@ -214,7 +218,7 @@ TEST_CASE("locale")
                 streambuf_type sb = test::str_uint1;
                 typedef estd::experimental::istreambuf_iterator<streambuf_type> iterator_type;
                 iterator_type it(sb), end;
-                experimental::num_get<char, iterator_type> n;
+                num_get<char, iterator_type> n;
 
                 auto result = n.get(it, end, fmt, state, v);
 
@@ -226,29 +230,26 @@ TEST_CASE("locale")
     }
     SECTION("cbase")
     {
+        // DEBT: cbase is nearly there, just needs a bit more testing
+        using namespace estd::experimental;
+
         SECTION("base 8")
         {
-            using namespace estd::experimental;
-
-            cbase<char, 8, estd::experimental::classic_locale_type> facet;
+            cbase<char, 8, estd::internal::classic_locale_type> facet;
 
             REQUIRE(*facet.from_char('7') == 7);
             REQUIRE(!facet.from_char('9').has_value());
         }
         SECTION("base 10")
         {
-            using namespace estd::experimental;
-
-            cbase<char, 10, estd::experimental::classic_locale_type> facet;
+            cbase<char, 10, estd::internal::classic_locale_type> facet;
 
             REQUIRE(*facet.from_char('2') == 2);
             REQUIRE(facet.from_char('A').has_value() == false);
         }
         SECTION("base 16")
         {
-            using namespace estd::experimental;
-
-            cbase<char, 16, estd::experimental::classic_locale_type> facet;
+            cbase<char, 16, estd::internal::classic_locale_type> facet;
 
             REQUIRE(*facet.from_char('A') == 10);
             REQUIRE(facet.from_char('.').has_value() == false);
@@ -283,10 +284,8 @@ TEST_CASE("locale")
             //REQUIRE(f.is(estd::experimental::ctype_base::alpha, c));
         }
 #endif
-        SECTION("use_facet4")
+        SECTION("use_facet")
         {
-            using namespace estd::experimental;
-
             SECTION("ctype")
             {
                 SECTION("char")

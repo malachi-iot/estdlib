@@ -3,7 +3,7 @@
 #include "fwd.h"
 #include "facet.h"
 
-namespace estd { namespace experimental {
+namespace estd { namespace internal {
 
 // DEBT: Only to avoid confusion with regular internal not in experimental space
 // Classes will be moved around and this namespace will go away

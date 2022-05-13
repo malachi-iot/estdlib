@@ -14,7 +14,8 @@
 // 2.  Kanji style
 // 3.  An Arabit (English) version which appears to be in with the other Kanji characters
 
-namespace estd { namespace experimental {
+namespace estd {
+namespace experimental {
 
 //template <typename TChar, unsigned b, class TLocale>
 //struct cbase;
@@ -36,6 +37,7 @@ struct cbase_utf_base
     //inline static CONSTEXPR int_type eol() { return -1; }
 
     typedef estd::layer1::optional<int_type, -1> optional_type;
+
     inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 
     static inline CONSTEXPR unsigned base() { return b; }
@@ -48,7 +50,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
     typedef cbase_utf_base<TChar, b> base_type;
     typedef typename base_type::int_type int_type;
     typedef TChar char_type;
-    
+
     // adapted from GNUC
     static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
     {
@@ -70,7 +72,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
     }
 
     static inline CONSTEXPR typename base_type::optional_type
-        from_char(char_type c, const int _base = b)
+    from_char(char_type c, const int _base = b)
     {
         return is_in_base(c, _base) ?
                from_char_raw(c) :
@@ -108,7 +110,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     // NOTE: Consider using estd::optional here instead
     static inline typename base_type::optional_type
-        from_char(char_type c, const unsigned short _base = b)
+    from_char(char_type c, const unsigned short _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit, toupper and islower here
         if (estd::internal::ascii_isdigit(c)) return c - '0';
@@ -141,7 +143,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
 
 template <typename TChar, unsigned b,
-    locale_code::values lc,
+    internal::locale_code::values lc,
     internal::encodings::values encoding>
 struct cbase<TChar, b, locale<lc, encoding>,
     typename estd::enable_if<
@@ -158,11 +160,14 @@ struct cbase<TChar, b, locale<lc, encoding>,
 template <typename TChar, unsigned b, class TLocale = void>
 using cbase = _internal::cbase<TChar, b, TLocale>;
 
+}
+
+namespace internal {
 
 template <class TChar, unsigned b, class TLocale>
-struct use_facet_helper4<cbase<TChar, b, void>, TLocale>
+struct use_facet_helper<experimental::cbase<TChar, b, void>, TLocale>
 {
-    typedef cbase<TChar, b, TLocale> facet_type;
+    typedef experimental::cbase<TChar, b, TLocale> facet_type;
 
     inline static facet_type use_facet(TLocale)
     {
@@ -170,5 +175,6 @@ struct use_facet_helper4<cbase<TChar, b, void>, TLocale>
     }
 };
 
+}
 
-}}
+}

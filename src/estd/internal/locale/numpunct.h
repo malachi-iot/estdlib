@@ -5,7 +5,7 @@
 #include "utility.h"
 #include <estd/string.h>
 
-namespace estd { namespace experimental {
+namespace estd {
 
 
 // DEBT: Only to avoid confusion with regular internal not in experimental space
@@ -44,7 +44,7 @@ struct numpunct<char,
         //is_compatible_locale_code<locale_code::en_US, lc>::value>
 
         //is_compatible_with_classic_locale<locale<lc, encoding> >::value>
-        is_compatible_with_classic_locale<TLocale>::value>
+        internal::_internal::is_compatible_with_classic_locale<TLocale>::value>
 
         ::type> :
     _internal::numpunct_base<char>
@@ -56,8 +56,8 @@ struct numpunct<char,
 
 template <internal::encodings::values encoding>
 struct numpunct<char, 
-    locale<locale_code::fr_FR, encoding>,
-    typename is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
+    locale<internal::locale_code::fr_FR, encoding>,
+    typename internal::_internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
     _internal::numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "vrai"; }
@@ -80,35 +80,16 @@ struct numpunct : _internal::numpunct<TChar, TLocale> {};
 #endif
 
 
+namespace internal {
 
 template <class TChar, class TLocale>
-struct use_facet_helper4<numpunct<TChar, void>, TLocale>
+struct use_facet_helper<numpunct<TChar, void>, TLocale>
 {
     typedef numpunct<TChar, TLocale> facet_type;
     
-    inline static numpunct<TChar, TLocale> use_facet(TLocale)
-    {
-        return numpunct<TChar, TLocale>();
-    }
+    inline static facet_type use_facet(TLocale) { return facet_type(); }
 };
 
-/*
-template <class TChar, locale_code::values lc>
-struct use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::UTF8> >
-{
-    typedef locale<lc, internal::encodings::UTF8> locale_type;
-    typedef numpunct<TChar, locale_type> facet_type;
-    
-    inline static facet_type use_facet(locale_type)
-    {
-        return facet_type();
-    }
-}; */
+}
 
-/*
-template <class TChar, locale_code::values lc>
-struct use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::UTF8> >
-    : use_facet_helper4<numpunct<TChar, void>, locale<lc, internal::encodings::ASCII> > {}; */
-
-
-}}
+}

@@ -2,7 +2,7 @@
 
 #include "../locale.h"
 
-namespace estd { namespace experimental {
+namespace estd {
 
 template <typename TChar, class TLocale = void>
 class ctype;
@@ -14,4 +14,4 @@ template <class TChar, bool international = false, class TLocale = void>
 struct moneypunct;
 
 
-}}
+}

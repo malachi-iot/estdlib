@@ -4,7 +4,7 @@
 #include "charconv.h"
 #include "locale/fwd.h"
 
-namespace estd { namespace experimental {
+namespace estd { namespace internal {
 
 // https://docs.oracle.com/cd/E23824_01/html/E26033/glset.html
 
@@ -28,9 +28,6 @@ struct locale_id
     locale_code::values code;
     internal::encodings::values encoding;
 };
-
-template <locale_code::values locale_code, internal::encodings::values encoding>
-struct locale;
 
 #if __cpp_constexpr
 #define ESTD_CPP_CONSTEXPR_RET constexpr
@@ -73,7 +70,26 @@ template <class TFacet, locale_code_enum locale_code, internal::encodings::value
 struct use_facet_helper;
 #endif
 
-// For internal use
+}
+
+struct locale_base_base
+{
+    typedef int category;
+
+    static CONSTEXPR category none = 0x0000;
+    static CONSTEXPR category ctype = 0x0001;
+    static CONSTEXPR category numeric = 0x0002;
+};
+
+
+template <internal::locale_code::values locale_code, internal::encodings::values encoding>
+struct locale;
+
+namespace internal {
+
 typedef locale<locale_code::C, estd::internal::encodings::ASCII> classic_locale_type;
 
-}}
+
+}
+
+}
