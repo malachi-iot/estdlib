@@ -107,7 +107,8 @@ inline internal::basic_istream<TStreambuf, TBase>& ws(
 // NOTE: Works well, just needs more testing (and hopefully elevation of experimental::num_get
 // to non-experimental) before elevating to API level
 template <class TStreambuf, class TBase, class T>
-enable_if_t<is_arithmetic<T>::value, internal::basic_istream<TStreambuf, TBase>&> operator >>(
+typename enable_if<is_arithmetic<T>::value, internal::basic_istream<TStreambuf, TBase>&>::type
+operator >>(
     internal::basic_istream<TStreambuf, TBase>& in,
     T& value)
 {

@@ -291,7 +291,7 @@ TEST_CASE("locale")
             {
                 SECTION("char")
                 {
-                    auto f = use_facet4<ctype<char>>(l);
+                    auto f = use_facet<ctype<char>>(l);
 
                     REQUIRE(f.is(ctype_base::upper, 'a') == false);
                     REQUIRE(f.is(ctype_base::upper | ctype_base::lower | ctype_base::xdigit, 'A') == true);
@@ -299,7 +299,7 @@ TEST_CASE("locale")
             }
             SECTION("num_get")
             {
-                auto f = use_facet4<num_get<wchar_t, const wchar_t*>>(l);
+                auto f = use_facet<num_get<wchar_t, const wchar_t*>>(l);
 
                 const wchar_t* number = L"1234";
                 int value;
@@ -319,30 +319,30 @@ TEST_CASE("locale")
             {
                 SECTION("en")
                 {
-                    auto f = use_facet4<numpunct<char>>(l);
+                    auto f = use_facet<numpunct<char>>(l);
 
                     REQUIRE(f.truename() == "true");
                 }
                 SECTION("fr")
                 {
-                   REQUIRE(use_facet4<numpunct<char>>(l_fr).truename() == "vrai");
+                   REQUIRE(use_facet<numpunct<char>>(l_fr).truename() == "vrai");
                 }
                 SECTION("en")
                 {
-                    REQUIRE(use_facet4<numpunct<char>>(l_ASCII).truename() == "true");
+                    REQUIRE(use_facet<numpunct<char>>(l_ASCII).truename() == "true");
                 }
                 SECTION("classic")
                 {
-                    REQUIRE(use_facet4<numpunct<char>>(l_classic).truename() == "true");
+                    REQUIRE(use_facet<numpunct<char>>(l_classic).truename() == "true");
                 }
             }
             SECTION("moneypunct")
             {
-                auto f = use_facet4<moneypunct<char>>(l);
+                auto f = use_facet<moneypunct<char>>(l);
 
                 REQUIRE(f.curr_symbol() == "$");
 
-                auto f2 = use_facet4<moneypunct<char, true>>(l);
+                auto f2 = use_facet<moneypunct<char, true>>(l);
 
                 REQUIRE(f2.curr_symbol() == "USD ");
             }

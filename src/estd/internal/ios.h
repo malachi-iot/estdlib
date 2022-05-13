@@ -181,7 +181,7 @@ public:
     {
         //typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char_type>
             //ctype_type;
-        return experimental::use_facet4<experimental::ctype<char_type> >(getloc()).widen(c);
+        return use_facet<experimental::ctype<char_type> >(getloc()).widen(c);
         //ctype_type ctype;
         //return ctype.widen(c);
     }

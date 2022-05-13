@@ -173,7 +173,7 @@ inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, 
 template <class TChar, class TLocale>
 inline bool isspace(TChar ch, const TLocale& loc)
 {
-    return use_facet4<ctype<TChar>>(loc).is(ctype_base::space, ch);
+    return use_facet<ctype<TChar>>(loc).is(ctype_base::space, ch);
 }
 
 
