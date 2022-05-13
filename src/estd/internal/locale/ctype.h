@@ -127,6 +127,14 @@ public:
     }
 };
 
+template <class TLocale>
+class ctype<wchar_t, TLocale> : public ctype_base
+{
+public:
+    static wchar_t widen(char ch) { return ch; }
+};
+
+
 template <locale_code_enum locale_code>
 class ctype<char, locale<locale_code, estd::internal::encodings::UTF8>> :
     public ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> {};

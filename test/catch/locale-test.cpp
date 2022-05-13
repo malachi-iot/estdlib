@@ -75,6 +75,9 @@ TEST_CASE("locale")
     experimental::locale<experimental::locale_code::en_US,
             internal::encodings::ASCII> l_ASCII;
     auto l_classic = experimental::locale_base::classic();
+    auto goodbit = ios_base::goodbit;
+    auto failbit = ios_base::failbit;
+    auto eofbit = ios_base::eofbit;
 
     SECTION("isspace")
     {
@@ -82,9 +85,6 @@ TEST_CASE("locale")
     }
     SECTION("num_get")
     {
-        auto goodbit = ios_base::goodbit;
-        auto failbit = ios_base::failbit;
-        auto eofbit = ios_base::eofbit;
         ios_base::iostate state = ios_base::goodbit;
         //ios_base fmt;
         // DEBT: Need to do this because we are basing on basic_ios, not ios_base, due
@@ -267,8 +267,21 @@ TEST_CASE("locale")
             }
             SECTION("num_get")
             {
-                auto f = use_facet4<num_get<char, const char*>>(l);
+                auto f = use_facet4<num_get<wchar_t, const wchar_t*>>(l);
 
+                const wchar_t* number = L"1234";
+                int value;
+                ios_base::iostate state = ios_base::goodbit;
+
+                // DEBT: Only used for format and locale specification
+                estd::internal::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
+
+                f.get(number, number + 4, fmt, state, value);
+
+                REQUIRE(state == eofbit);
+                // TODO: Works, but only because unicode comfortably narrows back down to regular
+                // char during char_base_traits usage
+                REQUIRE(value == 1234);
             }
             SECTION("numpunct")
             {
