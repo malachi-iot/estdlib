@@ -22,7 +22,7 @@ private:
         // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
         //       though it being locale-bound may affect that down the line
         template <unsigned base, class T>
-        static iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
+        static iter_type get_unsigned_integer(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             typedef estd::internal::char_base_traits<base> char_base_traits;
@@ -68,7 +68,7 @@ private:
                 ++i;
             }
 
-            i = get_unsigned_integer_ascii<10>(i, end, err, str, v);
+            i = get_unsigned_integer<10>(i, end, err, str, v);
 
             if(negative) v = -v;
 
@@ -121,17 +121,19 @@ private:
             return chosen;
         }
 
-        static iter_type get_bool_ascii(iter_type in, iter_type end,
+        static iter_type get_bool(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
         {
             if(str.flags() & ios_base::boolalpha)
             {
                 locale_type locale = str.getloc();
+                // DEBT: Use 'use_facet' here
                 numpunct<char_type, locale_type> np;
 
                 // tempted to get algorithmically fancy here, but with only two things to
                 // compare, brute force makes sense
-                estd::layer2::const_string names[] {
+                estd::layer2::basic_string<const char_type, 0>
+                    names[] {
                     np.truename(),
                     np.falsename()
                 };
@@ -152,7 +154,7 @@ private:
             else
             {
                 unsigned temp;
-                in = get_unsigned_integer_ascii<2>(in, end, err, str, temp);
+                in = get_unsigned_integer<2>(in, end, err, str, temp);
                 // DEBT: Try to avoid using temporary.
                 // No bounds check necessary here, since specifying base 2 already does that
                 v = temp == 1;
@@ -174,7 +176,7 @@ private:
             {
                 // No real negative in hex, so presume caller knows this and passed in a
                 // signed type for their own convenience
-                return get_unsigned_integer_ascii<16>(in, end, err, str, v);
+                return get_unsigned_integer<16>(in, end, err, str, v);
             }
 
             return in;
@@ -182,18 +184,18 @@ private:
 
 
         template <typename T>
-        static iter_type get_unsigned_ascii(iter_type in, iter_type end,
+        static iter_type get_unsigned(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
             if(basefield == estd::ios_base::dec)
             {
-                get_unsigned_integer_ascii<10>(in, end, err, str, v);
+                get_unsigned_integer<10>(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::hex)
             {
-                get_unsigned_integer_ascii<16>(in, end, err, str, v);
+                get_unsigned_integer<16>(in, end, err, str, v);
             }
 
             return in;
@@ -212,7 +214,7 @@ private:
             T& v,
             estd::true_type, estd::false_type)
         {
-            return get_unsigned_ascii(in, end, err, str, v);
+            return get_unsigned(in, end, err, str, v);
         }
 
         // types after 'v':
@@ -235,7 +237,7 @@ private:
             bool& v,
             estd::true_type, estd::false_type)
         {
-            return get_bool_ascii(in, end, err, str, v);
+            return get_bool(in, end, err, str, v);
         }
     };
 
