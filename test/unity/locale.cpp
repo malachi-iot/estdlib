@@ -45,7 +45,7 @@ static void _test_num_get(TNumGet& facet,
     // FIX: Fail, we get goodbit and 1456 - should be failbit due to lingering space
     // but somehow that's getting consumed as a '1'
     TEST_ASSERT_EQUAL(ios_base::failbit, err);
-    TEST_ASSERT_EQUAL(456, val);
+    TEST_ASSERT_EQUAL(0, val);
 
     it = facet.get(it, end, istream, err, val);
 

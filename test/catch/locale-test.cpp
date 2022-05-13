@@ -276,7 +276,7 @@ TEST_CASE("locale")
                     // mirrors what happens in our unity test
                     const char* input = "123 456/789";
 
-                    int val;
+                    unsigned val;
                     ios_base::iostate err = ios_base::goodbit;
 
                     typedef experimental::istringstream<64> istream_type;
