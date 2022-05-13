@@ -57,9 +57,9 @@ public:
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
 template <internal::locale_code_enum locale_code>
-class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
+class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> :
     public ctype_base,
-    public locale<locale_code, estd::internal::encodings::ASCII>::facet
+public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet
 {
     typedef internal::char_base_traits<10> char_base10_traits;
     typedef internal::char_base_traits<16> char_base16_traits;
@@ -136,8 +136,8 @@ public:
 
 
 template <internal::locale_code_enum locale_code>
-class ctype<char, locale<locale_code, estd::internal::encodings::UTF8>> :
-    public ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> {};
+class ctype<char, internal::locale<locale_code, estd::internal::encodings::UTF8>> :
+    public ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> {};
 
 namespace internal {
 

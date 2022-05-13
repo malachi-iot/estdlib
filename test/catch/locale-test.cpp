@@ -60,7 +60,7 @@ struct test_fallthrough3<encoding, estd::enable_if_t<encoding == estd::internal:
 
 template <internal::encodings::values encoding>
 struct test_fallthrough3<encoding,
-        typename internal::_internal::is_compatible_encoding<
+        typename internal::is_compatible_encoding<
             estd::internal::encodings::ASCII, encoding
             >::type>
 {
@@ -70,11 +70,11 @@ struct test_fallthrough3<encoding,
 
 TEST_CASE("locale")
 {
-    locale<internal::locale_code::en_US,
+    internal::locale<internal::locale_code::en_US,
         internal::encodings::UTF8> l;
-    locale<internal::locale_code::fr_FR,
+    internal::locale<internal::locale_code::fr_FR,
         internal::encodings::UTF8> l_fr;
-    locale<internal::locale_code::en_US,
+    internal::locale<internal::locale_code::en_US,
             internal::encodings::ASCII> l_ASCII;
 
     // DEBT: We want to get this 'classic' API rolling

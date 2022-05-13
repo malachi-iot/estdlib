@@ -5,10 +5,6 @@
 
 namespace estd { namespace internal {
 
-// DEBT: Only to avoid confusion with regular internal not in experimental space
-// Classes will be moved around and this namespace will go away
-namespace _internal {
-
 // Can the presented encoding work with the core encoding?  If so we get a 'type'
 // of the presented encoding
 // DEBT: Naming should be changed to reflect demote/promote relation between the two encodings
@@ -72,7 +68,5 @@ struct is_compatible_with_classic_locale<locale<lc, encoding>,
 {
     //typedef bool type;
 };
-
-}
 
 }}

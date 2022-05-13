@@ -70,7 +70,6 @@ template <class TFacet, locale_code_enum locale_code, internal::encodings::value
 struct use_facet_helper;
 #endif
 
-}
 
 struct locale_base_base
 {
@@ -85,7 +84,6 @@ struct locale_base_base
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale;
 
-namespace internal {
 
 typedef locale<locale_code::C, estd::internal::encodings::ASCII> classic_locale_type;
 

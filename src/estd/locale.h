@@ -129,6 +129,8 @@ inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, 
 
 }
 
+namespace internal {
+
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale : locale_base_base
 {
@@ -163,6 +165,8 @@ struct locale : locale_base_base
     // but does memory allocation out of our own GC-pool
     const char* name() const { return internal::locale_name<locale_code, encoding>(); }
 };
+
+}
 
 template <class TChar, class TLocale>
 inline bool isspace(TChar ch, const TLocale& loc)

@@ -145,7 +145,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 template <typename TChar, unsigned b,
     internal::locale_code::values lc,
     internal::encodings::values encoding>
-struct cbase<TChar, b, locale<lc, encoding>,
+struct cbase<TChar, b, internal::locale<lc, encoding>,
     typename estd::enable_if<
         encoding == internal::encodings::ASCII ||
         encoding == internal::encodings::UTF8 ||

@@ -44,7 +44,7 @@ struct numpunct<char,
         //is_compatible_locale_code<locale_code::en_US, lc>::value>
 
         //is_compatible_with_classic_locale<locale<lc, encoding> >::value>
-        internal::_internal::is_compatible_with_classic_locale<TLocale>::value>
+        internal::is_compatible_with_classic_locale<TLocale>::value>
 
         ::type> :
     _internal::numpunct_base<char>
@@ -55,10 +55,10 @@ struct numpunct<char,
 
 
 template <internal::encodings::values encoding>
-struct numpunct<char, 
-    locale<internal::locale_code::fr_FR, encoding>,
-    typename internal::_internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
-    _internal::numpunct_base<char>
+struct numpunct<char,
+    internal::locale<internal::locale_code::fr_FR, encoding>,
+    typename internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
+    numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "vrai"; }
     static estd::layer2::const_string falsename() { return "faux"; }

@@ -7,7 +7,7 @@
 namespace estd {
 
 template <>
-struct moneypunct<char, false, locale<internal::locale_code::en_US, internal::encodings::UTF8> >
+struct moneypunct<char, false, internal::locale<internal::locale_code::en_US, internal::encodings::UTF8> >
 {
     static char decimal_point() { return '.'; }
 
@@ -16,7 +16,7 @@ struct moneypunct<char, false, locale<internal::locale_code::en_US, internal::en
 
 
 template <>
-struct moneypunct<char, true, locale<internal::locale_code::en_US, internal::encodings::UTF8> >
+struct moneypunct<char, true, internal::locale<internal::locale_code::en_US, internal::encodings::UTF8> >
 {
     static char decimal_point() { return '.'; }
 
