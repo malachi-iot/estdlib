@@ -57,6 +57,8 @@ estd::layer1::string<128> provider_string;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+// Windows already defines this
+#ifndef _STATIC_ASSERT
 // trying this
 // https://stackoverflow.com/questions/2831934/how-to-use-if-inside-define-in-the-c-preprocessor
 #define _STATIC_ASSERT(expr) STATIC_ASSERT_##expr
@@ -67,6 +69,7 @@ estd::layer1::string<128> provider_string;
 // UNTESTED, UNFINISHED
 #if !defined(__cpp_static_assert)
 #define static_assert(expr, message) STATIC_ASSERT(expr)
+#endif
 #endif
 
 
@@ -585,11 +588,13 @@ TEST_CASE("experimental tests")
             REQUIRE(same_span[0] == buf[0]);
         }
     }
+#ifdef STATIC_ASSERT
     SECTION("STATIC_ASSERT")
     {
         STATIC_ASSERT(true);
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
+#endif
     SECTION("char_base_traits")
     {
         // TODO: Move out of experimental area, concept is proven

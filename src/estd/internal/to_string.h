@@ -11,7 +11,12 @@
 #if defined(__GNU_LIBRARY__)
 extern "C" int sprintf ( char * str, const char * format, ... ) __THROWNL;
 #else
-extern "C" int sprintf ( char * str, const char * format, ... );
+// Oddly, some compilers use C++ linkage for their sprintf.  Feels like a bug, in which
+// case we probably want to check a version range
+#if !(defined(__MINGW32__) || defined(__MINGW64__))
+extern "C"
+#endif
+int sprintf ( char * str, const char * format, ... );
 #endif
 
 namespace estd {

@@ -13,12 +13,15 @@ using namespace estd;
 namespace std
 {
 // Somehow clang has slightly different expectations during catch << resolution
-#if defined(__clang__)
+#if defined(__clang__) || defined(__MINGW32__)
 template <class TChar, class TStringTraits, class TAllocator>
 std::ostream& operator <<( std::ostream& os,
                            const estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits>& value)
 {
-    return ::operator <<(os, value);
+    const char* s = value.clock();
+    operator <<(os, s);
+    value.cunlock();
+    return os;
 }
 #endif
 }

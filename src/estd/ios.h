@@ -11,7 +11,7 @@ namespace estd {
 // altogether, or make it always the traditional virtualized streambuf flavor
 // currently, temporarily, everything is hardwired to the posix_streambuf
 // but we've already started to architect that away
-#ifdef ESTD_POSIX
+#ifdef FEATURE_POSIX_IOS
 #ifdef __cpp_alias_templates
 template<class TChar, class Traits = ::std::char_traits<TChar> >
 using basic_ios = estd::internal::basic_ios<posix_streambuf <TChar, Traits> >;

@@ -62,7 +62,7 @@ static void test_steady_clock()
 }
 #endif
 
-#ifdef ESTD_FREERTOS
+#ifdef ESTD_OS_FREERTOS
 static void test_freertos_clock()
 {
     test_clock<estd::chrono::freertos_clock>();
@@ -88,7 +88,7 @@ void test_chrono()
 #ifdef FEATURE_STD_CHRONO
     RUN_TEST(test_steady_clock);
 #endif
-#ifdef ESTD_FREERTOS
+#ifdef ESTD_OS_FREERTOS
     RUN_TEST(test_freertos_clock);
 #endif
 #ifdef ESTD_SDK_IDF
