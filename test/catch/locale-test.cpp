@@ -7,6 +7,8 @@
 
 #include "test-data.h"
 
+#include <estd/internal/locale/cbase.h>
+
 using namespace estd;
 
 template <internal::encodings::values encoding, bool enabled>
@@ -220,6 +222,25 @@ TEST_CASE("locale")
                 REQUIRE(v == test::uint1);
                 REQUIRE(result == end);
             }
+        }
+    }
+    SECTION("cbase")
+    {
+        SECTION("base 10")
+        {
+            using namespace estd::experimental;
+
+            cbase<char, 10, estd::experimental::classic_locale_type> facet;
+
+            REQUIRE(facet.from_char('2') == 2);
+        }
+        SECTION("base 16")
+        {
+            using namespace estd::experimental;
+
+            cbase<char, 16, estd::experimental::classic_locale_type> facet;
+
+            REQUIRE(facet.from_char('A') == 10);
         }
     }
     SECTION("use_facet")
