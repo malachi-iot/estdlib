@@ -3,6 +3,7 @@
 #include "charconv.h"
 #include "../algorithm.h"
 #include "../cctype.h"
+#include "locale/ctype.h"
 
 namespace estd { namespace internal {
 

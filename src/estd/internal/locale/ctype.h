@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "facet.h"
 
 namespace estd { namespace experimental {
 
@@ -21,7 +22,7 @@ struct ctype_base
 };
 
 
-template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
+template <typename TChar, class TLocale>
 class ctype : public ctype_base
 {
 #ifdef ENABLE_LOCALE_MULTI
@@ -47,7 +48,7 @@ public:
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
 template <locale_code_enum locale_code>
-class ctype<locale_code, estd::internal::encodings::ASCII, char> :
+class ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> :
     public ctype_base,
     public locale<locale_code, estd::internal::encodings::ASCII>::facet
 {
@@ -83,7 +84,19 @@ public:
 };
 
 template <locale_code_enum locale_code>
-class ctype<locale_code, estd::internal::encodings::UTF8, char> :
-    public ctype<locale_code, estd::internal::encodings::ASCII, char> {};
+class ctype<char, locale<locale_code, estd::internal::encodings::UTF8>> :
+    public ctype<char, locale<locale_code, estd::internal::encodings::ASCII>> {};
+
+template <class TChar, class TLocale>
+struct use_facet_helper4<ctype<TChar, void>, TLocale>
+{
+    typedef ctype<TChar, TLocale> facet_type;
+    
+    inline static facet_type use_facet(TLocale)
+    {
+        return facet_type();
+    }
+};
+
 
 }}

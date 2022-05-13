@@ -2,15 +2,11 @@
 
 #include "internal/platform.h"
 #include "internal/locale.h"
-#include "internal/iterator_standalone.h"
-#include "internal/ios.h"
-#include "internal/charconv.hpp"
 
 #include "internal/iosfwd.h"
 
-#include "string.h"
-
 #include "internal/locale/ctype.h"
+#include "internal/locale/facet.h"
 #include "internal/locale/money.h"
 #include "internal/locale/num_get.h"
 #include "internal/locale/numpunct.h"
@@ -113,6 +109,8 @@ inline const ctype<char>& use_facet(const locale&)
     return facet;
 } */
 
+// Outmoded experimental code.  Get rid of it on cleanup phase
+#if UNUSED
 // FIX: Just to get things compiling, hardcoding these
 template <class TFacet, class TLocale>
 inline bool has_facet(const TLocale&) { return true; }
@@ -170,15 +168,13 @@ inline ctype<locale_code, encoding, TChar> use_facet3(const locale<locale_code, 
 } */
 
 
-template <locale_code_enum locale_code, internal::encodings::values encoding, class TChar>
-inline bool isspace(TChar ch, const locale<locale_code, encoding>& loc)
+#endif
+
+template <class TChar, class TLocale>
+inline bool isspace(TChar ch, const TLocale& loc)
 {
-    typedef ctype<locale_code, encoding, TChar> ctype_type;
-    return use_facet<ctype_type>(loc).is(ctype_base::space, ch);
+    return use_facet4<ctype<TChar>>(loc).is(ctype_base::space, ch);
 }
 
-
-
-//classic_locale classic();
 
 }}

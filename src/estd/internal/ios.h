@@ -11,6 +11,10 @@
 #include "ios_base.h"
 #include "ios_policy.h"
 
+#include "locale/ctype.h"
+#include "locale/facet.h"
+
+
 namespace estd {
 
 namespace experimental {
@@ -175,11 +179,11 @@ public:
 
     char_type widen(char c) const
     {
-        typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char_type>
-            ctype_type;
-        return experimental::use_facet<ctype_type>(getloc()).widen(c);
-        ctype_type ctype;
-        return ctype.widen(c);
+        //typedef experimental::ctype<experimental::locale_code::en_US, internal::encodings::UTF8, char_type>
+            //ctype_type;
+        return experimental::use_facet4<experimental::ctype<char_type> >(getloc()).widen(c);
+        //ctype_type ctype;
+        //return ctype.widen(c);
     }
 
     char narrow(char_type c, char /* default */)
