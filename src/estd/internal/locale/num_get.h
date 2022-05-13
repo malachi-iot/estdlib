@@ -8,6 +8,7 @@
 
 #include "fwd.h"
 #include "cbase.h"
+#include "../ios_base.h"
 
 namespace estd {
 
