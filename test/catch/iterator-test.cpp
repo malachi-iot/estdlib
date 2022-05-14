@@ -37,11 +37,25 @@ TEST_CASE("iterator")
             }
             SECTION("eol")
             {
-                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                int i;
 
-                for(int i = sz; i > 0; --i, ++it);
+                SECTION("prefix")
+                {
+                    estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
-                REQUIRE(it == end);
+                    for (i = sz; i > 0; --i, ++it);
+
+                    REQUIRE(it == end);
+                }
+                SECTION("postfix")
+                {
+                    estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+
+                    for (i = sz; i > 0; i--, it++);
+
+                    REQUIRE(it == end);
+                    REQUIRE(it++ == end);
+                }
             }
         }
         SECTION("ostream")

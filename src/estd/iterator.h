@@ -1,5 +1,14 @@
+/**
+ *
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator
+ * 2. https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
+ */
 #pragma once
 
+#include "internal/platform.h"
 #include "internal/iterator_standalone.h"
 #include "internal/iosfwd.h"
 #include "internal/ios_base.h"
@@ -9,6 +18,11 @@
 // TODO: Might need a specialization for our accessor-related things. we'll see
 namespace estd {
 namespace experimental {
+
+struct default_sentinel_t {};
+#ifdef ESTD_CPP_INLINE_VARIABLES
+inline constexpr default_sentinel_t default_sentinel{};
+#endif
 
 template<class TStreambuf>
 class istreambuf_iterator
@@ -23,13 +37,29 @@ public:
     typedef char_type value_type;
     typedef typename traits_type::int_type int_type;
 
+    class proxy;
+
 private:
+    friend class proxy;
 
     streambuf_type* rdbuf;
-    char_type ch;
 
     //bool end() const { return ch == traits_type::eof(); }
     bool end() const { return rdbuf == NULLPTR; }
+
+
+    // https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
+    // [2] Tells suggests that only validity of the streambufs are of interest here
+    // [1] Tells us that EOF is of interest also
+    template <class TLHS, class TRHS>
+    static bool equal(const TLHS& lhs, const TRHS& rhs)
+    {
+        if(lhs.end() && rhs.end()) return true;
+
+        if(!lhs.end() && !rhs.end()) return true;
+
+        return false;
+    }
 
 public:
     istreambuf_iterator() :
@@ -39,20 +69,17 @@ public:
 
     istreambuf_iterator(streambuf_type& s) : rdbuf(&s)
     {
-        ch = rdbuf->sgetc();
     }
 
     template <class TIstreamBase>
     istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
         rdbuf(is.rdbuf())
     {
-        ch = rdbuf->sgetc();
     }
 
     istreambuf_iterator(streambuf_type* s) :
         rdbuf(s)
     {
-        ch = rdbuf->sgetc();
     }
 
 #ifdef FEATURE_CPP_DEFAULT_CTOR
@@ -64,61 +91,114 @@ public:
     {
         if(!end())
         {
+            // Prefix operator, we want to semi-peek into the next character to get a line
+            // in on whether we're EOF
             int_type _ch = rdbuf->snextc();
 
             if (_ch == traits_type::eof())
                 rdbuf = NULLPTR;
-            else
-                ch = traits_type::to_char_type(_ch);
         }
 
         return *this;
     }
 
+    class proxy
+    {
+        friend class istreambuf_iterator;
+
+        const int_type ch;
+        iterator& source;
+
+        bool end() const { return ch == traits_type::eof(); }
+
+        proxy(int_type ch, iterator& source) : ch(ch), source(source) {}
+
+    public:
+        char_type operator*() const
+        {
+            return traits_type::to_char_type(ch);
+        }
+
+        proxy operator++(int) { return source.operator++(int()); }
+        iterator operator++() { return source.operator++(); }
+
+        bool equal(const iterator& it) const
+        {
+            return iterator::equal(*this, it);
+        }
+    };
+
     // postfix version
-    iterator operator++(int)
+    proxy operator++(int)
     {
         if(!end())
         {
-            ch = rdbuf->sbumpc();
+            proxy p(rdbuf->sgetc(), *this);
 
-            if (ch == traits_type::eof()) rdbuf = NULLPTR;
+            operator++();
+
+            return p;
+        }
+        else
+        {
+            return proxy(traits_type::eof(), *this);
         }
 
-        return *this;
     }
 
 
     value_type operator*() const
     {
-        return ch;
+        return rdbuf->sgetc();
     }
 
-    // https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
-    // tells us that only validity of the streambufs are of interest here.  Something
-    // doesn't add up though, because with that alone we can't tell if we're at EOF/END
     bool equal(const iterator& it) const
     {
-        if(it.ch != traits_type::eof() && ch != traits_type::eof()) return true;
-
-        if(it.ch == traits_type::eof() && ch == traits_type::eof()) return true;
-
-        return false;
+        return equal(*this, it);
     }
 
-    // EXPERIMENTAL
-    // since streambufs are generally a forward only creature, and cross-streambuf comparison's
-    // aren't really viable, this mainly exists to compare against a NULL (end) iterator
-    bool operator!=(const iterator& compare_to) const
-    {
-        return rdbuf != compare_to.rdbuf;
-    }
 
-    bool operator==(const iterator& compare_to) const
+    bool equal(const proxy& it) const
     {
-        return rdbuf == compare_to.rdbuf;
+        return equal(*this, it);
     }
 };
+
+template <class TStreambuf>
+bool operator==(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator!=(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return !lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator==(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const typename istreambuf_iterator<TStreambuf>::proxy& rhs)
+{
+    return lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator==(
+    const typename istreambuf_iterator<TStreambuf>::proxy& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return lhs.equal(rhs);
+}
+
 
 template <class TStreambuf>
 class ostreambuf_iterator
