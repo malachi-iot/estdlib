@@ -204,6 +204,16 @@ private:
             return in;
         }
 
+        // TODO: Need to build this out for 0x, 0, etc. support
+        template <class T>
+        static iter_type get_interpreted(iter_type in, iter_type end,
+            istream_type& str, ios_base::iostate& err,
+            T& v)
+        {
+            err |= ios_base::failbit;
+            return in;
+        }
+
 
         // Special thanks to
         // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
@@ -220,20 +230,25 @@ private:
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
+            // TODO: Consider strongly using a switch statement, even though it does
+            // spiritually break the spec "the first applicable choice of the following five is selected" [1]
+
             if(basefield == estd::ios_base::oct)
             {
                 return get_unsigned_integer<8>(in, end, err, str, v);
-            }
-            else if(basefield == estd::ios_base::dec)
-            {
-                return get_unsigned_integer<10>(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::hex)
             {
                 return get_unsigned_integer<16>(in, end, err, str, v);
             }
-
-            return in;
+            else if(basefield == 0)
+            {
+                return get_interpreted(in, end, str, err, v);
+            }
+            else  //if(basefield == estd::ios_base::dec)
+            {
+                return get_unsigned_integer<10>(in, end, err, str, v);
+            }
         }
 
         // types after 'v':
@@ -251,18 +266,20 @@ private:
             {
                 return get_signed_integer<8>(in, end, err, str, v);
             }
-            else if(basefield == estd::ios_base::dec)
-            {
-                return get_signed_integer<10>(in, end, err, str, v);
-            }
             else if(basefield == estd::ios_base::hex)
             {
                 // No real negative in hex, so presume caller knows this and passed in a
                 // signed type for their own convenience
                 return get_unsigned_integer<16>(in, end, err, str, v);
             }
-
-            return in;
+            else if(basefield == 0)
+            {
+                return get_interpreted(in, end, str, err, v);
+            }
+            else // if(basefield == estd::ios_base::dec)
+            {
+                return get_signed_integer<10>(in, end, err, str, v);
+            }
         }
 
         // types after 'v':
