@@ -90,22 +90,23 @@ void num_get_simple_test(const char* in, TInt expected, TIStream& fmt)
 
 // As per
 // https://www.translate.com/klingon-english
-struct klingon_locale : locale::type<locale::iso::C, locale::encodings::UTF8>
+struct klingon_locale : locale::classic_type
 {
+    typedef estd::locale::classic_type base_type;
 };
 
 namespace estd {
 
 template <>
 struct ctype<char, klingon_locale> :
-    numpunct<char, locale::classic_type>
+    numpunct<char, klingon_locale::base_type>
 {
 
 };
 
 template <>
 struct numpunct<char, klingon_locale> :
-    numpunct<char, locale::classic_type>
+    numpunct<char, klingon_locale::base_type>
 {
     static layer2::const_string truename() { return "teH"; }
     static layer2::const_string falsename() { return "ngeb"; }
@@ -409,6 +410,6 @@ TEST_CASE("locale")
         auto facet = use_facet<numpunct<char> >(l);
         //const char* val = facet.truename().data();
 
-        REQUIRE(facet.truename() == "true");
+        REQUIRE(facet.truename() == "teH");
     }
 }

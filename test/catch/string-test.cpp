@@ -3,28 +3,11 @@
 #include <estd/vector.h>
 #include <estd/charconv.h>
 #include <cstdlib>
-#include <ostream>
 
 #include "mem.h"
 
 using namespace estd;
 //using namespace estd::experimental;
-
-namespace std
-{
-// Somehow clang has slightly different expectations during catch << resolution
-#if defined(__clang__) || defined(__MINGW32__)
-template <class TChar, class TStringTraits, class TAllocator>
-std::ostream& operator <<( std::ostream& os,
-                           const estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits>& value)
-{
-    const char* s = value.clock();
-    operator <<(os, s);
-    value.cunlock();
-    return os;
-}
-#endif
-}
 
 
 #include <catch.hpp>
