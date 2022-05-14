@@ -595,31 +595,6 @@ TEST_CASE("experimental tests")
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 #endif
-    SECTION("char_base_traits")
-    {
-        // TODO: Move out of experimental area, concept is proven
-        using namespace estd::internal;
-
-        SECTION("decimal")
-        {
-            typedef char_base_traits<10> cbt;
-
-            REQUIRE(cbt::is_in_base('9') == true);
-            REQUIRE(cbt::is_in_base('F') == false);
-
-            REQUIRE(cbt::from_char('9') == 9);
-        }
-        SECTION("hexadecimal")
-        {
-            typedef char_base_traits<16> cbt;
-
-            REQUIRE(cbt::is_in_base('F') == true);
-            REQUIRE(cbt::is_in_base('G') == false);
-
-            REQUIRE(cbt::from_char('9') == 9);
-            REQUIRE(cbt::from_char('B') == 11);
-        }
-    }
 }
 
 #pragma GCC diagnostic pop

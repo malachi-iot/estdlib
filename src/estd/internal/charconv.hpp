@@ -4,8 +4,7 @@
 #include "../algorithm.h"
 #include "cctype.h"
 
-// Actually it goes the other way around
-//#include "locale/ctype.h"
+#include "locale/ctype.h"
 
 namespace estd { namespace internal {
 
@@ -17,7 +16,7 @@ namespace estd { namespace internal {
 // adapted from GNUC
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
-raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
+inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 {
     if (__builtin_mul_overflow(__val, __base, &__val)
         || __builtin_add_overflow(__val, __c, &__val))
@@ -28,7 +27,7 @@ raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 
 template<typename _Tp>
 typename estd::enable_if<!estd::is_signed<_Tp>::value, bool>::type
-raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
+inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 {
     if (__builtin_umul_overflow(__val, __base, &__val)
         || __builtin_uadd_overflow(__val, __c, &__val))
@@ -38,7 +37,7 @@ raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 #else
 // DEBT: Only to get things to compile.  Overflow goes unnoticed
 template <typename T>
-bool raise_and_add(T& val, const unsigned short base, unsigned char c)
+inline bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 {
     val *= base;
     val += c;
@@ -46,99 +45,13 @@ bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 }
 #endif
 
-// Can likely be combined with upcoming estd::ctype and locale-oriented isdigit
-/// (Maybe) Requires ASCII
-template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<b <= 10> > :
-        char_base_traits_base<encodings::UTF8>
-{
-    static inline CONSTEXPR unsigned base() { return b; }
 
-    // adapted from GNUC
-    static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
-    {
-        return '0' <= c && c <= ('0' + (_base - 1));
-    }
-
-    static inline CONSTEXPR int_type from_char(char_type c)
-    {
-        return c - '0';
-    }
-
-    static inline CONSTEXPR char_type to_char(int_type v)
-    {
-        return '0' + v;
-    }
-
-    static inline CONSTEXPR int_type from_char_with_test(char_type c, const int _base = b)
-    {
-        return is_in_base(c, _base) ?
-            from_char(c) :
-            eol();
-    }
-};
-
-/// (Maybe) Requires ASCII
-template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
-        char_base_traits_base<encodings::UTF8>
-{
-    static inline CONSTEXPR bool isupper(char c, const unsigned short _base = b)
-    {
-        return 'A' <= c && c <= ('A' + (_base - 11));
-    }
-
-    static inline CONSTEXPR bool islower(char c, const unsigned short _base = b)
-    {
-        return 'a' <= c && c <= ('a' + (_base - 11));
-    }
-
-    static inline CONSTEXPR unsigned base() { return b; }
-
-    static inline CONSTEXPR bool is_in_base(char_type c, const unsigned short _base = b)
-    {
-        // DEBT: We really want to consider ctype's isdigit here
-        return estd::internal::ascii_isdigit(c) ||
-               isupper(c, _base) ||
-               islower(c, _base);
-    }
-
-    static inline int_type from_char_with_test(char_type c, const unsigned short _base = b)
-    {
-        if (estd::internal::ascii_isdigit(c)) return c - '0';
-
-        if (isupper(c, _base)) return c - 'A' + 10;
-
-        if (islower(c, _base)) return c - 'a' + 10;
-
-        return eol();
-    }
-
-    static inline int_type from_char(char_type c)
-    {
-        if (c <= '9')
-            return c - '0';
-        else if (c <= 'Z')
-            return c - 'A' + 10;
-        else
-            return c - 'a' + 10;
-    }
-
-    static inline CONSTEXPR char_type to_char(int_type v)
-    {
-        return v <= 10 ?
-            ('0' + v) :
-            'a' + (v - 10);
-    }
-};
-
-
-template<class TCharBaseTraits, class T>
+template<class TCbase, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            T& value,
-                                           const unsigned short base = TCharBaseTraits::base())
+                                           const unsigned short base = TCbase::base())
 {
-    typedef TCharBaseTraits traits;
+    typedef TCbase traits;
     typedef typename traits::int_type int_type;
 #ifdef __cpp_static_assert
     // DEBT: Expand this to allow any numeric type, we'll have to make specialized
@@ -164,8 +77,9 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     while (current != last)
     {
+        // DEBT: Use has_value() and friends for clarity here
         const int_type digit =
-                traits::from_char_with_test(*current, base);
+                *traits::from_char(*current, base);
         if (digit != traits::eol())
         {
             bool success = raise_and_add(local_value, base, digit);
@@ -218,10 +132,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \param value
 /// \param base
 /// \return
-template <class TCharBaseTraits, class TInt>
+template <class TCbase, class TInt>
 to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
 {
-    typedef TCharBaseTraits traits;
+    typedef TCbase traits;
     typedef estd::numeric_limits<TInt> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
@@ -255,10 +169,10 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 }
 
 // This one operates exactly according to spec, but slightly slower than above
-template <class TCharBaseTraits, class TInt>
+template <class TCbase, class TInt>
 to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
 {
-    typedef TCharBaseTraits traits;
+    typedef TCbase traits;
     typedef typename traits::char_type char_type;
 
     if(estd::numeric_limits<TInt>::is_signed && value < 0)

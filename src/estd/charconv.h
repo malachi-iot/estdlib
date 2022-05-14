@@ -11,9 +11,19 @@
 
 namespace estd {
 
-namespace legacy {
-from_chars_result from_chars(const char* first, const char* last,
-                             long& value, int base = 10);
+namespace internal {
+
+// DEBT: Put this somewhere else.  I got rid of it since estd::locale seemed like
+// a happy home for it, but now I've changed my mind (estd::locale brings in a lot
+// of dependencies)
+typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;
+
+// Temporarily used as we migrate away from char_traits_base
+typedef experimental::cbase<char, 2, internal::classic_locale_type> cbase_C_2_type;
+typedef experimental::cbase<char, 10, internal::classic_locale_type> cbase_C_10_type;
+typedef experimental::cbase<char, 16, internal::classic_locale_type> cbase_C_16_type;
+typedef experimental::cbase<char, 36, internal::classic_locale_type> cbase_C_36_type;
+
 }
 
 template <class TInt>
@@ -23,9 +33,9 @@ estd::from_chars_result from_chars(const char* first,
                                                 const int base = 10)
 {
     if(base > 10)
-        return internal::from_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::from_chars_integer<internal::cbase_C_36_type>(first, last, value, base);
     else
-        return internal::from_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::from_chars_integer<internal::cbase_C_10_type>(first, last, value, base);
 }
 
 // TODO: Needs bounds check on to_chars
@@ -42,9 +52,9 @@ template <class TInt>
 inline to_chars_result to_chars_opt(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer_opt<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::to_chars_integer_opt<internal::cbase_C_36_type>(first, last, value, base);
     else
-        return internal::to_chars_integer_opt<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::to_chars_integer_opt<internal::cbase_C_10_type>(first, last, value, base);
 }
 
 template <class TInt>
@@ -61,9 +71,9 @@ template <class TInt>
 to_chars_result to_chars_exp(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer<internal::char_base_traits<36> >(first, last, value, base);
+        return internal::to_chars_integer<internal::cbase_C_36_type>(first, last, value, base);
     else
-        return internal::to_chars_integer<internal::char_base_traits<10> >(first, last, value, base);
+        return internal::to_chars_integer<internal::cbase_C_10_type>(first, last, value, base);
 }
 
 

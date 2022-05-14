@@ -693,7 +693,7 @@ TEST_CASE("string tests")
                 const char *src = "1010";
 
                 short value = 0;
-                from_chars_integer<char_base_traits<2> >(src, src + 4, value, 2);
+                from_chars_integer<cbase_C_2_type>(src, src + 4, value, 2);
 
                 REQUIRE(value == 10);
             }
@@ -703,7 +703,7 @@ TEST_CASE("string tests")
                 {
                     const char* src = "1234";
                     int value = 0;
-                    from_chars_integer<char_base_traits<10> >(src, src + 4, value, 10);
+                    from_chars_integer<cbase_C_10_type>(src, src + 4, value, 10);
 
                     REQUIRE(value == 1234);
                 }
@@ -711,7 +711,7 @@ TEST_CASE("string tests")
                 {
                     const char* src = "-1234";
                     int value = 0;
-                    from_chars_integer<char_base_traits<10> >(src, src + 5, value);
+                    from_chars_integer<cbase_C_10_type>(src, src + 5, value);
 
                     REQUIRE(value == -1234);
                 }
@@ -721,7 +721,7 @@ TEST_CASE("string tests")
 
                     int value = 0;
                     estd::from_chars_result result =
-                        from_chars_integer<char_base_traits<10> >(
+                        from_chars_integer<cbase_C_10_type>(
                             src.data(),
                             src.data() + src.size(), value);
 
@@ -734,7 +734,7 @@ TEST_CASE("string tests")
             {
                 const char *src = "FF";
                 int value = 0;
-                from_chars_integer<char_base_traits<16> >(src, src + 4, value);
+                from_chars_integer<cbase_C_16_type>(src, src + 4, value);
 
                 REQUIRE(value == 255);
             }
