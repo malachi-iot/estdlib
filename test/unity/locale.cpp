@@ -29,7 +29,7 @@ static void _test_num_get(TNumGet& facet,
     typename TNumGet::iter_type end)
 {
     ios_base::iostate err = ios_base::goodbit;
-    unsigned val;
+    unsigned val = 0;
 
     it = facet.get(it, end, istream, err, val);
 
