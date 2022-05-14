@@ -33,6 +33,7 @@ struct ctype_base
 };
 
 
+/*
 template <typename TChar, class TLocale>
 class ctype : public ctype_base
 {
@@ -49,7 +50,7 @@ public:
 
     TChar toupper(TChar ch) { return do_toupper(ch); }
     TChar tolower(TChar ch) { return do_tolower(ch); }
-};
+}; */
 
 
 // specialization, deviating from standard in that locale is compile-time
@@ -58,12 +59,13 @@ public:
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <internal::locale_code_enum locale_code>
-class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> :
+template <internal::locale_code_enum locale_code, class TImpl>
+class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>, TImpl> :
     public ctype_base,
     // NOTE: This inherit-from-facet behavior, though prescribed by std spec, is not
     // used for us at this time
-    public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet
+    public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet,
+    public TImpl
 {
     typedef internal::locale<locale_code, estd::internal::encodings::ASCII> locale_type;
     typedef experimental::cbase<char, 10, locale_type> cbase_10_type;

@@ -41,7 +41,7 @@ inline bool raise_and_add(T& val, const unsigned short base, unsigned char c)
 {
     val *= base;
     val += c;
-    return false;
+    return true;
 }
 #endif
 
@@ -65,14 +65,16 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // the matched characters is not representable in the type of value, value is unmodified,"
     T local_value = 0;
 
+    /*
+     * "leading whitespace is not ignored"
     while (estd::internal::ascii_isspace(*current))
-        current++;
+        current++; */
 
     if (estd::is_signed<T>::value)
     {
         negate = *current == '-';
 
-        if (negate) current++;
+        if (negate) ++current;
     }
 
     while (current != last)
@@ -83,6 +85,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         if (digit != traits::eol())
         {
             bool success = raise_and_add(local_value, base, digit);
+
+            // If we didn't succeed, that means we overflowed
             if (!success)
             {
                 // skip to either end or next spot which isn't a number
