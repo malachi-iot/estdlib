@@ -68,6 +68,26 @@ struct test_fallthrough3<encoding,
 };
 
 
+static auto goodbit = ios_base::goodbit;
+static auto failbit = ios_base::failbit;
+static auto eofbit = ios_base::eofbit;
+
+
+template <class TInt, class TIStream>
+void num_get_simple_test(const char* in, TInt expected, TIStream& fmt)
+{
+    TInt v;
+    ios_base::iostate state = goodbit;
+
+    num_get<char, const char*> n;
+
+    n.get(in, in + strlen(in), fmt, state, v);
+
+    REQUIRE(state == eofbit);
+    REQUIRE(v == expected);
+}
+
+
 TEST_CASE("locale")
 {
     locale::type<locale::iso::en_US,
@@ -106,42 +126,22 @@ TEST_CASE("locale")
             {
                 SECTION("basic")
                 {
-                    const char* in = "123";
-
-                    n.get(in, in + 3, fmt, state, v);
-
-                    REQUIRE(state == eofbit);
-                    REQUIRE(v == 123);
+                    num_get_simple_test("123", 123, fmt);
                 }
                 SECTION("signed")
                 {
-                    const char* in = "-123";
-
-                    n.get(in, in + 4, fmt, state, v);
-
-                    REQUIRE(state == eofbit);
-                    REQUIRE(v == -123);
+                    num_get_simple_test("-123", -123, fmt);
                 }
                 SECTION("unsigned")
                 {
-                    const char* in = "123";
-                    unsigned _v;
-
-                    n.get(in, in + 3, fmt, state, _v);
-
-                    REQUIRE(state == eofbit);
-                    REQUIRE(_v == 123);
+                    num_get_simple_test("123", (unsigned)123, fmt);
                 }
             }
             SECTION("hex")
             {
-                const char* in = "FF";
-
                 fmt.setf(ios_base::hex, ios_base::basefield);
-                n.get(in, in + 2, fmt, state, v);
 
-                REQUIRE(state == eofbit);
-                REQUIRE(v == 255);
+                num_get_simple_test("FF", 255, fmt);
             }
             SECTION("erroneous")
             {
