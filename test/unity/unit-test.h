@@ -15,13 +15,16 @@
 
 void test_align();
 void test_array();
+void test_cpp();
 void test_chrono();
 void test_cstddef();
+void test_functional();
 void test_limits();
 void test_optional();
 void test_queue();
 void test_ratio();
-void test_streambuf();;
+void test_span();
+void test_streambuf();
 void test_string();
 void test_thread();
 void test_map();

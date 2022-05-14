@@ -57,6 +57,8 @@ estd::layer1::string<128> provider_string;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+// Windows already defines this
+#ifndef _STATIC_ASSERT
 // trying this
 // https://stackoverflow.com/questions/2831934/how-to-use-if-inside-define-in-the-c-preprocessor
 #define _STATIC_ASSERT(expr) STATIC_ASSERT_##expr
@@ -67,6 +69,7 @@ estd::layer1::string<128> provider_string;
 // UNTESTED, UNFINISHED
 #if !defined(__cpp_static_assert)
 #define static_assert(expr, message) STATIC_ASSERT(expr)
+#endif
 #endif
 
 
@@ -724,106 +727,13 @@ TEST_CASE("experimental tests")
             REQUIRE(same_span[0] == buf[0]);
         }
     }
-    SECTION("internal from_char prototypes")
-    {
-        // TODO: Move out of experimental area, concept is proven
-        using namespace estd::internal;
-
-        SECTION("base 2")
-        {
-            const char *src = "1010";
-
-            short value = 0;
-            from_chars_integer<char_base_traits<2> >(src, src + 4, value, 2);
-
-            REQUIRE(value == 10);
-        }
-        SECTION("base 10")
-        {
-            SECTION("positive")
-            {
-                const char* src = "1234";
-                int value = 0;
-                from_chars_integer<char_base_traits<10> >(src, src + 4, value, 10);
-
-                REQUIRE(value == 1234);
-            }
-            SECTION("negative")
-            {
-                const char* src = "-1234";
-                int value = 0;
-                from_chars_integer<char_base_traits<10> >(src, src + 5, value);
-
-                REQUIRE(value == -1234);
-            }
-            SECTION("extra stuff")
-            {
-                estd::layer2::const_string src = "1234 hello";
-
-                int value = 0;
-                estd::from_chars_result result =
-                        from_chars_integer<char_base_traits<10> >(
-                                src.data(),
-                          src.data() + src.size(), value);
-
-                REQUIRE(result.ec == 0);
-                REQUIRE(value == 1234);
-                REQUIRE(estd::layer2::const_string(result.ptr) == " hello");
-            }
-        }
-        SECTION("base 16")
-        {
-            const char *src = "FF";
-            int value = 0;
-            from_chars_integer<char_base_traits<16> >(src, src + 4, value);
-
-            REQUIRE(value == 255);
-        }
-    }
-    SECTION("from_char prototypes")
-    {
-        // TODO: Move out of experimental area, concept is proven
-
-        SECTION("long")
-        {
-            estd::layer2::const_string s = "1234";
-            long value;
-
-            estd::from_chars_result result =
-                    estd::from_chars(s.data(), s.data() + s.size(), value);
-
-            REQUIRE(result.ec == 0);
-            REQUIRE(value == 1234);
-        }
-        SECTION("unsigned")
-        {
-            estd::layer2::const_string s = "1234";
-            unsigned value;
-
-            estd::from_chars_result result =
-                    estd::from_chars(s.data(), s.data() + s.size(), value);
-
-            REQUIRE(result.ec == 0);
-            REQUIRE(value == 1234);
-        }
-        SECTION("lazy")
-        {
-            const char s[128] = "1234";
-
-            unsigned value;
-
-            estd::from_chars_result result =
-                    estd::from_chars(s, &s[0] + sizeof(s), value);
-
-            REQUIRE(result.ec == 0);
-            REQUIRE(value == 1234);
-        }
-    }
+#ifdef STATIC_ASSERT
     SECTION("STATIC_ASSERT")
     {
         STATIC_ASSERT(true);
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
+#endif
     SECTION("char_base_traits")
     {
         // TODO: Move out of experimental area, concept is proven

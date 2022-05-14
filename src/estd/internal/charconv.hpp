@@ -2,6 +2,7 @@
 
 #include "charconv.h"
 #include "../algorithm.h"
+#include "../cctype.h"
 
 namespace estd { namespace internal {
 

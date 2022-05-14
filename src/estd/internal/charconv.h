@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../system_error.h"
 #include "deduce_fixed_size.h"
 
 namespace estd {

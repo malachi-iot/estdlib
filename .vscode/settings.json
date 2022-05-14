@@ -21,5 +21,6 @@
         "variant": "cpp",
         "fstream": "cpp",
         "streambuf": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/test/catch"
 }

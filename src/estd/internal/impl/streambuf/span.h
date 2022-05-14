@@ -49,7 +49,7 @@ struct out_span_streambuf :
     }
 
 
-    out_span_streambuf(char_type* data, pos_type count) :
+    out_span_streambuf(char_type* data, const pos_type& count) :
             base_type(data, count)
     {
 
@@ -73,9 +73,7 @@ struct out_span_streambuf :
 
     int_type sputc(char_type ch)
     {
-        // DEBT: pos_type somehow becomes signed / std::streamoff here
-        unsigned pos = base_out_type::pos();
-        //if(base_out_type::pos() >= out().size_bytes())
+        const pos_type& pos = base_out_type::pos();
         if(pos >= out().size_bytes())
             return base_out_type::overflow();
 
@@ -129,6 +127,9 @@ template <class TChar,
         class TBase = estd::experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,
+
+        streambuf_gptr_tag,
+
         TBase
 {
     typedef in_pos_streambuf_base<TCharTraits> base_pos_type;
@@ -142,10 +143,12 @@ struct in_span_streambuf :
     typedef TChar char_type;
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
+protected:
     const span_type& in() const { return base_type::value(); }
 
-    pos_type pos() const { return base_pos_type::pos(); }
+    const pos_type& pos() const { return base_pos_type::pos(); }
 
+public:
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
             base_type(copy_from)
     {
@@ -162,13 +165,7 @@ struct in_span_streambuf :
 protected:
     streamsize xin_avail() const { return in().size() - pos(); }
 
-    streamsize showmanyc() const
-    {
-        streamsize r = xin_avail();
-
-        // there is never a time we are unsure if more characters remain in this type of span buffer
-        return r > 0 ? r : -1;
-    }
+    streamsize showmanyc() const { return base_pos_type::showmanyc(xin_avail()); }
 
     streamsize xsgetn(nonconst_char_type* s, streamsize count)
     {
@@ -179,7 +176,7 @@ protected:
         return c;
     }
 
-    char_type& xsgetc() const { return *gptr(); }
+    const char_type& xsgetc() const { return *gptr(); }
 };
 
 

@@ -21,6 +21,7 @@ void loop()
 
     Serial << "Hello: ";
     Serial << F("Number - counter=") << counter++;
+    Serial << F(", value=") << value;
 
     Serial.println(F("!!"));
     

@@ -81,6 +81,11 @@ struct EmptyClass {};
 static uint8_t octet_data[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
+static const char* str_simple = "hi2u";
+static const char* str_hello = "hello world";
+static const char* str_uint1 = "123456";
+static const unsigned uint1 = 123456;
+
 }}
 
 #pragma GCC diagnostic pop

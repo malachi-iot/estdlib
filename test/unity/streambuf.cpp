@@ -25,6 +25,9 @@ static void test_ospanbuf()
 
     TEST_ASSERT_EQUAL_INT(10, os.pos());
     TEST_ASSERT_EQUAL_INT(10, os.pubseekoff(0, ios_base::cur));
+
+    // FIX: On esp-idf we expect ~12 but we get 24.
+    //TEST_ASSERT_LESS_OR_EQUAL(sizeof(span) + sizeof(int), sizeof(os));
 }
 
 
@@ -37,7 +40,7 @@ static void test_ispanbuf()
 
     char c = os.sbumpc();
 
-#ifdef ESP_IDF_TESTING
+#if UNITY_VERSION < 0x200
     TEST_ASSERT_EQUAL(buf[0], c);
 #else
     TEST_ASSERT_EQUAL_CHAR(buf[0], c);
@@ -53,7 +56,7 @@ static void test_ispanbuf()
     buf2[sz] = 0;
 
     // TODO: See what we can do about this in esp-idf
-#ifndef ESP_IDF_TESTING
+#if UNITY_VERSION > 0x200
     TEST_ASSERT_EQUAL_CHAR_ARRAY(&buf[1], buf2, sz);
 #endif
 }

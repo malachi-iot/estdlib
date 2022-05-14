@@ -5,18 +5,49 @@
 #include <estd/cstddef.h>
 #include "unity/unit-test.h"
 
+CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
+
+
 void setup()
 {
+    // delay generally recommended by:
+    // https://docs.platformio.org/en/stable/plus/unit-testing.html
+    delay(5000);
+
+    pinMode(LED_PIN, OUTPUT);
+
+    Serial.begin(9600);
+    Serial.println("setup: begin");
+
     UNITY_BEGIN();
 
+    test_align();
+    test_array();
     test_chrono();
+    test_cpp();
     test_cstddef();
+    test_functional();
+    test_limits();
+    test_map();
+    test_optional();
+    test_queue();
+    test_ratio();
+    test_span();
+    test_streambuf();
     test_string();
     test_thread();
-    test_map();
 
     UNITY_END();
+
+    Serial.println("setup: end");
 }
 
 
-void loop() {}
+// Just to indicate we're not dead, we blink
+void loop()
+{
+    digitalWrite(LED_PIN, HIGH);
+    delay(100);
+    digitalWrite(LED_PIN, LOW);
+    delay(500);
+}

@@ -9,6 +9,9 @@
 #include "internal/impl/streambuf.h"
 #include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
+#include "internal/impl/streambuf/tags.h"
+#include "internal/impl/streambuf/helpers.h"
+
 
 //#include "features.h"
 #include "locale.h"
@@ -39,32 +42,26 @@ class streambuf :
     typedef streambuf<TImpl, TPolicy> this_type;
 
 public:
+    typedef TImpl impl_type;
     typedef TPolicy policy_type;
 
     typedef typename TImpl::char_type char_type;
     typedef typename TImpl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
-#if !defined(FEATURE_STD_STRING_FULL_CHAR_TRAITS)
-    typedef int_type pos_type;
-    typedef int_type off_type;
-#else
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
-#endif
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
-protected:
+    typedef internal::impl::streambuf_helper helper_type;
+
+    friend helper_type;
 
     int_type sungetc()
     {
-        if(this->gptr() > this->eback())
-        {
-            this->gbump(-1);
-            return traits_type::to_int_type(*this->gptr());
-        }
-
-        return this->pbackfail();
+        return helper_type::sungetc(this);
     }
+
+protected:
 
     // not yet used overflow helpers
     // overflow() without parameter looks loosely similar to sync, but
@@ -147,18 +144,9 @@ public:
         return written;
     }
 
-
     int_type sbumpc()
     {
-        int_type ch = this->sgetc();
-
-        if(ch != traits_type::eof())
-        {
-            this->gbump(1);
-            return ch;
-        }
-        else
-            return this->uflow();
+        return helper_type::sbumpc_evaporated(this);
     }
 
     int_type snextc()

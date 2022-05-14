@@ -144,6 +144,7 @@ set(SOURCE_FILES
         estd/tuple.h
         estd/type_traits.h
         estd/utility.h
+        estd/variant.h
         estd/vector.h
 
         estd/exp/heap.h

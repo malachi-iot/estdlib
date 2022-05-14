@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ESTD_POSIX
+#ifdef FEATURE_POSIX_IOS
 // Not ready quite yet
 #include "posix/streambuf.h"
 #elif defined(ESP_OPEN_RTOS)

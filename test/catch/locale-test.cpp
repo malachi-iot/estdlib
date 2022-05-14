@@ -1,7 +1,11 @@
 #include <catch.hpp>
 
 #include <estd/algorithm.h>
+#include <estd/iterator.h>
 #include <estd/locale.h>
+#include <estd/sstream.h>
+
+#include "test-data.h"
 
 using namespace estd;
 
@@ -15,36 +19,100 @@ TEST_CASE("locale")
     }
     SECTION("num_get")
     {
-        experimental::num_get<char, const char*> n;
-        ios_base::iostate state;
-        ios_base holder;
-        long v;
+        auto goodbit = ios_base::goodbit;
+        auto failbit = ios_base::failbit;
+        auto eofbit = ios_base::eofbit;
+        ios_base::iostate state = ios_base::goodbit;
+        ios_base fmt;
+        long v = -1;
 
         SECTION("simple source")
         {
-            SECTION("decimal")
+            experimental::num_get<char, const char*> n;
+
+            SECTION("dec")
             {
-                const char* in = "123";
+                SECTION("basic")
+                {
+                    const char* in = "123";
 
-                n.get(in, in + 4, state, holder, v);
+                    n.get(in, in + 3, fmt, state, v);
 
-                REQUIRE(v == 123);
+                    REQUIRE(state == eofbit);
+                    REQUIRE(v == 123);
+                }
+                SECTION("signed")
+                {
+                    const char* in = "-123";
+
+                    n.get(in, in + 4, fmt, state, v);
+
+                    REQUIRE(state == eofbit);
+                    REQUIRE(v == -123);
+                }
+                SECTION("unsigned")
+                {
+                    const char* in = "123";
+                    unsigned _v;
+
+                    n.get(in, in + 3, fmt, state, _v);
+
+                    REQUIRE(state == eofbit);
+                    REQUIRE(_v == 123);
+                }
             }
             SECTION("hex")
             {
                 const char* in = "FF";
 
-                holder.setf(ios_base::hex, ios_base::basefield);
-                n.get(in, in + 3, state, holder, v);
+                fmt.setf(ios_base::hex, ios_base::basefield);
+                n.get(in, in + 2, fmt, state, v);
 
+                REQUIRE(state == eofbit);
                 REQUIRE(v == 255);
+            }
+            SECTION("erroneous")
+            {
+                const char* in = "whoops";
+
+                n.get(in, in + 6, fmt, state, v);
+
+                REQUIRE(state == failbit);
+                // As per https://en.cppreference.com/w/cpp/locale/num_get/get "Stage 3: conversion and storage"
+                // "If the conversion function fails [...] 0 is stored in v" and also
+                // "C++98/C++03 left [v] unchanged [...]. Such behavior is corrected by [...] C++11"
+                REQUIRE(v == 0);
+            }
+            SECTION("unusual delimiter")
+            {
+                // Although I couldn't find it documented anywhere, hands on testing indicates
+                // f.get() treats any unrecognized character as a numeric delimiter, and that's
+                // how we end up with 'goodbit'* results --- * being that C++11 actually returns
+                // whatever you pass in, which for us is goodbit
+                const char* in = "123/";
+
+                const char* output_it = n.get(in, in + 6, fmt, state, v);
+                REQUIRE(state == goodbit);
+                REQUIRE(v == 123);
+                REQUIRE(*output_it == '/');
             }
         }
         SECTION("complex iterator")
         {
-            const char* in = "123/";
+            SECTION("istreambuf_iterator")
+            {
+                typedef estd::layer1::stringbuf<32> streambuf_type;
+                streambuf_type sb = test::str_uint1;
+                typedef estd::experimental::istreambuf_iterator<streambuf_type> iterator_type;
+                iterator_type it(sb), end;
+                experimental::num_get<char, iterator_type> n;
 
-            // TBD
+                auto result = n.get(it, end, fmt, state, v);
+
+                REQUIRE(state == eofbit);
+                REQUIRE(v == test::uint1);
+                REQUIRE(result == end);
+            }
         }
     }
     SECTION("use_facet")

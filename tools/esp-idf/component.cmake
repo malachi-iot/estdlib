@@ -21,3 +21,6 @@ set(COMPONENT_ADD_INCLUDEDIRS
 include(${CMAKE_CURRENT_LIST_DIR}/version_finder.cmake)
 
 register_component()
+
+# For diagnostic only - will break compilation
+#component_compile_options("-Wstack-usage=32" "-S")

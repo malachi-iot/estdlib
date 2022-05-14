@@ -462,12 +462,15 @@ TEST_CASE("linkedlist")
 
             int sz = sizeof(it_type);
 
+            // Size checks are very platform/toolchain dependent
+#ifdef ESTD_OS_UNIX
 #ifdef FEATURE_ESTD_LIST_BEFORE_BEGINNING
             // FIX: 'long' actually is a padded out boolean here and won't be
             // that on all platforms
             REQUIRE(sz == sizeof(void*) + sizeof(long));
 #else
             REQUIRE(sz == sizeof(void*));
+#endif
 #endif
         }
         SECTION("const")

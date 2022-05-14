@@ -21,16 +21,25 @@ public:
 
     typedef istreambuf_iterator iterator;
     typedef char_type value_type;
+    typedef typename traits_type::int_type int_type;
 
 private:
 
-    streambuf_type* const rdbuf;
+    streambuf_type* rdbuf;
     char_type ch;
+
+    //bool end() const { return ch == traits_type::eof(); }
+    bool end() const { return rdbuf == NULLPTR; }
 
 public:
     istreambuf_iterator() :
         rdbuf(NULLPTR)
     {
+    }
+
+    istreambuf_iterator(streambuf_type& s) : rdbuf(&s)
+    {
+        ch = rdbuf->sgetc();
     }
 
     template <class TIstreamBase>
@@ -46,12 +55,22 @@ public:
         ch = rdbuf->sgetc();
     }
 
+#ifdef FEATURE_CPP_DEFAULT_CTOR
     istreambuf_iterator(const istreambuf_iterator& copy_from) = default;
+#endif
 
     // prefix version
     iterator& operator++()
     {
-        ch = rdbuf->snextc();
+        if(!end())
+        {
+            int_type _ch = rdbuf->snextc();
+
+            if (_ch == traits_type::eof())
+                rdbuf = NULLPTR;
+            else
+                ch = traits_type::to_char_type(_ch);
+        }
 
         return *this;
     }
@@ -59,7 +78,12 @@ public:
     // postfix version
     iterator operator++(int)
     {
-        ch = rdbuf->sbumpc();
+        if(!end())
+        {
+            ch = rdbuf->sbumpc();
+
+            if (ch == traits_type::eof()) rdbuf = NULLPTR;
+        }
 
         return *this;
     }
@@ -68,6 +92,31 @@ public:
     value_type operator*() const
     {
         return ch;
+    }
+
+    // https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
+    // tells us that only validity of the streambufs are of interest here.  Something
+    // doesn't add up though, because with that alone we can't tell if we're at EOF/END
+    bool equal(const iterator& it) const
+    {
+        if(it.ch != traits_type::eof() && ch != traits_type::eof()) return true;
+
+        if(it.ch == traits_type::eof() && ch == traits_type::eof()) return true;
+
+        return false;
+    }
+
+    // EXPERIMENTAL
+    // since streambufs are generally a forward only creature, and cross-streambuf comparison's
+    // aren't really viable, this mainly exists to compare against a NULL (end) iterator
+    bool operator!=(const iterator& compare_to) const
+    {
+        return rdbuf != compare_to.rdbuf;
+    }
+
+    bool operator==(const iterator& compare_to) const
+    {
+        return rdbuf == compare_to.rdbuf;
     }
 };
 

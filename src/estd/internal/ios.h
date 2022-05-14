@@ -5,135 +5,13 @@
 #include "../type_traits.h"
 #include "locale.h"
 #include <stdint.h>
+#include "../iosfwd.h"
+#include "../variant.h"
+#include "../thread.h"
+#include "ios_base.h"
+#include "ios_policy.h"
 
 namespace estd {
-
-// TODO: use specific 16/32/64 bit versions depending on architecture
-typedef int streamoff;
-typedef int streamsize;
-
-class ios_base
-{
-public:
-    typedef uint8_t fmtflags;
-
-    // NOTE: Spec appears to conflict with itself.
-    // https://en.cppreference.com/w/cpp/io/ios_base/fmtflags suggests we have carte blanche
-    // do make these any values we wish, but
-    // https://en.cppreference.com/w/cpp/locale/num_get/get strongly implies that 'dec'
-    // is expected to be zero
-    static CONSTEXPR fmtflags dec = 0x01;
-    static CONSTEXPR fmtflags hex = 0x02;
-    static CONSTEXPR fmtflags oct = 0x03;
-    static CONSTEXPR fmtflags basefield = dec | hex;
-
-    static CONSTEXPR fmtflags left = 0x08;
-    static CONSTEXPR fmtflags right = 0x10;
-    static CONSTEXPR fmtflags adjustfield = left | right;
-
-    static CONSTEXPR fmtflags boolalpha = 0x20;
-    static CONSTEXPR fmtflags unitbuf = 0x40;
-
-
-    typedef uint8_t openmode;
-
-    static CONSTEXPR openmode app = 0x01;
-    static CONSTEXPR openmode binary = 0x02;
-    static CONSTEXPR openmode in = 0x04;
-    static CONSTEXPR openmode out = 0x08;
-
-    typedef uint8_t iostate;
-
-    static CONSTEXPR iostate goodbit = 0x00;
-    static CONSTEXPR iostate badbit = 0x01;
-    static CONSTEXPR iostate failbit = 0x02;
-    static CONSTEXPR iostate eofbit = 0x04;
-
-    typedef uint8_t seekdir;
-
-    static CONSTEXPR seekdir beg = 0x00;
-    static CONSTEXPR seekdir end = 0x01;
-    static CONSTEXPR seekdir cur = 0x02;
-
-private:
-    fmtflags fmtfl;
-    iostate _iostate;
-
-protected:
-    static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
-
-    // remove state, not official call
-    // UNTESTED
-    void unsetstate(iostate state)
-    {
-        _iostate &= ~state;
-    }
-
-public:
-    ios_base() : fmtfl(dec), _iostate(goodbit) {}
-
-    fmtflags setf(fmtflags flags)
-    { fmtflags prior = fmtfl; fmtfl |= flags; return prior; }
-
-    fmtflags setf(fmtflags flags, fmtflags mask)
-    {
-        fmtflags prior = fmtfl;
-        fmtfl &= ~mask;
-        fmtfl |= flags;
-        return prior;
-    }
-
-    fmtflags unsetf(fmtflags flags)
-    { fmtflags prior = fmtfl; fmtfl &= ~flags; return prior; }
-
-    fmtflags flags() const
-    { return fmtfl; }
-
-    fmtflags flags(fmtflags fmtfl)
-    { fmtflags prior = fmtfl; this->fmtfl = fmtfl; return prior; }
-
-    iostate rdstate() const
-    { return _iostate; }
-
-    void clear(iostate state = goodbit)
-    { _iostate = state; }
-
-    void setstate(iostate state)
-    {
-        _iostate |= state;
-    }
-
-    bool good() const
-    { return rdstate() == goodbit; }
-
-    bool bad() const
-    { return rdstate() & badbit; }
-
-    bool fail() const
-    { return rdstate() & failbit || rdstate() & badbit; }
-
-    bool eof() const
-    { return rdstate() & eofbit; }
-
-protected:
-    // internal call which we may make a layer0 version for optimization
-    bool is_unitbuf_set() const { return fmtfl & unitbuf; }
-
-};
-
-// NOTE: these are not heeded quite yet
-inline ios_base& unitbuf(ios_base& s)
-{
-    s.setf(ios_base::unitbuf);
-    return s;
-}
-
-inline ios_base& nounitbuf(ios_base& s)
-{
-    s.unsetf(ios_base::unitbuf);
-    return s;
-}
-
 
 namespace experimental {
 
@@ -168,11 +46,6 @@ struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_
 }
 
 namespace internal {
-
-struct ios_base_policy
-{
-    typedef experimental::locale locale_type;
-};
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
 // value of streambuf itself
@@ -246,8 +119,10 @@ public:
 
 
 //template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf, bool use_pointer = false, class TPolicy = ios_base_policy>
-class basic_ios : public basic_ios_base<TStreambuf, use_pointer>
+template<class TStreambuf, bool use_pointer = false,
+    class TPolicy = ios_base_policy<TStreambuf> >
+class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
+    estd::internal::struct_evaporator<TPolicy>
 {
 public:
     typedef basic_ios_base<TStreambuf, use_pointer> base_type;
@@ -257,6 +132,10 @@ public:
 
     typedef TPolicy policy_type;
     typedef typename policy_type::locale_type locale_type;
+    typedef typename policy_type::blocking_type blocking_type;
+
+    typedef typename estd::internal::struct_evaporator<TPolicy> policy_provider_type;
+    typedef typename policy_provider_type::evaporated_type evaporated_policy_type;
 
 protected:
     basic_ios() {}
@@ -271,17 +150,19 @@ protected:
 
     basic_ios(streambuf_type&& streambuf) :
         base_type(std::move(streambuf)) {}
-#endif
-    basic_ios(streambuf_type& streambuf) :
-        base_type(streambuf) {}
-
+#else
     template <class TParam1>
     basic_ios(TParam1& p) : base_type(p) {}
 
     template <class TParam1>
     basic_ios(TParam1* p) : base_type(p) {}
+#endif
+    basic_ios(streambuf_type& streambuf) :
+        base_type(streambuf) {}
 
 public:
+    evaporated_policy_type policy() const { return policy_provider_type::value(); }
+    
     // NOTE: spec calls for this actually in ios_base, but for now putting it
     // here so that it can reach into streambuf to grab it.  A slight but notable
     // deviation from standard C++

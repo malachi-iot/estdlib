@@ -149,10 +149,6 @@ public:
 #endif
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template< class... >
-using void_t = void;
-
-
 template< class T >
 using decay_t = typename decay<T>::type;
 #endif
@@ -188,12 +184,25 @@ struct is_empty
 #elif 0 // LLVM
 #endif
 
+#if defined(FEATURE_CPP_CONSTEXPR)
+#if defined(FEATURE_CPP_INLINE_VARIABLES)
+template <class T>
+inline constexpr bool is_empty_v = is_empty<T>::value;
+#endif
+/// Non-standard function deviation of is_empty_v for pre-C++17 scenarios
+/// Somewhat experimental
+/// \tparam T
+/// \return
+template <class T>
+inline constexpr bool is_empty_f() { return is_empty<T>::value; }
+#endif
+
 }
 
 #include "internal/llvm_type_traits.h"
+#include "internal/is_base_of.h"
 
 #ifdef FEATURE_CPP_VARIADIC
-#include "internal/is_base_of.h"
 #include "internal/invoke_result.h"
 #endif
 

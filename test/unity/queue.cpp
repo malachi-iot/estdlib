@@ -35,6 +35,22 @@ static void test_queue_struct()
     q.push(TestStruct(test_value_1));
 }
 
+
+static void test_priority_queue()
+{
+#if FEATURE_ESTD_PRIORITY_QUEUE
+    layer1::priority_queue<int, 10> q;
+
+    // FIX: Each 'push' consumes an additional 32 bytes of stack on esp-idf
+    q.push(7);
+    q.push(3);
+    q.push(8);
+    q.push(4);
+
+    TEST_ASSERT_EQUAL_INT(8, q.top());
+#endif
+}
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("queue tests", "[queue]")
 #else
@@ -43,4 +59,5 @@ void test_queue()
 {
     RUN_TEST(test_queue_int);
     RUN_TEST(test_queue_struct);
+    RUN_TEST(test_priority_queue);
 }

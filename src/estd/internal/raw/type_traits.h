@@ -131,6 +131,7 @@ struct remove_extent<T[N]> { typedef T type; };
 
 
 #ifdef FEATURE_CPP_ALIGN
+// NOTE: deprecated in C++23
 template<std::size_t Len, std::size_t Align /* default alignment not implemented */>
 struct aligned_storage {
     struct type {
@@ -146,6 +147,11 @@ struct aligned_storage {
         byte data[Align];
     };
 };
+#endif
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class... >
+using void_t = void;
 #endif
 
 

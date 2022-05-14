@@ -9,6 +9,9 @@
 
 namespace estd {
 
+template <class T>
+struct hash;
+
 //#if __cplusplus < 201200L
 template<class T>
 struct less

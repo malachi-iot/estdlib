@@ -10,6 +10,7 @@ set(ESTDLIB_DIR ../../src)
 add_subdirectory(${ESTDLIB_DIR} estdlib)
 
 add_executable(${PROJECT_NAME} "main.cpp"
+    algorithm-test.cpp
     allocator-test.cpp
     array-test.cpp
     buffer-test.cpp
@@ -25,17 +26,18 @@ add_executable(${PROJECT_NAME} "main.cpp"
 	locale-test.cpp
     map-test.cpp
     memory-test.cpp
+    misc-test.cpp
     optional-test.cpp
+    priority-queue-test.cpp
     queue-test.cpp
     stack-test.cpp
+	streambuf-test.cpp
     string-test.cpp
     test-data.h
     type-traits-test.cpp
     tuple-test.cpp
     vector-test.cpp
-    priority-queue-test.cpp
     utility-test.cpp
-	algorithm-test.cpp
         internal-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)

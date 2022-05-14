@@ -15,200 +15,17 @@
 #include "charconv.h"
 #include "internal/string_convert.h"
 #include "traits/char_traits.h"
+#include "internal/ostream.h"
 #ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
 #include "chrono.h"
 #include "thread.h"
 #endif
+#include "internal/ostream_basic_string.hpp"
+#include "port/ostream.h"
 
 namespace estd {
 
 namespace internal {
-
-//template<class TChar, class traits = std::char_traits<TChar>>
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
-class basic_ostream :
-#ifdef FEATURE_IOS_STREAMBUF_FULL
-        virtual
-#endif
-        public TBase
-{
-    typedef TBase base_type;
-
-public:
-    typedef typename base_type::streambuf_type streambuf_type;
-    typedef typename TBase::char_type char_type;
-    typedef typename streambuf_type::pos_type pos_type;
-    typedef typename streambuf_type::off_type off_type;
-
-private:
-    //typedef experimental::ios_policy policy_type;
-    //typedef int policy_type;
-    typedef typename base_type::policy_type policy_type;
-
-#ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
-    policy_type get_policy() { return policy_type{}; }
-
-    template <class TPolicy = policy_type,
-              class Enabled = typename TPolicy::do_timeout_tag>
-    void write_timeout(const char_type* s, streamsize n)
-    {
-        using namespace chrono;
-
-        milliseconds timeout(get_policy().timeout_in_ms());
-        milliseconds sleep_for(get_policy().sleep_in_ms());
-        typedef steady_clock::time_point time_point;
-        time_point start = steady_clock::now();
-        milliseconds elapsed;
-
-        streamsize remaining = n;
-
-        do
-        {
-            streamsize written = this->rdbuf()->sputn(s, n);
-
-            remaining -= written;
-            s += written;
-
-            if(remaining > 0 && sleep_for.count() > 0)
-            {
-                this_thread::sleep_for(sleep_for);
-            }
-            else
-            {
-                this_thread::yield();
-            }
-
-            // FIX: Can't quite do this because std::duration doesn't
-            // interact with estd::duration well and implicit conversions
-            // aren't kicking in presumably due to the templates
-            /*
-            if(steady_clock::now() - start > timeout)
-            {
-
-            } */
-
-            elapsed = duration_cast<milliseconds>(steady_clock::now() - start);
-        }
-        while(remaining > 0 && elapsed < timeout);
-    }
-
-    template <class TPolicy = policy_type,
-              class Enabled = typename enable_if<!experimental::is_do_timeout_tag_present<TPolicy>::value>::type>
-#endif
-    void write_timeout(const char_type* s, streamsize n, bool = false)
-    {
-        streamsize written = this->rdbuf()->sputn(s, n);
-
-        if(written != n)
-            base_type::setstate(ios_base::failbit);
-    }
-
-public:
-    struct sentry
-    {
-        explicit sentry(basic_ostream&) {}
-
-        // NOTE: deviate from spec so that we don't risk extra stuff floating
-        // around on stack.  This won't always be convenient though
-        // NOTE also we might opt for a compile-time flag on unitbuf to further
-        // optimize things
-        inline static void destroy(basic_ostream& os)
-        {
-            //if(os.flags() & ios_base::unitbuf)
-            if(os.is_unitbuf_set() && os.good())
-                os.flush();
-        }
-
-        ~sentry()
-        {
-
-        }
-    };
-
-    typedef typename TBase::traits_type traits_type;
-
-    typedef basic_ostream<TStreambuf, TBase> __ostream_type;
-
-    __ostream_type& flush()
-    {
-        if(this->rdbuf()->pubsync() == -1)
-            this->setstate(base_type::badbit);
-
-        return *this;
-    }
-
-    // UNTESTED
-    __ostream_type& seekp(off_type off, ios_base::seekdir dir)
-    {
-        this->rdbuf()->pubseekoff(off, dir, ios_base::out);
-    }
-
-    // When the time comes, these will replace the old virtual ones
-    __ostream_type& write(const char_type* s, streamsize n)
-    {
-        write_timeout(s, n);
-        sentry::destroy(*this);
-        return *this;
-    }
-
-
-    __ostream_type& put(char_type ch, bool bypass_sentry = false)
-    {
-        if(this->rdbuf()->sputc(ch) == estd::char_traits<char_type>::eof())
-            this->setstate(base_type::eofbit);
-
-        if(!bypass_sentry)
-            sentry::destroy(*this);
-
-        return *this;
-    }
-
-    // NOTE: Our tellp will indeed return an offset output position indicator
-    // on streambufs that can handle it, such as string, span and netbuf - they are not
-    // fully implemented for that yet however (just string)
-    pos_type tellp()
-    {
-        if(this->fail() == true) return pos_type(-1);
-
-        return this->rdbuf()->pubseekoff(0, ios_base::cur, ios_base::out);
-    }
-
-    //friend basic_ostream& operator<<(basic_ostream& (*__pf)(basic_ostream&));
-
-    __ostream_type& operator<<(__ostream_type& (*__pf)(__ostream_type&))
-    {
-        return __pf(*this);
-    }
-
-    /*
-    basic_ostream& operator<<(basic_ostream& (*__pf)(basic_ostream&))
-    {
-        return __pf(*this);
-    }*/
-
-#ifndef FEATURE_IOS_STREAMBUF_FULL
-    //typedef typename base_t::stream_type stream_t;
-
-    basic_ostream() {}
-
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
-    template <class ...TArgs>
-    basic_ostream(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
-
-    basic_ostream(streambuf_type&& streambuf) :
-        base_type(std::move(streambuf)) {}
-#endif
-    basic_ostream(streambuf_type& streambuf) :
-        base_type(streambuf) {}
-
-    template <class TParam1>
-    basic_ostream(TParam1& p1) : base_type(p1) {}
-
-    template <class TParam1>
-    basic_ostream(TParam1* p1) : base_type(p1) {}
-#endif
-
-};
 
 // Using TBase::char_type as it's the most reliable non-reference
 template <class TStreambuf, class TBase>
@@ -230,7 +47,10 @@ template <class TStreambuf, class T,
           class enabled = typename enable_if<(N > 1)>::type >
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
-    char buffer[N + 1];
+    /*
+    TStreambuf* rdbuf = out.rdbuf();
+    typedef typename TStreambuf::char_type char_type;
+    char_type* pptr = rdbuf->pptr(); */
 
     estd::ios_base::fmtflags flags = out.flags();
     // DEBT: Handle octal too. That will require a rework of maxStringLength.  hex
@@ -238,19 +58,32 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
     // dec but that's still an inefficiency/debt
     int base = flags & estd::ios_base::hex ? 16 : 10;
 
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+    /*
+     * impl::out_streambuf doesn't have ppbtr, pbase, etc due to abstract support
+     * for locking memory
+    if(rdbuf->epptr() - pptr >= N)
+    {
+        to_chars_result result = to_chars(pptr, pptr + N, value, base);
 
-    // DEBT: Check result for conversion failure
+        int size = result.ptr - pptr;
+        rdbuf->pbump(size);
+    }
+    else */
+    {
+        char buffer[N + 1];
 
-    // remember, opt flavor specifies 'ptr' as beginning and we must manually
-    // null terminate the end (ala standard to_chars operation)
-    buffer[N] = 0;
+        to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
 
-    return out << result.ptr;
+        // DEBT: Check result for conversion failure
+
+        // remember, opt flavor specifies 'ptr' as beginning and we must manually
+        // null terminate the end (ala standard to_chars operation)
+        buffer[N] = 0;
+
+        return out << result.ptr;
+    }
 }
 #endif
-
-
 
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
@@ -373,7 +206,7 @@ inline internal::basic_ostream<TStreambuf>& hex(internal::basic_ostream<TStreamb
 
 
 // TODO: Put this in layer1/layer2 since it isn't the traditional/fully virtual-capable version
-#ifdef ESTD_POSIX
+#ifdef FEATURE_POSIX_IOS
 #ifdef __cpp_alias_templates
 template<class TChar, class Traits = std::char_traits<TChar> >
 using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;

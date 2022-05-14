@@ -57,9 +57,12 @@ TEST_CASE("functional")
     {
         auto tuple = estd::make_tuple(0, 1.0, 2);
 
+        // Size checks are very platform/toolchain dependent
+#ifdef ESTD_OS_UNIX
         int sz = sizeof(tuple);
 
         REQUIRE(sz == sizeof(long) * 2 + sizeof(double));
+#endif
 
         auto val1 = estd::get<0>(tuple);
 
@@ -157,15 +160,54 @@ TEST_CASE("functional")
                 REQUIRE(val2 == 7);
                 REQUIRE(val3 == 1);
             }
+            SECTION("complex parameter lambda")
+            {
+                int val2 = 5;
+                int val3 = 0;
+
+                estd::experimental::function<int(int*, int)> f = [&val2](int* dest, int x) { return ++val2 + x; };
+
+                REQUIRE(f(&val3, 1) == 7);
+
+                int _dest = 0;
+
+                auto f2 = estd::experimental::function<void(int*, int)>::make_inline2(
+                    [&](int* dest, int x)
+                {
+                    *dest += x;
+                });
+
+                f2(&_dest, 1);
+                REQUIRE(_dest == 1);
+            }
             SECTION("make_inline")
             {
                 auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
 
                 REQUIRE(i.exec(1) == 2);
 
-                estd::experimental::function_base<int, int> f(&i);
+                estd::experimental::function_base<int(int)> f(&i);
 
                 REQUIRE(f.operator()(1) == 2);
+
+                int outside_scope_value = 5;
+                auto l = [&](int x) { return x + outside_scope_value; };
+
+                estd::experimental::inline_function<decltype(l), int(int)> _if(std::move(l));
+                /*
+                auto _if2 =
+                    estd::experimental::make_inline_function<decltype(l), int(int)>(std::move(l)); */
+
+                REQUIRE(_if(5) == 10);
+
+                auto _if3 = estd::experimental::function<int(int)>::make_inline2(
+                    [&](int x) { return x * outside_scope_value; });
+
+                REQUIRE(_if3(5) == 25);
+
+                estd::experimental::function_base<int(int)> fb1(_if3);
+
+                REQUIRE(fb1(5) == 25);
             }
         }
     }

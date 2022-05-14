@@ -1,14 +1,10 @@
 #pragma once
 
+#include "iosfwd.h"
 #include "../string.h"
 
 namespace estd {
-namespace internal {
 
-template <class TStreambuf, class TBase>
-class basic_ostream;
-
-}
 template <class TStreambuf, class TBase, class TStringAllocator, class TStringPolicy>
 inline internal::basic_ostream<TStreambuf, TBase>& operator <<(
         internal::basic_ostream<TStreambuf, TBase>& out,
