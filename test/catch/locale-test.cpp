@@ -68,9 +68,10 @@ struct test_fallthrough3<encoding,
 };
 
 
-static auto goodbit = ios_base::goodbit;
-static auto failbit = ios_base::failbit;
-static auto eofbit = ios_base::eofbit;
+// Because catch doesn't like our pseudo constexpr static members
+static const auto goodbit = ios_base::goodbit;
+static const auto failbit = ios_base::failbit;
+static const auto eofbit = ios_base::eofbit;
 
 
 template <class TInt, class TIStream>
@@ -87,6 +88,33 @@ void num_get_simple_test(const char* in, TInt expected, TIStream& fmt)
     REQUIRE(v == expected);
 }
 
+// As per
+// https://www.translate.com/klingon-english
+struct klingon_locale : locale::type<locale::iso::C, locale::encodings::UTF8>
+{
+    static layer2::const_string truename() { return "teH"; }
+    static layer2::const_string falsename() { return "ngeb"; }
+};
+
+namespace estd {
+
+template <>
+struct ctype<char, klingon_locale> :
+    numpunct<char, locale::classic_type>
+{
+
+};
+
+template <>
+struct numpunct<char, klingon_locale> :
+    numpunct<char, locale::classic_type>
+{
+
+};
+
+}
+
+
 
 TEST_CASE("locale")
 {
@@ -100,10 +128,6 @@ TEST_CASE("locale")
     // Not truly necessary (classic_type is fully static) but we do have the API for those
     // who want it
     locale::classic_type l_classic = locale::classic();
-
-    auto goodbit = ios_base::goodbit;
-    auto failbit = ios_base::failbit;
-    auto eofbit = ios_base::eofbit;
 
     SECTION("isspace")
     {
@@ -378,5 +402,14 @@ TEST_CASE("locale")
                 //test_fallthrough3<internal::encodings::UTF16> ft3;
             }
         }
+    }
+    SECTION("custom locale")
+    {
+        klingon_locale l;
+
+        auto facet = use_facet<numpunct<char> >(l);
+        const char* val = facet.truename().data();
+
+        //REQUIRE(!(facet.truename() == "true"));
     }
 }
