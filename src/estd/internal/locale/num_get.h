@@ -222,15 +222,15 @@ private:
 
             if(basefield == estd::ios_base::oct)
             {
-                get_unsigned_integer<8>(in, end, err, str, v);
+                return get_unsigned_integer<8>(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::dec)
             {
-                get_unsigned_integer<10>(in, end, err, str, v);
+                return get_unsigned_integer<10>(in, end, err, str, v);
             }
             else if(basefield == estd::ios_base::hex)
             {
-                get_unsigned_integer<16>(in, end, err, str, v);
+                return get_unsigned_integer<16>(in, end, err, str, v);
             }
 
             return in;

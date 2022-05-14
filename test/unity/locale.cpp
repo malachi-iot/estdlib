@@ -34,6 +34,7 @@ static void _test_num_get(TNumGet& facet,
     it = facet.get(it, end, istream, err, val);
 
     TEST_ASSERT_EQUAL(123, val);
+    TEST_ASSERT_EQUAL(' ', *it++);
 
     // DEBT: Manually skip the space, because istreambuf_iterator needs work
     // before >> ws works
@@ -42,14 +43,14 @@ static void _test_num_get(TNumGet& facet,
 
     it = facet.get(it, end, istream, err, val);
 
-    // FIX: Fail, we get goodbit and 1456 - should be failbit due to lingering space
-    // but somehow that's getting consumed as a '1'
-    TEST_ASSERT_EQUAL(ios_base::failbit, err);
-    TEST_ASSERT_EQUAL(0, val);
+    TEST_ASSERT_EQUAL(ios_base::goodbit, err);
+    TEST_ASSERT_EQUAL(456, val);
 
     it = facet.get(it, end, istream, err, val);
 
-    TEST_ASSERT_EQUAL(789, val);
+    // '/' makes this fail
+    TEST_ASSERT_EQUAL(ios_base::failbit, err);
+    TEST_ASSERT_EQUAL(0, val);
 }
 
 static void test_num_get()
