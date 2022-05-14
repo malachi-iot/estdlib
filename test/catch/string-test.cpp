@@ -802,11 +802,13 @@ TEST_CASE("string tests")
         {
             for(int i = 0; i < sz; ++i)
             {
-                estd::to_chars_result result = estd::to_chars_opt(&buffer[0], &buffer[127], inputs[i]);
+                // NOTE: Remember, to_chars is not a null terminating create, so we must
+                // designate the end a little earlier so there's room for the null terminator
+                estd::to_chars_result result = estd::to_chars_opt(&buffer[0], &buffer[126], inputs[i]);
 
                 REQUIRE(result.ec == 0);
 
-                buffer[128] = 0;
+                buffer[127] = 0;
 
                 REQUIRE(std::string(result.ptr) == outputs[i]);
             }
