@@ -61,12 +61,6 @@ struct locale : locale_base_base
 
     };
 
-    struct id
-    {
-
-    };
-#endif
-
     // TODO: deviates in that standard version uses a std::string
     // I want my own std::string (beginnings of which are in experimental::layer3::string)
     // but does memory allocation out of our own GC-pool
