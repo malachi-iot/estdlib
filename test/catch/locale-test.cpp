@@ -240,7 +240,7 @@ TEST_CASE("locale")
             {
                 typedef estd::layer1::stringbuf<32> streambuf_type;
                 streambuf_type sb = test::str_uint1;
-                typedef estd::experimental::istreambuf_iterator<streambuf_type> iterator_type;
+                typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
                 iterator_type it(sb), end;
                 num_get<char, iterator_type> n;
 
@@ -312,7 +312,7 @@ TEST_CASE("locale")
                     typedef experimental::istringstream<64> istream_type;
                     //estd::internal::basic_istream<layer1::basic_stringbuf<char, 32>> istream(input);
                     istream_type istream(input);
-                    typedef estd::experimental::istreambuf_iterator<decltype(istream)::streambuf_type>
+                    typedef estd::istreambuf_iterator<decltype(istream)::streambuf_type>
                         iterator_type;
                     auto facet = use_facet<num_get<char, iterator_type> > (istream.getloc());
 

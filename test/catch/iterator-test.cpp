@@ -16,13 +16,13 @@ TEST_CASE("iterator")
 
         SECTION("end-of-stream")
         {
-            estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it, end;
+            estd::istreambuf_iterator<estd::layer2::stringbuf> it, end;
 
             REQUIRE(it == end);
         }
         SECTION("misc stringbuf")
         {
-            estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+            estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
 
             SECTION("characters")
             {
@@ -41,7 +41,7 @@ TEST_CASE("iterator")
 
                 SECTION("prefix")
                 {
-                    estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
                     for (i = sz; i > 0; --i, ++it);
 
@@ -49,7 +49,7 @@ TEST_CASE("iterator")
                 }
                 SECTION("postfix")
                 {
-                    estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
                     for (i = sz; i > 0; i--, it++);
 

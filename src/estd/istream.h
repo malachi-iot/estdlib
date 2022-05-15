@@ -117,7 +117,7 @@ operator >>(
     typedef typename istream_type::streambuf_type streambuf_type;
     typedef typename istream_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
-    typedef estd::experimental::istreambuf_iterator<streambuf_type> iterator_type;
+    typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
 
     in >> ws;
 
