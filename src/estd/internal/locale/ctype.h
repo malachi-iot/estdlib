@@ -68,8 +68,8 @@ class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII
     public TImpl
 {
     typedef internal::locale<locale_code, estd::internal::encodings::ASCII> locale_type;
-    typedef experimental::cbase<char, 10, locale_type> cbase_10_type;
-    typedef experimental::cbase<char, 16, locale_type> cbase_16_type;
+    typedef cbase<char, 10, locale_type> cbase_10_type;
+    typedef cbase<char, 16, locale_type> cbase_16_type;
 
 public:
     static bool isspace(char ch)

@@ -34,7 +34,7 @@ private:
             ios_base::iostate& err, istream_type& str, T& v)
         {
             // DEBT: Consider using use_facet, though really not necessary at this time
-            typedef experimental::cbase<char_type, base, locale_type> cbase_type;
+            typedef cbase<char_type, base, locale_type> cbase_type;
             //use_facet4<cbase<char_type, base> >(str.getloc()).from_char(*i);
 
             v = 0;

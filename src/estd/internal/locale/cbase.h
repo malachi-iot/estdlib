@@ -15,15 +15,11 @@
 // 3.  An Arabit (English) version which appears to be in with the other Kanji characters
 
 namespace estd {
-namespace experimental {
 
 //template <typename TChar, unsigned b, class TLocale>
 //struct cbase;
 
-namespace _internal {
-
-template <typename TChar, unsigned b, class TLocale, typename TEnabled = void>
-struct cbase;
+namespace internal {
 
 template <typename TChar, unsigned b, typename = estd::internal::Range<true> >
 struct cbase_utf;
@@ -155,19 +151,10 @@ struct cbase<TChar, b, internal::locale<lc, encoding>,
 
 };
 
-}
-
-template <typename TChar, unsigned b, class TLocale = void>
-using cbase = _internal::cbase<TChar, b, TLocale>;
-
-}
-
-namespace internal {
-
 template <class TChar, unsigned b, class TLocale>
-struct use_facet_helper<experimental::cbase<TChar, b, void>, TLocale>
+struct use_facet_helper<estd::cbase<TChar, b, void>, TLocale>
 {
-    typedef experimental::cbase<TChar, b, TLocale> facet_type;
+    typedef estd::cbase<TChar, b, TLocale> facet_type;
 
     inline static facet_type use_facet(TLocale)
     {
