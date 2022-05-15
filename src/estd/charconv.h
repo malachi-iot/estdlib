@@ -19,7 +19,6 @@ namespace internal {
 typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;
 
 // Temporarily used as we migrate away from char_traits_base
-typedef experimental::cbase<char, 2, internal::classic_locale_type> cbase_C_2_type;
 typedef experimental::cbase<char, 10, internal::classic_locale_type> cbase_C_10_type;
 typedef experimental::cbase<char, 16, internal::classic_locale_type> cbase_C_16_type;
 typedef experimental::cbase<char, 36, internal::classic_locale_type> cbase_C_36_type;

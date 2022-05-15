@@ -1,3 +1,9 @@
+/**
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/utility/from_chars
+ */
 #pragma once
 
 #include "charconv.h"
@@ -51,8 +57,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            T& value,
                                            const unsigned short base = TCbase::base())
 {
-    typedef TCbase traits;
-    typedef typename traits::int_type int_type;
+    typedef TCbase cbase_type;
+    typedef typename cbase_type::int_type int_type;
 #ifdef __cpp_static_assert
     // DEBT: Expand this to allow any numeric type, we'll have to make specialized
     // versions of raise_and_add to account for that
@@ -62,7 +68,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     const char* current = first;
     bool negate;
     // "If no characters match the pattern or if the value obtained by parsing
-    // the matched characters is not representable in the type of value, value is unmodified,"
+    // the matched characters is not representable in the type of value, value is unmodified," [1]
     T local_value = 0;
 
     /*
@@ -81,8 +87,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     {
         // DEBT: Use has_value() and friends for clarity here
         const int_type digit =
-                *traits::from_char(*current, base);
-        if (digit != traits::eol())
+                *cbase_type::from_char(*current, base);
+        if (digit != cbase_type::eol())
         {
             bool success = raise_and_add(local_value, base, digit);
 
@@ -90,7 +96,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
             if (!success)
             {
                 // skip to either end or next spot which isn't a number
-                while (current++ != last && traits::is_in_base(*current)) {}
+                // "ptr points at the first character not matching the pattern." [1]
+                while (current++ != last && cbase_type::is_in_base(*current)) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
                 return from_chars_result{current, estd::errc::result_out_of_range};
@@ -139,7 +146,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 template <class TCbase, class TInt>
 to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
 {
-    typedef TCbase traits;
+    typedef TCbase cbase_type;
     typedef estd::numeric_limits<TInt> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
@@ -147,7 +154,7 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 
     while(first != last)
     {
-        *last = traits::to_char(value % base);
+        *last = cbase_type::to_char(value % base);
         value /= base;
 
         if(value == 0)
@@ -176,8 +183,8 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 template <class TCbase, class TInt>
 to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
 {
-    typedef TCbase traits;
-    typedef typename traits::char_type char_type;
+    typedef TCbase cbase_type;
+    typedef typename cbase_type::char_type char_type;
 
     if(estd::numeric_limits<TInt>::is_signed && value < 0)
     {
@@ -189,7 +196,7 @@ to_chars_result to_chars_integer(char* first, char* last, TInt value, const int 
 
     while(current != last)
     {
-        *current = traits::to_char(value % base);
+        *current = cbase_type::to_char(value % base);
         value /= base;
 
         current++;

@@ -52,7 +52,7 @@ TEST_CASE("charconv")
                 const char *src = "1010";
 
                 short value = 0;
-                from_chars_integer<cbase_C_2_type>(src, src + 4, value, 2);
+                from_chars_integer<cbase_C_10_type>(src, src + 4, value, 2);
 
                 REQUIRE(value == 10);
             }
