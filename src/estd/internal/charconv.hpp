@@ -59,7 +59,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            const unsigned short base = TCbase::base())
 {
     typedef TCbase cbase_type;
-    typedef typename cbase_type::int_type int_type;
+    typedef typename cbase_type::optional_type optional_type;
 #ifdef __cpp_static_assert
     // DEBT: Expand this to allow any numeric type, we'll have to make specialized
     // versions of raise_and_add to account for that
@@ -93,11 +93,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     while (current != last)
     {
         // DEBT: Use has_value() and friends for clarity here
-        const int_type digit =
-                *cbase_type::from_char(*current, base);
-        if (digit != cbase_type::eol())
+        const optional_type digit = *cbase_type::from_char(*current, base);
+        if (digit.has_value())
         {
-            bool success = raise_and_add(local_value, base, digit);
+            bool success = raise_and_add(local_value, base, digit.value());
 
             // If we didn't succeed, that means we overflowed
             if (!success)
@@ -113,15 +112,22 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 #endif
             }
         }
+        else if(current == first)
+        {
+            return from_chars_result
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+                {current, estd::errc::invalid_argument};
+#else
+                (current, estd::errc::invalid_argument);
+#endif
+        }
         else
         {
             value = local_value;
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-            return from_chars_result{current,
-                                     current==first ? estd::errc::invalid_argument : estd::errc(0)};
+            return from_chars_result{current, estd::errc(0)};
 #else
-            return from_chars_result(current,
-                 current==first ? estd::errc::invalid_argument : estd::errc(0));
+            return from_chars_result(current, estd::errc(0));
 #endif
         }
         ++current;

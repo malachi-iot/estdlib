@@ -78,6 +78,11 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
 };
 
 
+// DEBT: In fact, really we have only two cbase_utfs - a base 10 one and a base 36 one.
+// On one level, this range is almost overly fancy and showing off when we could merely
+// have specialized on b directly.
+// On the other hand, there is a convenience here in that consumers knowing at compile time
+// what base they are using can auto-feed 'base' to things like 'from_chars_integer'.
 template <typename TChar, unsigned b>
 struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
     cbase_utf_base<TChar, b>
@@ -104,7 +109,6 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
                islower(c, _base);
     }
 
-    // NOTE: Consider using estd::optional here instead
     static inline typename base_type::optional_type
     from_char(char_type c, const unsigned short _base = b)
     {
@@ -115,7 +119,6 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
         if (islower(c, _base)) return c - 'a' + 10;
 
-        //return base_type::eol();
         return estd::nullopt;
     }
 

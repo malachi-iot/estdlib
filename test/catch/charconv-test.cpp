@@ -36,11 +36,13 @@ TEST_CASE("charconv")
             }
             SECTION("bad")
             {
+                output = -7;
                 estd::layer2::const_string val = test_str;
                 estd::from_chars_result result = estd::from_chars(
                     val.data(), val.data() + val.size(), output);
 
                 REQUIRE(result.ec == estd::errc::invalid_argument);
+                REQUIRE(output == -7);
             }
             SECTION("overflow")
             {
@@ -66,7 +68,7 @@ TEST_CASE("charconv")
                 const char *src = "1010";
 
                 short value = 0;
-                from_chars_integer<cbase_C_10_type>(src, src + 4, value, 2);
+                from_chars_integer<2>(src, src + 4, value);
 
                 REQUIRE(value == 10);
             }
@@ -76,7 +78,7 @@ TEST_CASE("charconv")
                 {
                     const char* src = "1234";
                     int value = 0;
-                    from_chars_integer<cbase_C_10_type>(src, src + 4, value, 10);
+                    from_chars_integer<10>(src, src + 4, value);
 
                     REQUIRE(value == 1234);
                 }
@@ -84,7 +86,7 @@ TEST_CASE("charconv")
                 {
                     const char* src = "-1234";
                     int value = 0;
-                    from_chars_integer<cbase_C_10_type>(src, src + 5, value);
+                    from_chars_integer<10>(src, src + 5, value);
 
                     REQUIRE(value == -1234);
                 }
@@ -94,7 +96,7 @@ TEST_CASE("charconv")
 
                     int value = 0;
                     estd::from_chars_result result =
-                        from_chars_integer<cbase_C_10_type>(
+                        from_chars_integer<10>(
                             src.data(),
                             src.data() + src.size(), value);
 
@@ -107,7 +109,7 @@ TEST_CASE("charconv")
             {
                 const char *src = "FF";
                 int value = 0;
-                from_chars_integer<cbase_C_16_type>(src, src + 4, value);
+                from_chars_integer<16>(src, src + 4, value);
 
                 REQUIRE(value == 255);
             }
