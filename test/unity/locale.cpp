@@ -66,7 +66,7 @@ static void test_num_get_istream()
     typedef experimental::istringstream<64> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
-    typedef experimental::istreambuf_iterator<streambuf_type> iterator_type;
+    typedef istreambuf_iterator<streambuf_type> iterator_type;
 
     auto facet = use_facet<num_get<char, iterator_type> >(istream.getloc());
 
