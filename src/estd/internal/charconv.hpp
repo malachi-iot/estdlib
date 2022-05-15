@@ -3,6 +3,7 @@
  * References:
  *
  * 1. https://en.cppreference.com/w/cpp/utility/from_chars
+ * 2. https://en.cppreference.com/w/cpp/string/byte/strtol
  */
 #pragma once
 
@@ -71,8 +72,14 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     // the matched characters is not representable in the type of value, value is unmodified," [1]
     T local_value = 0;
 
+    // DEBT: Spec calls for octal leading '0' parsing when base = 0.  A fallback to decimal
+    // is also expected.  Specifically:
+    // "pattern identical to the one used by std::strtol" [1]
+    // "If the value of base is 0, the numeric base is auto-detected: if the prefix is 0, [...]
+    //  otherwise the base is decimal" [2]
+
     /*
-     * "leading whitespace is not ignored"
+     * "leading whitespace is not ignored" [1]
     while (estd::internal::ascii_isspace(*current))
         current++; */
 
@@ -97,7 +104,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
             {
                 // skip to either end or next spot which isn't a number
                 // "ptr points at the first character not matching the pattern." [1]
-                while (current++ != last && cbase_type::is_in_base(*current)) {}
+                while (++current != last && cbase_type::is_in_base(*current)) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
                 return from_chars_result{current, estd::errc::result_out_of_range};
@@ -117,7 +124,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                  current==first ? estd::errc::invalid_argument : estd::errc(0));
 #endif
         }
-        current++;
+        ++current;
     }
 
     // prepend with constexpr so we can optimize out non-signed flavors

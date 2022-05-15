@@ -42,6 +42,20 @@ TEST_CASE("charconv")
 
                 REQUIRE(result.ec == estd::errc::invalid_argument);
             }
+            SECTION("overflow")
+            {
+                const char* val = "128";
+                const char* val_end = val + strlen(val);
+
+                int8_t output = -7;
+
+                estd::from_chars_result result = estd::from_chars(
+                    val, val_end, output);
+
+                REQUIRE(result.ec == estd::errc::result_out_of_range);
+                REQUIRE(output == -7);
+                REQUIRE(result.ptr == val_end);
+            }
         }
         SECTION("internal")
         {
