@@ -56,21 +56,6 @@ namespace internal {
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale : locale_base_base
 {
-#ifdef ENABLE_LOCALE_MULTI
-    struct facet
-    {
-
-    };
-
-    typedef int id;
-
-    // FIX: 40 arbitrary number, could be more or less
-    // NOTE: seems kind of like a fake-rtti system a bit
-    facet* facets[40];
-
-    locale(const locale& other);
-    explicit locale(const char* std_name);
-#else
     struct facet
     {
 

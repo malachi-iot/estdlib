@@ -33,25 +33,6 @@ struct ctype_base
 };
 
 
-/*
-template <typename TChar, class TLocale>
-class ctype : public ctype_base
-{
-#ifdef ENABLE_LOCALE_MULTI
-    // TODO: determine if we want to roll with the virtual function do_is
-    // and friends or branch out into further templating
-#else
-    TChar do_tolower(TChar ch);
-    TChar do_toupper(TChar ch);
-#endif
-public:
-    bool is(mask m, TChar ch) const { return false; }
-    const TChar* is(const TChar* low, const TChar* high, mask* vec) const { return NULLPTR; }
-
-    TChar toupper(TChar ch) { return do_toupper(ch); }
-    TChar tolower(TChar ch) { return do_tolower(ch); }
-}; */
-
 
 // specialization, deviating from standard in that locale is compile-time
 // instead of runtime
