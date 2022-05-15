@@ -2,26 +2,10 @@
 #pragma once
 
 #include "charconv.h"
+
 #include "locale/fwd.h"
 
 namespace estd { namespace internal {
-
-// https://docs.oracle.com/cd/E23824_01/html/E26033/glset.html
-
-struct locale_code
-{
-    enum values
-    {
-        C,
-        POSIX,
-        en_GB,
-        en_US,
-        fr_FR,
-        ja_JP
-    };
-};
-
-typedef locale_code::values locale_code_enum;
 
 struct locale_id
 {
@@ -59,16 +43,6 @@ ESTD_CPP_CONSTEXPR_RET const char* locale_name<locale_code::C, internal::encodin
     return "C";
 };
 
-#if UNUSED
-template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-TFacet use_facet(const locale<locale_code, encoding>& loc);
-
-template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-void use_facet2(const locale<locale_code, encoding>& loc);
-
-template <class TFacet, locale_code_enum locale_code, internal::encodings::values encoding>
-struct use_facet_helper;
-#endif
 
 
 struct locale_base_base
@@ -82,8 +56,18 @@ struct locale_base_base
 
 
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
-struct locale;
+struct locale : locale_base_base
+{
+    struct facet
+    {
 
-}
+    };
 
-}
+    // TODO: deviates in that standard version uses a std::string
+    // I want my own std::string (beginnings of which are in experimental::layer3::string)
+    // but does memory allocation out of our own GC-pool
+    const char* name() const { return internal::locale_name<locale_code, encoding>(); }
+};
+
+
+}}

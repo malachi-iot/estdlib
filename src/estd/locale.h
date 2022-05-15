@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cstdint.h"
+
 #include "internal/platform.h"
 #include "internal/locale.h"
 
@@ -11,27 +13,8 @@
 #include "internal/locale/num_get.h"
 #include "internal/locale/numpunct.h"
 
-extern "C" {
-#include <stdint.h>
-}
 
 namespace estd { namespace experimental {
-
-#if UNUSED
-// DEBT: Need to move this out to regular estd and rename to 'locale'
-// so that calls like 'classic' have a std-like signature
-// NOTE: Due to how we specialize, this class cannot be base class of our specialized locale
-struct locale_base : locale_base_base
-{
-};
-#endif
-
-
-
-
-
-template <class TChar>
-class ctype_test;
 
 
 namespace layer5
@@ -51,23 +34,6 @@ public:
 
 }
 
-namespace internal {
-
-template <internal::locale_code::values locale_code, internal::encodings::values encoding>
-struct locale : locale_base_base
-{
-    struct facet
-    {
-
-    };
-
-    // TODO: deviates in that standard version uses a std::string
-    // I want my own std::string (beginnings of which are in experimental::layer3::string)
-    // but does memory allocation out of our own GC-pool
-    const char* name() const { return internal::locale_name<locale_code, encoding>(); }
-};
-
-}
 
 struct locale : internal::locale_base_base
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../locale.h"
-#include "../../variant.h"
+#include "iso.h"
+#include "../text/encodings.h"
 
 namespace estd {
 
@@ -9,6 +9,9 @@ namespace internal {
 
 template <typename TChar, unsigned b, class TLocale, typename TEnabled = void>
 struct cbase;
+
+template <internal::locale_code::values locale_code, internal::encodings::values encoding>
+struct locale;
 
 }
 
@@ -21,7 +24,7 @@ struct cbase : internal::cbase<TChar, b, TLocale> {};
 
 
 // DEBT: Make TImpl void again once we fix up helper to deal with that
-template <typename TChar, class TLocale = void, class TImpl = estd::monostate>
+template <typename TChar, class TLocale = void>
 class ctype;
 
 template <class TChar, class TLocale = void>

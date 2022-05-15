@@ -40,17 +40,14 @@ struct ctype_base
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <internal::locale_code_enum locale_code, class TImpl>
-class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>, TImpl> :
+template <internal::locale_code_enum locale_code>
+class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> :
     public ctype_base,
     // NOTE: This inherit-from-facet behavior, though prescribed by std spec, is not
     // used for us at this time
-    public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet,
-    public TImpl
+    public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet
 {
     typedef internal::locale<locale_code, estd::internal::encodings::ASCII> locale_type;
-    typedef cbase<char, 10, locale_type> cbase_10_type;
-    typedef cbase<char, 16, locale_type> cbase_16_type;
 
 public:
     static bool isspace(char ch)
@@ -95,12 +92,12 @@ public:
         }
         if(m & xdigit)
         {
-            if(cbase_16_type::is_in_base(ch))
+            if(cbase<char, 16, locale_type>::is_in_base(ch))
                 return true;
         }
         else if(m & digit)
         {
-            if(cbase_10_type::is_in_base(ch))
+            if(cbase<char, 10, locale_type>::is_in_base(ch))
                 return true;
         }
         if(m & upper)
