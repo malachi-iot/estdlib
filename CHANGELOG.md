@@ -5,6 +5,8 @@
 * `internal::basic_istream` can be configured in blocking or non blocking mode via `TPolicy`
 * `internal::flagged_istream` now available to make `TPolicy` interaction easier
 * istream and ostream wrappers for Arduino's `Stream` and `Print` classes
+* groundwork for compile-time locale support, including num_get, moneypunct and ctype
+* extraction operator >> now supports int types
 
 ## Quality Updates & Bug Fixes
 
@@ -18,7 +20,6 @@
 * istream:
     * Blocking support is new and is likely to have deficiencies
     * Arduino wrapper *only* works in blocking mode
-    * extraction operator only supports strings
 * POSIX: Too much feature flagging depends on the POSIX flags, erroneous and confusing
 
 ## Additional Notes
