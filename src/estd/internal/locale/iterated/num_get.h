@@ -1,11 +1,18 @@
+/***
+ * State machine flavor of num_get
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/locale/num_get/get
+ */
 #pragma once
 
 #include "../cbase.h"
+#include "../fwd.h"
 #include "../../ios_base.h"
 
 namespace estd { namespace iterated {
 
-// State machine flavor of num_get
 template <unsigned base, typename TChar, class TLocale>
 struct num_get
 {
@@ -16,6 +23,7 @@ struct num_get
     typedef cbase<char_type, base, locale_type> cbase_type;
     //typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
+    typedef typename cbase_type::int_type int_type;
 
     enum state
     {
@@ -41,23 +49,23 @@ struct num_get
 
     // 'false_type' means this is the unsigned flavor
     template <bool positive, typename T>
-    bool raise_and_add(optional_type n, T& v, false_type)
+    inline static bool raise_and_add(int_type n, T& v, false_type)
     {
         // Undefined/bad state.  Same as 'default' case switch
         // DEBT: Logging this and other internal failures would be nice.  In this case,
         // maybe we can do a static assert?
         if(!positive) return true;
 
-        return estd::internal::raise_and_add(v, base, n.value());
+        return estd::internal::raise_and_add(v, base, n);
     }
 
-    // 'false_type' means this is the unsigned flavor
+    // 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    bool raise_and_add(optional_type n, T& v, true_type)
+    inline static bool raise_and_add(int_type n, T& v, true_type)
     {
         return positive ?
-           estd::internal::raise_and_add(v, base, n.value()) :
-           estd::internal::raise_and_sub(v, base, n.value());
+           estd::internal::raise_and_add(v, base, n) :
+           estd::internal::raise_and_sub(v, base, n);
     }
 
     template <bool positive, typename T>
@@ -67,7 +75,7 @@ struct num_get
 
         if(n.has_value())
         {
-            if (!raise_and_add<positive>(n, v, is_signed<T>()))
+            if (!raise_and_add<positive>(n.value(), v, is_signed<T>()))
             {
                 state_.state_ = Overflow;
                 err |= ios_base::failbit;
@@ -151,5 +159,19 @@ struct num_get
         return get(*i++, err, v);
     }
 };
+
+
+template <typename TChar, class TLocale>
+struct num_get<0, TChar, TLocale>
+{
+    union
+    {
+        num_get<8, TChar, TLocale> base8;
+        num_get<10, TChar, TLocale> base10;
+        num_get<16, TChar, TLocale> base16;
+    };
+};
+
+
 
 }}

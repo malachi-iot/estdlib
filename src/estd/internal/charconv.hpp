@@ -12,7 +12,7 @@
 #include "cctype.h"
 
 #include "locale/ctype.h"
-#include "locale/iterated/num_get.h"    // Very minimal dependencies
+//#include "locale/iterated/num_get.h"    // Very minimal dependencies
 
 namespace estd { namespace internal {
 

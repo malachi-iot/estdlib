@@ -15,6 +15,13 @@ struct locale;
 
 }
 
+namespace iterated {
+
+template <unsigned base, typename TChar, class TLocale>
+struct num_get;
+
+}
+
 template <typename TChar, unsigned b, class TLocale = void>
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 using cbase = internal::cbase<TChar, b, TLocale>;
