@@ -256,18 +256,37 @@ TEST_CASE("locale")
             const char* in = "123";
             bool done;
 
-            iterated::num_get<10, char, locale::classic_type> n;
+            SECTION("core")
+            {
+                iterated::num_get<10, char, locale::classic_type> n;
 
-            done = n.get(*in++, state, v);
-            REQUIRE(!done);
-            done = n.get(*in++, state, v);
-            REQUIRE(!done);
-            done = n.get(*in++, state, v);
-            REQUIRE(!done);
-            REQUIRE(v == 123);
-            done = n.get(*in++, state, v);
-            REQUIRE(done);
-            REQUIRE(v == 123);
+                done = n.get(*in++, state, v);
+                REQUIRE(!done);
+                done = n.get(*in++, state, v);
+                REQUIRE(!done);
+                done = n.get(*in++, state, v);
+                REQUIRE(!done);
+                REQUIRE(v == 123);
+                done = n.get(*in++, state, v);
+                REQUIRE(done);
+                REQUIRE(state == goodbit);
+                REQUIRE(v == 123);
+            }
+            SECTION("helper method")
+            {
+                iterated::num_get<10, char, locale::classic_type> n;
+                const char* end = in + strlen(in);
+
+                done = n.get(in, end, state, v);
+                REQUIRE(!done);
+                done = n.get(in, end, state, v);
+                REQUIRE(!done);
+                done = n.get(in, end, state, v);
+                REQUIRE(!done);
+                done = n.get(in, end, state, v);
+                REQUIRE(state == eofbit);
+                REQUIRE(done);
+            }
         }
     }
     SECTION("cbase")

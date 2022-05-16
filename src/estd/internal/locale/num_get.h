@@ -58,6 +58,7 @@ struct num_get
         return true;
     }
 
+    // NOTE: This method never sets eof bit
     template <typename T>
     bool get(char_type c, ios_base::iostate& err, T& v)
     {
@@ -68,6 +69,7 @@ struct num_get
             case Start:
                 v = 0;
                 state_ = Nominal;
+
 #if __has_cpp_attribute(fallthrough)
                 [[fallthrough]];
 #endif
@@ -82,6 +84,20 @@ struct num_get
             default:
                 return true;
         }
+    }
+
+
+    template <class TIter, class T>
+    bool get(TIter& i, TIter end,
+        ios_base::iostate& err, T& v)
+    {
+        if(i == end)
+        {
+            err |= ios_base::eofbit;
+            return true;
+        }
+
+        return get(*i++, err, v);
     }
 };
 
