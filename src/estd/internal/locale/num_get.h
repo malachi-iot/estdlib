@@ -12,6 +12,81 @@
 
 namespace estd {
 
+namespace iterated {
+
+// State machine flavor of num_get
+template <unsigned base, typename TChar, class TLocale>
+struct num_get
+{
+    //typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+    //typedef typename istream_type::locale_type locale_type;
+    typedef TLocale locale_type;
+    typedef TChar char_type;
+    typedef cbase<char_type, base, locale_type> cbase_type;
+    typedef typename cbase_type::optional_type optional_type;
+
+    enum state
+    {
+        Start,
+        Nominal,
+        Overflow,
+        Complete
+    };
+
+    state state_;
+
+    num_get() : state_(Start) {}
+
+    template <typename T>
+    bool nominal(optional_type n, ios_base::iostate& err, T& v)
+    {
+        if(n.has_value())
+        {
+            if(!estd::internal::raise_and_add(v, base, n.value()))
+            {
+                state_ = Overflow;
+                err |= ios_base::failbit;
+            }
+
+            return false;
+        }
+
+        if(state_ == Start)
+            // "if the conversion function fails std::ios_base::failbit is assigned to err" [1]
+            err |= ios_base::failbit;
+
+        return true;
+    }
+
+    template <typename T>
+    bool get(char_type c, ios_base::iostate& err, T& v)
+    {
+        optional_type n = cbase_type::from_char(c);
+
+        switch(state_)
+        {
+            case Start:
+                v = 0;
+                state_ = Nominal;
+#if __has_cpp_attribute(fallthrough)
+                [[fallthrough]];
+#endif
+
+            case Nominal:
+                return nominal(n, err, v);
+
+            case Overflow:
+                return n.has_value();
+
+            // FIX: Just to satisfy compilation
+            default:
+                return true;
+        }
+    }
+};
+
+}
+
 template <class TChar, class InputIt>
 class num_get
 {
@@ -35,7 +110,7 @@ private:
         {
             // DEBT: Consider using use_facet, though really not necessary at this time
             typedef cbase<char_type, base, locale_type> cbase_type;
-            //use_facet4<cbase<char_type, base> >(str.getloc()).from_char(*i);
+            //use_facet<cbase<char_type, base> >(str.getloc()).from_char(*i);
 
             v = 0;
             // Since we are using forward-only iterators, we can't retain an
@@ -72,6 +147,9 @@ private:
                      */
                     if(!estd::internal::raise_and_add(v, base, n.value()))
                     {
+                        // TODO: It's subtle, but spec expects us to read all the digits out of
+                        // the input iterator, even on overflow
+
                         err |= ios_base::failbit;
                         return i;
                     }

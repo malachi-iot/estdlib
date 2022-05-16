@@ -251,12 +251,27 @@ TEST_CASE("locale")
                 REQUIRE(result == end);
             }
         }
+        SECTION("iterated")
+        {
+            const char* in = "123";
+            bool done;
+
+            iterated::num_get<10, char, locale::classic_type> n;
+
+            done = n.get(*in++, state, v);
+            REQUIRE(!done);
+            done = n.get(*in++, state, v);
+            REQUIRE(!done);
+            done = n.get(*in++, state, v);
+            REQUIRE(!done);
+            REQUIRE(v == 123);
+            done = n.get(*in++, state, v);
+            REQUIRE(done);
+            REQUIRE(v == 123);
+        }
     }
     SECTION("cbase")
     {
-        // DEBT: cbase is nearly there, just needs a bit more testing
-        using namespace estd::experimental;
-
         SECTION("base 8")
         {
             cbase<char, 8, locale::classic_type> facet;
