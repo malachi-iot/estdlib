@@ -46,16 +46,33 @@ struct num_get
 
     } state_;
 
+    // 'false_type' means this is the unsigned flavor
+    template <bool positive, typename T>
+    bool raise_and_add(optional_type n, T& v, false_type)
+    {
+        // Undefined/bad state.  Same as 'default' case switch
+        // DEBT: Logging this and other internal failures would be nice.  In this case,
+        // maybe we can do a static assert?
+        if(!positive) return true;
+
+        return estd::internal::raise_and_add(v, base, n.value());
+    }
+
+    // 'false_type' means this is the unsigned flavor
+    template <bool positive, typename T>
+    bool raise_and_add(optional_type n, T& v, true_type)
+    {
+        return positive ?
+           estd::internal::raise_and_add(v, base, n.value()) :
+           estd::internal::raise_and_sub(v, base, n.value());
+    }
+
     template <bool positive, typename T>
     bool nominal(optional_type n, ios_base::iostate& err, T& v)
     {
         if(n.has_value())
         {
-            const bool succeeded = positive ?
-                    estd::internal::raise_and_add(v, base, n.value()) :
-                    estd::internal::raise_and_sub(v, base, n.value());
-
-            if (!succeeded)
+            if (!raise_and_add<positive>(n, v, is_signed<T>()))
             {
                 state_.state_ = Overflow;
                 err |= ios_base::failbit;
@@ -141,10 +158,29 @@ private:
         typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
         typedef typename istream_type::locale_type locale_type;
 
-        // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
-        //       though it being locale-bound may affect that down the line
         template <unsigned base, class T>
         static iter_type get_unsigned_integer(iter_type i, iter_type end,
+                                             ios_base::iostate& err, istream_type& str, T& v)
+        {
+            iterated::num_get<base, char_type, locale_type> n;
+
+            for(; i != end; ++i)
+            {
+                if(n.get(*i, err, v)) return i;
+            }
+
+            err |= ios_base::eofbit;
+            return i;
+        }
+
+
+        // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
+        //       though it being locale-bound may affect that down the line
+        // NOTE: legacy version doesn't use state machine.  Due to our 'good' variable, I'd
+        // rate our state machine as equally efficient as legacy version, but more powerful.
+        // Given we can dogfood and reuse with apparently no penalty, we do it
+        template <unsigned base, class T>
+        static iter_type get_unsigned_integer_legacy(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             // DEBT: Consider using use_facet, though really not necessary at this time
