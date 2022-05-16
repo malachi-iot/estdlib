@@ -8,6 +8,7 @@
 #include "facet.h"
 #include "utility.h"
 #include "../deduce_fixed_size.h"
+#include "../cctype.h"
 
 // TODO: A future task.  Japanese character set has 3 different (at least) sets of numerals:
 // 1.  Regular ASCII style
