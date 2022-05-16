@@ -23,35 +23,48 @@ struct num_get
     typedef TLocale locale_type;
     typedef TChar char_type;
     typedef cbase<char_type, base, locale_type> cbase_type;
+    //typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
 
     enum state
     {
-        Start,
-        Nominal,
+        Start = 0,
+        Header,
+        NominalNegative,
+        NominalPositive,
         Overflow,
         Complete
     };
 
-    state state_;
+    struct _state
+    {
+        state state_ : 4;
+        //bool is_signed : 1;
 
-    num_get() : state_(Start) {}
+        _state() : state_(Start) //, is_signed(false)
+        {}
 
-    template <typename T>
+    } state_;
+
+    template <bool positive, typename T>
     bool nominal(optional_type n, ios_base::iostate& err, T& v)
     {
         if(n.has_value())
         {
-            if(!estd::internal::raise_and_add(v, base, n.value()))
+            const bool succeeded = positive ?
+                    estd::internal::raise_and_add(v, base, n.value()) :
+                    estd::internal::raise_and_sub(v, base, n.value());
+
+            if (!succeeded)
             {
-                state_ = Overflow;
+                state_.state_ = Overflow;
                 err |= ios_base::failbit;
             }
 
             return false;
         }
 
-        if(state_ == Start)
+        if(state_.state_ == Start)
             // "if the conversion function fails std::ios_base::failbit is assigned to err" [1]
             err |= ios_base::failbit;
 
@@ -62,23 +75,33 @@ struct num_get
     template <typename T>
     bool get(char_type c, ios_base::iostate& err, T& v)
     {
-        optional_type n = cbase_type::from_char(c);
-
-        switch(state_)
+        switch(state_.state_)
         {
             case Start:
                 v = 0;
-                state_ = Nominal;
+                state_.state_ = NominalPositive;
+
+                // DEBT: Revisit if we need to play with widening/narrowing/conversion
+                // to ensure this hyphen compare is proper
+                if (estd::is_signed<T>::value && c == '-')
+                {
+                    state_.state_ = NominalNegative;
+                    return false;
+                }
 
 #if __has_cpp_attribute(fallthrough)
                 [[fallthrough]];
 #endif
 
-            case Nominal:
-                return nominal(n, err, v);
+            case NominalPositive:
+                return nominal<true>(cbase_type::from_char(c), err, v);
+
+            case NominalNegative:
+                return nominal<false>(cbase_type::from_char(c), err, v);
 
             case Overflow:
-                return n.has_value();
+                // Merely consumed numbers in this mode
+                return cbase_type::from_char(c).has_value();
 
             // FIX: Just to satisfy compilation
             default:

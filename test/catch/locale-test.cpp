@@ -253,11 +253,12 @@ TEST_CASE("locale")
         }
         SECTION("iterated")
         {
-            const char* in = "123";
             bool done;
 
             SECTION("core")
             {
+                const char* in = "123";
+
                 iterated::num_get<10, char, locale::classic_type> n;
 
                 done = n.get(*in++, state, v);
@@ -274,18 +275,19 @@ TEST_CASE("locale")
             }
             SECTION("helper method")
             {
+                const char* in = "-123";
                 iterated::num_get<10, char, locale::classic_type> n;
                 const char* end = in + strlen(in);
 
-                done = n.get(in, end, state, v);
-                REQUIRE(!done);
-                done = n.get(in, end, state, v);
-                REQUIRE(!done);
-                done = n.get(in, end, state, v);
-                REQUIRE(!done);
-                done = n.get(in, end, state, v);
+                do
+                {
+                    done = n.get(in, end, state, v);
+                }
+                while(!done);
+
                 REQUIRE(state == eofbit);
                 REQUIRE(done);
+                REQUIRE(v == -123);
             }
         }
     }
