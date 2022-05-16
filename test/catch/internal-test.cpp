@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "estd/internal/value_evaporator.h"
+#include "estd/internal/chooser.h"
 #include "test-data.h"
 
 using namespace estd::test;
@@ -98,6 +99,34 @@ TEST_CASE("Internal tests", "[internal]")
                 REQUIRE(sizeof(value) == sizeof(EvaporatorBase));
                 REQUIRE(value.value().val1 == 3);
             }
+        }
+    }
+    SECTION("chooser")
+    {
+        estd::internal::chooser<const char> c;
+
+        const char* values[] { "zero", "one", "two" };
+        const char* input = "one";
+
+        SECTION("iterated")
+        {
+            REQUIRE(!c.process(values, *input++));
+            REQUIRE(!c.process(values, *input++));
+            REQUIRE(c.process(values, *input++));
+
+            REQUIRE(c.chosen() == 1);
+        }
+        SECTION("normal")
+        {
+            int chosen = c.choose(values, input, input + 3);
+
+            REQUIRE(chosen == 1);
+        }
+        SECTION("incomplete")
+        {
+            int chosen = c.choose(values, input, input + 2);
+
+            REQUIRE(chosen == -1);
         }
     }
 }
