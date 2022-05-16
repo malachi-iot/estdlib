@@ -30,6 +30,8 @@ struct num_get
     {
         Start = 0,
         Header,
+        FirstNegative,
+        FirstPositive,
         NominalNegative,
         NominalPositive,
         Overflow,
@@ -68,8 +70,10 @@ struct num_get
     }
 
     template <bool positive, typename T>
-    bool nominal(optional_type n, ios_base::iostate& err, T& v)
+    bool nominal(char_type c, ios_base::iostate& err, T& v)
     {
+        optional_type n = cbase_type::from_char(c);
+
         if(n.has_value())
         {
             if (!raise_and_add<positive>(n, v, is_signed<T>()))
@@ -80,10 +84,6 @@ struct num_get
 
             return false;
         }
-
-        if(state_.state_ == Start)
-            // "if the conversion function fails std::ios_base::failbit is assigned to err" [1]
-            err |= ios_base::failbit;
 
         return true;
     }
@@ -110,11 +110,31 @@ struct num_get
                 [[fallthrough]];
 #endif
 
+            case FirstPositive:
+                if(nominal<true>(c, err, v))
+                {
+                    // "if the conversion function fails std::ios_base::failbit is assigned to err" [1]
+                    err |= ios_base::failbit;
+                    return true;
+                }
+                else
+                    return false;
+
+            case FirstNegative:
+                if(nominal<false>(c, err, v))
+                {
+                    // "if the conversion function fails std::ios_base::failbit is assigned to err" [1]
+                    err |= ios_base::failbit;
+                    return true;
+                }
+                else
+                    return false;
+
             case NominalPositive:
-                return nominal<true>(cbase_type::from_char(c), err, v);
+                return nominal<true>(c, err, v);
 
             case NominalNegative:
-                return nominal<false>(cbase_type::from_char(c), err, v);
+                return nominal<false>(c, err, v);
 
             case Overflow:
                 // Merely consumed numbers in this mode
