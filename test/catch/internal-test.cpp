@@ -103,7 +103,7 @@ TEST_CASE("Internal tests", "[internal]")
     }
     SECTION("chooser")
     {
-        estd::internal::chooser<const char> c;
+        estd::internal::chooser c;
 
         const char* values[] { "zero", "one", "two" };
         const char* input = "one";
@@ -118,15 +118,20 @@ TEST_CASE("Internal tests", "[internal]")
         }
         SECTION("normal")
         {
-            int chosen = c.choose(values, input, input + 3);
+            c.choose(values, input, input + 3, false);
 
-            REQUIRE(chosen == 1);
+            REQUIRE(c.chosen() == 1);
         }
         SECTION("incomplete")
         {
-            int chosen = c.choose(values, input, input + 2);
+            c.choose(values, input, input + 2, false);
 
-            REQUIRE(chosen == -1);
+            REQUIRE(c.chosen() == -1);
+        }
+        SECTION("static")
+        {
+            const char* input = "two";
+            REQUIRE(estd::internal::chooser::choose(values, input) == 2);
         }
     }
 }

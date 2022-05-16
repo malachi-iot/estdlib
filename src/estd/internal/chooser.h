@@ -7,13 +7,10 @@ namespace estd { namespace internal {
 
 
 // DEBT: Works OK, but will get confused if names start with the same letters
-template <class TChar>
 class chooser
 {
-    typedef TChar char_type;
-
-    int chosen_ = -1;
-    unsigned i = 0;
+    short chosen_ = -1;
+    unsigned short i = 0;
 
 public:
     int chosen() const { return chosen_; }
@@ -37,8 +34,10 @@ public:
         return container.size();
     }
 
-    template <class TContainer, std::size_t N>
-    inline bool process(const TContainer (&containers)[N], const char_type c)
+    // We do demand random access array-style containers.  Otherwise, we'd have to maintain
+    // a whole list of iterators, one per container
+    template <class TContainer, std::size_t N, typename value_type>
+    inline bool process(const TContainer (&containers)[N], const value_type c)
     {
         // Look through all the containers to try to find the first match
         if(chosen_ == -1)
@@ -73,27 +72,32 @@ public:
     }
 
     template <class TContainer, std::size_t N, typename TIter>
-    int choose2(const TContainer (&containers)[N], TIter& in, TIter end, bool autoReset = false) { return chosen_; }
-
-    template <class TContainer, std::size_t N, typename TIter>
-    int choose(const TContainer (&containers)[N], TIter& in, TIter end, bool reset)
+    TIter choose(const TContainer (&containers)[N], TIter in, TIter end, bool reset)
     {
         if(reset) this->reset();
 
         for(; in != end; ++in)
         {
-            if(process(containers, *in)) return chosen_;
+            if(process(containers, *in)) return in;
         }
 
-        return chosen_ = -1;
+        chosen_ = -1;
+        return in;
     }
 
-    /*
     template <class TContainer, std::size_t N, typename TIter>
-    static int choose(const TContainer (&containers)[N], TIter& in, TIter end)
+    static inline int choose(const TContainer (&containers)[N], TIter& in, TIter end)
     {
-        chooser
-    } */
+        chooser c;
+        c.choose(containers, in, end, false);
+        return c.chosen();
+    }
+
+    template <class TContainer, std::size_t N>
+    static inline int choose(const TContainer (&containers)[N], TContainer& c)
+    {
+        return choose(containers, c, c + get_size(c));
+    }
 };
 
 }}
