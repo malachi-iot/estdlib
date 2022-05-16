@@ -29,7 +29,7 @@ private:
         typedef typename istream_type::locale_type locale_type;
 
         template <unsigned base, class T>
-        static iter_type get_unsigned_integer(iter_type i, iter_type end,
+        static iter_type get_signed_integer(iter_type i, iter_type end,
                                              ios_base::iostate& err, istream_type& str, T& v)
         {
             iterated::num_get<base, char_type, locale_type> n;
@@ -41,6 +41,13 @@ private:
 
             err |= ios_base::eofbit;
             return i;
+        }
+
+        template <unsigned base, class T>
+        static iter_type get_unsigned_integer(iter_type i, iter_type end,
+                                            ios_base::iostate& err, istream_type& str, T& v)
+        {
+            return get_signed_integer<base>(i, end, err, str, v);
         }
 
 
@@ -113,7 +120,7 @@ private:
         }
 
         template <unsigned base, class T>
-        static iter_type get_signed_integer(iter_type i, iter_type end,
+        static iter_type get_signed_integer_legacy(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
             bool negative = false;
