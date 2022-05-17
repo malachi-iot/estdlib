@@ -1,26 +1,31 @@
-# vNEXT - DDMMMYY
+# vNEXT - DDMMM22
 
 ## Added Features
 
 * `internal::basic_istream` can be configured in blocking or non blocking mode via `TPolicy`
 * `internal::flagged_istream` now available to make `TPolicy` interaction easier
 * istream and ostream wrappers for Arduino's `Stream` and `Print` classes
-* groundwork for compile-time locale support, including num_get, moneypunct and ctype
-* extraction operator >> now supports int types
+* Groundwork for compile-time locale support, including num_get, moneypunct and ctype
+    * num_get is supported by a class named `iterated::num_get` which is, as
+      the name suggests, a non blocking state machine
+* Extraction operator >> now supports int types
+* `istreambuf_iterator` has elevated from experimental to available API
 
 ## Quality Updates & Bug Fixes
 
 * C++0x compatibility, especially where streambuf/iostreams are involved
 * unit test under Windows (CLion) fixed
-* EOF glitch in istreambuf_iterator repaired
 * More granular POSIX support for scenarios which only have partial POSIX capability (MINGW)
 
-## Known Issues
+## Known Issues & Limitations
 
 * istream:
     * Blocking support is new and is likely to have deficiencies
     * Arduino wrapper *only* works in blocking mode
 * POSIX: Too much feature flagging depends on the POSIX flags, erroneous and confusing
+* locale:
+    * support exists at this time to support `num_get` int processing specifically.  It is very much not a complete locale implementation.
+    * changing the locale on an istream is difficult at the moment
 
 ## Additional Notes
 
