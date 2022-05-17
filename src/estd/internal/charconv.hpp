@@ -57,7 +57,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     while (current != last)
     {
         // DEBT: Use has_value() and friends for clarity here
-        const optional_type digit = *cbase_type::from_char(*current, base);
+        const optional_type digit = cbase_type::from_char(*current, base);
         if (digit.has_value())
         {
             bool success = raise_and_add(local_value, base, digit.value());

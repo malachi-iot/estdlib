@@ -250,6 +250,21 @@ TEST_CASE("locale")
                 REQUIRE(v == test::uint1);
                 REQUIRE(result == end);
             }
+            SECTION("istreambuf_iterator (deduced)")
+            {
+                // mimics the example at
+                // https://en.cppreference.com/w/cpp/locale/num_get/get
+                typedef estd::layer1::stringbuf<32> streambuf_type;
+                streambuf_type sb = test::str_uint1;
+                typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
+                num_get<char, iterator_type> n;
+                //use_facet<num_get<char> >(fmt.getloc());
+
+                n.get(sb, {}, fmt, state, v);
+
+                REQUIRE(state == eofbit);
+                REQUIRE(v == test::uint1);
+            }
         }
         SECTION("iterated")
         {
