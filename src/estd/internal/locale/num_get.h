@@ -148,52 +148,6 @@ private:
             return i;
         }
 
-        // DEBT: Works OK, but will get confused if names start with the same letters
-        // DEBT: Move this out to a more utility oriented location, and give it a better name
-        // Remember, we're limited how fancy we can get because we don't demand any kind of sorting
-        // of the containers on the way in
-        template <class TContainer, std::size_t N>
-        static int chooser(const TContainer (&containers)[N], iter_type& in, iter_type end)
-        {
-            //bool good = false;
-
-            int chosen = -1;
-
-            for(int i = 0; in != end;
-                ++in, ++i //, good = true
-                )
-            {
-                char_type c = *in;
-
-                // Look through all the containers to try to find the first match
-                if(chosen == -1)
-                {
-                    for (unsigned j = 0; j < N; ++j)
-                    {
-                        const TContainer& container = containers[j];
-
-                        if(container[i] == c)
-                        {
-                            chosen = j;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // DEBT: Consider doing this with a pointer instead
-                    const TContainer& container = containers[chosen];
-
-                    if(i == container.size())
-                        return chosen;
-                    else if(container[i] != c)
-                        return -1;
-                }
-            }
-
-            return chosen;
-        }
-
         static iter_type get_bool(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
         {
@@ -210,7 +164,7 @@ private:
                     np.falsename()
                 };
 
-                int chosen = chooser(names, in, end);
+                int chosen = estd::internal::chooser::choose(names, in, end);
 
                 if(in == end)
                     err |= ios_base::eofbit;

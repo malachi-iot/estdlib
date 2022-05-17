@@ -10,6 +10,7 @@
 #include "../cbase.h"
 #include "../fwd.h"
 #include "../../ios_base.h"
+#include "../../chooser.h"
 
 namespace estd { namespace iterated {
 

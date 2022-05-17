@@ -58,7 +58,12 @@ public:
             // DEBT: Consider doing this with a pointer instead
             const TContainer& container = containers[chosen_];
 
-            if(i == get_size(container) - 1)
+            // TODO: Optimize, detect containers which require processing to deduce size.
+            // Likely this is most easily done in reverse, to tag containers which hold
+            // a size variable/constant and detect that
+            const unsigned sz = get_size(container);
+
+            if(i == sz - 1)
                 return true;
             else if(container[i] != c)
             {
@@ -78,7 +83,9 @@ public:
 
         for(; in != end; ++in)
         {
-            if(process(containers, *in)) return in;
+            // On a match, be sure to bump up iterator by one since we match on the last
+            // character but C++ convention tends to want iterator one past the match
+            if(process(containers, *in)) return ++in;
         }
 
         chosen_ = -1;
@@ -89,7 +96,7 @@ public:
     static inline int choose(const TContainer (&containers)[N], TIter& in, TIter end)
     {
         chooser c;
-        c.choose(containers, in, end, false);
+        in = c.choose(containers, in, end, false);
         return c.chosen();
     }
 
