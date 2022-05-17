@@ -1,0 +1,9 @@
+menu "estdlib"
+
+# FIX: Not really tested or properly working, just a placeholder
+
+config FEATURE_ESTD_IOS_GCOUNT
+    bool "Enable or disable basic_istream::gcount()"
+    default false
+
+endmenu
