@@ -17,4 +17,8 @@ typedef int streampos;
 typedef int streamoff;
 typedef int streamsize;
 
+template<class TStreambuf>
+class istreambuf_iterator;
+
+
 }

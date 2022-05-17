@@ -9,8 +9,9 @@
 #include "internal/impl/streambuf.h"
 #include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
-#include "internal/impl/streambuf/tags.h"
 #include "internal/impl/streambuf/helpers.h"
+
+#include "internal/streambuf.h"
 
 
 //#include "features.h"
@@ -19,13 +20,6 @@
 namespace estd {
 
 namespace internal {
-
-// all the noop/defaults which we expect to hide/overload (not override specifically,
-// since we're not making these virtual here)
-struct streambuf_baseline
-{
-
-};
 
 // TODO: TPolicy shall specify modes:
 // 1. never blocking

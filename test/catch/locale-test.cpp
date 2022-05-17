@@ -258,7 +258,7 @@ TEST_CASE("locale")
                 streambuf_type sb = test::str_uint1;
                 typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
                 num_get<char, iterator_type> n;
-                //use_facet<num_get<char> >(fmt.getloc());
+                //auto n = use_facet<num_get<streambuf_type, locale::classic_type> >(fmt.getloc());
 
                 n.get(sb, {}, fmt, state, v);
 

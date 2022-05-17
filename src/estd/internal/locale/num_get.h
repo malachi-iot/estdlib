@@ -11,6 +11,9 @@
 #include "../ios_base.h"
 #include "iterated/num_get.h"
 
+#include "../../iosfwd.h"
+#include "../streambuf.h"
+
 namespace estd {
 
 template <class TChar, class InputIt>
@@ -328,6 +331,22 @@ template <typename TChar, typename TInputIt, class TLocale>
 struct use_facet_helper<num_get<TChar, TInputIt>, TLocale>
 {
     typedef num_get<TChar, TInputIt> facet_type;
+
+    static facet_type use_facet(TLocale) { return facet_type(); }
+};
+
+template <typename TStreambuf, class TLocale>
+struct use_facet_helper<num_get<
+    typename estd::enable_if<
+        estd::is_base_of<
+            estd::internal::streambuf_baseline, TStreambuf>::value,
+        typename TStreambuf::char_type>::type,
+        estd::istreambuf_iterator<TStreambuf> >,
+    TLocale>
+{
+    typedef num_get<
+        typename TStreambuf::char_type,
+        estd::istreambuf_iterator<TStreambuf>> facet_type;
 
     static facet_type use_facet(TLocale) { return facet_type(); }
 };
