@@ -61,7 +61,7 @@ static void test_num_get()
     _test_num_get(facet, istream, input, input + sizeof(input) - 1);
 }
 
-static void test_num_get_istream()
+static void test_num_get_istream1()
 {
     typedef experimental::istringstream<64> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
@@ -76,6 +76,18 @@ static void test_num_get_istream()
 }
 
 
+static void test_num_get_istream2()
+{
+    typedef experimental::istringstream<64> istream_type;
+    typedef typename istream_type::streambuf_type streambuf_type;
+    istream_type istream(input);
+
+    auto facet = use_facet<num_get<streambuf_type> >(istream.getloc());
+
+    _test_num_get(facet, istream, *istream.rdbuf(), {});
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("estd::locale and friends", "[locale]")
 #else
@@ -84,5 +96,6 @@ void test_locale()
 {
     RUN_TEST(test_use_facet);
     RUN_TEST(test_num_get);
-    RUN_TEST(test_num_get_istream);
+    RUN_TEST(test_num_get_istream1);
+    RUN_TEST(test_num_get_istream2);
 }

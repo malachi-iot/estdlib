@@ -13,11 +13,6 @@ namespace estd {
 
 namespace internal {
 
-// DEBT: Put this somewhere else.  I got rid of it since estd::locale seemed like
-// a happy home for it, but now I've changed my mind (estd::locale brings in a lot
-// of dependencies)
-typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;
-
 // Temporarily used as we migrate away from char_traits_base
 typedef cbase<char, 10, internal::classic_locale_type> cbase_C_10_type;
 typedef cbase<char, 36, internal::classic_locale_type> cbase_C_36_type;

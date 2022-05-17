@@ -67,5 +67,7 @@ struct locale : locale_base_base
     const char* name() const { return internal::locale_name<locale_code, encoding>(); }
 };
 
+typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;
+
 
 }}
