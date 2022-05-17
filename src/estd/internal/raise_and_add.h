@@ -1,14 +1,11 @@
 #pragma once
 
+#include "platform.h"
 #include "../algorithm.h"
 
 namespace estd { namespace internal {
 
-// AVR compiler appears to have incomplete implementation of __has_builtin
-// DEBT: According to https://stackoverflow.com/questions/3944505/detecting-signed-overflow-in-c-c
-// contents of the result (&__val in this case) are undefined on overflow.  That might be an
-// issue down the line if we're depending on what we've gathered so far.
-#if defined(__has_builtin) && !defined(__AVR__)
+#if FEATURE_TOOLCHAIN_OVERFLOW_BUILTIN
 // adapted from GNUC
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type

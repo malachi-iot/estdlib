@@ -3,10 +3,10 @@
 // FIX: eventually do this as <estd/opts.h> so users can override it
 #include "opts.h"
 #include "../port/identify_platform.h"
-#include "../port/toolchain.h"
 #include "version.h"
 #include "feature/std.h"
 #include "feature/cpp.h"
+#include "feature/toolchain.h"
 
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
