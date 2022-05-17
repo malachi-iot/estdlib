@@ -12,6 +12,7 @@
 #include "internal/iterator_standalone.h"
 #include "internal/iosfwd.h"
 #include "internal/ios_base.h"
+#include "internal/istream_iterator.h"
 #include "internal/istreambuf_iterator.h"
 
 // TODO: Might need a specialization for our accessor-related things. we'll see

@@ -48,6 +48,9 @@ private:
     }
 
 public:
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#endif
     istreambuf_iterator() :
         rdbuf(NULLPTR)
     {

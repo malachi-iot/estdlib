@@ -73,6 +73,11 @@ TEST_CASE("iterator")
             REQUIRE(sb.str() == "hello");
         }
     }
+    SECTION("istream_iterator")
+    {
+        estd::experimental::istringstream<32> istream;
+        estd::experimental::istream_iterator<unsigned, decltype(istream)> in(istream), end;
+    }
     SECTION("filter_iterator")
     {
         auto it = estd::experimental::make_filter_iterator(
