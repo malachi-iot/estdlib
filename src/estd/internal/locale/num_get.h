@@ -16,7 +16,7 @@
 
 namespace estd {
 
-template <class TChar, class InputIt>
+template <class TChar, class InputIt = void>
 class num_get
 {
 public:
@@ -335,20 +335,37 @@ struct use_facet_helper<num_get<TChar, TInputIt>, TLocale>
     static facet_type use_facet(TLocale) { return facet_type(); }
 };
 
-template <typename TStreambuf, class TLocale>
-struct use_facet_helper<num_get<
-    typename estd::enable_if<
+// Trick to convert a num_char<streambuf_type> into a
+// num_char<char_type, istreambuf_iterator<streambuf_type> >
+// DEBT: May be better doing this down at num_get level
+// DEBT: Really would like this enable_if to take hold so that we could load in other
+// types in addition to streambufs.  However, if all we can do is TStreambuf 'default' that
+// is acceptable
+template <typename TStreambuf
+/*, typename estd::enable_if<
         estd::is_base_of<
-            estd::internal::streambuf_baseline, TStreambuf>::value,
-        typename TStreambuf::char_type>::type,
-        estd::istreambuf_iterator<TStreambuf> >,
+                estd::internal::streambuf_baseline, TStreambuf>::value,
+        TStreambuf>::type* = nullptr> */
+        , class TLocale>
+struct use_facet_helper<
+    num_get<
+            /*
+        typename estd::enable_if<
+            estd::is_base_of<
+                estd::internal::streambuf_baseline, TStreambuf>::value,
+            TStreambuf>::type, */
+        TStreambuf,
+        void >,
     TLocale>
+    //internal::classic_locale_type>
 {
     typedef num_get<
         typename TStreambuf::char_type,
         estd::istreambuf_iterator<TStreambuf>> facet_type;
+    //typedef internal::classic_locale_type locale_type;
+    typedef TLocale locale_type;
 
-    static facet_type use_facet(TLocale) { return facet_type(); }
+    static facet_type use_facet(locale_type) { return facet_type(); }
 };
 
 }
