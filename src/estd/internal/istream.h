@@ -3,6 +3,11 @@
 #include "ios_policy.h"
 #include "ios.h"
 
+#ifndef FEATURE_ESTD_IOS_GCOUNT
+#define FEATURE_ESTD_IOS_GCOUNT 1
+#endif
+
+
 namespace estd { namespace internal {
 
 template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
@@ -95,7 +100,7 @@ public:
     int_type get()
     {
 #if FEATURE_ESTD_IOS_GCOUNT
-        _gcount = 1;
+        ++_gcount;
 #endif
         return this->rdbuf()->sbumpc();
     }

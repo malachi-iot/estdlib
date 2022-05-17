@@ -7,9 +7,9 @@
 #include "algorithm.h"
 #include "traits/char_traits.h"
 
+#include "port/istream.h"
 #include "internal/istream.h"
 #include "internal/istream_runtimearray.hpp"
-#include "port/istream.h"
 
 #include "iterator.h"
 #include "locale.h"
@@ -26,10 +26,6 @@
 //  b) we feel like fighting with the standard std namespace (which algorithm seems to auto include
 //     i.e. it seems to specify 'using namespace std'
 //#include <algorithm> // for min function
-
-#ifndef FEATURE_ESTD_IOS_GCOUNT
-#define FEATURE_ESTD_IOS_GCOUNT 1
-#endif
 
 namespace estd {
 
@@ -113,6 +109,7 @@ operator >>(
     internal::basic_istream<TStreambuf, TBase>& in,
     T& value)
 {
+    // TODO: We need to use a istream_iterator in order to ensure gcount gets updated
     typedef internal::basic_istream<TStreambuf, TBase> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     typedef typename istream_type::traits_type traits_type;
