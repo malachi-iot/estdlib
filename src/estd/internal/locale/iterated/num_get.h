@@ -4,6 +4,15 @@
  * References:
  *
  * 1. https://en.cppreference.com/w/cpp/locale/num_get/get
+ *
+ * Notes:
+ *
+ * "If Stage 2 was terminated by the test in==end, err|=std::ios_base::eofbit
+ *  is executed to set the eof bit."
+ *
+ * This is somewhat nuanced.  This means that certain types such as integer, we plunge
+ * forward until delimiter or EOF.  bool, however, we know where the end is - so EOF
+ * happens less often with a bool.
  */
 #pragma once
 
@@ -151,19 +160,17 @@ struct num_get
     bool get(TIter& i, TIter end,
         ios_base::iostate& err, T& v)
     {
-        if(i == end)
-        {
-            err |= ios_base::eofbit;
-            return true;
-        }
+        if(i != end) return get(*i++, err, v);
 
-        return get(*i++, err, v);
+        err |= ios_base::eofbit;
+        return true;
     }
 
     // Just a bit of future proofing
     num_get(TLocale) {}
     num_get() {}
 };
+
 
 
 template <typename TChar, class TLocale>
@@ -183,7 +190,42 @@ struct bool_get;
 template <typename TChar, class TLocale>
 struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
 {
-    typedef num_get<2, TChar, TLocale> base_type;
+    typedef TChar char_type;
+    typedef num_get<2, char_type, TLocale> base_type;
+
+    bool get(char_type c, ios_base::iostate& err, bool& v)
+    {
+        switch(c)
+        {
+            case '0':
+                v = false;
+                break;
+
+            default:
+                err |= ios_base::failbit;
+#if __has_cpp_attribute(fallthrough)
+                [[fallthrough]];
+#endif
+
+            case '1':
+                v = true;
+                break;
+        }
+
+        // Numeric bool is always one character, so we're always done no matter
+        // what the input
+        return true;
+    }
+
+    template <class TIter>
+    bool get(TIter& i, TIter end, ios_base::iostate& err, bool& v)
+    {
+        if(i != end) return get(*i++, err, v);
+
+        err |= ios_base::eofbit;
+        return true;
+    }
+
 
     bool_get(TLocale l) : base_type(l) {}
     bool_get() {}
@@ -221,8 +263,7 @@ struct bool_get<TChar, TLocale, true>
     }
 
     template <class TIter>
-    bool get(TIter& i, TIter end,
-        ios_base::iostate& err, bool& v)
+    bool get(TIter& i, TIter end, ios_base::iostate& err, bool& v)
     {
         if(i != end) return get(*i++, err, v);
 

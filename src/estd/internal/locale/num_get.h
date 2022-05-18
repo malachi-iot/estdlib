@@ -71,50 +71,14 @@ private:
                 i, end, str, err, str.getloc(), v);
         }
 
-
+        template <bool boolalpha>
         static iter_type get_bool(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
         {
-            if(str.flags() & ios_base::boolalpha)
-            {
-                numpunct<char_type, locale_type> np =
-                        use_facet<numpunct<char_type> >(str.getloc());
+            estd::iterated::bool_get<char_type, locale_type, boolalpha> n;
 
-                // tempted to get algorithmically fancy here, but with only two things to
-                // compare, brute force makes sense
-                estd::layer2::basic_string<const char_type, 0> names[]
-                #ifdef FEATURE_CPP_INITIALIZER_LIST
-                {
-                    np.truename(),
-                    np.falsename()
-                };
-                #else
-                ;
-                names[0] = np.truename();
-                names[1] = np.falsename();
-                #endif
+            while(!n.get(in, end, err, v));
 
-                int chosen = estd::internal::chooser::choose(names, in, end);
-
-                if(in == end)
-                    err |= ios_base::eofbit;
-
-                if(chosen == -1)
-                {
-                    v = false;
-                    err |= ios_base::failbit;
-                }
-                else
-                    v = chosen == 0;
-            }
-            else
-            {
-                unsigned temp;
-                in = get_unsigned_integer<2>(in, end, err, str, temp);
-                // DEBT: Try to avoid using temporary.
-                // No bounds check necessary here, since specifying base 2 already does that
-                v = temp == 1;
-            }
             return in;
         }
 
@@ -204,7 +168,10 @@ private:
             bool& v,
             estd::true_type, estd::false_type)
         {
-            return get_bool(in, end, err, str, v);
+            if(str.flags() & ios_base::boolalpha)
+                return get_bool<true>(in, end, err, str, v);
+            else
+                return get_bool<false>(in, end, err, str, v);
         }
     };
 
@@ -215,12 +182,19 @@ private:
 
 
 public:
-    // DEBT: Non standard call.  locale is picked up from use_facet
-    // DEBT: Non standard call.  At this time only supports base 10 every time
+    // NOTE: Non standard call.  locale is picked up from use_facet
+    // DEBT: Non standard call.  At this time only supports base 10/16 time
     template <typename T>
     iter_type get(iter_type in, iter_type end, ios_base& str, ios_base::iostate& err, T& v) const
     {
-        return _helper::template get_signed_integer<10>(in, end, str, err, locale_type(), v);
+        switch(str.flags() & estd::ios_base::basefield)
+        {
+            case estd::ios_base::hex:
+                return _helper::template get_signed_integer<16>(in, end, str, err, locale_type(), v);
+
+            default:
+                return _helper::template get_signed_integer<10>(in, end, str, err, locale_type(), v);
+        }
     }
 
     template <typename T, class TStreambuf, class TBase>

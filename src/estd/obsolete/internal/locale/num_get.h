@@ -129,5 +129,51 @@
 
 
 
+        static iter_type get_bool_legacy(iter_type in, iter_type end,
+            ios_base::iostate& err, istream_type& str, bool& v)
+        {
+            if(str.flags() & ios_base::boolalpha)
+            {
+                numpunct<char_type, locale_type> np =
+                        use_facet<numpunct<char_type> >(str.getloc());
+
+                // tempted to get algorithmically fancy here, but with only two things to
+                // compare, brute force makes sense
+                estd::layer2::basic_string<const char_type, 0> names[]
+                #ifdef FEATURE_CPP_INITIALIZER_LIST
+                {
+                    np.truename(),
+                    np.falsename()
+                };
+                #else
+                ;
+                names[0] = np.truename();
+                names[1] = np.falsename();
+                #endif
+
+                int chosen = estd::internal::chooser::choose(names, in, end);
+
+                if(in == end)
+                    err |= ios_base::eofbit;
+
+                if(chosen == -1)
+                {
+                    v = false;
+                    err |= ios_base::failbit;
+                }
+                else
+                    v = chosen == 0;
+            }
+            else
+            {
+                unsigned temp;
+                in = get_unsigned_integer<2>(in, end, err, str, temp);
+                // DEBT: Try to avoid using temporary.
+                // No bounds check necessary here, since specifying base 2 already does that
+                v = temp == 1;
+            }
+            return in;
+        }
+
 
 #endif

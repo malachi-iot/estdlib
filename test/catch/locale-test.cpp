@@ -202,7 +202,7 @@ TEST_CASE("locale")
                 bool _v;
 
                 n.get(in, in + 1, fmt, state, _v);
-                REQUIRE(state == eofbit);
+                REQUIRE(state == goodbit);
                 REQUIRE(_v == true);
             }
             SECTION("bool alpha")
@@ -223,7 +223,7 @@ TEST_CASE("locale")
                     const char* in = "false";
 
                     n.get(in, in + 5, fmt, state, _v);
-                    REQUIRE(state == eofbit);
+                    REQUIRE(state == goodbit);
                     REQUIRE(_v == false);
                 }
                 SECTION("error")
