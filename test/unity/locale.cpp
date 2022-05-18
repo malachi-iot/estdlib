@@ -11,7 +11,7 @@ using namespace estd;
 static void test_use_facet()
 {
     const char* truename = 
-        use_facet<numpunct<char>>(locale::classic()).truename().data();
+        use_facet<numpunct<char> >(locale::classic()).truename().data();
 
 #if UNITY_VERSION < 0x200
     TEST_ASSERT_EQUAL('t', truename[0]);
@@ -56,7 +56,7 @@ static void _test_num_get(TNumGet& facet,
 static void test_num_get()
 {
     experimental::istringstream<64> istream;   // Just for locale
-    auto facet = use_facet<num_get<char, const char*> >(istream.getloc());
+    num_get<char, const char*> facet = use_facet<num_get<char, const char*> >(istream.getloc());
 
     _test_num_get(facet, istream, input, input + sizeof(input) - 1);
 }
@@ -68,7 +68,7 @@ static void test_num_get_istream1()
     istream_type istream(input);
     typedef istreambuf_iterator<streambuf_type> iterator_type;
 
-    auto facet = use_facet<num_get<char, iterator_type> >(istream.getloc());
+    num_get<char, iterator_type> facet = use_facet<num_get<char, iterator_type> >(istream.getloc());
 
     iterator_type it(istream), end;
 
@@ -82,9 +82,11 @@ static void test_num_get_istream2()
     typedef typename istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
 
+#ifdef FEATURE_CPP_AUTO
     auto facet = use_facet<num_get<streambuf_type> >(istream.getloc());
 
     _test_num_get(facet, istream, *istream.rdbuf(), {});
+#endif
 }
 
 

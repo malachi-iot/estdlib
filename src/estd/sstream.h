@@ -5,6 +5,7 @@
 #include "string.h"
 #include "internal/impl/streambuf/string.h"
 
+// TODO: Move non-alias template flavor elsewhere, since it's so bulky
 namespace estd {
 
 namespace layer1 {
@@ -21,11 +22,14 @@ template<size_t N, bool null_terminated = true>
 using stringbuf = basic_stringbuf<char, N, null_terminated>;
 #else
 template <class TChar, size_t N, bool null_terminated = true, class Traits = std::char_traits<TChar> >
-struct basic_stringbuf : internal::streambuf<
-        internal::impl::basic_stringbuf<basic_string<TChar, N, null_terminated, Traits> >
+struct basic_stringbuf : estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<basic_string<TChar, N, null_terminated, Traits> >
         >
 {
-
+    typedef estd::internal::streambuf<
+        estd::internal::impl::basic_stringbuf<basic_string<TChar, N, null_terminated, Traits> >
+        > base_type;
+    ESTD_CPP_FORWARDING_CTOR(basic_stringbuf)
 };
 #endif
 }
@@ -45,6 +49,20 @@ using ostringstream = basic_ostringstream<char, N, null_terminated>;
 
 template<size_t N, bool null_terminated = true>
 using istringstream = basic_istringstream<char, N, null_terminated>;
+#else
+template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
+struct basic_istringstream : estd::internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >
+{
+    typedef estd::internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> > base_type;
+    ESTD_CPP_FORWARDING_CTOR(basic_istringstream)
+};
+
+template<size_t N, bool null_terminated = true>
+struct istringstream : basic_istringstream<char, N, null_terminated>
+{
+    typedef basic_istringstream<char, N, null_terminated> base_type;
+    ESTD_CPP_FORWARDING_CTOR(istringstream)
+};
 #endif
 
 }

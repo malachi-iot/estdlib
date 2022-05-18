@@ -161,11 +161,17 @@ private:
 
                 // tempted to get algorithmically fancy here, but with only two things to
                 // compare, brute force makes sense
-                estd::layer2::basic_string<const char_type, 0>
-                    names[] {
+                estd::layer2::basic_string<const char_type, 0> names[]
+                #ifdef FEATURE_CPP_INITIALIZER_LIST
+                {
                     np.truename(),
                     np.falsename()
                 };
+                #else
+                ;
+                names[0] = np.truename();
+                names[1] = np.falsename();
+                #endif
 
                 int chosen = estd::internal::chooser::choose(names, in, end);
 

@@ -108,13 +108,13 @@ protected:
 
     basic_ios_base(streambuf_type&& streambuf) :
         _rdbuf(std::move(streambuf))    {}
-#endif
-    basic_ios_base(streambuf_type& streambuf) :
-        _rdbuf(streambuf) {}
-
+#else
     template <class TParam1>
     basic_ios_base(TParam1& p1) : _rdbuf(p1)
             {}
+#endif
+    basic_ios_base(streambuf_type& streambuf) :
+        _rdbuf(streambuf) {}
 
 public:
     streambuf_type* rdbuf()

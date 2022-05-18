@@ -320,7 +320,11 @@ public:
     {
         gcount(0);
     }
-#endif
+#else
+    basic_istream()
+    {
+        gcount(0);
+    }
 
     template<class T1>
     basic_istream(T1& param1) :
@@ -328,6 +332,8 @@ public:
     {
         gcount(0);
     }
+
+#endif
 
     basic_istream(streambuf_type& streambuf) :
         base_type(streambuf)
