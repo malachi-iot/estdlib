@@ -8,11 +8,13 @@ namespace estd { namespace internal { namespace impl {
 // NOTE: In esp-idf, pos_type is big and doesn't seem to play well
 // with RVO - so returning/passing a "const pos_type&" rather than "pos_type"
 // makes a difference
-template <typename TCharTraits>
+template <typename TCharTraits, class TPos = unsigned short>
 struct pos_streambuf_base : streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
+    // FIX: Our pos_type here should instead by an unsigned
+    // that likely a derived class specifies the bitness of
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
 
