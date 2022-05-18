@@ -27,11 +27,12 @@ struct out_span_streambuf :
     span_type& out() { return base_type::value(); }
     const span_type& out() const { return base_type::value(); }
 
+    /*
     out_span_streambuf(T* buf, size_type size) :
             base_type(span_type(buf, size))
     {
 
-    }
+    } */
 
     // NOTE: Would use Extent here but that breaks it for scenarios
     // where Extent == -1
