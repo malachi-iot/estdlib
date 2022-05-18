@@ -23,12 +23,12 @@ struct pos_streambuf_base : streambuf_base<TCharTraits>
     typedef typename traits_type::off_type off_type;
 
 protected:
-    pos_type _pos;
+    index_type _pos;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    pos_streambuf_base(pos_type&& pos) : _pos(std::move(pos)) {}
+    pos_streambuf_base(index_type&& pos) : _pos(std::move(pos)) {}
 #endif
-    pos_streambuf_base(const pos_type& pos) : _pos(pos) {}
+    pos_streambuf_base(const index_type& pos) : _pos(pos) {}
 
     inline const index_type& seekpos(const pos_type& p)
     {
@@ -58,9 +58,12 @@ protected:
     }
 
 public:
+    // NOTE: Old comment here, just for reference as to why we have both index_type
+    // and pos_type
     // This method in particular is sensitive to pos_type reference.  Stack usage goes
     // sky high if we return a copy
-    const pos_type& pos() const { return _pos; }
+
+    const index_type& pos() const { return _pos; }
 };
 
 template <typename TCharTraits, class TIndex = unsigned short>
@@ -68,13 +71,14 @@ struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
 {
     typedef TCharTraits traits_type;
     typedef pos_streambuf_base<traits_type, TIndex> base_type;
+    typedef typename base_type::index_type index_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    in_pos_streambuf_base(pos_type&& pos) : base_type(std::move(pos)) {}
+    in_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
 #endif
-    in_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
+    in_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
@@ -98,11 +102,12 @@ struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
     typedef TCharTraits traits_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
+    typedef typename base_type::index_type index_type;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    out_pos_streambuf_base(pos_type&& pos) : base_type(std::move(pos)) {}
+    out_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
 #endif
-    out_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
+    out_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void pbump(int count) { this->_pos += count; }
