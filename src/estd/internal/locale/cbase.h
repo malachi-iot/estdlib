@@ -13,7 +13,7 @@
 // TODO: A future task.  Japanese character set has 3 different (at least) sets of numerals:
 // 1.  Regular ASCII style
 // 2.  Kanji style
-// 3.  An Arabit (English) version which appears to be in with the other Kanji characters
+// 3.  An Arabic (English) version which appears to be in with the other Kanji characters
 
 namespace estd {
 
