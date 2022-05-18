@@ -177,6 +177,74 @@ struct num_get<0, TChar, TLocale>
     };
 };
 
+template <typename TChar, class TLocale, bool boolalpha>
+struct bool_get;
+
+template <typename TChar, class TLocale>
+struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
+{
+    typedef num_get<2, TChar, TLocale> base_type;
+
+    bool_get(TLocale l) : base_type(l) {}
+    bool_get() {}
+};
+
+template <typename TChar, class TLocale>
+struct bool_get<TChar, TLocale, true>
+{
+    typedef TChar char_type;
+    typedef TLocale locale_type;
+    typedef estd::numpunct<char_type, locale_type> numpunct_type;
+
+    enum state
+    {
+        Start = 0
+    };
+
+    internal::chooser chooser;
+    estd::layer2::basic_string<const char_type, 0> names[2];
+
+    // NOTE: This method never sets eof bit
+    bool get(char_type c, ios_base::iostate& err, bool& v)
+    {
+        if(chooser.process(names, c) == false)
+            return false;
+
+        if(chooser.chosen() != -1)
+        {
+            v = chooser.chosen() == 0;
+        }
+        else
+            err |= ios_base::failbit;
+
+        return true;
+    }
+
+    template <class TIter>
+    bool get(TIter& i, TIter end,
+        ios_base::iostate& err, bool& v)
+    {
+        if(i != end) return get(*i++, err, v);
+
+        err |= ios_base::eofbit;
+        return true;
+    }
+
+
+    void set_names()
+    {
+        estd::numpunct<char_type, locale_type> n;
+        names[0] = n.truename();
+        names[1] = n.falsename();
+    }
+
+    //bool_get(TLocale) { set_names(); }
+    // DEBT: Not c++03 compat and also not instance-locale compat
+    bool_get() : names { numpunct_type::truename(), numpunct_type::falsename() }
+    {}
+    // { set_names(); }
+};
+
 
 
 }}

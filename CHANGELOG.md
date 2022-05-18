@@ -1,3 +1,9 @@
+# vNEXT - DDMMMYY
+
+## Quality Updates & Bug Fixes
+
+* Fixed last-character bug in `internal::chooser`
+
 # v0.3.0 - 18MAY22
 
 ## Added Features

@@ -60,18 +60,22 @@ public:
             // DEBT: Consider doing this with a pointer instead
             const TContainer& container = containers[chosen_];
 
+            if(container[i] != c)
+            {
+                chosen_ = -1;
+                return true;
+            }
+
             // TODO: Optimize, detect containers which require processing to deduce size.
             // Likely this is most easily done in reverse, to tag containers which hold
             // a size variable/constant and detect that
             const unsigned sz = get_size(container);
 
+            // We try to match up to chosen length, and whatever result in chosen_ we have
+            // as far as we go.  This is a big reason why same-prefixed matches
+            // are a DEBT thing for chooser
             if(i == sz - 1)
                 return true;
-            else if(container[i] != c)
-            {
-                chosen_ = -1;
-                return true;
-            }
         }
 
         ++i;

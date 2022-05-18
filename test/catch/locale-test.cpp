@@ -309,6 +309,22 @@ TEST_CASE("locale")
                 REQUIRE(done);
                 REQUIRE(v == -123);
             }
+            SECTION("bool")
+            {
+                iterated::bool_get<char, locale::classic_type, true> n;
+                const char* in = "true";
+                const char* end = in + 4;
+                bool v = false;
+                bool done;
+
+                do
+                {
+                    done = n.get(in, end, state, v);
+                }
+                while(!done);
+
+                REQUIRE(v == true);
+            }
         }
         SECTION("non standard")
         {
