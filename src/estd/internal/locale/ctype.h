@@ -32,7 +32,7 @@ struct ctype_base
     static CONSTEXPR mask graph = alnum | punct;
 };
 
-
+namespace internal {
 
 // specialization, deviating from standard in that locale is compile-time
 // instead of runtime
@@ -40,14 +40,13 @@ struct ctype_base
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <internal::locale_code_enum locale_code>
-class ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> :
-    public ctype_base,
-    // NOTE: This inherit-from-facet behavior, though prescribed by std spec, is not
-    // used for us at this time
-    public internal::locale<locale_code, estd::internal::encodings::ASCII>::facet
+template <class TLocale>
+class ctype<char, TLocale,
+    typename enable_if<
+        internal::is_compatible_with_classic_locale<TLocale>::value>::type> :
+    public ctype_base
 {
-    typedef internal::locale<locale_code, estd::internal::encodings::ASCII> locale_type;
+    typedef TLocale locale_type;
 
 public:
     static bool isspace(char ch)
@@ -92,12 +91,12 @@ public:
         }
         if(m & xdigit)
         {
-            if(cbase<char, 16, locale_type>::is_in_base(ch))
+            if(estd::cbase<char, 16, locale_type>::is_in_base(ch))
                 return true;
         }
         else if(m & digit)
         {
-            if(cbase<char, 10, locale_type>::is_in_base(ch))
+            if(estd::cbase<char, 10, locale_type>::is_in_base(ch))
                 return true;
         }
         if(m & upper)
@@ -112,6 +111,9 @@ public:
     }
 };
 
+}
+
+
 template <class TLocale>
 class ctype<wchar_t, TLocale> : public ctype_base
 {
@@ -120,16 +122,15 @@ public:
 };
 
 
-template <internal::locale_code_enum locale_code>
-class ctype<char, internal::locale<locale_code, estd::internal::encodings::UTF8>> :
-    public ctype<char, internal::locale<locale_code, estd::internal::encodings::ASCII>> {};
+template <class TLocale>
+struct ctype<char, TLocale> : internal::ctype<char, TLocale> {};
 
 namespace internal {
 
 template <class TChar, class TLocale>
-struct use_facet_helper<ctype<TChar, void>, TLocale>
+struct use_facet_helper<estd::ctype<TChar, void>, TLocale>
 {
-    typedef ctype<TChar, TLocale> facet_type;
+    typedef estd::ctype<TChar, TLocale> facet_type;
     
     inline static facet_type use_facet(TLocale)
     {

@@ -179,7 +179,7 @@ public:
 
     char_type widen(char c) const
     {
-        return use_facet<ctype<char_type> >(getloc()).widen(c);
+        return use_facet<estd::ctype<char_type> >(getloc()).widen(c);
     }
 
     char narrow(char_type c, char /* default */)

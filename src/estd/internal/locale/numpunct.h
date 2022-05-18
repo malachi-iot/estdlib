@@ -30,8 +30,10 @@ template <class TLocale>
 struct numpunct<char, 
     //locale<lc, encoding>,
     TLocale,
-    // Almost works, but not quite
+    // TODO: Almost works, but not quite yet.  Figure out why.  Would be much nicer
+    // than having to explicitly involve enable_if
     //typename is_compatible_with_classic_locale<TLocale>::type> :
+
     typename estd::enable_if<
 
         //(encoding == internal::encodings::ASCII || encoding == internal::encodings::UTF8) &&
