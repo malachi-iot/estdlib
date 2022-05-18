@@ -45,9 +45,13 @@ struct locale : internal::locale_base_base
     typedef internal::encodings::values encodings;
 
     template <iso iso_code, encodings encoding>
+#ifdef FEATURE_CPP_ALIASTEMPLATE
     using type = internal::locale<iso_code, encoding>;
-    /*
-    struct text : internal::locale<iso_code, encoding> {}; */
+#else
+    // FIX: This itself works, but ctype's technique for specialization
+    // is not compatible yet
+    struct type : internal::locale<iso_code, encoding> {};
+#endif
 
     typedef internal::locale<iso::C, encodings::ASCII> classic_type;
 

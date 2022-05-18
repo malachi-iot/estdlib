@@ -10,7 +10,7 @@ namespace estd {
 
 // DEBT: Only to avoid confusion with regular internal not in experimental space
 // Classes will be moved around and this namespace will go away
-namespace _internal {
+namespace internal {
 
 
 template <typename TChar>
@@ -24,9 +24,6 @@ struct numpunct_base<char>
     static char_type thousands_sep() { return ','; }
     static estd::layer2::const_string grouping() { return ""; }
 };
-
-template <typename TChar, class TLocale, class TEnabled = void>
-struct numpunct;
 
 //template <locale_code::values lc, internal::encodings::values encoding>
 template <class TLocale>
@@ -47,7 +44,7 @@ struct numpunct<char,
         internal::is_compatible_with_classic_locale<TLocale>::value>
 
         ::type> :
-    _internal::numpunct_base<char>
+    internal::numpunct_base<char>
 {
     static estd::layer2::const_string truename() { return "true"; }
     static estd::layer2::const_string falsename() { return "false"; }
@@ -67,25 +64,25 @@ struct numpunct<char,
 }
 
 
-// NOTE: All this wrapping is done to hide the 'TEnabled' template portion.
-// That may be of little consequence overall though.  If so, merely expose
-// the underlying numpunct and call it a day
+// All this wrapping is done to hide the 'TEnabled' template portion.
+// This comes in handy when doing custom specializations, one can avoid specifying
+// that extra 3rd template parameter
 #ifdef FEATURE_CPP_ALIASTEMPLATExx
 // Conflicts with fwd declaration
 template <typename TChar, class TLocale = void>
-using numpunct = _internal::numpunct<TChar, TLocale>;
+using numpunct = internal::numpunct<TChar, TLocale>;
 #else
 template <typename TChar, class TLocale>
-struct numpunct : _internal::numpunct<TChar, TLocale> {};
+struct numpunct : internal::numpunct<TChar, TLocale> {};
 #endif
 
 
 namespace internal {
 
 template <class TChar, class TLocale>
-struct use_facet_helper<numpunct<TChar, void>, TLocale>
+struct use_facet_helper<estd::numpunct<TChar, void>, TLocale>
 {
-    typedef numpunct<TChar, TLocale> facet_type;
+    typedef estd::numpunct<TChar, TLocale> facet_type;
     
     inline static facet_type use_facet(TLocale) { return facet_type(); }
 };

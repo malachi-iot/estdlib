@@ -13,6 +13,9 @@ struct cbase;
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale;
 
+template <typename TChar, class TLocale, class TEnabled = void>
+struct numpunct;
+
 }
 
 namespace iterated {
