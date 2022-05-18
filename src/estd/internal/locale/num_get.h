@@ -16,23 +16,28 @@
 
 namespace estd {
 
-template <class TChar, class InputIt = void>
+template <class TChar, class InputIt = void, class TLocale = void>
 class num_get
 {
 public:
     typedef TChar char_type;
     typedef InputIt iter_type;
+    typedef TLocale locale_type;
 
 private:
 
     struct _helper
     {
         // NOTE: iterated::num_get efficiently deals with unsigned as well
-        template <unsigned base, class TLocale, class T>
+        // std::num_get deals with two different locales -- the one specified
+        // on initial use_facet, then the one that is present in std::ios_base,
+        // incoming by way of str.
+        // Documentation [1] indicates to favor the latter
+        template <unsigned base, class TIncomingLocale, class T>
         static iter_type get_signed_integer(iter_type i, iter_type end,
-            ios_base& str, ios_base::iostate& err, TLocale l, T& v)
+            ios_base& str, ios_base::iostate& err, TIncomingLocale l, T& v)
         {
-            iterated::num_get<base, char_type, TLocale> n(l);
+            iterated::num_get<base, char_type, TIncomingLocale> n(l);
 
             for(; i != end; ++i)
             {
@@ -210,6 +215,14 @@ private:
 
 
 public:
+    // DEBT: Non standard call.  locale is picked up from use_facet
+    // DEBT: Non standard call.  At this time only supports base 10 every time
+    template <typename T>
+    iter_type get(iter_type in, iter_type end, ios_base& str, ios_base::iostate& err, T& v) const
+    {
+        return _helper::template get_signed_integer<10>(in, end, str, err, locale_type(), v);
+    }
+
     template <typename T, class TStreambuf, class TBase>
     iter_type get(iter_type in, iter_type end,
         estd::internal::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
@@ -224,7 +237,7 @@ namespace internal {
 template <typename TChar, typename TInputIt, class TLocale>
 struct use_facet_helper<num_get<TChar, TInputIt>, TLocale>
 {
-    typedef num_get<TChar, TInputIt> facet_type;
+    typedef num_get<TChar, TInputIt, TLocale> facet_type;
 
     static facet_type use_facet(TLocale) { return facet_type(); }
 };

@@ -143,6 +143,7 @@ TEST_CASE("locale")
         // DEBT: Need to do this because we are basing on basic_ios, not ios_base, due
         // to moved getloc().  Can be any estd istream here
         estd::internal::basic_istream<layer1::stringbuf<32>> fmt;
+        ios_base fmt2;
         long v = -1;
 
         SECTION("simple source")
@@ -308,6 +309,17 @@ TEST_CASE("locale")
                 REQUIRE(done);
                 REQUIRE(v == -123);
             }
+        }
+        SECTION("non standard")
+        {
+            const char* in = "-123";
+
+            auto n = use_facet<num_get<char, const char*> >(l);
+
+            // This call looks identical to standard call, but it deduces locale from
+            // use_facet rather than fmt.  I bet if those two are different in std
+            // version of things, it's undefined behavior.  So likely a very safe move here
+            n.get(in, in + strlen(in), fmt2, state, v);
         }
     }
     SECTION("cbase")
