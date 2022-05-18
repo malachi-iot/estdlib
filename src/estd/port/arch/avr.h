@@ -14,3 +14,6 @@
 #pragma once
 
 // Used to have new operators, but now we've put them out into new.h
+
+// Space is so limited on AVR we default this to on.
+#define FEATURE_ESTD_AGGRESIVE_BITFIELD 1

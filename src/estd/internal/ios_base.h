@@ -34,6 +34,9 @@ public:
     static CONSTEXPR fmtflags boolalpha = 0x20;
     static CONSTEXPR fmtflags unitbuf = 0x40;
 
+    // TODO: Not yet used, right now we are generally hardcoded to skipws = on
+    static CONSTEXPR fmtflags skipws = 0x80;
+
 
     typedef uint8_t openmode;
 
