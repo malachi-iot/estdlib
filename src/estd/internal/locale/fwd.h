@@ -1,3 +1,10 @@
+/**
+ * These forward declarations are particularly important due to the heavily
+ * specialization nature of our locale code.
+ *
+ * Even though one may be tempted to use alias template 'using' instead of
+ * old-style inheritance, it is the latter that works better with specialization.
+ */
 #pragma once
 
 #include "iso.h"
@@ -33,7 +40,7 @@ struct cbase : internal::cbase<TChar, b, TLocale> {};
 #endif
 
 
-// DEBT: Make TImpl void again once we fix up helper to deal with that
+
 template <typename TChar, class TLocale = void>
 class ctype;
 

@@ -66,15 +66,9 @@ struct numpunct<char,
 
 // All this wrapping is done to hide the 'TEnabled' template portion.
 // This comes in handy when doing custom specializations, one can avoid specifying
-// that extra 3rd template parameter
-#ifdef FEATURE_CPP_ALIASTEMPLATExx
-// Conflicts with fwd declaration
-template <typename TChar, class TLocale = void>
-using numpunct = internal::numpunct<TChar, TLocale>;
-#else
+// that extra 3rd template parameter.
 template <typename TChar, class TLocale>
 struct numpunct : internal::numpunct<TChar, TLocale> {};
-#endif
 
 
 namespace internal {
