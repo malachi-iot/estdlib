@@ -159,6 +159,10 @@ struct num_get
 
         return get(*i++, err, v);
     }
+
+    // Just a bit of future proofing
+    num_get(TLocale) {}
+    num_get() {}
 };
 
 
