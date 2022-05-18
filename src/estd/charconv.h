@@ -23,7 +23,7 @@ inline estd::from_chars_result from_chars_integer(const char* first, const char*
     const unsigned short base = b)
 {
     return internal::from_chars_integer<
-        cbase<char, b, internal::classic_locale_type>>(first, last, value, base);
+        cbase<char, b, internal::classic_locale_type> >(first, last, value, base);
 }
 
 }

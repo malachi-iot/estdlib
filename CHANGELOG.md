@@ -5,7 +5,7 @@
 * `internal::basic_istream` can be configured in blocking or non blocking mode via `TPolicy`
 * `internal::flagged_istream` now available to make `TPolicy` interaction easier
 * istream and ostream wrappers for Arduino's `Stream` and `Print` classes
-* Groundwork for compile-time locale support, including num_get, moneypunct and ctype
+* Groundwork for compile-time locale support, including `num_get`, `moneypunct` and `ctype`
     * num_get is supported by a class named `iterated::num_get` which is, as
       the name suggests, a non blocking state machine
 * Extraction operator >> now supports int types
@@ -32,6 +32,8 @@
 Although istreams can now be configured as blocking or nonblocking, underlying streambufs continue
 to be nonblocking.  At some point we'll probably need a blocking streambuf paradigm as well, but so
 far we've avoided it.
+
+Custom locales actually work, but slightly fiddly at the moment.
 
 # v0.2.1 - 06MAY22
 

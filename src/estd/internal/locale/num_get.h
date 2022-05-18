@@ -134,7 +134,7 @@ private:
             // NOTE: spec strongly implies hyphen is *always* used to denote a negative number
             // regardless of locale
             const char hyphen =
-                use_facet<ctype<char_type>>(str.getloc()).widen('-');
+                use_facet<ctype<char_type> >(str.getloc()).widen('-');
 
             // TODO: Might be able to merely copy this iterator and to this evaluation
             // at the end.  Perhaps do a specialization for this based on policy
@@ -157,7 +157,7 @@ private:
             if(str.flags() & ios_base::boolalpha)
             {
                 numpunct<char_type, locale_type> np =
-                        use_facet<numpunct<char_type>>(str.getloc());
+                        use_facet<numpunct<char_type> >(str.getloc());
 
                 // tempted to get algorithmically fancy here, but with only two things to
                 // compare, brute force makes sense
@@ -361,7 +361,7 @@ struct use_facet_helper<
 {
     typedef num_get<
         typename TStreambuf::char_type,
-        estd::istreambuf_iterator<TStreambuf>> facet_type;
+        estd::istreambuf_iterator<TStreambuf> > facet_type;
     //typedef internal::classic_locale_type locale_type;
     typedef TLocale locale_type;
 

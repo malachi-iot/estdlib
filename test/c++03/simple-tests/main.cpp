@@ -33,6 +33,7 @@ int main()
     test_cpp();
     test_cstddef();
     test_limits();
+//  test_locale();
     test_optional();
     test_queue();
     test_ratio();

@@ -44,16 +44,19 @@ struct locale : internal::locale_base_base
     typedef internal::locale_code::values iso;
     typedef internal::encodings::values encodings;
 
-    template <iso iso_code, encodings encoding>
 #ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <iso iso_code, encodings encoding>
     using type = internal::locale<iso_code, encoding>;
 #else
-    // FIX: This itself works, but ctype's technique for specialization
-    // is not compatible yet
-    struct type : internal::locale<iso_code, encoding> {};
+    // FIX: We have to find a way to inherited class specialization
+    // to work before this itself can work.  PGGCC-25
+    //template <iso iso_code, encodings encoding>
+    //struct type : internal::locale<iso_code, encoding> {};
 #endif
 
-    typedef internal::locale<iso::C, encodings::ASCII> classic_type;
+    typedef internal::classic_locale_type classic_type;
+    // DEBT: c++03 doesn't like below line.  Find out why
+    //typedef internal::locale<iso::C, encodings::ASCII> classic_type;
 
     inline static classic_type classic() { return classic_type(); }
 };
@@ -61,7 +64,7 @@ struct locale : internal::locale_base_base
 template <class TChar, class TLocale>
 inline bool isspace(TChar ch, const TLocale& loc)
 {
-    return use_facet<ctype<TChar>>(loc).is(ctype_base::space, ch);
+    return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
 }
 
 }

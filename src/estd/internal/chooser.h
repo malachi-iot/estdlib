@@ -9,10 +9,12 @@ namespace estd { namespace internal {
 // DEBT: Works OK, but will get confused if names start with the same letters
 class chooser
 {
-    short chosen_ = -1;
-    unsigned short i = 0;
+    short chosen_;
+    unsigned short i;
 
 public:
+    chooser() : chosen_(-1), i(0) {}
+
     int chosen() const { return chosen_; }
 
     void reset()
