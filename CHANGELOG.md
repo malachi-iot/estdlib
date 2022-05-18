@@ -1,8 +1,17 @@
-# vNEXT - DDMMMYY
+# v0.3.1 - DDMMMYY
+
+## Added Features
+
+* An iterated bool version of num_get is now available, called `bool_get`
 
 ## Quality Updates & Bug Fixes
 
 * Fixed last-character bug in `internal::chooser`
+
+## Known Issues & Limitations
+
+* `internal::chooser` very much a work in progress and only reliable for the limited use
+  cases it's currently employed into
 
 # v0.3.0 - 18MAY22
 

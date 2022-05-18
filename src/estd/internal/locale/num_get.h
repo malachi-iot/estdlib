@@ -75,7 +75,7 @@ private:
         static iter_type get_bool(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
         {
-            estd::iterated::bool_get<char_type, locale_type, boolalpha> n;
+            estd::iterated::bool_get<char_type, locale_type, boolalpha> n(str.getloc());
 
             while(!n.get(in, end, err, v));
 

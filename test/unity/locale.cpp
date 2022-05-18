@@ -8,6 +8,8 @@
 
 using namespace estd;
 
+typedef experimental::istringstream<64> istream_type;
+
 static void test_use_facet()
 {
     const char* truename = 
@@ -55,20 +57,34 @@ static void _test_num_get(TNumGet& facet,
 
 static void test_num_get()
 {
-    experimental::istringstream<64> istream;   // Just for locale
-    num_get<char, const char*> facet = use_facet<num_get<char, const char*> >(istream.getloc());
+    istream_type istream;   // Just for locale
+    num_get<char, const char*, istream_type::locale_type> facet = 
+        use_facet<num_get<char, const char*> >(istream.getloc());
 
     _test_num_get(facet, istream, input, input + sizeof(input) - 1);
 }
 
+
+// Non-standard num_get.get which feeds locale based on
+// num_get itself rather that from istream/str
+static void test_num_get_alt()
+{
+    ios_base istream;
+    num_get<char, const char*, locale::classic_type> facet = 
+        use_facet<num_get<char, const char*> >(locale::classic());
+
+    _test_num_get(facet, istream, input, input + sizeof(input) - 1);
+}
+
+
 static void test_num_get_istream1()
 {
-    typedef experimental::istringstream<64> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
     typedef istreambuf_iterator<streambuf_type> iterator_type;
 
-    num_get<char, iterator_type> facet = use_facet<num_get<char, iterator_type> >(istream.getloc());
+    num_get<char, iterator_type, istream_type::locale_type> facet = 
+        use_facet<num_get<char, iterator_type> >(istream.getloc());
 
     iterator_type it(istream), end;
 
@@ -78,7 +94,6 @@ static void test_num_get_istream1()
 
 static void test_num_get_istream2()
 {
-    typedef experimental::istringstream<64> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
 
@@ -98,6 +113,7 @@ void test_locale()
 {
     RUN_TEST(test_use_facet);
     RUN_TEST(test_num_get);
+    RUN_TEST(test_num_get_alt);
     RUN_TEST(test_num_get_istream1);
     RUN_TEST(test_num_get_istream2);
 }

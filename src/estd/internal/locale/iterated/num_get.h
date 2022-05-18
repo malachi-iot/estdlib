@@ -272,17 +272,23 @@ struct bool_get<TChar, TLocale, true>
     }
 
 
-    void set_names()
+    void set_names(locale_type l)
     {
-        estd::numpunct<char_type, locale_type> n;
+        estd::numpunct<char_type, locale_type> n = use_facet<numpunct<char> >(l);
         names[0] = n.truename();
         names[1] = n.falsename();
     }
 
-    //bool_get(TLocale) { set_names(); }
-    // DEBT: Not c++03 compat and also not instance-locale compat
+#if __cplusplus >= 201103L
+    // DEBT: Not instance-locale compat
+    bool_get(locale_type l) : names { numpunct_type::truename(), numpunct_type::falsename() }
+    {}
     bool_get() : names { numpunct_type::truename(), numpunct_type::falsename() }
     {}
+#else
+    bool_get() { set_names(locale_type()); }
+    bool_get(locale_type l) { set_names(l); }
+#endif
     // { set_names(); }
 };
 
