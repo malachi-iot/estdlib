@@ -95,6 +95,9 @@ struct klingon_locale : locale::classic_type
     typedef estd::locale::classic_type base_type;
 };
 
+struct copycat_classic_locale :
+    estd::internal::locale<locale::iso::en_US, locale::encodings::ASCII> {};
+
 namespace estd {
 
 template <>
@@ -452,6 +455,19 @@ TEST_CASE("locale")
                 test_fallthrough3<internal::encodings::UTF8> ft2;
                 // Won't compile, and that's correct
                 //test_fallthrough3<internal::encodings::UTF16> ft3;
+            }
+            SECTION("helpers")
+            {
+                REQUIRE(internal::is_compatible_with_classic_locale<decltype(l)>::value);
+                REQUIRE(internal::is_compatible_with_classic_locale<decltype(l_ASCII)>::value);
+                REQUIRE(internal::is_compatible_with_classic_locale<decltype(l_classic)>::value);
+
+                // FIX: This should be true, but comes back false
+                //REQUIRE(internal::is_compatible_with_classic_locale<copycat_classic_locale>::value);
+
+                // Actually, at the moment klingon_locale IS compatible with classic, though
+                // this test actually thinks it isn't
+                //REQUIRE(!internal::is_compatible_with_classic_locale<klingon_locale>::value);
             }
         }
     }
