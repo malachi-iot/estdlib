@@ -98,13 +98,25 @@ struct num_get
     }
 
     // NOTE: This method never sets eof bit
-    template <typename T>
+    // NOTE: Doing autoinit because compilers sometimes don't trust that we really do initialize
+    // v, causing "maybe-uninitialized" warning.  To handle this, external parties may elect to
+    // init to zero instead of us.
+    // DEBT: Guard against availability of autoinit with something more cohesive than just __cplusplus
+    template <
+#if __cplusplus >= 201103L
+        bool autoinit = true,
+#endif
+        typename T>
     bool get(char_type c, ios_base::iostate& err, T& v)
     {
         switch(state_.state_)
         {
             case Start:
+#if __cplusplus >= 201103L
+                if(autoinit) v = 0;
+#else
                 v = 0;
+#endif
                 state_.state_ = NominalPositive;
 
                 // DEBT: Revisit if we need to play with widening/narrowing/conversion
@@ -187,11 +199,12 @@ struct num_get<0, TChar, TLocale>
 template <typename TChar, class TLocale, bool boolalpha>
 struct bool_get;
 
+// numeric (non alpha) version
 template <typename TChar, class TLocale>
 struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
 {
     typedef TChar char_type;
-    typedef num_get<2, char_type, TLocale> base_type;
+    //typedef num_get<2, char_type, TLocale> base_type;
 
     bool get(char_type c, ios_base::iostate& err, bool& v)
     {
@@ -227,10 +240,13 @@ struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
     }
 
 
-    bool_get(TLocale l) : base_type(l) {}
+    bool_get(TLocale l)
+    //    : base_type(l)
+    {}
     bool_get() {}
 };
 
+// alpha version
 template <typename TChar, class TLocale>
 struct bool_get<TChar, TLocale, true>
 {
@@ -257,7 +273,10 @@ struct bool_get<TChar, TLocale, true>
             v = chooser.chosen() == 0;
         }
         else
+        {
+            v = false;
             err |= ios_base::failbit;
+        }
 
         return true;
     }

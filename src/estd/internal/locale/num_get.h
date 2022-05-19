@@ -39,9 +39,15 @@ private:
         {
             iterated::num_get<base, char_type, TIncomingLocale> n(l);
 
+            v = 0;
+
             for(; i != end; ++i)
             {
+#if __cplusplus >= 201103L
+                if(n.template get<false>(*i, err, v)) return i;
+#else
                 if(n.get(*i, err, v)) return i;
+#endif
             }
 
             err |= ios_base::eofbit;
@@ -76,6 +82,10 @@ private:
             ios_base::iostate& err, istream_type& str, bool& v)
         {
             estd::iterated::bool_get<char_type, locale_type, boolalpha> n(str.getloc());
+
+            // DEBT: Some compilers want us to initialize v right away rather than in a state machine,
+            // otherwise we get warnings.  Hopefully compilers are smart enough to figure out our pathing
+            // in bool_get as we do always assign 'v'
 
             while(!n.get(in, end, err, v));
 
