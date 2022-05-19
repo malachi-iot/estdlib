@@ -1,6 +1,12 @@
 #pragma once
 
 #include "ios_policy.h"
+#include "ios.h"
+
+#ifndef FEATURE_ESTD_IOS_GCOUNT
+#define FEATURE_ESTD_IOS_GCOUNT 1
+#endif
+
 
 namespace estd { namespace internal {
 
@@ -94,7 +100,7 @@ public:
     int_type get()
     {
 #if FEATURE_ESTD_IOS_GCOUNT
-        _gcount = 1;
+        ++_gcount;
 #endif
         return this->rdbuf()->sbumpc();
     }
@@ -314,7 +320,11 @@ public:
     {
         gcount(0);
     }
-#endif
+#else
+    basic_istream()
+    {
+        gcount(0);
+    }
 
     template<class T1>
     basic_istream(T1& param1) :
@@ -322,6 +332,8 @@ public:
     {
         gcount(0);
     }
+
+#endif
 
     basic_istream(streambuf_type& streambuf) :
         base_type(streambuf)

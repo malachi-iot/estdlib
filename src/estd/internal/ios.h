@@ -11,6 +11,10 @@
 #include "ios_base.h"
 #include "ios_policy.h"
 
+#include "locale/ctype.h"
+#include "locale/facet.h"
+
+
 namespace estd {
 
 namespace experimental {
@@ -104,13 +108,13 @@ protected:
 
     basic_ios_base(streambuf_type&& streambuf) :
         _rdbuf(std::move(streambuf))    {}
-#endif
-    basic_ios_base(streambuf_type& streambuf) :
-        _rdbuf(streambuf) {}
-
+#else
     template <class TParam1>
     basic_ios_base(TParam1& p1) : _rdbuf(p1)
             {}
+#endif
+    basic_ios_base(streambuf_type& streambuf) :
+        _rdbuf(streambuf) {}
 
 public:
     streambuf_type* rdbuf()
@@ -122,7 +126,8 @@ public:
 template<class TStreambuf, bool use_pointer = false,
     class TPolicy = ios_base_policy<TStreambuf> >
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
-    estd::internal::struct_evaporator<TPolicy>
+    estd::internal::struct_evaporator<TPolicy>,
+    estd::internal::struct_evaporator<typename TPolicy::locale_type>
 {
 public:
     typedef basic_ios_base<TStreambuf, use_pointer> base_type;
@@ -136,6 +141,7 @@ public:
 
     typedef typename estd::internal::struct_evaporator<TPolicy> policy_provider_type;
     typedef typename policy_provider_type::evaporated_type evaporated_policy_type;
+    typedef typename estd::internal::struct_evaporator<locale_type> locale_provider_type;
 
 protected:
     basic_ios() {}
@@ -168,15 +174,12 @@ public:
     // deviation from standard C++
     locale_type getloc() const
     {
-        locale_type l;
-        return l;
+        return locale_provider_type::value();
     }
 
     char_type widen(char c) const
     {
-        return experimental::use_facet<experimental::ctype<char_type> >(getloc()).widen(c);
-        experimental::ctype<char_type> ctype;
-        return ctype.widen(c);
+        return use_facet<estd::ctype<char_type> >(getloc()).widen(c);
     }
 
     char narrow(char_type c, char /* default */)

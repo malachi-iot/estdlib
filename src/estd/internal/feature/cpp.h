@@ -129,6 +129,7 @@
     {}
 #else
 #define ESTD_CPP_FORWARDING_CTOR(class_name)    \
+    class_name() {}                             \
     template <class TParam1>                    \
     class_name(const TParam1& p1) :             \
         base_type(p1) {}

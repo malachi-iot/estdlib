@@ -11,15 +11,16 @@ namespace estd { namespace internal { namespace impl {
 template <class T, std::ptrdiff_t Extent = -1,
         class TBase = estd::experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
-        out_pos_streambuf_base<estd::char_traits<T> >,
+        out_pos_streambuf_base<estd::char_traits<T>,
+            typename TBase::value_type::size_type >,
         TBase
 {
     typedef TBase base_type;
     typedef T char_type;
     typedef estd::char_traits<char_type> traits_type;
-    typedef out_pos_streambuf_base<traits_type> base_out_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
+    typedef out_pos_streambuf_base<traits_type, size_type> base_out_type;
     typedef typename base_out_type::off_type off_type;
     typedef typename base_out_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
@@ -27,22 +28,31 @@ struct out_span_streambuf :
     span_type& out() { return base_type::value(); }
     const span_type& out() const { return base_type::value(); }
 
+    /*
     out_span_streambuf(T* buf, size_type size) :
             base_type(span_type(buf, size))
     {
 
-    }
+    } */
 
     // NOTE: Would use Extent here but that breaks it for scenarios
     // where Extent == -1
     template <std::size_t N>
-    out_span_streambuf(T (&array)[N]) :
+    out_span_streambuf(char_type (&array)[N]) :
             base_type(array)
     {
 
     }
 
-    out_span_streambuf(const estd::span<T, Extent>& copy_from) :
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    out_span_streambuf(span_type&& move_from) :
+        base_type(std::move(move_from))
+    {
+
+    }
+#endif
+
+    out_span_streambuf(const span_type& copy_from) :
             base_type(copy_from)
     {
 

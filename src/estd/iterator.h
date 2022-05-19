@@ -1,124 +1,65 @@
+/**
+ *
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator
+ * 2. https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
+ */
 #pragma once
 
+#include "internal/platform.h"
 #include "internal/iterator_standalone.h"
-#include "istream.h"
-#include "ostream.h"
-
-
+#include "internal/iosfwd.h"
+#include "internal/ios_base.h"
+#include "internal/istream_iterator.h"
+#include "internal/istreambuf_iterator.h"
 
 // TODO: Might need a specialization for our accessor-related things. we'll see
 namespace estd {
+
+template <class TStreambuf>
+bool operator==(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator!=(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return !lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator==(
+    const istreambuf_iterator<TStreambuf>& lhs,
+    const typename istreambuf_iterator<TStreambuf>::proxy& rhs)
+{
+    return lhs.equal(rhs);
+}
+
+
+template <class TStreambuf>
+bool operator==(
+    const typename istreambuf_iterator<TStreambuf>::proxy& lhs,
+    const istreambuf_iterator<TStreambuf>& rhs)
+{
+    return lhs.equal(rhs);
+}
+
 namespace experimental {
 
-template<class TStreambuf>
-class istreambuf_iterator
-{
-public:
-    typedef typename TStreambuf::char_type char_type;
-    typedef typename TStreambuf::traits_type traits_type;
-
-    typedef TStreambuf streambuf_type;
-
-    typedef istreambuf_iterator iterator;
-    typedef char_type value_type;
-    typedef typename traits_type::int_type int_type;
-
-private:
-
-    streambuf_type* rdbuf;
-    char_type ch;
-
-    //bool end() const { return ch == traits_type::eof(); }
-    bool end() const { return rdbuf == NULLPTR; }
-
-public:
-    istreambuf_iterator() :
-        rdbuf(NULLPTR)
-    {
-    }
-
-    istreambuf_iterator(streambuf_type& s) : rdbuf(&s)
-    {
-        ch = rdbuf->sgetc();
-    }
-
-    template <class TIstreamBase>
-    istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
-        rdbuf(is.rdbuf())
-    {
-        ch = rdbuf->sgetc();
-    }
-
-    istreambuf_iterator(streambuf_type* s) :
-        rdbuf(s)
-    {
-        ch = rdbuf->sgetc();
-    }
-
-#ifdef FEATURE_CPP_DEFAULT_CTOR
-    istreambuf_iterator(const istreambuf_iterator& copy_from) = default;
+struct default_sentinel_t {};
+#ifdef ESTD_CPP_INLINE_VARIABLES
+inline constexpr default_sentinel_t default_sentinel{};
 #endif
 
-    // prefix version
-    iterator& operator++()
-    {
-        if(!end())
-        {
-            int_type _ch = rdbuf->snextc();
-
-            if (_ch == traits_type::eof())
-                rdbuf = NULLPTR;
-            else
-                ch = traits_type::to_char_type(_ch);
-        }
-
-        return *this;
-    }
-
-    // postfix version
-    iterator operator++(int)
-    {
-        if(!end())
-        {
-            ch = rdbuf->sbumpc();
-
-            if (ch == traits_type::eof()) rdbuf = NULLPTR;
-        }
-
-        return *this;
-    }
-
-
-    value_type operator*() const
-    {
-        return ch;
-    }
-
-    // https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
-    // tells us that only validity of the streambufs are of interest here.  Something
-    // doesn't add up though, because with that alone we can't tell if we're at EOF/END
-    bool equal(const iterator& it) const
-    {
-        if(it.ch != traits_type::eof() && ch != traits_type::eof()) return true;
-
-        if(it.ch == traits_type::eof() && ch == traits_type::eof()) return true;
-
-        return false;
-    }
-
-    // EXPERIMENTAL
-    // since streambufs are generally a forward only creature, and cross-streambuf comparison's
-    // aren't really viable, this mainly exists to compare against a NULL (end) iterator
-    bool operator!=(const iterator& compare_to) const
-    {
-        return rdbuf != compare_to.rdbuf;
-    }
-
-    bool operator==(const iterator& compare_to) const
-    {
-        return rdbuf == compare_to.rdbuf;
-    }
-};
 
 template <class TStreambuf>
 class ostreambuf_iterator

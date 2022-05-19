@@ -101,7 +101,7 @@ struct basic_stringbuf :
 #endif
 
     // See in_base_type::pos() for why we use ref here
-    const pos_type& pos() const { return in_base_type::pos(); }
+    const typename in_base_type::index_type& pos() const { return in_base_type::pos(); }
 
     streamsize xsgetn(char_type* s, streamsize count)
     {

@@ -1,137 +1,31 @@
+/**
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/utility/from_chars
+ * 2. https://en.cppreference.com/w/cpp/string/byte/strtol
+ */
 #pragma once
 
 #include "charconv.h"
-#include "../algorithm.h"
-#include "../cctype.h"
+#include "raise_and_add.h"
+#include "cctype.h"
+
+#include "locale/ctype.h"
+#include "locale.h"
+
+//#include "locale/iterated/num_get.h"    // Very minimal dependencies
 
 namespace estd { namespace internal {
 
-// AVR compiler appears to have incomplete implementation of __has_builtin
-#if defined(__has_builtin) && !defined(__AVR__)
-// adapted from GNUC
-template<typename _Tp>
-typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
-raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
-{
-    if (__builtin_mul_overflow(__val, __base, &__val)
-        || __builtin_add_overflow(__val, __c, &__val))
-        return false;
-    return true;
-}
 
-
-template<typename _Tp>
-typename estd::enable_if<!estd::is_signed<_Tp>::value, bool>::type
-raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
-{
-    if (__builtin_umul_overflow(__val, __base, &__val)
-        || __builtin_uadd_overflow(__val, __c, &__val))
-        return false;
-    return true;
-}
-#else
-// DEBT: Only to get things to compile.  Overflow goes unnoticed
-template <typename T>
-bool raise_and_add(T& val, const unsigned short base, unsigned char c)
-{
-    val *= base;
-    val += c;
-    return true;
-}
-#endif
-
-/// (Maybe) Requires ASCII
-template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<b <= 10> > :
-        char_base_traits_base<encodings::UTF8>
-{
-    static inline CONSTEXPR unsigned base() { return b; }
-
-    // adapted from GNUC
-    static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
-    {
-        return '0' <= c && c <= ('0' + (_base - 1));
-    }
-
-    static inline CONSTEXPR int_type from_char(char_type c)
-    {
-        return c - '0';
-    }
-
-    static inline CONSTEXPR char_type to_char(int_type v)
-    {
-        return '0' + v;
-    }
-
-    static inline CONSTEXPR int_type from_char_with_test(char_type c, const int _base = b)
-    {
-        return is_in_base(c, _base) ?
-            from_char(c) :
-            eol();
-    }
-};
-
-/// (Maybe) Requires ASCII
-template<unsigned short b>
-struct char_base_traits<b, estd::internal::Range<(b > 10 && b <= 36)> > :
-        char_base_traits_base<encodings::UTF8>
-{
-    static inline CONSTEXPR bool isupper(char c, const unsigned short _base = b)
-    {
-        return 'A' <= c && c <= ('A' + (_base - 11));
-    }
-
-    static inline CONSTEXPR bool islower(char c, const unsigned short _base = b)
-    {
-        return 'a' <= c && c <= ('a' + (_base - 11));
-    }
-
-    static inline CONSTEXPR unsigned base() { return b; }
-
-    static inline CONSTEXPR bool is_in_base(char_type c, const unsigned short _base = b)
-    {
-        return estd::isdigit(c) ||
-               isupper(c, _base) ||
-               islower(c, _base);
-    }
-
-    static inline int_type from_char_with_test(char_type c, const unsigned short _base = b)
-    {
-        if (estd::isdigit(c)) return c - '0';
-
-        if (isupper(c, _base)) return c - 'A' + 10;
-
-        if (islower(c, _base)) return c - 'a' + 10;
-
-        return eol();
-    }
-
-    static inline int_type from_char(char_type c)
-    {
-        if (c <= '9')
-            return c - '0';
-        else if (c <= 'Z')
-            return c - 'A' + 10;
-        else
-            return c - 'a' + 10;
-    }
-
-    static inline CONSTEXPR char_type to_char(int_type v)
-    {
-        return v <= 10 ?
-            ('0' + v) :
-            'a' + (v - 10);
-    }
-};
-
-
-template<class TCharBaseTraits, class T>
+template<class TCbase, class T>
 estd::from_chars_result from_chars_integer(const char* first, const char* last,
                                            T& value,
-                                           const unsigned short base = TCharBaseTraits::base())
+                                           const unsigned short base = TCbase::base())
 {
-    typedef TCharBaseTraits traits;
-    typedef typename traits::int_type int_type;
+    typedef TCbase cbase_type;
+    typedef typename cbase_type::optional_type optional_type;
 #ifdef __cpp_static_assert
     // DEBT: Expand this to allow any numeric type, we'll have to make specialized
     // versions of raise_and_add to account for that
@@ -141,30 +35,41 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
     const char* current = first;
     bool negate;
     // "If no characters match the pattern or if the value obtained by parsing
-    // the matched characters is not representable in the type of value, value is unmodified,"
+    // the matched characters is not representable in the type of value, value is unmodified," [1]
     T local_value = 0;
 
-    while (estd::isspace(*current))
-        current++;
+    // DEBT: Spec calls for octal leading '0' parsing when base = 0.  A fallback to decimal
+    // is also expected.  Specifically:
+    // "pattern identical to the one used by std::strtol" [1]
+    // "If the value of base is 0, the numeric base is auto-detected: if the prefix is 0, [...]
+    //  otherwise the base is decimal" [2]
+
+    /*
+     * "leading whitespace is not ignored" [1]
+    while (estd::internal::ascii_isspace(*current))
+        current++; */
 
     if (estd::is_signed<T>::value)
     {
         negate = *current == '-';
 
-        if (negate) current++;
+        if (negate) ++current;
     }
 
     while (current != last)
     {
-        const int_type digit =
-                traits::from_char_with_test(*current, base);
-        if (digit != traits::eol())
+        // DEBT: Use has_value() and friends for clarity here
+        const optional_type digit = cbase_type::from_char(*current, base);
+        if (digit.has_value())
         {
-            bool success = raise_and_add(local_value, base, digit);
+            bool success = raise_and_add(local_value, base, digit.value());
+
+            // If we didn't succeed, that means we overflowed
             if (!success)
             {
                 // skip to either end or next spot which isn't a number
-                while (current++ != last && traits::is_in_base(*current)) {}
+                // "ptr points at the first character not matching the pattern." [1]
+                while (++current != last && cbase_type::is_in_base(*current)) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
                 return from_chars_result{current, estd::errc::result_out_of_range};
@@ -173,18 +78,25 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 #endif
             }
         }
+        else if(current == first)
+        {
+            return from_chars_result
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+                {current, estd::errc::invalid_argument};
+#else
+                (current, estd::errc::invalid_argument);
+#endif
+        }
         else
         {
             value = local_value;
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-            return from_chars_result{current,
-                                     current==first ? estd::errc::invalid_argument : estd::errc(0)};
+            return from_chars_result{current, estd::errc(0)};
 #else
-            return from_chars_result(current,
-                 current==first ? estd::errc::invalid_argument : estd::errc(0));
+            return from_chars_result(current, estd::errc(0));
 #endif
         }
-        current++;
+        ++current;
     }
 
     // prepend with constexpr so we can optimize out non-signed flavors
@@ -210,10 +122,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \param value
 /// \param base
 /// \return
-template <class TCharBaseTraits, class TInt>
+template <class TCbase, class TInt>
 to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
 {
-    typedef TCharBaseTraits traits;
+    typedef TCbase cbase_type;
     typedef estd::numeric_limits<TInt> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
@@ -221,7 +133,7 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 
     while(first != last)
     {
-        *last = traits::to_char(value % base);
+        *last = cbase_type::to_char(value % base);
         value /= base;
 
         if(value == 0)
@@ -247,11 +159,11 @@ to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const 
 }
 
 // This one operates exactly according to spec, but slightly slower than above
-template <class TCharBaseTraits, class TInt>
+template <class TCbase, class TInt>
 to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
 {
-    typedef TCharBaseTraits traits;
-    typedef typename traits::char_type char_type;
+    typedef TCbase cbase_type;
+    typedef typename cbase_type::char_type char_type;
 
     if(estd::numeric_limits<TInt>::is_signed && value < 0)
     {
@@ -263,7 +175,7 @@ to_chars_result to_chars_integer(char* first, char* last, TInt value, const int 
 
     while(current != last)
     {
-        *current = traits::to_char(value % base);
+        *current = cbase_type::to_char(value % base);
         value /= base;
 
         current++;

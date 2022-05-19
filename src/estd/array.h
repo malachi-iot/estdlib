@@ -8,17 +8,14 @@
 #include "internal/runtime_array.h"
 #include "internal/impl/allocated_array.h"
 #include "allocators/fixed.h"
-
-// TODO: utilize portions of std array here, if we can
-// Note that std::array maps directly to our layer1 approach
-// but we value add with layer2, layer3, etc.
+#include "internal/array.h"
 
 namespace estd {
 
 #define FEATURE_ESTD_LEGACY_ARRAY
 #ifdef FEATURE_ESTD_LEGACY_ARRAY
 
-namespace experimental {
+namespace internal {
 
 struct array_traits
 {
@@ -30,7 +27,7 @@ struct array_traits
 
 
 template<class T, class TArray, typename TSize = std::size_t,
-         class TProvider = instance_provider<TArray> >
+         class TProvider = estd::experimental::instance_provider<TArray> >
 struct array_base
 #ifdef FEATURE_ESTD_ARRAY_PROVIDER
         : TProvider
@@ -216,9 +213,9 @@ template<
     class T,
     std::size_t N,
     typename TSize = typename internal::deduce_fixed_size_t<N>::size_type
-> struct array : public experimental::array_base<T, T[N], size_t>
+> struct array : public internal::array_base<T, T[N], size_t>
 {
-    typedef experimental::array_base<T, T[N], size_t> base_t;
+    typedef internal::array_base<T, T[N], size_t> base_t;
 
 public:
     typedef TSize size_type;
@@ -251,92 +248,7 @@ public:
 #endif
 };
 
-#ifdef FEATURE_CPP_VARIADIC
-namespace experimental { namespace layer0 {
 
-// fiddling with idea suggested here:
-// https://stackoverflow.com/questions/19019252/create-n-element-constexpr-array-in-c11
-
-template <class T, T... values>
-class array_exp1
-{
-public:
-    typedef T value_type;
-};
-
-template <class T, T value, T... values>
-class array_exp1<T, value, values...> : array_exp1<T, values...>
-{
-    typedef array_exp1<T, values...> base_t;
-
-public:
-    typedef T value_type;
-};
-
-
-template <class T, T... values>
-class array
-{
-public:
-    typedef T value_type;
-};
-
-template <class T, T value, T... values>
-class array<T, value, values...> : array<T, values...>
-{
-
-};
-
-// since this generates annoying warnings under some circumstances (esp32),
-// AND it's experimental, only enabling during unit testing
-#ifdef UNIT_TESTING
-// FIX: So far is not viable under gcc, but not sure why.  Merely rejects
-// anything coming into 'value'.  Maybe because 'T* const'?
-template <class T, T* const value, size_t N>
-struct array_exp2 :
-        array_base<T, T* const,
-            size_t,
-            //typename estd::internal::deduce_fixed_size_t<N>::type,
-            global_pointer_provider<T, value> >
-{
-    typedef array_base<T, T* const,
-        size_t,
-        //typename estd::internal::deduce_fixed_size_t<N>::type,
-        global_pointer_provider<T, value> > base_type;
-    typedef typename base_type::size_type size_type;
-    //typedef typename base_type::const_iterator const_iterator;
-
-    typedef const T* const const_iterator;
-    typedef T* iterator;
-
-    // just because pointer casting is different, it creates some warnings, so brute
-    // force code again to reduce those warnings
-    // esp32 generates its own set of compiler warnings from this though
-    iterator begin() { return base_type::data(); }
-    const_iterator begin() const { return base_type::data(); }
-
-    iterator end() { return base_type::data() + N; }
-    const_iterator end() const { return base_type::data() + N; }
-};
-#endif
-
-/*
- * Won't work because 'array' would need to be a constexpr, which is
- * invalid as a function parameter modifier
-template <class T, size_t N>
-constexpr auto make_array(T (&array)[N]) -> array_exp2<T, array, N>
-{
-    return array_exp2<T, array, N>(array);
-} */
-
-/*
-template <class T, class TArray, size_t N = sizeof(TArray) / sizeof(T)>
-constexpr array_exp2<T, TArray, N> make_array()
-{
-}
-*/
-}}
-#endif
 
 namespace layer1 {
 // TODO: alias estd::array into here
@@ -349,9 +261,9 @@ template<
     class T,
     std::size_t N,
     typename size_t = typename estd::internal::deduce_fixed_size_t<N>::size_type
-> struct array : public experimental::array_base<T, T*, size_t>
+> struct array : public internal::array_base<T, T*, size_t>
 {
-    typedef experimental::array_base<T, T*, size_t> base_t;
+    typedef internal::array_base<T, T*, size_t> base_t;
 
 private:
     //T* m_array() { return base_t::m_array; }
@@ -392,9 +304,9 @@ namespace layer3 {
 template<
     class T,
     typename size_t = std::size_t
-> struct array : public experimental::array_base<T, T*, size_t>
+> struct array : public internal::array_base<T, T*, size_t>
 {
-    typedef experimental::array_base<T, T*, size_t> base_t;
+    typedef internal::array_base<T, T*, size_t> base_t;
 
 protected:
     size_t m_size;

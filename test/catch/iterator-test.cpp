@@ -16,13 +16,13 @@ TEST_CASE("iterator")
 
         SECTION("end-of-stream")
         {
-            estd::experimental::istreambuf_iterator<estd::layer2::stringbuf> it, end;
+            estd::istreambuf_iterator<estd::layer2::stringbuf> it, end;
 
             REQUIRE(it == end);
         }
         SECTION("misc stringbuf")
         {
-            estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+            estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
 
             SECTION("characters")
             {
@@ -37,11 +37,25 @@ TEST_CASE("iterator")
             }
             SECTION("eol")
             {
-                estd::experimental::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                int i;
 
-                for(int i = sz; i > 0; --i, ++it);
+                SECTION("prefix")
+                {
+                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
 
-                REQUIRE(it == end);
+                    for (i = sz; i > 0; --i, ++it);
+
+                    REQUIRE(it == end);
+                }
+                SECTION("postfix")
+                {
+                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+
+                    for (i = sz; i > 0; i--, it++);
+
+                    REQUIRE(it == end);
+                    REQUIRE(it++ == end);
+                }
             }
         }
         SECTION("ostream")
@@ -58,6 +72,11 @@ TEST_CASE("iterator")
 
             REQUIRE(sb.str() == "hello");
         }
+    }
+    SECTION("istream_iterator")
+    {
+        estd::experimental::istringstream<32> istream;
+        estd::experimental::istream_iterator<unsigned, decltype(istream)> in(istream), end;
     }
     SECTION("filter_iterator")
     {

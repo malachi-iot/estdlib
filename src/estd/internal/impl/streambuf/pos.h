@@ -8,20 +8,29 @@ namespace estd { namespace internal { namespace impl {
 // NOTE: In esp-idf, pos_type is big and doesn't seem to play well
 // with RVO - so returning/passing a "const pos_type&" rather than "pos_type"
 // makes a difference
-template <typename TCharTraits>
+template <typename TCharTraits, class TIndex = unsigned short>
 struct pos_streambuf_base : streambuf_base<TCharTraits>
 {
     typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
-    typedef typename traits_type::pos_type pos_type;
+    // FIX: Our pos_type here should instead by an unsigned
+    // that likely a derived class specifies the bitness of
+    //typedef typename traits_type::pos_type pos_type;
+    typedef TIndex pos_type;
+    // Not calling pos_type because that carries a C++ meaning of fpos, statefulness
+    // and signed integer - none of which we want for our positioner
+    typedef TIndex index_type;
     typedef typename traits_type::off_type off_type;
 
 protected:
-    pos_type _pos;
+    index_type _pos;
 
-    pos_streambuf_base(const pos_type& pos) : _pos(pos) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    pos_streambuf_base(index_type&& pos) : _pos(std::move(pos)) {}
+#endif
+    pos_streambuf_base(const index_type& pos) : _pos(pos) {}
 
-    inline pos_type seekpos(const pos_type& p)
+    inline const index_type& seekpos(const pos_type& p)
     {
         _pos = p;
         return _pos;
@@ -49,20 +58,27 @@ protected:
     }
 
 public:
+    // NOTE: Old comment here, just for reference as to why we have both index_type
+    // and pos_type
     // This method in particular is sensitive to pos_type reference.  Stack usage goes
     // sky high if we return a copy
-    const pos_type& pos() const { return _pos; }
+
+    const index_type& pos() const { return _pos; }
 };
 
-template <typename TCharTraits>
-struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits>
+template <typename TCharTraits, class TIndex = unsigned short>
+struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
 {
     typedef TCharTraits traits_type;
-    typedef pos_streambuf_base<traits_type> base_type;
+    typedef pos_streambuf_base<traits_type, TIndex> base_type;
+    typedef typename base_type::index_type index_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
 
-    in_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    in_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
+#endif
+    in_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
@@ -79,15 +95,19 @@ protected:
 };
 
 
-template <typename TCharTraits>
-struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits>
+template <typename TCharTraits, class TIndex = unsigned short>
+struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
 {
-    typedef pos_streambuf_base<TCharTraits> base_type;
+    typedef pos_streambuf_base<TCharTraits, TIndex> base_type;
     typedef TCharTraits traits_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
+    typedef typename base_type::index_type index_type;
 
-    out_pos_streambuf_base(const pos_type& pos = 0) : base_type(pos) {}
+#ifdef FEATURE_CPP_MOVESEMANTIC
+    out_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
+#endif
+    out_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void pbump(int count) { this->_pos += count; }

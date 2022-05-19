@@ -277,10 +277,10 @@ namespace layer1 {
 
 namespace internal {
 
-template <class T, T null_value>
+template <class T, T null_value_>
 class optional_base //: public estd::internal::optional_tag_base
 {
-    T _value;
+    T value_;
 
 protected:
 //public:
@@ -288,22 +288,24 @@ protected:
     // should always bool == true here
     optional_base(bool) {}
 
-    optional_base() : _value(null_value) {}
+    optional_base() : value_(null_value_) {}
 
     void value(T& value)
     {
-        _value = value;
+        value_ = value;
     }
 
 public:
     typedef T value_type;
 
-    bool has_value() const { return _value != null_value; }
+    bool has_value() const { return value_ != null_value_; }
     void has_value(bool) {}
-    void reset() { _value = null_value; }
+    void reset() { value_ = null_value_; }
 
-    value_type& value() { return _value; }
-    const value_type& value() const { return _value; }
+    value_type& value() { return value_; }
+    const value_type& value() const { return value_; }
+
+    static CONSTEXPR value_type null_value() { return null_value_; }
 };
 
 }

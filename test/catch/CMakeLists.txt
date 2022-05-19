@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     tuple-test.cpp
     vector-test.cpp
     utility-test.cpp
-        internal-test.cpp)
+        internal-test.cpp charconv-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 # TODO: Instead, filter by presence of GCC

@@ -75,6 +75,8 @@ TEST_CASE("optional")
 
         REQUIRE(v == 5);
 
+        REQUIRE(val.null_value() == -1);
+
         SECTION("conversion to traditional")
         {
             optional<int> val2(val);

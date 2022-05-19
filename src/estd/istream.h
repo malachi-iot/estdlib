@@ -1,3 +1,10 @@
+/***
+ *
+ * References:
+ *
+ * 1. https://en.cppreference.com/w/cpp/io/basic_istream/operator_gtgt
+ * 2. https://www.cplusplus.com/reference/istream/istream/operator%3E%3E/
+ */
 #ifndef UTIL_EMBEDDED_ISTREAM_H
 #define UTIL_EMBEDDED_ISTREAM_H
 
@@ -7,9 +14,12 @@
 #include "algorithm.h"
 #include "traits/char_traits.h"
 
+#include "port/istream.h"
 #include "internal/istream.h"
 #include "internal/istream_runtimearray.hpp"
-#include "port/istream.h"
+
+#include "iterator.h"
+#include "locale.h"
 
 //#include <cassert>
 
@@ -23,10 +33,6 @@
 //  b) we feel like fighting with the standard std namespace (which algorithm seems to auto include
 //     i.e. it seems to specify 'using namespace std'
 //#include <algorithm> // for min function
-
-#ifndef FEATURE_ESTD_IOS_GCOUNT
-#define FEATURE_ESTD_IOS_GCOUNT 1
-#endif
 
 namespace estd {
 
@@ -100,6 +106,43 @@ inline internal::basic_istream<TStreambuf, TBase>& ws(
             return __is;
     }
 }
+
+
+// NOTE: Works well, just needs more testing (and hopefully elevation of experimental::num_get
+// to non-experimental) before elevating to API level
+template <class TStreambuf, class TBase, class T>
+typename enable_if<is_arithmetic<T>::value, internal::basic_istream<TStreambuf, TBase>&>::type
+operator >>(
+    internal::basic_istream<TStreambuf, TBase>& in,
+    T& value)
+{
+    // NOTE:
+    // "Except where stated otherwise, calling this function does not alter the
+    //  value returned by member gcount." [2]
+    // Since gcount is mentioned nowhere else on the page, we don't update gcount.
+    // A very specific gcount update is mentioned for scenario #11 in [1], which
+    // is outside the scope of this method.
+    typedef internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename istream_type::streambuf_type streambuf_type;
+    typedef typename istream_type::traits_type traits_type;
+    typedef typename traits_type::char_type char_type;
+    typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
+
+    in >> ws;
+
+    iterator_type it(in.rdbuf()), end;
+    ios_base::iostate err;
+
+    num_get<char_type, iterator_type> n;
+
+    n.get(it, end, in, err, value);
+
+    return in;
+}
+
+
+
+
 
 // Experimental because:
 // - naming I'm 90% on, not 100%

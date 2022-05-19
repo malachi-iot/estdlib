@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal/iosfwd.h"
+
 namespace estd {
 
 #if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
@@ -14,5 +16,9 @@ class fpos;
 typedef int streampos;
 typedef int streamoff;
 typedef int streamsize;
+
+template<class TStreambuf>
+class istreambuf_iterator;
+
 
 }

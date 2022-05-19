@@ -1,131 +1,20 @@
 #pragma once
 
+#include "cstdint.h"
+
 #include "internal/platform.h"
 #include "internal/locale.h"
-#include "internal/iterator_standalone.h"
-#include "internal/ios.h"
-#include "internal/charconv.hpp"
 
-extern "C" {
-#include <stdint.h>
-}
+#include "internal/iosfwd.h"
+
+#include "internal/locale/ctype.h"
+#include "internal/locale/facet.h"
+#include "internal/locale/money.h"
+#include "internal/locale/num_get.h"
+#include "internal/locale/numpunct.h"
+
 
 namespace estd { namespace experimental {
-
-struct ctype_base
-{
-    typedef uint8_t mask;
-
-    static CONSTEXPR mask space = 0x01;
-    static CONSTEXPR mask digit = 0x02;
-    static CONSTEXPR mask alpha = 0x04;
-    static CONSTEXPR mask punct = 0x08;
-    static CONSTEXPR mask upper = 0x10;
-    static CONSTEXPR mask lower = 0x20;
-    static CONSTEXPR mask xdigit = 0x40;
-
-    static CONSTEXPR mask alnum = alpha | digit;
-    static CONSTEXPR mask graph = alnum | punct;
-};
-
-
-template <class TChar>
-class ctype : public ctype_base
-{
-#ifdef ENABLE_LOCALE_MULTI
-    // TODO: determine if we want to roll with the virtual function do_is
-    // and friends or branch out into further templating
-#else
-    TChar do_tolower(TChar ch);
-    TChar do_toupper(TChar ch);
-#endif
-public:
-    bool is(mask m, TChar ch) const { return false; }
-    const TChar* is(const TChar* low, const TChar* high, mask* vec) const { return NULLPTR; }
-
-    TChar toupper(TChar ch) { return do_toupper(ch); }
-    TChar tolower(TChar ch) { return do_tolower(ch); }
-};
-
-struct locale
-{
-#ifdef ENABLE_LOCALE_MULTI
-    struct facet
-    {
-
-    };
-
-    typedef int id;
-
-    // FIX: 40 arbitrary number, could be more or less
-    // NOTE: seems kind of like a fake-rtti system a bit
-    facet* facets[40];
-
-    locale(const locale& other);
-    explicit locale(const char* std_name);
-#else
-    struct facet
-    {
-
-    };
-
-    struct id
-    {
-
-    };
-#endif
-
-    typedef int category;
-
-    static CONSTEXPR category none = 0x0000;
-    static CONSTEXPR category ctype = 0x0001;
-    static CONSTEXPR category numeric = 0x0002;
-
-    // TODO: deviates in that standard version uses a std::string
-    // I want my own std::string (beginnings of which are in experimental::layer3::string)
-    // but does memory allocation out of our own GC-pool
-    const char* name() const { return "*"; }
-};
-
-
-
-// specialization, deviating from standard in that locale is compile-time
-// instead of runtime
-// This has a number of implications, but mainly we are hard-wired
-// to default-ASCII behaviors.  Ultimately this will be an issue but
-// we can build out ctype at that time
-// strongly implies a layer1 behavior
-template <>
-class ctype<char> : public ctype_base, public locale::facet
-{
-public:
-    //static locale::id id;
-
-    char widen(char c) const { return c; }
-
-    bool is(mask m, char ch) const
-    {
-        if(m & space)
-        {
-            // as per http://en.cppreference.com/w/cpp/string/byte/isspace
-            switch(ch)
-            {
-                case ' ':
-                case 13:
-                case 10:
-                case '\f':
-                case '\t':
-                case '\v':
-                    return true;
-            }
-        }
-        if(m & digit)
-        {
-            if(ch >= '0' && ch <= '9') return true;
-        }
-        return false;
-    }
-};
 
 
 namespace layer5
@@ -141,219 +30,41 @@ public:
 
 }
 
-template <class TFacet>
-bool has_facet(const locale& loc);
 
-template<>
-inline bool has_facet<ctype<char> >(const locale&)
-{
-    return true;
+
 }
 
-template<>
-inline const ctype<char>& use_facet(const locale&)
+
+struct locale : internal::locale_base_base
 {
-    static ctype<char> facet;
+    // Maps closely to the GNU interpretation/combination of
+    // ISO 639-1 and ISO 3166 (i.e. en_US)
+    // https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html
+    // https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html
+    typedef internal::locale_code::values iso;
+    typedef internal::encodings::values encodings;
 
-    return facet;
-}
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+    template <iso iso_code, encodings encoding>
+    using type = internal::locale<iso_code, encoding>;
+#else
+    // FIX: We have to find a way to inherited class specialization
+    // to work before this itself can work.  PGGCC-25
+    //template <iso iso_code, encodings encoding>
+    //struct type : internal::locale<iso_code, encoding> {};
+#endif
 
-template <class TChar>
-inline bool isspace(TChar ch, const locale& loc)
+    typedef internal::classic_locale_type classic_type;
+    // DEBT: c++03 doesn't like below line.  Find out why
+    //typedef internal::locale<iso::C, encodings::ASCII> classic_type;
+
+    inline static classic_type classic() { return classic_type(); }
+};
+
+template <class TChar, class TLocale>
+inline bool isspace(TChar ch, const TLocale& loc)
 {
     return use_facet<ctype<TChar> >(loc).is(ctype_base::space, ch);
 }
 
-
-// DEBT: Consolidate all this with char_base_traits
-template <class TChar, class InputIt>
-class num_get
-{
-public:
-    typedef TChar char_type;
-    typedef InputIt iter_type;
-
-private:
-
-    // TODO: Do a LUT since bounds checking to detect invalid hex chars likely is fastest.  See:
-    // https://stackoverflow.com/questions/34365746/whats-the-fastest-way-to-convert-hex-to-integer-in-c
-    // Also consider a cut-down one with only maybe 64 characters instead of 128 or 256, because unless
-    // we do 256 we have to do bounds checking anyway
-
-
-    // Lifted from
-    // https://stackoverflow.com/questions/221001/performance-question-fastest-way-to-convert-hexadecimal-char-to-its-number-valu
-    template <class T>
-    void get_integer_ascii_hexadecimal_unchecked(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        v = 0;
-
-        // Doesn't detect errors
-
-        for(; i < (end - 1); ++i)
-        {
-            char_type c = *i;
-
-            c|=0x20;
-
-            c = c<='9'? c+0xD0 : c+0xA9;
-
-            v <<= 4;
-            v += c;
-        }
-
-        err |= ios_base::eofbit;
-    }
-
-
-    // DEBT: We can likely place this elsewhere since it doesn't actually need 'this'
-    //       though it being locale-bound may affect that down the line
-    template <unsigned base, class T>
-    iter_type get_unsigned_integer_ascii(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        typedef estd::internal::char_base_traits<base> char_base_traits;
-        typedef typename char_base_traits::int_type int_type;
-
-        v = 0;
-        // Since we are using forward-only iterators, we can't retain an
-        // old 'i' to compare against
-        bool good = false;
-
-        for(; i != end; ++i, good = true)
-        {
-            int_type n = char_base_traits::from_char_with_test(*i);
-
-            if(n != char_base_traits::eol())
-            {
-                estd::internal::raise_and_add(v, char_base_traits::base(), n);
-            }
-            else
-            {
-                if(!good)
-                    err |= ios_base::failbit;
-
-                return i;
-            }
-        }
-
-        err |= ios_base::eofbit;
-        return i;
-    }
-
-    template <class T>
-    iter_type get_signed_integer_ascii_decimal(iter_type i, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        bool negative = false;
-
-        // TODO: Might be able to merely copy this iterator and to this evaluation
-        // at the end.  Perhaps do a specialization for this based on policy
-        if(*i == '-')
-        {
-            negative = true;
-            ++i;
-        }
-
-        i = get_unsigned_integer_ascii<10>(i, end, err, str, v);
-
-        if(negative) v = -v;
-
-        return i;
-    }
-
-public:
-    /*
-    template <typename T>
-    iter_type get(iter_type in, iter_type end,
-        estd::ios_base& str,
-        estd::ios_base::iostate& err,
-        T& v) const; */
-
-    template <typename T>
-    iter_type get_integer_ascii(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
-
-        if(basefield == estd::ios_base::dec)
-        {
-            return get_signed_integer_ascii_decimal(in, end, err, str, v);
-        }
-        else if(basefield == estd::ios_base::hex)
-        {
-            // No real negative in hex, so presume caller knows this and passed in a
-            // signed type for their own convenience
-            return get_unsigned_integer_ascii<16>(in, end, err, str, v);
-        }
-
-        return in;
-    }
-
-
-    template <typename T>
-    iter_type get_unsigned_ascii(iter_type in, iter_type end,
-        ios_base::iostate& err, ios_base& str, T& v) const
-    {
-        const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
-
-        if(basefield == estd::ios_base::dec)
-        {
-            get_unsigned_integer_ascii<10>(in, end, err, str, v);
-        }
-        else if(basefield == estd::ios_base::hex)
-        {
-            get_unsigned_integer_ascii<16>(in, end, err, str, v);
-        }
-
-        return in;
-    }
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, unsigned& v) const
-    {
-        return get_unsigned_ascii(in, end, err, str, v);
-    }
-
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, unsigned short& v) const
-    {
-        return get_unsigned_ascii(in, end, err, str, v);
-    }
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, short& v) const
-    {
-        return get_integer_ascii(in, end, err, str, v);
-    }
-
-
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, int& v) const
-    {
-        return get_integer_ascii(in, end, err, str, v);
-    }
-
-    iter_type get(iter_type in, iter_type end,
-        ios_base& str, ios_base::iostate& err, long& v) const
-    {
-        return get_integer_ascii(in, end, err, str, v);
-    }
-};
-
-/*
- * Can't remember if this is possible / how to do it
-template <class TChar, class InputIt>
-template <>
-inline typename num_get<TChar, InputIt>::iter_type num_get<TChar, InputIt>::get<long>(
-    iter_type in,
-    iter_type end, estd::ios_base::iostate& err, long& v) const
-{
-    return in;
 }
- */
-
-}}

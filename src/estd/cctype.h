@@ -1,6 +1,9 @@
 #pragma once
 
-// DEBT: All these expect ASCII "C" locale
+#include "internal/cctype.h"
+#include "internal/locale/ctype.h"
+
+// DEBT: Revamp all these to use locale's ctype
 namespace estd {
 
 inline int isupper(int ch)
@@ -20,12 +23,12 @@ inline int isalpha(int ch)
 
 inline int isspace(int ch)
 {
-    return ch == ' ';
+    return internal::ascii_isspace(ch);
 }
 
 inline int isdigit(int ch)
 {
-    return '0' <= ch && ch <= '9';
+    return internal::ascii_isdigit(ch);
 }
 
 }
