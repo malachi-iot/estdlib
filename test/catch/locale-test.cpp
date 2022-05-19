@@ -265,7 +265,7 @@ TEST_CASE("locale")
                 // just char_type, iter_type
                 auto n = use_facet<num_get<streambuf_type>>(fmt.getloc());
 
-                n.get(sb, {}, fmt, state, v);
+                n.get(sb, {}, fmt2, state, v);
 
                 REQUIRE(state == eofbit);
                 REQUIRE(v == test::uint1);

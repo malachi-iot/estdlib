@@ -240,11 +240,11 @@ struct use_facet_helper<
     TLocale>
     //internal::classic_locale_type>
 {
+    typedef TLocale locale_type;
     typedef num_get<
         typename TStreambuf::char_type,
-        estd::istreambuf_iterator<TStreambuf> > facet_type;
+        estd::istreambuf_iterator<TStreambuf>, locale_type > facet_type;
     //typedef internal::classic_locale_type locale_type;
-    typedef TLocale locale_type;
 
     static facet_type use_facet(locale_type) { return facet_type(); }
 };
