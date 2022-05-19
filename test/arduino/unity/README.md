@@ -11,6 +11,6 @@ Shared unity tests with esp32 rtos + visualdsp
 
 |   Date  | Vendor    | Platform      | Result |
 | ------- | --------- | --------------| ------ |
-| 18MAY22 | Microchip | ARM SAMD21 m0 | Pass   |
-| 18MAY22 | Microchip | AVR 32u4      | Pass   |
+| 19MAY22 | Microchip | ARM SAMD21 m0 | Pass   |
+| 19MAY22 | Microchip | AVR 32u4      | Pass   |
 | 20APR22 | Espressif | ESP32S        | Pass   |
