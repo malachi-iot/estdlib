@@ -35,7 +35,7 @@ private:
         // Documentation [1] indicates to favor the latter
         template <unsigned base, class TIncomingLocale, class T>
         static iter_type get_signed_integer(iter_type i, iter_type end,
-            ios_base& str, ios_base::iostate& err, TIncomingLocale l, T& v)
+            ios_base::iostate& err, TIncomingLocale l, T& v)
         {
             iterated::num_get<base, char_type, TIncomingLocale> n(l);
 
@@ -52,6 +52,14 @@ private:
 
             err |= ios_base::eofbit;
             return i;
+        }
+
+
+        template <unsigned base, class TIncomingLocale, class T>
+        inline static iter_type get_signed_integer(iter_type i, iter_type end,
+            ios_base&, ios_base::iostate& err, TIncomingLocale l, T& v)
+        {
+            return get_signed_integer<base>(i, end, err,l, v);
         }
     };
 
@@ -190,21 +198,38 @@ private:
     // Also consider a cut-down one with only maybe 64 characters instead of 128 or 256, because unless
     // we do 256 we have to do bounds checking anyway
 
+    // NOTE: Keeping this private just so we don't offer too many non standard options
+    template <unsigned base, typename T>
+    inline iter_type get(iter_type in, iter_type end, ios_base::iostate& err, T& v) const
+    {
+        return _helper::template get_signed_integer<base>(in, end, err, locale_type(), v);
+    }
+
 
 public:
     // NOTE: Non standard call.  locale is picked up from use_facet
-    // DEBT: Non standard call.  At this time only supports base 10/16 time
+    // DEBT: Non standard call.  At this time only supports base 8/10/16 time
     template <typename T>
-    iter_type get(iter_type in, iter_type end, ios_base& str, ios_base::iostate& err, T& v) const
+    inline iter_type get(iter_type in, iter_type end, const ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
     {
-        switch(str.flags() & estd::ios_base::basefield)
+        switch(basefield)
         {
+            case estd::ios_base::oct:
+                return get<8>(in, end, err, v);
+
             case estd::ios_base::hex:
-                return _helper::template get_signed_integer<16>(in, end, str, err, locale_type(), v);
+                return get<16>(in, end, err, v);
 
             default:
-                return _helper::template get_signed_integer<10>(in, end, str, err, locale_type(), v);
+                return get<10>(in, end, err, v);
         }
+    }
+
+    // NOTE: Non standard call.  locale is picked up from use_facet
+    template <typename T>
+    iter_type get(iter_type in, iter_type end, const ios_base& str, ios_base::iostate& err, T& v) const
+    {
+        return get(in, end, str.flags() & estd::ios_base::basefield, err, v);
     }
 
     template <typename T, class TStreambuf, class TBase>
