@@ -13,6 +13,7 @@
 #include <estd/cctype.h>
 //#include <estd/locale.h>
 #include "estd/exp/memory_pool2.h"
+#include <estd/exp/array.h>
 
 
 struct TestA {};
@@ -734,6 +735,34 @@ TEST_CASE("experimental tests")
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 #endif
+    SECTION("nibble array")
+    {
+        typedef estd::experimental::nibble nibble_type;
+        estd::array<nibble_type, 8> a;
+
+        a[0] = 5;
+        a[2] = 6;
+        a[3] = 7;
+
+        REQUIRE(a[0] == 5);
+        REQUIRE(a[1] == 0);
+
+        auto it = a.begin();
+
+        REQUIRE(*it == 5);
+
+        ++it;
+
+        REQUIRE(*it == 0);
+
+        ++it;
+
+        REQUIRE(*it == 6);
+        REQUIRE(*++it == 7);
+        REQUIRE(*--it == 6);
+        REQUIRE(*--it == 0);
+        REQUIRE(*--it == 5);
+    }
 }
 
 #pragma GCC diagnostic pop
