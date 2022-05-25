@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     string-test.cpp
     test-data.h
     type-traits-test.cpp
+    typeinfo-test.cpp
     tuple-test.cpp
     vector-test.cpp
     utility-test.cpp
