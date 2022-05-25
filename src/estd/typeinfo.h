@@ -54,7 +54,9 @@ struct system_type_info_index
         i_int32,
         i_uint32,
         i_char,
-        i_uchar
+        i_uchar,
+
+        end
     };
 };
 
@@ -120,6 +122,22 @@ inline const char* type_name_helper(unsigned idx);
 
 template <unsigned group, typename Enabled>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx);
+
+// DEBT: Recursion tidily works here, but
+// https://quuxplusone.github.io/blog/2018/07/23/metafilter/
+// tells us iterating would be better
+template <unsigned group, unsigned N, unsigned max>
+struct _reverse_type_in_range
+{
+    typedef typename estd::conditional<
+        (N < max),
+        _reverse_type_in_range<group, N + 1, max>,
+        false_type
+        >::type type;
+
+    CONSTEXPR static bool value =
+        type::value | !estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value;
+};
 
 /// If any type infos up to N + 3 are available, value is true
 /// \tparam group

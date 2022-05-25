@@ -60,14 +60,31 @@ TEST_CASE("typeinfo tests")
     }
     SECTION("internal")
     {
-
-
         const char* result = experimental::type_name_helper3(0);
         REQUIRE(result == "int");
         result = experimental::type_name_helper3(2);
         REQUIRE(result == "bool");
         result = experimental::type_name_helper3(4);
         result = experimental::type_name_helper3(8);
+
+        bool v = experimental::_reverse_type_in_range<
+            0, experimental::system_type_info_index::end, 10>::value;
+
+        REQUIRE(v == false);
+
+        v = experimental::_reverse_type_in_range<
+            0,
+            experimental::system_type_info_index::i_uint8,
+            experimental::system_type_info_index::i_uint8 + 4>::value;
+
+        REQUIRE(v == true);
+
+        v = experimental::_reverse_type_in_range<
+                0,
+                experimental::system_type_info_index::i_uint8,
+                experimental::system_type_info_index::i_uint8>::value;
+
+        REQUIRE(v == false);
     }
 }
 
