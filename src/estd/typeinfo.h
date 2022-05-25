@@ -35,36 +35,57 @@ ESTD_TYPEINFO_HELPER(int8_t, 2)
 ESTD_TYPEINFO_HELPER(char, 3)
 ESTD_TYPEINFO_HELPER(unsigned char, 4)
 
-namespace internal {
+namespace experimental {
+
+template <unsigned N, typename Enabled>
+inline const char* type_name_helper(unsigned idx);
+
+struct type_eof_tag {};
 
 template <unsigned N>
-struct reverse_type_info
+struct reverse_type_info : type_eof_tag
 {
-    static const char* test1(unsigned index) { return nullptr; }
+    static const char* name() { return nullptr; }
+
+    //static const char* test1(unsigned index) { return nullptr; }
 };
 
 template <>
-struct reverse_type_info<0>
+struct reverse_type_info<2>
 {
-    static const char* test1(unsigned index)
-    {
-        if(index == 0) return "test1";
-
-        reverse_type_info<1>::test1(index);
-    }
+    static const char* name() { return "index2"; }
 };
 
+template <unsigned N, estd::enable_if_t<
+    estd::is_base_of<type_eof_tag, reverse_type_info<N> >::value, int
+    > = 0>
+inline const char* type_name_helper(unsigned idx)
+{
+    return nullptr;
+}
 
-template <unsigned N>
+template <unsigned N, estd::enable_if_t<
+    //true, int
+    !(estd::is_base_of<type_eof_tag, reverse_type_info<N> >::value), int
+    > = 0>
 inline const char* type_name_helper(unsigned idx)
 {
     switch(idx)
     {
         case N:
-            break;
+            return reverse_type_info<N>::name();
 
         case N + 1:
-            return type_name_helper<N>(idx);
+            return reverse_type_info<N + 1>::name();
+
+        case N + 2:
+            return reverse_type_info<N + 2>::name();
+
+        case N + 3:
+            return reverse_type_info<N + 3>::name();
+
+        default:
+            return type_name_helper<N + 4>(idx);
     }
 }
 

@@ -29,6 +29,11 @@ TEST_CASE("typeinfo tests")
 
     type_index i_bool(type_info<bool>());
     type_index i_int(type_info<int>());
+
+    const char* result = experimental::type_name_helper<0>(0);
+    result = experimental::type_name_helper<2>(2);
+    result = experimental::type_name_helper<4>(4);
+    result = experimental::type_name_helper<8>(8);
 }
 
 #pragma GCC diagnostic pop
