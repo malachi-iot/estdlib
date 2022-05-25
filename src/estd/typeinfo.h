@@ -66,12 +66,16 @@ struct system_type_info_index
 #define ESTD_Q(x) #x
 #define ESTD_QUOTE(x) Q(x)
 
+// DEBT: May need an alternate version if platform doesn't support
+// static CONSTEXPR char* name_ here.
+
 #define ESTD_TYPEINFO_HELPER(type, group, idx)  \
 template <>                         \
 struct type_info<type>              \
-{                                   \
+{                                               \
+    static CONSTEXPR char* name_ = ESTD_Q(type); \
     static const char* name()       \
-    { return ESTD_Q(type); }        \
+    { return name_; }        \
                                     \
     ESTD_CPP_CONSTEXPR_RET                       \
     static std::size_t hashcode()   \
@@ -123,10 +127,14 @@ inline const char* type_name_helper(unsigned idx);
 template <unsigned group, typename Enabled>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx);
 
+/// More or less, "is there anybody out there" for the specified N-range in 'group'
+/// \tparam group
+/// \tparam N starting point
+/// \tparam max end point, defaults to N + 16
 // DEBT: Recursion tidily works here, but
 // https://quuxplusone.github.io/blog/2018/07/23/metafilter/
 // tells us iterating would be better
-template <unsigned group, unsigned N, unsigned max>
+template <unsigned group, unsigned N, unsigned max = N + 16>
 struct _reverse_type_in_range
 {
     typedef typename estd::conditional<
@@ -139,6 +147,7 @@ struct _reverse_type_in_range
         type::value | !estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value;
 };
 
+#if UNUSED
 /// If any type infos up to N + 3 are available, value is true
 /// \tparam group
 /// \tparam N
@@ -170,6 +179,7 @@ struct reverse_type_in_range2 : estd::conditional<
     false_type>
 {
 };
+#endif
 
 
 
@@ -178,20 +188,20 @@ struct reverse_type_in_range2 : estd::conditional<
 // TODO: Do an is_base_of range right up here
 template <unsigned group, unsigned N, estd::enable_if_t<
     //estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value, int
-    !reverse_type_in_range<group, N>::value, int
+    !_reverse_type_in_range<group, N>::value, int
     > = 0>
 inline const char* type_name_helper(unsigned idx)
 {
     return nullptr;
 }
 
-// TODO: Do an is_base_of range right up here
+// Effectively a code generator for type name retrieval
 template <unsigned group, unsigned N, estd::enable_if_t<
     //true, int
     // !(estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value), int
-    reverse_type_in_range<group, N>::value, int
+    _reverse_type_in_range<group, N>::value, int
     > = 0>
-inline const char* type_name_helper(unsigned idx)
+const char* type_name_helper(unsigned idx)
 {
     switch(idx)
     {
@@ -207,14 +217,26 @@ inline const char* type_name_helper(unsigned idx)
         case N + 3:
             return reverse_type_info<group, N + 3>::name();
 
+        case N + 4:
+            return reverse_type_info<group, N + 4>::name();
+
+        case N + 5:
+            return reverse_type_info<group, N + 5>::name();
+
+        case N + 6:
+            return reverse_type_info<group, N + 6>::name();
+
+        case N + 7:
+            return reverse_type_info<group, N + 7>::name();
+
         default:
-            return type_name_helper<group, N + 4>(idx);
+            return type_name_helper<group, N + 8>(idx);
     }
 }
 
 template <unsigned group, estd::enable_if_t<
     //estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value, int
-    !reverse_type_in_range<group, 0>::value, int
+    !_reverse_type_in_range<group, 0>::value, int
 > = 0>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 {
@@ -223,7 +245,7 @@ inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 
 template <unsigned group, estd::enable_if_t<
     // !(estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value), int
-    reverse_type_in_range<group, 0>::value, int
+    _reverse_type_in_range<group, 0>::value, int
 > = 0>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 {
@@ -235,16 +257,16 @@ inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
             return type_name_helper<group, 0>(idx);
 
         case group + 10:
-            return type_name_helper<group + 1, 0>(idx);
+            return type_name_helper<group + 10, 0>(idx);
 
         case group + 20:
-            return type_name_helper<group + 2, 0>(idx);
+            return type_name_helper<group + 20, 0>(idx);
 
         case group + 30:
-            return type_name_helper<group + 3, 0>(idx);
+            return type_name_helper<group + 30, 0>(idx);
 
         default:
-            return type_name_helper2<group + 4>(grp_idx, idx);
+            return type_name_helper2<group + 40>(grp_idx, idx);
     }
 }
 
