@@ -43,6 +43,10 @@ struct system_type_info_index
 {
     enum values
     {
+        i_int,
+        i_long,
+        i_bool,
+
         i_int8,
         i_uint8,
         i_int16,
@@ -87,24 +91,27 @@ struct type_info<int>
 {
     static const char* name() { return "int"; }
 
-    static std::size_t hashcode() { return 0; }
+    static std::size_t hashcode() { return experimental::system_type_info_index::i_int; }
 };
 
 namespace experimental {
-template <> struct reverse_type_info<0, 0>
+template <> struct reverse_type_info<0, experimental::system_type_info_index::i_int>
 {
     static const char* name() { return type_info<int>::name(); }
 };
 }
 
-
-
-ESTD_TYPEINFO_HELPER(long, 0, 1)
-ESTD_TYPEINFO_HELPER(bool, 0, 2)
-ESTD_TYPEINFO_HELPER(int8_t, 0, 3)
+ESTD_TYPEINFO_HELPER(long, 0, experimental::system_type_info_index::i_long)
+ESTD_TYPEINFO_HELPER(bool, 0, experimental::system_type_info_index::i_bool)
+ESTD_TYPEINFO_HELPER(int8_t, 0, experimental::system_type_info_index::i_int8)
 //ESTD_TYPEINFO_HELPER(uint8_t)
-ESTD_TYPEINFO_HELPER(char, 0, 4)
-ESTD_TYPEINFO_HELPER(unsigned char, 0, 5)
+ESTD_TYPEINFO_HELPER(char, 0, experimental::system_type_info_index::i_char)
+ESTD_TYPEINFO_HELPER(unsigned char, 0, experimental::system_type_info_index::i_uchar)
+ESTD_TYPEINFO_HELPER(int16_t, 0, experimental::system_type_info_index::i_int16)
+ESTD_TYPEINFO_HELPER(uint16_t, 0, experimental::system_type_info_index::i_uint16)
+// Collision with int on x64 debian gcc
+//ESTD_TYPEINFO_HELPER(int32_t, 0, experimental::system_type_info_index::i_int32)
+ESTD_TYPEINFO_HELPER(uint32_t, 0, experimental::system_type_info_index::i_uint32)
 
 namespace experimental {
 
@@ -114,18 +121,57 @@ inline const char* type_name_helper(unsigned idx);
 template <unsigned group, typename Enabled>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx);
 
+/// If any type infos up to N + 3 are available, value is true
+/// \tparam group
+/// \tparam N
+template <unsigned group, unsigned N>
+struct reverse_type_in_range
+{
+    typedef typename estd::conditional<
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 1> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 2> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 3> >::value,
+        true_type,
+        false_type>::type type;
 
+    static CONSTEXPR bool value =
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 1> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 2> >::value |
+        !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 3> >::value;
+};
+
+template <unsigned group, unsigned N>
+struct reverse_type_in_range2 : estd::conditional<
+    !estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value |
+    !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 1> >::value |
+    !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 2> >::value |
+    !estd::is_base_of<type_eof_tag, reverse_type_info<group, N + 3> >::value,
+    true_type,
+    false_type>
+{
+};
+
+
+
+
+
+// TODO: Do an is_base_of range right up here
 template <unsigned group, unsigned N, estd::enable_if_t<
-    estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value, int
+    //estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value, int
+    !reverse_type_in_range<group, N>::value, int
     > = 0>
 inline const char* type_name_helper(unsigned idx)
 {
     return nullptr;
 }
 
+// TODO: Do an is_base_of range right up here
 template <unsigned group, unsigned N, estd::enable_if_t<
     //true, int
-    !(estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value), int
+    // !(estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value), int
+    reverse_type_in_range<group, N>::value, int
     > = 0>
 inline const char* type_name_helper(unsigned idx)
 {
@@ -149,7 +195,8 @@ inline const char* type_name_helper(unsigned idx)
 }
 
 template <unsigned group, estd::enable_if_t<
-    estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value, int
+    //estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value, int
+    !reverse_type_in_range<group, 0>::value, int
 > = 0>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 {
@@ -157,23 +204,25 @@ inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 }
 
 template <unsigned group, estd::enable_if_t<
-    //true, int
-    !(estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value), int
+    // !(estd::is_base_of<type_eof_tag, reverse_type_info<group, 0> >::value), int
+    reverse_type_in_range<group, 0>::value, int
 > = 0>
 inline const char* type_name_helper2(unsigned grp_idx, unsigned idx)
 {
+    // DEBT: Hardcoded groups at 10 spaces apart, mapping to
+    // experimental::system_type_info_index.  General idea is good but needs work
     switch(grp_idx)
     {
         case group:
             return type_name_helper<group, 0>(idx);
 
-        case group + 1:
+        case group + 10:
             return type_name_helper<group + 1, 0>(idx);
 
-        case group + 2:
+        case group + 20:
             return type_name_helper<group + 2, 0>(idx);
 
-        case group + 3:
+        case group + 30:
             return type_name_helper<group + 3, 0>(idx);
 
         default:
