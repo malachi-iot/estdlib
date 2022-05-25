@@ -41,6 +41,18 @@ template <> struct reverse_type_info<0, 2>
 }
 */
 
+template <typename T>
+static void dispatched(type_info<T> t)
+{
+
+}
+
+template <typename T>
+static void dispatched2(T t)
+{
+
+}
+
 TEST_CASE("typeinfo tests")
 {
     SECTION("type_info")
@@ -85,6 +97,11 @@ TEST_CASE("typeinfo tests")
                 experimental::system_type_info_index::i_uint8>::value;
 
         REQUIRE(v == false);
+    }
+    SECTION("dispatcher")
+    {
+        // Not working
+        //experimental::type_dispatcher<0, 0>(0, &dispatched2);
     }
 }
 

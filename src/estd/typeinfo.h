@@ -69,11 +69,11 @@ struct system_type_info_index
 // DEBT: May need an alternate version if platform doesn't support
 // static CONSTEXPR char* name_ here.
 
-#define ESTD_TYPEINFO_HELPER(type, group, idx)  \
+#define ESTD_TYPEINFO_HELPER(type_name, group, idx)  \
 template <>                         \
-struct type_info<type>              \
+struct type_info<type_name>              \
 {                                               \
-    static CONSTEXPR char* name_ = ESTD_Q(type); \
+    static CONSTEXPR char* name_ = ESTD_Q(type_name); \
     static const char* name()       \
     { return name_; }        \
                                     \
@@ -84,8 +84,9 @@ struct type_info<type>              \
                                                 \
 namespace experimental {                            \
 template <> struct reverse_type_info<group, idx>    \
-{   \
-    static const char* name() { return type_info<type>::name(); }   \
+{                                               \
+    typedef type_info<type_name> type;       \
+    static const char* name() { return type::name(); }   \
 };  \
 }
 
@@ -185,7 +186,6 @@ struct reverse_type_in_range2 : estd::conditional<
 
 
 
-// TODO: Do an is_base_of range right up here
 template <unsigned group, unsigned N, estd::enable_if_t<
     //estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value, int
     !_reverse_type_in_range<group, N>::value, int
@@ -274,6 +274,55 @@ inline const char* type_name_helper3(unsigned _idx)
 {
     decoded_type_index_type d = decode_type_index(_idx);
     return type_name_helper2<0>(d.first, d.second);
+}
+
+
+template <unsigned group, unsigned N, typename F, estd::enable_if_t<
+    //estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value, int
+    !_reverse_type_in_range<group, N>::value, int
+> = 0>
+inline const char* type_dispatcher(unsigned idx, F&& f)
+{
+    return nullptr;
+}
+
+// Effectively a code generator for type name retrieval
+template <unsigned group, unsigned N, typename F, estd::enable_if_t<
+    //true, int
+    // !(estd::is_base_of<type_eof_tag, reverse_type_info<group, N> >::value), int
+    _reverse_type_in_range<group, N>::value, int
+> = 0>
+const char* type_dispatcher(unsigned idx, F&& f)
+{
+    switch(idx)
+    {
+        case N:
+            return f(typename reverse_type_info<group, N>::type{});
+
+        case N + 1:
+            return f(typename reverse_type_info<group, N + 1>::type{});
+
+        case N + 2:
+            return f(typename reverse_type_info<group, N + 2>::type{});
+
+        case N + 3:
+            return f(typename reverse_type_info<group, N + 3>::type{});
+
+        case N + 4:
+            return f(typename reverse_type_info<group, N + 4>::type{});
+
+        case N + 5:
+            return f(typename reverse_type_info<group, N + 5>::type{});
+
+        case N + 6:
+            return f(typename reverse_type_info<group, N + 6>::type{});
+
+        case N + 7:
+            return f(typename reverse_type_info<group, N + 7>::type{});
+
+        default:
+            return type_dispatcher<group, N + 8>(idx, std::move(f));
+    }
 }
 
 }
