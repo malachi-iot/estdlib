@@ -43,19 +43,32 @@ template <> struct reverse_type_info<0, 2>
 
 TEST_CASE("typeinfo tests")
 {
-    REQUIRE(type_info<int>::name() == "int");
-    REQUIRE(type_info<bool>::name() == "bool");
-    REQUIRE(type_info<bool>::hashcode() != type_info<int>::hashcode());
+    SECTION("type_info")
+    {
+        REQUIRE(type_info<int>::name() == "int");
+        REQUIRE(type_info<bool>::name() == "bool");
+        REQUIRE(type_info<bool>::hashcode() != type_info<int>::hashcode());
+    }
+    SECTION("type_index")
+    {
+        type_info<bool> dummy;
+        type_index i_bool (dummy);
+        type_index i_int (type_info<int>{});
 
-    type_index i_bool(type_info<bool>());
-    type_index i_int(type_info<int>());
+        REQUIRE(i_int.name() == "int");
+        REQUIRE(i_bool.name() == "bool");
+    }
+    SECTION("internal")
+    {
 
-    const char* result = experimental::type_name_helper3(0);
-    REQUIRE(result == "long");
-    result = experimental::type_name_helper3(2);
-    REQUIRE(result == "int8_t");
-    result = experimental::type_name_helper3(4);
-    result = experimental::type_name_helper3(8);
+
+        const char* result = experimental::type_name_helper3(0);
+        REQUIRE(result == "int");
+        result = experimental::type_name_helper3(2);
+        REQUIRE(result == "bool");
+        result = experimental::type_name_helper3(4);
+        result = experimental::type_name_helper3(8);
+    }
 }
 
 #pragma GCC diagnostic pop

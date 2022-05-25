@@ -39,6 +39,21 @@ struct type_info_groups
     };
 };
 
+struct system_type_info_index
+{
+    enum values
+    {
+        i_int8,
+        i_uint8,
+        i_int16,
+        i_uint16,
+        i_int32,
+        i_uint32,
+        i_char,
+        i_uchar
+    };
+};
+
 
 }
 
@@ -72,15 +87,24 @@ struct type_info<int>
 {
     static const char* name() { return "int"; }
 
-    static std::size_t hashcode() { return __COUNTER__; }
+    static std::size_t hashcode() { return 0; }
 };
 
-ESTD_TYPEINFO_HELPER(long, 0, 0)
-ESTD_TYPEINFO_HELPER(bool, 0, 1)
-ESTD_TYPEINFO_HELPER(int8_t, 0, 2)
+namespace experimental {
+template <> struct reverse_type_info<0, 0>
+{
+    static const char* name() { return type_info<int>::name(); }
+};
+}
+
+
+
+ESTD_TYPEINFO_HELPER(long, 0, 1)
+ESTD_TYPEINFO_HELPER(bool, 0, 2)
+ESTD_TYPEINFO_HELPER(int8_t, 0, 3)
 //ESTD_TYPEINFO_HELPER(uint8_t)
-ESTD_TYPEINFO_HELPER(char, 0, 3)
-ESTD_TYPEINFO_HELPER(unsigned char, 0, 4)
+ESTD_TYPEINFO_HELPER(char, 0, 4)
+ESTD_TYPEINFO_HELPER(unsigned char, 0, 5)
 
 namespace experimental {
 

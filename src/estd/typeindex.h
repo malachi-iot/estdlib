@@ -16,6 +16,11 @@ struct type_index
     type_index(type_info<T> v) : index(v.hashcode())
     {
     }
+
+    const char* name()
+    {
+        return experimental::type_name_helper3(index);
+    }
 };
 
 }
