@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     memory-test.cpp
     misc-test.cpp
     optional-test.cpp
+    ostream-test.cpp
     priority-queue-test.cpp
     queue-test.cpp
     stack-test.cpp
