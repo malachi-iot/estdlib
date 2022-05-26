@@ -86,6 +86,11 @@ unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
 template <class T>
 struct unique_handle;
 
+// At this time, shared_handle is almost just a syntactic helper on top of unique_handle
+// because we:
+// a) haven't fully cracked the nut on shared_ptr, which is necessary (probably need a memory pool)
+// b) when possible, will favor types which inherently already do ref counting, like pbufs - which
+//    one could use directly with unique_handle since deallocate phase directly flows into ref decrement
 template <class T>
 struct shared_handle;
 

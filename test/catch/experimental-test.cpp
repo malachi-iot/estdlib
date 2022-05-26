@@ -80,8 +80,14 @@ typedef int fake_handle2;
 
 namespace estd { namespace experimental {
 
+struct fake_handle2_struct
+{
+    estd::layer1::string<64> s;
+    int refcount = 0;
+};
+
 static std::map<const fake_handle, const char*> fake_handle_map;
-static std::map<fake_handle2, estd::layer1::string<64> > fake_handle2_map;
+static std::map<fake_handle2, fake_handle2_struct> fake_handle2_map;
 
 fake_handle fake_handle_alloc(const char* s)
 {
@@ -115,7 +121,53 @@ void fake_handle_dealloc(fake_handle h)
     fake_handle_map.erase(it);
 }
 
-struct fake_handle_container
+
+fake_handle2 fake_handle2_alloc(const char* s)
+{
+    static int counter = 0;
+
+    char* val = new char[strlen(s)];
+
+    fake_handle2_struct _s;
+
+    _s.refcount = 0;
+    _s.s = s;
+
+    fake_handle2_map.emplace(
+        std::make_pair(++counter, std::move(_s)));
+
+    return counter;
+}
+
+int fake_handle2_getref(fake_handle2 h)
+{
+    return fake_handle2_map[h].refcount;
+}
+
+void fake_handle2_ref(fake_handle2 h)
+{
+    ++fake_handle2_map[h].refcount;
+}
+
+const char* fake_handle2_str(fake_handle2 h)
+{
+    return fake_handle2_map[h].s.data();
+}
+
+void fake_handle2_dealloc(fake_handle2 h)
+{
+    if(h == -1)
+    {
+        // aka null / invalid handle
+        return;
+    }
+
+    auto it = fake_handle2_map.find(h);
+    if(--(it->second.refcount) == 0)
+        fake_handle2_map.erase(it);
+}
+
+struct fake_handle_traits
 {
     typedef fake_handle handle_type;
     typedef estd::layer1::optional<handle_type, -1> optional_type;
@@ -131,10 +183,30 @@ struct fake_handle_container
     }
 };
 
-struct fake_handle2_container
+struct fake_handle2_traits
 {
     typedef fake_handle2 handle_type;
     typedef estd::layer1::optional<handle_type, -1> optional_type;
+
+    static inline handle_type allocate(const char* s)
+    {
+        return fake_handle2_alloc(s);
+    }
+
+    static inline void deallocate(handle_type h)
+    {
+        fake_handle2_dealloc(h);
+    }
+
+    static inline void reference(handle_type h)
+    {
+        fake_handle2_ref(h);
+    }
+
+    static inline int reference_count(handle_type h)
+    {
+        return fake_handle2_getref(h);
+    }
 };
 
 template <class THandleTraits>
@@ -142,7 +214,7 @@ struct unique_handle_base2
 {
     typedef THandleTraits container_type;
     typedef typename container_type::optional_type optional_type;
-    typedef typename fake_handle_container::handle_type handle_type;
+    typedef typename container_type::handle_type handle_type;
     optional_type value_;
 
     inline void do_delete()
@@ -186,17 +258,39 @@ struct unique_handle_base2
 };
 
 template <>
-struct unique_handle<fake_handle_container> : unique_handle_base2<fake_handle_container>
+struct unique_handle<fake_handle_traits> : unique_handle_base2<fake_handle_traits>
 {
-    typedef unique_handle_base2<fake_handle_container> base_type;
+    typedef unique_handle_base2<fake_handle_traits> base_type;
 
     ESTD_CPP_FORWARDING_CTOR(unique_handle);
 };
 
 template <>
-struct unique_handle<fake_handle2_container>
+struct unique_handle<fake_handle2_traits>
 {
 
+};
+
+template <class THandleTraits>
+struct shared_handle_base : unique_handle_base2<THandleTraits>
+{
+    typedef THandleTraits handle_traits;
+    typedef typename handle_traits::handle_type handle_type;
+
+    handle_type value_;
+
+    int use_count() const
+    {
+        return handle_traits::reference_count(value_);
+    }
+};
+
+template <>
+struct shared_handle<fake_handle2_traits> : shared_handle_base<fake_handle2_traits>
+{
+    typedef shared_handle_base<fake_handle2_traits> base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(shared_handle);
 };
 
 
@@ -727,7 +821,7 @@ TEST_CASE("experimental tests")
     {
         SECTION("fake_handle")
         {
-            estd::experimental::unique_handle<estd::experimental::fake_handle_container>
+            estd::experimental::unique_handle<estd::experimental::fake_handle_traits>
                 val, val2, val3, val4("Hello");
             val.reset(estd::experimental::fake_handle_alloc("hi2u"));
 
@@ -738,7 +832,7 @@ TEST_CASE("experimental tests")
         }
         SECTION("fake_handle2")
         {
-            estd::experimental::unique_handle<estd::experimental::fake_handle2_container> val2;
+            estd::experimental::unique_handle<estd::experimental::fake_handle2_traits> val2;
         }
     }
 }
