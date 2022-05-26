@@ -97,8 +97,19 @@ fake_handle fake_handle_alloc(const char* s)
     return counter;
 }
 
+const char* fake_handle_str(fake_handle h)
+{
+    return fake_handle_map[h];
+}
+
 void fake_handle_dealloc(fake_handle h)
 {
+    if(h == -1)
+    {
+        // aka null / invalid handle
+        return;
+    }
+
     auto it = fake_handle_map.find(h);
     delete [] it->second;
     fake_handle_map.erase(it);
@@ -108,6 +119,16 @@ struct fake_handle_container
 {
     typedef fake_handle handle_type;
     typedef estd::layer1::optional<handle_type, -1> optional_type;
+
+    static inline handle_type allocate(const char* s)
+    {
+        return fake_handle_alloc(s);
+    }
+
+    static inline void deallocate(handle_type h)
+    {
+        fake_handle_dealloc(h);
+    }
 };
 
 struct fake_handle2_container
@@ -119,12 +140,48 @@ struct fake_handle2_container
 template <>
 struct unique_handle<fake_handle_container>
 {
-    fake_handle_container::optional_type value_;
+    typedef fake_handle_container container_type;
+    typedef container_type::optional_type optional_type;
+    typedef typename fake_handle_container::handle_type handle_type;
+    optional_type value_;
+
+    inline void do_delete()
+    {
+        if(value_.has_value())
+            container_type::deallocate(*value_);
+    }
+
+    template <class ...TArgs>
+    unique_handle(TArgs&&...args) :
+        value_{container_type::allocate(std::forward<TArgs>(args)...)}
+    {
+    }
+
+    unique_handle() = default;
+    unique_handle(handle_type h) : value_(h) {}
+
+    ~unique_handle()
+    {
+        do_delete();
+    }
 
     void release()
     {
-        if(value_.has_value())
-            fake_handle_dealloc(*value_);
+        value_.reset();
+    }
+
+    optional_type get() const { return value_; }
+
+    void reset(handle_type h)
+    {
+        do_delete();
+        value_ = h;
+    }
+
+    void reset()
+    {
+        do_delete();
+        value_.reset();
     }
 };
 
@@ -660,8 +717,21 @@ TEST_CASE("experimental tests")
 #endif
     SECTION("unique/shared handle")
     {
-        estd::experimental::unique_handle<estd::experimental::fake_handle_container> val;
-        estd::experimental::unique_handle<estd::experimental::fake_handle2_container> val2;
+        SECTION("fake_handle")
+        {
+            estd::experimental::unique_handle<estd::experimental::fake_handle_container>
+                val, val2, val3, val4("Hello");
+            val.reset(estd::experimental::fake_handle_alloc("hi2u"));
+
+            REQUIRE(strcmp(
+                estd::experimental::fake_handle_str(*val.get()), "hi2u") == 0);
+            REQUIRE(strcmp(
+                estd::experimental::fake_handle_str(*val4.get()), "Hello") == 0);
+        }
+        SECTION("fake_handle2")
+        {
+            estd::experimental::unique_handle<estd::experimental::fake_handle2_container> val2;
+        }
     }
 }
 
