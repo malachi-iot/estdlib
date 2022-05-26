@@ -838,8 +838,28 @@ TEST_CASE("experimental tests")
     SECTION("shared resource")
     {
         using namespace estd::experimental;
+        int v = 0;
 
-        shared_resource<int, shared_resource_pointer_traits<int> > val1;
+        SECTION("basic")
+        {
+            shared_resource<int*, shared_resource_pointer_traits<int> > val1;
+        }
+        SECTION("copy")
+        {
+            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<int*, shared_resource_pointer_traits<int> > val2(val1);
+
+            REQUIRE(val1.use_count() == 2);
+            REQUIRE(val2.use_count() == 2);
+        }
+        SECTION("move")
+        {
+            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<int*, shared_resource_pointer_traits<int> > val2(std::move(val1));
+
+            REQUIRE(val1.use_count() == 0);
+            REQUIRE(val2.use_count() == 1);
+        }
     }
 }
 

@@ -110,9 +110,19 @@ public:
 template <class T>
 struct shared_resource_pointer_traits
 {
-    inline static void deleter(T& v)
+    static inline void relinquish(T** v)
     {
-        v.~T();
+        *v = nullptr;
+    }
+
+    static inline bool owned(T* v)
+    {
+        return v != nullptr;
+    }
+
+    inline static void deleter(T* v)
+    {
+        v->~T();
     }
 };
 
@@ -129,11 +139,23 @@ struct shared_resource
 
     T get() const { return value_; }
 
-    void add(T value, shared_resource* prev)
+    //template <class Y>
+    void reset() NOEXCEPT
+    {
+        resource_traits::relinquish(&value_);
+        remove();
+    }
+
+    void add(shared_resource* prev)
     {
         // splice ourselves into circular list
         next = prev->next;
         prev->next = this;
+    }
+
+    void add(T value, shared_resource* prev)
+    {
+        add(prev);
 
         value_ = value;
     }
@@ -144,6 +166,7 @@ struct shared_resource
         {
             // we're last one, so actually deallocate
             // DEBT: More of a traditional allocater_traits would be nice here
+            // DEBT: Would it be better to do this at dtor phase?
             resource_traits::deleter(value_);
             return;
         }
@@ -161,9 +184,13 @@ struct shared_resource
 
     int use_count() const
     {
-        int counter = 0;
+        if(!resource_traits::owned(value_)) return 0;
 
-        for(shared_resource* i = next; i; ++counter, i = i->next);
+        if(this == next) return 1;
+
+        int counter = 1;
+
+        for(shared_resource* i = next; i != this; ++counter, i = i->next);
 
         return counter;
     }
@@ -171,11 +198,28 @@ struct shared_resource
     shared_resource() : next(this) {} // just us
 
     template <typename Y>
-    shared_resource() {}
+    shared_resource(shared_resource<Y, resource_traits>& r)
+    {
+        add(r.value_, &r);
+    }
+
+    template <typename Y>
+    shared_resource(shared_resource<Y, resource_traits>&& r)
+    {
+        add(r.value_, &r);
+        r.reset();
+    }
+
+    template <typename Y>
+    shared_resource(const Y& y) : next(this)
+    {
+        value_ = y;
+    }
 
     ~shared_resource()
     {
-        remove();
+        if(resource_traits::owned(value_))
+            remove();
     }
 };
 
