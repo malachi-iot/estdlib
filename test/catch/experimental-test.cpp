@@ -137,11 +137,11 @@ struct fake_handle2_container
     typedef estd::layer1::optional<handle_type, -1> optional_type;
 };
 
-template <>
-struct unique_handle<fake_handle_container>
+template <class THandleTraits>
+struct unique_handle_base2
 {
-    typedef fake_handle_container container_type;
-    typedef container_type::optional_type optional_type;
+    typedef THandleTraits container_type;
+    typedef typename container_type::optional_type optional_type;
     typedef typename fake_handle_container::handle_type handle_type;
     optional_type value_;
 
@@ -152,15 +152,15 @@ struct unique_handle<fake_handle_container>
     }
 
     template <class ...TArgs>
-    unique_handle(TArgs&&...args) :
+    unique_handle_base2(TArgs&&...args) :
         value_{container_type::allocate(std::forward<TArgs>(args)...)}
     {
     }
 
-    unique_handle() = default;
-    unique_handle(handle_type h) : value_(h) {}
+    unique_handle_base2() = default;
+    unique_handle_base2(handle_type h) : value_(h) {}
 
-    ~unique_handle()
+    ~unique_handle_base2()
     {
         do_delete();
     }
@@ -183,6 +183,14 @@ struct unique_handle<fake_handle_container>
         do_delete();
         value_.reset();
     }
+};
+
+template <>
+struct unique_handle<fake_handle_container> : unique_handle_base2<fake_handle_container>
+{
+    typedef unique_handle_base2<fake_handle_container> base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(unique_handle);
 };
 
 template <>
