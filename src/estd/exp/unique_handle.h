@@ -110,6 +110,9 @@ public:
 template <class T>
 struct shared_resource_pointer_traits
 {
+    typedef T element_type;
+    typedef T* value_type;
+
     static inline void relinquish(T** v)
     {
         *v = nullptr;
@@ -130,14 +133,15 @@ template <class T, class TTraits>
 struct shared_resource
 {
     typedef TTraits resource_traits;
+    typedef typename resource_traits::value_type value_type;
 
-    T value_;
+    value_type value_;
 
     shared_resource* next;
 
     operator bool() const { return resource_traits::is_present(value_); }
 
-    T get() const { return value_; }
+    const value_type& get() const { return value_; }
 
     //template <class Y>
     void reset() NOEXCEPT
@@ -153,7 +157,7 @@ struct shared_resource
         prev->next = this;
     }
 
-    void add(T value, shared_resource* prev)
+    void add(const value_type& value, shared_resource* prev)
     {
         add(prev);
 
@@ -221,6 +225,11 @@ struct shared_resource
         if(resource_traits::owned(value_))
             remove();
     }
+};
+
+template <class T, class TTraits>
+struct weak_resource : protected shared_resource<T, TTraits>
+{
 };
 
 }}
