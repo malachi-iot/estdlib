@@ -1,6 +1,9 @@
 #pragma once
 
+#include <estd/optional.h>
+
 namespace estd { namespace experimental {
+
 
 // Moved here from internal/dynamic_array.h
 // A memory lock/unlock oriented take on handles
@@ -73,5 +76,24 @@ unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
 }
 #endif
 #endif
+
+template <class T>
+struct unique_handle;
+
+template <class T>
+struct shared_handle;
+
+template <class T, class TOptional = estd::optional<T> >
+class unique_handle_base
+{
+    TOptional value_;
+
+public:
+    typedef T element_type;
+
+    operator bool() const { return value_.has_value(); }
+
+    const element_type& operator*() const { return value_; }
+};
 
 }}

@@ -73,7 +73,17 @@ estd::layer1::string<128> provider_string;
 #endif
 #endif
 
+typedef int fake_handle;
 
+namespace estd { namespace experimental {
+
+template <>
+struct unique_handle<fake_handle>
+{
+
+};
+
+}}
 
 TEST_CASE("experimental tests")
 {
@@ -596,6 +606,11 @@ TEST_CASE("experimental tests")
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 #endif
+    SECTION("unique/shared handle")
+    {
+        estd::experimental::unique_handle<int> val;
+        estd::experimental::unique_handle<fake_handle> val2;
+    }
 }
 
 #pragma GCC diagnostic pop
