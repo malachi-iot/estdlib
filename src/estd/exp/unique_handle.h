@@ -107,4 +107,76 @@ public:
     const element_type& operator*() const { return value_; }
 };
 
+template <class T>
+struct shared_resource_pointer_traits
+{
+    inline static void deleter(T& v)
+    {
+        v.~T();
+    }
+};
+
+template <class T, class TTraits>
+struct shared_resource
+{
+    typedef TTraits resource_traits;
+
+    T value_;
+
+    shared_resource* next;
+
+    operator bool() const { return resource_traits::is_present(value_); }
+
+    T get() const { return value_; }
+
+    void add(T value, shared_resource* prev)
+    {
+        // splice ourselves into circular list
+        next = prev->next;
+        prev->next = this;
+
+        value_ = value;
+    }
+
+    void remove()
+    {
+        if(next == this)
+        {
+            // we're last one, so actually deallocate
+            // DEBT: More of a traditional allocater_traits would be nice here
+            resource_traits::deleter(value_);
+            return;
+        }
+
+        // DEBT: We'll want to bounds check, getting caught in this infinite
+        // loop would be nasty.
+        // DEBT: On an overall sense, we want something like FEATURE_ESTD_STRICT, but for
+        // bounds checking
+        shared_resource* i = next;
+
+        // unsplice ourself out of the circular linked list
+        for(; i->next != this; i = i->next);
+        i->next = next;
+    }
+
+    int use_count() const
+    {
+        int counter = 0;
+
+        for(shared_resource* i = next; i; ++counter, i = i->next);
+
+        return counter;
+    }
+
+    shared_resource() : next(this) {} // just us
+
+    template <typename Y>
+    shared_resource() {}
+
+    ~shared_resource()
+    {
+        remove();
+    }
+};
+
 }}

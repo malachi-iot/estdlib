@@ -835,6 +835,12 @@ TEST_CASE("experimental tests")
             estd::experimental::unique_handle<estd::experimental::fake_handle2_traits> val2;
         }
     }
+    SECTION("shared resource")
+    {
+        using namespace estd::experimental;
+
+        shared_resource<int, shared_resource_pointer_traits<int> > val1;
+    }
 }
 
 #pragma GCC diagnostic pop
