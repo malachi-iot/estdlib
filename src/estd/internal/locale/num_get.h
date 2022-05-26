@@ -213,10 +213,10 @@ public:
     // save a few bytes because ios_base doesn't need to exist and basefield can be optimized away.  Then again,
     // optimizers are so good they probably can optimize away ios_base as well.  May revert back to ios_base& only
     // flavor
+    template <typename T>
 #if __cplusplus >= 201402L
     [[deprecated("Unsure if we are keeping this API.  Use get(iter_type, iter_type, ios_base, ios_base::iostate, T) instead")]]
 #endif
-    template <typename T>
     inline iter_type get(iter_type in, iter_type end, const ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
     {
         switch(basefield)
