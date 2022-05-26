@@ -13,6 +13,7 @@
 #include <estd/cctype.h>
 //#include <estd/locale.h>
 #include "estd/exp/memory_pool2.h"
+#include "estd/exp/unique_handle.h"
 
 
 struct TestA {};
