@@ -74,14 +74,66 @@ estd::layer1::string<128> provider_string;
 #endif
 
 typedef int fake_handle;
+typedef int fake_handle2;
+
+#include <map>
 
 namespace estd { namespace experimental {
 
+static std::map<const fake_handle, const char*> fake_handle_map;
+static std::map<fake_handle2, estd::layer1::string<64> > fake_handle2_map;
+
+fake_handle fake_handle_alloc(const char* s)
+{
+    static fake_handle counter = 0;
+
+    char* val = new char[strlen(s)];
+
+    strcpy(val, s);
+
+    fake_handle_map.emplace(
+        std::make_pair(++counter, val));
+
+    return counter;
+}
+
+void fake_handle_dealloc(fake_handle h)
+{
+    auto it = fake_handle_map.find(h);
+    delete [] it->second;
+    fake_handle_map.erase(it);
+}
+
+struct fake_handle_container
+{
+    typedef fake_handle handle_type;
+    typedef estd::layer1::optional<handle_type, -1> optional_type;
+};
+
+struct fake_handle2_container
+{
+    typedef fake_handle2 handle_type;
+    typedef estd::layer1::optional<handle_type, -1> optional_type;
+};
+
 template <>
-struct unique_handle<fake_handle>
+struct unique_handle<fake_handle_container>
+{
+    fake_handle_container::optional_type value_;
+
+    void release()
+    {
+        if(value_.has_value())
+            fake_handle_dealloc(*value_);
+    }
+};
+
+template <>
+struct unique_handle<fake_handle2_container>
 {
 
 };
+
 
 }}
 
@@ -608,8 +660,8 @@ TEST_CASE("experimental tests")
 #endif
     SECTION("unique/shared handle")
     {
-        estd::experimental::unique_handle<int> val;
-        estd::experimental::unique_handle<fake_handle> val2;
+        estd::experimental::unique_handle<estd::experimental::fake_handle_container> val;
+        estd::experimental::unique_handle<estd::experimental::fake_handle2_container> val2;
     }
 }
 

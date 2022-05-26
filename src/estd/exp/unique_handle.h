@@ -77,6 +77,12 @@ unique_handle<T, TAllocator> make_unique_handle(TArgs&&...args)
 #endif
 #endif
 
+// as per
+// https://stackoverflow.com/questions/48242171/is-it-possible-to-get-the-name-of-a-type-alias-in-c
+// https://stackoverflow.com/questions/20419869/is-it-possible-to-define-an-implementation-template-specialization-as-typedef-of
+// We will likely have to do wrapper classes around handles.  At first this seemed like a bummer, but I remember
+// I make a habit of doing this anyway to C++-ize them (i.e. embr::lwip namespace)
+
 template <class T>
 struct unique_handle;
 
