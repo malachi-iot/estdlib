@@ -35,6 +35,7 @@
 
 #ifndef ESTD_MCU_STM32
 // TODO: Next up look for Atmel/Microchip ARM
+#include "arch/atmelsam.h"
 #endif
 
 #endif

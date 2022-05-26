@@ -51,10 +51,20 @@
 
 // Adapted from https://stackoverflow.com/questions/1505582/determining-32-vs-64-bit-in-c
 // more reference https://sourceforge.net/p/predef/wiki/Architectures/
-#if __x86_64__ || __ppc64__ || __aarch64__
+#if __x86_64__ || __ppc64__
 #define ESTD_ARCH_BITNESS   64
+#elif __aarch64__
+#define ESTD_ARCH_BITNESS   64
+#ifndef ESTD_MCU_ARM
+#define ESTD_MCU_ARM        __ARM_ARCH
+#endif
 #elif defined(__AVR__)
 #define ESTD_ARCH_BITNESS   16
+#elif defined(__arm__)
+#define ESTD_ARCH_BITNESS   32
+#ifndef ESTD_MCU_ARM
+#define ESTD_MCU_ARM        __ARM_ARCH
+#endif
 #else
 #if FEATURE_ESTD_STRICT
 #warning "Assuming 32 bit architecture"

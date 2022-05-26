@@ -12,8 +12,8 @@ void setup()
 
 void loop()
 {
-    static int counter = 0;
+    static unsigned counter = 0;
 
-    cout << "hi2u" << ++counter << estd::endl;
+    cout << F("Hello World: ") << ++counter << estd::endl;
     delay(1000);
 }

@@ -7,6 +7,7 @@
 ## Quality Updates & Bug Fixes
 
 * Fixed last-character bug in `internal::chooser`
+* Fixed `ostream` integer output glitch on m0
 
 ## Known Issues & Limitations
 

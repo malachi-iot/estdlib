@@ -83,6 +83,13 @@ template<> inline CONSTEXPR uint8_t maxStringLength<int64_t>() { return 20;}
 template<> inline CONSTEXPR uint8_t maxStringLength<float>() { return 32; }
 template<> inline CONSTEXPR uint8_t maxStringLength<double>() { return 64; }
 
+// DEBT: Unsure why exactly on some platforms int/int32_t seem to overlap and others
+// don't.
+#if ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32
+template<> inline CONSTEXPR uint8_t maxStringLength<int>() { return 11; }
+template<> inline CONSTEXPR uint8_t maxStringLength<unsigned>() { return 11; }
+#endif
+
 
 extern const char VALIDATE_NULLSTR_ERROR[];
 extern const char VALIDATE_STRTOOLONG_ERROR[];
