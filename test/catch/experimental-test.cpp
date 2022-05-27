@@ -842,14 +842,14 @@ TEST_CASE("experimental tests")
 
         SECTION("basic")
         {
-            shared_resource<int*, shared_resource_pointer_traits<int> > val1;
+            shared_resource<shared_resource_pointer_traits<int> > val1;
         }
         SECTION("copy")
         {
             v = 7;
 
-            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
-            shared_resource<int*, shared_resource_pointer_traits<int> > val2(val1);
+            shared_resource<shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<shared_resource_pointer_traits<int> > val2(val1);
 
             REQUIRE(val1.use_count() == 2);
             REQUIRE(val2.use_count() == 2);
@@ -861,8 +861,8 @@ TEST_CASE("experimental tests")
         {
             v = 77;
 
-            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
-            shared_resource<int*, shared_resource_pointer_traits<int> > val2(std::move(val1));
+            shared_resource<shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<shared_resource_pointer_traits<int> > val2(std::move(val1));
 
             REQUIRE(val1.use_count() == 0);
             REQUIRE(val2.use_count() == 1);
@@ -875,9 +875,9 @@ TEST_CASE("experimental tests")
         {
             v = 6;
 
-            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
-            shared_resource<int*, shared_resource_pointer_traits<int> > val2(val1);
-            weak_resource<int*, shared_resource_pointer_traits<int> > val3(val1);
+            shared_resource<shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<shared_resource_pointer_traits<int> > val2(val1);
+            weak_resource<shared_resource_pointer_traits<int> > val3(val1);
 
             REQUIRE(val1.use_count() == 2);
 

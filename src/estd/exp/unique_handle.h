@@ -129,8 +129,10 @@ struct shared_resource_pointer_traits
     }
 };
 
-template <class T, class TTraits>
-class shared_resource
+struct shared_resources_tag {};
+
+template <class TTraits>
+class shared_resource : shared_resources_tag
 {
 protected:
     typedef TTraits resource_traits;
@@ -278,24 +280,34 @@ public:
         relinquish();
     }
 
-    template <typename Y>
-    shared_resource(shared_resource<Y, resource_traits>& r)
+    template <typename YTraits>
+    shared_resource(shared_resource<YTraits>& r)
     {
         add(r.value_, &r);
     }
 
-    template <typename Y>
-    shared_resource(shared_resource<Y, resource_traits>&& r)
+    template <typename YTraits>
+    shared_resource(shared_resource<YTraits>&& r)
     {
         add(r.value_, &r);
         r.reset();
     }
 
+    //template <typename Y,
+        //estd::enable_if_t<!estd::is_base_of<shared_resources_tag, Y>::value, bool> = true>
     template <typename Y>
     shared_resource(const Y& y) : next(this)
     {
         value_ = y;
     }
+
+    // NOTE: Be careful, all this floaty template-y stuff, if you don't get it just right,
+    // this particular constructor quietly takes over and makes things confusing.  Above
+    // value_ = y flavor does too.
+    shared_resource(const shared_resource& copy_from) = delete;
+    // DEBT: Figure out why this particular one we can't delete, but above copy
+    // constructor we can
+    //shared_resource(shared_resource&& copy_from) = delete;
 
     ~shared_resource()
     {
@@ -303,11 +315,11 @@ public:
     }
 };
 
-template <class T, class TTraits>
-class weak_resource : protected shared_resource<T, TTraits>
+template <class TTraits>
+class weak_resource : protected shared_resource<TTraits>
 {
-    typedef shared_resource<T, TTraits> base_type;
-    typedef shared_resource<T, TTraits> shared_type;
+    typedef shared_resource<TTraits> base_type;
+    typedef shared_resource<TTraits> shared_type;
     typedef typename base_type::iterator iterator;
 
     shared_type* first_shared() const
@@ -327,7 +339,8 @@ public:
 
     weak_resource() NOEXCEPT {}
 
-    weak_resource(shared_resource<T, TTraits>& r) NOEXCEPT
+    template <class YTraits>
+    weak_resource(shared_resource<YTraits>& r) NOEXCEPT
     {
         base_type::add(&r);
     }
