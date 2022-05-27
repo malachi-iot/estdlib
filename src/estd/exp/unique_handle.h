@@ -149,6 +149,11 @@ struct shared_resource
 
     operator bool() const { return owned(); }
 
+    inline bool party_of_one() const
+    {
+        return next == this;
+    }
+
     void relinquish() NOEXCEPT
     {
         resource_traits::relinquish(&value_);
@@ -212,7 +217,7 @@ struct shared_resource
 
     void remove()
     {
-        if(next == this)
+        if(party_of_one())
         {
             // we're last one, so actually deallocate
             // DEBT: More of a traditional allocater_traits would be nice here
@@ -236,7 +241,7 @@ struct shared_resource
     {
         if(!owned()) return 0;
 
-        if(this == next) return 1;
+        if(party_of_one()) return 1;
 
         int counter = 1;
 
@@ -290,12 +295,42 @@ template <class T, class TTraits>
 struct weak_resource : protected shared_resource<T, TTraits>
 {
     typedef shared_resource<T, TTraits> base_type;
+    typedef shared_resource<T, TTraits> shared_type;
+    typedef typename base_type::iterator iterator;
+
+    shared_type* first_shared() const
+    {
+        iterator i = base_type::next;
+
+        ++i;
+
+        return *i == this ? nullptr : *i;
+    }
+
+    bool expired() const
+    {
+        return first_shared() != nullptr;
+    }
 
     weak_resource() NOEXCEPT {}
 
     weak_resource(shared_resource<T, TTraits>& r) NOEXCEPT
     {
         base_type::add(&r);
+    }
+
+    // Not const because we ARE our own control block also
+    shared_type lock() NOEXCEPT
+    {
+        shared_type* first = first_shared();
+
+        return first == nullptr ? shared_type{} : shared_type(*first);
+    }
+
+    // By nature we are already relinquished, so only do a remove
+    void reset() NOEXCEPT
+    {
+        base_type::remove();
     }
 };
 

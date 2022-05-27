@@ -883,7 +883,21 @@ TEST_CASE("experimental tests")
 
             REQUIRE(*val1.get() == 6);
             REQUIRE(*val2.get() == 6);
-            //REQUIRE(*val3.lock().get() == 6);
+
+            REQUIRE(*val3.lock().get() == 6);
+
+            // Temporary auto removes itself right away.  Not 100% sure we can always count on that,
+            // but pretty cool
+            REQUIRE(val1.use_count() == 2);
+
+            auto val4 = val3.lock();
+
+            REQUIRE(val1.use_count() == 3);
+            REQUIRE(val4.use_count() == 3);
+
+            val4.reset();
+
+            REQUIRE(val4.use_count() == 0);
         }
     }
 }
