@@ -118,7 +118,7 @@ struct shared_resource_pointer_traits
         *v = nullptr;
     }
 
-    static inline bool owned(T* v)
+    static inline bool owned(const T* v)
     {
         return v != nullptr;
     }
@@ -134,19 +134,30 @@ struct shared_resource
 {
     typedef TTraits resource_traits;
     typedef typename resource_traits::value_type value_type;
+    typedef shared_resource this_type;
 
     value_type value_;
 
     shared_resource* next;
 
-    operator bool() const { return resource_traits::is_present(value_); }
-
     const value_type& get() const { return value_; }
+
+    bool owned() const NOEXCEPT
+    {
+        return resource_traits::owned(value_);
+    }
+
+    operator bool() const { return owned(); }
+
+    void relinquish() NOEXCEPT
+    {
+        resource_traits::relinquish(&value_);
+    }
 
     //template <class Y>
     void reset() NOEXCEPT
     {
-        resource_traits::relinquish(&value_);
+        relinquish();
         remove();
     }
 
@@ -163,6 +174,41 @@ struct shared_resource
 
         value_ = value;
     }
+
+    // This iterator moves forward through the linked list skipping weak pointers
+    struct iterator
+    {
+        this_type* i;
+
+        iterator(this_type* i) : i{i} {}
+
+        iterator& operator++()
+        {
+            do
+            {
+                i = i->next;
+
+            // Only weak_resources are in the list but not owned
+            // shared_resources always are owned while in the list
+            }   while(!i->owned());
+
+            return *this;
+        }
+
+        this_type* operator*() const { return i; }
+
+        bool operator!=(const iterator& compare_to) const
+        {
+            return compare_to.i != i;
+        }
+
+    };
+
+    typedef const iterator const_iterator;
+
+    // Since it's a circle
+    iterator end() { return iterator(this); }
+    const_iterator end() const { return iterator(this); }
 
     void remove()
     {
@@ -186,20 +232,33 @@ struct shared_resource
         i->next = next;
     }
 
-    int use_count() const
+    int use_count()     // const // DEBT: Bring back const once we work out constness of iterator
     {
-        if(!resource_traits::owned(value_)) return 0;
+        if(!owned()) return 0;
 
         if(this == next) return 1;
 
         int counter = 1;
 
-        for(shared_resource* i = next; i != this; ++counter, i = i->next);
+        iterator i = this, end = this->end();
+
+        // Skip past one, we can't do traditional begin != end because begin and end are the same
+        // Additionally, we need to use the iterator's smarts to skip past a possible weak pointer
+        // at the beginning
+        ++i;
+
+        for(; i != end; ++counter, ++i);
+        //for(shared_resource* i = next; i != this; ++counter, i = i->next);
 
         return counter;
     }
 
-    shared_resource() : next(this) {} // just us
+    shared_resource() : next(this)  // just us
+    {
+        // DEBT: Optimization, when using 'optional' it will auto-init things, so no need
+        // to init again here in that case
+        relinquish();
+    }
 
     template <typename Y>
     shared_resource(shared_resource<Y, resource_traits>& r)
@@ -230,6 +289,14 @@ struct shared_resource
 template <class T, class TTraits>
 struct weak_resource : protected shared_resource<T, TTraits>
 {
+    typedef shared_resource<T, TTraits> base_type;
+
+    weak_resource() NOEXCEPT {}
+
+    weak_resource(shared_resource<T, TTraits>& r) NOEXCEPT
+    {
+        base_type::add(&r);
+    }
 };
 
 }}

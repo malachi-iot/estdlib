@@ -846,19 +846,44 @@ TEST_CASE("experimental tests")
         }
         SECTION("copy")
         {
+            v = 7;
+
             shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
             shared_resource<int*, shared_resource_pointer_traits<int> > val2(val1);
 
             REQUIRE(val1.use_count() == 2);
             REQUIRE(val2.use_count() == 2);
+
+            REQUIRE(*val1.get() == 7);
+            REQUIRE(*val2.get() == 7);
         }
         SECTION("move")
         {
+            v = 77;
+
             shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
             shared_resource<int*, shared_resource_pointer_traits<int> > val2(std::move(val1));
 
             REQUIRE(val1.use_count() == 0);
             REQUIRE(val2.use_count() == 1);
+
+            REQUIRE(val1 == false);
+            //REQUIRE(*val1.get() == 77);   // Would be undefined, and likely crash
+            REQUIRE(*val2.get() == 77);
+        }
+        SECTION("weak resource")
+        {
+            v = 6;
+
+            shared_resource<int*, shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<int*, shared_resource_pointer_traits<int> > val2(val1);
+            weak_resource<int*, shared_resource_pointer_traits<int> > val3(val1);
+
+            REQUIRE(val1.use_count() == 2);
+
+            REQUIRE(*val1.get() == 6);
+            REQUIRE(*val2.get() == 6);
+            //REQUIRE(*val3.lock().get() == 6);
         }
     }
 }
