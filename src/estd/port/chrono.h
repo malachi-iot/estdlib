@@ -197,6 +197,11 @@ typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::typ
     CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
                          const duration<Rep2,Period2>& rhs );
 
+template< class Rep1, class Period1, class Rep2, class Period2 >
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
+    CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
+                         const duration<Rep2,Period2>& rhs );
+
 template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs);
@@ -309,6 +314,13 @@ public:
         return *this;
     }
 
+    time_point operator+(const duration& d)
+    {
+        time_point copied(*this);
+        copied += d;
+        return copied;
+    }
+
     static inline CONSTEXPR time_point min() NOEXCEPT
     {
         return time_point(duration::min());
@@ -332,6 +344,10 @@ CONSTEXPR bool operator>=( const time_point<Clock,Dur1>& lhs,
 
 template< class Clock, class Dur1, class Dur2 >
 CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
+                          const time_point<Clock,Dur2>& rhs );
+
+template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
 
