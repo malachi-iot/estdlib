@@ -130,8 +130,9 @@ struct shared_resource_pointer_traits
 };
 
 template <class T, class TTraits>
-struct shared_resource
+class shared_resource
 {
+protected:
     typedef TTraits resource_traits;
     typedef typename resource_traits::value_type value_type;
     typedef shared_resource this_type;
@@ -140,14 +141,12 @@ struct shared_resource
 
     shared_resource* next;
 
-    const value_type& get() const { return value_; }
-
     bool owned() const NOEXCEPT
     {
         return resource_traits::owned(value_);
     }
 
-    operator bool() const { return owned(); }
+    bool is_weak() const { return !owned(); }
 
     inline bool party_of_one() const
     {
@@ -157,13 +156,6 @@ struct shared_resource
     void relinquish() NOEXCEPT
     {
         resource_traits::relinquish(&value_);
-    }
-
-    //template <class Y>
-    void reset() NOEXCEPT
-    {
-        relinquish();
-        remove();
     }
 
     void add(shared_resource* prev)
@@ -181,39 +173,48 @@ struct shared_resource
     }
 
     // This iterator moves forward through the linked list skipping weak pointers
-    struct iterator
+    // Good const guidance from
+    // https://quuxplusone.github.io/blog/2018/12/01/const-iterator-antipatterns/
+    // Not going whole hog because this is an internal-only iterator
+    template <bool is_const>
+    class iterator_base
     {
-        this_type* i;
+        typedef typename estd::conditional<is_const,
+            const this_type*, this_type*>::type pointer;
 
-        iterator(this_type* i) : i{i} {}
+        pointer i;
 
-        iterator& operator++()
+    public:
+        iterator_base(pointer i) : i{i} {}
+
+        iterator_base& operator++()
         {
             do
             {
                 i = i->next;
 
-            // Only weak_resources are in the list but not owned
+            // Only weak_resources are both in the list but not owned
             // shared_resources always are owned while in the list
-            }   while(!i->owned());
+            }   while(i->is_weak());
 
             return *this;
         }
 
-        this_type* operator*() const { return i; }
+        pointer operator*() const { return i; }
 
-        bool operator!=(const iterator& compare_to) const
+        bool operator!=(const iterator_base& compare_to) const
         {
             return compare_to.i != i;
         }
 
     };
 
-    typedef const iterator const_iterator;
+    typedef iterator_base<false> iterator;
+    typedef iterator_base<true> const_iterator;
 
     // Since it's a circle
     iterator end() { return iterator(this); }
-    const_iterator end() const { return iterator(this); }
+    const_iterator end() const { return const_iterator(this); }
 
     void remove()
     {
@@ -237,7 +238,19 @@ struct shared_resource
         i->next = next;
     }
 
-    int use_count()     // const // DEBT: Bring back const once we work out constness of iterator
+public:
+    void reset() NOEXCEPT
+    {
+        relinquish();
+        remove();
+    }
+
+    const value_type& get() const { return value_; }
+
+    operator bool() const { return owned(); }
+
+
+    int use_count() const // DEBT: Bring back const once we work out constness of iterator
     {
         if(!owned()) return 0;
 
@@ -245,7 +258,7 @@ struct shared_resource
 
         int counter = 1;
 
-        iterator i = this, end = this->end();
+        const_iterator i(this), end(this->end());
 
         // Skip past one, we can't do traditional begin != end because begin and end are the same
         // Additionally, we need to use the iterator's smarts to skip past a possible weak pointer
@@ -286,13 +299,12 @@ struct shared_resource
 
     ~shared_resource()
     {
-        if(resource_traits::owned(value_))
-            remove();
+        if(owned()) remove();
     }
 };
 
 template <class T, class TTraits>
-struct weak_resource : protected shared_resource<T, TTraits>
+class weak_resource : protected shared_resource<T, TTraits>
 {
     typedef shared_resource<T, TTraits> base_type;
     typedef shared_resource<T, TTraits> shared_type;
@@ -307,6 +319,7 @@ struct weak_resource : protected shared_resource<T, TTraits>
         return *i == this ? nullptr : *i;
     }
 
+public:
     bool expired() const
     {
         return first_shared() != nullptr;
