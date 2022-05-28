@@ -123,7 +123,7 @@ public:
 
 
 template <class TLocale>
-struct ctype<char, TLocale> : internal::ctype<char, TLocale> {};
+class ctype<char, TLocale> : public internal::ctype<char, TLocale> {};
 
 namespace internal {
 

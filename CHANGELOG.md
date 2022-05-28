@@ -2,6 +2,8 @@ v 0.x.x - XXXXX22
 
 ## Quality Updates & Bug Fixes
 
+* disabling `chrono_literals` on CLang as it generates warnings and doesn't compile right
+
 # v0.3.1 - 27MAY22
 
 ## Added Features
