@@ -361,6 +361,12 @@ inline
 #endif
 namespace chrono_literals {
 
+// CLang allows this during the compile phase, but ignores the definitions and generates
+// a bunch of warnings.  Until we can repair that, CLang is disabled.  In the short term,
+// we only enable these literals for GCC
+#if defined(__GNUC__) && !defined(__clang__)
+#define FEATURE_ESTD_CHRONO_LITERALS 1
+
 // Compiler complains that these are in the reserved suffix category, which is in a sense
 // true - i.e. an actual std::literal::chrono_literals ""s is "correct", but we like to use
 // our own version of seconds, microseconds, etc.
@@ -391,6 +397,9 @@ constexpr chrono::seconds operator "" ns(unsigned long long ms)
 #endif
 
 #pragma GCC diagnostic pop
+#else
+#define FEATURE_ESTD_CHRONO_LITERALS 0
+#endif
 }
 
 }

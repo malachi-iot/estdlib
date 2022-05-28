@@ -362,12 +362,14 @@ TEST_CASE("chrono tests")
 
         REQUIRE(d.count() == 110);
     }
+#if FEATURE_ESTD_CHRONO_LITERALS
     SECTION("literals")
     {
-        using namespace estd::literals;
+        using namespace estd::literals::chrono_literals;
 
         auto s = 10s + 4000ms + 1000000us;
 
         REQUIRE(s.count() == 15);
     }
+#endif
 }
