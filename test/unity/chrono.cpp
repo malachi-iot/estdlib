@@ -77,6 +77,20 @@ static void test_esp_idf_clock()
 #endif
 
 
+#ifdef FEATURE_CPP_USER_LITERAL
+static void test_literals()
+{
+    using namespace estd::literals::chrono_literals;
+
+    estd::chrono::milliseconds s = 10s + 5s;
+
+    s += 5s;
+
+    TEST_ASSERT_EQUAL(20000, s.count());
+}
+#endif
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("chrono tests", "[chrono]")
 #else
@@ -93,6 +107,9 @@ void test_chrono()
 #endif
 #ifdef ESTD_SDK_IDF
     RUN_TEST(test_esp_idf_clock);
+#endif
+#ifdef FEATURE_CPP_USER_LITERAL
+    RUN_TEST(test_literals);
 #endif
 }
 

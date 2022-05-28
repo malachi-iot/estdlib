@@ -27,6 +27,7 @@
 #define FEATURE_CPP_OVERRIDE
 #define FEATURE_CPP_NOEXCEPT
 #define FEATURE_CPP_USER_LITERAL    // https://en.cppreference.com/w/cpp/language/user_literal
+#define FEATURE_CPP_INLINE_NAMESPACE
 
 
 #if defined(__STDC_LIB_EXT1__)

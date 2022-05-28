@@ -3,7 +3,6 @@
  * chrono is rather platform specific at times, so dispatch out here
  * NOTE: When FreeRTOS is in play, it supercedes other bare metal and/or
  *       Arduino time API
- * TODO: Move all this into port/chrono.h
  */
 #pragma once
 

@@ -3,6 +3,7 @@
 ## Added Features
 
 * An iterated bool version of num_get is now available, called `bool_get`
+* Adding more bits and pieces to chrono: + operator, != operator and literals
 
 ## Quality Updates & Bug Fixes
 

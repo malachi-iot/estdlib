@@ -351,13 +351,19 @@ CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
 
+#ifdef FEATURE_CPP_INLINE_NAMESPACE
+inline
+#endif
 namespace literals {
 
+#ifdef FEATURE_CPP_INLINE_NAMESPACE
+inline
+#endif
 namespace chrono_literals {
 
-// spammy warnings make this too obnoxious to enable right now
-#ifdef UNUSED
-
+// Compiler complains that these are in the reserved suffix category, which is in a sense
+// true - i.e. an actual std::literal::chrono_literals ""s is "correct", but we like to use
+// our own version of seconds, microseconds, etc.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wliteral-suffix"
 
@@ -372,12 +378,19 @@ constexpr chrono::seconds operator "" ms(unsigned long long ms)
     return chrono::milliseconds(ms);
 }
 
+constexpr chrono::seconds operator "" us(unsigned long long ms)
+{
+    return chrono::microseconds(ms);
+}
+
+constexpr chrono::seconds operator "" ns(unsigned long long ms)
+{
+    return chrono::nanoseconds(ms);
+}
+
+#endif
+
 #pragma GCC diagnostic pop
-
-#endif
-
-#endif
-
 }
 
 }
@@ -393,4 +406,5 @@ constexpr chrono::seconds operator "" ms(unsigned long long ms)
 #pragma pop_macro("abs")
 #endif
 
-#endif // FEATURE_ESTD_CHRONO
+
+#endif
