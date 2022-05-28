@@ -110,6 +110,12 @@ public:
         return c.back();
     }
 #endif
+
+    // non standard experimental call
+    void sort()
+    {
+        std::push_heap(c.begin(), c.end(), Compare());
+    }
 };
 
 
