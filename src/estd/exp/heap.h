@@ -187,6 +187,7 @@ struct internal_heap
     {
        // sift_down(0);
 
+
         unsigned first_nonleaf_idx = (size() / k) - 1;
         //unsigned first_nonleaf_idx = (size() - 1) / k;
 
@@ -273,6 +274,59 @@ void make_heap( RandomIt first, RandomIt last, Compare comp)
     internal_heap<RandomIt, Compare> heap(first, last, comp);
 
     heap.make();
+}
+
+// following is from
+// https://stackoverflow.com/questions/32672474/how-to-replace-top-element-of-heap-efficiently-withouth-re-establishing-heap-inv
+
+template <typename DifferenceT>
+DifferenceT heap_parent(DifferenceT k)
+{
+    return (k - 1) / 2;
+}
+
+template <typename DifferenceT>
+DifferenceT heap_left(DifferenceT k)
+{
+    return 2 * k + 1;
+}
+
+template<typename RandomIt,
+    typename Compare = estd::less<typename estd::iterator_traits<RandomIt>::value_type> >
+void heapreplace(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    auto const size = last - first;
+    if (size <= 1)
+        return;
+    typename std::iterator_traits<RandomIt>::difference_type k = 0;
+    auto e = std::move(first[k]);
+    auto const max_k = heap_parent(size - 1);
+    while (k <= max_k) {
+        auto max_child = heap_left(k);
+        if (max_child < size - 1 && comp(first[max_child], first[max_child + 1]))
+            ++max_child; // Go to right sibling.
+        if (!comp(e, first[max_child]))
+            break;
+        first[k] = std::move(first[max_child]);
+        k = max_child;
+    }
+
+    first[k] = std::move(e);
+}
+
+template<typename RandomIt,
+    typename Compare = estd::less<typename estd::iterator_traits<RandomIt>::value_type> >
+void heappush(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    auto k = last - first - 1; // k = last valid
+    auto e = std::move(first[k]);
+
+    while (k > 0 && comp(first[heap_parent(k)], e)) {
+        first[k] = std::move(first[heap_parent(k)]);
+        k = heap_parent(k);
+    }
+
+    first[k] = std::move(e);
 }
 
 }}
