@@ -283,12 +283,12 @@ TEST_CASE("priority-queue-test")
             int* begin2 = values2;
             int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
 
-            // DEBT: Undefined behavior if not GCC--- stackoverflow code
-            // depends on a k=2 value for heap tree structure
-            std::make_heap(begin2, end2, std::greater<int>());
-
             SECTION("sanity check")
             {
+                // DEBT: Undefined behavior if not GCC--- stackoverflow code
+                // depends on a k=2 value for heap tree structure
+                std::make_heap(begin2, end2, std::greater<int>());
+
                 REQUIRE(*begin2 == 0);
                 std::pop_heap(begin2, end2--, std::greater<int>());
                 REQUIRE(*begin2 == 1);
@@ -299,6 +299,10 @@ TEST_CASE("priority-queue-test")
             }
             SECTION("heappush")
             {
+                // DEBT: Undefined behavior if not GCC--- stackoverflow code
+                // depends on a k=2 value for heap tree structure
+                std::make_heap(begin2, end2, std::greater<int>());
+
                 *begin2 = 11;
 
                 estd::experimental::heapreplace(begin2, end2, std::greater<int>());
@@ -317,6 +321,26 @@ TEST_CASE("priority-queue-test")
                 REQUIRE(*begin2 == 9);
                 std::pop_heap(begin2, end2--, std::greater<int>());
                 REQUIRE(*begin2 == 11);
+            }
+            SECTION("with our internal heap")
+            {
+                // DEBT: Our heap comparison mechanism is backward
+                estd::experimental::internal_heap<int*, estd::less<int> > heap(begin2, end2);
+
+                heap.make2();
+
+                *begin2 = 11;
+
+                estd::experimental::heapreplace(begin2, end2, std::greater<int>());
+
+                REQUIRE(heap.front() == 1);
+                REQUIRE(heap.pop2() == 2);
+                REQUIRE(heap.pop2() == 3);
+                REQUIRE(heap.pop2() == 5);
+                REQUIRE(heap.pop2() == 7);
+                REQUIRE(heap.pop2() == 9);
+                REQUIRE(heap.pop2() == 11);
+                REQUIRE(heap.pop2() == 34);
             }
         }
     }
