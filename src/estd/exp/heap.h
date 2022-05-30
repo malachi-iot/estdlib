@@ -206,21 +206,14 @@ struct internal_heap
         iterator_type largest = i;
 
         iterator_type left_child = first + ((idx * 2) + 1);
-        //iterator_type right_child = left_child + 1;
-        iterator_type right_child = first + ((idx * 2) + 2);
+        iterator_type right_child = left_child + 1;
 
-        if(comp(*left_child, *largest))
-        {
+        if(right_child < last && comp(*left_child, *largest))
             largest = left_child;
-        }
         else if(right_child < last && comp(*right_child, *largest))
-        {
             largest = right_child;
-        }
         else
-        {
             return;
-        }
 
         swap(i, largest);
         heapify(idx);
@@ -232,12 +225,13 @@ struct internal_heap
         unsigned first_nonleaf_idx = (size() / k) - 1;
         //unsigned first_nonleaf_idx = (size() - 1) / k;
 
-        for(unsigned i = first_nonleaf_idx;;--i)
+        unsigned i = first_nonleaf_idx;
+
+        do
         {
             heapify(i);
-
-            if(i == 0) break;
         }
+        while(i-- > 0);
     }
 
     reference pop2()
