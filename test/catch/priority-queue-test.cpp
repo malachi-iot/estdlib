@@ -146,6 +146,7 @@ TEST_CASE("priority-queue-test")
               100, 509, 407, 34, 7 };
         int* begin2 = values2;
         int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
+        int8_t values3[] = { 1, 5, 9, 3, 2, 0, 15 };
 
         SECTION("std::make_heap")
         {
@@ -288,6 +289,24 @@ TEST_CASE("priority-queue-test")
                 REQUIRE(heap.pop2() == 11);
                 REQUIRE(heap.pop2() == 34); */
             }
+            SECTION("value3 (non-even sized)")
+            {
+                int8_t* begin3 = values3;
+                estd::experimental::internal_heap<int8_t*, estd::less<int> > heap2(
+                    begin3, begin3 + sizeof(values3));
+
+                heap2.make2();
+
+                REQUIRE(heap2.size() == 7);
+
+                REQUIRE(heap2.front() == 0);
+                REQUIRE(heap2.pop2() == 1);
+                REQUIRE(heap2.pop2() == 2);
+                REQUIRE(heap2.pop2() == 3);
+                REQUIRE(heap2.pop2() == 5);
+                REQUIRE(heap2.pop2() == 9);
+                REQUIRE(heap2.pop2() == 15);
+            }
         }
         SECTION("stackoverflow guidance")
         {
@@ -339,7 +358,7 @@ TEST_CASE("priority-queue-test")
 
                 *begin2 = 11;
 
-                estd::experimental::heapreplace(begin2, end2, std::greater<int>());
+                estd::experimental::heapreplace(begin2, end2 - 1, std::greater<int>());
 
                 REQUIRE(heap.front() == 1);
                 REQUIRE(heap.pop2() == 2);
@@ -349,6 +368,10 @@ TEST_CASE("priority-queue-test")
                 REQUIRE(heap.pop2() == 9);
                 REQUIRE(heap.pop2() == 11);
                 REQUIRE(heap.pop2() == 34);
+                REQUIRE(heap.pop2() == 98);
+                REQUIRE(heap.pop2() == 100);
+                REQUIRE(heap.pop2() == 407);
+                REQUIRE(heap.pop2() == 509);
             }
         }
     }
