@@ -379,19 +379,19 @@ constexpr chrono::seconds operator "" s(unsigned long long s)
     return chrono::seconds(s);
 }
 
-constexpr chrono::seconds operator "" ms(unsigned long long ms)
+constexpr chrono::milliseconds operator "" ms(unsigned long long ms)
 {
     return chrono::milliseconds(ms);
 }
 
-constexpr chrono::seconds operator "" us(unsigned long long ms)
+constexpr chrono::microseconds operator "" us(unsigned long long rep)
 {
-    return chrono::microseconds(ms);
+    return chrono::microseconds(rep);
 }
 
-constexpr chrono::seconds operator "" ns(unsigned long long ms)
+constexpr chrono::nanoseconds operator "" ns(unsigned long long rep)
 {
-    return chrono::nanoseconds(ms);
+    return chrono::nanoseconds(rep);
 }
 
 #endif

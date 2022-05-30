@@ -2,7 +2,9 @@ v 0.x.x - XXXXX22
 
 ## Quality Updates & Bug Fixes
 
-* disabling `chrono_literals` on CLang as it generates warnings and doesn't compile right
+* `chrono_literals` operators: 
+    * disabling on CLang as it generates warnings and doesn't compile right
+    * was returning `seconds` incorrectly instead of `milliseconds`, etc. 
 
 # v0.3.1 - 27MAY22
 
