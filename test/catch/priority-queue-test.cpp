@@ -141,7 +141,24 @@ TEST_CASE("priority-queue-test")
         int values[] = { 1, 5, 9, 3, 2, 0 };
         int* begin = values;
         int* end = values + sizeof(values) / sizeof(values[0]);
+        int values2[] =
+            { 1, 5, 9, 3, 2, 0, 98,
+              100, 509, 407, 34, 7 };
+        int* begin2 = values2;
+        int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
 
+        SECTION("std::make_heap")
+        {
+            // DEBT: We are backward from std C++ paradigm
+            std::make_heap(begin, end, [](int a, int b){ return a > b; });
+
+            REQUIRE(values[0] == 0);
+            REQUIRE(values[1] == 2);
+            REQUIRE(values[2] == 1);
+            REQUIRE(values[3] == 3);
+            REQUIRE(values[4] == 5);
+            REQUIRE(values[5] == 9);
+        }
         SECTION("make_heap")
         {
             estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
@@ -233,14 +250,11 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("internal heap mk. 2")
         {
-            int values2[] =
-                { 1, 5, 9, 3, 2, 0, 98,
-                  100, 509, 407, 34, 7 };
-            int* begin2 = values2;
-            int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
 
             estd::experimental::internal_heap<int*, estd::less<int> > heap(begin2, end2);
 
+            // NOTE: Our make2 puts 7 and 9 in opposite spots, which I thought was valid but freaks
+            // out 'heapreplace' down below
             heap.make2();
 
             REQUIRE(heap.size() == 12);
@@ -277,12 +291,6 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("stackoverflow guidance")
         {
-            int values2[] =
-                { 1, 5, 9, 3, 2, 0, 98,
-                  100, 509, 407, 34, 7 };
-            int* begin2 = values2;
-            int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
-
             SECTION("sanity check")
             {
                 // DEBT: Undefined behavior if not GCC--- stackoverflow code
