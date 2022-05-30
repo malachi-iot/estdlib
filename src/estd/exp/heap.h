@@ -15,7 +15,7 @@ namespace estd { namespace experimental {
 /// \tparam Compare
 /// reference:
 /// https://www.geeksforgeeks.org/k-ary-heap/
-template< class RandomIt, class Compare >
+template< class RandomIt, class Compare, unsigned k = 2 >
 struct internal_heap
 {
     typedef RandomIt iterator_type;
@@ -29,13 +29,11 @@ struct internal_heap
     // towards root node.  If one wants a minheap, then make
     // comp(a, b) = a < b
     Compare comp;
-    const int k;
 
-    internal_heap(RandomIt first, RandomIt last, const int k = 2, Compare comp = Compare()) :
+    internal_heap(RandomIt first, RandomIt last, Compare comp = Compare()) :
         first(first),
         last(last),
-        comp(comp),
-        k(k)
+        comp(comp)
     {}
 
     // NOTE!! this swap dereferences the expected iterators, so does
@@ -49,6 +47,7 @@ struct internal_heap
 
     // starting from last element, bubble up
     // returns true when no swapping was needed
+    // aka sift up
     bool restore_up()
     {
         //typedef typename iterator_traits::value_type value_type;
@@ -79,7 +78,7 @@ struct internal_heap
         return current_idx == last_idx - 1;
     }
 
-    // push down
+    // push down aka sift down
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
     constexpr
 #endif
@@ -133,6 +132,7 @@ struct internal_heap
     // 2. an immediate push back of the same 'top' memory spot
     // this is useful if you have in-placed updated the element and wish to re-insert it.
     // use case: reschedule
+    // Similar to https://docs.python.org/3/library/heapq.html#heapq.heapreplace
     void posh()
     {
         restore_down();
@@ -178,9 +178,9 @@ template< class RandomIt, class Compare >
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
 constexpr
 #endif
-void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
+void make_heap( RandomIt first, RandomIt last, Compare comp)
 {
-    internal_heap<RandomIt, Compare> heap(first, last, k, comp);
+    internal_heap<RandomIt, Compare> heap(first, last, comp);
 
     heap.make();
 }
