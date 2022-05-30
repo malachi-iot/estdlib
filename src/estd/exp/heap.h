@@ -128,6 +128,16 @@ struct internal_heap
         restore_down();
     }
 
+    // evaluate the 'top' elemant as:
+    // 1. a pop
+    // 2. an immediate push back of the same 'top' memory spot
+    // this is useful if you have in-placed updated the element and wish to re-insert it.
+    // use case: reschedule
+    void posh()
+    {
+        restore_down();
+    }
+
     // NOTE: be careful, last++ may not produce correct results
     void push(const typename iterator_traits::value_type& v)
     {

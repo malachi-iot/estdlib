@@ -206,6 +206,30 @@ TEST_CASE("priority-queue-test")
 
                 REQUIRE(heap.size() == 3);
             }
+            SECTION("posh")
+            {
+                heap.pop();
+
+                REQUIRE(heap.front() == 1);
+
+                *(heap.first) = 4;
+
+                REQUIRE(heap.front() == 4);
+
+                heap.posh();
+
+                REQUIRE(heap.front() == 2);
+
+                heap.pop();
+
+                REQUIRE(heap.front() == 3);
+
+                heap.pop();
+
+                REQUIRE(heap.front() == 4);
+
+                heap.pop();
+            }
         }
     }
 }
