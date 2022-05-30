@@ -155,6 +155,47 @@ struct internal_heap
         restore_up();
     }
 
+    // FIX: Does not do what we want - do not use
+    void sift_down(unsigned idx)
+    {
+        iterator_type i = first + idx;
+        iterator_type largest = i;
+
+        iterator_type left_child = first + ((idx * 2) + 1);
+        //iterator_type right_child = left_child + 1;
+        iterator_type right_child = first + ((idx * 2) + 2);
+
+        if(!comp(*left_child, *largest))
+        {
+            largest = left_child;
+        }
+        else if(right_child < last && !comp(*right_child, *largest))
+        {
+            largest = right_child;
+        }
+        else
+        {
+            return;
+        }
+
+        swap(i, largest);
+        sift_down(idx);
+    }
+
+    // FIX: Does not do what we want - do not use
+    void sift_down()
+    {
+       // sift_down(0);
+
+        unsigned first_nonleaf_idx = (size() / k) - 1;
+        //unsigned first_nonleaf_idx = (size() - 1) / k;
+
+        for(unsigned i = 0; i < first_nonleaf_idx;++i)
+        {
+            sift_down(i);
+        }
+    }
+
 
     // from https://www.programiz.com/dsa/heap-data-structure
     // and https://www.geeksforgeeks.org/cpp-program-for-heap-sort/

@@ -259,7 +259,19 @@ TEST_CASE("priority-queue-test")
             }
             SECTION("posh")
             {
+                heap.front() = 11;
+                //heap.posh();
 
+                heap.sift_down();
+
+                REQUIRE(heap.front() == 1);
+                REQUIRE(heap.pop2() == 2);
+                REQUIRE(heap.pop2() == 3);
+                REQUIRE(heap.pop2() == 5);
+                REQUIRE(heap.pop2() == 7);
+                REQUIRE(heap.pop2() == 9);
+                REQUIRE(heap.pop2() == 11);
+                REQUIRE(heap.pop2() == 34);
             }
         }
     }
