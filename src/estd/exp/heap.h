@@ -1,5 +1,9 @@
 /**
  * @file
+ *
+ * References:
+ *
+ * 1. https://www.cplusplus.com/reference/algorithm/make_heap/
  */
 #pragma once
 
@@ -203,29 +207,36 @@ struct internal_heap
     void heapify(unsigned idx)
     {
         iterator_type i = first + idx;
-        iterator_type largest = i;
 
         iterator_type left_child = first + ((idx * 2) + 1);
         iterator_type right_child = left_child + 1;
 
-        if(right_child < last && comp(*left_child, *largest))
-            largest = left_child;
-        else if(right_child < last && comp(*right_child, *largest))
-            largest = right_child;
-        else
-            return;
-
-        swap(i, largest);
-        heapify(idx);
+        // DEBT: Consider a sanity check so that we don't infinite loop on bad data
+        // DEBT: Turn this into an n-ary rather than binary
+        // NOTE: Algorithm is such that we never expect idx to result in a left_child
+        // which is out of bounds: idx max = (size() / k) - 1
+        for(;;)
+        {
+            if (comp(*left_child, *i))
+                swap(i, left_child);
+            else if (right_child < last && comp(*right_child, *i))
+                swap(i, right_child);
+            else
+                return;
+        }
     }
 
     // from https://www.programiz.com/dsa/heap-data-structure
-    void make2()
+    // "Note that invalid arguments cause undefined behavior." [1]
+    void make2(bool bounds_check = true)
     {
-        unsigned first_nonleaf_idx = (size() / k) - 1;
-        //unsigned first_nonleaf_idx = (size() - 1) / k;
+        const size_t sz = size();
 
-        unsigned i = first_nonleaf_idx;
+        // Spec [1] does not call for bounds check, but seems useful
+        if(bounds_check && sz <= 1) return;
+
+        // first nonleaf / halfway point's children reach into last nodes
+        unsigned i = (sz / k) - 1;
 
         do
         {

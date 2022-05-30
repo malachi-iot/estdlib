@@ -251,7 +251,6 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("internal heap mk. 2")
         {
-
             estd::experimental::internal_heap<int*, estd::less<int> > heap(begin2, end2);
 
             // NOTE: Our make2 puts 7 and 9 in opposite spots, which I thought was valid but freaks
@@ -306,6 +305,24 @@ TEST_CASE("priority-queue-test")
                 REQUIRE(heap2.pop2() == 5);
                 REQUIRE(heap2.pop2() == 9);
                 REQUIRE(heap2.pop2() == 15);
+            }
+            SECTION("too small heap: 0")
+            {
+                int8_t* begin3 = values3;
+                estd::experimental::internal_heap<int8_t*, estd::less<int> > heap2(
+                    begin3, begin3);
+
+                heap2.make2();
+
+            }
+            SECTION("too small heap: 1")
+            {
+                int8_t* begin3 = values3;
+                estd::experimental::internal_heap<int8_t*, estd::less<int> > heap2(
+                    begin3, begin3 + 1);
+
+                heap2.make2();
+
             }
         }
         SECTION("stackoverflow guidance")
