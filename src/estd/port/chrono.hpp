@@ -170,6 +170,14 @@ CONSTEXPR typename estd::common_type<D1,D2>::type
 
 
 template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator<( const time_point<Clock,Dur1>& lhs,
+    const time_point<Clock,Dur2>& rhs )
+{
+    return lhs.time_since_epoch() < rhs.time_since_epoch();
+}
+
+
+template< class Clock, class Dur1, class Dur2 >
 CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs )
 {
