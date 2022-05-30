@@ -156,6 +156,55 @@ struct internal_heap
     }
 
 
+    // from https://www.programiz.com/dsa/heap-data-structure
+    // and https://www.geeksforgeeks.org/cpp-program-for-heap-sort/
+    void heapify(unsigned idx)
+    {
+        iterator_type i = first + idx;
+        iterator_type largest = i;
+
+        iterator_type left_child = first + ((idx * 2) + 1);
+        //iterator_type right_child = left_child + 1;
+        iterator_type right_child = first + ((idx * 2) + 2);
+
+        if(comp(*left_child, *largest))
+        {
+            largest = left_child;
+        }
+        else if(right_child < last && comp(*right_child, *largest))
+        {
+            largest = right_child;
+        }
+        else
+        {
+            return;
+        }
+
+        swap(i, largest);
+        heapify(idx);
+    }
+
+    // from https://www.programiz.com/dsa/heap-data-structure
+    void make2()
+    {
+        unsigned first_nonleaf_idx = (size() / k) - 1;
+        //unsigned first_nonleaf_idx = (size() - 1) / k;
+
+        for(unsigned i = first_nonleaf_idx;;--i)
+        {
+            heapify(i);
+
+            if(i == 0) break;
+        }
+    }
+
+    reference pop2()
+    {
+        pop();
+        return *first;
+    }
+
+
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
     constexpr
 #endif

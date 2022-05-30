@@ -231,5 +231,36 @@ TEST_CASE("priority-queue-test")
                 heap.pop();
             }
         }
+        SECTION("internal heap mk. 2")
+        {
+            int values2[] =
+                { 1, 5, 9, 3, 2, 0, 98,
+                  100, 509, 407, 34, 7 };
+            int* begin2 = values2;
+            int* end2 = values2 + sizeof(values2) / sizeof(values2[0]);
+
+            estd::experimental::internal_heap<int*, estd::less<int> > heap(begin2, end2);
+
+            heap.make2();
+
+            REQUIRE(heap.size() == 12);
+
+            SECTION("pop2")
+            {
+                REQUIRE(heap.front() == 0);
+                REQUIRE(heap.pop2() == 1);
+                REQUIRE(heap.pop2() == 2);
+                REQUIRE(heap.pop2() == 3);
+                REQUIRE(heap.pop2() == 5);
+                REQUIRE(heap.pop2() == 7);
+                REQUIRE(heap.pop2() == 9);
+                REQUIRE(heap.pop2() == 34);
+                REQUIRE(heap.pop2() == 98);
+            }
+            SECTION("posh")
+            {
+
+            }
+        }
     }
 }
