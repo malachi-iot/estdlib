@@ -160,6 +160,14 @@ TEST_CASE("functional")
                 REQUIRE(val2 == 7);
                 REQUIRE(val3 == 1);
             }
+            SECTION("in place execution")
+            {
+                int val = 0;
+
+                estd::experimental::function<void(int)>([&](int v) { val = v; })(5);
+
+                REQUIRE(val == 5);
+            }
             SECTION("complex parameter lambda")
             {
                 int val2 = 5;

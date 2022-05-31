@@ -367,7 +367,7 @@ TEST_CASE("chrono tests")
     {
         using namespace estd::literals::chrono_literals;
 
-        auto s = 10s + 4000ms + 1000000us;
+        estd::chrono::seconds s = 10s + 4000ms + 1000000us;
 
         REQUIRE(s.count() == 15);
     }
