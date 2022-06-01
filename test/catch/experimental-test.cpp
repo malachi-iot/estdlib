@@ -857,6 +857,16 @@ TEST_CASE("experimental tests")
             REQUIRE(*val1.get() == 7);
             REQUIRE(*val2.get() == 7);
         }
+        SECTION("swap")
+        {
+            v = 7;
+
+            shared_resource<shared_resource_pointer_traits<int> > val1(&v);
+            shared_resource<shared_resource_pointer_traits<int> > val2(val1);
+            shared_resource<shared_resource_pointer_traits<int> > val3;
+
+            estd::swap(val1, val3);
+        }
         SECTION("move")
         {
             v = 77;

@@ -131,13 +131,18 @@ struct shared_resource_pointer_traits
 
 struct shared_resources_tag {};
 
-template <class TTraits>
+// DEBT: Need a doubly-linked-list version
+// DEBT: This technique isn't always better than the classic control-structure flavor
+// (traditional std shared_ptr).  Be sure to round out that one too (including memory pooling)
+// and only offer this one up when both are available to a consumer
+template <class TTraits, class TPolicy = estd::monostate>
 class shared_resource : shared_resources_tag
 {
 protected:
     typedef TTraits resource_traits;
     typedef typename resource_traits::value_type value_type;
     typedef shared_resource this_type;
+    typedef TPolicy policy_type;
 
     value_type value_;
 
@@ -160,9 +165,10 @@ protected:
         resource_traits::relinquish(&value_);
     }
 
+    /// splice ourselves into circular list
+    /// @param prev
     void add(shared_resource* prev)
     {
-        // splice ourselves into circular list
         next = prev->next;
         prev->next = this;
     }
@@ -245,6 +251,11 @@ public:
     {
         relinquish();
         remove();
+    }
+
+    void swap(shared_resource& r) NOEXCEPT
+    {
+        // TODO: Important to do this, because shared_resource typically depends on *this not moving
     }
 
     const value_type& get() const { return value_; }
@@ -360,4 +371,13 @@ public:
     }
 };
 
-}}
+
+}
+
+template <class TTraits>
+void swap(experimental::shared_resource<TTraits>& lhs, experimental::shared_resource<TTraits>& rhs) NOEXCEPT
+{
+    lhs.swap(rhs);
+}
+
+}
