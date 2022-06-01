@@ -37,6 +37,17 @@ decltype (take_front_impl(t, make_index_sequence<N>{}))
     return take_front_impl(t, make_index_sequence<N>{});
 }
 
+void forwarder_func(int val, estd::experimental::function_base<void(int)> f)
+{
+    f(val);
+}
+
+template <class ...TArgs>
+void forwarder(TArgs&&...args)
+{
+    forwarder_func(std::forward<TArgs>(args)...);
+}
+
 TEST_CASE("functional")
 {
     constexpr auto z = estd::make_tuple(1, 2);
@@ -167,6 +178,30 @@ TEST_CASE("functional")
                 estd::experimental::function<void(int)>([&](int v) { val = v; })(5);
 
                 REQUIRE(val == 5);
+            }
+            SECTION("passing to another")
+            {
+                int val = 0;
+
+                estd::experimental::function<void(int)> f([&](int v) { val = v; });
+
+                SECTION("function_base")
+                {
+                    auto tester = [](estd::experimental::function_base<void(int)> _f, int param)
+                    {
+                        _f(std::move(param));
+                    };
+
+                    tester(f, 5);
+
+                    REQUIRE(val == 5);
+                }
+                SECTION("function_base perfect forwarding")
+                {
+                    forwarder(5, f);
+
+                    REQUIRE(val == 5);
+                }
             }
             SECTION("complex parameter lambda")
             {
