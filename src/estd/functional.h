@@ -342,8 +342,9 @@ public:
 
     function_base(concept* m) : m(m) {}
 
-    /*
     function_base(const function_base& copy_from) = default;
+
+    /*
     function_base(function_base&& move_from) :
         m(move_from.m)
     {
