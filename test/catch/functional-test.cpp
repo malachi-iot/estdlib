@@ -256,7 +256,7 @@ TEST_CASE("functional")
     }
     SECTION("bind")
     {
-        auto b = estd::bind(do_something, "hello");
+        auto b = estd::obsolete::bind(do_something, "hello");
 
         int sz = sizeof(b);
 

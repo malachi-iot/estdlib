@@ -301,7 +301,13 @@ TEST_CASE("vector tests")
                 value += v;
             });
 
-            //v.emplace_back(f);
+            v.emplace_back(f);
+            v.emplace_back(f);
+
+            for(auto _f : v)
+                _f(5);
+
+            REQUIRE(value == 10);
         }
     }
 }

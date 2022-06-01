@@ -1,10 +1,15 @@
 v 0.x.x - XXXXX22
 
+## Added Features
+
+* Adding `remove_cv_t` and friends
+
 ## Quality Updates & Bug Fixes
 
 * `chrono_literals` operators: 
     * disabling on CLang as it generates warnings and doesn't compile right
     * was returning `seconds` incorrectly instead of `milliseconds`, etc. 
+* Fixed deep `layer1::vector` glitch which sometimes broke `emplace`
 
 # v0.3.1 - 27MAY22
 

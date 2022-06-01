@@ -222,8 +222,12 @@ public:
     void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
 
 #ifdef FEATURE_CPP_VARIADIC
+    /// Constructs an item specifically at the given position in an array
+    /// @tparam TArgs
+    /// @param pos
+    /// @param args
     template <class ...TArgs>
-    void construct(size_type pos, TArgs...args)
+    void construct(size_type pos, TArgs&&...args)
     {
         allocator_type& a = base_t::get_allocator();
         allocator_traits::construct(a, &lock(pos, 1), std::forward<TArgs>(args)...);

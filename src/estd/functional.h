@@ -10,6 +10,8 @@
 
 #include "internal/invoke.h"
 
+#include "variant.h"
+
 // TODO: Utilize std version of this, if available
 
 namespace estd {
@@ -59,6 +61,8 @@ private:
 
 
 #if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
+
+namespace obsolete {
 
 template <class F>
 struct function
@@ -131,6 +135,8 @@ auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
     return b;
 }
 
+}
+
 #endif
 
 
@@ -161,19 +167,13 @@ namespace experimental {
 // Guidance from
 // https://stackoverflow.com/questions/14936539/how-stdfunction-works
 
-// since 'void' doesn't play nice with reference_evaporator
-struct empty_type
-{
-
-};
-
 template <typename F, typename TResult, typename... TArgs>
 struct model_base
 {
 
 };
 
-template <typename T, class TAllocator = empty_type>
+template <typename T, class TAllocator = monostate>
 class function;
 
 template <typename TResult, typename... TArgs>
@@ -424,19 +424,19 @@ private:
     }
 
 public:
+    /*
     template <typename T,
-        // FIX: This filter is no help, we still erroneously arrive here
         estd::enable_if_t<!estd::is_base_of<function_base_tag,
             estd::remove_cv_t<T>
-            >::value, bool> = true>
+            >::value, bool> = true> */
+    template <typename T>
     function(T&& t) : allocator_provider_type(TAllocator())
     {
         typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
         //allocator_traits::rebind_alloc<model_type>
         // FIX: Don't want to dynamically allocate memory quite this way
-        // FIX: Forward feels a little wrong here somehow.  Move, perhaps?
-        auto m = new model_type(std::forward<T>(t));
+        auto m = new model_type(std::move(t));
         base_type::m = m;
     }
 
