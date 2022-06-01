@@ -173,7 +173,7 @@ struct model_base
 
 };
 
-template <typename T, class TAllocator = monostate>
+template <typename T, bool nullable = true, class TAllocator = monostate>
 class function;
 
 template <typename TResult, typename... TArgs>
@@ -389,8 +389,8 @@ template <class TFunc, typename F>
 class inline_function;
 
 
-template <typename TResult, typename... TArgs, class TAllocator>
-class function<TResult(TArgs...), TAllocator> :
+template <typename TResult, typename... TArgs, bool nullable, class TAllocator>
+class function<TResult(TArgs...), nullable, TAllocator> :
     public function_base<TResult(TArgs...)>,
     //public function_base_tag,
     public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
@@ -416,11 +416,19 @@ class function<TResult(TArgs...), TAllocator> :
     }; */
 
 private:
+    concept* getm() const { return base_type::m; }
+
+    void clear()
+    {
+        base_type::m = nullptr;
+    }
+
     void reset()
     {
-        // FIX: Don't want to dynamically allocate memory quite this way, and delete void*
-        // rightly gives us complaints and warnings
-        delete base_type::m;
+        // DEBT: function_base does not check for nullptr before () is called
+        if(nullable == false || base_type::m != nullptr)
+            // FIX: Don't want to dynamically allocate memory quite this way
+            delete base_type::m;
     }
 
 public:
@@ -467,10 +475,12 @@ public:
     function(const function& other) = default;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
+    // FIX: SFINAE remove this when nullable == false
     function(function&& other) NOEXCEPT :
         allocator_provider_type(std::move(other))
     {
-        // TODO
+        base_type::m = other.getm();
+        other.clear();
     }
 #endif
 
@@ -491,6 +501,11 @@ public:
     static inline_function<F, TResult(TArgs...)> make_inline2(F&& f)
     {
         return inline_function<F, TResult(TArgs...)>(std::move(f));
+    }
+
+    explicit operator bool() const noexcept
+    {
+        return nullable ? base_type::m != nullptr : true;
     }
 };
 
