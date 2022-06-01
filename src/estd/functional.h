@@ -428,6 +428,11 @@ private:
         // DEBT: function_base does not check for nullptr before () is called
         if(nullable == false || base_type::m != nullptr)
             // FIX: Don't want to dynamically allocate memory quite this way
+            // DEBT: Technically we aren't deleting `concept` but instead our
+            // special subclass `model_type` (see ctor) - this may not delete properly
+            // i.e. may not delete the extended memory that `model_type` occupies
+            // a virtual destructor may be necessary for that.  We're careful to (so far)
+            // not need a virtual destructor otherwise.
             delete base_type::m;
     }
 
