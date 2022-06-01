@@ -58,6 +58,16 @@ struct remove_cv {
     typedef typename estd::remove_volatile<typename remove_const<T>::type>::type type;
 };
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class T >
+using remove_cv_t = typename remove_cv<T>::type;
+
+template< class T >
+using remove_const_t = typename remove_const<T>::type;
+
+template< class T >
+using remove_volatile_t = typename remove_volatile<T>::type;
+#endif
 
 template< class T >
 struct add_cv { typedef const volatile T type; };

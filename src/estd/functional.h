@@ -179,9 +179,11 @@ class function;
 template <typename TResult, typename... TArgs>
 class function_base;
 
+struct function_base_tag {};
+
 
 template <typename TResult, typename... TArgs>
-class function_base<TResult(TArgs...)>
+class function_base<TResult(TArgs...)> : public function_base_tag
 {
 protected:
     // function pointer approach works, but if we have to add in a virtual destructor
@@ -390,6 +392,7 @@ class inline_function;
 template <typename TResult, typename... TArgs, class TAllocator>
 class function<TResult(TArgs...), TAllocator> :
     public function_base<TResult(TArgs...)>,
+    //public function_base_tag,
     public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
 {
     typedef function_base<TResult(TArgs...)> base_type;
@@ -421,13 +424,18 @@ private:
     }
 
 public:
-    template <typename T>
+    template <typename T,
+        // FIX: This filter is no help, we still erroneously arrive here
+        estd::enable_if_t<!estd::is_base_of<function_base_tag,
+            estd::remove_cv_t<T>
+            >::value, bool> = true>
     function(T&& t) : allocator_provider_type(TAllocator())
     {
         typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
         //allocator_traits::rebind_alloc<model_type>
         // FIX: Don't want to dynamically allocate memory quite this way
+        // FIX: Forward feels a little wrong here somehow.  Move, perhaps?
         auto m = new model_type(std::forward<T>(t));
         base_type::m = m;
     }

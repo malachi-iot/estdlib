@@ -288,4 +288,20 @@ TEST_CASE("vector tests")
     {
         //layer1::vector<reference_wrapper<int>, 10> a;
     }
+    SECTION("experimental")
+    {
+        SECTION("vector of functions")
+        {
+            int value = 0;
+
+            layer1::vector<estd::experimental::function_base<void(int)>, 10> v;
+
+            estd::experimental::function<void(int)> f([&](int v)
+            {
+                value += v;
+            });
+
+            //v.emplace_back(f);
+        }
+    }
 }
