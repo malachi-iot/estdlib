@@ -1,3 +1,9 @@
+/**
+ *
+ * References:
+ *
+ * 1. https://wiki.sei.cmu.edu/confluence/display/cplusplus/OOP52-CPP.+Do+not+delete+a+polymorphic+object+without+a+virtual+destructor
+ */
 #pragma once
 
 #include "internal/platform.h"
@@ -192,6 +198,7 @@ protected:
     struct concept_fnptr1
     {
         typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
+        typedef void (*deleter_type)(concept_fnptr1*);  // EXPERIMENTAL
 
         const function_type f;
 
@@ -295,6 +302,7 @@ protected:
     struct concept_virtual
     {
         virtual TResult _exec(TArgs&&...args) = 0;
+        virtual ~concept_virtual() = default;
     };
 
     template <class F>
@@ -318,6 +326,12 @@ protected:
         }
     };
 
+    // We like this way best, but due to [1] it may not be viable.
+    // However, they say that:
+    // "Deleting a polymorphic object without a virtual destructor
+    //  is permitted if the object is referenced by a pointer to its
+    //  class, rather than via a pointer to a class it inherits from."
+    // This might be possible with a manual function pointer deleter.
     typedef concept_fnptr1 concept;
     template <class F>
     using model = model_fnptr1<F>;
@@ -346,12 +360,9 @@ public:
 
     function_base(const function_base& copy_from) = default;
 
-    /*
-    function_base(function_base&& move_from) :
-        m(move_from.m)
-    {
-
-    } */
+    // NOTE: If we decide to add nullability to function_base, then a move constructor
+    // makes sense
+    function_base(function_base&& move_from) = delete;
 
 #if __cplusplus >= 201402L
     TResult operator()(TArgs&&... args)
