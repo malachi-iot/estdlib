@@ -434,6 +434,20 @@ private:
         base_type::m = nullptr;
     }
 
+    typedef void (*deleter_type)(concept*);  // EXPERIMENTAL
+
+    template <class F>
+    static void deleter(concept* c)
+    {
+        typedef typename estd::decay_t<F> incoming_function_type;
+        typedef typename base_type::template model<incoming_function_type> model_type;
+
+        delete (model_type*) c;
+    }
+
+    // Jumping through some hoops to avoid overhead of a virtual destructor.  On a plus note
+    const deleter_type _deleter;
+
     void reset()
     {
         // DEBT: function_base does not check for nullptr before () is called
@@ -444,7 +458,9 @@ private:
             // i.e. may not delete the extended memory that `model_type` occupies
             // a virtual destructor may be necessary for that.  We're careful to (so far)
             // not need a virtual destructor otherwise.
-            delete base_type::m;
+            //delete base_type::m;
+
+            _deleter(base_type::m);
     }
 
 public:
@@ -454,7 +470,9 @@ public:
             estd::remove_cv_t<T>
             >::value, bool> = true> */
     template <typename T>
-    function(T&& t) : allocator_provider_type(TAllocator())
+    function(T&& t) :
+        allocator_provider_type(TAllocator()),
+        _deleter{deleter<T>}
     {
         typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
@@ -465,7 +483,9 @@ public:
     }
 
     template <typename T>
-    function(T&& t, TAllocator& allocator) : allocator_provider_type(allocator)
+    function(T&& t, TAllocator& allocator) :
+        allocator_provider_type(allocator),
+        _deleter{deleter<T>}
     {
         typedef typename estd::decay<T>::type incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
@@ -493,7 +513,8 @@ public:
 #ifdef FEATURE_CPP_MOVESEMANTIC
     // FIX: SFINAE remove this when nullable == false
     function(function&& other) NOEXCEPT :
-        allocator_provider_type(std::move(other))
+        allocator_provider_type(std::move(other)),
+        _deleter{other._deleter}
     {
         base_type::m = other.getm();
         other.clear();
