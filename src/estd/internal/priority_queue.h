@@ -109,6 +109,23 @@ public:
         std::push_heap(c.begin(), c.end(), Compare());
         return c.back();
     }
+
+    /// Experimental call which calls `f` with accessor for the emplaced
+    /// item before it gets heapified
+    /// @tparam F
+    /// @tparam TArgs
+    /// @param f
+    /// @param args
+    /// @return
+    template <class F, class ...TArgs>
+    accessor emplace_with_notify(F f, TArgs&&...args)
+    {
+        auto accessor = c.emplace_back(std::forward<TArgs>(args)...);
+        f(accessor.lock());
+        accessor.unlock();
+        std::push_heap(c.begin(), c.end(), Compare());
+        return c.back();
+    }
 #endif
 };
 
