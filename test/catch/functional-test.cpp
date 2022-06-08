@@ -4,7 +4,9 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#if __has_warning("-Wunused-but-set-variable")
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
 
 static const char* got_something = NULLPTR;
 
@@ -262,7 +264,7 @@ TEST_CASE("functional")
 
         REQUIRE(b() == -1);
 
-        REQUIRE(got_something == "hello");
+        REQUIRE(std::string(got_something) == "hello");
     }
 }
 
