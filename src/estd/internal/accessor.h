@@ -176,6 +176,8 @@ public:
 };
 
 
+// DEBT: Phase this out in favor of direct usage of base class,
+// or document why we don't
 template <class TAllocator>
 class accessor : public accessor_shared<TAllocator, true >
 {
@@ -207,6 +209,8 @@ public:
 };
 
 
+// DEBT: Phase this out in favor of direct usage of base class,
+// or document why we don't
 template <class TAllocator>
 class accessor_stateless : public accessor_shared<TAllocator, false>
 {
