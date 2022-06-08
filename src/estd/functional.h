@@ -364,6 +364,8 @@ public:
     // makes sense
     function_base(function_base&& move_from) = delete;
 
+    function_base& operator =(const function_base&) = default;
+
 #if __cplusplus >= 201402L
     TResult operator()(TArgs&&... args)
     {
