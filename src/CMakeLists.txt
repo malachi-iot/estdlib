@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(estd VERSION 0.3.1 LANGUAGES CXX)
+project(estd VERSION 0.3.2 LANGUAGES CXX)
 
 set(SOURCE_FILES
         dummy.cpp
