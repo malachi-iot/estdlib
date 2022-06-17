@@ -9,7 +9,9 @@ v 0.x.x - XXXXX22
 * `chrono_literals` operators: 
     * disabling on CLang as it generates warnings and doesn't compile right
     * was returning `seconds` incorrectly instead of `milliseconds`, etc. 
-* Fixed deep `layer1::vector` glitch which sometimes broke `emplace`
+* `vector`:
+    * Fixed deep `layer1::vector` glitch which sometimes broke `emplace`
+    * Fixed bug which disallowed resizing up to maximum layer1 size
 
 # v0.3.1 - 27MAY22
 

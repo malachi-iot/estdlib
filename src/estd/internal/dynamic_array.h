@@ -100,7 +100,7 @@ protected:
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
 
-        if(size() + increase_by >= cap)
+        if(size() + increase_by > cap)
         {
             // increase by as near to 32 bytes as is practical
             success = reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));

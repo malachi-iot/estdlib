@@ -126,6 +126,12 @@ TEST_CASE("vector tests")
         accessor_type a = v[0];
 
         REQUIRE(a == 3);
+
+        // Push it to the very limit
+        v.clear();
+
+        for(int i = 0; i < 10; ++i)
+            v.push_back(i);
     }
     SECTION("layer2 vector")
     {
