@@ -89,3 +89,10 @@ static const unsigned uint1 = 123456;
 }}
 
 #pragma GCC diagnostic pop
+
+#if __GNUC__
+#ifndef __has_warning
+// GNUC is permissive of disabling warnings even if it doesn't know about them, I think
+#define __has_warning(x)    (true) // FAKE has warning
+#endif
+#endif

@@ -2,6 +2,8 @@
 
 #include <estd/functional.h>
 
+#include "test-data.h"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #if __has_warning("-Wunused-but-set-variable")
