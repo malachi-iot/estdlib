@@ -12,8 +12,11 @@ template<
     std::intmax_t Denom = 1
 > class ratio
 {
+private:
+    static CONSTEXPR std::intmax_t gcd = internal::gcd<Num, Denom>::value;
 public:
-    typedef ratio type;
+    /// Reduced version
+    typedef ratio<Num / gcd, Denom / gcd> type;
 
     static CONSTEXPR std::intmax_t num = Num;
     static CONSTEXPR std::intmax_t den = Denom;
@@ -79,7 +82,8 @@ struct ratio_divide<ratio<Num1, Denom1>, ratio<1, Denom2> >
 
 namespace detail {
 
-// TODO: Need to do overflow processing
+// https://en.cppreference.com/w/cpp/numeric/ratio/ratio_divide indicates no overflow
+// processing is required
 template <std::intmax_t Num1, std::intmax_t Num2,
     std::intmax_t Denom1, std::intmax_t Denom2>
 struct ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
@@ -92,7 +96,7 @@ public:
     static CONSTEXPR std::intmax_t num = Denom2 * Num1 / gcd;
     static CONSTEXPR std::intmax_t den = Denom1 * Num2 / gcd;
 
-    typedef estd::ratio<num, den> type;
+    typedef typename estd::ratio<num, den>::type type;
 };
 
 
@@ -108,25 +112,23 @@ public:
     static CONSTEXPR std::intmax_t num = Num1 * Num2 / gcd;
     static CONSTEXPR std::intmax_t den = Denom1 * Denom2 / gcd;
 
-    typedef estd::ratio<num, den> type;
+    typedef typename estd::ratio<num, den>::type type;
 };
 
 
-// Not ready yet
 template <std::intmax_t Num1, std::intmax_t Num2,
     std::intmax_t Denom1, std::intmax_t Denom2>
 struct ratio_add<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
 {
-    /*
 private:
-    static CONSTEXPR std::intmax_t gcd =
-        internal::gcd<Denom2 * Num1, Denom1 * Num2>::value;
+    typedef estd::ratio<Num1 * Denom2, Denom1 * Denom2> normalized1;
+    typedef estd::ratio<Num2 * Denom1, Denom1 * Denom2> normalized2;
 
 public:
-    static CONSTEXPR std::intmax_t num = Denom2 * Num1 / gcd;
-    static CONSTEXPR std::intmax_t den = Denom1 * Num2 / gcd;
+    static CONSTEXPR std::intmax_t num = normalized1::num + normalized2::num;
+    static CONSTEXPR std::intmax_t den = normalized1::den;
 
-    typedef estd::ratio<num, den> type; */
+    typedef typename estd::ratio<num, den>::type type;
 };
 
 
@@ -139,5 +141,7 @@ using ratio_multiply = typename detail::ratio_multiply<R1, R2>::type;
 template <class R1, class R2>
 using ratio_divide = typename detail::ratio_divide<R1, R2>::type;
 
+template <class R1, class R2>
+using ratio_add = typename detail::ratio_add<R1, R2>::type;
 
 }

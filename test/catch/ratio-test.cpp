@@ -9,8 +9,9 @@ TEST_CASE("ratio")
         typedef estd::ratio<1, 3> one_third;
         typedef estd::ratio<2, 3> two_third;
         typedef estd::ratio<1, 6> one_sixth;
+        typedef estd::ratio<25, 100> quarter;
 
-        SECTION("Ratio dividing")
+        SECTION("dividing")
         {
             SECTION("Simplest case")
             {
@@ -33,15 +34,48 @@ TEST_CASE("ratio")
                 REQUIRE(den == 1);
             }
         }
-        SECTION("ratio multiplying")
+        SECTION("multiplying")
         {
-            typedef estd::ratio_multiply<two_third, one_sixth> r;
+            SECTION("2/3 * 1/6")
+            {
+                typedef estd::ratio_multiply<two_third, one_sixth> r;
+
+                CONSTEXPR int num = r::num;
+                CONSTEXPR int den = r::den;
+
+                REQUIRE(num == 1);
+                REQUIRE(den == 9);
+            }
+            SECTION("25/100 * 2")
+            {
+                typedef estd::ratio_multiply<quarter, estd::ratio<2> > r;
+
+                CONSTEXPR int num = r::num;
+                CONSTEXPR int den = r::den;
+
+                REQUIRE(num == 1);
+                REQUIRE(den == 2);
+            }
+        }
+        SECTION("adding")
+        {
+            typedef estd::ratio_add<two_third, one_sixth> r;
 
             CONSTEXPR int num = r::num;
             CONSTEXPR int den = r::den;
 
+            REQUIRE(num == 5);
+            REQUIRE(den == 6);
+        }
+        SECTION("reduced")
+        {
+            typedef quarter::type reduced;
+
+            CONSTEXPR int num = reduced::num;
+            CONSTEXPR int den = reduced::den;
+
             REQUIRE(num == 1);
-            REQUIRE(den == 9);
+            REQUIRE(den == 4);
         }
     }
 }

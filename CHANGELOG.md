@@ -1,5 +1,13 @@
 v 0.X.X - XXXXX22
 
+## Added Features
+
+* ratio.h:
+    * `ratio` now auto reduces its `type`, as called for by std spec
+    * `ratio_add` now present
+    * `ratio_divide` and `ratio_multiply` auto reduce as briefl
+       mentioned by std spec
+
 ## Quality Updates & Bug Fixes
 
 * `ratio_divide` and `ratio_multiply` are now aliased out for
