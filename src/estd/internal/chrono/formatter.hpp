@@ -53,39 +53,59 @@ public:
 
 }
 
+// DEBT: Optimize with modulo instead of brute force subtracting (which will cascade out into
+// multiplies and divides)
+// DEBT:
 template <class Duration>
 class hh_mm_ss
 {
-    Duration value;
+    const Duration value;
+
+    typedef estd::is_signed<typename Duration::rep> is_signed;
 
     typedef duration<uint8_t, chrono::hours::period> hours_type;
     typedef duration<uint8_t, chrono::minutes::period> minutes_type;
     typedef duration<typename Duration::rep, chrono::seconds::period> seconds_type;
+
+    constexpr Duration _abs() const
+    {
+        return chrono::internal::abs(value);
+    }
 
 public:
     hh_mm_ss(Duration duration) : value(duration) {}
 
     typedef Duration precision;
 
-    constexpr hours_type hours() const
+    constexpr bool is_negative() const NOEXCEPT
     {
-        return hours_type{value};
+        return is_signed::value ? value.count() < 0 : false;
     }
 
-    constexpr minutes_type minutes() const
+    constexpr hours_type hours() const NOEXCEPT
     {
-        return minutes_type{value - hours()};
+        return hours_type{_abs()};
     }
 
-    constexpr seconds_type seconds() const
+    constexpr minutes_type minutes() const NOEXCEPT
     {
-        return seconds_type{value - minutes_type{value}};
+        return minutes_type{_abs() - hours()};
     }
 
-    constexpr precision subseconds() const
+    inline seconds_type seconds() const NOEXCEPT
     {
-        return precision{value - seconds_type{value}};
+        Duration a = _abs();
+        return seconds_type{a - minutes_type{a}};
     }
+
+    inline precision subseconds() const NOEXCEPT
+    {
+        Duration a = _abs();
+        return precision{a - seconds_type{a}};
+    }
+
+    constexpr explicit operator precision() const NOEXCEPT { return value; }
+    constexpr precision to_duration() const NOEXCEPT { return value; }
 };
 
 }}

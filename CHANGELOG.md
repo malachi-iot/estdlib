@@ -2,7 +2,9 @@ v 0.X.X - XXXXX22
 
 ## Added Features
 
-* ratio.h:
+* chrono:
+    * Added `hh_mm_ss`
+* ratio:
     * `ratio` now auto reduces its `type`, as called for by std spec
     * `ratio_add` now present
     * `ratio_divide` and `ratio_multiply` auto reduce as briefl

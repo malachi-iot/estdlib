@@ -211,14 +211,46 @@ CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
 
 #if __cpp_constexpr
 // lifted from https://en.cppreference.com/w/cpp/chrono/duration/abs
-// FIX: Not going to work until we implement min() and zero()
 template <class Rep, class Period, class = estd::enable_if_t<
-   duration<Rep, Period>::min() < duration<Rep, Period>::zero()> >
-CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
+    estd::numeric_limits<Rep>::is_signed &&
+    duration<Rep, Period>::min() < duration<Rep, Period>::zero()> >
+constexpr duration<Rep, Period> abs(duration<Rep, Period> d)
+{
+    return d >= d.zero() ? d : -d;
+}
+#else
+// UNTESTED
+// DEBT: I think even c++03 can check for min()/zero() at compile time, so if
+// so we can merge this and above version
+template <class Rep, class Period, class = typename estd::enable_if<
+    estd::numeric_limits<Rep>::is_signed>::type>
+duration<Rep, Period> abs(duration<Rep, Period> d)
 {
     return d >= d.zero() ? d : -d;
 }
 #endif
+
+namespace internal {
+
+template <class Rep, class Period, typename estd::enable_if<
+    estd::numeric_limits<Rep>::is_signed, bool>::type = true>
+CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
+{
+    return chrono::abs(d);
+}
+
+
+template <class Rep, class Period, typename estd::enable_if<
+    !estd::numeric_limits<Rep>::is_signed, bool>::type = true>
+CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
+{
+    return d;
+}
+
+
+
+
+}
 
 }}
 

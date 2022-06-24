@@ -215,6 +215,22 @@ TEST_CASE("chrono tests")
             REQUIRE(result);
         }
 #endif
+        SECTION("unsigned abs")
+        {
+            typedef estd::chrono::duration<uint16_t, estd::micro> microseconds_st;
+            microseconds_st ms;
+
+            // Does indeed not compile, as spec calls for
+            // "Does not participate ... unless std::numeric_limits<Rep>::is_signed is true."
+            //abs(ms);
+
+            SECTION("internal")
+            {
+                // It's useful to have a noop flavor, so we do our own internal version of
+                // abs which does just that
+                estd::chrono::internal::abs(ms);
+            }
+        }
     }
     SECTION("signed/unsigned test")
     {
@@ -375,13 +391,45 @@ TEST_CASE("chrono tests")
         }
         SECTION("hh_mm_ss")
         {
-            estd::chrono::milliseconds s{3601005};
-            estd::chrono::hh_mm_ss<decltype(s)> v{s};
+            SECTION("basic")
+            {
+                estd::chrono::milliseconds s{3601005};
+                estd::chrono::hh_mm_ss<decltype(s)> v{s};
 
-            REQUIRE(v.hours().count() == 1);
-            REQUIRE(v.minutes().count() == 0);
-            REQUIRE(v.seconds().count() == 1);
-            REQUIRE(v.subseconds().count() == 5);
+                REQUIRE(v.hours().count() == 1);
+                REQUIRE(v.minutes().count() == 0);
+                REQUIRE(v.seconds().count() == 1);
+                REQUIRE(v.subseconds().count() == 5);
+
+                REQUIRE(v.is_negative() == false);
+            }
+            SECTION("unsigned")
+            {
+                typedef estd::chrono::duration<uint32_t, estd::milli> time_type;
+                time_type ms{3601005};
+                estd::chrono::hh_mm_ss<time_type> v{ms};
+
+                auto hours = v.hours().count();
+
+                REQUIRE(hours == 1);
+                REQUIRE(v.minutes().count() == 0);
+                REQUIRE(v.seconds().count() == 1);
+                REQUIRE(v.subseconds().count() == 5);
+
+                REQUIRE(v.is_negative() == false);
+            }
+            SECTION("negative")
+            {
+                estd::chrono::milliseconds s{-3601005};
+                estd::chrono::hh_mm_ss<decltype(s)> v{s};
+
+                REQUIRE(v.hours().count() == 1);
+                REQUIRE(v.minutes().count() == 0);
+                REQUIRE(v.seconds().count() == 1);
+                REQUIRE(v.subseconds().count() == 5);
+
+                REQUIRE(v.is_negative() == true);
+            }
         }
     }
 }
