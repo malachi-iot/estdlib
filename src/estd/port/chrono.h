@@ -32,8 +32,7 @@ namespace estd {
 namespace internal {
 
 // embedded-oriented version has lower precision.  Deviates from standard
-// Revisit this on a per-platform and
-// option-selectable level
+// DEBT: Revisit this on a per-platform and option-selectable level
 #ifdef FEATURE_ESTD_CHRONO_LOWPRECISION
 typedef int32_t nano_rep;
 typedef int32_t micro_rep;
@@ -55,7 +54,7 @@ typedef int32_t hours_rep;
 typedef int32_t days_rep;
 typedef int32_t weeks_rep;
 typedef int32_t months_rep;
-typedef int16_t years_rep;
+typedef int16_t years_rep;      ///< Deviates from spec which calls for 17 bit minimum
 #endif
 
 
@@ -252,9 +251,19 @@ typedef internal::estd_chrono::duration<internal::milli_rep, milli> milliseconds
 typedef internal::estd_chrono::duration<internal::seconds_rep> seconds;
 typedef internal::estd_chrono::duration<internal::minutes_rep, ratio<60> > minutes;
 typedef internal::estd_chrono::duration<internal::hours_rep, ratio<3600> > hours;
+
 // NOTE: AVR compiler requires this long typecast.  Doesn't hurt anything (though it's
 // a bit ugly)
 typedef internal::estd_chrono::duration<internal::days_rep, ratio<(long)3600 * 24> > days;
+typedef internal::estd_chrono::duration<internal::weeks_rep, ratio<(long)3600 * 24 * 7> > weeks;
+
+// "Each of the predefined duration types days, weeks, months and years covers a range
+//  of at least ±40000 years. years is equal to 365.2425 days (the average length of a
+//  Gregorian year). months is equal to 30.436875 days (exactly 1/12 of years)."
+// https://en.cppreference.com/w/cpp/chrono/duration
+typedef internal::estd_chrono::duration<internal::months_rep, ratio<(long)2629746> > months;
+typedef internal::estd_chrono::duration<internal::years_rep, ratio<(long)31556952> > years;
+
 
 #ifdef FEATURE_ESTD_CHRONO
 
