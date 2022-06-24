@@ -33,6 +33,9 @@ typedef ratio<1000000000000, 1> tera;
 namespace detail {
 
 template <class R1, class R2>
+struct ratio_add;
+
+template <class R1, class R2>
 struct ratio_divide;
 
 template <class R1, class R2>
@@ -134,6 +137,26 @@ public:
 
     typedef estd::ratio<num, den> type;
 };
+
+
+// Not ready yet
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct ratio_add<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
+{
+    /*
+private:
+    static CONSTEXPR std::intmax_t gcd =
+        internal::gcd<Denom2 * Num1, Denom1 * Num2>::value;
+
+public:
+    static CONSTEXPR std::intmax_t num = Denom2 * Num1 / gcd;
+    static CONSTEXPR std::intmax_t den = Denom1 * Num2 / gcd;
+
+    typedef estd::ratio<num, den> type; */
+};
+
+
 
 }
 
