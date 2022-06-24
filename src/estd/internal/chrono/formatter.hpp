@@ -53,4 +53,39 @@ public:
 
 }
 
+template <class Duration>
+class hh_mm_ss
+{
+    Duration value;
+
+    typedef duration<uint8_t, chrono::hours::period> hours_type;
+    typedef duration<uint8_t, chrono::minutes::period> minutes_type;
+    typedef duration<typename Duration::rep, chrono::seconds::period> seconds_type;
+
+public:
+    hh_mm_ss(Duration duration) : value(duration) {}
+
+    typedef Duration precision;
+
+    constexpr hours_type hours() const
+    {
+        return hours_type{value};
+    }
+
+    constexpr minutes_type minutes() const
+    {
+        return minutes_type{value - hours()};
+    }
+
+    constexpr seconds_type seconds() const
+    {
+        return seconds_type{value - minutes_type{value}};
+    }
+
+    constexpr precision subseconds() const
+    {
+        return precision{value - seconds_type{value}};
+    }
+};
+
 }}

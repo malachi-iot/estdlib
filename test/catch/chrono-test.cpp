@@ -373,5 +373,15 @@ TEST_CASE("chrono tests")
                 //REQUIRE((int)ymd.days() == 9);
             }
         }
+        SECTION("hh_mm_ss")
+        {
+            estd::chrono::milliseconds s{3601005};
+            estd::chrono::hh_mm_ss<decltype(s)> v{s};
+
+            REQUIRE(v.hours().count() == 1);
+            REQUIRE(v.minutes().count() == 0);
+            REQUIRE(v.seconds().count() == 1);
+            REQUIRE(v.subseconds().count() == 5);
+        }
     }
 }
