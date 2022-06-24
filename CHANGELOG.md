@@ -1,3 +1,12 @@
+v 0.X.X - XXXXX22
+
+## Quality Updates & Bug Fixes
+
+* `ratio_divide` and `ratio_multiply` are now aliased out for
+  compilers that support the feature.  The non aliased specialized
+  structs are moved now to `detail` namespace, which is a
+  breaking change for c++03 targets.
+
 v 0.3.2 - 17JUN22
 
 ## Added Features

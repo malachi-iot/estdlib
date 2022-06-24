@@ -30,11 +30,15 @@ typedef ratio<1000000, 1> mega;
 typedef ratio<1000000000, 1> giga;
 typedef ratio<1000000000000, 1> tera;
 
-template<class R1, class R2>
+namespace detail {
+
+template <class R1, class R2>
 struct ratio_divide;
 
-template<class R1, class R2>
+template <class R1, class R2>
 struct ratio_multiply;
+
+}
 
 namespace internal {
 
@@ -97,9 +101,11 @@ struct ratio_divide<ratio<Num1, Denom1>, ratio<1, Denom2> >
     static CONSTEXPR std::intmax_t den = Denom1;
 }; */
 
+namespace detail {
+
 // TODO: Need to do overflow processing
-template<std::intmax_t Num1, std::intmax_t Num2,
-         std::intmax_t Denom1, std::intmax_t Denom2>
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
 struct ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
 {
 private:
@@ -109,11 +115,13 @@ private:
 public:
     static CONSTEXPR std::intmax_t num = Denom2 * Num1 / gcd;
     static CONSTEXPR std::intmax_t den = Denom1 * Num2 / gcd;
+
+    typedef estd::ratio<num, den> type;
 };
 
 
-template<std::intmax_t Num1, std::intmax_t Num2,
-         std::intmax_t Denom1, std::intmax_t Denom2>
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
 struct ratio_multiply<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
 {
 private:
@@ -123,7 +131,17 @@ private:
 public:
     static CONSTEXPR std::intmax_t num = Num1 * Num2 / gcd;
     static CONSTEXPR std::intmax_t den = Denom1 * Denom2 / gcd;
+
+    typedef estd::ratio<num, den> type;
 };
+
+}
+
+template <class R1, class R2>
+using ratio_multiply = typename detail::ratio_multiply<R1, R2>::type;
+
+template <class R1, class R2>
+using ratio_divide = typename detail::ratio_divide<R1, R2>::type;
 
 
 }
