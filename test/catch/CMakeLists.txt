@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     stack-test.cpp
 	streambuf-test.cpp
     string-test.cpp
+    ratio-test.cpp
     test-data.h
     type-traits-test.cpp
     tuple-test.cpp
