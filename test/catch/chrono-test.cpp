@@ -359,13 +359,18 @@ TEST_CASE("chrono tests")
             }
             SECTION("specific")
             {
-                estd::chrono::seconds synthetic_now{1000000000};
-                estd::chrono::time_point<clock_type> tp{synthetic_now};
+                // https://www.wikiwand.com/en/Unix_time
+                estd::chrono::seconds dkuug_celebration{1000000000};
+                estd::chrono::time_point<clock_type> tp{dkuug_celebration};
                 estd::chrono::internal::year_month_day<clock_type> ymd{tp};
 
                 auto year = ymd.year();
 
                 REQUIRE(year == 2001);
+                REQUIRE(ymd.month() == 9);
+
+                // FIX: Not working, date/time calculations can get tricky
+                //REQUIRE((int)ymd.days() == 9);
             }
         }
     }

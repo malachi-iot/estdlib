@@ -22,9 +22,20 @@ class year_month_day
     sys_days days_;
 
 public:
-    constexpr chrono::month month() const NOEXCEPT
+    chrono::day days() const NOEXCEPT
     {
-        return chrono::month(7);
+        chrono::months m = days_.time_since_epoch();
+        chrono::days d = days_.time_since_epoch() - m;
+        return chrono::day(d.count() + 1);
+    }
+
+    //constexpr
+    chrono::month month() const NOEXCEPT
+    {
+        chrono::years y = days_.time_since_epoch();
+        chrono::days d{y};
+        chrono::months m = days_.time_since_epoch() - d;
+        return chrono::month(m.count() + 1);
     }
 
     //constexpr
