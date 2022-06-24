@@ -10,6 +10,7 @@
 #include "../internal/common_type.h"
 #include "../ratio.h"
 #include "../limits.h"
+#include "../internal/fwd/chrono.h"
 
 #if (defined(FEATURE_POSIX_CHRONO) || defined(ESTD_SDK_IDF)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
 // DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
@@ -304,7 +305,7 @@ public:
     // NOTE: Compiles, but not tested
     template <class TDuration2>
     time_point(const time_point<Clock, TDuration2>& t) :
-        m_time_since_epoch(t.m_time_since_epoch)
+        m_time_since_epoch(t.time_since_epoch())
     {}
 
     Duration time_since_epoch() const { return m_time_since_epoch; }

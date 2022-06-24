@@ -332,4 +332,41 @@ TEST_CASE("chrono tests")
         REQUIRE(s.count() == 15);
     }
 #endif
+    SECTION("C++20 style")
+    {
+        SECTION("year")
+        {
+            estd::chrono::year y{2001}, y2{4};
+
+            auto y3 = y += y2;
+
+            REQUIRE(y3 == 2005);
+        }
+        SECTION("year_month_day")
+        {
+            // DEBT: Can't use std::chrono::system_clock here because we are unable to convert
+            // from estd::chrono::duration to std::chrono::duration
+            // NOTE: We wouldn't want to grab now() anyway for unit test
+            //estd::chrono::time_point<std::chrono::system_clock> tp{std::chrono::system_clock::now()};
+            typedef fake_clock clock_type;
+
+            SECTION("basic")
+            {
+                estd::chrono::time_point<clock_type> tp;
+                estd::chrono::internal::year_month_day<clock_type> ymd{tp};
+
+                REQUIRE(ymd.year() == 1970);
+            }
+            SECTION("specific")
+            {
+                estd::chrono::seconds synthetic_now{1000000000};
+                estd::chrono::time_point<clock_type> tp{synthetic_now};
+                estd::chrono::internal::year_month_day<clock_type> ymd{tp};
+
+                auto year = ymd.year();
+
+                REQUIRE(year == 2001);
+            }
+        }
+    }
 }

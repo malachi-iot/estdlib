@@ -1,3 +1,5 @@
+#pragma once
+
 #include "chrono.h"
 
 namespace estd { namespace chrono {

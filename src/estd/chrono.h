@@ -9,6 +9,7 @@
 #include "internal/platform.h"
 #include "port/identify_platform.h"
 #include "port/chrono.h"
+#include "internal/chrono/formatter.hpp"
 
 // esp-idf native version coexists with the others
 #if defined(ESTD_SDK_IDF)
