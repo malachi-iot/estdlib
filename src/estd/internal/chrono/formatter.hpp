@@ -51,6 +51,82 @@ public:
     }
 };
 
+template <class TClock>
+class month_day_last
+{
+    const chrono::month month_;
+
+public:
+    explicit CONSTEXPR month_day_last(const chrono::month& m) NOEXCEPT : month_{m}
+    {
+    }
+
+    constexpr chrono::month month() const { return month_; }
+
+    constexpr bool ok() const { return month_.ok(); }
+};
+
+
+template <class TClock>
+class year_month_day_last
+{
+    const chrono::year year_;
+    const chrono::month month_;
+
+public:
+    constexpr year_month_day_last(const chrono::year& y,
+        const month_day_last<TClock>& mdl) NOEXCEPT :
+        year_{y},
+        month_{mdl.month()}
+    {}
+
+    constexpr chrono::year year() const { return year_; }
+
+    inline chrono::day day() const
+    {
+        switch(month_)
+        {
+            case 2: return year_.is_leap() ? day(29) : day(28);
+
+            case 4: return day(30);
+            case 6: return day(30);
+            case 11: return day(30);
+
+            default:    return day(31);
+        }
+    }
+
+    constexpr bool ok() const NOEXCEPT
+    {
+        return month_.ok() && year_.ok();
+    }
+};
+
+
+template <>
+class year_month_day<void>
+{
+    chrono::year year_;
+    chrono::month month_;
+    chrono::day day_;
+
+public:
+    constexpr year_month_day(
+        const chrono::year& y,
+        const chrono::month& m,
+        const chrono::day& d) : year_{y}, month_{m}, day_{d}
+    {}
+
+    constexpr bool ok() const NOEXCEPT
+    {
+        return day_.ok() && month_.ok() && year_.ok();
+    }
+
+    constexpr chrono::day day() const NOEXCEPT { return day_; }
+    constexpr chrono::month month() const NOEXCEPT { return month_; }
+    constexpr chrono::year year() const NOEXCEPT { return year_; }
+};
+
 }
 
 // DEBT: Optimize with modulo instead of brute force subtracting (which will cascade out into

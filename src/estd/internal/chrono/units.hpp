@@ -35,7 +35,14 @@ protected:
 
     constexpr unit_base(TInt value) : value_{value} {}
 
+    constexpr bool in_range(TInt min, TInt max) const
+    {
+        return value_ >= min && max >= value_;
+    }
+
 public:
+    typedef TInt int_type;
+
     inline TContainer& operator+=(const TContainer& v)
     {
         value_ += v.value_;
@@ -60,6 +67,14 @@ class year : public internal::unit_base<int16_t, year>
 public:
     year() = default;
     explicit constexpr year(int year) : base_type{(int16_t)year} {}
+
+    static constexpr year min() NOEXCEPT { return year(-32767); }
+    static constexpr year max() NOEXCEPT { return year(32767); }
+
+    constexpr bool is_leap() const NOEXCEPT { return value_ % 400 == 0; }
+
+    // upper end of 16-bit value can never be out of range
+    constexpr bool ok() const NOEXCEPT { return *this >= min(); }
 };
 
 
@@ -70,6 +85,8 @@ class month : public internal::unit_base<uint8_t, month>
 public:
     month() = default;
     explicit constexpr month(int month) : base_type{(uint8_t)month} {}
+
+    constexpr bool ok() const { return base_type::in_range(1, 12); }
 };
 
 
@@ -80,6 +97,8 @@ class day : public internal::unit_base<uint8_t, day>
 public:
     day() = default;
     explicit constexpr day(int day) : base_type{(uint8_t)day} {}
+
+    constexpr bool ok() const NOEXCEPT { return in_range(1, 31); }
 };
 
 #ifdef FEATURE_CPP_INLINE_VARIABLES
