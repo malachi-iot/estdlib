@@ -22,7 +22,16 @@ template<
     typedef T1 first_type;
     typedef T2 second_type;
 
-    //pair(T1& first, T2& second) : first(first), second(second) {}
+#if __cplusplus >= 201103L
+    constexpr pair() : first(), second() {}
+
+    pair(const T1& first, const T2& second) : first(first), second(second) {}
+
+    template <class U1, class U2>
+    constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
+#else
+    pair() : first(), second() {}
+#endif
 };
 
 template <class T1, class T2>

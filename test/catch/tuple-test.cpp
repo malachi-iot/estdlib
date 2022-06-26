@@ -69,4 +69,18 @@ TEST_CASE("tuple")
             // TODO: Look into tuple<T&, TArgs...> see if we accidently light that up
         }
     }
+    SECTION("tuple_size")
+    {
+        // TODO: Implement from https://en.cppreference.com/w/cpp/utility/tuple/tuple_size
+        estd::make_tuple(2.0f, 3.0f);
+    }
+    SECTION("apply")
+    {
+        // From https://en.cppreference.com/w/cpp/utility/apply
+
+        auto add_lambda = [](int first, int second) { return first + second; };
+
+        // FIX: Doesn't work yet
+        //estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
+    }
 }
