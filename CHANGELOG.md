@@ -9,6 +9,7 @@ v 0.X.X - XXXXX22
     * `ratio_add` now present
     * `ratio_divide` and `ratio_multiply` auto reduce as briefl
        mentioned by std spec
+* c++03 flavor of `tuple` now available
 
 ## Quality Updates & Bug Fixes
 
