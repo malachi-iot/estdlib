@@ -68,6 +68,7 @@ template <class T1, class T2>
 struct GetImplPair<0, T1, T2>
 {
     static ESTD_CPP_CONSTEXPR_FUNCTION T1& value(pair<T1, T2>& p) { return p.first; }
+    static ESTD_CPP_CONSTEXPR_FUNCTION const T1& value(const pair<T1, T2>& p) { return p.first; }
 
     typedef T1 type;
 };
@@ -76,6 +77,7 @@ template <class T1, class T2>
 struct GetImplPair<1, T1, T2>
 {
     static ESTD_CPP_CONSTEXPR_FUNCTION T2& value(pair<T1, T2>& p) { return p.second; }
+    static ESTD_CPP_CONSTEXPR_FUNCTION const T2& value(const pair<T1, T2>& p) { return p.second; }
 
     typedef T2 type;
 };
@@ -93,6 +95,13 @@ struct tuple_element<I, pair<T1, T2> > :
 template <std::size_t index, class T1, class T2>
 ESTD_CPP_CONSTEXPR_FUNCTION
 typename tuple_element<index, pair<T1, T2> >::type& get(pair<T1, T2>& p)
+{
+    return internal::GetImplPair<index, T1, T2>::value(p);
+}
+
+template <std::size_t index, class T1, class T2>
+const ESTD_CPP_CONSTEXPR_FUNCTION
+typename tuple_element<index, pair<T1, T2> >::type& get(const pair<T1, T2>& p)
 {
     return internal::GetImplPair<index, T1, T2>::value(p);
 }

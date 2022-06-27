@@ -274,7 +274,7 @@ TEST_CASE("utility")
     }
     SECTION("pair")
     {
-        estd::pair<float, float> p(2.0, 3.0);
+        const estd::pair<float, float> p(2.0, 3.0);
 
         REQUIRE(estd::get<0>(p) == 2.0);
     }
