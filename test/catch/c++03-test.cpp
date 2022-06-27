@@ -7,7 +7,7 @@ TEST_CASE("c++03 sanity check")
 {
     SECTION("tuple")
     {
-        using namespace estd::experimental;
+        using namespace estd;
 
         struct fakeout
         {

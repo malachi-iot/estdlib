@@ -6,7 +6,7 @@
 // doesn't help us
 //#include "type_traits.h"
 // internal type_traits has no dependencies, so that's safe
-#include "internal/fwd/tuple.h"
+#include "internal/fwd/tuple-shared.h"
 #include "internal/type_traits.h"
 
 #include "cstddef.h"
@@ -239,7 +239,7 @@ void swap(T& a, T& b)
 namespace internal {
 
 template <class T>
-void xor_swap(T& a, T& b)
+inline void xor_swap(T& a, T& b)
 {
     a ^= b;
     b ^= a;

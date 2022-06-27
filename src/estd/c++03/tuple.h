@@ -1,12 +1,9 @@
 #pragma once
 
-#include "../internal/variant.h"
 #include "../type_traits.h"
+#include "../internal/fwd/c++03-tuple.h"
 
-namespace estd { namespace experimental {
-// NOTE: this is experimental, pre C++03 support
-template<class TArg1, class = monostate, class = monostate, class = monostate, class = monostate>
-class tuple;
+namespace estd {
 
 namespace internal {
 
@@ -185,4 +182,4 @@ inline void set(TTuple& tuple, typename internal::tuple_type_getter<I, typename 
     internal::tuple_type_getter<I, typename TTuple::impl_type>::value(tuple.impl, v);
 }
 
-}}
+}

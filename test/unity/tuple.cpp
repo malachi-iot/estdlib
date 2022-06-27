@@ -2,7 +2,7 @@
 
 #include <estd/tuple.h>
 
-using namespace estd::experimental;
+using namespace estd;
 
 static void test_tuple_1()
 {
