@@ -158,33 +158,30 @@ public:
         impl(v1, v2, v3, v4) {};
 };
 
-template <std::size_t I, class TTuple,
-    class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
-inline typename Getter::reference get(TTuple& tuple)
+template <std::size_t I, class TTuple>
+inline typename internal::tuple_type_getter<I, typename TTuple::impl_type>::reference get(TTuple& tuple)
 {
     // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
     // (see tuple_type_getter's tuple_tag filter)
-    return Getter::value(tuple.impl);
+    return internal::tuple_type_getter<I, typename TTuple::impl_type>::value(tuple.impl);
 }
 
 
-template <std::size_t I, class TTuple,
-    class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
-inline typename Getter::const_reference get(const TTuple& tuple)
+template <std::size_t I, class TTuple>
+inline typename internal::tuple_type_getter<I, typename TTuple::impl_type>::const_reference get(const TTuple& tuple)
 {
     // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
     // (see tuple_type_getter's tuple_tag filter)
-    return Getter::value(tuple.impl);
+    return internal::tuple_type_getter<I, typename TTuple::impl_type>::value(tuple.impl);
 }
 
 
-template <std::size_t I, class TTuple,
-    class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
-inline void set(TTuple& tuple, typename Getter::const_reference v)
+template <std::size_t I, class TTuple>
+inline void set(TTuple& tuple, typename internal::tuple_type_getter<I, typename TTuple::impl_type>::const_reference v)
 {
     // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
     // (see tuple_type_getter's tuple_tag filter)
-    Getter::value(tuple.impl, v);
+    internal::tuple_type_getter<I, typename TTuple::impl_type>::value(tuple.impl, v);
 }
 
 }}

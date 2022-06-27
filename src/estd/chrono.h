@@ -9,7 +9,10 @@
 #include "internal/platform.h"
 #include "port/identify_platform.h"
 #include "port/chrono.h"
+// DEBT: We'd like this to be c++03 friendly
+#if __cplusplus >= 201103L
 #include "internal/chrono/formatter.hpp"
+#endif
 
 // esp-idf native version coexists with the others
 #if defined(ESTD_SDK_IDF)

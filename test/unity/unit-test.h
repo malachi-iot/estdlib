@@ -28,6 +28,7 @@ void test_span();
 void test_streambuf();
 void test_string();
 void test_thread();
+void test_tuple();
 void test_map();
 
 struct TestStruct

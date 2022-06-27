@@ -135,6 +135,7 @@ public:
 
 }
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
 template <class R1, class R2>
 using ratio_multiply = typename detail::ratio_multiply<R1, R2>::type;
 
@@ -143,5 +144,6 @@ using ratio_divide = typename detail::ratio_divide<R1, R2>::type;
 
 template <class R1, class R2>
 using ratio_add = typename detail::ratio_add<R1, R2>::type;
+#endif
 
 }

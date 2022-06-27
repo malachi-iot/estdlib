@@ -8,7 +8,7 @@
 using namespace std;
 
 void test();
-void test_tuple();
+void test_tuple_old();
 
 // +++ Unity specific
 void setUp (void) {}
@@ -23,7 +23,7 @@ int main()
 
     test();
 #if defined(FEATURE_CPP_VARIADIC)
-    test_tuple();
+    test_tuple_old();
 #endif
 
     UNITY_BEGIN();
@@ -40,6 +40,7 @@ int main()
     test_span();
     test_streambuf();
     test_string();
+    test_tuple();
     UNITY_END();
 
     return 0;

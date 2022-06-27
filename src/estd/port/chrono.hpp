@@ -14,7 +14,11 @@ template<
 >
 CONSTEXPR Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
 {
+#ifdef FEATURE_CPP_ALIASTEMPLATE
     typedef ratio_divide<Period2, Period> rd;
+#else
+    typedef detail::ratio_divide<Period2, Period> rd;
+#endif
 
     // So this isn't the answer but it's close
     // 1) a warning would be much preferred
@@ -222,15 +226,19 @@ constexpr duration<Rep, Period> abs(duration<Rep, Period> d)
 // UNTESTED
 // DEBT: I think even c++03 can check for min()/zero() at compile time, so if
 // so we can merge this and above version
-template <class Rep, class Period, class = typename estd::enable_if<
-    estd::numeric_limits<Rep>::is_signed>::type>
-duration<Rep, Period> abs(duration<Rep, Period> d)
+template <class Rep, class Period>
+inline typename estd::enable_if<
+    estd::numeric_limits<Rep>::is_signed, duration<Rep, Period> >::type
+    abs(duration<Rep, Period> d)
 {
     return d >= d.zero() ? d : -d;
 }
 #endif
 
 namespace internal {
+
+// DEBT: We'd like this to be c++03 friendly
+#if __cplusplus >= 201103L
 
 template <class Rep, class Period, typename estd::enable_if<
     estd::numeric_limits<Rep>::is_signed, bool>::type = true>
@@ -247,7 +255,7 @@ CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
     return d;
 }
 
-
+#endif
 
 
 }

@@ -2,6 +2,8 @@
 
 #include "platform.h"
 
+#include "../cstdint.h"
+
 namespace estd {
 
 namespace internal {

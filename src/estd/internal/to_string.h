@@ -5,6 +5,7 @@
 #include "../string.h"
 #include "string_convert.h"
 #include "../charconv.h"
+#include "impl/allocated_array.h"
 
 // not doing #include <stdio.h> because all its putc/putchar macros get things
 // confused
@@ -74,9 +75,9 @@ struct string_convert_traits<char, int16_t>
     static CONSTEXPR uint8_t max_size() { return 5; }
 
     template <class TImpl>
-    static void to_string(internal::allocated_array<TImpl>& s, int16_t value)
+    static void to_string(estd::internal::allocated_array<TImpl>& s, int16_t value)
     {
-        internal::toString(s.lock(), value);
+        estd::internal::toString(s.lock(), value);
         s.unlock();
     }
 };

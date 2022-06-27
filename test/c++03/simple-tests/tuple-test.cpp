@@ -3,7 +3,7 @@
 #if defined(FEATURE_CPP_VARIADIC)
 #include <estd/tuple.h>
 
-void test_tuple()
+void test_tuple_old()
 {
     estd::tuple<int, int> val(1, 2);
 

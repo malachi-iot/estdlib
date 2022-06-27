@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 98)
 
@@ -31,6 +31,7 @@ set(TESTSRC
         ${TESTSRC_DIR}/span.cpp
         ${TESTSRC_DIR}/streambuf.cpp
         ${TESTSRC_DIR}/string.cpp
+        ${TESTSRC_DIR}/tuple.cpp
         )
 
 #   ${TESTSRC_DIR}/map.cpp
