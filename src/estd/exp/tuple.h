@@ -4,8 +4,7 @@
 
 namespace estd { namespace experimental {
 // NOTE: this is experimental, pre C++03 support
-#ifndef EXP1
-template<class TArg1, class TArg2 = monostate, class TArg3 = monostate, class TArg4 = monostate>
+template<class TArg1, class = monostate, class = monostate, class = monostate, class = monostate>
 class tuple;
 
 namespace internal {
@@ -38,31 +37,9 @@ public:
         value(v1) {}
 };
 
-template <size_t I, class T, class TNext>
-struct _tuple_type_getter;
-
-template <size_t I, class T, class TNext>
-struct _tuple_type_getter
-{
-    typedef tuple_impl<T, TNext> impl_type;
-};
-
-template <class T, class TNext>
-struct _tuple_type_getter<0, T, TNext>
-{
-    typedef tuple_impl<T, TNext> impl_type;
-    typedef typename impl_type::value_type value_type;
-
-    static value_type& value(impl_type& impl) { return impl.value; }
-};
-
-template <size_t I, class T, class TNext>
-inline typename _tuple_type_getter<I, T, TNext>::value_type& get(tuple_impl<T, TNext>& impl)
-{
-    return _tuple_type_getter<I, T, TNext>::value(impl);
-}
-
-template <size_t I, class TImpl, bool Enable = estd::is_base_of<tuple_tag, TImpl>::value >
+template <size_t I, class TImpl, bool Enable =
+    estd::is_base_of<tuple_tag, TImpl>::value &&
+    !estd::is_same<tuple_tag, TImpl>::value>
 struct tuple_type_getter;
 
 template <class T, class TNext>
@@ -71,8 +48,11 @@ struct tuple_type_getter<0, tuple_impl<T, TNext>, true>
     typedef tuple_impl<T, TNext> impl_type;
     typedef typename impl_type::value_type value_type;
     typedef value_type& reference;
+    typedef const value_type& const_reference;
 
+    static const_reference value(const impl_type& impl) { return impl.value; }
     static reference value(impl_type& impl) { return impl.value; }
+    static void value(impl_type& impl, const_reference v) { impl.value = v; }
 };
 
 template <size_t I, class T, class TNext>
@@ -86,6 +66,10 @@ template <size_t I, class TWrongImpl>
 struct tuple_type_getter<I, TWrongImpl, false>
 {
     typedef int& reference;
+
+    // This is as close as we can get to a custom error indicating 'tuple' wasn't correctly
+    // fed into the getter.  'invalid_tuple' is expected to not exist and generate an error.
+    static reference value(TWrongImpl) { return TWrongImpl::invalid_tuple(); }
 };
 
 /*
@@ -111,28 +95,10 @@ typename enable_if<I == 0>::type _iterate_test(tuple_impl<T, TNext>& t)
 {
 }
 
-/*
-template <std::size_t I, class TRet, class T, class TNext,
-    typename enable_if<is_same<T, monostate>::value, bool>::type = true>
-inline TRet&  _get_from_tuple(tuple_impl<T, TNext>& v)
-{
-
-}
-
-template <std::size_t I, class TRet, class T, class TNext,
-    typename enable_if<!is_same<T, monostate>::value, bool>::type = true>
-inline TRet&  _get_from_tuple(tuple_impl<T, TNext>& v)
-{
-
-} */
-
 }
 
 template <class TArg1>
-class tuple<TArg1,
-        monostate,
-        monostate,
-        monostate>
+class tuple<TArg1>
 {
 public:
     typedef internal::tuple_impl<TArg1, monostate> impl_type;
@@ -144,10 +110,7 @@ public:
 };
 
 template <class TArg1, class TArg2>
-class tuple<TArg1,
-    TArg2,
-    monostate,
-    monostate>
+class tuple<TArg1, TArg2>
 {
 public:
     typedef internal::tuple_impl<TArg1,
@@ -162,10 +125,7 @@ public:
 
 
 template <class TArg1, class TArg2, class TArg3>
-class tuple<TArg1,
-    TArg2,
-    TArg3,
-    monostate>
+class tuple<TArg1, TArg2, TArg3>
 {
 public:
     typedef     internal::tuple_impl<TArg1,
@@ -180,6 +140,24 @@ public:
         impl(v1, v2, v3) {};
 };
 
+
+template <class TArg1, class TArg2, class TArg3, class TArg4>
+class tuple<TArg1, TArg2, TArg3, TArg4>
+{
+public:
+    typedef     internal::tuple_impl<TArg1,
+        internal::tuple_impl<TArg2,
+            internal::tuple_impl<TArg3,
+                internal::tuple_impl<TArg4> > > > impl_type;
+
+    impl_type impl;
+
+public:
+    tuple() {}
+    tuple(const TArg1& v1, const TArg2& v2, const TArg3& v3, const TArg4& v4) :
+        impl(v1, v2, v3, v4) {};
+};
+
 template <std::size_t I, class TTuple,
     class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
 inline typename Getter::reference get(TTuple& tuple)
@@ -189,12 +167,24 @@ inline typename Getter::reference get(TTuple& tuple)
     return Getter::value(tuple.impl);
 }
 
-#elif defined(EXP2)
-template<class TArg1>
-class tuple;
 
-template<class TArg1, class TArg2>
-class tuple;
+template <std::size_t I, class TTuple,
+    class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
+inline typename Getter::const_reference get(const TTuple& tuple)
+{
+    // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
+    // (see tuple_type_getter's tuple_tag filter)
+    return Getter::value(tuple.impl);
+}
 
-#endif
+
+template <std::size_t I, class TTuple,
+    class Getter = internal::tuple_type_getter<I, typename TTuple::impl_type> >
+inline void set(TTuple& tuple, typename Getter::const_reference v)
+{
+    // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
+    // (see tuple_type_getter's tuple_tag filter)
+    Getter::value(tuple.impl, v);
+}
+
 }}
