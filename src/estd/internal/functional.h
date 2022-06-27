@@ -5,12 +5,10 @@
  */
 #pragma once
 
+#include "fwd/functional.h"
 #include "../type_traits.h"
 
 namespace estd {
-
-template <class T>
-struct hash;
 
 //#if __cplusplus < 201200L
 template<class T>

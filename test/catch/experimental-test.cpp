@@ -14,7 +14,6 @@
 //#include <estd/locale.h>
 #include "estd/exp/memory_pool2.h"
 #include "estd/exp/unique_handle.h"
-#include "estd/exp/tuple.h"
 
 
 struct TestA {};
@@ -597,53 +596,6 @@ TEST_CASE("experimental tests")
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 #endif
-    SECTION("c++03 friendly tuple")
-    {
-        using namespace estd::experimental;
-
-        struct fakeout
-        {
-            typedef int impl_type;
-            impl_type impl;
-        } f;
-
-        tuple<float, float, char> v(2.0, 3.0, 'A');
-
-        SECTION("low level get")
-        {
-            //internal::_iterate_test<1>(v.impl);
-            //internal::get<1>(v.impl);
-            auto r = internal::tuple_type_getter<0, decltype(v.impl)>::value(v.impl);
-
-            REQUIRE(r == 2);
-
-            auto r2 = internal::tuple_type_getter<2, decltype(v.impl)>::value(v.impl);
-
-            REQUIRE(r2 == 'A');
-        }
-        SECTION("high level get")
-        {
-            auto r1 = get<0>(v);
-            REQUIRE(r1 == 2.0);
-            REQUIRE(get<1>(v) == 3.0);
-            REQUIRE(get<2>(v) == 'A');
-
-            // Both of the following are expected to generate compile time errors
-            //REQUIRE(get<3>(v) == 'X');    // A succinct and kludgy but helpful error
-            //REQUIRE(get<0>(f));           // A succinct, but not super helpful error
-        }
-        SECTION("low level set")
-        {
-            internal::tuple_type_getter<1, decltype(v.impl)>::value(v.impl, 10);
-
-            REQUIRE(get<1>(v) == 10);
-        }
-        SECTION("high level set")
-        {
-            set<1>(v, 10);
-            REQUIRE(get<1>(v) == 10);
-        }
-    }
 }
 
 #pragma GCC diagnostic pop

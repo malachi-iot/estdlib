@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     allocator-test.cpp
     array-test.cpp
     buffer-test.cpp
+    c++03-test.cpp
     chrono-test.cpp
 	cstddef-test.cpp
     experimental-test.cpp

@@ -9,6 +9,9 @@ set(SOURCE_FILES
         estd/allocators/generic.h
         estd/allocators/handle_desc.h
         estd/array.h
+
+        estd/c++03/tuple.h
+
         estd/cctype.h
         estd/charconv.h
         estd/cstdint.h
@@ -20,7 +23,6 @@ set(SOURCE_FILES
         estd/exp/memory_pool2.h
         estd/exp/observer.h
         estd/exp/tmr.h
-        estd/exp/tuple.h
 
         estd/forward_list.h
         estd/functional.h

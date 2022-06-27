@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../variant.h"
+#include "../internal/variant.h"
+#include "../type_traits.h"
 
 namespace estd { namespace experimental {
 // NOTE: this is experimental, pre C++03 support
