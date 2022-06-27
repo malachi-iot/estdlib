@@ -6,6 +6,12 @@
 
 using namespace estd::test;
 
+template <class ...TArgs>
+void tester(TArgs...args)
+{
+
+}
+
 TEST_CASE("tuple")
 {
     SECTION("std lib version")
@@ -78,9 +84,20 @@ TEST_CASE("tuple")
     {
         // From https://en.cppreference.com/w/cpp/utility/apply
 
-        auto add_lambda = [](int first, int second) { return first + second; };
+        SECTION("basic")
+        {
+            auto add_lambda = [](int first, int second) { return first + second; };
 
-        // FIX: Doesn't work yet
-        //estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
+            // FIX: Doesn't work yet
+            //estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
+        }
+        SECTION("parameter pack")
+        {
+            auto t = estd::make_tuple(2.0f, 3.0f);
+
+            // template argument deduction/substitution failed:
+            // couldn’t deduce template parameter ‘F2’
+            //estd::apply(tester, estd::make_tuple(2.0f, 3.0f));
+        }
     }
 }
