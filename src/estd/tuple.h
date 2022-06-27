@@ -1,18 +1,12 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/fwd/tuple.h"
 
-#include "utility.h"
 #include "type_traits.h"
 
 #ifdef FEATURE_CPP_VARIADIC
 namespace estd {
-
-template<class... TArgs>
-class tuple;
-
-template<std::size_t I, class T>
-struct tuple_element;
 
 template <std::size_t I, class T>
 using tuple_element_t = typename tuple_element<I, T>::type;
@@ -173,13 +167,23 @@ const tuple_element_t<index, tuple<Types...> >&& get(const tuple<Types...>&& t)
     return internal::GetImpl<index, Types...>::value(t);
 }
 
-template< class T >
+#if OLD_VERSION
+// I think this was used with hopes of c++03 friendliness.  Since none of the rest of
+// tuple support is c++03 friendly, phasing this out should be harmless
+template < class T >
 struct tuple_size
         : estd::integral_constant<std::size_t, T::index + 1>
 {
     //static constexpr unsigned value();// T::index;
 };
+#else
+template <class ...TArgs>
+struct tuple_size<estd::tuple<TArgs...> >
+    : estd::integral_constant<std::size_t, sizeof...(TArgs)>
+{
+};
 
+#endif
 
 template <class...Types>
 CONSTEXPR tuple<Types...> make_tuple( Types&&... args )

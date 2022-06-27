@@ -6,7 +6,9 @@
 // doesn't help us
 //#include "type_traits.h"
 // internal type_traits has no dependencies, so that's safe
+#include "internal/fwd/tuple.h"
 #include "internal/type_traits.h"
+
 #include "cstddef.h"
 
 namespace estd {
@@ -46,6 +48,9 @@ pair<T1, T2> make_pair(T1 t, T2 u)
     return pair<T1, T2>(t, u);
 #endif
 }
+
+template <class T1, class T2>
+struct tuple_size<pair<T1, T2> > : integral_constant<std::size_t, 2> {};
 
 /*
 template<class T>

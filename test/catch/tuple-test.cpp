@@ -198,18 +198,25 @@ TEST_CASE("tuple")
         SECTION("pair")
         {
             auto p = estd::make_pair(2.0f, 3.0f);
-            //constexpr int sz = estd::tuple_size<decltype(p)>::value;
-            //REQUIRE(sz == 2);
+            constexpr int sz = estd::tuple_size<decltype(p)>::value;
+            REQUIRE(sz == 2);
         }
     }
     SECTION("apply")
     {
         // From https://en.cppreference.com/w/cpp/utility/apply
 
-        SECTION("basic")
-        {
-            auto add_lambda = [](int first, int second) { return first + second; };
+        auto add_lambda = [](int first, int second) { return first + second; };
 
+
+        SECTION("tuple")
+        {
+            auto result = estd::apply(add_lambda, estd::make_tuple(2.0f, 3.0f));
+
+            REQUIRE(result == 5);
+        }
+        SECTION("pair")
+        {
             // FIX: Doesn't work yet
             //estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
         }
