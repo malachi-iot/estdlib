@@ -51,5 +51,11 @@ TEST_CASE("c++03 sanity check")
             set<1>(v, 10);
             REQUIRE(get<1>(v) == 10);
         }
+        SECTION("const")
+        {
+            const tuple<float> v1{4};
+
+            REQUIRE(get<0>(v1) == 4);
+        }
     }
 }
