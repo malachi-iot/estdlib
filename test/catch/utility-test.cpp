@@ -272,6 +272,12 @@ TEST_CASE("utility")
             swap_numeric_test<uint32_t>();
         }
     }
+    SECTION("pair")
+    {
+        estd::pair<float, float> p(2.0, 3.0);
+
+        REQUIRE(estd::get<0>(p) == 2.0);
+    }
 }
 
 #pragma GCC diagnostic pop

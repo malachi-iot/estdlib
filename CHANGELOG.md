@@ -16,6 +16,7 @@ v 0.X.X - XXXXX22
   compilers that support the feature.  The non aliased specialized
   structs are moved now to `detail` namespace, which is a
   breaking change for c++03 targets.
+* `tuple` and `pair` cleanup and minor improvements
 
 v 0.3.2 - 17JUN22
 

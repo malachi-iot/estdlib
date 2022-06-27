@@ -246,8 +246,9 @@ TEST_CASE("tuple")
         }
         SECTION("pair")
         {
-            // FIX: Doesn't work yet
-            //estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
+            auto result = estd::apply(add_lambda, estd::make_pair(2.0f, 3.0f));
+
+            REQUIRE(result == 5);
         }
         SECTION("parameter pack")
         {

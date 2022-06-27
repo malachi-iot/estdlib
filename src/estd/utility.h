@@ -52,6 +52,51 @@ pair<T1, T2> make_pair(T1 t, T2 u)
 template <class T1, class T2>
 struct tuple_size<pair<T1, T2> > : integral_constant<std::size_t, 2> {};
 
+namespace internal {
+
+template <std::size_t index, class T1, class T2>
+struct GetImplPair;
+
+// Semi-experimental
+#ifdef FEATURE_CPP_CONSTEXPR
+#define ESTD_CPP_CONSTEXPR_FUNCTION constexpr
+#else
+#define ESTD_CPP_CONSTEXPR_FUNCTION inline
+#endif
+
+template <class T1, class T2>
+struct GetImplPair<0, T1, T2>
+{
+    static ESTD_CPP_CONSTEXPR_FUNCTION T1& value(pair<T1, T2>& p) { return p.first; }
+
+    typedef T1 type;
+};
+
+template <class T1, class T2>
+struct GetImplPair<1, T1, T2>
+{
+    static ESTD_CPP_CONSTEXPR_FUNCTION T2& value(pair<T1, T2>& p) { return p.second; }
+
+    typedef T2 type;
+};
+
+
+};
+
+
+template <std::size_t I, class T1, class T2>
+struct tuple_element<I, pair<T1, T2> > :
+    internal::GetImplPair<I, T1, T2>
+{
+};
+
+template <std::size_t index, class T1, class T2>
+ESTD_CPP_CONSTEXPR_FUNCTION
+typename tuple_element<index, pair<T1, T2> >::type& get(pair<T1, T2>& p)
+{
+    return internal::GetImplPair<index, T1, T2>::value(p);
+}
+
 /*
 template<class T>
 typename estd::add_rvalue_reference<T>::type declval() */
