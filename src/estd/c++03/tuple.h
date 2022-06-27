@@ -20,10 +20,35 @@ class tuple_impl : public TNext
 {
 public:
     typedef T value_type;
-
-    T value;
-
     typedef TNext next_type;
+
+protected:
+    // Experimenting with keeping this inside impl class.  Works identically
+    // to tuple_type_getter
+    template <std::size_t I, typename Enabled = void>
+    struct navigator2;
+
+    template <std::size_t I>
+    struct navigator2<I, typename estd::enable_if<(I == 0)>::type>
+    {
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+        typedef tuple_impl impl_type;
+
+        static const_reference value(const impl_type& impl) { return impl.value; }
+        static reference value(impl_type& impl) { return impl.value; }
+        static void value(impl_type& impl, const_reference v) { impl.value = v; }
+    };
+
+    template <std::size_t I>
+    struct navigator2<I, typename estd::enable_if<(I > 0)>::type> :
+        next_type::template navigator2<I - 1>
+    {
+
+    };
+
+public:
+    T value;
 
     TNext& next() { return *this; }
 
@@ -44,19 +69,19 @@ public:
     struct navigator : tuple_type_getter<I, tuple_impl> {};
 
     template <std::size_t I>
-    inline typename navigator<I>::reference get()
+    inline typename navigator2<I>::reference get()
     {
         // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
         // (see tuple_type_getter's tuple_tag filter)
-        return navigator<I>::value(*this);
+        return navigator2<I>::value(*this);
     }
 
     template <std::size_t I>
-    inline typename navigator<I>::const_reference get() const
+    inline typename navigator2<I>::const_reference get() const
     {
         // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
         // (see tuple_type_getter's tuple_tag filter)
-        return navigator<I>::value(*this);
+        return navigator2<I>::value(*this);
     }
 };
 
