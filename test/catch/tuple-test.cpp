@@ -188,8 +188,19 @@ TEST_CASE("tuple")
     }
     SECTION("tuple_size")
     {
-        // TODO: Implement from https://en.cppreference.com/w/cpp/utility/tuple/tuple_size
-        estd::make_tuple(2.0f, 3.0f);
+        SECTION("tuple")
+        {
+            // TODO: Implement from https://en.cppreference.com/w/cpp/utility/tuple/tuple_size
+            auto t = estd::make_tuple(2.0f, 3.0f);
+            constexpr int sz = estd::tuple_size<decltype(t)>::value;
+            REQUIRE(sz == 2);
+        }
+        SECTION("pair")
+        {
+            auto p = estd::make_pair(2.0f, 3.0f);
+            //constexpr int sz = estd::tuple_size<decltype(p)>::value;
+            //REQUIRE(sz == 2);
+        }
     }
     SECTION("apply")
     {
