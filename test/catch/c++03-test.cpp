@@ -21,11 +21,11 @@ TEST_CASE("c++03 sanity check")
         {
             //internal::_iterate_test<1>(v.impl);
             //internal::get<1>(v.impl);
-            auto r = internal::tuple_type_getter<0, decltype(v.impl)>::value(v.impl);
+            auto r = internal::tuple_navigator<0, decltype(v.impl)>::value(v.impl);
 
             REQUIRE(r == 2);
 
-            auto r2 = internal::tuple_type_getter<2, decltype(v.impl)>::value(v.impl);
+            auto r2 = internal::tuple_navigator<2, decltype(v.impl)>::value(v.impl);
 
             REQUIRE(r2 == 'A');
         }
@@ -42,7 +42,7 @@ TEST_CASE("c++03 sanity check")
         }
         SECTION("low level set")
         {
-            internal::tuple_type_getter<1, decltype(v.impl)>::value(v.impl, 10);
+            internal::tuple_navigator<1, decltype(v.impl)>::value(v.impl, 10);
 
             REQUIRE(get<1>(v) == 10);
         }

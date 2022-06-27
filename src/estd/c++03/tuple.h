@@ -9,10 +9,8 @@ namespace internal {
 
 struct tuple_tag {};
 
-template <size_t I, class TImpl, bool Enable =
-    estd::is_base_of<tuple_tag, TImpl>::value &&
-    !estd::is_same<tuple_tag, TImpl>::value>
-struct tuple_type_getter;
+template <size_t I, class TImpl>
+struct tuple_navigator;
 
 
 template <class T, class TNext = tuple_tag>
@@ -66,27 +64,27 @@ public:
         value(v1) {}
 
     template <size_t I>
-    struct navigator : tuple_type_getter<I, tuple_impl> {};
+    struct navigator : tuple_navigator<I, tuple_impl> {};
 
     template <std::size_t I>
-    inline typename navigator2<I>::reference get()
+    inline typename navigator<I>::reference get()
     {
         // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
         // (see tuple_type_getter's tuple_tag filter)
-        return navigator2<I>::value(*this);
+        return navigator<I>::value(*this);
     }
 
     template <std::size_t I>
-    inline typename navigator2<I>::const_reference get() const
+    inline typename navigator<I>::const_reference get() const
     {
         // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
         // (see tuple_type_getter's tuple_tag filter)
-        return navigator2<I>::value(*this);
+        return navigator<I>::value(*this);
     }
 };
 
 template <class T, class TNext>
-struct tuple_type_getter<0, tuple_impl<T, TNext>, true>
+struct tuple_navigator<0, tuple_impl<T, TNext>>
 {
     typedef tuple_impl<T, TNext> impl_type;
     typedef typename impl_type::value_type value_type;
@@ -99,14 +97,14 @@ struct tuple_type_getter<0, tuple_impl<T, TNext>, true>
 };
 
 template <size_t I, class T, class TNext>
-struct tuple_type_getter<I, tuple_impl<T, TNext>, true > :
-    tuple_type_getter<I - 1, TNext>
+struct tuple_navigator<I, tuple_impl<T, TNext>> :
+    tuple_navigator<I - 1, TNext>
 {
 
 };
 
 template <size_t I, class TWrongImpl>
-struct tuple_type_getter<I, TWrongImpl, false>
+struct tuple_navigator
 {
     typedef int& reference;
 
@@ -202,25 +200,25 @@ public:
 };
 
 template <std::size_t I, class TTuple>
-inline typename internal::tuple_type_getter<I, typename TTuple::impl_type>::reference get(TTuple& tuple)
+inline typename internal::tuple_navigator<I, typename TTuple::impl_type>::reference get(TTuple& tuple)
 {
     return tuple.impl.template get<I>();
 }
 
 
 template <std::size_t I, class TTuple>
-inline typename internal::tuple_type_getter<I, typename TTuple::impl_type>::const_reference get(const TTuple& tuple)
+inline typename internal::tuple_navigator<I, typename TTuple::impl_type>::const_reference get(const TTuple& tuple)
 {
     return tuple.impl.template get<I>();
 }
 
 
 template <std::size_t I, class TTuple>
-inline void set(TTuple& tuple, typename internal::tuple_type_getter<I, typename TTuple::impl_type>::const_reference v)
+inline void set(TTuple& tuple, typename internal::tuple_navigator<I, typename TTuple::impl_type>::const_reference v)
 {
     // If you see 'value' is not a member, that may be a guard against an invalid TTuple type
     // (see tuple_type_getter's tuple_tag filter)
-    internal::tuple_type_getter<I, typename TTuple::impl_type>::value(tuple.impl, v);
+    internal::tuple_navigator<I, typename TTuple::impl_type>::value(tuple.impl, v);
 }
 
 }
