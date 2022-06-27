@@ -185,6 +185,9 @@ struct tuple_size<estd::tuple<TArgs...> >
 
 #endif
 
+
+
+
 template <class...Types>
 CONSTEXPR tuple<Types...> make_tuple( Types&&... args )
 {
@@ -206,7 +209,7 @@ inline auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
 
 template <class F2, class Tuple, class TSeq = make_index_sequence<
               tuple_size<
-                  Tuple
+                  remove_reference_t<Tuple>
               >::value> >
 inline auto apply(F2&& f, Tuple&& t) ->
     decltype (internal::apply_impl(std::move(f),

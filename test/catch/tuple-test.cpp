@@ -13,6 +13,35 @@ void tester(TArgs...args)
 
 }
 
+template <class ...TArgs>
+struct tester2
+{
+    tuple<TArgs...> v;
+
+    explicit tester2(TArgs&&...args) : v(std::forward<TArgs>(args)...)
+    {
+
+    }
+
+    float adder() { return 0; }
+
+    template <class ...TArgs2>
+    float adder(float v, TArgs2 const&...args)
+    {
+        return v + adder(args...);
+    }
+
+    // DEBT: Would be better if we could return auto here, but c++11 doesn't go for
+    // that
+    float test()
+    {
+        return apply([&](TArgs const&... tupleArgs)
+        {
+            return adder(tupleArgs...);
+        }, v);
+    }
+};
+
 
 template <class Tuple, size_t... Is>
 constexpr auto take_front_impl(const Tuple& t,
@@ -222,11 +251,15 @@ TEST_CASE("tuple")
         }
         SECTION("parameter pack")
         {
-            auto t = estd::make_tuple(2.0f, 3.0f);
+            /*
+            auto t1 = estd::make_tuple(2.0f, 3.0f);
 
             // template argument deduction/substitution failed:
             // couldn’t deduce template parameter ‘F2’
-            //estd::apply(tester, estd::make_tuple(2.0f, 3.0f));
+            estd::apply(tester, t1); */
+            tester2<float, float> t(2.0, 3.0);
+
+            REQUIRE(t.test() == 5);
         }
     }
 }

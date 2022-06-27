@@ -49,7 +49,7 @@
 // for inline method constexpr as described https://en.cppreference.com/w/cpp/language/constexpr
 #define FEATURE_CPP_CONSTEXPR_METHOD
 #define FEATURE_CPP_DEDUCTION_GUIDES
-#define FEATURE_CPP_INLINE_VARIABLES    // whether freestanding variables can be declared inline
+#define FEATURE_CPP_INLINE_VARIABLES    // whether freestanding/static variables can be declared inline
 #endif
 
 #elif defined(__GXX_EXPERIMENTAL_CXX0X__)
