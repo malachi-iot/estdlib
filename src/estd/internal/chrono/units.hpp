@@ -116,4 +116,25 @@ inline constexpr month November{11};
 inline constexpr month December{12};
 #endif
 
-}}
+}
+
+
+#ifdef FEATURE_STD_CHRONO
+namespace internal {
+
+template <>
+struct clock_traits<std::chrono::system_clock>
+{
+    template <class T>
+    constexpr static T adjust_epoch(T t) { return t; }
+    constexpr static chrono::year adjust_epoch(chrono::year y)
+    {
+        return y;
+        //return y + chrono::years(1970);
+    }
+};
+
+}
+#endif
+
+}

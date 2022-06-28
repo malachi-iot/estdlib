@@ -18,6 +18,7 @@ template <class TClock>
 class year_month_day
 {
     typedef clock_days<TClock> sys_days;
+    typedef estd::internal::clock_traits<TClock> clock_traits;
 
     sys_days days_;
 
@@ -26,7 +27,7 @@ public:
     {
         chrono::months m = days_.time_since_epoch();
         chrono::days d = days_.time_since_epoch() - m;
-        return chrono::day(d.count() + 1);
+        return clock_traits::adjust_epoch(chrono::day(d.count() + 1));
     }
 
     //constexpr
@@ -35,14 +36,14 @@ public:
         chrono::years y = days_.time_since_epoch();
         chrono::days d{y};
         chrono::months m = days_.time_since_epoch() - d;
-        return chrono::month(m.count() + 1);
+        return clock_traits::adjust_epoch(chrono::month(m.count() + 1));
     }
 
     //constexpr
     chrono::year year() const NOEXCEPT
     {
         chrono::years y = days_.time_since_epoch();
-        return chrono::year(y.count() + 1970);
+        return clock_traits::adjust_epoch(chrono::year(y.count() + 1970));
     }
 
     constexpr year_month_day(const sys_days& dp) NOEXCEPT :

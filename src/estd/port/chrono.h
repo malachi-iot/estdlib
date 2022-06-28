@@ -32,6 +32,14 @@ namespace estd {
 
 namespace internal {
 
+template <class TClock>
+struct clock_traits
+{
+    template <class T>
+    constexpr static T adjust_epoch(T t) { return t; }
+};
+
+
 // embedded-oriented version has lower precision.  Deviates from standard
 // DEBT: Revisit this on a per-platform and option-selectable level
 #ifdef FEATURE_ESTD_CHRONO_LOWPRECISION
