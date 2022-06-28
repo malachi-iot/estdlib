@@ -77,6 +77,18 @@ public:
     constexpr bool ok() const NOEXCEPT { return *this >= min(); }
 };
 
+constexpr year operator+( const year& y,
+    const years& ys ) noexcept
+{
+    return year(int(y) + ys.count());
+}
+
+constexpr year operator+( const years& ys,
+    const year& y ) noexcept
+{
+    return year(int(y) + ys.count());
+}
+
 
 class month : public internal::unit_base<uint8_t, month>
 {
@@ -129,8 +141,7 @@ struct clock_traits<std::chrono::system_clock>
     constexpr static T adjust_epoch(T t) { return t; }
     constexpr static chrono::year adjust_epoch(chrono::year y)
     {
-        return y;
-        //return y + chrono::years(1970);
+        return chrono::year(y + 1970);
     }
 };
 

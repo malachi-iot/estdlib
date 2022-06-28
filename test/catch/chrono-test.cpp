@@ -18,6 +18,18 @@ public:
     }
 };
 
+template <>
+struct estd::internal::clock_traits<fake_clock>
+{
+    template <class T>
+    static constexpr T adjust_epoch(T t) { return t; }
+
+    static constexpr estd::chrono::year adjust_epoch(estd::chrono::year y)
+    {
+        return estd::chrono::year(y + 1970);
+    }
+};
+
 TEST_CASE("chrono tests")
 {
     SECTION("default time_point")

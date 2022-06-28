@@ -14,6 +14,9 @@ namespace estd { namespace chrono {
 
 namespace internal {
 
+// As per
+// https://en.cppreference.com/w/cpp/chrono/year_month_day example
+// system_clock epoch is calculated into days(), months(), years()
 template <class TClock>
 class year_month_day
 {
@@ -43,7 +46,7 @@ public:
     chrono::year year() const NOEXCEPT
     {
         chrono::years y = days_.time_since_epoch();
-        return clock_traits::adjust_epoch(chrono::year(y.count() + 1970));
+        return clock_traits::adjust_epoch(chrono::year(y.count()));
     }
 
     constexpr year_month_day(const sys_days& dp) NOEXCEPT :
