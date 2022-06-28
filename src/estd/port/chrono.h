@@ -31,7 +31,7 @@
 namespace estd {
 
 namespace internal {
-
+ 
 template <class TClock>
 struct clock_traits
 {
@@ -325,6 +325,7 @@ public:
     // claiming we're specializing clock_traits after instantiation
     // DEBT: What we really want to do is compare clock tag type itself and make
     // sure it matches - even if it's not unix_epoch_clock_tag.  Very much an edge case though
+    // DEBT: Probably should do https://en.cppreference.com/w/cpp/chrono/clock_cast instead
     template <class TClock2, class TDuration2, class TClock3 = Clock,
         typename estd::enable_if<
             estd::is_base_of<
