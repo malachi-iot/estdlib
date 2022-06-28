@@ -90,6 +90,14 @@ TEST_CASE("type traits tests")
             REQUIRE(is_base_of<Parent3, Child>::value);
         }
     }
+    SECTION("underlying_type")
+    {
+        enum test1 : int16_t { a, b, c };
+
+        constexpr bool v = is_same<underlying_type<test1>::type, int16_t>::value;
+
+        REQUIRE(v == true);
+    }
 }
 
 #pragma GCC diagnostic pop
