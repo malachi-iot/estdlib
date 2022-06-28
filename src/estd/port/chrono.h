@@ -288,6 +288,7 @@ public:
     typedef Duration duration;
     typedef typename duration::rep rep;
     typedef typename duration::period period;
+    typedef estd::internal::clock_traits<clock> clock_traits;
 
     // NOTE: *may* deviate from spec.  Leaves m_time_since_epoch undefined
     // spec, to my ears, is unclear:
@@ -315,6 +316,32 @@ public:
     time_point(const time_point<Clock, TDuration2>& t) :
         m_time_since_epoch(t.time_since_epoch())
     {}
+
+#ifdef FEATURE_STD_CHRONO
+    // Deviates from spec, normally one is not permitted to convert time points between clocks.
+    // We make an exception here since one might want to convert from
+    // std::chrono::time_point to estd::chrono::time_point
+    // NOTE: Have to pull TClock3 shenanigan, otherwise compiler gets upset
+    // claiming we're specializing clock_traits after instantiation
+    // DEBT: What we really want to do is compare clock tag type itself and make
+    // sure it matches - even if it's not unix_epoch_clock_tag.  Very much an edge case though
+    template <class TClock2, class TDuration2, class TClock3 = Clock,
+        typename estd::enable_if<
+            estd::is_base_of<
+                estd::internal::unix_epoch_clock_tag,
+                estd::internal::clock_traits<TClock2> >::value
+                &&
+            estd::is_base_of<
+                estd::internal::unix_epoch_clock_tag,
+                //clock_traits
+                //estd::internal::clock_traits<Clock>
+                estd::internal::clock_traits<TClock3>
+                >::value
+            , bool>::type = true>
+    inline time_point(const std::chrono::time_point<TClock2, TDuration2>& t) :
+        m_time_since_epoch(t.time_since_epoch())
+    {}
+#endif
 
     Duration time_since_epoch() const { return m_time_since_epoch; }
 

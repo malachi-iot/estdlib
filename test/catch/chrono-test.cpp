@@ -19,15 +19,9 @@ public:
 };
 
 template <>
-struct estd::internal::clock_traits<fake_clock>
+struct estd::internal::clock_traits<fake_clock> :
+    estd::internal::unix_epoch_clock_traits
 {
-    template <class T>
-    static constexpr T adjust_epoch(T t) { return t; }
-
-    static constexpr estd::chrono::year adjust_epoch(estd::chrono::year y)
-    {
-        return estd::chrono::year(y + 1970);
-    }
 };
 
 TEST_CASE("chrono tests")
@@ -442,6 +436,26 @@ TEST_CASE("chrono tests")
 
                 REQUIRE(v.is_negative() == true);
             }
+        }
+    }
+    SECTION("conversions")
+    {
+        SECTION("std::chrono::steady_clock -> fake_clock")
+        {
+            auto tp = std::chrono::system_clock::now();
+            fake_clock::time_point t{tp};
+        }
+        SECTION("std::chrono::duration -> hh_mm_ss")
+        {
+            std::chrono::seconds s{3601};
+            //estd::chrono::duration<int64_t> s{3601};
+            //estd::chrono::duration<int64_t> s{std::chrono::seconds{3601}};
+
+            estd::chrono::hh_mm_ss<decltype(s)> v(s);
+
+            //auto v2 = v.hours();
+
+            //REQUIRE(v.seconds().count() == 1);
         }
     }
 }

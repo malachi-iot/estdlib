@@ -131,12 +131,12 @@ inline constexpr month December{12};
 }
 
 
-#ifdef FEATURE_STD_CHRONO
 namespace internal {
 
-template <>
-struct clock_traits<std::chrono::system_clock>
+struct unix_epoch_clock_traits : unix_epoch_clock_tag
 {
+    typedef unix_epoch_clock_tag tag;
+
     template <class T>
     constexpr static T adjust_epoch(T t) { return t; }
     constexpr static chrono::year adjust_epoch(chrono::year y)
@@ -145,7 +145,13 @@ struct clock_traits<std::chrono::system_clock>
     }
 };
 
-}
+#ifdef FEATURE_STD_CHRONO
+template <>
+struct clock_traits<std::chrono::system_clock> : unix_epoch_clock_traits
+{
+};
 #endif
+
+}
 
 }

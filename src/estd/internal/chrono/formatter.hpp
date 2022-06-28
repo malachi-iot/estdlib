@@ -139,15 +139,19 @@ public:
 template <class Duration>
 class hh_mm_ss
 {
-    const Duration value;
+    typedef typename Duration::rep rep;
+    typedef typename Duration::period period;
+    typedef chrono::duration<rep, period> duration_type;
 
-    typedef estd::is_signed<typename Duration::rep> is_signed;
+    const duration_type value;
+
+    typedef estd::is_signed<rep> is_signed;
 
     typedef duration<uint8_t, chrono::hours::period> hours_type;
     typedef duration<uint8_t, chrono::minutes::period> minutes_type;
-    typedef duration<typename Duration::rep, chrono::seconds::period> seconds_type;
+    typedef duration<rep, chrono::seconds::period> seconds_type;
 
-    constexpr Duration _abs() const
+    constexpr duration_type _abs() const
     {
         return chrono::internal::abs(value);
     }
@@ -177,13 +181,13 @@ public:
 
     inline seconds_type seconds() const NOEXCEPT
     {
-        Duration a = _abs();
+        duration_type a = _abs();
         return seconds_type{a - minutes_type{a}};
     }
 
     inline precision subseconds() const NOEXCEPT
     {
-        Duration a = _abs();
+        duration_type a = _abs();
         return precision{a - seconds_type{a}};
     }
 
