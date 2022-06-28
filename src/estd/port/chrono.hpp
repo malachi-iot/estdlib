@@ -334,6 +334,31 @@ public:
     typedef chrono::duration<common_int_type, ratio_type > type;
 };
 
+// Additional specializations to interact with std::ratio, if present
+#ifdef FEATURE_STD_RATIO
+template <typename Dur1Int, typename Dur2Int,
+    std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct common_type<
+    chrono::duration<Dur1Int, std::ratio<Num1, Denom1> >,
+    chrono::duration<Dur2Int, ratio<Num2, Denom2> > > :
+
+    common_type<chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
+        chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
+{};
+
+template <typename Dur1Int, typename Dur2Int,
+    std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct common_type<
+    chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
+    chrono::duration<Dur2Int, std::ratio<Num2, Denom2> > > :
+
+    common_type<chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
+        chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
+{};
+#endif
+
 #endif
 
 }

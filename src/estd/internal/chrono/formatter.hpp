@@ -182,7 +182,8 @@ public:
     inline seconds_type seconds() const NOEXCEPT
     {
         duration_type a = _abs();
-        return seconds_type{a - minutes_type{a}};
+        auto v = a - minutes_type{a};
+        return seconds_type{v};
     }
 
     inline precision subseconds() const NOEXCEPT

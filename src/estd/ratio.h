@@ -5,11 +5,17 @@
 #include "type_traits.h"
 #include "cstdint.h"
 
+#include "internal/fwd/ratio.h"
+
+#ifdef FEATURE_STD_RATIO
+#include <ratio>
+#endif
+
 namespace estd {
 
 template<
     std::intmax_t Num,
-    std::intmax_t Denom = 1
+    std::intmax_t Denom
 > class ratio
 {
 private:
@@ -33,19 +39,6 @@ typedef ratio<1000, 1> kilo;
 typedef ratio<1000000, 1> mega;
 typedef ratio<1000000000, 1> giga;
 typedef ratio<1000000000000, 1> tera;
-
-namespace detail {
-
-template <class R1, class R2>
-struct ratio_add;
-
-template <class R1, class R2>
-struct ratio_divide;
-
-template <class R1, class R2>
-struct ratio_multiply;
-
-}
 
 /*
 // both have numerator of 1
@@ -99,7 +92,6 @@ public:
     typedef typename estd::ratio<num, den>::type type;
 };
 
-
 template <std::intmax_t Num1, std::intmax_t Num2,
     std::intmax_t Denom1, std::intmax_t Denom2>
 struct ratio_multiply<ratio<Num1, Denom1>, ratio<Num2, Denom2> >
@@ -131,7 +123,19 @@ public:
     typedef typename estd::ratio<num, den>::type type;
 };
 
+// Conversions from std ratio
+#ifdef FEATURE_STD_RATIO
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct ratio_divide<std::ratio<Num1, Denom1>, ratio<Num2, Denom2> > :
+    ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> > {};
 
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct ratio_divide<ratio<Num1, Denom1>, std::ratio<Num2, Denom2> > :
+    ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> > {};
+
+#endif
 
 }
 

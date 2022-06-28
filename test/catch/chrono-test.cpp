@@ -453,9 +453,10 @@ TEST_CASE("chrono tests")
 
             estd::chrono::hh_mm_ss<decltype(s)> v(s);
 
-            //auto v2 = v.hours();
+            auto v2 = v.hours();
 
-            //REQUIRE(v.seconds().count() == 1);
+            REQUIRE(v.seconds().count() == 1);
+            REQUIRE(v2 == estd::chrono::hours(1));
         }
     }
 }
