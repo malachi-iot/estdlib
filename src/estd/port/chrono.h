@@ -359,10 +359,19 @@ public:
         return *this;
     }
 
+    // DEBT: Spec calls for this operation as outside of class
     time_point operator+(const duration& d)
     {
         time_point copied(*this);
         copied += d;
+        return copied;
+    }
+
+    // DEBT: Spec calls for this operation as outside of class
+    time_point operator-(const duration& d)
+    {
+        time_point copied(*this);
+        copied -= d;
         return copied;
     }
 

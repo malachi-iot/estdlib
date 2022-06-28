@@ -440,9 +440,10 @@ TEST_CASE("chrono tests")
     }
     SECTION("conversions")
     {
-        SECTION("std::chrono::steady_clock -> fake_clock")
+        auto tp = std::chrono::system_clock::now();
+
+        SECTION("std::chrono::system_clock -> fake_clock")
         {
-            auto tp = std::chrono::system_clock::now();
             fake_clock::time_point t{tp};
         }
         SECTION("std::chrono::duration -> hh_mm_ss")
@@ -457,6 +458,30 @@ TEST_CASE("chrono tests")
 
             REQUIRE(v.seconds().count() == 1);
             REQUIRE(v2 == estd::chrono::hours(1));
+        }
+        SECTION("std::chrono::system_clock -> year_month_day")
+        {
+            estd::chrono::internal::year_month_day<std::chrono::system_clock> v{tp};
+
+            REQUIRE(v.year() >= 2022);
+        }
+        SECTION("std::chrono::system_clock -> hh_mm_ss")
+        {
+            // Some guidance from
+            // https://stackoverflow.com/questions/15957805/extract-year-month-day-etc-from-stdchronotime-point-in-c
+            // But that has some issues
+            //auto dp = floor<estd::chrono::days>{tp};
+            fake_clock::time_point _tp{tp};
+            auto dp = estd::chrono::days{_tp.time_since_epoch()};
+            auto _v = _tp - dp;
+            auto ms = estd::chrono::milliseconds(_v.time_since_epoch());
+            estd::chrono::hh_mm_ss<decltype(ms)> __v{ms};
+
+            auto hour = __v.hours();
+            auto minute = __v.minutes();
+            auto second = __v.seconds();
+
+            REQUIRE(dp.count() > 0);
         }
     }
 }
