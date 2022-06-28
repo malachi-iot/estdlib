@@ -10,6 +10,7 @@ v 0.X.X - XXXXX22
     * `ratio_divide` and `ratio_multiply` auto reduce as briefl
        mentioned by std spec
 * c++03 flavor of `tuple` now available
+* type_traits: added `underlying_type` and `type_identity`
 
 ## Quality Updates & Bug Fixes
 
