@@ -151,6 +151,9 @@ class hh_mm_ss
 public:
     hh_mm_ss(Duration duration) : value(duration) {}
 
+    // NOTE: Purposely leaving this raw instead of computing a common type against seconds
+    // because we want to leave 'rep' in a lower-precision state for embedded systems unless
+    // explicitly specified otherwise by Duration
     typedef Duration precision;
 
     constexpr bool is_negative() const NOEXCEPT
