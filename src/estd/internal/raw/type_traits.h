@@ -30,10 +30,25 @@ struct integral_constant {
     //constexpr value_type operator()() const noexcept { return value; } //since c++14
 };
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <bool B>
+using bool_constant = integral_constant<bool, B>;
+#endif
+
 
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
 
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class T >
+struct type_identity { using type = T; };
+
+template< class T >
+using type_identity_t = typename type_identity<T>::type;
+#else
+template< class T >
+struct type_identity { typedef T type; };
+#endif
 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
