@@ -33,7 +33,7 @@ typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
 struct freertos_clock
 {
-    typedef estd::internal::milli_rep rep;
+    typedef estd::chrono::internal::milli_rep rep;
     typedef internal::freertos_system_period period;
     typedef internal::estd_chrono::duration<rep, period> duration;
     typedef internal::estd_chrono::time_point<freertos_clock> time_point;
