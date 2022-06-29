@@ -382,12 +382,17 @@ public:
     }
 #endif
 
+    // DEBT: Unknown why STM32 flavor doesn't compile this.  Starting to seem like different versions
+    // of c++ handle this particular overload in different ways.  Technically we prefer the
+    // above version solo anyway.
+#if !defined(ESTD_MCU_STM32)
     // FIX: Unsure why we need both this and && version, but somehow forwarding an
     // lvalue with TArgs&& in this context makes it mad
     TResult operator()(TArgs... args)
     {
         return m->_exec(std::forward<TArgs>(args)...);
     }
+#endif
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 

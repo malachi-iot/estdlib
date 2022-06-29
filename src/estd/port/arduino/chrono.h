@@ -8,7 +8,7 @@ namespace chrono {
 // compiles, untested
 struct arduino_clock
 {
-    typedef estd::internal::milli_rep rep;
+    typedef estd::chrono::internal::milli_rep rep;
     // Arduino leans on millis() call for general case timing, so we report that
     // as system_period
     // "a tick period, where the tick period is a compile-time rational
