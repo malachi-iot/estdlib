@@ -11,6 +11,12 @@ template<
 >
 class duration;
 
+template<
+    class Clock,
+    class Duration = typename Clock::duration
+> class time_point;
+
+
 // DEBT: Would do estd::chrono::internal, but that collides with our estd_chrono trick in port area
 namespace internal {
 
@@ -86,5 +92,28 @@ CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
 template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
     const duration<Rep2, Period2>& rhs);
+
+template< class C, class D1, class D2 >
+CONSTEXPR typename estd::common_type<D1,D2>::type
+operator-( const time_point<C,D1>& pt_lhs,
+    const time_point<C,D2>& pt_rhs );
+
+
+template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
+    const time_point<Clock,Dur2>& rhs );
+
+template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator>=( const time_point<Clock,Dur1>& lhs,
+    const time_point<Clock,Dur2>& rhs );
+
+template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
+    const time_point<Clock,Dur2>& rhs );
+
+template< class Clock, class Dur1, class Dur2 >
+CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
+    const time_point<Clock,Dur2>& rhs );
+
 
 }}

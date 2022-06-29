@@ -174,7 +174,7 @@ typedef internal::estd_chrono::duration<internal::years_rep, ratio<(long)3155695
 
 template<
     class Clock,
-    class Duration = typename Clock::duration
+    class Duration
 > class time_point
 {
     Duration m_time_since_epoch;
@@ -279,27 +279,6 @@ public:
 };
 
 
-template< class C, class D1, class D2 >
-CONSTEXPR typename estd::common_type<D1,D2>::type
-    operator-( const time_point<C,D1>& pt_lhs,
-               const time_point<C,D2>& pt_rhs );
-
-
-template< class Clock, class Dur1, class Dur2 >
-CONSTEXPR bool operator>( const time_point<Clock,Dur1>& lhs,
-                          const time_point<Clock,Dur2>& rhs );
-
-template< class Clock, class Dur1, class Dur2 >
-CONSTEXPR bool operator>=( const time_point<Clock,Dur1>& lhs,
-                          const time_point<Clock,Dur2>& rhs );
-
-template< class Clock, class Dur1, class Dur2 >
-CONSTEXPR bool operator==( const time_point<Clock,Dur1>& lhs,
-                          const time_point<Clock,Dur2>& rhs );
-
-template< class Clock, class Dur1, class Dur2 >
-CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
-                          const time_point<Clock,Dur2>& rhs );
 }
 
 

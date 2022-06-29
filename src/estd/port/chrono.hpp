@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chrono.h"
+#include "../internal/fwd/chrono.h"
 
 namespace estd { namespace chrono {
 
