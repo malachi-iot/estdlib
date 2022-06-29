@@ -6,7 +6,7 @@ namespace estd { namespace chrono {
 
 struct esp_clock
 {
-    typedef estd::internal::micro_rep rep;
+    typedef estd::chrono::internal::micro_rep rep;
     typedef micro period;
     typedef internal::estd_chrono::duration<rep, period> duration;
     typedef internal::estd_chrono::time_point<esp_clock> time_point;
