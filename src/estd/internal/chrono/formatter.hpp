@@ -21,7 +21,7 @@ template <class TClock>
 class year_month_day
 {
     typedef clock_days<TClock> sys_days;
-    typedef estd::internal::clock_traits<TClock> clock_traits;
+    typedef estd::chrono::internal::clock_traits<TClock> clock_traits;
 
     sys_days days_;
 

@@ -7,7 +7,7 @@ class fake_clock
 public:
     int ticks;
 
-    typedef estd::internal::milli_rep rep;
+    typedef estd::chrono::internal::milli_rep rep;
     typedef estd::ratio<1, 15> period; // each 'fake' tick is 1/15 of a second
     typedef estd::chrono::duration<rep, period> duration;
     typedef estd::chrono::time_point<fake_clock> time_point;
@@ -19,8 +19,8 @@ public:
 };
 
 template <>
-struct estd::internal::clock_traits<fake_clock> :
-    estd::internal::unix_epoch_clock_traits
+struct estd::chrono::internal::clock_traits<fake_clock> :
+    estd::chrono::internal::unix_epoch_clock_traits
 {
 };
 
@@ -376,8 +376,9 @@ TEST_CASE("chrono tests")
             {
                 estd::chrono::time_point<clock_type> tp;
                 estd::chrono::internal::year_month_day<clock_type> ymd{tp};
+                unsigned year = ymd.year();
 
-                REQUIRE(ymd.year() == 1970);
+                REQUIRE(year == 1970);
             }
             SECTION("specific")
             {

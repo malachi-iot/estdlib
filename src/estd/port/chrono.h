@@ -28,10 +28,10 @@
 #endif
 
 
-namespace estd {
+namespace estd { namespace chrono {
 
 namespace internal {
- 
+
 template <class TClock>
 struct clock_traits
 {
@@ -39,33 +39,7 @@ struct clock_traits
     constexpr static T adjust_epoch(T t) { return t; }
 };
 
-
-// embedded-oriented version has lower precision.  Deviates from standard
-// DEBT: Revisit this on a per-platform and option-selectable level
-#ifdef FEATURE_ESTD_CHRONO_LOWPRECISION
-typedef int32_t nano_rep;
-typedef int32_t micro_rep;
-typedef int32_t milli_rep;
-typedef int16_t seconds_rep;
-typedef int16_t minutes_rep;
-typedef int16_t hours_rep;
-typedef int16_t days_rep;
-typedef int8_t weeks_rep;
-typedef int8_t months_rep;
-typedef int8_t years_rep;
-#else
-typedef int64_t nano_rep;
-typedef int64_t micro_rep;
-typedef int64_t milli_rep;
-typedef int64_t seconds_rep;
-typedef int32_t minutes_rep;
-typedef int32_t hours_rep;
-typedef int32_t days_rep;
-typedef int32_t weeks_rep;
-typedef int32_t months_rep;
-typedef int16_t years_rep;      ///< Deviates from spec which calls for 17 bit minimum
-#endif
-
+}
 
 }
 
@@ -232,8 +206,6 @@ CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
 
 #endif // FEATURE_ESTD_CHRONO
 
-}
-
 namespace internal {
 
 // Use this to turn on incomplete estd::chrono support namespace
@@ -250,8 +222,6 @@ namespace estd_chrono = std::chrono;
 #endif
 
 }
-
-namespace chrono {
 
 // These lower-precision ones are available even during non-FEATURE_ESTD_CHRONO
 typedef internal::estd_chrono::duration<internal::nano_rep, nano> nanoseconds;
@@ -273,7 +243,6 @@ typedef internal::estd_chrono::duration<internal::weeks_rep, ratio<(long)3600 * 
 typedef internal::estd_chrono::duration<internal::months_rep, ratio<(long)2629746> > months;
 typedef internal::estd_chrono::duration<internal::years_rep, ratio<(long)31556952> > years;
 
-
 #ifdef FEATURE_ESTD_CHRONO
 
 template<
@@ -288,7 +257,7 @@ public:
     typedef Duration duration;
     typedef typename duration::rep rep;
     typedef typename duration::period period;
-    typedef estd::internal::clock_traits<clock> clock_traits;
+    typedef estd::chrono::internal::clock_traits<clock> clock_traits;
 
     // NOTE: *may* deviate from spec.  Leaves m_time_since_epoch undefined
     // spec, to my ears, is unclear:
@@ -329,14 +298,14 @@ public:
     template <class TClock2, class TDuration2, class TClock3 = Clock,
         typename estd::enable_if<
             estd::is_base_of<
-                estd::internal::unix_epoch_clock_tag,
-                estd::internal::clock_traits<TClock2> >::value
+                estd::chrono::internal::unix_epoch_clock_tag,
+                estd::chrono::internal::clock_traits<TClock2> >::value
                 &&
             estd::is_base_of<
-                estd::internal::unix_epoch_clock_tag,
+                estd::chrono::internal::unix_epoch_clock_tag,
                 //clock_traits
                 //estd::internal::clock_traits<Clock>
-                estd::internal::clock_traits<TClock3>
+                estd::chrono::internal::clock_traits<TClock3>
                 >::value
             , bool>::type = true>
     inline time_point(const std::chrono::time_point<TClock2, TDuration2>& t) :
@@ -405,6 +374,7 @@ template< class Clock, class Dur1, class Dur2 >
 CONSTEXPR bool operator!=( const time_point<Clock,Dur1>& lhs,
                           const time_point<Clock,Dur2>& rhs );
 }
+
 
 #ifdef FEATURE_CPP_INLINE_NAMESPACE
 inline

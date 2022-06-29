@@ -131,7 +131,7 @@ inline constexpr month December{12};
 }
 
 
-namespace internal {
+namespace chrono { namespace internal {
 
 struct unix_epoch_clock_traits : unix_epoch_clock_tag
 {
@@ -154,4 +154,4 @@ struct clock_traits<std::chrono::system_clock> : unix_epoch_clock_traits
 
 }
 
-}
+}}
