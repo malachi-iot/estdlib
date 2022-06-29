@@ -19,6 +19,7 @@ v 0.X.X - XXXXX22
   structs are moved now to `detail` namespace, which is a
   breaking change for c++03 targets.
 * `tuple` and `pair` cleanup and minor improvements
+* chrono: general cleanup
 
 v 0.3.2 - 17JUN22
 
