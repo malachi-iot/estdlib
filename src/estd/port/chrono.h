@@ -22,8 +22,7 @@
 
 #ifdef FEATURE_ESTD_CHRONO
 
-namespace estd {
-namespace chrono {
+namespace estd { namespace chrono {
 
 template <class Rep>
 struct duration_values
@@ -35,7 +34,7 @@ struct duration_values
 
 template<
         class Rep,
-        class Period = estd::ratio<1>
+        class Period
 >
 class duration
 {
@@ -137,9 +136,6 @@ public:
     static CONSTEXPR duration zero() { return duration(duration_values<rep>::zero()); }
 };
 
-template <class ToDuration, class Rep, class Period>
-ToDuration duration_cast(const duration<Rep, Period>& d);
-
 #ifdef FEATURE_STD_CHRONO
 template <class ToDuration, class Rep, class Period>
 inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
@@ -151,36 +147,6 @@ inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
     return duration_cast<ToDuration>(our_d);
 }
 #endif
-
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-    CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
-                         const duration<Rep2,Period2>& rhs );
-
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-    CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
-                         const duration<Rep2,Period2>& rhs );
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
-                          const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-CONSTEXPR bool operator<(const duration<Rep1, Period1>& lhs,
-                          const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-CONSTEXPR bool operator>=(const duration<Rep1, Period1>& lhs,
-                          const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
-                          const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
-                          const duration<Rep2, Period2>& rhs);
 
 #endif // FEATURE_ESTD_CHRONO
 

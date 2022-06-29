@@ -22,11 +22,6 @@ struct clock_traits
     constexpr static T adjust_epoch(T t) { return t; }
 };
 
-}
-
-
-namespace internal {
-
 // Use this to turn on incomplete estd::chrono support namespace
 // there's a lot that goes into a healthy, functioning chrono namespace
 // so we default to using std::chrono

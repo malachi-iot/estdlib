@@ -5,17 +5,13 @@
 // mainly just for tooltips, normally you don't include internal/common_type directly
 #include "../type_traits.h"
 #include "../utility.h"
+#include "fwd/common_type.h"
 
 
 
 namespace estd {
 // NOTE: This is rife with C++11 features, so this is a general guard
 #ifdef FEATURE_CPP_VARIADIC
-
-// lifted from https://en.cppreference.com/w/cpp/types/common_type
-
-// primary template (used for zero types)
-template <class ...T> struct common_type {};
 
 //////// one type
 template <class T>

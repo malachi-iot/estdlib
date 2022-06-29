@@ -1,6 +1,15 @@
 #pragma once
 
+#include "common_type.h"
+#include "ratio.h"
+
 namespace estd { namespace chrono {
+
+template<
+    class Rep,
+    class Period = estd::ratio<1>
+>
+class duration;
 
 // DEBT: Would do estd::chrono::internal, but that collides with our estd_chrono trick in port area
 namespace internal {
@@ -44,5 +53,38 @@ typedef int16_t years_rep;      ///< Deviates from spec which calls for 17 bit m
 
 
 }
+
+template <class ToDuration, class Rep, class Period>
+ToDuration duration_cast(const duration<Rep, Period>& d);
+
+template< class Rep1, class Period1, class Rep2, class Period2 >
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
+CONSTEXPR operator-( const duration<Rep1,Period1>& lhs,
+    const duration<Rep2,Period2>& rhs );
+
+template< class Rep1, class Period1, class Rep2, class Period2 >
+typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
+CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
+    const duration<Rep2,Period2>& rhs );
+
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
+    const duration<Rep2, Period2>& rhs);
+
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator<(const duration<Rep1, Period1>& lhs,
+    const duration<Rep2, Period2>& rhs);
+
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator>=(const duration<Rep1, Period1>& lhs,
+    const duration<Rep2, Period2>& rhs);
+
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator<=(const duration<Rep1, Period1>& lhs,
+    const duration<Rep2, Period2>& rhs);
+
+template <class Rep1, class Period1, class Rep2, class Period2>
+CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
+    const duration<Rep2, Period2>& rhs);
 
 }}
