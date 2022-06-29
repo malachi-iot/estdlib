@@ -17,6 +17,9 @@ extern "C" {
 
 namespace estd {
 
+namespace chrono {
+
+
 // configTICK_RATE_HZ = ticks we expect to occur per second
 // portTICK_PERIOD_MS = milliseconds we expect to occur per tick
 // std:: tick period =
@@ -27,8 +30,6 @@ namespace internal {
 typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
 }
-
-namespace chrono {
 
 struct freertos_clock
 {
