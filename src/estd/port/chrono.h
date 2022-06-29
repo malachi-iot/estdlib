@@ -1,16 +1,8 @@
 #pragma once
 
-// While developing, leave this on
-#define FEATURE_ESTD_CHRONO
-
-// Fully activating more advanced common_type/promoted_type fused
-// duration conversions
-#define FEATURE_ESTD_CHRONO_EXP
-
-#include "../internal/common_type.h"
+#include "../internal/chrono.h"
 #include "../ratio.h"
 #include "../limits.h"
-#include "../internal/fwd/chrono.h"
 
 #if (defined(FEATURE_POSIX_CHRONO) || defined(ESTD_SDK_IDF)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
 // DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
@@ -28,23 +20,9 @@
 #endif
 
 
-namespace estd { namespace chrono {
-
-namespace internal {
-
-template <class TClock>
-struct clock_traits
-{
-    template <class T>
-    constexpr static T adjust_epoch(T t) { return t; }
-};
-
-}
-
-}
-
 #ifdef FEATURE_ESTD_CHRONO
 
+namespace estd {
 namespace chrono {
 
 template <class Rep>
@@ -205,23 +183,6 @@ CONSTEXPR bool operator==(const duration<Rep1, Period1>& lhs,
                           const duration<Rep2, Period2>& rhs);
 
 #endif // FEATURE_ESTD_CHRONO
-
-namespace internal {
-
-// Use this to turn on incomplete estd::chrono support namespace
-// there's a lot that goes into a healthy, functioning chrono namespace
-// so we default to using std::chrono
-#ifdef FEATURE_ESTD_CHRONO
-namespace estd_ratio = estd;
-namespace estd_chrono = estd::chrono;
-#elif FEATURE_STD_CHRONO
-namespace estd_ratio = std;
-namespace estd_chrono = std::chrono;
-#else
-#warning Invalid configuration, neither std or estd chrono fully activated
-#endif
-
-}
 
 // These lower-precision ones are available even during non-FEATURE_ESTD_CHRONO
 typedef internal::estd_chrono::duration<internal::nano_rep, nano> nanoseconds;
