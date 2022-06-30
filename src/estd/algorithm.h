@@ -42,7 +42,7 @@ template< class ForwardIt, class T >
 inline void fill(ForwardIt first, ForwardIt last, const T& value)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
-    fill(first, last, value);
+    std::fill(first, last, value);
 #else
     for (; first != last; ++first)
     {
