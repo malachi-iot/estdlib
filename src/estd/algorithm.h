@@ -9,27 +9,46 @@
 #include <algorithm>
 #endif
 
+#ifndef FEATURE_ESTD_ALGORITHM_OPT
+#define FEATURE_ESTD_ALGORITHM_OPT 1
+#endif
+
+#ifndef FEATURE_STD_ALGORITHM
+#undef FEATURE_ESTD_ALGORITHM_OPT
+#endif
+
 // mainly to fill in gaps for pre C++11 compatibility
 namespace estd {
+
+// NOTE: Aliasing these out as best we can because std copy/fill operations may have some nice
+// optimizations depending on your environment
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
 template<class OutputIt, class Size, class T>
 inline OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
+#if FEATURE_ESTD_ALGORITHM_OPT
+    return std::fill_n(first, count, value);
+#else
     for (; count != 0; --count)
     {
         *first++ = value;
     }
     return first;
+#endif
 }
 
 template< class ForwardIt, class T >
 inline void fill(ForwardIt first, ForwardIt last, const T& value)
 {
+#if FEATURE_ESTD_ALGORITHM_OPT
+    fill(first, last, value);
+#else
     for (; first != last; ++first)
     {
         *first = value;
     }
+#endif
 }
 
 // https://en.cppreference.com/w/cpp/algorithm/equal
@@ -85,20 +104,24 @@ ForwardIt min_element(ForwardIt first, ForwardIt last,
 #endif
 
 template<class InputIt, class OutputIt>
-OutputIt copy(InputIt first, InputIt last,
+inline OutputIt copy(InputIt first, InputIt last,
               OutputIt d_first)
 {
+#if FEATURE_ESTD_ALGORITHM_OPT
+    return std::copy(first, last, d_first);
+#else
     while (first != last) {
         *d_first++ = *first++;
     }
     return d_first;
+#endif
 }
 
 // https://en.cppreference.com/w/cpp/algorithm/copy_n
 // has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
 // iterator unnecessarily?
 template <class InputIt, class Size, class OutputIt>
-OutputIt copy_n(InputIt first, Size count, OutputIt result)
+inline OutputIt copy_n(InputIt first, Size count, OutputIt result)
 {
     while(count--)
         *result++ = *first++;
