@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../platform.h"
+
 namespace estd {
 #ifdef FEATURE_CPP_VARIADIC
 

@@ -1,11 +1,11 @@
 #include <Arduino.h>
 
+#include <estd/thread.h>
 #include <estd/type_traits.h>
 #include <estd/chrono.h>
 //#include <estd/iostream.h>    // FIX: Still too sloppy for prime time
 #include <estd/ostream.h>
 #include <estd/string.h>
-#include <estd/thread.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 // 1/20/2020: No longer the case:
