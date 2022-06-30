@@ -37,6 +37,7 @@ void setup()
     test_streambuf();
     test_string();
     test_thread();
+    test_tuple();
 
     UNITY_END();
 
