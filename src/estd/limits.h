@@ -36,23 +36,8 @@
 
 namespace estd {
 
-// FIX: I implemented this wrong, numeric_limits should be a specializing type, not a namespace
-// holding on to incorrect one in deprecated form just incase I used it somewhere
-namespace numeric_limits_deprecated {
-
-template <class T>
-CONSTEXPR T max();
-
-template<>
-inline CONSTEXPR uint16_t max<uint16_t>()
-{ return 65535; }
-
-template<>
-inline CONSTEXPR uint8_t max<uint8_t>()
-{ return 255; }
-
-}
-
+// DEBT: Would likely be better off doing SIZEOF_INTEGER and friends with template
+// metaprogramming to avoid potential name collisions
 // size in 8-bit bytes
 #define SIZEOF_INTEGER(max) \
     (max == INT64_MAX ? 8 : \
@@ -206,6 +191,14 @@ template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t>
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
 #endif
 
+template <> struct numeric_limits<bool>
+{
+    static CONSTEXPR bool min() { return false; }
+    static CONSTEXPR bool max() { return true; }
+
+    static CONSTEXPR int digits = 1;
+    static CONSTEXPR int digits10 = 0;
+};
 
 }
 

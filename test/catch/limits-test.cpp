@@ -111,6 +111,10 @@ TEST_CASE("limits & common_type tests")
             REQUIRE(digits >= 15);
         }
     }
+    SECTION("bool")
+    {
+        REQUIRE(numeric_limits<bool>::max());
+    }
     SECTION("8 bit")
     {
         auto digits = numeric_limits<int8_t>::digits;

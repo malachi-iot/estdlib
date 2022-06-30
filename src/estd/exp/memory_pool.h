@@ -292,7 +292,7 @@ public:
         // needs to operate on (which will be our 'item' class)
         typedef typename traits_type::tracked_value_type tracked_value_type;
 
-        static CONSTEXPR handle_type eol() { return numeric_limits_deprecated::max<handle_type>(); }
+        static CONSTEXPR handle_type eol() { return numeric_limits<handle_type>::max(); }
     };
 
     typedef typename base_type::template item<tracked_value_type,
