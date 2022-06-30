@@ -5,6 +5,7 @@
 #pragma once
 
 #include "cstddef.h"
+#include "../fwd/type_traits.h"
 
 namespace estd {
 

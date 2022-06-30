@@ -1,6 +1,8 @@
 /**
  * @file
  * standalone implementation so that can be #included from support_platform.h
+ * BE CAREFUL - including this directly may not process FEATURE flag right
+ * (see README.md)
  */
 #pragma once
 
