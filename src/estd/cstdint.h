@@ -10,6 +10,7 @@
 namespace std {
 
 typedef ::intmax_t intmax_t;
+typedef ::uintmax_t uintmax_t;
 
 }
 #endif
