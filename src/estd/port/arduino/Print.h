@@ -5,7 +5,9 @@
  */
 #pragma once
 
-#include <estd/type_traits.h>
+#ifdef ESTD_INTERNAL_TYPE_TRAITS_ONLINE
+
+#include <estd/internal/type_traits.h>
 
 #ifndef ENABLE_ESTD_ARDUINO_STREAMING
 #define ENABLE_ESTD_ARDUINO_STREAMING 1
@@ -23,4 +25,6 @@ template<class T, class Enable =
     >::type
 >
 inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; }
+#endif
+
 #endif

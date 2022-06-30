@@ -13,3 +13,10 @@
 #include "raw/type_traits.h"
 #include "../port/type_traits.h"
 
+// Semi-hack to get arduino/Print.h to auto include more smoothly
+// Only a little kludgey
+#ifndef ESTD_INTERNAL_TYPE_TRAITS_ONLINE
+#define ESTD_INTERNAL_TYPE_TRAITS_ONLINE
+#endif
+
+#include "../port/support_platform.h"
