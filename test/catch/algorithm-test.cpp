@@ -41,4 +41,15 @@ TEST_CASE("algorithm tests")
 
         REQUIRE(std::string(buf) == "4321");
     }
+    SECTION("fill")
+    {
+        char buf[10];
+
+        buf[9] = 0;
+
+        estd::fill_n(buf, 10, 7);
+
+        REQUIRE(buf[5] == 7);
+        REQUIRE(buf[9] == 7);
+    }
 }

@@ -5,8 +5,32 @@
 #include "internal/functional.h"
 #include "utility.h"
 
+#ifdef FEATURE_STD_ALGORITHM
+#include <algorithm>
+#endif
+
 // mainly to fill in gaps for pre C++11 compatibility
 namespace estd {
+
+// Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
+template<class OutputIt, class Size, class T>
+inline OutputIt fill_n(OutputIt first, Size count, const T& value)
+{
+    for (; count != 0; --count)
+    {
+        *first++ = value;
+    }
+    return first;
+}
+
+template< class ForwardIt, class T >
+inline void fill(ForwardIt first, ForwardIt last, const T& value)
+{
+    for (; first != last; ++first)
+    {
+        *first = value;
+    }
+}
 
 // https://en.cppreference.com/w/cpp/algorithm/equal
 template<class InputIt1, class InputIt2>
