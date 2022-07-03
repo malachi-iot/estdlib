@@ -97,7 +97,7 @@ public:
 
     inline chrono::day day() const
     {
-        switch(month_)
+        switch(month_.value())
         {
             case 2: return year_.is_leap() ? day(29) : day(28);
 

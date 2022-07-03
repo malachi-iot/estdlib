@@ -40,6 +40,7 @@ class unit_base
 protected:
     TInt value_;
 
+    unit_base() = default;
     constexpr unit_base(TInt value) : value_{value} {}
 
     constexpr bool in_range(TInt min, TInt max) const
@@ -63,6 +64,8 @@ public:
     }
 
     constexpr operator TInt() const { return value_; }
+
+    constexpr const TInt& value() const { return value_; }
 };
 
 }
