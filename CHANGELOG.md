@@ -20,6 +20,7 @@ v 0.X.X - XXXXX22
   breaking change for c++03 targets.
 * `tuple` and `pair` cleanup and minor improvements
 * chrono: general cleanup
+* `platformio` unity tests working again
 
 v 0.3.2 - 17JUN22
 
