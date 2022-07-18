@@ -147,6 +147,26 @@ TEST_CASE("functional")
 
                 REQUIRE(fb1(5) == 25);
             }
+            SECTION("upcast")
+            {
+                auto dynamic_f = new estd::experimental::function<int(int)>([](int v)
+                {
+                    return v;
+                });
+
+                SECTION("initialization")
+                {
+                    estd::experimental::function_base<int(int)> f(*dynamic_f);
+                }
+                SECTION("assignment")
+                {
+                    estd::experimental::function_base<int(int)> f;
+
+                    f = *dynamic_f;
+                }
+
+                delete dynamic_f;
+            }
         }
     }
     SECTION("bind")
