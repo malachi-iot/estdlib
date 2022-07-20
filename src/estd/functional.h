@@ -135,7 +135,7 @@ auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
 {
     internal::bind_type<F, TArgs...> b(
                 std::move(f),
-                std::forward<TArgs...>(args...)
+                std::forward<TArgs>(args)...
                 );
 
     return b;
@@ -588,7 +588,7 @@ public:
         // surprised if this falls into "undefined" behavior at some point, but in the end we are
         // only relying on 2 runtime pointers to not change size and 2 compile time pointers
         template <class T2, function_type<T2> f2>
-        model(const model<T2, f2>& copy_from) :
+        constexpr model(const model<T2, f2>& copy_from) :
             base_type(static_cast<typename base_type::function_type>(&model<T2, f2>::exec)),
             foreign_this{(T*)copy_from.foreign_this}
         {
@@ -626,7 +626,7 @@ public:
     } */
 
     template <class T, function_type<T> f>
-    context_function(model<T, f> m) :
+    constexpr context_function(model<T, f> m) :
         base_type(&m_),
         m_(m)
     {
@@ -695,6 +695,67 @@ inline_function<TFunc, F> make_inline_function(F&& f)
 {
     return inline_function<TFunc, F>();
 }
+
+//namespace internal {
+
+template <class TFunc>
+struct bind_helper;
+
+template <typename TResult, class ...TArgs>
+struct bind_helper<TResult(TArgs...)>
+{
+    using R = TResult;
+    using A = estd::tuple<TArgs...>;
+};
+
+template <class TFunc, class F, class ...TArgs>
+struct bind_helper2;
+
+template <typename TResult, class ...TArgs2, class F, class ...TArgs>
+struct bind_helper2<TResult(TArgs2...), F, TArgs...>
+{
+};
+
+// TODO: Put into an internal area
+template <class TFunc, class F, class ...TArgs>
+struct bind_type : inline_function<TFunc, F>
+{
+    typedef inline_function<TFunc, F> base_type;
+
+    tuple<TArgs...> args;
+
+    typedef typename base_type::template model<F> model_type;
+
+    model_type m;
+
+    bind_type(F&& f, TArgs&&...args) :
+        base_type(std::move(f)),
+        args(std::forward<TArgs>(args)...)
+    {
+
+    }
+
+    template <typename ...TArgs2>
+    auto operator ()(TArgs2&&...args2) -> decltype (apply(std::move(base_type::f), std::move(args)))
+    {
+        return apply(std::move(base_type::f), std::move(args));
+    }
+};
+
+//}
+
+template <class F, class ...TArgs>
+auto bind(F&& f, TArgs&&... args) -> bind_type<decltype(f), F, TArgs...>
+{
+    bind_type<decltype(f), F, TArgs...> b(
+        std::move(f),
+        std::forward<TArgs>(args)...
+    );
+
+    return b;
+}
+
+
 
 }
 

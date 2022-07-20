@@ -48,8 +48,6 @@ TEST_CASE("functional")
 {
     SECTION("function")
     {
-        //estd::function<int()> f = []() { return 5; };
-
         SECTION("experimental")
         {
             SECTION("simplest lambda")
@@ -202,17 +200,47 @@ TEST_CASE("functional")
 
                 REQUIRE(ctx.val == 5);
             }
+            SECTION("bind")
+            {
+                SECTION("helper")
+                {
+                    // hitting issue described here:
+                    // https://stackoverflow.com/questions/43560492/how-to-extract-lambdas-return-type-and-variadic-parameters-pack-back-from-gener
+                    // I am certain at one time I went down the function_traits/callable_traits route.  Perhaps it's
+                    // lingering on an unfinished branch somewhere?
+                    //typedef estd::experimental::bind_helper<decltype([](){})> bh;
+                }
+                SECTION("lambda")
+                {
+                    int val = 0;
+                    //auto b = estd::experimental::bind([&](){ val += 2; });
+                }
+                SECTION("to member")
+                {
+                    ContextTest ctx;
+
+                    //estd::experimental::bind(&ContextTest::add, &ctx);
+                }
+            }
         }
     }
-    SECTION("bind")
+    SECTION("obsolete")
     {
-        auto b = estd::obsolete::bind(do_something, "hello");
+        SECTION("basic")
+        {
+            // Doesn't seem to work at this point
+            //estd::obsolete::function<int()> f = []() { return 5; };
+        }
+        SECTION("bind")
+        {
+            auto b = estd::obsolete::bind(do_something, "hello");
 
-        int sz = sizeof(b);
+            int sz = sizeof(b);
 
-        REQUIRE(b() == -1);
+            REQUIRE(b() == -1);
 
-        REQUIRE(std::string(got_something) == "hello");
+            REQUIRE(std::string(got_something) == "hello");
+        }
     }
 }
 
