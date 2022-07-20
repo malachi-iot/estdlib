@@ -196,7 +196,7 @@ TEST_CASE("functional")
                 ContextTest ctx;
 
                 estd::experimental::context_function2<
-                    decltype(&ContextTest::add), ContextTest, &ContextTest::add> f(&ctx);
+                    decltype(&ContextTest::add), &ContextTest::add> f(&ctx);
 
                 f(5);
 

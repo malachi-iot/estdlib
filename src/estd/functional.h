@@ -642,11 +642,11 @@ public:
 // Guidance from
 // https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature
 
-template <typename TFunc, class TContext, TFunc f>
+template <typename TFunc, TFunc f>
 class context_function2;
 
 template <typename TResult, typename... TArgs, class TContext, TResult (TContext::*f)(TArgs...)>
-class context_function2<TResult(TContext::*)(TArgs...), TContext, f> :
+class context_function2<TResult(TContext::*)(TArgs...), f> :
     public context_function<TResult(TArgs...)>
 {
     typedef context_function<TResult(TArgs...)> base_type;
