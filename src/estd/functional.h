@@ -580,13 +580,18 @@ public:
 
         T* const foreign_this;
 
-        model(const model&) = default;
-
-        // DEBT: Sloppy, just doing this to bring online experimental fake-templated-union
-        model() :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
-            foreign_this{nullptr}
-        {}
+        // NOTE: This is a bizarre thing we do here.  We take advantage of the fact that pointer
+        // sizes don't change and accept a foreign-typed model.  We do this to simulate a runtime
+        // templated union initialization.  base type gets initialized with a constant pointer to
+        // foreign model's exec helper, and naturally we copy over the 'this'.  I would not be
+        // surprised if this falls into "undefined" behavior at some point, but in the end we are
+        // only relying on 2 runtime pointers to not change size and 2 compile time pointers
+        template <class T2, function_type<T2> f2>
+        model(const model<T2, f2>& copy_from) :
+            base_type(static_cast<typename base_type::function_type>(&model<T2, f2>::exec)),
+            foreign_this{(T*)copy_from.foreign_this}
+        {
+        }
 
         model(T* foreign_this) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
@@ -621,12 +626,30 @@ public:
 
     template <class T, function_type<T> f>
     context_function(model<T, f> m) :
-        base_type(&m_)
-        //holder<T, f>{m}
+        base_type(&m_),
+        m_(m)
     {
-        new (&m_) model<T, f>(m);
+    }
+
+    template <class T, function_type<T> f>
+    static context_function create(T* foreign_this)
+    {
+        return context_function(model<T, f>(foreign_this));
     }
 };
+
+// Guidance from
+// https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature
+
+template <typename TFunc, class TContext, TFunc f>
+class context_function2;
+
+template <typename TResult, typename... TArgs, class TContext, TResult (*f)(TArgs...)>
+class context_function2<TResult(*)(TArgs...), TContext, f>
+{
+
+};
+
 
 
 template <class TFunc, typename TResult, typename... TArgs>
