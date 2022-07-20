@@ -569,6 +569,7 @@ class context_function<TResult(TArgs...)> : public function_base<TResult(TArgs..
     //typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
     //typedef typename concept::function_type function_type;
 
+protected:
     template <class T>
     using function_type = TResult (T::*)(TArgs...);
 
@@ -644,10 +645,21 @@ public:
 template <typename TFunc, class TContext, TFunc f>
 class context_function2;
 
-template <typename TResult, typename... TArgs, class TContext, TResult (*f)(TArgs...)>
-class context_function2<TResult(*)(TArgs...), TContext, f>
+template <typename TResult, typename... TArgs, class TContext, TResult (TContext::*f)(TArgs...)>
+class context_function2<TResult(TContext::*)(TArgs...), TContext, f> :
+    public context_function<TResult(TArgs...)>
 {
+    typedef context_function<TResult(TArgs...)> base_type;
 
+    typedef typename base_type::template function_type<TContext> function_type;
+    typedef typename base_type::template model<TContext, f> model_type;
+
+public:
+    context_function2(TContext* foreign_this) :
+        base_type(model_type(foreign_this))
+    {
+
+    }
 };
 
 

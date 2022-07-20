@@ -191,6 +191,17 @@ TEST_CASE("functional")
 
                 REQUIRE(ctx.val == 5);
             }
+            SECTION("context_function2")
+            {
+                ContextTest ctx;
+
+                estd::experimental::context_function2<
+                    decltype(&ContextTest::add), ContextTest, &ContextTest::add> f(&ctx);
+
+                f(5);
+
+                REQUIRE(ctx.val == 5);
+            }
         }
     }
     SECTION("bind")
