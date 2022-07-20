@@ -326,6 +326,8 @@ protected:
         }
     };
 
+    // DEBT: Need to change name from concept, I suspect this will cause
+    // c++20 issues
     // We like this way best, but due to [1] it may not be viable.
     // However, they say that:
     // "Deleting a polymorphic object without a virtual destructor
@@ -550,6 +552,79 @@ public:
     explicit operator bool() const noexcept
     {
         return nullable ? base_type::m != nullptr : true;
+    }
+};
+
+template <typename TFunc>
+class context_function;
+
+// DEBT: Only works with 'method 1' concept/model at the moment
+template <typename TResult, typename... TArgs>
+class context_function<TResult(TArgs...)> : public function_base<TResult(TArgs...)>
+{
+    typedef function_base<TResult(TArgs...)> base_type;
+    typedef typename base_type::concept concept_base;
+    typedef context_function this_type;
+
+    //typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
+    //typedef typename concept::function_type function_type;
+
+    template <class T>
+    using function_type = TResult (T::*)(TArgs...);
+
+public:
+    template <class T, function_type<T> f>
+    struct model : concept_base
+    {
+        typedef concept_base base_type;
+
+        T* const foreign_this;
+
+        model(const model&) = default;
+
+        // DEBT: Sloppy, just doing this to bring online experimental fake-templated-union
+        model() :
+            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            foreign_this{nullptr}
+        {}
+
+        model(T* foreign_this) :
+            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            foreign_this{foreign_this}
+        {
+
+        }
+
+        TResult exec(TArgs&&...args)
+        {
+            return (foreign_this->*f)(std::forward<TArgs>(args)...);
+        }
+    };
+
+    /* Nifty but not useful here
+    template <class T, function_type<T> f>
+    union holder
+    {
+        model<T, f> m;
+    };*/
+
+    TResult dummy(TArgs...args) { return TResult{}; }
+
+    model<this_type, &this_type::dummy> m_;
+
+public:
+    /*
+    template <class T, function_type<T> f>
+    context_function(T* foreign_this)
+    {
+    } */
+
+    template <class T, function_type<T> f>
+    context_function(model<T, f> m) :
+        base_type(&m_)
+        //holder<T, f>{m}
+    {
+        new (&m_) model<T, f>(m);
     }
 };
 

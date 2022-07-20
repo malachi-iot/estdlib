@@ -37,6 +37,13 @@ void forwarder(TArgs&&...args)
     forwarder_func(std::forward<TArgs>(args)...);
 }
 
+struct ContextTest
+{
+    int val = 0;
+
+    int add(int v) { return val += v; }
+};
+
 TEST_CASE("functional")
 {
     SECTION("function")
@@ -166,6 +173,23 @@ TEST_CASE("functional")
                 }
 
                 delete dynamic_f;
+            }
+            SECTION("context_function")
+            {
+                ContextTest ctx;
+
+                estd::experimental::context_function<int(int)>::
+                    model<ContextTest, &ContextTest::add>
+                    m(&ctx);
+
+                //int sz = sizeof(m.f);
+                REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
+
+                estd::experimental::context_function<int(int)> f(m);
+
+                f(5);
+
+                REQUIRE(ctx.val == 5);
             }
         }
     }
