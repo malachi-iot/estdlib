@@ -208,4 +208,33 @@ TEST_CASE("priority-queue-test")
             }
         }
     }
+    SECTION("erase")
+    {
+        estd::layer1::priority_queue<Dummy, 10> pq;
+
+        Dummy d7(7, "val7");
+
+        pq.push(Dummy(5, "val5"));
+        pq.push(Dummy(9, "val9"));
+        pq.push(Dummy(3, "val3"));
+        pq.push(d7);
+
+        REQUIRE(pq.container().size() == 4);
+
+        auto f = estd::find_if(pq.container().begin(), pq.container().end(),
+            [&](Dummy& v){ return v.value2 == d7.value2; });
+
+        REQUIRE((*f).val1 == 7);
+
+        pq.erase(*f);
+
+        REQUIRE(pq.top().lock().val1 == 9);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 5);
+        pq.pop();
+        REQUIRE(pq.top().lock().val1 == 3);
+        pq.pop();
+
+        REQUIRE(pq.container().size() == 0);
+    }
 }

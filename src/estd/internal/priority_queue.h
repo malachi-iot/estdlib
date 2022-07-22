@@ -50,6 +50,7 @@ protected:
 public:
     typedef Container container_type;
     typedef typename Container::value_type value_type;
+    typedef typename Container::reference reference;
     typedef typename Container::size_type size_type;
     typedef typename container_type::accessor accessor;
 
@@ -63,6 +64,9 @@ public:
 
     size_type size() const { return c.size(); }
 
+    // DEBT: Consider returning a const reference here instead, since returned
+    // value is expected to be used and discarded rather quickly.  So theoretically
+    // moved memory under a weak lock might be acceptable
     accessor top() const
     {
         return c.front();
@@ -131,6 +135,19 @@ public:
     // EXPERIMENTAL
     container_type& container() { return c; }
     const container_type& container() const { return c; }
+
+    // EXPERIMENTAL
+    // https://www.geeksforgeeks.org/insertion-and-deletion-in-heaps/
+    void erase(reference v)
+    {
+        v = c.back();
+        c.pop_back();
+        // DEBT: Slow!  make_heap does multiple heapify and we only need one
+        // see https://stackoverflow.com/questions/32213377/heapify-in-c-stl
+        // DEBT: Also, we want to do this from 'v' not c.begin().  However,
+        // our accessor-rather-than-pointer makes that a little tricky
+        std::make_heap(c.begin(), c.end(), Compare());
+    }
 };
 
 
