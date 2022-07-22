@@ -127,6 +127,10 @@ public:
         return c.back();
     }
 #endif
+
+    // EXPERIMENTAL
+    container_type& container() { return c; }
+    const container_type& container() const { return c; }
 };
 
 
