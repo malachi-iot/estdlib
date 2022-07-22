@@ -403,6 +403,9 @@ public:
     {
         return model<F>(std::move(f));
     }
+
+    // EXPERIMENTAL
+    const concept* getm() const { return m; }
 };
 
 template <class TFunc, typename F>
