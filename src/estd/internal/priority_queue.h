@@ -148,6 +148,18 @@ public:
         // our accessor-rather-than-pointer makes that a little tricky
         std::make_heap(c.begin(), c.end(), Compare());
     }
+
+    // EXPERIMENTAL
+    template <class F>
+    bool erase2(F&& f)
+    {
+        auto i = estd::find_if(c.begin(), c.end(), f);
+
+        if(i == c.end()) return false;
+
+        erase(*i);
+        return true;
+    }
 };
 
 
