@@ -368,8 +368,10 @@ public:
 
     function_base& operator =(const function_base&) = default;
 
-#if __cplusplus >= 201402L
-    TResult operator()(TArgs&&... args)
+    // NOTE: Removed separate && version since it was an ambiguous overload, and
+    // std::function only has this kind of signature anyway
+    // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
+    inline TResult operator()(TArgs... args)
     {
         // a little complicated.  Some guidance from:
         // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
@@ -382,19 +384,6 @@ public:
         // let's make our lives easier
         return m->_exec(std::forward<TArgs>(args)...);
     }
-#endif
-
-    // DEBT: Unknown why STM32 flavor doesn't compile this.  Starting to seem like different versions
-    // of c++ handle this particular overload in different ways.  Technically we prefer the
-    // above version solo anyway.
-#if !defined(ESTD_MCU_STM32)
-    // FIX: Unsure why we need both this and && version, but somehow forwarding an
-    // lvalue with TArgs&& in this context makes it mad
-    TResult operator()(TArgs... args)
-    {
-        return m->_exec(std::forward<TArgs>(args)...);
-    }
-#endif
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
