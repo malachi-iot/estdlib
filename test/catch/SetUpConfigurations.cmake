@@ -5,15 +5,20 @@
 
 # Be sure to move this out into the /tools folder (maybe /tools/cmake)
 
+# Interesting tidbits here:
+# https://youtrack.jetbrains.com/issue/CPP-19478 (from Ivan K, no less)
+
 if(NOT SET_UP_CONFIGURATIONS_DONE)
     set(SET_UP_CONFIGURATIONS_DONE TRUE)
 
     # No reason to set CMAKE_CONFIGURATION_TYPES if it's not a multiconfig generator
     # Also no reason mess with CMAKE_BUILD_TYPE if it's a multiconfig generator.
     get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(isMultiConfig)
-        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Profile" CACHE STRING "" FORCE) 
+    if(${isMultiConfig} OR ("$ENV{CLION_IDE}" STREQUAL "TRUE"))
+        message("Multiconfig got here 1")
+        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Profile;c++20" CACHE STRING "" FORCE)
     else()
+        message("Multiconfig got here 2")
         if(NOT CMAKE_BUILD_TYPE)
             message("Defaulting to release build.")
             set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
