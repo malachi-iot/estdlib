@@ -4,7 +4,7 @@ project("estdlib-unit-tests")
 
 include(SetUpConfigurations.cmake)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD ${ESTD_CXX_STANDARD})
 
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
 set(ESTDLIB_DIR ../../src)

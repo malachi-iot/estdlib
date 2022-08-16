@@ -16,7 +16,7 @@ if(NOT SET_UP_CONFIGURATIONS_DONE)
     get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(${isMultiConfig} OR ("$ENV{CLION_IDE}" STREQUAL "TRUE"))
         message("Multiconfig got here 1")
-        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Profile;c++20" CACHE STRING "" FORCE)
+        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;c++14;c++20" CACHE STRING "" FORCE)
     else()
         message("Multiconfig got here 2")
         if(NOT CMAKE_BUILD_TYPE)
@@ -26,5 +26,45 @@ if(NOT SET_UP_CONFIGURATIONS_DONE)
         set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
         # set the valid options for cmake-gui drop-down list
         set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;Profile")
+    endif()
+
+    # None of the below are functional.  It seems CMake generators may be a 2nd pass
+    # and not available during traditional CMake scan/building
+    # https://stackoverflow.com/questions/51353110/how-do-i-output-the-result-of-a-generator-expression-in-cmake
+    # If so, then we may need to set the C++ language version with a cascading generator if statement of
+    # sorts
+
+    set(TEST123 $<CONFIG>)
+
+    message($<C_COMPILER_VERSION>)
+    message($<CONFIG:Debug>)
+    message("Testing: $<CONFIG> ${TEST123}")
+
+    set(TEST_FILE "log.txt")
+
+    # add_custom_command does not create a new target. You have to define targets explicitly
+    # by add_executable, add_library or add_custom_target in order to make them visible to make
+    add_custom_command(OUTPUT ${TEST_FILE}
+            COMMAND touch ${TEST_FILE}
+
+            # Display the given message before the commands are executed at build time
+            COMMENT "Creating ${TEST_FILE}"
+            )
+
+    add_custom_target(print_config ALL
+            # Prints "Config is Debug" in this single-config case
+            COMMAND ${CMAKE_COMMAND} -E echo "Config is $<CONFIG>"
+            VERBATIM
+            )
+
+    if("$<CONFIG:c++20>")
+        message("c++20 mode")
+        set(ESTD_CXX_STANDARD 20)
+    elseif("$<CONFIG:c++14>")
+        message("c++14 mode")
+        set(ESTD_CXX_STANDARD 14)
+    else()
+        message("c++11 mode")
+        set(ESTD_CXX_STANDARD 11)
     endif()
 endif()
