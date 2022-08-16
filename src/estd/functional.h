@@ -334,7 +334,7 @@ protected:
     //  is permitted if the object is referenced by a pointer to its
     //  class, rather than via a pointer to a class it inherits from."
     // This might be possible with a manual function pointer deleter.
-    typedef concept_fnptr1 concept;
+    typedef concept_fnptr1 model_base;
     template <class F>
     using model = model_fnptr1<F>;
 
@@ -350,7 +350,7 @@ protected:
 
     // DEBT: 'function' constructors need this to not be const, for now
     //concept* const m;
-    concept* m;
+    model_base* m;
 
 protected:
     //function_base(function_type f) : f(f) {}
@@ -358,7 +358,7 @@ protected:
 public:
     function_base() : m(NULLPTR) {}
 
-    function_base(concept* m) : m(m) {}
+    function_base(model_base* m) : m(m) {}
 
     function_base(const function_base& copy_from) = default;
 
@@ -394,7 +394,7 @@ public:
     }
 
     // EXPERIMENTAL
-    const concept* getm() const { return m; }
+    const model_base* getm() const { return m; }
 };
 
 template <class TFunc, typename F>
@@ -408,7 +408,7 @@ class function<TResult(TArgs...), nullable, TAllocator> :
     public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
 {
     typedef function_base<TResult(TArgs...)> base_type;
-    typedef typename base_type::concept concept;
+    using typename base_type::model_base;
 
     typedef estd::internal::reference_evaporator <TAllocator, false> allocator_provider_type;
     typedef estd::allocator_traits<TAllocator> allocator_traits;
@@ -428,17 +428,17 @@ class function<TResult(TArgs...), nullable, TAllocator> :
     }; */
 
 private:
-    concept* getm() const { return base_type::m; }
+    model_base* getm() const { return base_type::m; }
 
     void clear()
     {
         base_type::m = nullptr;
     }
 
-    typedef void (*deleter_type)(concept*);  // EXPERIMENTAL
+    typedef void (*deleter_type)(model_base*);  // EXPERIMENTAL
 
     template <class F>
-    static void deleter(concept* c)
+    static void deleter(model_base* c)
     {
         typedef typename estd::decay_t<F> incoming_function_type;
         typedef typename base_type::template model<incoming_function_type> model_type;
@@ -555,7 +555,7 @@ template <typename TResult, typename... TArgs>
 class context_function<TResult(TArgs...)> : public function_base<TResult(TArgs...)>
 {
     typedef function_base<TResult(TArgs...)> base_type;
-    typedef typename base_type::concept concept_base;
+    using typename base_type::model_base;
     typedef context_function this_type;
 
     //typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
@@ -567,9 +567,9 @@ protected:
 
 public:
     template <class T, function_type<T> f>
-    struct model : concept_base
+    struct model : model_base
     {
-        typedef concept_base base_type;
+        typedef model_base base_type;
 
         T* const foreign_this;
 

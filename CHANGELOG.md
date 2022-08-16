@@ -21,6 +21,7 @@ v 0.X.X - XXXXX22
 * `tuple` and `pair` cleanup and minor improvements
 * chrono: general cleanup
 * `platformio` unity tests working again
+* Minor c++20 compatibility
 
 v 0.3.2 - 17JUN22
 
