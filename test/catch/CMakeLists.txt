@@ -14,10 +14,13 @@ set(ESTDLIB_DIR ../../src)
 
 add_subdirectory(${ESTDLIB_DIR} estdlib)
 
+# Seems to more guarantee a minimum than it does specify a specific version
+#target_compile_features(estd_lib PRIVATE cxx_std_11)
+
 set_target_properties(estd_lib
         PROPERTIES
         #CXX_STANDARD "$<IF:$<CONFIG:c++20>,20,11>"
-        #CXX_STANDARD 11
+        CXX_STANDARD 11
         #CXX_STANDARD $<CONFIG:11>
         CXX_STANDARD_REQUIRED YES)
 
@@ -73,3 +76,4 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED YES)
+#target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
