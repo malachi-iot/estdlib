@@ -1,15 +1,26 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 project("estdlib-unit-tests")
 
 include(SetUpConfigurations.cmake)
 
-set(CMAKE_CXX_STANDARD ${ESTD_CXX_STANDARD})
+#set_target_properties(${PROJECT}
+#        PROPERTIES
+#            CMAKE_CXX_STANDARD $<IF:$<CONFIG:c++20>,11,11>>)
+#set(CMAKE_CXX_STANDARD ${ESTD_CXX_STANDARD})
 
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
 set(ESTDLIB_DIR ../../src)
 
 add_subdirectory(${ESTDLIB_DIR} estdlib)
+
+set_target_properties(estd_lib
+        PROPERTIES
+        #CXX_STANDARD "$<IF:$<CONFIG:c++20>,20,11>"
+        #CXX_STANDARD 11
+        #CXX_STANDARD $<CONFIG:11>
+        CXX_STANDARD_REQUIRED YES)
+
 
 add_executable(${PROJECT_NAME} "main.cpp"
     algorithm-test.cpp
@@ -57,3 +68,8 @@ endif()
 # -Wextra) not ready for this just yet, but want it
 
 target_link_libraries(${PROJECT_NAME} estd_lib)
+
+set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES)

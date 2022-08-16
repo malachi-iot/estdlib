@@ -8,6 +8,13 @@
 # Interesting tidbits here:
 # https://youtrack.jetbrains.com/issue/CPP-19478 (from Ivan K, no less)
 
+# It's starting to seem like it's not possible to (smoothly) set C++ version compliance
+# via the CONFIG/profile CMake modes:
+# https://discourse.cmake.org/t/using-get-target-property-or-just-get-property-with-generator-expressions/2090/6
+# https://stackoverflow.com/questions/66037258/cmake-generator-expression-in-a-target-property-is-not-evaluated
+# https://stackoverflow.com/questions/55262774/cmake-set-property-command-with-generator-expressions-using-multiple-values
+# https://gitlab.kitware.com/cmake/cmake/-/issues/17611
+
 if(NOT SET_UP_CONFIGURATIONS_DONE)
     set(SET_UP_CONFIGURATIONS_DONE TRUE)
 

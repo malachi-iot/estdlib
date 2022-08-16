@@ -1,6 +1,11 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 
 project(estd VERSION 0.3.2 LANGUAGES CXX)
+
+set_target_properties(${PROJECT}
+        PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES)
 
 set(SOURCE_FILES
         dummy.cpp
