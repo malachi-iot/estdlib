@@ -182,7 +182,8 @@ struct model_base
 template <typename T, bool nullable = true, class TAllocator = monostate>
 class function;
 
-template <typename TResult, typename... TArgs>
+// TImpl currently experimental
+template <typename T, class TImpl = void>
 class function_base;
 
 struct function_base_tag {};
