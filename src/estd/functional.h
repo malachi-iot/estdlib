@@ -200,6 +200,12 @@ struct function_fnptr2;
 template <typename T>
 struct function_virtual;
 
+// We like this way best, but due to [1] it may not be viable.
+// However, they say that:
+// "Deleting a polymorphic object without a virtual destructor
+//  is permitted if the object is referenced by a pointer to its
+//  class, rather than via a pointer to a class it inherits from."
+// This might be possible with a manual function pointer deleter.
 template <typename TResult, typename... TArgs>
 struct function_fnptr1<TResult(TArgs...)>
 {
@@ -364,21 +370,20 @@ class function_base<TResult(TArgs...), TImpl> : public function_base_tag
 protected:
     typedef TImpl impl_type;
 
-    // We like this way best, but due to [1] it may not be viable.
-    // However, they say that:
-    // "Deleting a polymorphic object without a virtual destructor
-    //  is permitted if the object is referenced by a pointer to its
-    //  class, rather than via a pointer to a class it inherits from."
-    // This might be possible with a manual function pointer deleter.
+    // DEBT: Don't really like model_base and model as public, but may be necessary
+public:
     typedef typename impl_type::model_base model_base;
+
+    // NOTE: c++17 CTAD may be required for this to really be useful
+    // https://en.cppreference.com/w/cpp/language/class_template_argument_deduction
     template <class F>
     using model = typename impl_type::template model<F>;
 
+protected:
     // DEBT: 'function' constructors need this to not be const, for now
     //concept* const m;
     model_base* m;
 
-protected:
     //function_base(function_type f) : f(f) {}
 
 public:
@@ -413,6 +418,7 @@ public:
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
+    // See above 'model' CTAD comments
     template <typename F>
     static model<F> make_inline(F&& f)
     {

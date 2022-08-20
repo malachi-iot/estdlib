@@ -44,6 +44,10 @@ struct ContextTest
     int add(int v) { return val += v; }
 };
 
+template <typename T>
+using fb = estd::experimental::function_base<T, estd::experimental::impl::function_virtual<T> >;
+
+
 TEST_CASE("functional")
 {
     SECTION("function")
@@ -240,6 +244,35 @@ TEST_CASE("functional")
             REQUIRE(b() == -1);
 
             REQUIRE(std::string(got_something) == "hello");
+        }
+    }
+    SECTION("other impls")
+    {
+        SECTION("explicit")
+        {
+            typedef estd::experimental::function_base<void(int), estd::experimental::impl::function_virtual<void(int)> > _fb;
+
+            struct model : _fb::model_base
+            {
+                int counter = 0;
+
+                // FIX: Don't want int becoming int&&
+                virtual void _exec(int&& v) override
+                {
+                    counter += v;
+                }
+            };
+
+            model m;
+            _fb f(&m);
+
+            f(5);
+
+            REQUIRE(m.counter == 5);
+        }
+        SECTION("aliased")
+        {
+            fb<void(int)> f;
         }
     }
 }
