@@ -229,7 +229,7 @@ struct function_fnptr1<TResult(TArgs...)>
             f(move_from.f)
         {}
 
-        inline TResult _exec(TArgs&&...args)
+        inline TResult _exec(TArgs...args)
         {
             return (this->*f)(std::forward<TArgs>(args)...);
         }
