@@ -256,8 +256,7 @@ TEST_CASE("functional")
             {
                 int counter = 0;
 
-                // FIX: Don't want int becoming int&&
-                virtual void _exec(int&& v) override
+                virtual void _exec(int v) override
                 {
                     counter += v;
                 }
@@ -272,7 +271,18 @@ TEST_CASE("functional")
         }
         SECTION("aliased")
         {
-            fb<void(int)> f;
+            fb<void(int&&)> f;
+
+            struct model : decltype(f)::model_base
+            {
+                int counter = 0;
+
+                virtual void _exec(int&& v) override
+                {
+                    counter += v;
+                }
+            };
+
         }
     }
 }

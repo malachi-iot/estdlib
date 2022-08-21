@@ -214,7 +214,7 @@ struct function_fnptr1<TResult(TArgs...)>
     // switch over to virtual operator() in that case
     struct model_base
     {
-        typedef TResult (model_base::*function_type)(TArgs&&...);
+        typedef TResult (model_base::*function_type)(TArgs...);
         typedef void (*deleter_type)(model_base*);  // EXPERIMENTAL
 
         const function_type f;
@@ -250,7 +250,7 @@ struct function_fnptr1<TResult(TArgs...)>
 
         F f;
 
-        TResult exec(TArgs&&...args)
+        TResult exec(TArgs...args)
         {
             return f(std::forward<TArgs>(args)...);
         }
@@ -328,7 +328,7 @@ struct function_virtual<TResult(TArgs...)>
 {
     struct model_base
     {
-        virtual TResult _exec(TArgs&&...args) = 0;
+        virtual TResult _exec(TArgs...args) = 0;
         virtual ~model_base() = default;
     };
 
@@ -342,12 +342,7 @@ struct function_virtual<TResult(TArgs...)>
 
         F f;
 
-        virtual TResult _exec(TArgs&&...args) override
-        {
-            return f(std::forward<TArgs>(args)...);
-        }
-
-        inline TResult exec(TArgs&&...args)
+        virtual TResult _exec(TArgs...args) override
         {
             return f(std::forward<TArgs>(args)...);
         }
@@ -625,7 +620,7 @@ public:
 
         }
 
-        TResult exec(TArgs&&...args)
+        TResult exec(TArgs...args)
         {
             return (foreign_this->*f)(std::forward<TArgs>(args)...);
         }
