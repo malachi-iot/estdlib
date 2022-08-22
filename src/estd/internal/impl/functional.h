@@ -166,6 +166,44 @@ struct function_virtual<TResult(TArgs...)>
 
 }}
 
+namespace internal { namespace impl {
+
+template <typename F>
+struct function_context_provider;
+
+// Adapting from 'context_function'
+template <typename TResult, typename... TArgs>
+struct function_context_provider<TResult(TArgs...)>
+{
+protected:
+    typedef detail::function<TResult(TArgs...)> function;
+    using model_base = typename function::model_base;
+
+    template <class T>
+    using function_type = TResult (T::*)(TArgs...);
+
+public:
+    template <class T, function_type<T> f>
+    struct model : model_base
+    {
+        T* const foreign_this;
+
+        model(T* foreign_this) :
+            model_base(static_cast<typename model_base::function_type>(&model::exec)),
+            foreign_this{foreign_this}
+        {
+
+        }
+
+        TResult exec(TArgs...args)
+        {
+            return (foreign_this->*f)(std::forward<TArgs>(args)...);
+        }
+    };
+};
+
+}}
+
 #endif
 
 }

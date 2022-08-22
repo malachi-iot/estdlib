@@ -316,6 +316,16 @@ TEST_CASE("functional")
 
         }
     }
+    SECTION("impl")
+    {
+        ContextTest context;
+        internal::impl::function_context_provider<int(int)>::model<ContextTest, &ContextTest::add> m(&context);
+        estd::detail::function<int(int)> f(&m);
+
+        f(5);
+
+        REQUIRE(context.val == 5);
+    }
 }
 
 #endif
