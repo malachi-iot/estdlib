@@ -47,6 +47,17 @@ struct ContextTest
 template <typename T>
 using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 
+template <typename F>
+struct ProvidedTest1;
+
+template <typename TResult, typename ...TArgs>
+struct ProvidedTest1<TResult(TArgs...)>
+{
+    typedef TResult (test)(TArgs...);
+
+    static TResult test2(TArgs...) { return TResult(); }
+};
+
 
 TEST_CASE("functional")
 {
@@ -325,6 +336,11 @@ TEST_CASE("functional")
         f(5);
 
         REQUIRE(context.val == 5);
+
+        // TODO: Do 'model' using this 'provider' technique in hopes of reducing verbosity
+        typedef internal::impl::function_context_provider<int(int)>::provided<ProvidedTest1> p1;
+
+        p1::test2(5);
     }
 }
 

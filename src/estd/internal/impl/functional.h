@@ -200,6 +200,9 @@ public:
             return (foreign_this->*f)(std::forward<TArgs>(args)...);
         }
     };
+
+    template <template <typename F> class TProvided>
+    using provided = TProvided<TResult(TArgs...)>;
 };
 
 }}
