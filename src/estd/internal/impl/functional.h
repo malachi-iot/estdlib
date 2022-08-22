@@ -205,6 +205,14 @@ public:
     using provided = TProvided<TResult(TArgs...)>;
 };
 
+// EXPERIMENTATION
+template <typename TResult, typename... TArgs>
+struct function_context_provider<detail::function<TResult(TArgs...)> > :
+    function_context_provider<TResult(TArgs...)>
+{
+};
+
+
 }}
 
 #endif

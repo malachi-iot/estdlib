@@ -351,6 +351,9 @@ TEST_CASE("functional")
         p2 m2(&context);
 
         //p1::test2(5);
+
+        internal::impl::function_context_provider<fn1_type>::model<ContextTest, &ContextTest::add>
+            m3(&context);
     }
 }
 
