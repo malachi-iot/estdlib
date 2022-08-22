@@ -329,18 +329,28 @@ TEST_CASE("functional")
     }
     SECTION("impl")
     {
+        typedef estd::detail::function<int(int)> fn1_type;
+
         ContextTest context;
         internal::impl::function_context_provider<int(int)>::model<ContextTest, &ContextTest::add> m(&context);
-        estd::detail::function<int(int)> f(&m);
+        fn1_type f(&m);
 
         f(5);
 
         REQUIRE(context.val == 5);
 
-        // TODO: Do 'model' using this 'provider' technique in hopes of reducing verbosity
-        typedef internal::impl::function_context_provider<int(int)>::provided<ProvidedTest1> p1;
+        typedef fn1_type::provided<ProvidedTest1> p1;
 
         p1::test2(5);
+
+        // Doing 'model' using this 'provider' technique in hopes of reducing verbosity
+        // However, so far it doesn't really seem to be much help
+        typedef fn1_type::provided<internal::impl::function_context_provider>::
+            model<ContextTest, &ContextTest::add> p2;
+
+        p2 m2(&context);
+
+        //p1::test2(5);
     }
 }
 
