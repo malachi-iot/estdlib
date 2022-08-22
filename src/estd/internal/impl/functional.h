@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../utility.h"
+#include "../fwd/functional.h"
 
 namespace estd {
 
@@ -12,15 +13,6 @@ namespace detail { namespace impl {
 // 'virtual', formalizing different techniques into impls here
 // DEBT: May need to wrap these in a provider so that TResult(TArgs...) doesn't interfere too
 // much with us switching to different impls
-
-template <typename T>
-struct function_fnptr1;
-
-template <typename T>
-struct function_fnptr2;
-
-template <typename T>
-struct function_virtual;
 
 // We like this way best, but due to [1] it may not be viable.
 // However, they say that:

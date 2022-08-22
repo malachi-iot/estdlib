@@ -111,10 +111,6 @@ public:
 
 namespace detail {
 
-// DEBT: Put this out into a fwd area
-template <typename T, class TImpl = impl::function_fnptr1<T> >
-class function;
-
 /// Lower-level version of function which is hands-off for memory management
 template <typename TResult, typename... TArgs, class TImpl>
 class function<TResult(TArgs...), TImpl> : public internal::function_base_tag
