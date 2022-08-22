@@ -80,7 +80,7 @@ struct function_fnptr2<TResult(TArgs...)>
     // woes
     struct model_base
     {
-        typedef TResult (*function_type)(void*, TArgs&&...);
+        typedef TResult (*function_type)(void*, TArgs...);
 
         const function_type _f;
 

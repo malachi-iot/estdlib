@@ -274,7 +274,30 @@ TEST_CASE("functional")
             }
             SECTION("fnptr2")
             {
+                typedef estd::detail::function<void(int), estd::detail::impl::function_fnptr2<void(
+                    int)> > _fb;
 
+                struct model : _fb::model_base
+                {
+                    typedef _fb::model_base base_type;
+
+                    int counter = 0;
+
+                    model() : base_type(&_exec)
+                    {}
+
+                    static void _exec(void* _this, int v)
+                    {
+                        ((model*)_this)->counter += v;
+                    }
+                };
+
+                model m;
+                _fb f(&m);
+
+                f(5);
+
+                REQUIRE(m.counter == 5);
             }
         }
         SECTION("aliased")
