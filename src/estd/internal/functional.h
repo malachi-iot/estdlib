@@ -176,6 +176,7 @@ public:
     // EXPERIMENTAL
     const model_base* getm() const { return m; }
 
+    // EXPERIMENTAL
     template <template <typename F> class TProvided>
     using provided = TProvided<TResult(TArgs...)>;
 };
