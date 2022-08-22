@@ -182,259 +182,17 @@ struct model_base
 template <typename T, bool nullable = true, class TAllocator = monostate>
 class function;
 
-struct function_base_tag {};
-
-namespace impl {
-
-// Since we prefer 'fnptr1', but can't discount the value of
-// 'virtual', formalizing different techniques into impls here
-// DEBT: May need to wrap these in a provider so that TResult(TArgs...) doesn't interfere too
-// much with us switching to different impls
-
-template <typename T>
-struct function_fnptr1;
-
-template <typename T>
-struct function_fnptr2;
-
-template <typename T>
-struct function_virtual;
-
-// We like this way best, but due to [1] it may not be viable.
-// However, they say that:
-// "Deleting a polymorphic object without a virtual destructor
-//  is permitted if the object is referenced by a pointer to its
-//  class, rather than via a pointer to a class it inherits from."
-// This might be possible with a manual function pointer deleter.
-template <typename TResult, typename... TArgs>
-struct function_fnptr1<TResult(TArgs...)>
-{
-    // function pointer approach works, but if we have to add in a virtual destructor
-    // (which is likely) then we are faced with incurring that overhead anyway so might
-    // switch over to virtual operator() in that case
-    struct model_base
-    {
-        typedef TResult (model_base::*function_type)(TArgs...);
-        typedef void (*deleter_type)(model_base*);  // EXPERIMENTAL
-
-        const function_type f;
-
-        model_base(function_type f) : f(f) {}
-
-        model_base(const model_base& copy_from) = default;
-        // just like concept_fnptr2, default move constructor somehow
-        // results in make_inline2 leaving f uninitialized
-        //concept_fnptr1(concept_fnptr1&& move_from) = default;
-        model_base(model_base&& move_from) :
-            f(move_from.f)
-        {}
-
-        inline TResult _exec(TArgs...args)
-        {
-            return (this->*f)(std::forward<TArgs>(args)...);
-        }
-    };
-
-
-    template <typename F>
-    struct model : model_base
-    {
-        typedef model_base base_type;
-
-        //template <typename U>
-        model(F&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
-            f(std::forward<F>(u))
-        {
-        }
-
-        F f;
-
-        TResult exec(TArgs...args)
-        {
-            return f(std::forward<TArgs>(args)...);
-        }
-    };
-};
-
-
-template <typename TResult, typename... TArgs>
-struct function_fnptr2<TResult(TArgs...)>
-{
-    // this is a slightly less fancy more brute force approach to try to diagose esp32
-    // woes
-    struct model_base
-    {
-        typedef TResult (*function_type)(void*, TArgs&&...);
-
-        const function_type _f;
-
-        model_base(function_type f) : _f(f) {}
-
-        model_base(const model_base& copy_from) = default;
-        // DEBT: For some reason ESP32's default move constructor
-        // doesn't initialize _f
-        //concept_fnptr2(concept_fnptr2&& move_from) = default;
-        model_base(model_base&& move_from) :
-            _f(std::move(move_from._f))
-        {}
-
-        inline TResult _exec(TArgs&&...args)
-        {
-            return _f(this, std::forward<TArgs>(args)...);
-        }
-    };
-
-    template <typename F>
-    struct model : model_base
-    {
-        typedef model_base base_type;
-
-        model(F&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::__exec)),
-            f(std::forward<F>(u))
-        {
-        }
-
-        /*
-        model_fnptr2(const model_fnptr2& copy_from) = default;
-        //model_fnptr2(model_fnptr2&& move_from) = default;
-        model_fnptr2(model_fnptr2&& move_from) :
-            base_type(std::move(move_from)),
-            f(std::move(move_from.f))
-        {} */
-
-        F f;
-
-        // TODO: Consolidate different models down to a model_base since they
-        // all need this exec function
-        TResult exec(TArgs&&...args)
-        {
-            return f(std::forward<TArgs>(args)...);
-        }
-
-        static TResult __exec(void* _this, TArgs&&...args)
-        {
-            auto __this = ((model*)_this);
-
-            return __this->f(std::forward<TArgs>(args)...);
-        }
-    };
-};
-
-
-template <typename TResult, typename... TArgs>
-struct function_virtual<TResult(TArgs...)>
-{
-    struct model_base
-    {
-        virtual TResult _exec(TArgs...args) = 0;
-        virtual ~model_base() = default;
-    };
-
-    template <class F>
-    struct model : model_base
-    {
-        model(F&& u) :
-            f(std::forward<F>(u))
-        {
-        }
-
-        F f;
-
-        virtual TResult _exec(TArgs...args) override
-        {
-            return f(std::forward<TArgs>(args)...);
-        }
-    };
-};
-
-}
-
-
-// DEBT: Put this out into a fwd area
-template <typename T, class TImpl = impl::function_fnptr1<T> >
-class function_base;
-
-
-// DEBT: Put this out into a 'detail' namespace, likely changing name to
-// 'function'
-template <typename TResult, typename... TArgs, class TImpl>
-class function_base<TResult(TArgs...), TImpl> : public function_base_tag
-{
-protected:
-    typedef TImpl impl_type;
-
-    // DEBT: Don't really like model_base and model as public, but may be necessary
-public:
-    typedef typename impl_type::model_base model_base;
-
-    // NOTE: c++17 CTAD may be required for this to really be useful
-    // https://en.cppreference.com/w/cpp/language/class_template_argument_deduction
-    template <class F>
-    using model = typename impl_type::template model<F>;
-
-protected:
-    // DEBT: 'function' constructors need this to not be const, for now
-    //concept* const m;
-    model_base* m;
-
-    //function_base(function_type f) : f(f) {}
-
-public:
-    function_base() : m(NULLPTR) {}
-
-    function_base(model_base* m) : m(m) {}
-
-    function_base(const function_base& copy_from) = default;
-
-    // NOTE: If we decide to add nullability to function_base, then a move constructor
-    // makes sense
-    function_base(function_base&& move_from) = delete;
-
-    function_base& operator =(const function_base&) = default;
-
-    // NOTE: Removed separate && version since it was an ambiguous overload, and
-    // std::function only has this kind of signature anyway
-    // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
-    inline TResult operator()(TArgs... args)
-    {
-        // a little complicated.  Some guidance from:
-        // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
-        // the first portion m->* indicates that a method function pointer call is happening
-        // and to load in 'm' to the 'this' pointer.  The (m->f) portion actually retrieves
-        // the function pointer itself
-        //return (m->*(m->f))(std::forward<TArgs>(args)...);
-
-        // DEBT: Prefer lower overhead of above mess, but while we diagnose ESP32 failures
-        // let's make our lives easier
-        return m->_exec(std::forward<TArgs>(args)...);
-    }
-
-    explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
-
-    // See above 'model' CTAD comments
-    template <typename F>
-    static model<F> make_inline(F&& f)
-    {
-        return model<F>(std::move(f));
-    }
-
-    // EXPERIMENTAL
-    const model_base* getm() const { return m; }
-};
-
 template <class TFunc, typename F>
 class inline_function;
 
 
 template <typename TResult, typename... TArgs, bool nullable, class TAllocator>
 class function<TResult(TArgs...), nullable, TAllocator> :
-    public function_base<TResult(TArgs...)>,
+    public detail::function<TResult(TArgs...)>,
     //public function_base_tag,
     public estd::internal::reference_evaporator < TAllocator, false> //estd::is_class<TAllocator>::value>
 {
-    typedef function_base<TResult(TArgs...)> base_type;
+    typedef detail::function<TResult(TArgs...)> base_type;
     using typename base_type::model_base;
 
     typedef estd::internal::reference_evaporator <TAllocator, false> allocator_provider_type;
@@ -579,9 +337,9 @@ class context_function;
 
 // DEBT: Only works with 'method 1' concept/model at the moment
 template <typename TResult, typename... TArgs>
-class context_function<TResult(TArgs...)> : public function_base<TResult(TArgs...)>
+class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
 {
-    typedef function_base<TResult(TArgs...)> base_type;
+    typedef detail::function<TResult(TArgs...)> base_type;
     using typename base_type::model_base;
     typedef context_function this_type;
 
@@ -684,9 +442,9 @@ public:
 
 
 template <class TFunc, typename TResult, typename... TArgs>
-class inline_function<TFunc, TResult(TArgs...)> : public function_base<TResult(TArgs...)>
+class inline_function<TFunc, TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
 {
-    typedef function_base<TResult(TArgs...)> base_type;
+    typedef detail::function<TResult(TArgs...)> base_type;
     typedef typename base_type::template model<TFunc> model_type;
 
     model_type m;

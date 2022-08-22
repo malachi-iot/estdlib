@@ -6,6 +6,7 @@
 #pragma once
 
 #include "fwd/functional.h"
+#include "impl/functional.h"
 #include "../type_traits.h"
 
 namespace estd {
@@ -105,5 +106,83 @@ public:
 #endif
 
 }
+
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+
+namespace detail {
+
+// DEBT: Put this out into a fwd area
+template <typename T, class TImpl = impl::function_fnptr1<T> >
+class function;
+
+/// Lower-level version of function which is hands-off for memory management
+template <typename TResult, typename... TArgs, class TImpl>
+class function<TResult(TArgs...), TImpl> : public internal::function_base_tag
+{
+protected:
+    typedef TImpl impl_type;
+
+    // DEBT: Don't really like model_base and model as public, but may be necessary
+public:
+    typedef typename impl_type::model_base model_base;
+
+    // NOTE: c++17 CTAD may be required for this to really be useful
+    // https://en.cppreference.com/w/cpp/language/class_template_argument_deduction
+    template <class F>
+    using model = typename impl_type::template model<F>;
+
+protected:
+    // DEBT: 'function' constructors need this to not be const, for now
+    //concept* const m;
+    model_base* m;
+
+    //function_base(function_type f) : f(f) {}
+
+public:
+    function() : m(NULLPTR) {}
+
+    function(model_base* m) : m(m) {}
+
+    function(const function& copy_from) = default;
+
+    // NOTE: If we decide to add nullability to function_base, then a move constructor
+    // makes sense
+    function(function&& move_from) = delete;
+
+    function& operator =(const function&) = default;
+
+    // NOTE: Removed separate && version since it was an ambiguous overload, and
+    // std::function only has this kind of signature anyway
+    // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
+    inline TResult operator()(TArgs... args)
+    {
+        // a little complicated.  Some guidance from:
+        // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
+        // the first portion m->* indicates that a method function pointer call is happening
+        // and to load in 'm' to the 'this' pointer.  The (m->f) portion actually retrieves
+        // the function pointer itself
+        //return (m->*(m->f))(std::forward<TArgs>(args)...);
+
+        // DEBT: Prefer lower overhead of above mess, but while we diagnose ESP32 failures
+        // let's make our lives easier
+        return m->_exec(std::forward<TArgs>(args)...);
+    }
+
+    explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
+
+    // See above 'model' CTAD comments
+    template <typename F>
+    inline static model<F> make_inline(F&& f)
+    {
+        return model<F>(std::move(f));
+    }
+
+    // EXPERIMENTAL
+    const model_base* getm() const { return m; }
+};
+
+}
+
+#endif
 
 }

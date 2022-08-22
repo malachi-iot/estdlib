@@ -26,7 +26,7 @@ using namespace estd;
 #ifdef FEATURE_CPP_VARIADIC
 
 
-void forwarder_func(int val, estd::experimental::function_base<void(int)> f)
+void forwarder_func(int val, estd::detail::function<void(int)> f)
 {
     f(val);
 }
@@ -45,7 +45,7 @@ struct ContextTest
 };
 
 template <typename T>
-using fb = estd::experimental::function_base<T, estd::experimental::impl::function_virtual<T> >;
+using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 
 
 TEST_CASE("functional")
@@ -91,7 +91,7 @@ TEST_CASE("functional")
 
                 SECTION("function_base")
                 {
-                    auto tester = [](estd::experimental::function_base<void(int)> _f, int param)
+                    auto tester = [](estd::detail::function<void(int)> _f, int param)
                     {
                         _f(std::move(param));
                     };
@@ -133,7 +133,7 @@ TEST_CASE("functional")
 
                 REQUIRE(i.exec(1) == 2);
 
-                estd::experimental::function_base<int(int)> f(&i);
+                estd::detail::function<int(int)> f(&i);
 
                 REQUIRE(f.operator()(1) == 2);
 
@@ -152,7 +152,7 @@ TEST_CASE("functional")
 
                 REQUIRE(_if3(5) == 25);
 
-                estd::experimental::function_base<int(int)> fb1(_if3);
+                estd::detail::function<int(int)> fb1(_if3);
 
                 REQUIRE(fb1(5) == 25);
             }
@@ -165,11 +165,11 @@ TEST_CASE("functional")
 
                 SECTION("initialization")
                 {
-                    estd::experimental::function_base<int(int)> f(*dynamic_f);
+                    estd::detail::function<int(int)> f(*dynamic_f);
                 }
                 SECTION("assignment")
                 {
-                    estd::experimental::function_base<int(int)> f;
+                    estd::detail::function<int(int)> f;
 
                     f = *dynamic_f;
                 }
@@ -250,24 +250,32 @@ TEST_CASE("functional")
     {
         SECTION("explicit")
         {
-            typedef estd::experimental::function_base<void(int), estd::experimental::impl::function_virtual<void(int)> > _fb;
-
-            struct model : _fb::model_base
+            SECTION("virtual")
             {
-                int counter = 0;
+                typedef estd::detail::function<void(int), estd::detail::impl::function_virtual<void(
+                    int)> > _fb;
 
-                virtual void _exec(int v) override
+                struct model : _fb::model_base
                 {
-                    counter += v;
-                }
-            };
+                    int counter = 0;
 
-            model m;
-            _fb f(&m);
+                    virtual void _exec(int v) override
+                    {
+                        counter += v;
+                    }
+                };
 
-            f(5);
+                model m;
+                _fb f(&m);
 
-            REQUIRE(m.counter == 5);
+                f(5);
+
+                REQUIRE(m.counter == 5);
+            }
+            SECTION("fnptr2")
+            {
+
+            }
         }
         SECTION("aliased")
         {

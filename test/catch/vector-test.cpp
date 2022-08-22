@@ -300,7 +300,7 @@ TEST_CASE("vector tests")
         {
             int value = 0;
 
-            layer1::vector<estd::experimental::function_base<void(int)>, 10> v;
+            layer1::vector<estd::detail::function<void(int)>, 10> v;
 
             estd::experimental::function<void(int)> f([&](int v)
             {
