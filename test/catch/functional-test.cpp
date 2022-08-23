@@ -58,6 +58,17 @@ struct ProvidedTest1<TResult(TArgs...)>
     static TResult test2(TArgs...) { return TResult(); }
 };
 
+template <typename F, typename TDummy>
+struct ProvidedTest2;
+
+template <typename TResult, typename ...TArgs, class TDummy>
+struct ProvidedTest2<TResult(TArgs...), TDummy>
+{
+    typedef TResult (test)(TArgs...);
+
+    static TResult test2(TArgs...) { return TResult(); }
+};
+
 
 TEST_CASE("functional")
 {
@@ -343,17 +354,20 @@ TEST_CASE("functional")
 
         p1::test2(5);
 
-        // Doing 'model' using this 'provider' technique in hopes of reducing verbosity
-        // However, so far it doesn't really seem to be much help
-        typedef fn1_type::provided<internal::impl::function_context_provider>::
-            model<ContextTest, &ContextTest::add> p2;
-
-        p2 m2(&context);
-
         //p1::test2(5);
 
         internal::impl::function_context_provider<fn1_type>::model<ContextTest, &ContextTest::add>
             m3(&context);
+
+        SECTION("provided")
+        {
+            // Doing 'model' using this 'provider' technique in hopes of reducing verbosity
+            // However, so far it doesn't really seem to be much help
+            typedef fn1_type::provided<internal::impl::function_context_provider>::
+            model<ContextTest, &ContextTest::add> p2;
+
+            p2 m2(&context);
+        }
     }
 }
 

@@ -222,8 +222,8 @@ public:
     const model_base* getm() const { return m; }
 
     // EXPERIMENTAL
-    template <template <typename F> class TProvided>
-    using provided = TProvided<TResult(TArgs...)>;
+    template <template <typename F, class ...TArgs2> class TProvided, class ...TArgs2>
+    using provided = TProvided<TResult(TArgs...), TArgs2...>;
 };
 
 }
