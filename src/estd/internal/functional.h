@@ -223,7 +223,7 @@ public:
 
     // EXPERIMENTAL
     template <template <typename F, class ...TArgs2> class TProvided, class ...TArgs2>
-    using provided = TProvided<TResult(TArgs...), TArgs2...>;
+    using imbue = TProvided<TResult(TArgs...), TArgs2...>;
 };
 
 }

@@ -64,6 +64,8 @@ struct ProvidedTest2;
 template <typename TResult, typename ...TArgs, class TDummy>
 struct ProvidedTest2<TResult(TArgs...), TDummy>
 {
+    TDummy value2;
+
     typedef TResult (test)(TArgs...);
 
     static TResult test2(TArgs...) { return TResult(); }
@@ -350,7 +352,7 @@ TEST_CASE("functional")
 
         REQUIRE(context.val == 5);
 
-        typedef fn1_type::provided<ProvidedTest1> p1;
+        typedef fn1_type::imbue<ProvidedTest1> p1;
 
         p1::test2(5);
 
@@ -363,10 +365,17 @@ TEST_CASE("functional")
         {
             // Doing 'model' using this 'provider' technique in hopes of reducing verbosity
             // However, so far it doesn't really seem to be much help
-            typedef fn1_type::provided<internal::impl::function_context_provider>::
+            typedef fn1_type::imbue<internal::impl::function_context_provider>::
             model<ContextTest, &ContextTest::add> p2;
 
             p2 m2(&context);
+
+            typedef fn1_type::imbue<ProvidedTest2, float> type1;
+
+            type1 p3;
+
+            p3.test2(5);
+            REQUIRE(estd::is_same<decltype(type1::value2), float>::value);
         }
     }
 }
