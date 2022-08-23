@@ -188,7 +188,8 @@ public:
     template <class T, function_type<T> f>
     struct model : model_base
     {
-    private:
+        // DEBT: base class needs this public
+    public:
         T* const foreign_this;
 
     protected:

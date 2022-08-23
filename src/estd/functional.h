@@ -340,7 +340,7 @@ template <typename TResult, typename... TArgs>
 class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
 {
     typedef detail::function<TResult(TArgs...)> base_type;
-    using typename base_type::model_base;
+    //using typename base_type::model_base;
     //typedef context_function this_type;
     typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
 
@@ -352,13 +352,14 @@ protected:
     //using function_type = TResult (T::*)(TArgs...);
     using function_type = typename provider_type::function_type<T>;
 
+    template <class T, function_type<T> f>
+    using model_base = typename provider_type::model<T, f>;
+
 public:
     template <class T, function_type<T> f>
-    struct model : model_base
+    struct model : model_base<T, f>
     {
-        typedef model_base base_type;
-
-        T* const foreign_this;
+        typedef model_base<T, f> base_type;
 
         // NOTE: This is a bizarre thing we do here.  We take advantage of the fact that pointer
         // sizes don't change and accept a foreign-typed model.  We do this to simulate a runtime
@@ -367,22 +368,16 @@ public:
         // surprised if this falls into "undefined" behavior at some point, but in the end we are
         // only relying on 2 runtime pointers to not change size and 2 compile time pointers
         template <class T2, function_type<T2> f2>
-        constexpr model(const model<T2, f2>& copy_from) :
-            base_type(static_cast<typename base_type::function_type>(&model<T2, f2>::exec)),
-            foreign_this{(T*)copy_from.foreign_this}
+        constexpr model(const model_base<T2, f2>& copy_from) : 
+            base_type(
+                (T*)copy_from.foreign_this,
+                static_cast<typename base_type::function_type>(&model<T2, f2>::exec))
         {
-        }
-
-        model(T* foreign_this) :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
-            foreign_this{foreign_this}
-        {
-
         }
 
         TResult exec(TArgs...args)
         {
-            return (foreign_this->*f)(std::forward<TArgs>(args)...);
+            return (base_type::foreign_this->*f)(std::forward<TArgs>(args)...);
         }
     };
 
