@@ -111,6 +111,9 @@ public:
 template<typename T>
 struct function_traits;
 
+template <typename F, F f>
+struct function_ptr_traits;
+
 template<typename R, typename ...Args>
 struct function_traits<R(Args...)>
 {
@@ -133,6 +136,15 @@ struct function_traits<estd::detail::function<R(Args...)> > :
     function_traits<R(Args...)>
 {
 
+};
+
+// Guidance from
+// https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature
+template<class T, class R, typename ...Args, R (T::*f)(Args...)>
+struct function_ptr_traits<R (T::*)(Args...), f> :
+    function_traits<R(Args...)>
+{
+    typedef T this_type;
 };
 
 

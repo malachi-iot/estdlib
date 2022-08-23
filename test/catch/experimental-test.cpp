@@ -32,6 +32,16 @@ struct Test
 
 TestA t;
 
+struct TestB
+{
+    int counter = 0;
+
+    int add(int val)
+    {
+        return counter += val;
+    }
+};
+
 template <class TBase>
 struct provider_test : TBase
 {
@@ -598,6 +608,16 @@ TEST_CASE("experimental tests")
         SECTION("basic")
         {
             REQUIRE(estd::is_same<function_traits<fn_type>::arg_t<0>, int>::value);
+            REQUIRE(estd::is_same<function_traits<fn_type>::arg_t<0>, float>::value == false);
+        }
+        SECTION("member function pointer")
+        {
+            TestB v;
+
+            typedef function_ptr_traits<decltype(&TestB::add), &TestB::add> fn_traits;
+
+            REQUIRE(estd::is_same<fn_traits::this_type, TestB>::value);
+            REQUIRE(estd::is_same<fn_traits::arg_t<0>, int>::value);
         }
     }
 #ifdef STATIC_ASSERT
