@@ -224,6 +224,32 @@ struct function_context_provider<detail::function<TResult(TArgs...)> > :
 {
 };
 
+// Almost, but not quite
+/*
+template <typename F, typename T, typename F2, F2 f>
+struct method_model;
+
+template <typename TResult, typename... TArgs, typename T, TResult (T::*f)(TArgs...)>
+struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
+    function_context_provider<TResult(TArgs...)>::template model<T, f>
+{
+
+}; */
+template <typename F, typename T>
+using tester = typename function_context_provider<F>::template function_type<T>;
+
+template <typename F, typename T, tester<F, T> f>
+struct method_model;
+
+template <typename TResult, typename... TArgs, class T, tester<TResult(TArgs...), T> f>
+struct method_model<TResult(TArgs...), T, f> :
+    function_context_provider<TResult(TArgs...)>::template model<T, f>
+{
+    typedef typename function_context_provider<TResult(TArgs...)>::template model<T, f> base_type;
+
+    method_model(T* foreign_this) : base_type(foreign_this) {}
+};
+
 
 }}
 

@@ -361,6 +361,16 @@ TEST_CASE("functional")
         internal::impl::function_context_provider<fn1_type>::model<ContextTest, &ContextTest::add>
             m3(&context);
 
+        //internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m4(&context);
+        internal::impl::tester<int(int), ContextTest> m4;
+        internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m5(&context);
+
+        detail::function<int(int)> f_m5(&m5);
+
+        f_m5(2);
+
+        REQUIRE(context.val == 7);
+
         SECTION("provided")
         {
             // Doing 'model' using this 'provider' technique in hopes of reducing verbosity
