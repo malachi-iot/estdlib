@@ -105,6 +105,39 @@ public:
 };
 #endif
 
+#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+// Adapted from
+// https://stackoverflow.com/questions/9065081/how-do-i-get-the-argument-types-of-a-function-pointer-in-a-variadic-template-cla
+template<typename T>
+struct function_traits;
+
+template<typename R, typename ...Args>
+struct function_traits<R(Args...)>
+{
+    static const size_t nargs = sizeof...(Args);
+
+    typedef R result_type;
+
+    template <size_t i>
+    struct arg
+    {
+        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+    };
+
+    template <size_t i>
+    using arg_t = typename arg<i>::type;
+};
+
+template<typename R, typename ...Args>
+struct function_traits<estd::detail::function<R(Args...)> > :
+    function_traits<R(Args...)>
+{
+
+};
+
+
+#endif
+
 }
 
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
