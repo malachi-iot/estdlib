@@ -356,6 +356,8 @@ protected:
     using model_base = typename provider_type::model<T, f>;
 
 public:
+    // This model exists specifically to accomodate overlay/union of specific model
+    // onto placeholder
     template <class T, function_type<T> f>
     struct model : model_base<T, f>
     {
@@ -375,9 +377,9 @@ public:
         {
         }
 
-        TResult exec(TArgs...args)
+        model(T* foreign_this) : base_type(foreign_this)
         {
-            return (base_type::foreign_this->*f)(std::forward<TArgs>(args)...);
+
         }
     };
 
