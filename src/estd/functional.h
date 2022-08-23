@@ -341,14 +341,16 @@ class context_function<TResult(TArgs...)> : public detail::function<TResult(TArg
 {
     typedef detail::function<TResult(TArgs...)> base_type;
     using typename base_type::model_base;
-    typedef context_function this_type;
+    //typedef context_function this_type;
+    typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
 
     //typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
     //typedef typename concept::function_type function_type;
 
 protected:
     template <class T>
-    using function_type = TResult (T::*)(TArgs...);
+    //using function_type = TResult (T::*)(TArgs...);
+    using function_type = typename provider_type::function_type<T>;
 
 public:
     template <class T, function_type<T> f>
@@ -391,9 +393,12 @@ public:
         model<T, f> m;
     };*/
 
-    TResult dummy(TArgs...args) { return TResult{}; }
+    struct placeholder
+    {
+        TResult noop(TArgs...args) { return TResult{}; }
+    };
 
-    model<this_type, &this_type::dummy> m_;
+    model<placeholder, &placeholder::noop> m_;
 
 public:
     /*

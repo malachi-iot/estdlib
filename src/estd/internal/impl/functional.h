@@ -172,6 +172,8 @@ template <typename F>
 struct function_context_provider;
 
 // Adapting from 'context_function'
+// DEBT: provider may want to consider an additional level of specialization on
+// the impl type.  Right now it's hard wired to fnptr1
 template <typename TResult, typename... TArgs>
 struct function_context_provider<TResult(TArgs...)>
 {
@@ -179,15 +181,24 @@ protected:
     typedef detail::function<TResult(TArgs...)> function;
     using model_base = typename function::model_base;
 
+public:
     template <class T>
     using function_type = TResult (T::*)(TArgs...);
 
-public:
     template <class T, function_type<T> f>
     struct model : model_base
     {
+    private:
         T* const foreign_this;
 
+    protected:
+        // EXPERIMENTAL
+        model(T* foreign_this, typename model_base::function_type _f) :
+            model_base(_f),
+            foreign_this{foreign_this}
+        {}
+
+    public:
         model(T* foreign_this) :
             model_base(static_cast<typename model_base::function_type>(&model::exec)),
             foreign_this{foreign_this}
