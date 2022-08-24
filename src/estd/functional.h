@@ -18,6 +18,8 @@
 
 #include "variant.h"
 
+#include "exp/functional.h"
+
 // TODO: Utilize std version of this, if available
 
 namespace estd {

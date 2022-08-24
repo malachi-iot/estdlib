@@ -236,12 +236,12 @@ struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
 
 }; */
 template <typename F, typename T>
-using tester = typename function_context_provider<F>::template function_type<T>;
+using method_type = typename function_context_provider<F>::template function_type<T>;
 
-template <typename F, typename T, tester<F, T> f>
+template <typename F, typename T, method_type<F, T> f>
 struct method_model;
 
-template <typename TResult, typename... TArgs, class T, tester<TResult(TArgs...), T> f>
+template <typename TResult, typename... TArgs, class T, method_type<TResult(TArgs...), T> f>
 struct method_model<TResult(TArgs...), T, f> :
     function_context_provider<TResult(TArgs...)>::template model<T, f>
 {
