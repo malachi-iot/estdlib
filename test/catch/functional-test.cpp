@@ -365,6 +365,9 @@ TEST_CASE("functional")
         internal::impl::tester<int(int), ContextTest> m4;
         internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m5(&context);
 
+        // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
+        //fn1_type::imbue<internal::impl::method_model, ContextTest, &ContextTest::add> m6(&context);
+
         detail::function<int(int)> f_m5(&m5);
 
         f_m5(2);
