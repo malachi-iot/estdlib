@@ -426,6 +426,7 @@ TEST_CASE("functional")
         {
             typedef function_traits<decltype(do_something)> traits;
 
+            REQUIRE(estd::is_same<traits::arg_t<0>, const char*>::value);
             REQUIRE(estd::is_same<traits::result_type, int>::value);
         }
         SECTION("functor")

@@ -8,6 +8,7 @@
 #include "fwd/functional.h"
 #include "impl/functional.h"
 #include "../type_traits.h"
+#include "../tuple.h"
 
 namespace estd {
 
@@ -126,11 +127,13 @@ struct function_traits<R(Args...)>
     template <size_t i>
     struct arg
     {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+        typedef typename estd::tuple_element<i, estd::tuple<Args...>>::type type;
     };
 
     template <size_t i>
     using arg_t = typename arg<i>::type;
+
+    using tuple = estd::tuple<Args...>;
 };
 
 template<typename R, typename ...Args>
