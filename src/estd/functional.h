@@ -352,12 +352,12 @@ class context_function<TResult(TArgs...)> : public detail::function<TResult(TArg
 protected:
     template <class T>
     //using function_type = TResult (T::*)(TArgs...);
-    using function_type = typename provider_type::function_type<T>;
+    using function_type = typename provider_type::template function_type<T>;
 
     template <class T, function_type<T> f>
-    using model_base = typename provider_type::model<T, f>;
+    using model_base = typename provider_type::template model<T, f>;
 
-public:
+//public:
     // This model exists specifically to accomodate overlay/union of specific model
     // onto placeholder
     template <class T, function_type<T> f>
@@ -377,11 +377,6 @@ public:
                 (T*)copy_from.foreign_this,
                 static_cast<typename base_type::function_type>(&model<T2, f2>::exec))
         {
-        }
-
-        model(T* foreign_this) : base_type(foreign_this)
-        {
-
         }
     };
 
@@ -407,7 +402,7 @@ public:
     } */
 
     template <class T, function_type<T> f>
-    constexpr context_function(model<T, f> m) :
+    constexpr context_function(model_base<T, f> m) :
         base_type(&m_),
         m_(m)
     {
@@ -433,7 +428,7 @@ class context_function2<TResult(TContext::*)(TArgs...), f> :
     typedef context_function<TResult(TArgs...)> base_type;
 
     typedef typename base_type::template function_type<TContext> function_type;
-    typedef typename base_type::template model<TContext, f> model_type;
+    typedef typename base_type::template model_base<TContext, f> model_type;
 
 public:
     context_function2(TContext* foreign_this) :

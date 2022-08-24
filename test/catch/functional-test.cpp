@@ -204,8 +204,8 @@ TEST_CASE("functional")
             {
                 ContextTest ctx;
 
-                estd::experimental::context_function<int(int)>::
-                    model<ContextTest, &ContextTest::add>
+                estd::internal::impl::method_model<int(int),
+                    ContextTest, &ContextTest::add>
                     m(&ctx);
 
                 //int sz = sizeof(m.f);
@@ -362,7 +362,7 @@ TEST_CASE("functional")
             m3(&context);
 
         //internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m4(&context);
-        internal::impl::tester<int(int), ContextTest> m4;
+        internal::impl::method_type<int(int), ContextTest> m4;
         internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m5(&context);
 
         // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
