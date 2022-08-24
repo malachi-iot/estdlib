@@ -163,7 +163,7 @@ TEST_CASE("functional")
                 f2(&_dest, 1);
                 REQUIRE(_dest == 1);
             }
-            SECTION("make_inline")
+            SECTION("make_inline (deprecated)")
             {
                 auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
 
@@ -322,6 +322,20 @@ TEST_CASE("functional")
                 f(5);
 
                 REQUIRE(m.counter == 5);
+            }
+            SECTION("fnptr1 (default)")
+            {
+                //estd::detail::impl::function_fnptr2<void(int)>::
+                int value = 0;
+
+                auto m = estd::internal::make_model<void(int)>(
+                    [&](int v) { value += v; });
+
+                estd::detail::function<void(int)> f(&m);
+
+                f(5);
+
+                REQUIRE(value == 5);
             }
             SECTION("fnptr2")
             {

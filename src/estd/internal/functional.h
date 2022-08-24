@@ -221,6 +221,9 @@ public:
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
+#if __cplusplus >= 201402L
+    [[deprecated("Use make_model instead")]]
+#endif
     // See above 'model' CTAD comments
     template <typename F>
     inline static model<F> make_inline(F&& f)
@@ -324,6 +327,20 @@ public:
     }
 };
 
+// DEBT: Move this to 'impl' namespace
+template <class TImpl, class F>
+inline typename TImpl::template model<F> make_model_impl(F&& f)
+{
+    return typename TImpl::template model<F>(std::move(f));
+}
+
+// DEBT: Hard wired to detail::impl::function_default.  Probably OK as long as we
+// maintain a separate explicit impl flavor
+template <class TSignature, class F>
+inline typename detail::impl::function_default<TSignature>::template model<F> make_model(F&& f)
+{
+    return make_model_impl<detail::impl::function_default<TSignature> >(std::move(f));
+}
 
 }
 
