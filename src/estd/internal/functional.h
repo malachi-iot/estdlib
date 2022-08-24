@@ -173,11 +173,9 @@ public:
     using model = typename impl_type::template model<F>;
 
 protected:
-    // DEBT: 'function' constructors need this to not be const, for now
+    // DEBT: child class constructors need this to not be const, for now.  Also, nullability demands it
     //concept* const m;
     model_base* m;
-
-    //function_base(function_type f) : f(f) {}
 
 public:
     function() : m(NULLPTR) {}
@@ -243,14 +241,15 @@ protected:
     using function_type = typename provider_type::template function_type<T>;
 
     template <class T, function_type<T> f>
-    using model_base = typename provider_type::template model<T, f>;
+    using model = typename provider_type::template model<T, f>;
 
+private:
     // This model exists specifically to accomodate overlay/union of specific model
     // onto placeholder
     template <class T, function_type<T> f>
-    struct model : model_base<T, f>
+    struct overlay_model : model<T, f>
     {
-        typedef model_base<T, f> base_type;
+        typedef model<T, f> base_type;
 
         // NOTE: This is a bizarre thing we do here.  We take advantage of the fact that pointer
         // sizes don't change and accept a foreign-typed model.  We do this to simulate a runtime
@@ -259,7 +258,7 @@ protected:
         // surprised if this falls into "undefined" behavior at some point, but in the end we are
         // only relying on 2 runtime pointers to not change size and 2 compile time pointers
         template <class T2, function_type<T2> f2>
-        constexpr model(const model_base<T2, f2>& copy_from) :
+        constexpr overlay_model(const model<T2, f2>& copy_from) :
             base_type(
                 (T*)copy_from.foreign_this,
                 static_cast<typename base_type::function_type>(&model<T2, f2>::exec))
@@ -274,27 +273,38 @@ protected:
         model<T, f> m;
     };*/
 
-    struct placeholder
+    struct placeholder_result
     {
         TResult noop(TArgs...args) { return TResult{}; }
     };
 
-    model<placeholder, &placeholder::noop> m_;
+    struct placeholder_void
+    {
+        void noop(TArgs...args) {}
+    };
+
+    typedef estd::conditional_t<estd::is_void<TResult>::value,
+            placeholder_void,
+            placeholder_result> placeholder;
+
+    overlay_model<placeholder, &placeholder::noop> m_;
 
 public:
     /*
+     * NOTE: Not usable because 'f' can never be deduced
     template <class T, function_type<T> f>
     context_function(T* foreign_this)
     {
     } */
 
     template <class T, function_type<T> f>
-    constexpr context_function(model_base<T, f> m) :
+    constexpr context_function(const model<T, f>& m) :
         base_type(&m_),
         m_(m)
     {
     }
 
+    // UNUSED, and you're probably better off using inline_function
     template <class T, function_type<T> f>
     static context_function create(T* foreign_this)
     {

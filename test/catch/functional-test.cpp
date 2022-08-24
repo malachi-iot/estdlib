@@ -42,6 +42,10 @@ struct ContextTest
     int val = 0;
 
     int add(int v) { return val += v; }
+
+    // NOTE: Cannot name 'add' since estd::experimental::context_function is unable to resolve
+    // overloads
+    void add2() { val += 7; }
 };
 
 template <typename T>
@@ -204,18 +208,33 @@ TEST_CASE("functional")
             {
                 ContextTest ctx;
 
-                estd::internal::impl::method_model<int(int),
-                    ContextTest, &ContextTest::add>
-                    m(&ctx);
+                SECTION("int(int)")
+                {
+                    estd::internal::impl::method_model<int(int),
+                        ContextTest, &ContextTest::add>
+                        m(&ctx);
 
-                //int sz = sizeof(m.f);
-                REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
+                    //int sz = sizeof(m.f);
+                    REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
 
-                estd::internal::context_function<int(int)> f(m);
+                    estd::internal::context_function<int(int)> f(m);
 
-                f(5);
+                    f(5);
 
-                REQUIRE(ctx.val == 5);
+                    REQUIRE(ctx.val == 5);
+                }
+                SECTION("void(void)")
+                {
+                    estd::internal::impl::method_model<void(void),
+                        ContextTest, &ContextTest::add2>
+                        m(&ctx);
+
+                    estd::internal::context_function<void(void)> f(m);
+
+                    f();
+
+                    REQUIRE(ctx.val == 7);
+                }
             }
             SECTION("context_function")
             {

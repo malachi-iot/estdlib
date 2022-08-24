@@ -259,7 +259,7 @@ class context_function<TResult(TContext::*)(TArgs...), f> :
 {
     typedef internal::context_function<TResult(TArgs...)> base_type;
 
-    typedef typename base_type::template model_base<TContext, f> model_type;
+    typedef typename base_type::template model<TContext, f> model_type;
 
 public:
     context_function(TContext* foreign_this) :
