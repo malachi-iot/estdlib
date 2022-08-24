@@ -108,6 +108,8 @@ public:
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
 // Adapted from
 // https://stackoverflow.com/questions/9065081/how-do-i-get-the-argument-types-of-a-function-pointer-in-a-variadic-template-cla
+// Additional guidance from
+// https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda/7943765#7943765
 template<typename T>
 struct function_traits;
 
@@ -138,6 +140,14 @@ struct function_traits<estd::detail::function<R(Args...)> > :
 
 };
 
+// This one works well for functors from regular functions
+template<typename R, typename ...Args>
+struct function_traits<R (&)(Args...)> :
+    function_traits<R(Args...)>
+{
+
+};
+
 // Guidance from
 // https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature
 template<class T, class R, typename ...Args, R (T::*f)(Args...)>
@@ -146,7 +156,6 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
 {
     typedef T this_type;
 };
-
 
 #endif
 

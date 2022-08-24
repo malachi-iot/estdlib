@@ -20,6 +20,14 @@ int do_something(const char* msg)
     return -1;
 }
 
+template <typename F>
+void do_something_inspector(F&&)
+{
+    typedef estd::experimental::function_traits<F> traits;
+
+    REQUIRE(estd::is_same<typename traits::result_type, int>::value);
+}
+
 using namespace estd;
 
 // temporarily switching this on or off here as I build out experimental pre C++03 tuple
@@ -408,6 +416,30 @@ TEST_CASE("functional")
 
             p3.test2(5);
             REQUIRE(estd::is_same<decltype(type1::value2), float>::value);
+        }
+    }
+    SECTION("function_traits")
+    {
+        using namespace estd::experimental;
+
+        SECTION("direct")
+        {
+            typedef function_traits<decltype(do_something)> traits;
+
+            REQUIRE(estd::is_same<traits::result_type, int>::value);
+        }
+        SECTION("functor")
+        {
+            do_something_inspector(do_something);
+        }
+        SECTION("lambda")
+        {
+            auto l = [](int v) { return v + 5; };
+
+            typedef function_traits<decltype(l)> traits;
+
+            // Not ready
+            //REQUIRE(estd::is_same<traits::resullt_type, int>::value);
         }
     }
 }
