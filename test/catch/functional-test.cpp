@@ -200,7 +200,7 @@ TEST_CASE("functional")
 
                 delete dynamic_f;
             }
-            SECTION("context_function")
+            SECTION("internal::context_function")
             {
                 ContextTest ctx;
 
@@ -211,17 +211,17 @@ TEST_CASE("functional")
                 //int sz = sizeof(m.f);
                 REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
 
-                estd::experimental::context_function<int(int)> f(m);
+                estd::internal::context_function<int(int)> f(m);
 
                 f(5);
 
                 REQUIRE(ctx.val == 5);
             }
-            SECTION("context_function2")
+            SECTION("context_function")
             {
                 ContextTest ctx;
 
-                estd::experimental::context_function2<
+                estd::experimental::context_function<
                     decltype(&ContextTest::add), &ContextTest::add> f(&ctx);
 
                 f(5);

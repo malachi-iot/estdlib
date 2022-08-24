@@ -228,6 +228,83 @@ public:
 
 }
 
+namespace internal {
+
+// DEBT: Only works with 'method 1' concept/model at the moment
+// DEBT: Might be better named as 'method', except that could be somewhat ambiguous
+template <typename TResult, typename... TArgs>
+class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
+{
+    typedef detail::function<TResult(TArgs...)> base_type;
+    typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
+
+protected:
+    template <class T>
+    using function_type = typename provider_type::template function_type<T>;
+
+    template <class T, function_type<T> f>
+    using model_base = typename provider_type::template model<T, f>;
+
+    // This model exists specifically to accomodate overlay/union of specific model
+    // onto placeholder
+    template <class T, function_type<T> f>
+    struct model : model_base<T, f>
+    {
+        typedef model_base<T, f> base_type;
+
+        // NOTE: This is a bizarre thing we do here.  We take advantage of the fact that pointer
+        // sizes don't change and accept a foreign-typed model.  We do this to simulate a runtime
+        // templated union initialization.  base type gets initialized with a constant pointer to
+        // foreign model's exec helper, and naturally we copy over the 'this'.  I would not be
+        // surprised if this falls into "undefined" behavior at some point, but in the end we are
+        // only relying on 2 runtime pointers to not change size and 2 compile time pointers
+        template <class T2, function_type<T2> f2>
+        constexpr model(const model_base<T2, f2>& copy_from) :
+            base_type(
+                (T*)copy_from.foreign_this,
+                static_cast<typename base_type::function_type>(&model<T2, f2>::exec))
+        {
+        }
+    };
+
+    /* Nifty but not useful here
+    template <class T, function_type<T> f>
+    union holder
+    {
+        model<T, f> m;
+    };*/
+
+    struct placeholder
+    {
+        TResult noop(TArgs...args) { return TResult{}; }
+    };
+
+    model<placeholder, &placeholder::noop> m_;
+
+public:
+    /*
+    template <class T, function_type<T> f>
+    context_function(T* foreign_this)
+    {
+    } */
+
+    template <class T, function_type<T> f>
+    constexpr context_function(model_base<T, f> m) :
+        base_type(&m_),
+        m_(m)
+    {
+    }
+
+    template <class T, function_type<T> f>
+    static context_function create(T* foreign_this)
+    {
+        return context_function(model<T, f>(foreign_this));
+    }
+};
+
+
+}
+
 #endif
 
 }

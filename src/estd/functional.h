@@ -19,6 +19,7 @@
 #include "variant.h"
 
 #include "exp/functional.h"
+#include "obsolete/functional.h"
 
 // TODO: Utilize std version of this, if available
 
@@ -68,88 +69,6 @@ private:
 };
 
 
-#if defined (FEATURE_CPP_VARIADIC) && defined (FEATURE_CPP_MOVESEMANTIC)
-
-namespace obsolete {
-
-template <class F>
-struct function
-{
-    F f;
-
-    function() NOEXCEPT = default;
-
-    template <class F2>
-    function(F2 f) : f(f) {}
-
-    // deviates from spec here, but doing this to conform with how bind likes to
-    // do things
-    function(F&& f) : f(std::move(f)) {}
-
-    // deviates from spec, function class itself is supposed to take these args
-    template <class ...TArgs>
-    auto operator()(TArgs&&...args) -> decltype (f(args...))
-    {
-        return f(std::forward<TArgs>(args)...);
-    }
-
-    // UNTESTED
-    function& operator=(F&& f)
-    {
-        this->f = std::move(f);
-        return *this;
-    }
-
-    function& operator=(reference_wrapper<F> f) NOEXCEPT
-    {
-        this->f = f;
-        return *this;
-    }
-};
-
-namespace internal {
-
-
-template <class F, class ...TArgs>
-struct bind_type : function<F>
-{
-    typedef function<F> base_type;
-
-    tuple<TArgs...> args;
-
-    bind_type(F&& f, TArgs&&...args) :
-        base_type(std::move(f)),
-        args(std::forward<TArgs>(args)...)
-    {
-
-    }
-
-    auto operator ()() -> decltype (apply(std::move(base_type::f), std::move(args)))
-    {
-        return apply(std::move(base_type::f), std::move(args));
-    }
-};
-
-}
-
-template <class F, class ...TArgs>
-auto bind(F&& f, TArgs&&... args) -> internal::bind_type<F, TArgs...>
-{
-    internal::bind_type<F, TArgs...> b(
-                std::move(f),
-                std::forward<TArgs>(args)...
-                );
-
-    return b;
-}
-
-}
-
-#endif
-
-
-
-
 #ifdef FEATURE_CPP_DEDUCTION_GUIDES
 // deduction guides
 template<class T>
@@ -174,12 +93,6 @@ namespace experimental {
 
 // Guidance from
 // https://stackoverflow.com/questions/14936539/how-stdfunction-works
-
-template <typename F, typename TResult, typename... TArgs>
-struct model_base
-{
-
-};
 
 template <typename T, bool nullable = true, class TAllocator = monostate>
 class function;
@@ -334,104 +247,22 @@ public:
     }
 };
 
-template <typename TFunc>
-class context_function;
-
-// DEBT: Only works with 'method 1' concept/model at the moment
-template <typename TResult, typename... TArgs>
-class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
-{
-    typedef detail::function<TResult(TArgs...)> base_type;
-    //using typename base_type::model_base;
-    //typedef context_function this_type;
-    typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
-
-    //typedef TResult (concept_fnptr1::*function_type)(TArgs&&...);
-    //typedef typename concept::function_type function_type;
-
-protected:
-    template <class T>
-    //using function_type = TResult (T::*)(TArgs...);
-    using function_type = typename provider_type::template function_type<T>;
-
-    template <class T, function_type<T> f>
-    using model_base = typename provider_type::template model<T, f>;
-
-//public:
-    // This model exists specifically to accomodate overlay/union of specific model
-    // onto placeholder
-    template <class T, function_type<T> f>
-    struct model : model_base<T, f>
-    {
-        typedef model_base<T, f> base_type;
-
-        // NOTE: This is a bizarre thing we do here.  We take advantage of the fact that pointer
-        // sizes don't change and accept a foreign-typed model.  We do this to simulate a runtime
-        // templated union initialization.  base type gets initialized with a constant pointer to
-        // foreign model's exec helper, and naturally we copy over the 'this'.  I would not be
-        // surprised if this falls into "undefined" behavior at some point, but in the end we are
-        // only relying on 2 runtime pointers to not change size and 2 compile time pointers
-        template <class T2, function_type<T2> f2>
-        constexpr model(const model_base<T2, f2>& copy_from) : 
-            base_type(
-                (T*)copy_from.foreign_this,
-                static_cast<typename base_type::function_type>(&model<T2, f2>::exec))
-        {
-        }
-    };
-
-    /* Nifty but not useful here
-    template <class T, function_type<T> f>
-    union holder
-    {
-        model<T, f> m;
-    };*/
-
-    struct placeholder
-    {
-        TResult noop(TArgs...args) { return TResult{}; }
-    };
-
-    model<placeholder, &placeholder::noop> m_;
-
-public:
-    /*
-    template <class T, function_type<T> f>
-    context_function(T* foreign_this)
-    {
-    } */
-
-    template <class T, function_type<T> f>
-    constexpr context_function(model_base<T, f> m) :
-        base_type(&m_),
-        m_(m)
-    {
-    }
-
-    template <class T, function_type<T> f>
-    static context_function create(T* foreign_this)
-    {
-        return context_function(model<T, f>(foreign_this));
-    }
-};
-
 // Guidance from
 // https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature
 
 template <typename TFunc, TFunc f>
-class context_function2;
+class context_function;
 
 template <typename TResult, typename... TArgs, class TContext, TResult (TContext::*f)(TArgs...)>
-class context_function2<TResult(TContext::*)(TArgs...), f> :
-    public context_function<TResult(TArgs...)>
+class context_function<TResult(TContext::*)(TArgs...), f> :
+    public internal::context_function<TResult(TArgs...)>
 {
-    typedef context_function<TResult(TArgs...)> base_type;
+    typedef internal::context_function<TResult(TArgs...)> base_type;
 
-    typedef typename base_type::template function_type<TContext> function_type;
     typedef typename base_type::template model_base<TContext, f> model_type;
 
 public:
-    context_function2(TContext* foreign_this) :
+    context_function(TContext* foreign_this) :
         base_type(model_type(foreign_this))
     {
 
