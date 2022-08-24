@@ -221,6 +221,13 @@ public:
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
+    // See above 'model' CTAD comments
+    template <typename F>
+    inline static model<F> make_model(F&& f)
+    {
+        return model<F>(std::move(f));
+    }
+
 #if __cplusplus >= 201402L
     [[deprecated("Use make_model instead")]]
 #endif
@@ -228,7 +235,7 @@ public:
     template <typename F>
     inline static model<F> make_inline(F&& f)
     {
-        return model<F>(std::move(f));
+        return make_model(std::move(f));
     }
 
     // EXPERIMENTAL
