@@ -15,11 +15,18 @@ extern "C" {
 
 namespace estd {
 
+namespace freertos {
+
+template <bool static_allocated = false>
+class mutex;
+    
+}
+
 namespace experimental {
 
 class mutex
 {
-    SemaphoreHandle_t s;
+    const SemaphoreHandle_t s;
 
 protected:
     mutex(SemaphoreHandle_t s) : s(s) {}
@@ -27,16 +34,18 @@ protected:
 public:
     typedef SemaphoreHandle_t native_handle_type;
 
-    mutex(bool binary = false)
+    mutex(bool binary = false) :
+        s(binary ? xSemaphoreCreateBinary() : xSemaphoreCreateMutex())
     {
-        if(binary)
-            s = xSemaphoreCreateBinary();
-        else
-            s = xSemaphoreCreateMutex();
     }
 
     ~mutex()
     {
+        // From the source code:
+        /* The queue could have been allocated statically or dynamically, so
+         * check before attempting to free the memory. */
+        // Therefore we use this for both static and dynamic allocations of
+        // semaphore
         vSemaphoreDelete(s);
     }
 
