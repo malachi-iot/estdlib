@@ -14,7 +14,6 @@ void test_thread_get_id()
     TEST_ASSERT_EQUAL(id, estd::this_thread::get_id());
 }
 
-
 // TODO: Do a simplistic timed mutex scenario so that we are reasonably
 // sure we wait for one before doing the other
 // NOTE: This is *not* in reference to timed_mutex
@@ -24,6 +23,9 @@ void test_lock_guard()
     estd::mutex m;
     estd::lock_guard<estd::mutex> _m(m);
 }
+
+#ifdef ESTD_OS_FREERTOS
+#endif
 
 
 #ifdef ESP_IDF_TESTING

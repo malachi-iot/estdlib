@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../arch/freertos.h"
+
 extern "C" {
 
 #if ESP_PLATFORM
@@ -17,14 +19,11 @@ namespace estd {
 
 namespace freertos {
 
-template <bool static_allocated = false>
+template <bool static_allocated>
 class mutex;
-    
-}
 
-namespace experimental {
-
-class mutex
+template <>
+class mutex<false>
 {
     const SemaphoreHandle_t s;
 
@@ -67,9 +66,29 @@ public:
     }
 };
 
-
-class timed_mutex : public mutex
+template <>
+class mutex<true> : public mutex<false>
 {
+    typedef mutex<false> base_type;
+
+protected:
+    StaticSemaphore_t storage;
+
+public:
+    mutex(bool binary = false) :
+        base_type(binary ?
+            xSemaphoreCreateBinaryStatic(&storage) : 
+            xSemaphoreCreateMutexStatic(&storage))
+    {
+    }
+};
+
+
+template <bool static_allocated>
+class timed_mutex : public mutex<static_allocated>
+{
+    typedef mutex<static_allocated> base_type;
+
 public:
     template< class Rep, class Period >
     bool try_lock_for( const estd::chrono::duration<Rep,Period>& timeout_duration )
@@ -81,20 +100,21 @@ public:
         estd::chrono::freertos_clock::duration d = timeout_duration;
 
         // get number of ticks
-        return xSemaphoreTake(s, d.count());
+        return xSemaphoreTake(base_type::s, d.count());
     }
 
     template< class Clock, class Duration >
     bool try_lock_until( const estd::chrono::time_point<Clock,Duration>& timeout_time )
     {
-        return xSemaphoreTake(s, timeout_time - chrono::freertos_clock::now());
+        return xSemaphoreTake(base_type::s, timeout_time - chrono::freertos_clock::now());
     }
 };
 
-
+    
 }
 
-// NOTE: Be warned, still experimental IF you do binary sem vs mutex
-typedef experimental::mutex mutex;
+
+typedef freertos::mutex<false> mutex;
+typedef freertos::timed_mutex<false> timed_mutex;
 
 }
