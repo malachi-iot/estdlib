@@ -60,9 +60,9 @@ public:
         return xSemaphoreTake(s, 0);
     }
 
-    void unlock()
+    bool unlock()
     {
-        xSemaphoreGive(s);
+        return xSemaphoreGive(s) == pdTRUE;
     }
 };
 

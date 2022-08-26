@@ -2,6 +2,7 @@
 
 #include "chrono.h"
 #include "../../functional.h"
+#include "../arch/freertos.h"
 
 #ifdef ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
