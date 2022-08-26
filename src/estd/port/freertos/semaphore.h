@@ -1,17 +1,6 @@
 #pragma once
 
-#include "../arch/freertos.h"
-
-extern "C" {
-
-#if ESP_PLATFORM
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
-#else
-#include <semphr.h>
-#endif
-
-}
+#include "wrapper/semphr.h"
 
 namespace estd {
     
@@ -19,13 +8,10 @@ namespace freertos {
 
 namespace internal {
 
-// DEBT: This is both a base class and a wrapper class.  Could be useful
-// to make wrapper distinct.  When doing so, we'll decouple the auto deletion
-// out of the wrapper
 class semaphore_base
 {
 protected:
-    const SemaphoreHandle_t s;
+    const wrapper::semaphore s;
 
     semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
@@ -41,37 +27,6 @@ protected:
     }
 
 public:
-
-    BaseType_t give()
-    {
-        return xSemaphoreGive(s);
-    }
-
-    BaseType_t give_recursive()
-    {
-        return xSemaphoreGiveRecursive(s);
-    }
-
-    BaseType_t give_from_isr(BaseType_t* higherPriorityTaskWoken)
-    {
-        return xSemaphoreGiveFromISR(s, higherPriorityTaskWoken);
-    }
-
-    BaseType_t take(TickType_t ticksToWait)
-    {
-        return xSemaphoreTake(s, ticksToWait);
-    }
-
-    BaseType_t take_recursive(TickType_t ticksToWait)
-    {
-        return xSemaphoreTakeRecursive(s, ticksToWait);
-    }
-
-    BaseType_t take_from_isr(BaseType_t* higherPriorityTaskWoken)
-    {
-        return xSemaphoreTakeFromISR(s, higherPriorityTaskWoken);
-    }
-
     typedef SemaphoreHandle_t native_handle_type;
 
     // NOTE: C++ spec only calls for this during mutex, but for freertos
@@ -87,17 +42,17 @@ protected:
 public:
     void acquire()
     {
-        take(portMAX_DELAY);
+        s.take(portMAX_DELAY);
     }
 
     bool try_acquire()
     {
-        return take(0);
+        return s.take(0);
     }
 
     void release()
     {
-        give();
+        s.give();
     }
 };
 
@@ -105,11 +60,11 @@ public:
 
 #ifndef FEATURE_CPP_ALIASTEMPLATE
 template <>
-class binary_semaphore<false> : public internal::semaphore_base
+class binary_semaphore<false> : public internal::semaphore
 {
 public:
     binary_semaphore() :
-        internal::semaphore_base(xSemaphoreCreateBinary())
+        internal::semaphore(xSemaphoreCreateBinary())
     {}
 };
 #endif
@@ -118,32 +73,32 @@ public:
 // as well as unsigned instead of ptrdiff_t
 
 template<unsigned max>
-class counting_semaphore<max, false> : public internal::semaphore_base
+class counting_semaphore<max, false> : public internal::semaphore
 {
 public:
     counting_semaphore(unsigned desired = 0) :
-        internal::semaphore_base(xSemaphoreCreateCounting(max, desired))
+        internal::semaphore(xSemaphoreCreateCounting(max, desired))
     {}
 };
 
 template <>
-class counting_semaphore<1, false> : public internal::semaphore_base
+class counting_semaphore<1, false> : public internal::semaphore
 {
 public:
     counting_semaphore() :
-        internal::semaphore_base(xSemaphoreCreateBinary())
+        internal::semaphore(xSemaphoreCreateBinary())
     {}
 };
 
 
 template<unsigned max>
-class counting_semaphore<max, true> : public internal::semaphore_base
+class counting_semaphore<max, true> : public internal::semaphore
 {
     StaticSemaphore_t storage;
 
 public:
     counting_semaphore(unsigned desired = 0) :
-        internal::semaphore_base(
+        internal::semaphore(
             xSemaphoreCreateCountingStatic(max, desired, &storage))
     {}
 };
