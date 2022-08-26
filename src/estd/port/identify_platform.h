@@ -55,7 +55,7 @@
 
 #if !defined(ESTD_OS_FREERTOS)
 #define ESTD_FREERTOS
-#define ESTD_OS_FREERTOS
+#include "arch/freertos.h"
 #endif
 
 

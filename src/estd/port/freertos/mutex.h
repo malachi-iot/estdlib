@@ -1,69 +1,100 @@
 #pragma once
 
-extern "C" {
-
-#if ESP_PLATFORM
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
-#else
-#include <semphr.h>
-#endif
-
-}
-
-#include "chrono.h"
+#include "semaphore.h"
 
 namespace estd {
 
-namespace experimental {
+namespace freertos {
 
-class mutex
+namespace internal {
+
+class mutex_base : public semaphore_base
 {
-    SemaphoreHandle_t s;
-
 protected:
-    mutex(SemaphoreHandle_t s) : s(s) {}
+    mutex_base(SemaphoreHandle_t s) :
+        semaphore_base(s) {}
 
 public:
-    typedef SemaphoreHandle_t native_handle_type;
-
-    mutex(bool binary = false)
-    {
-        if(binary)
-            s = xSemaphoreCreateBinary();
-        else
-            s = xSemaphoreCreateMutex();
-    }
-
-    ~mutex()
-    {
-        vSemaphoreDelete(s);
-    }
-
-    native_handle_type native_handle() const { return s; }
-
     void lock()
     {
-        xSemaphoreTake(s, portMAX_DELAY);
+        s.take(portMAX_DELAY);
     }
 
     bool try_lock()
     {
-        return xSemaphoreTake(s, 0);
+        return s.take(0);
     }
 
-    void unlock()
+    bool unlock()
     {
-        xSemaphoreGive(s);
+        return s.give() == pdTRUE;
+    }
+
+};
+
+
+class recursive_mutex_base : public semaphore_base
+{
+public:
+    recursive_mutex_base(SemaphoreHandle_t s) :
+        semaphore_base(s) {}
+
+    void lock()
+    {
+        s.take_recursive(portMAX_DELAY);
+    }
+
+    bool try_lock()
+    {
+        return s.take_recursive(0);
+    }
+
+    bool unlock()
+    {
+        return s.give_recursive() == pdTRUE;
+    }
+};
+
+}
+
+template <>
+class mutex<false> : public internal::mutex_base
+{
+public:
+    mutex(bool binary = false) :
+        internal::mutex_base(binary ?
+            xSemaphoreCreateBinary() :
+            xSemaphoreCreateMutex())
+    {
+    }
+};
+
+template <>
+class mutex<true> : public internal::mutex_base
+{
+    typedef internal::mutex_base base_type;
+
+protected:
+    StaticSemaphore_t storage;
+
+public:
+    mutex(bool binary = false) :
+        base_type(binary ?
+            wrapped::create(binary_tag(), &storage) : 
+            wrapped::create(mutex_tag(), &storage))
+    {
     }
 };
 
 
-class timed_mutex : public mutex
+template <bool static_allocated>
+class timed_mutex : public mutex<static_allocated>
 {
+    typedef mutex<static_allocated> base_type;
+
 public:
     template< class Rep, class Period >
-    bool try_lock_for( const estd::chrono::duration<Rep,Period>& timeout_duration )
+    bool try_lock_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
     {
         // This should convert whatever incoming time format duration into our steady_clock
         // duration, which is very specifically freertos-tick bound
@@ -72,20 +103,43 @@ public:
         estd::chrono::freertos_clock::duration d = timeout_duration;
 
         // get number of ticks
-        return xSemaphoreTake(s, d.count());
+        return xSemaphoreTake(base_type::s, d.count());
     }
 
-    template< class Clock, class Duration >
-    bool try_lock_until( const estd::chrono::time_point<Clock,Duration>& timeout_time )
+    template<class Clock, class Duration>
+    bool try_lock_until(const estd::chrono::time_point<Clock,Duration>& timeout_time)
     {
-        return xSemaphoreTake(s, timeout_time - chrono::freertos_clock::now());
+        return xSemaphoreTake(base_type::s, timeout_time - chrono::freertos_clock::now());
     }
 };
 
+template <>
+class recursive_mutex<false> : public internal::recursive_mutex_base
+{
+public:
+    recursive_mutex() :
+        internal::recursive_mutex_base(xSemaphoreCreateRecursiveMutex())
+    {}
+};
+
+
+template <>
+class recursive_mutex<true> : public internal::recursive_mutex_base
+{
+    StaticSemaphore_t storage;
+
+public:
+    recursive_mutex() : internal::recursive_mutex_base(
+        xSemaphoreCreateRecursiveMutexStatic(&storage))
+    {}
+};
 
 }
 
-// NOTE: Be warned, still experimental IF you do binary sem vs mutex
-typedef experimental::mutex mutex;
+#if FEATURE_ESTD_FREERTOS_THREAD
+typedef freertos::mutex<false> mutex;
+typedef freertos::timed_mutex<false> timed_mutex;
+typedef freertos::recursive_mutex<false> recursive_mutex;
+#endif
 
 }
