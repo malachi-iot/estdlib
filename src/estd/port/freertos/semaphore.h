@@ -19,7 +19,8 @@ namespace freertos {
 
 namespace internal {
 
-// DEBT: Consider consolidating with mutex_base
+// DEBT: This is both a base class and a wrapper class.  Could be useful
+// to make wrapper distinct
 class semaphore_base
 {
 protected:
@@ -30,9 +31,58 @@ protected:
 
     ~semaphore_base()
     {
+        // From the source code:
+        /* The queue could have been allocated statically or dynamically, so
+         * check before attempting to free the memory. */
+        // Therefore we use this for both static and dynamic allocations of
+        // semaphore
         vSemaphoreDelete(s);
     }
 
+    BaseType_t give()
+    {
+        return xSemaphoreGive(s);
+    }
+
+    BaseType_t give_recursive()
+    {
+        return xSemaphoreGiveRecursive(s);
+    }
+
+    BaseType_t give_from_isr(BaseType_t* higherPriorityTaskWoken)
+    {
+        return xSemaphoreGiveFromISR(s, higherPriorityTaskWoken);
+    }
+
+    BaseType_t take(TickType_t ticksToWait)
+    {
+        return xSemaphoreTake(s, ticksToWait);
+    }
+
+    BaseType_t take_recursive(TickType_t ticksToWait)
+    {
+        return xSemaphoreTakeRecursive(s, ticksToWait);
+    }
+
+    BaseType_t take_from_isr(BaseType_t* higherPriorityTaskWoken)
+    {
+        return xSemaphoreTakeFromISR(s, higherPriorityTaskWoken);
+    }
+
+public:
+    typedef SemaphoreHandle_t native_handle_type;
+
+    // NOTE: C++ spec only calls for this during mutex, but for freertos
+    // it's identical so we expose it at this level
+    native_handle_type native_handle() const { return s; }
+};
+
+class semaphore : public semaphore_base
+{
+protected:
+    semaphore(SemaphoreHandle_t s) : semaphore_base(s) {}
+
+public:
     void acquire()
     {
         xSemaphoreTake(s, portMAX_DELAY);

@@ -14,6 +14,7 @@ extern "C" {
 }
 
 #include "fwd.h"
+#include "semaphore.h"
 #include "chrono.h"
 
 namespace estd {
@@ -22,44 +23,51 @@ namespace freertos {
 
 namespace internal {
 
-class mutex_base
+class mutex_base : public semaphore_base
 {
-    const SemaphoreHandle_t s;
-
 protected:
-    mutex_base(SemaphoreHandle_t s) : s(s) {}
+    mutex_base(SemaphoreHandle_t s) :
+        semaphore_base(s) {}
 
 public:
-    typedef SemaphoreHandle_t native_handle_type;
-
-    ~mutex_base()
-    {
-        // From the source code:
-        /* The queue could have been allocated statically or dynamically, so
-         * check before attempting to free the memory. */
-        // Therefore we use this for both static and dynamic allocations of
-        // semaphore
-        vSemaphoreDelete(s);
-    }
-
-    native_handle_type native_handle() const { return s; }
-
     void lock()
     {
-        xSemaphoreTake(s, portMAX_DELAY);
+        take(portMAX_DELAY);
     }
 
     bool try_lock()
     {
-        return xSemaphoreTake(s, 0);
+        return take(0);
     }
 
     bool unlock()
     {
-        return xSemaphoreGive(s) == pdTRUE;
+        return give() == pdTRUE;
     }
 };
 
+
+class recursive_mutex_base : public semaphore_base
+{
+public:
+    recursive_mutex_base(SemaphoreHandle_t s) :
+        semaphore_base(s) {}
+
+    void lock()
+    {
+        take_recursive(portMAX_DELAY);
+    }
+
+    bool try_lock()
+    {
+        return take_recursive(0);
+    }
+
+    bool unlock()
+    {
+        return give_recursive() == pdTRUE;
+    }
+};
 
 }
 
@@ -120,22 +128,22 @@ public:
 };
 
 template <>
-class recursive_mutex<false> : public internal::mutex_base
+class recursive_mutex<false> : public internal::recursive_mutex_base
 {
 public:
     recursive_mutex() :
-        internal::mutex_base(xSemaphoreCreateRecursiveMutex())
+        internal::recursive_mutex_base(xSemaphoreCreateRecursiveMutex())
     {}
 };
 
 
 template <>
-class recursive_mutex<true> : public internal::mutex_base
+class recursive_mutex<true> : public internal::recursive_mutex_base
 {
     StaticSemaphore_t storage;
 
 public:
-    recursive_mutex() : internal::mutex_base(
+    recursive_mutex() : internal::recursive_mutex_base(
         xSemaphoreCreateRecursiveMutexStatic(&storage))
     {}
 };
