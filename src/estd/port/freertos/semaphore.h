@@ -82,6 +82,17 @@ public:
     }
 };
 
+template <unsigned m>
+struct semaphore_max
+{
+#ifdef FEATURE_CPP_CONSTEXPR
+    constexpr
+#else
+    inline
+#endif
+    static unsigned max() { return m; }
+};
+
 }
 
 #ifndef FEATURE_CPP_ALIASTEMPLATE
@@ -92,6 +103,8 @@ public:
     binary_semaphore() :
         internal::semaphore(create(binary_tag))
     {}
+
+    static CONSTEXPR 
 };
 #endif
 
@@ -99,18 +112,18 @@ public:
 // as well as unsigned instead of ptrdiff_t
 
 template<unsigned max>
-class counting_semaphore<max, false> : public internal::semaphore
+struct counting_semaphore<max, false> : internal::semaphore,
+    internal::semaphore_max<max>
 {
-public:
     counting_semaphore(unsigned desired = 0) :
         internal::semaphore(wrapped::create(counting_tag(), max, desired))
     {}
 };
 
 template <>
-class counting_semaphore<1, false> : public internal::semaphore
+struct counting_semaphore<1, false> : internal::semaphore,
+    internal::semaphore_max<1>
 {
-public:
     counting_semaphore() :
         internal::semaphore(create(binary_tag()))
     {}
@@ -118,8 +131,10 @@ public:
 
 
 template<unsigned max>
-class counting_semaphore<max, true> : public internal::semaphore
+struct counting_semaphore<max, true> : internal::semaphore,
+    internal::semaphore_max<max>
 {
+private:
     StaticSemaphore_t storage;
 
 public:

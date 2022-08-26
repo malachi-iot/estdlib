@@ -11,7 +11,7 @@ template <bool static_allocated>
 class recursive_mutex;
 
 template <unsigned max, bool static_allocated>
-class counting_semaphore;
+struct counting_semaphore;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template <bool static_allocated>

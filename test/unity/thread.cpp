@@ -208,11 +208,15 @@ static void test_semaphore()
     {
         estd::freertos::counting_semaphore<4, true> s(0);
 
+        TEST_ASSERT_EQUAL(4, s.max());
+        
         test_semaphore_iteration(s);
     }
 
     {
         estd::freertos::counting_semaphore<4, false> s(0);
+
+        TEST_ASSERT_EQUAL(4, s.max());
 
         test_semaphore_iteration(s);
     }
