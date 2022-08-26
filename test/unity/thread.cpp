@@ -55,6 +55,13 @@ static void test_freertos_mutex_iteration(estd::freertos::mutex<is_static>& m)
     TEST_ASSERT_EQUAL(pdPASS, xReturned);
 }
 
+template <bool is_static>
+static void test_freertos_mutex_iteration(estd::freertos::recursive_mutex<is_static>& m)
+{
+    TEST_ASSERT_NOT_NULL(m.native_handle());
+}
+
+
 static void test_freertos_mutex()
 {
     // Dynamic (regular) mutex
@@ -94,6 +101,21 @@ static void test_freertos_mutex_static()
     }
 }
 
+static void test_freertos_recursive_mutex()
+{
+    {
+        estd::freertos::recursive_mutex<true> m;
+
+        test_freertos_mutex_iteration(m);
+    }
+
+    {
+        estd::freertos::recursive_mutex<false> m;
+
+        test_freertos_mutex_iteration(m);
+    }
+}
+
 static void test_freertos_thread()
 {
 
@@ -104,6 +126,7 @@ static void test_freertos()
 {
     RUN_TEST(test_freertos_mutex);
     RUN_TEST(test_freertos_mutex_static);
+    RUN_TEST(test_freertos_recursive_mutex);
     RUN_TEST(test_freertos_thread);
 }
 #endif

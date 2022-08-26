@@ -13,32 +13,26 @@ extern "C" {
 
 }
 
+#include "fwd.h"
 #include "chrono.h"
 
 namespace estd {
 
 namespace freertos {
 
-template <bool static_allocated>
-class mutex;
+namespace internal {
 
-template <>
-class mutex<false>
+class mutex_base
 {
     const SemaphoreHandle_t s;
 
 protected:
-    mutex(SemaphoreHandle_t s) : s(s) {}
+    mutex_base(SemaphoreHandle_t s) : s(s) {}
 
 public:
     typedef SemaphoreHandle_t native_handle_type;
 
-    mutex(bool binary = false) :
-        s(binary ? xSemaphoreCreateBinary() : xSemaphoreCreateMutex())
-    {
-    }
-
-    ~mutex()
+    ~mutex_base()
     {
         // From the source code:
         /* The queue could have been allocated statically or dynamically, so
@@ -66,10 +60,25 @@ public:
     }
 };
 
+
+}
+
 template <>
-class mutex<true> : public mutex<false>
+class mutex<false> : public internal::mutex_base
 {
-    typedef mutex<false> base_type;
+public:
+    mutex(bool binary = false) :
+        internal::mutex_base(binary ?
+            xSemaphoreCreateBinary() :
+            xSemaphoreCreateMutex())
+    {
+    }
+};
+
+template <>
+class mutex<true> : public internal::mutex_base
+{
+    typedef internal::mutex_base base_type;
 
 protected:
     StaticSemaphore_t storage;
@@ -110,12 +119,33 @@ public:
     }
 };
 
-    
+template <>
+class recursive_mutex<false> : public internal::mutex_base
+{
+public:
+    recursive_mutex() :
+        internal::mutex_base(xSemaphoreCreateRecursiveMutex())
+    {}
+};
+
+
+template <>
+class recursive_mutex<true> : public internal::mutex_base
+{
+    StaticSemaphore_t storage;
+
+public:
+    recursive_mutex() : internal::mutex_base(
+        xSemaphoreCreateRecursiveMutexStatic(&storage))
+    {}
+};
+
 }
 
 #if FEATURE_ESTD_FREERTOS_THREAD
 typedef freertos::mutex<false> mutex;
 typedef freertos::timed_mutex<false> timed_mutex;
+typedef freertos::recursive_mutex<false> recursive_mutex;
 #endif
 
 }
