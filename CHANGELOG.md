@@ -1,3 +1,18 @@
+v 0.X.X - XXXXX22
+
+## Added Features
+
+* Added official FreeRTOS support: 
+    * `estd::freertos::mutex`
+    * `estd::freertos::counting_semaphore`
+    * above has static and dynamic allocation variants
+    * aliases of above to `estd::mutex` and `estd::counting_semaphore`
+
+## Known Issues & Limitations
+
+* FreeRTOS support:
+    * `estd::freertos::recursive_mutex` not well tested
+
 v 0.3.3 - 16AUG22
 
 ## Added Features
