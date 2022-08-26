@@ -20,7 +20,8 @@ namespace freertos {
 namespace internal {
 
 // DEBT: This is both a base class and a wrapper class.  Could be useful
-// to make wrapper distinct
+// to make wrapper distinct.  When doing so, we'll decouple the auto deletion
+// out of the wrapper
 class semaphore_base
 {
 protected:
@@ -38,6 +39,8 @@ protected:
         // semaphore
         vSemaphoreDelete(s);
     }
+
+public:
 
     BaseType_t give()
     {
@@ -69,7 +72,6 @@ protected:
         return xSemaphoreTakeFromISR(s, higherPriorityTaskWoken);
     }
 
-public:
     typedef SemaphoreHandle_t native_handle_type;
 
     // NOTE: C++ spec only calls for this during mutex, but for freertos
@@ -85,17 +87,17 @@ protected:
 public:
     void acquire()
     {
-        xSemaphoreTake(s, portMAX_DELAY);
+        take(portMAX_DELAY);
     }
 
     bool try_acquire()
     {
-        return xSemaphoreTake(s, 0);
+        return take(0);
     }
 
     void release()
     {
-        xSemaphoreGive(s);
+        give();
     }
 };
 

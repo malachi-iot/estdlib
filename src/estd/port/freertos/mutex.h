@@ -23,11 +23,29 @@ namespace freertos {
 
 namespace internal {
 
-class mutex_base : public semaphore_base
+class mutex_base_base : protected semaphore_base
+{
+    typedef semaphore_base base_type;
+
+protected:
+    mutex_base_base(SemaphoreHandle_t s) :
+        semaphore_base(s) {}
+
+public:
+    // Since base class is protected, we need to re-expose these
+
+    typedef SemaphoreHandle_t native_handle_type;
+    native_handle_type native_handle() const
+    {
+        return base_type::native_handle();
+    }
+};
+
+class mutex_base : public mutex_base_base
 {
 protected:
     mutex_base(SemaphoreHandle_t s) :
-        semaphore_base(s) {}
+        mutex_base_base(s) {}
 
 public:
     void lock()
@@ -44,14 +62,15 @@ public:
     {
         return give() == pdTRUE;
     }
+
 };
 
 
-class recursive_mutex_base : public semaphore_base
+class recursive_mutex_base : public mutex_base_base
 {
 public:
     recursive_mutex_base(SemaphoreHandle_t s) :
-        semaphore_base(s) {}
+        mutex_base_base(s) {}
 
     void lock()
     {
