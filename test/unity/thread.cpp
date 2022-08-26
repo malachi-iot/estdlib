@@ -30,7 +30,16 @@ void test_lock_guard()
 namespace freertos {
 
 static estd::freertos::wrapper::semaphore sync_sem;
+static estd::freertos::wrapper::task unity_task;
 static int counter;
+
+namespace notifications {
+
+CONSTEXPR uint32_t
+    started = 0x0001,
+    finished = 0x0002;
+
+}
 
 static TaskHandle_t create_task(TaskFunction_t taskCode,
     const char* name,
@@ -69,10 +78,14 @@ static void mutex_looper(estd::freertos::mutex<is_static>& m, int* counter, bool
     }
 }
 
-template <bool is_static>
+template <bool is_static, bool direct_task_notification>
 static void test_mutex_task(void* p)
 {
-    sync_sem.take(portMAX_DELAY);   // signal that we have started
+    // signal that we have started
+    if(direct_task_notification)
+        unity_task.notify(notifications::started, eSetBits);
+    else
+        sync_sem.take(portMAX_DELAY);
 
     mutex_looper(
         * (estd::freertos::mutex<is_static>*) p,
@@ -84,10 +97,12 @@ static void test_mutex_task(void* p)
     vTaskDelete(NULL);
 }
 
-// FIX: Incomplete unit test
-template <bool is_static>
+template <bool direct_task_notification, bool is_static>
 static void test_mutex_iteration(estd::freertos::mutex<is_static>& m)
 {
+    BaseType_t r;
+    // DEBT: Use chrono to calculate 1s
+    CONSTEXPR TickType_t ticksToWait = 100; // 1s, usually
     TEST_ASSERT_NOT_NULL(m.native_handle());
 
     counter = 0;
@@ -95,13 +110,26 @@ static void test_mutex_iteration(estd::freertos::mutex<is_static>& m)
     m.lock();
     TEST_ASSERT_TRUE(m.unlock());
 
-    create_task(test_mutex_task<is_static>, "test_mutex", &m);
-    
-    sync_sem.give();    // wait till test_mutex starts
+    estd::freertos::wrapper::task t = 
+        create_task(test_mutex_task<is_static, direct_task_notification>,
+        "test_mutex", &m);
+
+    if(direct_task_notification)
+    {
+        uint32_t notifiedValue;
+        r = xTaskNotifyWait(0, ULONG_MAX, &notifiedValue, ticksToWait);
+        TEST_ASSERT_TRUE(r);
+        TEST_ASSERT_EQUAL(notifications::started, notifiedValue);
+    }
+    else
+    {
+        t.name();           // Just to quiet down unused 't' warnings
+        sync_sem.give();    // wait till test_mutex starts
+    }
     
     mutex_looper(m, &counter, false);
 
-    sync_sem.take(portMAX_DELAY);   // wait till test_mutex ends
+    r = sync_sem.take(ticksToWait);   // wait till test_mutex ends
 
     TEST_ASSERT_EQUAL(0, counter);
 }
@@ -153,17 +181,8 @@ static void test_mutex()
     {
         estd::freertos::mutex<false> m;
 
-        test_mutex_iteration(m);
-    }
-
-    // FIX: The binary flavor causes a lockup
-    return;
-
-    // Dynamic (regular) mutex, binary
-    {
-        estd::freertos::mutex<false> m(true);
-
-        test_mutex_iteration(m);
+        test_mutex_iteration<true>(m);
+        test_mutex_iteration<false>(m);
     }
 }
 
@@ -173,16 +192,8 @@ static void test_mutex_static()
     {
         estd::freertos::mutex<true> m;
 
-        test_mutex_iteration(m);
-    }
-
-    return;
-
-    // Static mutex, binary
-    {
-        estd::freertos::mutex<true> m(true);
-
-        test_mutex_iteration(m);
+        test_mutex_iteration<true>(m);
+        test_mutex_iteration<false>(m);
     }
 }
 
@@ -243,6 +254,7 @@ static void test_thread()
 static void test_freertos()
 {
     freertos::sync_sem.create_binary();
+    freertos::unity_task = estd::freertos::wrapper::task::current();
 
     RUN_TEST(freertos::test_mutex);
     RUN_TEST(freertos::test_mutex_static);

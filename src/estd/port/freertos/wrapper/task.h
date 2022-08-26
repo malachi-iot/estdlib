@@ -35,9 +35,9 @@ public:
         return xTaskNotifyGiveIndexed(t, indexToNotify);
     }
 
-    BaseType_t notify_give_from_isr(BaseType_t* higherPriorityTaskWoken = NULLPTR) const
+    void notify_give_from_isr(BaseType_t* higherPriorityTaskWoken = NULLPTR) const
     {
-        return xTaskNotifyGiveFromISR(t, higherPriorityTaskWoken);
+        vTaskNotifyGiveFromISR(t, higherPriorityTaskWoken);
     }
 
     BaseType_t notify(uint32_t ulValue, eNotifyAction eAction) const
@@ -51,11 +51,6 @@ public:
         return xTaskNotifyFromISR(t, ulValue, eAction, higherPriorityTaskWoken);
     }
 
-    void info(TaskStatus_t* taskStatus, BaseType_t getFreeStackSpace, eTaskState eState) const
-    {
-        xTaskGetInfo(t, taskStatus, getFreeStackSpace, eState);
-    }
-
     uint32_t notify_value_clear(uint32_t bitsToClear) const
     {
         return ulTaskNotifyValueClear(t, bitsToClear);
@@ -64,6 +59,33 @@ public:
     BaseType_t notify_state_clear() const
     {
         return xTaskNotifyStateClear(t);
+    }
+
+    const char* name() const
+    {
+        return pcTaskGetName(t);
+    }
+
+#if configUSE_APPLICATION_TASK_TAG 
+    TaskHookFunction_t tag() const
+    {
+        return xTaskGetApplicationTaskTag(t);
+    }
+
+    void tag(TaskHookFunction_t tagValue)
+    {
+        xTaskSetApplicationTaskTag(t, tagValue);
+    }
+#endif
+
+    void info(TaskStatus_t* taskStatus, BaseType_t getFreeStackSpace, eTaskState eState) const
+    {
+        vTaskGetInfo(t, taskStatus, getFreeStackSpace, eState);
+    }
+
+    eTaskState state() const
+    {
+        return eTaskGetState(t);
     }
 
     static task current()
