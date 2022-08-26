@@ -112,37 +112,36 @@ static void test_mutex_iteration(estd::freertos::recursive_mutex<is_static>& m)
     TEST_ASSERT_NOT_NULL(m.native_handle());
 }
 
-static void semaphore_tester(estd::freertos::internal::semaphore& s)
-{
-    s.release();
-    s.acquire();
-}
-
 static void test_semaphote_task(void* p)
 {
     sync_sem.take(portMAX_DELAY);   // signal that we have started
 
-    semaphore_tester(* (estd::freertos::internal::semaphore*) p);
-
-    sync_sem.give();                // signal that we have finished
+    // signal that we have finished
+    ((estd::freertos::internal::semaphore*) p)->release();
 
     vTaskDelete(NULL);
 }
 
 
-static void test_semaphore_iteration(estd::freertos::internal::semaphore& s)
+static void test_semaphore_iteration(estd::freertos::internal::semaphore& s, int max)
 {
     TEST_ASSERT_NOT_NULL(s.native_handle());
 
     s.release();
     TEST_ASSERT_EQUAL(1, s.native_handle().count());
     s.acquire();
+    
+    if(max > 1)
+    {
+        // Not quite ready
+        //TEST_ASSERT_TRUE(s.try_acquire_for(estd::chrono::milliseconds(100)));
+    }
 
     create_task(test_semaphote_task, "test_semaphore", &s);
 
     sync_sem.give();    // wait till test_semaphote starts
 
-    sync_sem.take(portMAX_DELAY);
+    s.acquire();        // wait till test_semaphore ends
 
     TEST_ASSERT_EQUAL(0, s.native_handle().count());
 }
@@ -210,7 +209,7 @@ static void test_semaphore()
 
         TEST_ASSERT_EQUAL(4, s.max());
         
-        test_semaphore_iteration(s);
+        test_semaphore_iteration(s, s.max());
     }
 
     {
@@ -218,19 +217,19 @@ static void test_semaphore()
 
         TEST_ASSERT_EQUAL(4, s.max());
 
-        test_semaphore_iteration(s);
+        test_semaphore_iteration(s, s.max());
     }
 
     {
         estd::freertos::binary_semaphore<true> s;
 
-        test_semaphore_iteration(s);
+        test_semaphore_iteration(s, s.max());
     }
 
     {
         estd::freertos::binary_semaphore<false> s;
 
-        test_semaphore_iteration(s);
+        test_semaphore_iteration(s, s.max());
     }
 }
 

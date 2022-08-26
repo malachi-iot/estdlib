@@ -94,7 +94,7 @@ class timed_mutex : public mutex<static_allocated>
 
 public:
     template< class Rep, class Period >
-    bool try_lock_for( const estd::chrono::duration<Rep,Period>& timeout_duration )
+    bool try_lock_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
     {
         // This should convert whatever incoming time format duration into our steady_clock
         // duration, which is very specifically freertos-tick bound
@@ -106,8 +106,8 @@ public:
         return xSemaphoreTake(base_type::s, d.count());
     }
 
-    template< class Clock, class Duration >
-    bool try_lock_until( const estd::chrono::time_point<Clock,Duration>& timeout_time )
+    template<class Clock, class Duration>
+    bool try_lock_until(const estd::chrono::time_point<Clock,Duration>& timeout_time)
     {
         return xSemaphoreTake(base_type::s, timeout_time - chrono::freertos_clock::now());
     }

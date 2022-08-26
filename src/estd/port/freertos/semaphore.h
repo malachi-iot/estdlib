@@ -68,12 +68,18 @@ public:
         return s.take(0);
     }
 
-    template< class Rep, class Period >
+    template<class Rep, class Period>
     bool try_acquire_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
     {
         estd::chrono::freertos_clock::duration d = timeout_duration;
 
         return s.take(d.count());
+    }
+
+    template<class Clock, class Duration>
+    bool try_acquire_until(const estd::chrono::time_point<Clock,Duration>& timeout_time)
+    {
+        return s.take(timeout_time - chrono::freertos_clock::now());
     }
 
     void release()
