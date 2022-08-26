@@ -113,8 +113,9 @@ public:
     
 }
 
-
+#if FEATURE_ESTD_FREERTOS_THREAD
 typedef freertos::mutex<false> mutex;
 typedef freertos::timed_mutex<false> timed_mutex;
+#endif
 
 }
