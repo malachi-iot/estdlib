@@ -2,6 +2,7 @@
 
 #include <estd/thread.h>
 #include <estd/mutex.h>
+#include <estd/semaphore.h>
 
 #ifdef FEATURE_ESTD_THREADING
 
@@ -116,6 +117,18 @@ static void test_freertos_recursive_mutex()
     }
 }
 
+
+static void test_freertos_semaphore()
+{
+    {
+        estd::freertos::counting_semaphore<4, true> s(0);
+    }
+
+    {
+        estd::freertos::counting_semaphore<4, false> s(0);
+    }
+}
+
 static void test_freertos_thread()
 {
 
@@ -127,6 +140,7 @@ static void test_freertos()
     RUN_TEST(test_freertos_mutex);
     RUN_TEST(test_freertos_mutex_static);
     RUN_TEST(test_freertos_recursive_mutex);
+    RUN_TEST(test_freertos_semaphore);
     RUN_TEST(test_freertos_thread);
 }
 #endif

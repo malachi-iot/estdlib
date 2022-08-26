@@ -1,3 +1,5 @@
+#include "../../internal/platform.h"
+
 #pragma once
 
 namespace estd { namespace freertos {
@@ -7,5 +9,16 @@ class mutex;
 
 template <bool static_allocated>
 class recursive_mutex;
+
+template <unsigned max, bool static_allocated>
+class counting_semaphore;
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template <bool static_allocated>
+using binary_semaphore = counting_semaphore<1, static_allocated>;
+#else
+template <bool static_allocated>
+class binary_semaphore;
+#endif
 
 }}

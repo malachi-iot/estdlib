@@ -1,9 +1,13 @@
+extern "C" {
+
 #if ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #else
 #include <task.h>
 #endif
+
+}
 
 #include "version.h"
 
