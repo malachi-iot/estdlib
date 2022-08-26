@@ -11,7 +11,11 @@ namespace internal {
 class semaphore_base
 {
 protected:
+    typedef wrapper::semaphore wrapped;
+
     const wrapper::semaphore s;
+
+    
 
     semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
@@ -23,7 +27,20 @@ protected:
          * check before attempting to free the memory. */
         // Therefore we use this for both static and dynamic allocations of
         // semaphore
-        vSemaphoreDelete(s);
+        s.free();
+    }
+
+    typedef wrapped::counting_tag counting_tag;
+    typedef wrapped::binary_tag binary_tag;
+    typedef wrapped::mutex_tag mutex_tag;
+    typedef wrapped::recursive_mutex_tag recursive_mutex_tag;
+
+    // Helper for simple cases.  Not using parameter pack for clarity
+    // and for c++03 compatibility
+    template <class TTag>
+    static inline SemaphoreHandle_t create(TTag tag)
+    {
+        return wrapped::create(tag);
     }
 
 public:
@@ -64,7 +81,7 @@ class binary_semaphore<false> : public internal::semaphore
 {
 public:
     binary_semaphore() :
-        internal::semaphore(xSemaphoreCreateBinary())
+        internal::semaphore(create(binary_tag))
     {}
 };
 #endif
@@ -77,7 +94,7 @@ class counting_semaphore<max, false> : public internal::semaphore
 {
 public:
     counting_semaphore(unsigned desired = 0) :
-        internal::semaphore(xSemaphoreCreateCounting(max, desired))
+        internal::semaphore(wrapped::create(counting_tag(), max, desired))
     {}
 };
 
@@ -86,7 +103,7 @@ class counting_semaphore<1, false> : public internal::semaphore
 {
 public:
     counting_semaphore() :
-        internal::semaphore(xSemaphoreCreateBinary())
+        internal::semaphore(create(binary_tag()))
     {}
 };
 
@@ -99,7 +116,7 @@ class counting_semaphore<max, true> : public internal::semaphore
 public:
     counting_semaphore(unsigned desired = 0) :
         internal::semaphore(
-            xSemaphoreCreateCountingStatic(max, desired, &storage))
+            wrapped::create(counting_tag(), max, desired, &storage))
     {}
 };
 

@@ -27,9 +27,37 @@ void test_lock_guard()
 
 #ifdef ESTD_OS_FREERTOS
 
+static estd::freertos::wrapper::semaphore sync_sem;
+static int counter;
+
+template <bool is_static>
+static void freertos_mutex_looper(estd::freertos::mutex<is_static>& m, int* counter, bool increment)
+{
+    for(int i = 0; i < 50; ++i)
+    {
+        m.lock();
+
+        if(increment)
+            ++(*counter);
+        else
+            --(*counter);
+
+        m.unlock();
+    }
+}
+
 template <bool is_static>
 static void test_freertos_mutex_task(void* p)
 {
+    sync_sem.take(portMAX_DELAY);   // signal that we have started
+
+    freertos_mutex_looper(
+        * (estd::freertos::mutex<is_static>*) p,
+        &counter,
+        true);
+
+    sync_sem.give();                // signal that we have finished
+
     vTaskDelete(NULL);
 }
 
@@ -41,6 +69,8 @@ static void test_freertos_mutex_iteration(estd::freertos::mutex<is_static>& m)
 
     BaseType_t xReturned;
     TaskHandle_t xHandle = NULL;
+
+    counter = 0;
 
     m.lock();
     TEST_ASSERT_TRUE(m.unlock());
@@ -54,6 +84,14 @@ static void test_freertos_mutex_iteration(estd::freertos::mutex<is_static>& m)
         &xHandle);
 
     TEST_ASSERT_EQUAL(pdPASS, xReturned);
+    
+    sync_sem.give();    // wait till test_freertos_mutex starts
+    
+    freertos_mutex_looper(m, &counter, false);
+
+    sync_sem.take(portMAX_DELAY);   // wait till test_freertos_mutex ends
+
+    TEST_ASSERT_EQUAL(0, counter);
 }
 
 template <bool is_static>
@@ -137,11 +175,15 @@ static void test_freertos_thread()
 
 static void test_freertos()
 {
+    sync_sem.create_binary();
+
     RUN_TEST(test_freertos_mutex);
     RUN_TEST(test_freertos_mutex_static);
     RUN_TEST(test_freertos_recursive_mutex);
     RUN_TEST(test_freertos_semaphore);
     RUN_TEST(test_freertos_thread);
+
+    sync_sem.free();
 }
 #endif
 

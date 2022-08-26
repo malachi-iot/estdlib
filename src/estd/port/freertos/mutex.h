@@ -95,8 +95,8 @@ protected:
 public:
     mutex(bool binary = false) :
         base_type(binary ?
-            xSemaphoreCreateBinaryStatic(&storage) : 
-            xSemaphoreCreateMutexStatic(&storage))
+            wrapped::create(binary_tag(), &storage) : 
+            wrapped::create(mutex_tag(), &storage))
     {
     }
 };
