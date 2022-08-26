@@ -27,11 +27,34 @@ void test_lock_guard()
 
 #ifdef ESTD_OS_FREERTOS
 
+namespace freertos {
+
 static estd::freertos::wrapper::semaphore sync_sem;
 static int counter;
 
+static TaskHandle_t create_task(TaskFunction_t taskCode,
+    const char* name,
+    void* parameters)
+{
+    TaskHandle_t handle;
+
+    BaseType_t xReturned = xTaskCreate(
+        taskCode,
+        "test_mutex",
+        2048,
+        parameters,
+        4,      // DEBT: Need a more clear or configurable priority
+        &handle);
+
+    TEST_ASSERT_EQUAL(pdPASS, xReturned);
+
+    // Since we abort if fail, we can return handle in a
+    // more basic way
+    return handle;
+}
+
 template <bool is_static>
-static void freertos_mutex_looper(estd::freertos::mutex<is_static>& m, int* counter, bool increment)
+static void mutex_looper(estd::freertos::mutex<is_static>& m, int* counter, bool increment)
 {
     for(int i = 0; i < 50; ++i)
     {
@@ -47,11 +70,11 @@ static void freertos_mutex_looper(estd::freertos::mutex<is_static>& m, int* coun
 }
 
 template <bool is_static>
-static void test_freertos_mutex_task(void* p)
+static void test_mutex_task(void* p)
 {
     sync_sem.take(portMAX_DELAY);   // signal that we have started
 
-    freertos_mutex_looper(
+    mutex_looper(
         * (estd::freertos::mutex<is_static>*) p,
         &counter,
         true);
@@ -63,51 +86,64 @@ static void test_freertos_mutex_task(void* p)
 
 // FIX: Incomplete unit test
 template <bool is_static>
-static void test_freertos_mutex_iteration(estd::freertos::mutex<is_static>& m)
+static void test_mutex_iteration(estd::freertos::mutex<is_static>& m)
 {
     TEST_ASSERT_NOT_NULL(m.native_handle());
-
-    BaseType_t xReturned;
-    TaskHandle_t xHandle = NULL;
 
     counter = 0;
 
     m.lock();
     TEST_ASSERT_TRUE(m.unlock());
 
-    xReturned = xTaskCreate(
-        test_freertos_mutex_task<is_static>,
-        "test_freertos_mutex",
-        2048,
-        &m,
-        4,      // DEBT: Need a more clear or configurable priority
-        &xHandle);
-
-    TEST_ASSERT_EQUAL(pdPASS, xReturned);
+    create_task(test_mutex_task<is_static>, "test_mutex", &m);
     
-    sync_sem.give();    // wait till test_freertos_mutex starts
+    sync_sem.give();    // wait till test_mutex starts
     
-    freertos_mutex_looper(m, &counter, false);
+    mutex_looper(m, &counter, false);
 
-    sync_sem.take(portMAX_DELAY);   // wait till test_freertos_mutex ends
+    sync_sem.take(portMAX_DELAY);   // wait till test_mutex ends
 
     TEST_ASSERT_EQUAL(0, counter);
 }
 
 template <bool is_static>
-static void test_freertos_mutex_iteration(estd::freertos::recursive_mutex<is_static>& m)
+static void test_mutex_iteration(estd::freertos::recursive_mutex<is_static>& m)
 {
     TEST_ASSERT_NOT_NULL(m.native_handle());
 }
 
+static void test_semaphote_task(void* p)
+{
+    sync_sem.take(portMAX_DELAY);   // signal that we have started
 
-static void test_freertos_mutex()
+    sync_sem.give();                // signal that we have finished
+
+    vTaskDelete(NULL);
+}
+
+
+static void test_semaphore_iteration(estd::freertos::internal::semaphore& s)
+{
+    TEST_ASSERT_NOT_NULL(s.native_handle());
+
+    s.release();
+    s.acquire();
+
+    create_task(test_semaphote_task, "test_semaphore", &s);
+
+    sync_sem.give();    // wait till test_semaphote starts
+
+    sync_sem.take(portMAX_DELAY);
+}
+
+
+static void test_mutex()
 {
     // Dynamic (regular) mutex
     {
         estd::freertos::mutex<false> m;
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 
     // FIX: The binary flavor causes a lockup
@@ -117,17 +153,17 @@ static void test_freertos_mutex()
     {
         estd::freertos::mutex<false> m(true);
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 }
 
-static void test_freertos_mutex_static()
+static void test_mutex_static()
 {
     // Static mutex
     {
         estd::freertos::mutex<true> m;
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 
     return;
@@ -136,54 +172,71 @@ static void test_freertos_mutex_static()
     {
         estd::freertos::mutex<true> m(true);
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 }
 
-static void test_freertos_recursive_mutex()
+static void test_recursive_mutex()
 {
     {
         estd::freertos::recursive_mutex<true> m;
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 
     {
         estd::freertos::recursive_mutex<false> m;
 
-        test_freertos_mutex_iteration(m);
+        test_mutex_iteration(m);
     }
 }
 
 
-static void test_freertos_semaphore()
+static void test_semaphore()
 {
     {
         estd::freertos::counting_semaphore<4, true> s(0);
+
+        test_semaphore_iteration(s);
     }
 
     {
         estd::freertos::counting_semaphore<4, false> s(0);
+
+        test_semaphore_iteration(s);
+    }
+
+    {
+        estd::freertos::binary_semaphore<true> s;
+
+        test_semaphore_iteration(s);
+    }
+
+    {
+        estd::freertos::binary_semaphore<false> s;
+
+        test_semaphore_iteration(s);
     }
 }
 
-static void test_freertos_thread()
+static void test_thread()
 {
 
 }
 
+}
 
 static void test_freertos()
 {
-    sync_sem.create_binary();
+    freertos::sync_sem.create_binary();
 
-    RUN_TEST(test_freertos_mutex);
-    RUN_TEST(test_freertos_mutex_static);
-    RUN_TEST(test_freertos_recursive_mutex);
-    RUN_TEST(test_freertos_semaphore);
-    RUN_TEST(test_freertos_thread);
+    RUN_TEST(freertos::test_mutex);
+    RUN_TEST(freertos::test_mutex_static);
+    RUN_TEST(freertos::test_recursive_mutex);
+    RUN_TEST(freertos::test_semaphore);
+    RUN_TEST(freertos::test_thread);
 
-    sync_sem.free();
+    freertos::sync_sem.free();
 }
 #endif
 
