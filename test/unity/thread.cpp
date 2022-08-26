@@ -112,9 +112,17 @@ static void test_mutex_iteration(estd::freertos::recursive_mutex<is_static>& m)
     TEST_ASSERT_NOT_NULL(m.native_handle());
 }
 
+static void semaphore_tester(estd::freertos::internal::semaphore& s)
+{
+    s.release();
+    s.acquire();
+}
+
 static void test_semaphote_task(void* p)
 {
     sync_sem.take(portMAX_DELAY);   // signal that we have started
+
+    semaphore_tester(* (estd::freertos::internal::semaphore*) p);
 
     sync_sem.give();                // signal that we have finished
 
@@ -127,6 +135,7 @@ static void test_semaphore_iteration(estd::freertos::internal::semaphore& s)
     TEST_ASSERT_NOT_NULL(s.native_handle());
 
     s.release();
+    TEST_ASSERT_EQUAL(1, s.native_handle().count());
     s.acquire();
 
     create_task(test_semaphote_task, "test_semaphore", &s);
@@ -134,6 +143,8 @@ static void test_semaphore_iteration(estd::freertos::internal::semaphore& s)
     sync_sem.give();    // wait till test_semaphote starts
 
     sync_sem.take(portMAX_DELAY);
+
+    TEST_ASSERT_EQUAL(0, s.native_handle().count());
 }
 
 

@@ -2,6 +2,9 @@
 
 #include "wrapper/semphr.h"
 
+#include "fwd.h"
+#include "chrono.h"
+
 namespace estd {
     
 namespace freertos {
@@ -14,8 +17,6 @@ protected:
     typedef wrapper::semaphore wrapped;
 
     const wrapper::semaphore s;
-
-    
 
     semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
@@ -44,7 +45,7 @@ protected:
     }
 
 public:
-    typedef SemaphoreHandle_t native_handle_type;
+    typedef wrapped native_handle_type;
 
     // NOTE: C++ spec only calls for this during mutex, but for freertos
     // it's identical so we expose it at this level
@@ -65,6 +66,14 @@ public:
     bool try_acquire()
     {
         return s.take(0);
+    }
+
+    template< class Rep, class Period >
+    bool try_acquire_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
+    {
+        estd::chrono::freertos_clock::duration d = timeout_duration;
+
+        return s.take(d.count());
     }
 
     void release()
