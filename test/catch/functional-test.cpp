@@ -247,6 +247,11 @@ TEST_CASE("functional")
 
                     REQUIRE(ctx.val == 7);
                 }
+                SECTION("tag/indicator")
+                {
+                    // TODO: Try passing in a tag or an actual function pointer which
+                    // is immediately tossed out
+                }
             }
             SECTION("context_function")
             {
