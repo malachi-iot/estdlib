@@ -225,6 +225,8 @@ TEST_CASE("functional")
                     //int sz = sizeof(m.f);
                     REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
 
+                    // NOTE: In this case we actually are using 'm' to copy
+                    // into f and technically m storage is not required
                     estd::internal::context_function<int(int)> f(m);
 
                     f(5);
@@ -237,6 +239,8 @@ TEST_CASE("functional")
                         ContextTest, &ContextTest::add2>
                         m(&ctx);
 
+                    // NOTE: In this case we actually are using 'm' to copy
+                    // into f and technically m storage is not required
                     estd::internal::context_function<void(void)> f(m);
 
                     f();
