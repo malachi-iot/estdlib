@@ -351,16 +351,22 @@ public:
         estd::tuple<T, TContexts...> contexts;
 
     public:
-        model(T&& t) :
+        model(T&& t, TContexts&&... contexts) :
             base_type::model_base(static_cast<typename base_type::model_base::function_type>(&model::exec)),
-            contexts(std::move(t))
+            contexts(std::move(t), std::forward<TContexts>(contexts)...)
         {
 
         }
 
+        // DEBT: Doesn't yet handle void return
         TResult exec(TArgs...args)
         {
-            return f(std::forward<TArgs>(args)..., get<0>(contexts));
+            return estd::apply([&](T t, TContexts...c)
+            {
+                return f(args..., t, c...);
+            },
+            contexts);
+            //return f(std::forward<TArgs>(args)..., get<0>(contexts));
         }
     };
 };

@@ -482,6 +482,8 @@ TEST_CASE("functional")
         estd::detail::function<int(int)> f(&m);
 
         f(5);
+
+        REQUIRE(c.val == 5);
     }
 }
 
