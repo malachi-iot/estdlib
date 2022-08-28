@@ -334,6 +334,7 @@ public:
     }
 };
 
+// Like a dumbed-down bind
 template <typename TResult, typename... TArgs, typename... TContexts>
 class contextify_function<TResult(TArgs...), TContexts...> :
     public detail::function<TResult(TArgs...)>
@@ -344,10 +345,23 @@ public:
     template <class T>
     using function_type = TResult (*)(TArgs..., T, TContexts...);
 
-    template <class T, function_type<T> >
-    class model : public base_type::model
+    template <class T, function_type<T> f>
+    class model : public base_type::model_base
     {
+        estd::tuple<T, TContexts...> contexts;
 
+    public:
+        model(T&& t) :
+            base_type::model_base(static_cast<typename base_type::model_base::function_type>(&model::exec)),
+            contexts(std::move(t))
+        {
+
+        }
+
+        TResult exec(TArgs...args)
+        {
+            return f(std::forward<TArgs>(args)..., get<0>(contexts));
+        }
     };
 };
 

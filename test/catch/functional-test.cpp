@@ -54,6 +54,11 @@ struct ContextTest
     // NOTE: Cannot name 'add' since estd::experimental::context_function is unable to resolve
     // overloads
     void add2() { val += 7; }
+
+    static int add3(int v, ContextTest* c)
+    {
+        return c->add(v);
+    }
 };
 
 template <typename T>
@@ -465,6 +470,18 @@ TEST_CASE("functional")
             // Not ready
             //REQUIRE(estd::is_same<traits::resullt_type, int>::value);
         }
+    }
+    SECTION("thisify")
+    {
+
+    }
+    SECTION("contextify")
+    {
+        ContextTest c;
+        estd::internal::contextify_function<int(int)>::model<ContextTest*, &ContextTest::add3> m(&c);
+        estd::detail::function<int(int)> f(&m);
+
+        f(5);
     }
 }
 
