@@ -227,7 +227,7 @@ TEST_CASE("functional")
 
                     // NOTE: In this case we actually are using 'm' to copy
                     // into f and technically m storage is not required
-                    estd::internal::context_function<int(int)> f(m);
+                    estd::internal::thisify_function<int(int)> f(m);
 
                     f(5);
 
@@ -241,7 +241,7 @@ TEST_CASE("functional")
 
                     // NOTE: In this case we actually are using 'm' to copy
                     // into f and technically m storage is not required
-                    estd::internal::context_function<void(void)> f(m);
+                    estd::internal::thisify_function<void(void)> f(m);
 
                     f();
 

@@ -255,9 +255,9 @@ class context_function;
 
 template <typename TResult, typename... TArgs, class TContext, TResult (TContext::*f)(TArgs...)>
 class context_function<TResult(TContext::*)(TArgs...), f> :
-    public internal::context_function<TResult(TArgs...)>
+    public internal::thisify_function<TResult(TArgs...)>
 {
-    typedef internal::context_function<TResult(TArgs...)> base_type;
+    typedef internal::thisify_function<TResult(TArgs...)> base_type;
 
     typedef typename base_type::template model<TContext, f> model_type;
 

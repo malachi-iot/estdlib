@@ -33,7 +33,10 @@ namespace internal {
 struct function_base_tag {};
 
 template <typename F>
-class context_function;
+class thisify_function;
+
+template <typename F, typename ...TContexts>
+class contextify_function;
 
 }
 

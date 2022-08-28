@@ -253,7 +253,7 @@ namespace internal {
 // DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
 template <typename TResult, typename... TArgs>
-class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
+class thisify_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
 {
     typedef detail::function<TResult(TArgs...)> base_type;
     typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
@@ -320,7 +320,7 @@ public:
     } */
 
     template <class T, function_type<T> f>
-    constexpr context_function(const model<T, f>& m) :
+    constexpr thisify_function(const model<T, f>& m) :
         base_type(&m_),
         m_(m)
     {
@@ -328,10 +328,27 @@ public:
 
     // UNUSED, and you're probably better off using inline_function
     template <class T, function_type<T> f>
-    static context_function create(T* foreign_this)
+    static thisify_function create(T* foreign_this)
     {
-        return context_function(model<T, f>(foreign_this));
+        return thisify_function(model<T, f>(foreign_this));
     }
+};
+
+template <typename TResult, typename... TArgs, typename... TContexts>
+class contextify_function<TResult(TArgs...), TContexts...> :
+    public detail::function<TResult(TArgs...)>
+{
+    typedef detail::function<TResult(TArgs...)> base_type;
+
+public:
+    template <class T>
+    using function_type = TResult (*)(TArgs..., T, TContexts...);
+
+    template <class T, function_type<T> >
+    class model : public base_type::model
+    {
+
+    };
 };
 
 // DEBT: Move this to 'impl' namespace
