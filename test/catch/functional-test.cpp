@@ -217,47 +217,6 @@ TEST_CASE("functional")
 
                 delete dynamic_f;
             }
-            SECTION("internal::context_function")
-            {
-                ContextTest ctx;
-
-                SECTION("int(int)")
-                {
-                    estd::internal::impl::method_model<int(int),
-                        ContextTest, &ContextTest::add>
-                        m(&ctx);
-
-                    //int sz = sizeof(m.f);
-                    REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
-
-                    // NOTE: In this case we actually are using 'm' to copy
-                    // into f and technically m storage is not required
-                    estd::internal::thisify_function<int(int)> f(m);
-
-                    f(5);
-
-                    REQUIRE(ctx.val == 5);
-                }
-                SECTION("void(void)")
-                {
-                    estd::internal::impl::method_model<void(void),
-                        ContextTest, &ContextTest::add2>
-                        m(&ctx);
-
-                    // NOTE: In this case we actually are using 'm' to copy
-                    // into f and technically m storage is not required
-                    estd::internal::thisify_function<void(void)> f(m);
-
-                    f();
-
-                    REQUIRE(ctx.val == 7);
-                }
-                SECTION("tag/indicator")
-                {
-                    // TODO: Try passing in a tag or an actual function pointer which
-                    // is immediately tossed out
-                }
-            }
             SECTION("context_function")
             {
                 ContextTest ctx;
@@ -473,7 +432,44 @@ TEST_CASE("functional")
     }
     SECTION("thisify")
     {
+        ContextTest ctx;
 
+        SECTION("int(int)")
+        {
+            estd::internal::impl::method_model<int(int),
+                ContextTest, &ContextTest::add>
+                m(&ctx);
+
+            //int sz = sizeof(m.f);
+            REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
+
+            // NOTE: In this case we actually are using 'm' to copy
+            // into f and technically m storage is not required
+            estd::internal::thisify_function<int(int)> f(m);
+
+            f(5);
+
+            REQUIRE(ctx.val == 5);
+        }
+        SECTION("void(void)")
+        {
+            estd::internal::impl::method_model<void(void),
+                ContextTest, &ContextTest::add2>
+                m(&ctx);
+
+            // NOTE: In this case we actually are using 'm' to copy
+            // into f and technically m storage is not required
+            estd::internal::thisify_function<void(void)> f(m);
+
+            f();
+
+            REQUIRE(ctx.val == 7);
+        }
+        SECTION("tag/indicator")
+        {
+            // TODO: Try passing in a tag or an actual function pointer which
+            // is immediately tossed out
+        }
     }
     SECTION("contextify")
     {
