@@ -2,6 +2,7 @@
 
 #include "../../utility.h"
 #include "../fwd/functional.h"
+#include <estd/tuple.h>
 
 namespace estd {
 
@@ -168,14 +169,14 @@ struct function_virtual<TResult(TArgs...)>
 
 namespace internal { namespace impl {
 
-template <typename F>
+template <typename F, typename... TContexts>
 struct function_context_provider;
 
 // Adapting from 'context_function'
 // DEBT: provider may want to consider an additional level of specialization on
 // the impl type.  Right now it's hard wired to fnptr1
-template <typename TResult, typename... TArgs>
-struct function_context_provider<TResult(TArgs...)>
+template <typename TResult, typename... TArgs, typename... TContexts>
+struct function_context_provider<TResult(TArgs...), TContexts...>
 {
 protected:
     typedef detail::function<TResult(TArgs...)> function;
@@ -183,11 +184,14 @@ protected:
 
 public:
     template <class T>
-    using function_type = TResult (T::*)(TArgs...);
+    using function_type = TResult (T::*)(TArgs..., TContexts...);
 
     template <class T, function_type<T> f>
-    struct model : model_base
+    struct model : model_base,
+        estd::tuple<TContexts...>
     {
+        typedef estd::tuple<TContexts...> contexts_type;
+
         // DEBT: base class needs this public
     public:
         T* const foreign_this;
@@ -200,8 +204,9 @@ public:
         {}
 
     public:
-        model(T* foreign_this) :
+        model(T* foreign_this, TContexts...contexts) :
             model_base(static_cast<typename model_base::function_type>(&model::exec)),
+            contexts_type(std::forward<TContexts>(contexts)...),
             foreign_this{foreign_this}
         {
 
@@ -209,6 +214,8 @@ public:
 
         TResult exec(TArgs...args)
         {
+            // FIX: Do apply so that we can get at TContexts... also
+            
             return (foreign_this->*f)(std::forward<TArgs>(args)...);
         }
     };
