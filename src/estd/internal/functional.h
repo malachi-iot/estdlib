@@ -190,7 +190,7 @@ protected:
     model_base* m;
 
 public:
-    function() : m(NULLPTR) {}
+    function(nullptr_t = nullptr_t{}) : m(NULLPTR) {}
 
     function(model_base* m) : m(m) {}
 
@@ -258,7 +258,7 @@ class thisify_function<TResult(TArgs...)> : public detail::function<TResult(TArg
     typedef detail::function<TResult(TArgs...)> base_type;
     typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
 
-protected:
+public:
     template <class T>
     using function_type = typename provider_type::template function_type<T>;
 

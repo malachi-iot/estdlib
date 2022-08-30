@@ -436,6 +436,9 @@ TEST_CASE("functional")
 
         SECTION("int(int)")
         {
+            estd::internal::thisify_function<int(int)>::
+                model<ContextTest, &ContextTest::add> m2(&ctx);
+
             estd::internal::impl::method_model<int(int),
                 ContextTest, &ContextTest::add>
                 m(&ctx);
@@ -443,13 +446,23 @@ TEST_CASE("functional")
             //int sz = sizeof(m.f);
             REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
 
-            // NOTE: In this case we actually are using 'm' to copy
-            // into f and technically m storage is not required
-            estd::internal::thisify_function<int(int)> f(m);
+            estd::detail::function<int(int)> f(&m);
 
             f(5);
 
             REQUIRE(ctx.val == 5);
+
+            f = &m2;
+
+            REQUIRE(f);
+
+            f(2);
+
+            REQUIRE(ctx.val == 7);
+
+            f = nullptr_t{};
+
+            REQUIRE(!f);
         }
         SECTION("void(void)")
         {
