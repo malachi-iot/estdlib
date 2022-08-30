@@ -494,6 +494,24 @@ TEST_CASE("functional")
 
         REQUIRE(c.val == 5);
     }
+    SECTION("static_function")
+    {
+        int value = 0;
+
+        // As the name implies, I am not convinced this will play nice when used
+        // inside a method - how is one static F&&/model going to differentiate
+        // between multiple 'this' pointers?  Then again if the storage is a pointer
+        // to the this pointer, that may be different.  We definitely don't expect
+        // concurrency/multi thread to behave well here.
+        estd::experimental::static_function<int(int)> f([&](int v)
+        {
+            return value += v;
+        });
+
+        f(5);
+
+        REQUIRE(value == 5);
+    }
 }
 
 #endif
