@@ -20,6 +20,14 @@ int do_something(const char* msg)
     return -1;
 }
 
+template <typename F>
+void do_something_inspector(F&&)
+{
+    typedef estd::experimental::function_traits<F> traits;
+
+    REQUIRE(estd::is_same<typename traits::result_type, int>::value);
+}
+
 using namespace estd;
 
 // temporarily switching this on or off here as I build out experimental pre C++03 tuple
@@ -46,6 +54,11 @@ struct ContextTest
     // NOTE: Cannot name 'add' since estd::experimental::context_function is unable to resolve
     // overloads
     void add2() { val += 7; }
+
+    static int add3(int v, ContextTest* c)
+    {
+        return c->add(v);
+    }
 };
 
 template <typename T>
@@ -155,7 +168,7 @@ TEST_CASE("functional")
                 f2(&_dest, 1);
                 REQUIRE(_dest == 1);
             }
-            SECTION("make_inline")
+            SECTION("make_inline (deprecated)")
             {
                 auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
 
@@ -203,38 +216,6 @@ TEST_CASE("functional")
                 }
 
                 delete dynamic_f;
-            }
-            SECTION("internal::context_function")
-            {
-                ContextTest ctx;
-
-                SECTION("int(int)")
-                {
-                    estd::internal::impl::method_model<int(int),
-                        ContextTest, &ContextTest::add>
-                        m(&ctx);
-
-                    //int sz = sizeof(m.f);
-                    REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
-
-                    estd::internal::context_function<int(int)> f(m);
-
-                    f(5);
-
-                    REQUIRE(ctx.val == 5);
-                }
-                SECTION("void(void)")
-                {
-                    estd::internal::impl::method_model<void(void),
-                        ContextTest, &ContextTest::add2>
-                        m(&ctx);
-
-                    estd::internal::context_function<void(void)> f(m);
-
-                    f();
-
-                    REQUIRE(ctx.val == 7);
-                }
             }
             SECTION("context_function")
             {
@@ -314,6 +295,20 @@ TEST_CASE("functional")
                 f(5);
 
                 REQUIRE(m.counter == 5);
+            }
+            SECTION("fnptr1 (default)")
+            {
+                //estd::detail::impl::function_fnptr2<void(int)>::
+                int value = 0;
+
+                auto m = estd::internal::make_model<void(int)>(
+                    [&](int v) { value += v; });
+
+                estd::detail::function<void(int)> f(&m);
+
+                f(5);
+
+                REQUIRE(value == 5);
             }
             SECTION("fnptr2")
             {
@@ -409,6 +404,113 @@ TEST_CASE("functional")
             p3.test2(5);
             REQUIRE(estd::is_same<decltype(type1::value2), float>::value);
         }
+    }
+    SECTION("function_traits")
+    {
+        using namespace estd::experimental;
+
+        SECTION("direct")
+        {
+            typedef function_traits<decltype(do_something)> traits;
+
+            REQUIRE(estd::is_same<traits::arg_t<0>, const char*>::value);
+            REQUIRE(estd::is_same<traits::result_type, int>::value);
+        }
+        SECTION("functor")
+        {
+            do_something_inspector(do_something);
+        }
+        SECTION("lambda")
+        {
+            auto l = [](int v) { return v + 5; };
+
+            typedef function_traits<decltype(l)> traits;
+
+            // Not ready
+            //REQUIRE(estd::is_same<traits::resullt_type, int>::value);
+        }
+    }
+    SECTION("thisify")
+    {
+        ContextTest ctx;
+
+        SECTION("int(int)")
+        {
+            estd::internal::thisify_function<int(int)>::
+                model<ContextTest, &ContextTest::add> m2(&ctx);
+
+            estd::internal::impl::method_model<int(int),
+                ContextTest, &ContextTest::add>
+                m(&ctx);
+
+            //int sz = sizeof(m.f);
+            REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
+
+            estd::detail::function<int(int)> f(&m);
+
+            f(5);
+
+            REQUIRE(ctx.val == 5);
+
+            f = &m2;
+
+            REQUIRE(f);
+
+            f(2);
+
+            REQUIRE(ctx.val == 7);
+
+            f = nullptr_t{};
+
+            REQUIRE(!f);
+        }
+        SECTION("void(void)")
+        {
+            estd::internal::impl::method_model<void(void),
+                ContextTest, &ContextTest::add2>
+                m(&ctx);
+
+            // NOTE: In this case we actually are using 'm' to copy
+            // into f and technically m storage is not required
+            estd::internal::thisify_function<void(void)> f(m);
+
+            f();
+
+            REQUIRE(ctx.val == 7);
+        }
+        SECTION("tag/indicator")
+        {
+            // TODO: Try passing in a tag or an actual function pointer which
+            // is immediately tossed out
+        }
+    }
+    SECTION("contextify")
+    {
+        ContextTest c;
+        estd::internal::contextify_function<int(int)>::model<ContextTest*, &ContextTest::add3> m(&c);
+        estd::detail::function<int(int)> f(&m);
+
+        f(5);
+
+        REQUIRE(c.val == 5);
+    }
+    SECTION("static_function")
+    {
+        int value = 0;
+
+        // As the name implies, I am not convinced this will play nice when used
+        // inside a method - how is one static F&&/model going to differentiate
+        // between multiple 'this' pointers?  Then again if the storage is a pointer
+        // to the this pointer, that may be different.  We definitely don't expect
+        // concurrency/multi thread to behave well here.
+        estd::experimental::static_function<int(int)> f([&](int v)
+        {
+            return value += v;
+        });
+
+        f(5);
+
+        REQUIRE(value == 5);
     }
 }
 

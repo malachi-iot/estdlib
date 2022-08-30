@@ -8,6 +8,7 @@
 #include "fwd/functional.h"
 #include "impl/functional.h"
 #include "../type_traits.h"
+#include "../tuple.h"
 
 namespace estd {
 
@@ -108,6 +109,8 @@ public:
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
 // Adapted from
 // https://stackoverflow.com/questions/9065081/how-do-i-get-the-argument-types-of-a-function-pointer-in-a-variadic-template-cla
+// Additional guidance from
+// https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda/7943765#7943765
 template<typename T>
 struct function_traits;
 
@@ -124,15 +127,25 @@ struct function_traits<R(Args...)>
     template <size_t i>
     struct arg
     {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+        typedef typename estd::tuple_element<i, estd::tuple<Args...>>::type type;
     };
 
     template <size_t i>
     using arg_t = typename arg<i>::type;
+
+    using tuple = estd::tuple<Args...>;
 };
 
 template<typename R, typename ...Args>
 struct function_traits<estd::detail::function<R(Args...)> > :
+    function_traits<R(Args...)>
+{
+
+};
+
+// This one works well for functors from regular functions
+template<typename R, typename ...Args>
+struct function_traits<R (&)(Args...)> :
     function_traits<R(Args...)>
 {
 
@@ -146,7 +159,6 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
 {
     typedef T this_type;
 };
-
 
 #endif
 
@@ -178,7 +190,7 @@ protected:
     model_base* m;
 
 public:
-    function() : m(NULLPTR) {}
+    function(nullptr_t = nullptr_t{}) : m(NULLPTR) {}
 
     function(model_base* m) : m(m) {}
 
@@ -211,9 +223,19 @@ public:
 
     // See above 'model' CTAD comments
     template <typename F>
-    inline static model<F> make_inline(F&& f)
+    inline static model<F> make_model(F&& f)
     {
         return model<F>(std::move(f));
+    }
+
+#if __cplusplus >= 201402L
+    [[deprecated("Use make_model instead")]]
+#endif
+    // See above 'model' CTAD comments
+    template <typename F>
+    inline static model<F> make_inline(F&& f)
+    {
+        return make_model(std::move(f));
     }
 
     // EXPERIMENTAL
@@ -231,12 +253,12 @@ namespace internal {
 // DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
 template <typename TResult, typename... TArgs>
-class context_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
+class thisify_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
 {
     typedef detail::function<TResult(TArgs...)> base_type;
     typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
 
-protected:
+public:
     template <class T>
     using function_type = typename provider_type::template function_type<T>;
 
@@ -298,7 +320,7 @@ public:
     } */
 
     template <class T, function_type<T> f>
-    constexpr context_function(const model<T, f>& m) :
+    constexpr thisify_function(const model<T, f>& m) :
         base_type(&m_),
         m_(m)
     {
@@ -306,12 +328,63 @@ public:
 
     // UNUSED, and you're probably better off using inline_function
     template <class T, function_type<T> f>
-    static context_function create(T* foreign_this)
+    static thisify_function create(T* foreign_this)
     {
-        return context_function(model<T, f>(foreign_this));
+        return thisify_function(model<T, f>(foreign_this));
     }
 };
 
+// Like a dumbed-down bind
+template <typename TResult, typename... TArgs, typename... TContexts>
+class contextify_function<TResult(TArgs...), TContexts...> :
+    public detail::function<TResult(TArgs...)>
+{
+    typedef detail::function<TResult(TArgs...)> base_type;
+
+public:
+    template <class T>
+    using function_type = TResult (*)(TArgs..., T, TContexts...);
+
+    template <class T, function_type<T> f>
+    class model : public base_type::model_base
+    {
+        estd::tuple<T, TContexts...> contexts;
+
+    public:
+        model(T&& t, TContexts&&... contexts) :
+            base_type::model_base(static_cast<typename base_type::model_base::function_type>(&model::exec)),
+            contexts(std::move(t), std::forward<TContexts>(contexts)...)
+        {
+
+        }
+
+        // DEBT: Doesn't yet handle void return
+        TResult exec(TArgs...args)
+        {
+            return estd::apply([&](T t, TContexts...c)
+            {
+                return f(args..., t, c...);
+            },
+            contexts);
+            //return f(std::forward<TArgs>(args)..., get<0>(contexts));
+        }
+    };
+};
+
+// DEBT: Move this to 'impl' namespace
+template <class TImpl, class F>
+inline typename TImpl::template model<F> make_model_impl(F&& f)
+{
+    return typename TImpl::template model<F>(std::move(f));
+}
+
+// DEBT: Hard wired to detail::impl::function_default.  Probably OK as long as we
+// maintain a separate explicit impl flavor
+template <class TSignature, class F>
+inline typename detail::impl::function_default<TSignature>::template model<F> make_model(F&& f)
+{
+    return make_model_impl<detail::impl::function_default<TSignature> >(std::move(f));
+}
 
 }
 
