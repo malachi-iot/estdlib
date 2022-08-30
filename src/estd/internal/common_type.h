@@ -67,14 +67,6 @@ template< class... T >
 using common_type_t = typename common_type<T...>::type;
 #endif
 
-#else  // FEATURE_CPP_VARIADIC
-
-// C++98 mode currently only implemented for chrono specialization
-
-template <class T1 = void, class T2 = void, class T3 = void, class T4 = void>
-struct common_type;
-
-
 #endif // FEATURE_CPP_VARIADIC
 }
 

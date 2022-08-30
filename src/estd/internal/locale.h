@@ -11,12 +11,6 @@ struct locale_id
     internal::encodings::values encoding;
 };
 
-#if __cpp_constexpr
-#define ESTD_CPP_CONSTEXPR_RET constexpr
-#else
-#define ESTD_CPP_CONSTEXPR_RET inline
-#endif
-
 // locale_names generally correspond to what we see in Debian
 
 template <locale_code::values locale_code, internal::encodings::values encoding>

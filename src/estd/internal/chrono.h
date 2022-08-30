@@ -19,7 +19,7 @@ template <class TClock>
 struct clock_traits
 {
     template <class T>
-    constexpr static T adjust_epoch(T t) { return t; }
+    ESTD_CPP_CONSTEXPR_RET static T adjust_epoch(T t) { return t; }
 };
 
 // Use this to turn on incomplete estd::chrono support namespace

@@ -149,6 +149,7 @@ public:
         std::make_heap(c.begin(), c.end(), Compare());
     }
 
+#ifdef __cpp_rvalue_references
     // EXPERIMENTAL
     template <class F>
     bool erase2(F&& f)
@@ -160,6 +161,7 @@ public:
         erase(*i);
         return true;
     }
+#endif
 };
 
 

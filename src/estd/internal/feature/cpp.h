@@ -6,7 +6,7 @@
 // http://en.cppreference.com/w/cpp/experimental
 #if __cplusplus >= 201103L
 #define FEATURE_CPP_AUTO
-#define FEATURE_CPP_ALIASTEMPLATE
+#define FEATURE_CPP_ALIASTEMPLATE   // 'using' keyword in conjunction with templates
 #define FEATURE_CPP_ALIGN
 #define FEATURE_CPP_CONSTEXPR
 #define FEATURE_CPP_DECLTYPE
@@ -139,3 +139,10 @@
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
 #define FEATURE_PRAGMA_PUSH_MACRO
 #endif
+
+#if __cpp_constexpr
+#define ESTD_CPP_CONSTEXPR_RET constexpr
+#else
+#define ESTD_CPP_CONSTEXPR_RET inline
+#endif
+

@@ -13,5 +13,13 @@ struct common_type
 {
 };
 
+#else
+
+// NOTE: C++98 mode currently only implemented for chrono specialization
+
+template <class T1 = void, class T2 = void, class T3 = void, class T4 = void>
+struct common_type;
+
+
 #endif
 }

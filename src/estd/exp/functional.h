@@ -13,7 +13,7 @@ namespace estd { namespace experimental {
 template <typename F>
 class static_function;
 
-
+#ifdef __cpp_variadic_templates
 template <typename TResult, typename... TArgs>
 class static_function<TResult(TArgs...)> :
     public detail::function<TResult(TArgs...)>
@@ -29,6 +29,7 @@ public:
         base_type::m = &m;
     }
 };
+#endif
 
 
 }}
