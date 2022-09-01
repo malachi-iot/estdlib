@@ -25,6 +25,12 @@ TEST_CASE("buffers")
             REQUIRE(sizeof(b) == sizeof(uint8_t*));
         }
     }
+    SECTION("empty/default constructed")
+    {
+        estd::span<char> s;
+
+        REQUIRE(s.data() == NULLPTR);
+    }
     SECTION("A")
     {
         estd::span<uint8_t> b(estd::test::octet_data);

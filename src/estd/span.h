@@ -31,18 +31,21 @@ public:
     typedef typename base_t::size_type index_type;
     typedef typename estd::remove_cv<T>::type value_type;
 
-    CONSTEXPR index_type size_bytes() const
+    ESTD_CPP_CONSTEXPR_RET index_type size_bytes() const
     { return base_t::size() * sizeof(element_type); }
 
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    span(pointer data, index_type count) :
+    // DEBT:
+    // "This overload participates in overload resolution only if extent == 0 || extent == std::dynamic_extent."
+    ESTD_CPP_CONSTEXPR_RET span() :
+        base_t(NULLPTR, 0) {}
+
+    ESTD_CPP_CONSTEXPR_RET span(pointer data, index_type count) :
             base_t(data, count) {}
 
     // ExtendLocal needed because SFINAE function selection needs that
     // fluidity
     // dynamic flavor
+    // DEBT: add 'explicit'
 #ifdef FEATURE_CPP_DEFAULT_TARGS
     template <size_t N, ptrdiff_t ExtentLocal = Extent,
               class ExtentOnly = typename enable_if<ExtentLocal == -1>::type>
