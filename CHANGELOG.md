@@ -9,10 +9,18 @@ v 0.X.X - XXXXX22
     * aliases of above to `estd::mutex` and `estd::counting_semaphore`
 * Added low level variant of `std::function`: `estd::detail::function`
 
+## Quality Updates & Bug Fixes
+
+* estd::span now has default constructor
+* CMake project name now `estd` rather than `estd_lib`
+    * The latter still exists as an alias for legacy compatibility
+    * Added also `malachi-iot::estd` alias in case of collisions
+
 ## Known Issues & Limitations
 
 * FreeRTOS support:
     * `estd::freertos::recursive_mutex` not well tested
+    * `estd::freertos::mutex` binary mode is confusing and likely will be removed.  Better to use `counting_semaphore`
 
 v 0.3.3 - 16AUG22
 
