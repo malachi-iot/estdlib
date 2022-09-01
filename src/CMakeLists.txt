@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(estd VERSION 0.3.2 LANGUAGES CXX)
+project(estd VERSION 0.3.3 LANGUAGES CXX)
 
 set(SOURCE_FILES
         dummy.cpp
@@ -154,9 +154,11 @@ set(SOURCE_FILES
         estd/exp/streambuf-traits.h
         estd/exp/memory_resource.h)
 
-add_library(estd_lib ${SOURCE_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(estd_lib ALIAS ${PROJECT_NAME})
+add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 
-target_include_directories(estd_lib PUBLIC .)
+target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_compile_options(estd_lib PRIVATE -Wall -Werror=return-type)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 

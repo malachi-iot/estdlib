@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.1)
 
-project("estdlib-unit-tests")
+project("estd-unit-tests")
 
 set(CMAKE_CXX_STANDARD 11)
 
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
-set(ESTDLIB_DIR ../../src)
+set(ESTD_DIR ../../src)
 
-add_subdirectory(${ESTDLIB_DIR} estdlib)
+add_subdirectory(${ESTD_DIR} estdlib)
 
 add_executable(${PROJECT_NAME} "main.cpp"
     algorithm-test.cpp
@@ -54,4 +54,4 @@ endif()
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
 
-target_link_libraries(${PROJECT_NAME} estd_lib)
+target_link_libraries(${PROJECT_NAME} estd)
