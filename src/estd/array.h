@@ -246,6 +246,12 @@ public:
 
     }
 #endif
+
+
+    void fill(const T& value)
+    {
+        estd::fill(base_t::begin(), size(), value);
+    }
 };
 
 
@@ -288,7 +294,7 @@ public:
     CONSTEXPR size_type size() const { return N; }
 };
 
-
+// DEBT: to_array is the preferred API
 template <class T, ptrdiff_t N>
 estd::layer2::array<T, N> make_array(T (&a)[N])
 {
@@ -301,6 +307,7 @@ estd::layer2::array<T, N> make_array(T (&a)[N])
 
 namespace layer3 {
 
+// DEBT: Phase this out in lieu of estd::span, or keep it and derive directly from estd::span
 template<
     class T,
     typename size_t = std::size_t
@@ -429,4 +436,15 @@ public:
 
 
 #endif
+
+template <class T, size_t N>
+inline array<typename estd::remove_cv<T>::type, N> to_array(T (&a)[N])
+{
+    array<typename estd::remove_cv<T>::type, N> array;
+
+    estd::copy_n(a, N, array.begin());
+
+    return array;
+}
+
 }

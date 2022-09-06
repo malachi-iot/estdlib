@@ -9,6 +9,7 @@
 using namespace estd;
 
 static int static_values[] = { 1, 2, 3, 4 };
+static const uint8_t static_const_values[] = { 0x12, 0x34, 0x56, 0x78 };
 
 
 TEST_CASE("array/vector tests")
@@ -116,6 +117,25 @@ TEST_CASE("array/vector tests")
             REQUIRE(moved_array1[4].val == 4);
         }
 
+    }
+    SECTION("initialization")
+    {
+        SECTION("standard")
+        {
+            array<int, 4> a = to_array(static_values);
+
+            bool result = estd::equal(a.begin(), a.end(), static_values);
+
+            REQUIRE(result);
+        }
+        SECTION("from const")
+        {
+            array<uint8_t, 4> a = to_array(static_const_values);
+
+            bool result = estd::equal(a.begin(), a.end(), static_const_values);
+
+            REQUIRE(result);
+        }
     }
     SECTION("Experimental layer0 array")
     {
