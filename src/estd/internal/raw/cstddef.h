@@ -98,6 +98,15 @@ byte& operator|=(byte& l, byte r) NOEXCEPT
 
 #ifdef FEATURE_STD_CSTDDEF
 #include <cstddef>
+
+#if __cplusplus < 201103L
+namespace std {
+
+typedef void* nullptr_t;
+
+}
+#endif
+
 #else
 #include <stddef.h>
 
@@ -117,8 +126,6 @@ namespace estd {
 
 typedef std::size_t size_t;
 typedef std::ptrdiff_t ptrdiff_t;
-#if __cplusplus >= 201103L
 typedef std::nullptr_t nullptr_t;
-#endif
 
 }
