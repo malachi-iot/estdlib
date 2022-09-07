@@ -250,7 +250,7 @@ public:
 
     void fill(const T& value)
     {
-        estd::fill(base_t::begin(), size(), value);
+        estd::fill_n(base_t::begin(), size(), value);
     }
 };
 
