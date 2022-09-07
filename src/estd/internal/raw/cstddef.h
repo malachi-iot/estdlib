@@ -106,5 +106,19 @@ namespace std {
 typedef ::size_t size_t;
 typedef ::ptrdiff_t ptrdiff_t;
 
+// TODO: Make our own nullptr_t here, if necessary
+//typedef ::nullptr_t nullptr_t;
+
 }
 #endif
+
+
+namespace estd {
+
+typedef std::size_t size_t;
+typedef std::ptrdiff_t ptrdiff_t;
+#if __cplusplus >= 201103L
+typedef std::nullptr_t nullptr_t;
+#endif
+
+}
