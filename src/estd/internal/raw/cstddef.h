@@ -102,7 +102,11 @@ byte& operator|=(byte& l, byte r) NOEXCEPT
 #if __cplusplus < 201103L
 namespace std {
 
-typedef void* nullptr_t;
+#ifdef __GNUC__
+//typedef void* nullptr_t;
+typedef typeof(NULLPTR) nullptr_t;
+//struct nullptr_t {};
+#endif
 
 }
 #endif
