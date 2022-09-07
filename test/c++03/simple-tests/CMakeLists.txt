@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 98)
 # available, but it seems to have those defs)
 add_compile_definitions(FEATURE_STD_INTTYPES)
 
-project(simple-tests)
+project(estd-unity-tests)
 
 set(UNITY_DIR ../../../ext/Unity)
 set(ESTDLIB_DIR ../../../src)
@@ -44,5 +44,5 @@ add_executable(${PROJECT_NAME}
         ${TESTSRC}
         )
 
-target_link_libraries(${PROJECT_NAME} unity estd_lib)
+target_link_libraries(${PROJECT_NAME} unity estd)
 

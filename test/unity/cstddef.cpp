@@ -12,6 +12,12 @@ static void test_byte_shift()
 }
 
 
+static void test_nullptr_t()
+{
+    // TODO
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("cstddef tests", "[cstddef]")
 #else
@@ -19,5 +25,6 @@ void test_cstddef()
 #endif
 {
 	RUN_TEST(test_byte_shift);
+    RUN_TEST(test_nullptr_t);
 }
 
