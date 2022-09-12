@@ -177,8 +177,10 @@ public:
         typedef int difference_type;
         typedef value_type* pointer;
         typedef value_type& reference;
+        // DEBT: estd-ize this tag, aliasing ::std ones when possible
         typedef ::std::bidirectional_iterator_tag iterator_category;
 
+        // DEBT: Seems to need a const version of lock as well
         value_type& lock() { return current.lock(); }
         void unlock() { current.unlock(); }
 
