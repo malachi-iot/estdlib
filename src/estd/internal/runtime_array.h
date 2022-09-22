@@ -180,8 +180,8 @@ public:
         // DEBT: estd-ize this tag, aliasing ::std ones when possible
         typedef ::std::bidirectional_iterator_tag iterator_category;
 
-        // DEBT: Seems to need a const version of lock as well
         value_type& lock() { return current.lock(); }
+        const value_type& lock() const { return current.clock(); }
         void unlock() { current.unlock(); }
 
 
