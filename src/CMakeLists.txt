@@ -20,8 +20,8 @@ set(SOURCE_FILES
         estd/deque.h
 
         estd/exp/functional.h
-        estd/exp/memory_pool.h
-        estd/exp/memory_pool2.h
+        estd/exp/memory/memory_pool.h
+        estd/exp/memory/memory_pool2.h
         estd/exp/observer.h
         estd/exp/tmr.h
 

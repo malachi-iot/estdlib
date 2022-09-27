@@ -3,16 +3,12 @@
  */
 #pragma once
 
-#include "../array.h"
-#include "../memory.h"
-#include "../type_traits.h"
-#include "../cstdint.h"
-#include "../forward_list.h"
-#include "../algorithm.h"
-#include "../limits.h"
+#include "../base.h"
 
 // memory pools continually turn out to be kinda tricky, so numbering my attempts
 namespace estd { namespace experimental {
+
+namespace memory { namespace v1 {
 
 template <class T, std::ptrdiff_t N, std::ptrdiff_t align>
 struct typed_aligned_storage
@@ -587,5 +583,6 @@ typename TMemoryPool::value_type& make_shared(TMemoryPool& pool, TArgs&&...args)
 }
 #endif
 
+}}
 
 }}

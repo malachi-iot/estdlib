@@ -5,14 +5,14 @@
 #include "mem.h"
 #include "test-data.h"
 #include <estd/string.h>
-#include <estd/exp/memory_pool.h>
+#include <estd/exp/memory/memory_pool.h>
 #include <estd/memory.h>
 #include <estd/functional.h>
 #include "estd/streambuf.h"
 #include <estd/charconv.h>
 #include <estd/cctype.h>
 //#include <estd/locale.h>
-#include "estd/exp/memory_pool2.h"
+#include "estd/exp/memory/memory_pool2.h"
 #include "estd/exp/unique_handle.h"
 
 
@@ -198,7 +198,7 @@ TEST_CASE("experimental tests")
 
         SECTION("simple integer pool")
         {
-            typedef estd::experimental::memory_pool_1<int, 10> memory_pool_type;
+            typedef estd::experimental::memory::v1::memory_pool_1<int, 10> memory_pool_type;
             memory_pool_type pool;
 
             int* i = pool.allocate();
@@ -225,7 +225,7 @@ TEST_CASE("experimental tests")
         }
         SECTION("low level access")
         {
-            typedef memory_pool_1<int, 10> pool_type;
+            typedef memory::v1::memory_pool_1<int, 10> pool_type;
             pool_type pool;
 
             auto& item = pool.allocate_item();
@@ -265,7 +265,7 @@ TEST_CASE("experimental tests")
                     //alignas(8)
                     test1 { int val; };
 
-            typedef estd::experimental::memory_pool_1<test1, 10> memory_pool_type;
+            typedef estd::experimental::memory::v1::memory_pool_1<test1, 10> memory_pool_type;
             memory_pool_type pool;
 
             constexpr int sz = sizeof(pool);
@@ -294,7 +294,7 @@ TEST_CASE("experimental tests")
             // I see now why they passed in their Destructor type in shared_ptr constructor
             // - so instead, memory_pool_1 has s specialized behavior when it
             // encounters layer1 shared ptrs
-            memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
+            memory::v1::memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
             typedef typename decltype (pool)::value_type shared_ptr;
 
             // NOTE: pool construct will call shared_ptr constructor,
@@ -418,12 +418,12 @@ TEST_CASE("experimental tests")
         }
         SECTION("memory-pool specific make_shared")
         {
-            memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
+            memory::v1::memory_pool_1<layer1::shared_ptr<test::Dummy>, 10> pool;
             typedef typename decltype (pool)::value_type shared_ptr;
 
             // would be better to do this kind of in reverse, where make_shared can take any allocator,
             // including a memory pool
-            shared_ptr& p = experimental::make_shared(pool);
+            shared_ptr& p = experimental::memory::v1::make_shared(pool);
 
             REQUIRE(p.use_count() == 1);
             REQUIRE(pool.count_free() == 9);
@@ -436,7 +436,7 @@ TEST_CASE("experimental tests")
         {
             // almost there, just some lingering pointer vs non pointer descrepency for handling
             // '_next'
-            typedef memory_pool_ll<int, 10> pool_type;
+            typedef memory::v1::memory_pool_ll<int, 10> pool_type;
             intrusive_forward_list<pool_type::item> list;
             pool_type pool;
 
@@ -479,7 +479,7 @@ TEST_CASE("experimental tests")
             {
                 typedef array<byte, 32> value_type;
 
-                v2::memory_pool<value_type, 10, v2::pool_types::linked_list> pool;
+                memory::v2::memory_pool<value_type, 10, memory::v2::pool_types::linked_list> pool;
 
                 REQUIRE(pool.count_free() == 10);
                 value_type* v = pool.allocate();
@@ -490,7 +490,7 @@ TEST_CASE("experimental tests")
             SECTION("virtual allocator")
             {
                 constexpr int pool_size = 1024;
-                v2::virtual_memory<pool_size, 20> v;
+                memory::v2::virtual_memory<pool_size, 20> v;
                 unsigned node_counter;
 
                 SECTION("allocate 1 item")
@@ -544,7 +544,7 @@ TEST_CASE("experimental tests")
                     {
                         v.maint();
                     }
-                    while(v.state() != v2::maintenance_mode::uninitialized);
+                    while(v.state() != memory::v2::maintenance_mode::uninitialized);
 
                     REQUIRE(v.total_free(&node_counter) == pool_size);
                     //REQUIRE(node_counter == 1);

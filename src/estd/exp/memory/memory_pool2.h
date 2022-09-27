@@ -2,16 +2,13 @@
 
 #include <cstddef>
 
-#include "../internal/deduce_fixed_size.h"
-#include "../memory.h"  // for platform + raw_instance_provider
-#include "../array.h"
-#include "../algorithm.h"
+#include "../base.h"
 
 namespace estd { namespace experimental {
 
 // regular memory_pool.h seems to work well, but was done very long ago and I can't remember
 // enough about its underlying architecture to proceed comfortably.
-namespace v2 {
+namespace memory { namespace v2 {
 
 enum class pool_types
 {
@@ -384,6 +381,6 @@ struct virtual_memory
     }
 };
 
-}
+}}
 
 }}
