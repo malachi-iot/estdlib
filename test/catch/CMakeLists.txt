@@ -17,6 +17,9 @@ add_executable(${PROJECT_NAME} "main.cpp"
     c++03-test.cpp
     chrono-test.cpp
 	cstddef-test.cpp
+    experimental/memory-pool1-test.cpp
+    experimental/memory-pool2-test.cpp
+    experimental/memory-pool3-test.cpp
     experimental-test.cpp
     functional-test.cpp
     ios-test.cpp

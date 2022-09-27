@@ -15,8 +15,7 @@
 #include "estd/exp/memory/memory_pool2.h"
 #include "estd/exp/unique_handle.h"
 
-
-struct TestA {};
+using namespace estd::test;
 
 struct Test
 {
@@ -31,35 +30,6 @@ struct Test
 };
 
 TestA t;
-
-struct TestB
-{
-    int counter = 0;
-
-    int add(int val)
-    {
-        return counter += val;
-    }
-};
-
-template <class TBase>
-struct provider_test : TBase
-{
-    typedef TBase value_provider;
-    typedef typename value_provider::value_type value_type;
-
-    template <class T>
-    void do_require(const T& value)
-    {
-        const value_type& v = value_provider::value();
-
-        REQUIRE(v == value);
-    }
-
-    provider_test() {}
-
-    provider_test(int v) : value_provider (v) {}
-};
 
 int global_provider_test_value = 6;
 
