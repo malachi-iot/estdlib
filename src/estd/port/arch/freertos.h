@@ -1,13 +1,17 @@
-extern "C" {
-
+// Need to pull in FreeRTOS/task.h in order to acquire tskKERNEL_ macros
 #if ESP_PLATFORM
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #else
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <task.h>
+#ifdef __cplusplus
+}
+#endif
 #endif
 
-}
 
 #include "version.h"
 

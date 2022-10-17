@@ -15,7 +15,7 @@ extern "C" void test_task(void* pv)
         auto now_ms = chrono::milliseconds(now.time_since_epoch());
         auto now_freertos_ms = chrono::milliseconds(now_freertos.time_since_epoch());
 
-        printf("Time passed: (native)=%d / (rtos)=%d\n", 
+        printf("Time passed: (native)=%lld / (rtos)=%lld\n",
             now_ms.count(),
             now_freertos_ms.count());
     }
