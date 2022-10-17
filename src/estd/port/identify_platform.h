@@ -15,8 +15,7 @@
 // DEBT: Arduino is not mutually exclusive to FreeRTOS
 // NOTE: esp-idf doesn't define FREERTOS flag.  See below
 #elif defined(FREERTOS)
-#define ESTD_FREERTOS   // deprecated, use ESTD_OS_FREERTOS
-#define ESTD_OS_FREERTOS
+#include "arch/freertos.h"
 #elif (defined(__APPLE__) && defined(__MACH__))
 #define ESTD_OS_MACOS
 #elif (defined(__unix__) || defined(__linux__))
@@ -54,7 +53,6 @@
 #endif
 
 #if !defined(ESTD_OS_FREERTOS)
-#define ESTD_FREERTOS
 #include "arch/freertos.h"
 #endif
 
