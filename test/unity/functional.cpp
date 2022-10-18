@@ -3,11 +3,11 @@
 #if defined (FEATURE_CPP_VARIADIC)
 #include <estd/functional.h>
 
-static void test_function_base()
+static void test_detail_function()
 {
     int counter = 0;
 
-    estd::experimental::function_base<void()> fb;
+    estd::detail::function<void()> fb;
 
     auto m = fb.make_inline([&](){++counter;});
 
@@ -60,7 +60,7 @@ TEST_CASE("runtime function tests", "[functional]")
 void test_functional()
 #endif
 {
-    RUN_TEST(test_function_base);
+    RUN_TEST(test_detail_function);
 	RUN_TEST(test_inline_function);
 }
 
