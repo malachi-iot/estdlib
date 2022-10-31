@@ -48,6 +48,14 @@ protected:
     Container c;
 
 public:
+    // 'evaporated' type which means either Compare itself if empty, or
+    // a reference to Compare if not empty
+    typedef typename compare_provider_type::evaporated_type compare_type;
+
+    // EXPERIMENTAL making this public, embedded environments can benefit from the few bytes
+    // saved by not passing around pointers for more advanced compare behavior
+    inline compare_type compare() { return compare_provider_type::value(); }
+
     typedef Container container_type;
     typedef typename Container::value_type value_type;
     typedef typename Container::reference reference;
@@ -75,14 +83,14 @@ public:
     void push(const value_type& value)
     {
         c.push_back(value);
-        std::push_heap(c.begin(), c.end(), compare_provider_type::value());
+        std::push_heap(c.begin(), c.end(), compare());
     }
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     void push(value_type&& value)
     {
         c.push_back(std::move(value));
-        std::push_heap(c.begin(), c.end(), compare_provider_type::value());
+        std::push_heap(c.begin(), c.end(), compare());
     }
 
     priority_queue& operator =(priority_queue&& move_from)
@@ -100,7 +108,7 @@ public:
 
     void pop()
     {
-        std::pop_heap(c.begin(), c.end(), compare_provider_type::value());
+        std::pop_heap(c.begin(), c.end(), compare());
         c.pop_back();
     }
 
@@ -110,7 +118,7 @@ public:
     accessor emplace(TArgs&&...args)
     {
         c.emplace_back(std::forward<TArgs>(args)...);
-        std::push_heap(c.begin(), c.end(), Compare());
+        std::push_heap(c.begin(), c.end(), compare());
         return c.back();
     }
 
@@ -127,7 +135,7 @@ public:
         auto accessor = c.emplace_back(std::forward<TArgs>(args)...);
         f(accessor.lock());
         accessor.unlock();
-        std::push_heap(c.begin(), c.end(), Compare());
+        std::push_heap(c.begin(), c.end(), compare());
         return c.back();
     }
 #endif
@@ -146,7 +154,7 @@ public:
         // see https://stackoverflow.com/questions/32213377/heapify-in-c-stl
         // DEBT: Also, we want to do this from 'v' not c.begin().  However,
         // our accessor-rather-than-pointer makes that a little tricky
-        std::make_heap(c.begin(), c.end(), Compare());
+        std::make_heap(c.begin(), c.end(), compare());
     }
 
 #ifdef __cpp_rvalue_references

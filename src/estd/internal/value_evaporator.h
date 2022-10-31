@@ -72,7 +72,7 @@ public:
     typedef T value_type;
     typedef const value_type evaporated_type;
 
-    evaporated_type value() const { return value_type(); }
+    ESTD_CPP_CONSTEXPR_RET evaporated_type value() const { return value_type(); }
 
     ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
 
@@ -94,8 +94,8 @@ private:
     value_type value_;
 
 public:
-    evaporated_type value() { return value_; }
-    const_evaporated_type value() const { return value_; }
+    inline evaporated_type value() { return value_; }
+    ESTD_CPP_CONSTEXPR_RET const_evaporated_type value() const { return value_; }
 
     ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
     struct_evaporator(const value_type& value) :
@@ -104,7 +104,7 @@ public:
 
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_reference
     struct_evaporator(value_type&& value) :
         value_(std::move(value))
     {}

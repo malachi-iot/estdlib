@@ -16,6 +16,7 @@ v 0.X.X - XXXXX22
 * CMake project name now `estd` rather than `estd_lib`
     * The latter still exists as an alias for legacy compatibility
     * Added also `malachi-iot::estd` alias in case of collisions
+* estd::priority_queue now can use instanced `Compare`
 
 ## Known Issues & Limitations
 
