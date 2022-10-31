@@ -15,6 +15,7 @@ struct queue
 {
     typedef T value_type;
     typedef value_type* pointer;
+    typedef const value_type* const_pointer;
     typedef value_type& reference;
     typedef const value_type& const_reference;
     typedef estd::chrono::freertos_clock::duration duration;
@@ -29,6 +30,16 @@ protected:
     }
 
 public:
+    UBaseType_t messages_waiting() const
+    {
+        return q.messages_waiting();
+    }
+
+    bool send(const_pointer v, duration timeout)
+    {
+        return q.send(v, timeout.count()) == pdTRUE;
+    }
+
     bool receive(pointer v, duration timeout)
     {
         return q.receive(v, timeout.count()) == pdTRUE;

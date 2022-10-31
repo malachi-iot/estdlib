@@ -33,7 +33,8 @@ typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
 struct freertos_clock
 {
-    typedef estd::chrono::internal::milli_rep rep;
+    //typedef estd::chrono::internal::milli_rep rep;
+    typedef TickType_t rep;
     typedef internal::freertos_system_period period;
     typedef internal::estd_chrono::duration<rep, period> duration;
     typedef internal::estd_chrono::time_point<freertos_clock> time_point;
@@ -46,6 +47,15 @@ struct freertos_clock
     }
 };
 
+
+}
+
+namespace freertos {
+
+ESTD_CPP_CONSTEXPR_RET estd::chrono::freertos_clock::duration max_delay()
+{
+    return estd::chrono::freertos_clock::duration(portMAX_DELAY);
+}
 
 }
 

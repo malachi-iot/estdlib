@@ -56,20 +56,38 @@ static void test_priority_queue()
 }
 
 #ifdef ESTD_OS_FREERTOS
+
+template <class T>
+static void test_freertos_queue(freertos::internal::queue<T>& queue)
+{
+    typedef chrono::freertos_clock::duration tick_type;
+    const unsigned val = 7;
+    unsigned val2 = 0;
+
+    TEST_ASSERT_EQUAL(0, queue.messages_waiting());
+    TEST_ASSERT_TRUE(queue.send(&val, freertos::max_delay()));
+    TEST_ASSERT_EQUAL(1, queue.messages_waiting());
+    TEST_ASSERT_TRUE(queue.receive(&val2, tick_type(portMAX_DELAY)));
+    TEST_ASSERT_EQUAL(val, val2);
+}
+
 static void test_freertos_queue()
 {
     // mainly just wrappers
     {
         freertos::queue<unsigned, false> dynamic_q(10);
+        test_freertos_queue(dynamic_q);
     }
 
     {
         unsigned storage[10];
         freertos::queue<unsigned, true> static_q(storage, 10);
+        test_freertos_queue(static_q);
     }
 
     {
         freertos::layer1::queue<unsigned, 10> static_q2;
+        test_freertos_queue(static_q2);
     }
 }
 #endif

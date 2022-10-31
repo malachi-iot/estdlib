@@ -5,6 +5,7 @@ v 0.X.X - XXXXX22
 * Added official FreeRTOS support: 
     * `estd::freertos::mutex`
     * `estd::freertos::counting_semaphore`
+    * `estd::freertos::queue`
     * above has static and dynamic allocation variants
     * aliases of above to `estd::mutex` and `estd::counting_semaphore`
 * Added low level variant of `std::function`: `estd::detail::function`

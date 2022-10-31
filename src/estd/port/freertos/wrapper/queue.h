@@ -49,6 +49,21 @@ public:
 
     void free() { vQueueDelete(h); }
 
+    UBaseType_t messages_waiting() const
+    {
+        return uxQueueMessagesWaiting(h);
+    }
+
+    BaseType_t peek(void* pvBuffer, TickType_t xTicksToWait) const
+    {
+        return xQueuePeek(h, pvBuffer, xTicksToWait);
+    }
+
+    BaseType_t send(const void* pvItemToQueue, TickType_t xTicksToWait)
+    {
+        return xQueueSend(h, pvItemToQueue, xTicksToWait);
+    }
+
     BaseType_t send_from_isr(const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken)
     {
         return xQueueSendFromISR(h, pvItemToQueue, pxHigherPriorityTaskWoken);
@@ -57,6 +72,11 @@ public:
     BaseType_t receive(void* pvBuffer, TickType_t xTicksToWait)
     {
         return xQueueReceive(h, pvBuffer, xTicksToWait);
+    }
+
+    UBaseType_t spaces_available() const
+    {
+        return uxQueueSpacesAvailable(h);
     }
 };
 
