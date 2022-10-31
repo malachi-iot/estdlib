@@ -2,6 +2,10 @@
 
 #include <estd/queue.h>
 
+#ifdef ESTD_OS_FREERTOS
+#include <estd/port/freertos/queue.h>
+#endif
+
 using namespace estd;
 
 CONSTEXPR int test_value_1 = 5;
@@ -51,6 +55,25 @@ static void test_priority_queue()
 #endif
 }
 
+#ifdef ESTD_OS_FREERTOS
+static void test_freertos_queue()
+{
+    // mainly just wrappers
+    {
+        freertos::queue<unsigned, false> dynamic_q(10);
+    }
+
+    {
+        unsigned storage[10];
+        freertos::queue<unsigned, true> static_q(storage, 10);
+    }
+
+    {
+        freertos::layer1::queue<unsigned, 10> static_q2;
+    }
+}
+#endif
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("queue tests", "[queue]")
 #else
@@ -60,4 +83,7 @@ void test_queue()
     RUN_TEST(test_queue_int);
     RUN_TEST(test_queue_struct);
     RUN_TEST(test_priority_queue);
+#ifdef ESTD_OS_FREERTOS
+    RUN_TEST(test_freertos_queue);
+#endif
 }

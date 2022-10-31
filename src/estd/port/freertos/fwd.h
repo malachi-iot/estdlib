@@ -21,4 +21,7 @@ template <bool static_allocated>
 class binary_semaphore;
 #endif
 
+template <class T, bool static_allocated = false>
+class queue;
+
 }}
