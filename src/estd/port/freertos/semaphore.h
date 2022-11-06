@@ -150,6 +150,22 @@ public:
     {}
 };
 
+
+template<>
+struct counting_semaphore<1, true> : internal::semaphore,
+    internal::semaphore_max<1>
+{
+private:
+    StaticSemaphore_t storage;
+
+public:
+    counting_semaphore() :
+        internal::semaphore(
+            wrapped::create(binary_tag(), &storage))
+    {}
+};
+
+
 }
 
 #if FEATURE_ESTD_FREERTOS_THREAD

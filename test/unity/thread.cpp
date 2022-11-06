@@ -27,6 +27,8 @@ void test_lock_guard()
 
 #ifdef ESTD_OS_FREERTOS
 
+#include <estd/port/freertos/wrapper/timer.h>
+
 namespace freertos {
 
 static estd::freertos::wrapper::semaphore sync_sem;
@@ -249,6 +251,32 @@ static void test_thread()
 
 }
 
+static void timer_callback(TimerHandle_t xTimer)
+{
+    void* arg = pvTimerGetTimerID(xTimer);
+    estd::freertos::internal::semaphore* s = (estd::freertos::internal::semaphore*) arg;
+
+    s->release();
+}
+
+static void test_timer()
+{
+    // FIX: Really we should be passing in a 0 here to match std API signature.  FreeRTOS
+    // doesn't give us an API for that though we do an initial take easily enough
+    // NOTE: Making static just incase timer_callback takes way too long to do its thing
+    static estd::freertos::binary_semaphore<true> sync;
+
+    estd::freertos::timer<false> timer("unit test only",
+        estd::chrono::milliseconds(100), false,
+        &sync, &timer_callback);
+
+    timer.native().start(0);
+
+    bool result = sync.try_acquire_for(estd::chrono::milliseconds(200));
+
+    TEST_ASSERT_TRUE(result);
+}
+
 }
 
 static void test_freertos()
@@ -261,6 +289,7 @@ static void test_freertos()
     RUN_TEST(freertos::test_recursive_mutex);
     RUN_TEST(freertos::test_semaphore);
     RUN_TEST(freertos::test_thread);
+    RUN_TEST(freertos::test_timer);
 
     freertos::sync_sem.free();
 }
