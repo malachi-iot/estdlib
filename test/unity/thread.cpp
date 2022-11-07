@@ -27,7 +27,7 @@ void test_lock_guard()
 
 #ifdef ESTD_OS_FREERTOS
 
-#include <estd/port/freertos/wrapper/timer.h>
+#include <estd/port/freertos/timer.h>
 
 namespace freertos {
 

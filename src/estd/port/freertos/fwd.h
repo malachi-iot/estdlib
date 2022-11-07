@@ -24,4 +24,10 @@ class binary_semaphore;
 template <class T, bool static_allocated = false>
 class queue;
 
+// --- 
+// Below this line are mechanisms which do not have a direct std mapping
+
+template <bool is_static = false>
+class timer;
+
 }}

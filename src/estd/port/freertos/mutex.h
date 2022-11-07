@@ -93,6 +93,8 @@ class timed_mutex : public mutex<static_allocated>
     typedef mutex<static_allocated> base_type;
 
 public:
+    timed_mutex(bool binary = false) : base_type(binary) {}
+    
     template< class Rep, class Period >
     bool try_lock_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
     {
