@@ -28,6 +28,7 @@ void test_lock_guard()
 #ifdef ESTD_OS_FREERTOS
 
 #include <estd/port/freertos/timer.h>
+#include <estd/port/freertos/wrapper/event_groups.h>
 
 namespace freertos {
 
@@ -51,7 +52,7 @@ static TaskHandle_t create_task(TaskFunction_t taskCode,
 
     BaseType_t xReturned = xTaskCreate(
         taskCode,
-        "test_mutex",
+        name,
         2048,
         parameters,
         4,      // DEBT: Need a more clear or configurable priority
@@ -277,6 +278,28 @@ static void test_timer()
     TEST_ASSERT_TRUE(result);
 }
 
+static void event_group_task(void* arg)
+{
+    auto& e = * (estd::freertos::wrapper::event_group*) arg;
+
+    e.set_bits(1);
+
+    vTaskDelete(NULL);
+}
+
+
+
+static void test_event_groups()
+{
+    estd::freertos::wrapper::event_group e = estd::freertos::wrapper::event_group::create();
+    //estd::freertos::wrapper::task t = 
+    create_task(event_group_task, "event group task", &e);
+
+    TEST_ASSERT_TRUE(e.wait_bits(1, false, false, 100));
+
+    e.free();
+}
+
 }
 
 static void test_freertos()
@@ -290,6 +313,7 @@ static void test_freertos()
     RUN_TEST(freertos::test_semaphore);
     RUN_TEST(freertos::test_thread);
     RUN_TEST(freertos::test_timer);
+    RUN_TEST(freertos::test_event_groups);
 
     freertos::sync_sem.free();
 }
