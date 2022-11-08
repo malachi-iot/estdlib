@@ -288,6 +288,12 @@ static void event_group_task(void* arg)
 }
 
 
+static void test_event_groups_1(estd::freertos::internal::event_group e)
+{
+
+}
+
+
 
 static void test_event_groups()
 {
@@ -296,9 +302,8 @@ static void test_event_groups()
 
     TEST_ASSERT_TRUE(e.wait_bits(1, false, true, estd::chrono::milliseconds(100)));
 
-    estd::freertos::wrapper::event_group e1, e2;
-
-    e2 = e1;
+    estd::freertos::wrapper::event_group e1;
+    test_event_groups_1(e1);
 }
 
 }

@@ -7,18 +7,15 @@
 
 namespace estd { namespace freertos {
 
-template <>
-class event_group<false> : public wrapper::event_group
+namespace internal {
+
+struct event_group : wrapper::event_group
 {
     typedef wrapper::event_group base_type;
     typedef estd::chrono::freertos_clock::duration duration;
-
-protected:
+    
     event_group(EventGroupHandle_t h) : base_type(h) {}
-
-public:
-    event_group() : base_type(base_type::create()) {}
-    ~event_group() { base_type::free(); }
+    event_group(wrapper::event_group e) : base_type(e) {}
 
     EventBits_t wait_bits(
                        const EventBits_t uxBitsToWaitFor,
@@ -35,6 +32,22 @@ public:
     {
         return base_type::sync(uxBitsToSet, uxBitsToWaitFor, wait.count());
     }
+};
+
+}
+
+template <>
+class event_group<false> : public internal::event_group
+{
+    typedef internal::event_group base_type;
+
+protected:
+    event_group(EventGroupHandle_t h) : base_type(h) {}
+
+public:
+    event_group() : base_type(base_type::create()) {}
+    ~event_group() { base_type::free(); }
+
 };
 
 
