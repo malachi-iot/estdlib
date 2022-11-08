@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
 
 # From https://stackoverflow.com/questions/38823537/execute-git-describe-in-custom-target
+
+# NOTE: Only use this if you really need < 4.0 detection.  For all other (most) cases,
+# you will want https://github.com/espressif/esp-idf/blob/v4.4.2/components/esp_common/include/esp_idf_version.h 
 
 SET(IDF_PATH $ENV{IDF_PATH})
 
@@ -19,7 +22,7 @@ execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always --dirty
 #SET(IDF_VER v3.0.1-dev)
 #SET(IDF_VER v3.0.1)
 
-message(STATUS "cmake IDF_VER = ${IDF_VER}")
+message(DEBUG "cmake IDF_VER = ${IDF_VER}")
 
 #string(REGEX MATCHALL "^v([0-9]).([0-9])([.][0-9]|)(-[A-Za-z]+|)" TEST_OUT ${IDF_VER})
 string(REGEX MATCHALL "^v([0-9]).([0-9])([.])?([0-9])?(-)?(.+)?" TEST_OUT ${IDF_VER})
@@ -43,5 +46,5 @@ if (NOT CMAKE_SCRIPT_MODE_FILE)
         -DESTD_IDF_VER_PATCH=${IDF_VER_PATCH}
         )
 else()
-    message(STATUS "cmake TEST_OUT=${TEST_OUT} / ${CMAKE_MATCH_1} + ${CMAKE_MATCH_2} + ${CMAKE_MATCH_3} + ${CMAKE_MATCH_4} + ${CMAKE_MATCH_5} + ${CMAKE_MATCH_6}")
+    message(DEBUG "cmake TEST_OUT=${TEST_OUT} / ${CMAKE_MATCH_1} + ${CMAKE_MATCH_2} + ${CMAKE_MATCH_3} + ${CMAKE_MATCH_4} + ${CMAKE_MATCH_5} + ${CMAKE_MATCH_6}")
 endif()
