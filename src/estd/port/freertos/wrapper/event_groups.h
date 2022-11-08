@@ -14,10 +14,14 @@ namespace estd { namespace freertos { namespace wrapper {
 
 class event_group
 {
-    const EventGroupHandle_t h;
+    EventGroupHandle_t h;
 
 public:
-    ESTD_CPP_DEFAULT_CTOR(event_group)
+#ifdef FEATURE_CPP_DEFAULT_CTOR
+    event_group() = default;
+#else
+    event_group() {}
+#endif
     inline event_group(EventGroupHandle_t h) : h(h) {}
 
     static event_group create()
@@ -33,6 +37,11 @@ public:
     void free()
     {
         vEventGroupDelete(h);
+    }
+
+    EventBits_t clear_bits(const EventBits_t uxBitsToClear)
+    {
+        return xEventGroupClearBits(h, uxBitsToClear);
     }
 
     BaseType_t clear_bits_from_isr(const EventBits_t uxBitsToClear)

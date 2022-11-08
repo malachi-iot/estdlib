@@ -295,6 +295,10 @@ static void test_event_groups()
     create_task(event_group_task, "event group task", &e);
 
     TEST_ASSERT_TRUE(e.wait_bits(1, false, true, estd::chrono::milliseconds(100)));
+
+    estd::freertos::wrapper::event_group e1, e2;
+
+    e2 = e1;
 }
 
 }
