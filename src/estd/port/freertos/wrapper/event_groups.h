@@ -9,6 +9,7 @@
 #include <event_groups.h>
 #endif
 
+
 namespace estd { namespace freertos { namespace wrapper {
 
 class event_group
@@ -24,7 +25,7 @@ public:
         return xEventGroupCreate();
     }
 
-    static event_group create_static(StaticEventGroup_t* pxEventGroupBuffer)
+    static event_group create(StaticEventGroup_t* pxEventGroupBuffer)
     {
         return xEventGroupCreateStatic(pxEventGroupBuffer);
     }
@@ -66,6 +67,8 @@ public:
     {
         return xEventGroupSync(h, uxBitsToSet, uxBitsToWaitFor, xTicksToWait);
     }
+
+    operator EventGroupHandle_t () const { return h; }
 };
 
 }}}

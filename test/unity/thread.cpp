@@ -28,7 +28,7 @@ void test_lock_guard()
 #ifdef ESTD_OS_FREERTOS
 
 #include <estd/port/freertos/timer.h>
-#include <estd/port/freertos/wrapper/event_groups.h>
+#include <estd/port/freertos/event_groups.h>
 
 namespace freertos {
 
@@ -291,13 +291,10 @@ static void event_group_task(void* arg)
 
 static void test_event_groups()
 {
-    estd::freertos::wrapper::event_group e = estd::freertos::wrapper::event_group::create();
-    //estd::freertos::wrapper::task t = 
+    estd::freertos::event_group<true> e;
     create_task(event_group_task, "event group task", &e);
 
-    TEST_ASSERT_TRUE(e.wait_bits(1, false, false, 100));
-
-    e.free();
+    TEST_ASSERT_TRUE(e.wait_bits(1, false, true, estd::chrono::milliseconds(100)));
 }
 
 }

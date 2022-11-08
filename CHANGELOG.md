@@ -7,6 +7,7 @@ v 0.X.X - XXXXX22
     * `estd::freertos::counting_semaphore`
     * `estd::freertos::queue`
     * `estd::freertos::timer`
+    * `estd::freertos::event_groups`
     * above has static and dynamic allocation variants
     * aliases of above to `estd::mutex` and `estd::counting_semaphore`
 * Added low level variant of `std::function`: `estd::detail::function`

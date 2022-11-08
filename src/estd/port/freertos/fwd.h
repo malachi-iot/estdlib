@@ -30,4 +30,7 @@ class queue;
 template <bool is_static = false>
 class timer;
 
+template <bool static_allocated>
+class event_group;
+
 }}

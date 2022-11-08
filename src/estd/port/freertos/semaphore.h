@@ -162,7 +162,8 @@ public:
     counting_semaphore() :
         internal::semaphore(
             wrapped::create(binary_tag(), &storage))
-    {}
+    {
+    }
 };
 
 
