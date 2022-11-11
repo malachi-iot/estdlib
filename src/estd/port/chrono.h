@@ -19,6 +19,7 @@
 #undef min
 #endif
 
+// DEBT: Move this, does not belong in 'port'
 
 #ifdef FEATURE_ESTD_CHRONO
 
@@ -27,9 +28,9 @@ namespace estd { namespace chrono {
 template <class Rep>
 struct duration_values
 {
-    static CONSTEXPR Rep zero() { return Rep(0); }
-    static CONSTEXPR Rep min() { return estd::numeric_limits<Rep>::min(); }
-    static CONSTEXPR Rep max() { return estd::numeric_limits<Rep>::max(); }
+    static ESTD_CPP_CONSTEXPR_RET Rep zero() { return Rep(0); }
+    static ESTD_CPP_CONSTEXPR_RET Rep min() { return estd::numeric_limits<Rep>::min(); }
+    static ESTD_CPP_CONSTEXPR_RET Rep max() { return estd::numeric_limits<Rep>::max(); }
 };
 
 template<
@@ -44,28 +45,20 @@ class duration
 
 protected:
     template <class Rep2, class Period2>
-    static CONSTEXPR Rep convert_from(const duration<Rep2, Period2>& d);
+    static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const duration<Rep2, Period2>& d);
 
 #ifdef FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
-    static CONSTEXPR Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
+    static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
 
 public:
     typedef Rep rep;
-    typedef Period period;
+    typedef typename Period::type period;
 
-    CONSTEXPR rep count() const { return ticks; }
+    ESTD_CPP_CONSTEXPR_RET rep count() const { return ticks; }
 
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    duration()
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-        = default;
-#else
-    {}
-#endif
+    ESTD_CPP_DEFAULT_CTOR(duration)
 
     template <class Rep2>
 #ifdef FEATURE_CPP_CONSTEXPR

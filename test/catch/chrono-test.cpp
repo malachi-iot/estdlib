@@ -478,9 +478,13 @@ TEST_CASE("chrono tests")
             auto ms = estd::chrono::milliseconds(_v.time_since_epoch());
             estd::chrono::hh_mm_ss<decltype(ms)> __v{ms};
 
+            /*
+             * Useful when debugging, but since it's a real timestamp we can't easily do a unit test
+             * on these values
             auto hour = __v.hours();
             auto minute = __v.minutes();
             auto second = __v.seconds();
+            */
 
             REQUIRE(dp.count() > 0);
         }
