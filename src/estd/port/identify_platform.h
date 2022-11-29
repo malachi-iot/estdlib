@@ -28,7 +28,7 @@
 #include "arch/arduino.h"
 // DEBT: Arduino is not mutually exclusive to FreeRTOS
 // NOTE: esp-idf doesn't define FREERTOS flag.  See below
-#elif defined(FREERTOS)
+#elif defined(FREERTOS) || defined(ESTD_OS_FREERTOS)
 #include "arch/freertos.h"
 #define ESTD_OS_TYPE ESTD_RTOS_TYPE_FREERTOS
 #elif (defined(__APPLE__) && defined(__MACH__))
