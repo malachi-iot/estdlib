@@ -69,6 +69,8 @@ public:
     }
 };
 
+
+#if configSUPPORT_STATIC_ALLOCATION
 template <>
 class mutex<true> : public internal::mutex_base
 {
@@ -85,7 +87,7 @@ public:
     {
     }
 };
-
+#endif
 
 template <bool static_allocated>
 class timed_mutex : public mutex<static_allocated>
@@ -123,6 +125,7 @@ public:
 };
 
 
+#if configSUPPORT_STATIC_ALLOCATION
 template <>
 class recursive_mutex<true> : public internal::recursive_mutex_base
 {
@@ -133,6 +136,7 @@ public:
         xSemaphoreCreateRecursiveMutexStatic(&storage))
     {}
 };
+#endif
 
 }
 

@@ -23,7 +23,7 @@ set(SOURCES
     span.cpp
     streambuf.cpp
     string.cpp
-    #thread.cpp
+    thread.cpp
     tuple.cpp
     )
 
