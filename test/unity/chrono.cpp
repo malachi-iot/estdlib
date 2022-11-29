@@ -95,6 +95,7 @@ static void test_literals()
 TEST_CASE("chrono tests", "[chrono]")
 #else
 void test_chrono()
+    //UnitySetTestFile(__FILE__);
 #endif
 {
     RUN_TEST(test_chrono_convert);

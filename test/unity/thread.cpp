@@ -1,10 +1,12 @@
 #include "unit-test.h"
 
+#include <estd/port/identify_platform.h>
+
+#ifdef FEATURE_ESTD_THREADING
+
 #include <estd/thread.h>
 #include <estd/mutex.h>
 #include <estd/semaphore.h>
-
-#ifdef FEATURE_ESTD_THREADING
 
 void test_thread_get_id()
 {
