@@ -65,10 +65,21 @@ static void test_std_steady_clock()
     test_clock<std::chrono::steady_clock>();
 }
 
+static void test_std_system_clock()
+{
+    test_clock<std::chrono::system_clock>();
+}
+
 static void test_estd_steady_clock()
 {
     test_clock<estd::chrono::steady_clock>();
 }
+
+static void test_estd_system_clock()
+{
+    test_clock<estd::chrono::system_clock>();
+}
+
 #endif
 
 #ifdef ESTD_OS_FREERTOS
@@ -111,7 +122,9 @@ void test_chrono()
     RUN_TEST(test_chrono_subtract);
 #ifdef FEATURE_STD_CHRONO
     RUN_TEST(test_std_steady_clock);
+    RUN_TEST(test_std_system_clock);
     RUN_TEST(test_estd_steady_clock);
+    RUN_TEST(test_estd_system_clock);
 #endif
 #ifdef ESTD_OS_FREERTOS
     RUN_TEST(test_freertos_clock);
