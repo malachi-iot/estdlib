@@ -24,7 +24,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE .)
 
 # Add pico_stdlib library which aggregates commonly used features
 target_link_libraries(${PROJECT_NAME} pico_stdlib malachi-iot::estd unit-tests unity)
-if(ESTD_OS_FREERTOS)
+if(ESTD_OS_FREERTOS EQUAL 2)
+    message(DEBUG "Linking against FreeRTOS")
     target_link_libraries(${PROJECT_NAME}
         #FreeRTOS-Kernel         # Static only
         FreeRTOS-Kernel-Heap4   # FreeRTOS kernel and dynamic heap
