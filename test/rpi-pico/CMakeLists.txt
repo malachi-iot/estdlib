@@ -9,16 +9,11 @@ project(rpi-unit-tests LANGUAGES C CXX)
 
 set(ROOT_DIR ../..)
 
-add_subdirectory(${ROOT_DIR}/test/unity unit-tests)
-
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-if(DEFINED ENV{FREERTOS_KERNEL_PATH})
-    include($ENV{FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
-    add_compile_definitions(ESTD_OS_FREERTOS=2)
-    set(ESTD_OS_FREERTOS 2)
-endif()
+# picks up estd for us also
+add_subdirectory(${ROOT_DIR}/test/unity unit-tests)
 
 add_executable(${PROJECT_NAME}
     main.cpp
