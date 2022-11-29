@@ -69,6 +69,7 @@ public:
     }
 };
 
+#if configSUPPORT_STATIC_ALLOCATION
 template <class T>
 class queue<T, true> : public internal::queue<T>
 {
@@ -89,6 +90,7 @@ public:
 
     }
 };
+#endif
 
 namespace layer1 {
 

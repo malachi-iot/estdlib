@@ -34,12 +34,14 @@ public:
         return q;
     }
 
+#if configSUPPORT_STATIC_ALLOCATION
     static queue create(UBaseType_t uxQueueLength, UBaseType_t uxItemSize,
         uint8_t* pucQueueStorageBuffer, StaticQueue_t* pxQueueBuffer)
     {
         queue q{xQueueCreateStatic(uxQueueLength, uxItemSize, pucQueueStorageBuffer, pxQueueBuffer)};
         return q;
     }
+#endif
 
 #if ( configQUEUE_REGISTRY_SIZE > 0 )
     const char* get_name() const { return pcQueueGetName(h); }
