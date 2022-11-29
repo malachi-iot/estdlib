@@ -27,8 +27,12 @@ set(SOURCES
     tuple.cpp
     )
 
-add_library(${PROJECT_NAME} ${SOURCES})
+# NOTE: Making this an INTERFACE library so that flags and compiler settings
+# of parent projects are picked up during compilation
+add_library(${PROJECT_NAME} INTERFACE)
 
-target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_sources(${PROJECT_NAME} INTERFACE ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} unity estd)
+target_include_directories(${PROJECT_NAME} INTERFACE .)
+
+target_link_libraries(${PROJECT_NAME} INTERFACE unity estd)
