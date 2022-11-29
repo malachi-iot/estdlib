@@ -163,7 +163,7 @@ if(ESTD_AS_INTERFACE)
 
     target_include_directories(${PROJECT_NAME} INTERFACE .)
     if(ESTD_OS_FREERTOS)
-        message(DEBUG "Got here 1")
+        message(DEBUG "estdlib: FreeRTOS compile defs")
         target_compile_definitions(estd INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
     endif()
 else()

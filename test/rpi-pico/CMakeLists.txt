@@ -18,6 +18,7 @@ add_subdirectory(${ROOT_DIR}/test/unity unit-tests)
 add_executable(${PROJECT_NAME}
     main.cpp
     proving.cpp
+    rtos.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE .)

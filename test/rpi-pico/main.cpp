@@ -7,16 +7,15 @@
 
 #include <unit-test.h>
 
+
 void setUp (void) {}
 void tearDown (void) {}
 
 void proving();
+void freertos_start();
 
-
-int main()
+void main_task(__unused void *params)
 {
-    stdio_init_all();
-
     UNITY_BEGIN();
     test_align();
     test_array();
@@ -35,8 +34,6 @@ int main()
     test_tuple();
     UNITY_END();
 
-    proving();
-
     while (true) {
         static int counter = 0;
 
@@ -48,6 +45,19 @@ int main()
 
         sleep_ms(5000);
     }
+}
+
+int main()
+{
+    stdio_init_all();
+
+#if ESTD_OS_FREERTOS
+    freertos_start();
+#else
+    main_task(NULL);
+#endif
+
+    proving();
 
     return 0;
 }

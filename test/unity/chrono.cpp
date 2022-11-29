@@ -41,13 +41,18 @@ void test_clock()
 {
     typedef TClock clock_type;
     typedef typename clock_type::time_point time_point;
+    //typedef typename time_point::duration duration;
 
     clock_type c;
 
-    time_point min = time_point::min();
+    //time_point min = time_point::min();
+    time_point min;
     time_point n = c.now();
 
-    TEST_ASSERT(n > min);
+    TEST_ASSERT_GREATER_THAN(
+        min.time_since_epoch().count(),
+        n.time_since_epoch().count());
+    //TEST_ASSERT(n > min);
 }
 
 
@@ -55,9 +60,13 @@ void test_clock()
 // so this test at the moment overlaps with others, except for robust environments
 // like esp-idf which have a proper std::chrono::steady_clock implementation
 #ifdef FEATURE_STD_CHRONO
-static void test_steady_clock()
+static void test_std_steady_clock()
 {
     test_clock<std::chrono::steady_clock>();
+}
+
+static void test_estd_steady_clock()
+{
     test_clock<estd::chrono::steady_clock>();
 }
 #endif
@@ -101,7 +110,8 @@ void test_chrono()
     RUN_TEST(test_chrono_convert);
     RUN_TEST(test_chrono_subtract);
 #ifdef FEATURE_STD_CHRONO
-    RUN_TEST(test_steady_clock);
+    RUN_TEST(test_std_steady_clock);
+    RUN_TEST(test_estd_steady_clock);
 #endif
 #ifdef ESTD_OS_FREERTOS
     RUN_TEST(test_freertos_clock);

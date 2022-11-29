@@ -14,4 +14,8 @@ if(DEFINED ENV{FREERTOS_KERNEL_PATH})
     # DEBT: '2' here means flag as FREERTOS but then rewrite as 1 or 
     # RTOS version number - not so clear
     add_compile_definitions(ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
+else()
+    # DEBT: Kind of obnoxious, have to forcefully remove it because, well
+    # it IS cached...
+    unset(ESTD_OS_FREERTOS CACHE)
 endif()
