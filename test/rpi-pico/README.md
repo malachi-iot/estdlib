@@ -1,3 +1,9 @@
+# Raspberry Pi Pico Unit Testing
+
+## FreeRTOS
+
+Config file comes from https://github.com/raspberrypi/pico-examples/blob/sdk-1.4.0/pico_w/freertos/ping/FreeRTOSConfig.h
+
 ## Results
 
 |   Date  | Board                | PICO_SDK | Result |

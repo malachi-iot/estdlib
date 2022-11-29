@@ -93,3 +93,7 @@
 
 // Identify depth of POSIX support
 #include "posix.h"
+
+#if ESTD_OS_TYPE
+#define FEATURE_ESTD_THREADING 1
+#endif

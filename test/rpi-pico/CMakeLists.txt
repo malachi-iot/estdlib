@@ -14,15 +14,21 @@ add_subdirectory(${ROOT_DIR}/test/unity unit-tests)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-#message(STATUS "GOT HERE=${PICO_SDK}")
+if(DEFINED ENV{FREERTOS_KERNEL_PATH})
+    message(STATUS "GOT HERE=${PICO_SDK}")
+    include($ENV{FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
+endif()
 
 add_executable(${PROJECT_NAME}
     main.cpp
     proving.cpp
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE .)
+
 # Add pico_stdlib library which aggregates commonly used features
 target_link_libraries(${PROJECT_NAME} pico_stdlib malachi-iot::estd unit-tests unity)
+target_link_libraries(${PROJECT_NAME} FreeRTOS-Kernel)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(${PROJECT_NAME} 1)

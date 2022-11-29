@@ -13,10 +13,6 @@
 #include "asf/thread.h"
 #endif
 
-#if ESTD_OS_TYPE
-#define FEATURE_ESTD_THREADING 1
-#endif
-
 #ifdef FEATURE_ESTD_FREERTOS_CHRONO
 #include "freertos/thread.h"
 #elif defined(ESTD_ARDUINO)
