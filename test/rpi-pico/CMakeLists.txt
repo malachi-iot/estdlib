@@ -14,8 +14,11 @@ add_subdirectory(${ROOT_DIR}/test/unity unit-tests)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+#message(STATUS "GOT HERE=${PICO_SDK}")
+
 add_executable(${PROJECT_NAME}
     main.cpp
+    proving.cpp
 )
 
 # Add pico_stdlib library which aggregates commonly used features

@@ -4,7 +4,7 @@
 #include "../ratio.h"
 #include "../limits.h"
 
-#if (defined(FEATURE_POSIX_CHRONO) || defined(ESTD_SDK_IDF)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
+#if (defined(FEATURE_POSIX_CHRONO) || defined(ESTD_SDK_IDF) || defined(LIB_PICO_STDLIB)) && !defined(FEATURE_ESTD_NATIVE_CHRONO) && __cplusplus >= 201103L
 // DEBT: Doing this define here is the wrong spot - should be earlier in port/platform chain
 #define FEATURE_STD_CHRONO
 #include <chrono>

@@ -10,6 +10,8 @@
 void setUp (void) {}
 void tearDown (void) {}
 
+void proving();
+
 
 int main()
 {
@@ -25,6 +27,8 @@ int main()
     test_string();
     test_tuple();
     UNITY_END();
+
+    proving();
 
     while (true) {
         static int counter = 0;

@@ -26,6 +26,8 @@
 #include "port/arduino/chrono.h"
 #elif defined(FEATURE_POSIX_CHRONO) || defined(WIN32)
 #include "port/posix/chrono.h"
+#elif LIB_PICO_TIME
+#include "port/rpi/pico/chrono.h"
 #else
 #error Unsupported platform
 #endif
