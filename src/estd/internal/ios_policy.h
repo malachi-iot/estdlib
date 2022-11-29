@@ -1,6 +1,8 @@
 #pragma once
 
+#if ESTD_OS_TYPE
 #include "../port/thread.h"
+#endif
 #include "ios_base.h"
 
 namespace estd {
@@ -88,7 +90,10 @@ struct istream_blocking_policy<TStreambuf, estd::internal::istream_flags::blocki
 
                 if(avail == 0)
                 {
+// yield requires presence of an OS
+#if ESTD_OS_TYPE
                     estd::this_thread::yield();
+#endif
                 }
                 else
                 {

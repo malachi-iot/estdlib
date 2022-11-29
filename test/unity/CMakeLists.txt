@@ -15,13 +15,13 @@ set(SOURCES
     cstddef.cpp
     functional.cpp
     limits.cpp
-    #locale.cpp
+    locale.cpp
     map.cpp
     optional.cpp
     queue.cpp
     ratio.cpp
     span.cpp
-    #streambuf.cpp
+    streambuf.cpp
     string.cpp
     #thread.cpp
     tuple.cpp
