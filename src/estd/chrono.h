@@ -29,7 +29,7 @@
 #elif LIB_PICO_TIME
 #include "port/rpi/pico/chrono.h"
 #else
-#error Unsupported platform
+#warning Unsupported platform
 #endif
 
 // if we don't already have a std::chrono::steady_clock aliased...

@@ -10,7 +10,7 @@ add_subdirectory(${ROOT_DIR}/ext/Unity unity)
 set(SOURCES
     align.cpp
     array.cpp
-    #chrono.cpp
+    chrono.cpp
     cpp.cpp
     cstddef.cpp
     functional.cpp
