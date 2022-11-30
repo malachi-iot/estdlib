@@ -9,6 +9,7 @@ v 0.X.X - XXXXX22
     * above has static and dynamic allocation variants
     * aliases of above to `estd::mutex` and `estd::counting_semaphore`
 * Added low level variant of `std::function`: `estd::detail::function`
+* Added Raspberry Pi Pico support
 
 ## Quality Updates & Bug Fixes
 
