@@ -24,6 +24,9 @@ namespace chrono {
 
 namespace experimental {
 
+// Due to aforementioned ambiguity, implementing our own simplistic version
+// of steady/high_resolution clock.  Probably one of those actually does
+// this already
 struct pico_clock
 {
     typedef uint64_t rep;
