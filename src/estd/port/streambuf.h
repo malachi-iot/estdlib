@@ -23,3 +23,7 @@
 #elif defined(ARDUINO)
 #include <Arduino.h>
 #endif
+
+#if LIB_PICO_STDIO
+#include "rpi/pico/streambuf.h"
+#endif
