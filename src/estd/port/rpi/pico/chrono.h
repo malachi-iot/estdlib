@@ -23,7 +23,11 @@ struct pico_clock
 
 }
 
-#if ESTD_OS_TYPEX
+/*
+ * No mappings for now due to ambiguity of feature availability
+ * https://github.com/raspberrypi/pico-sdk/issues/1034
+ * 
+#if ESTD_OS_TYPE
 // DEBT: This is just to get things compiling.  Although freertos_clock
 // likely well qualifies as steady_clock, I'd rather #ifdef consuming code
 // instead
@@ -35,6 +39,7 @@ typedef estd::chrono::freertos_clock system_clock;
 typedef std::chrono::system_clock system_clock;
 typedef std::chrono::steady_clock steady_clock;
 #endif
+*/
 
 }
 

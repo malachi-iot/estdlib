@@ -59,7 +59,7 @@ void test_clock()
 // NOTE: Right now we aggressively alias our own _clock into steady_clock
 // so this test at the moment overlaps with others, except for robust environments
 // like esp-idf which have a proper std::chrono::steady_clock implementation
-#ifdef FEATURE_STD_CHRONO
+#if FEATURE_STD_CHRONO_CLOCK
 static void test_std_steady_clock()
 {
     test_clock<std::chrono::steady_clock>();
@@ -120,7 +120,7 @@ void test_chrono()
 {
     RUN_TEST(test_chrono_convert);
     RUN_TEST(test_chrono_subtract);
-#ifdef FEATURE_STD_CHRONO
+#if FEATURE_STD_CHRONO_CLOCK
     RUN_TEST(test_std_steady_clock);
     RUN_TEST(test_std_system_clock);
     RUN_TEST(test_estd_steady_clock);
