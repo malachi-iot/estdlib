@@ -10,7 +10,7 @@ namespace estd {
 namespace internal { namespace impl {
 
 template <class TTraits, stdio_driver_t* d>
-class pico_streambuf : public streambuf_base<TTraits>
+class pico_stdio_streambuf : public streambuf_base<TTraits>
 {
     typedef streambuf_base<TTraits> base_type;
 
@@ -62,8 +62,8 @@ public:
 }}
 
 template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
-using basic_pico_streambuf = estd::internal::streambuf<
-        internal::impl::pico_streambuf<TTraits, d> >;
+using basic_pico_stdio_streambuf = estd::internal::streambuf<
+        internal::impl::pico_stdio_streambuf<TTraits, d> >;
 
 //typedef basic_pico_streambuf<char> = pico_streambuf;
 
