@@ -1,4 +1,4 @@
-v 0.4.x - DDMMMYY
+# v0.4.x - DDMMMYY
 
 ## Added Features
 
@@ -13,8 +13,7 @@ v 0.4.x - DDMMMYY
 * FreeRTOS:
     * `estd::freertos::timer` static mode not well tested
 
-
-v 0.4.0 - 01DEC22
+# v0.4.0 - 01DEC22
 
 ## Added Features
 
@@ -44,7 +43,7 @@ v 0.4.0 - 01DEC22
     * `estd::freertos::recursive_mutex` not well tested or implemented
     * `estd::freertos::mutex` binary mode is confusing and might get removed.  Use `binary_semaphore`
 
-v 0.3.3 - 16AUG22
+# v0.3.3 - 16AUG22
 
 ## Added Features
 
@@ -69,7 +68,7 @@ v 0.3.3 - 16AUG22
 * `platformio` unity tests working again
 * Minor c++20 compatibility
 
-v 0.3.2 - 17JUN22
+# v0.3.2 - 17JUN22
 
 ## Added Features
 
