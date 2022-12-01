@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(estd VERSION 0.3.3 LANGUAGES CXX)
+project(estd VERSION 0.4.0 LANGUAGES CXX)
 
 include(../tools/cmake/platform.cmake)
 
