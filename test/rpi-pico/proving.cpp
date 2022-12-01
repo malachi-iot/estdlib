@@ -2,6 +2,8 @@
 #include <mutex>
 #include <thread>
 
+#include <estd/chrono.h>
+
 using namespace std::chrono_literals;
 
 static void chrono_proving()
@@ -19,6 +21,11 @@ static void thread_proving()
 
     //std::this_thread::sleep_for(100ms);
     //std::mutex m;
+
+    // ---
+    // DEBT: This won't compile because the std -> estd duration conversion
+    // is not working
+    //estd::this_core::sleep_for(100ms);
 }
 
 
