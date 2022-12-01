@@ -269,6 +269,7 @@ static void timer_callback(TimerHandle_t xTimer)
 
 static void test_timer()
 {
+#if configSUPPORT_STATIC_ALLOCATION
     // FIX: Really we should be passing in a 0 here to match std API signature.  FreeRTOS
     // doesn't give us an API for that though we do an initial take easily enough
     // NOTE: Making static just incase timer_callback takes way too long to do its thing
@@ -283,6 +284,7 @@ static void test_timer()
     bool result = sync.try_acquire_for(estd::chrono::milliseconds(200));
 
     TEST_ASSERT_TRUE(result);
+#endif
 }
 
 static void event_group_task(void* arg)
@@ -304,6 +306,7 @@ static void test_event_groups_1(estd::freertos::internal::event_group e)
 
 static void test_event_groups()
 {
+#if configSUPPORT_STATIC_ALLOCATION
     estd::freertos::event_group<true> e;
     create_task(event_group_task, "event group task", &e);
 
@@ -311,6 +314,7 @@ static void test_event_groups()
 
     estd::freertos::wrapper::event_group e1;
     test_event_groups_1(e1);
+#endif
 }
 
 }

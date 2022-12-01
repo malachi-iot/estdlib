@@ -116,7 +116,7 @@ public:
 
 // NOTE: Deviate from spec in that we have implicit '0' for desired,
 // as well as unsigned instead of ptrdiff_t
-
+#if configSUPPORT_DYNAMIC_ALLOCATION
 template<unsigned max>
 struct counting_semaphore<max, false> : internal::semaphore,
     internal::semaphore_max<max>
@@ -134,7 +134,7 @@ struct counting_semaphore<1, false> : internal::semaphore,
         internal::semaphore(create(binary_tag()))
     {}
 };
-
+#endif
 
 #if configSUPPORT_STATIC_ALLOCATION
 template<unsigned max>
@@ -150,7 +150,6 @@ public:
             wrapped::create(counting_tag(), max, desired, &storage))
     {}
 };
-#endif
 
 
 template<>
@@ -167,6 +166,7 @@ public:
     {
     }
 };
+#endif
 
 
 }

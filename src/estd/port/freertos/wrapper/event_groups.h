@@ -24,15 +24,19 @@ public:
 #endif
     inline event_group(EventGroupHandle_t h) : h(h) {}
 
+#if configSUPPORT_DYNAMIC_ALLOCATION
     static event_group create()
     {
         return xEventGroupCreate();
     }
+#endif
 
+#if configSUPPORT_STATIC_ALLOCATION
     static event_group create(StaticEventGroup_t* pxEventGroupBuffer)
     {
         return xEventGroupCreateStatic(pxEventGroupBuffer);
     }
+#endif
 
     void free()
     {

@@ -20,6 +20,7 @@ class timer
 public:
     timer(TimerHandle_t h) : h(h) {}
 
+#if configSUPPORT_DYNAMIC_ALLOCATION
     static timer create(const char* const pcTimerName,
         const TickType_t xTimerPeriod,
         const UBaseType_t uxAutoReload,
@@ -31,8 +32,9 @@ public:
             uxAutoReload, pvTimerID,
             pxCallbackFunction);
     }
+#endif
 
-
+#if configSUPPORT_STATIC_ALLOCATION
     static timer create(const char* const pcTimerName,
         const TickType_t xTimerPeriod,
         const UBaseType_t uxAutoReload,
@@ -46,6 +48,7 @@ public:
             pxCallbackFunction,
             pxTimerBuffer);
     }
+#endif
 
     BaseType_t free(TickType_t xBlockTime)
     {

@@ -6,6 +6,7 @@
 
 namespace estd { namespace freertos { 
 
+#if configSUPPORT_DYNAMIC_ALLOCATION
 template <>
 class timer<false> : public internal::timer
 {
@@ -25,8 +26,10 @@ public:
         free(estd::chrono::milliseconds(100));
     }
 };
+#endif
 
 
+#if configSUPPORT_STATIC_ALLOCATION
 // FIX: Not well tested, because unit test crashes when trying it.  Probably
 // unit test frees its stack-allocated StaticTimer_t before timer is truly done with it
 template <>
@@ -50,5 +53,6 @@ public:
         free(estd::chrono::milliseconds(100));
     }
 };
+#endif
 
 }}

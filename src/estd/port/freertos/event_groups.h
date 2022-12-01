@@ -36,6 +36,7 @@ struct event_group : wrapper::event_group
 
 }
 
+#if configSUPPORT_DYNAMIC_ALLOCATION
 template <>
 class event_group<false> : public internal::event_group
 {
@@ -49,8 +50,9 @@ public:
     ~event_group() { base_type::free(); }
 
 };
+#endif
 
-
+#if configSUPPORT_STATIC_ALLOCATION
 template <>
 class event_group<true> : public event_group<false>
 {
@@ -61,6 +63,6 @@ class event_group<true> : public event_group<false>
 public:
     event_group() : base_type(base_type::create(&storage)) {}
 };
-
+#endif
 
 }}
