@@ -10,14 +10,16 @@ set(ROOT_DIR ../../..)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# Forcefully disable any FreeRTOS inclusion.  Not necessary for most
+# people as the system usually auto deduces whether you want it.
+set(FEATURE_ESTD_FREERTOS 0)
+
 add_subdirectory(${ROOT_DIR}/src estd)
 
 add_executable(${PROJECT_NAME}
     main.cpp
 )
 
-# DEBT: FREERTOS_KERNEL_PATH if set causes compilation issues, because it
-# then expects FreeRTOS to get linked in, which of course then demands a FreeRTOSConfig.h
 target_link_libraries(${PROJECT_NAME} pico_stdlib estd)
 
 # enable usb output, disable uart output

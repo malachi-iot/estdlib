@@ -1,4 +1,4 @@
-
+# C++ Level
 
 ## FEATURE_ESTD_AGGRESIVE_BITFIELD
 
@@ -19,3 +19,14 @@ enabled always.
 ## FEATURE_ESTD_IOS_GCOUNT
 
 Enable or disable 'gcount' feature in istream
+
+# CMake level
+
+## FEATURE_ESTD_FREERTOS
+
+Normally FreeRTOS, if detected as available, defaults to fully enabled.
+This means frequent extra includes into FreeRTOS headers including possibly
+FreeRTOSConfig.h which may present a headache.  So, that can be forced off
+If FreeRTOS is present but you really don't want to include support.
+
+Specifically this may interest you if you are compiling a lot of different scenarios and have FREERTOS_KERNEL_PATH set to on

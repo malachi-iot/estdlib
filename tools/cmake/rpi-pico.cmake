@@ -2,7 +2,7 @@ message(DEBUG "estdlib: Raspberry Pi Pico mode")
 
 set(ESTD_AS_INTERFACE 1)
 
-if(DEFINED ENV{FREERTOS_KERNEL_PATH})
+if(DEFINED ENV{FREERTOS_KERNEL_PATH} AND FEATURE_ESTD_FREERTOS)
     message(DEBUG "estdlib: Raspberry Pi Pico FreeRTOS")
 
     # Tested against v10.5.1
