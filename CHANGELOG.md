@@ -8,6 +8,8 @@
 
 ## Quality Updates & Bug Fixes
 
+* CMake INTERFACE mode fixed
+
 ## Known Issues & Limitations
 
 * FreeRTOS:
