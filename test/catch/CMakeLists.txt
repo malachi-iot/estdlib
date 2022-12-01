@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
 set(ESTD_DIR ../../src)
 
-add_subdirectory(${ESTD_DIR} estdlib)
+add_subdirectory(${ESTD_DIR} estd)
 
 add_executable(${PROJECT_NAME} "main.cpp"
     algorithm-test.cpp

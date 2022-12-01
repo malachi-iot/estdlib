@@ -1,12 +1,18 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 
 project(estd VERSION 0.4.0 LANGUAGES CXX)
 
 include(../tools/cmake/platform.cmake)
 
-# DEBT: Phase out inclusion of .h files
 set(SOURCE_FILES
-        dummy.cpp
+    #dummy.cpp
+    estd/internal/string_convert.cpp
+    estd/internal/utility.cpp
+    estd/port/posix/streambuf.cpp
+    )
+
+# DEBT: Phasing out inclusion of .h files, but keeping this around just in case something needs it
+set(INCLUDE_FILES
         estd/algorithm.h
         estd/allocators/fixed.h
         estd/allocators/generic.h
@@ -79,11 +85,9 @@ set(SOURCE_FILES
         estd/internal/reverse_list.h
         estd/internal/runtime_array.h
         estd/internal/string_convert.h
-        estd/internal/string_convert.cpp
         estd/internal/to_string.h
         estd/internal/type_traits.h
         estd/internal/llvm_type_traits.h
-        estd/internal/utility.cpp
         estd/internal/utility.h
         estd/internal/value_evaporator.h
 
@@ -123,7 +127,6 @@ set(SOURCE_FILES
         estd/port/freertos/thread.h
         estd/port/freertos/mutex.h
         estd/port/posix/chrono.h
-        estd/port/posix/streambuf.cpp
         estd/port/posix/streambuf.h
         estd/port/posix/thread.h
         estd/port/streambuf.h
@@ -159,11 +162,11 @@ set(SOURCE_FILES
 
 if(FEATURE_ESTD_INTERFACE)
     add_library(${PROJECT_NAME} INTERFACE)
-    target_sources(${PROJECT_NAME} INTERFACE ${SOURCES})
+    target_sources(${PROJECT_NAME} INTERFACE ${SOURCE_FILES})
 
     target_include_directories(${PROJECT_NAME} INTERFACE .)
     if(ESTD_OS_FREERTOS)
-        message(DEBUG "estdlib: FreeRTOS compile defs")
+        message(DEBUG "estd: FreeRTOS compile defs")
         target_compile_definitions(estd INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
     endif()
 else()
