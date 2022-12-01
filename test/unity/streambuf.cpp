@@ -114,6 +114,12 @@ static void test_pico_ostream()
 
     out << "test_pico_ostream: output" << estd::endl;
 }
+
+static void test_pico_streambuf()
+{
+    basic_pico_stdio_streambuf<char> s;
+}
+
 #endif
 
 

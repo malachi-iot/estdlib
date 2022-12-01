@@ -9,10 +9,46 @@ namespace estd {
 
 namespace internal { namespace impl {
 
-template <class TTraits, stdio_driver_t* d>
-class pico_stdio_streambuf : public streambuf_base<TTraits>
+// DEBT: Use evaporators here
+
+// NOTE: layer0 is nifty and viable, but when used within ostream it doesn't
+// save much since streambuf itself we don't attempt to evaporate yet (we
+// could, just haven't optimized that far)
+namespace layer0 {
+
+template <stdio_driver_t* d>
+class pico_stdio_streambuf_provider
+{
+protected:
+    static constexpr stdio_driver_t* value() { return d; }
+};
+
+// Would prefer this if we can
+template <stdio_driver_t& d>
+class pico_stdio_streambuf_provider_exp
+{
+protected:
+    static constexpr stdio_driver_t* value() { return &d; }
+};
+
+
+}
+
+class pico_stdio_streambuf_provider
+{
+    stdio_driver_t* d;
+
+protected:
+    stdio_driver_t* value() const { return d; }
+};
+
+
+template <class TTraits, class TProvider>
+class pico_stdio_streambuf : public streambuf_base<TTraits>,
+    TProvider
 {
     typedef streambuf_base<TTraits> base_type;
+    typedef TProvider provider;
 
 protected:
     typedef TTraits traits_type;
@@ -22,14 +58,14 @@ protected:
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
-        d->out_chars(s, count);
+        provider::value()->out_chars(s, count);
         return count;
     }
 
     // EXPERIMENTAL, UNTESTED
     streamsize xsgetn(char_type* s, streamsize count)
     {
-        int rc = d->in_chars(&s, count);
+        int rc = provider::value()->in_chars(&s, count);
 
         if(rc < PICO_OK) return 0;
 
@@ -37,13 +73,12 @@ protected:
     }
 
 public:
-
     // EXPERIMENTAL, UNTESTED    
     int_type sbumpc()
     {
         char c;
 
-        int rc = d->in_chars(&c, 1);
+        int rc = provider::value()->in_chars(&c, 1);
 
         if(rc == PICO_ERROR_NO_DATA)
             return traits_type::eof();
@@ -53,7 +88,7 @@ public:
 
     int_type sputc(char_type ch)
     {
-        d->out_chars(&ch, 1);
+        provider::value()->out_chars(&ch, 1);
         return traits_type::to_int_type(ch);
     }
 };
@@ -61,10 +96,18 @@ public:
 
 }}
 
+namespace layer0 {
+
 template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
 using basic_pico_stdio_streambuf = estd::internal::streambuf<
-        internal::impl::pico_stdio_streambuf<TTraits, d> >;
+        internal::impl::pico_stdio_streambuf<TTraits,
+            internal::impl::layer0::pico_stdio_streambuf_provider<d> > >;
 
-//typedef basic_pico_streambuf<char> = pico_streambuf;
+}
+
+template <class TChar, class TTraits = estd::char_traits<TChar> >
+using basic_pico_stdio_streambuf = estd::internal::streambuf<
+        internal::impl::pico_stdio_streambuf<TTraits,
+            internal::impl::pico_stdio_streambuf_provider > >;
 
 }
