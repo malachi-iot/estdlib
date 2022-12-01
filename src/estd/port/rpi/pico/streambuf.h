@@ -38,29 +38,22 @@ protected:
 
 }
 
-class pico_stdio_streambuf_provider
-{
-protected:
-    stdio_driver_t* d;
-
-    stdio_driver_t* value() const { return d; }
-};
-
 
 template <stdio_driver_t* d>
-class pico_stdio_streambuf_provider2 : public layer0::pico_stdio_streambuf_provider<d>
+class pico_stdio_streambuf_provider : public layer0::pico_stdio_streambuf_provider<d>
 {
 
 };
 
 template <>
-class pico_stdio_streambuf_provider2<nullptr> : public pico_stdio_streambuf_provider
+class pico_stdio_streambuf_provider<nullptr>
 {
+    stdio_driver_t* d;
+
 protected:
-    pico_stdio_streambuf_provider2(stdio_driver_t* d)
-    {
-        this->d = d;
-    }
+    constexpr pico_stdio_streambuf_provider(stdio_driver_t* d) : d{d} {}
+
+    stdio_driver_t* value() const { return d; }
 };
 
 
@@ -96,7 +89,7 @@ protected:
 
 public:
     pico_stdio_streambuf() = default;
-    pico_stdio_streambuf(stdio_driver_t* d) : provider(d) {}
+    constexpr pico_stdio_streambuf(stdio_driver_t& d) : provider(&d) {}
 
     //template <class ...TArgs>
     //pico_stdio_streambuf(TArgs...args) : provider(std::forward<TArgs>(args)...) {}
@@ -124,23 +117,10 @@ public:
 
 }}
 
-namespace layer0 {
 
 template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
 using basic_pico_stdio_streambuf = estd::internal::streambuf<
         internal::impl::pico_stdio_streambuf<TTraits,
-            internal::impl::layer0::pico_stdio_streambuf_provider<d> > >;
-
-}
-
-template <class TChar, class TTraits = estd::char_traits<TChar> >
-using basic_pico_stdio_streambuf = estd::internal::streambuf<
-        internal::impl::pico_stdio_streambuf<TTraits,
-            internal::impl::pico_stdio_streambuf_provider > >;
-
-template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
-using basic_pico_stdio_streambuf2 = estd::internal::streambuf<
-        internal::impl::pico_stdio_streambuf<TTraits,
-            internal::impl::pico_stdio_streambuf_provider2<d> > >;
+            internal::impl::pico_stdio_streambuf_provider<d> > >;
 
 }

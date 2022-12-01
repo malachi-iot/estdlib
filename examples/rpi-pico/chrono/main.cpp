@@ -4,8 +4,7 @@
 #include <pico/stdio_usb.h>
 #include <pico/time.h>
 
-static estd::basic_pico_ostream<char, &stdio_usb> cout;
-//static estd::basic_pico_ostream<char> cout(&stdio_usb);
+static estd::pico_ostream cout(stdio_usb);
 
 using namespace estd::chrono_literals;
 
