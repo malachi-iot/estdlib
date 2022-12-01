@@ -252,14 +252,17 @@ TEST_CASE("experimental: memory pool v1 tests")
         intrusive_forward_list<pool_type::item> list;
         pool_type pool;
 
+        // Skip these size checks if not in ideal scenario, and all these
+        // tests are phasing out anyhow
+#if ESTD_ARCH_BITNESS == 64
         int sz = sizeof(pool_type::item);
         int expected_sz = sizeof(int) + sizeof(void*) + 4; // extra 4 because of padding on 64-bit gnu
 
         REQUIRE(sz == expected_sz);
 
         sz = sizeof(pool);
-
         REQUIRE(sz == (expected_sz * 10) + sizeof(void*));
+#endif
 
         int* val1 = pool.allocate();
 

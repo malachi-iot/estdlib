@@ -1,10 +1,12 @@
 #include "unit-test.h"
 
+#include <estd/port/identify_platform.h>
+
+#ifdef FEATURE_ESTD_THREADING
+
 #include <estd/thread.h>
 #include <estd/mutex.h>
 #include <estd/semaphore.h>
-
-#ifdef FEATURE_ESTD_THREADING
 
 void test_thread_get_id()
 {
@@ -189,6 +191,7 @@ static void test_mutex()
     }
 }
 
+#if configSUPPORT_STATIC_ALLOCATION
 static void test_mutex_static()
 {
     // Static mutex
@@ -199,15 +202,17 @@ static void test_mutex_static()
         test_mutex_iteration<false>(m);
     }
 }
+#endif
 
 static void test_recursive_mutex()
 {
+#if configSUPPORT_STATIC_ALLOCATION
     {
         estd::freertos::recursive_mutex<true> m;
 
         test_mutex_iteration(m);
     }
-
+#endif
     {
         estd::freertos::recursive_mutex<false> m;
 
@@ -218,6 +223,7 @@ static void test_recursive_mutex()
 
 static void test_semaphore()
 {
+#if configSUPPORT_STATIC_ALLOCATION
     {
         estd::freertos::counting_semaphore<4, true> s(0);
 
@@ -225,6 +231,7 @@ static void test_semaphore()
         
         test_semaphore_iteration(s, s.max());
     }
+#endif
 
     {
         estd::freertos::counting_semaphore<4, false> s(0);
@@ -233,13 +240,13 @@ static void test_semaphore()
 
         test_semaphore_iteration(s, s.max());
     }
-
+#if configSUPPORT_STATIC_ALLOCATION
     {
         estd::freertos::binary_semaphore<true> s;
 
         test_semaphore_iteration(s, s.max());
     }
-
+#endif
     {
         estd::freertos::binary_semaphore<false> s;
 
@@ -314,7 +321,9 @@ static void test_freertos()
     freertos::unity_task = estd::freertos::wrapper::task::current();
 
     RUN_TEST(freertos::test_mutex);
+#if configSUPPORT_STATIC_ALLOCATION
     RUN_TEST(freertos::test_mutex_static);
+#endif
     RUN_TEST(freertos::test_recursive_mutex);
     RUN_TEST(freertos::test_semaphore);
     RUN_TEST(freertos::test_thread);

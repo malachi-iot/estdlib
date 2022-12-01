@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include "../iosfwd.h"
 #include "../variant.h"
+#if ESTD_OS_TYPE
 #include "../thread.h"
+#endif
 #include "ios_base.h"
 #include "ios_policy.h"
 

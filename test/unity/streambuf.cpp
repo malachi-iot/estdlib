@@ -101,6 +101,27 @@ static void test_ispanstream()
     TEST_ASSERT_EQUAL('1', s[0]);
 }
 
+// DEBT: Not 100% sure this means USB output is actually enabled
+#if LIB_PICO_STDIO_USB
+#include <pico/stdio_usb.h>
+
+
+// NOTE: Not really a unit test so much as a vote of confidence that
+// it compiles and (probably) runs - have to visually look for output
+static void test_pico_ostream()
+{
+    basic_pico_ostream<char, &stdio_usb> out;
+
+    out << "test_pico_ostream: output" << estd::endl;
+}
+
+static void test_pico_streambuf()
+{
+    basic_pico_stdio_streambuf<char> s(stdio_usb);
+}
+
+#endif
+
 
 
 #ifdef ESP_IDF_TESTING
@@ -113,4 +134,7 @@ void test_streambuf()
     RUN_TEST(test_ospanbuf);
     RUN_TEST(test_ispanstream);
     RUN_TEST(test_ospanstream);
+#if LIB_PICO_STDLIB
+    RUN_TEST(test_pico_ostream);
+#endif
 }

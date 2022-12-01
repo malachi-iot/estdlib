@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(estd VERSION 0.3.3 LANGUAGES CXX)
+project(estd VERSION 0.4.0 LANGUAGES CXX)
 
+include(../tools/cmake/platform.cmake)
+
+# DEBT: Phase out inclusion of .h files
 set(SOURCE_FILES
         dummy.cpp
         estd/algorithm.h
@@ -154,11 +157,22 @@ set(SOURCE_FILES
         estd/exp/streambuf-traits.h
         estd/exp/memory_resource.h)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-add_library(estd_lib ALIAS ${PROJECT_NAME})
+if(FEATURE_ESTD_INTERFACE)
+    add_library(${PROJECT_NAME} INTERFACE)
+    target_sources(${PROJECT_NAME} INTERFACE ${SOURCES})
+
+    target_include_directories(${PROJECT_NAME} INTERFACE .)
+    if(ESTD_OS_FREERTOS)
+        message(DEBUG "estdlib: FreeRTOS compile defs")
+        target_compile_definitions(estd INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
+    endif()
+else()
+    add_library(${PROJECT_NAME} ${SOURCE_FILES})
+    add_library(estd_lib ALIAS ${PROJECT_NAME})
+
+    target_include_directories(${PROJECT_NAME} PUBLIC .)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+endif()
+
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
-
-target_include_directories(${PROJECT_NAME} PUBLIC .)
-
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 

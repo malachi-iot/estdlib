@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 # From https://stackoverflow.com/questions/38823537/execute-git-describe-in-custom-target
 
@@ -37,7 +37,7 @@ if ("${IDF_VER_PATCH}" STREQUAL "")
 endif()
 
 if (NOT CMAKE_SCRIPT_MODE_FILE)
-    message(STATUS "** v${IDF_VER_MAJOR}.${IDF_VER_MINOR}.${IDF_VER_PATCH} (${IDF_VER_TAG}) **")
+    message(STATUS "estd: esp-idf v${IDF_VER_MAJOR}.${IDF_VER_MINOR}.${IDF_VER_PATCH} (${IDF_VER_TAG})")
     # Not add_definitions or add_compile_definitions, as per
     # https://github.com/espressif/esp-idf/issues/4607
     add_compile_options(

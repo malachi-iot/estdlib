@@ -136,6 +136,7 @@ struct counting_semaphore<1, false> : internal::semaphore,
 };
 
 
+#if configSUPPORT_STATIC_ALLOCATION
 template<unsigned max>
 struct counting_semaphore<max, true> : internal::semaphore,
     internal::semaphore_max<max>
@@ -149,6 +150,7 @@ public:
             wrapped::create(counting_tag(), max, desired, &storage))
     {}
 };
+#endif
 
 
 template<>

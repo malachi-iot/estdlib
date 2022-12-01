@@ -743,41 +743,6 @@ inline CONSTEXPR uint8_t maxStringLength<estd::internal::no_max_string_length_ta
 }
 }
 
-#if defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
-
-// FIX: this just doesn't feel natural putting in string.h, move it... somewhere
-//A bit finicky so that we can remove const (via Traits::char_type)
-template <class Allocator, class StringTraits,
-          class Traits,
-          class CharT>
-inline std::basic_ostream<typename Traits::char_type, Traits>&
-    operator<<(std::basic_ostream<typename Traits::char_type, Traits>& os,
-               const estd::basic_string<CharT, Traits, Allocator, StringTraits>& str)
-{
-    // TODO: Do query for null terminated vs non null terminated so that
-    // this might be more efficient
-    os.write(str.clock(), str.size());
-
-    str.cunlock();
-
-    return os;
-}
-
-/*
-template <class CharT, class Traits, class Allocator>
-inline std::ostream&
-    operator<<(std::ostream& os,
-               const estd::basic_string<const CharT, typename Traits::char_traits, Allocator, Traits>& str)
-{
-    // TODO: Do query for null terminated vs non null terminated so that
-    // this might be more efficient
-    os.write(str.clock(), str.size());
-
-    str.cunlock();
-
-    return os;
-} */
-#endif
 
 
 

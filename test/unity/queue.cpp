@@ -79,6 +79,7 @@ static void test_freertos_queue()
         test_freertos_queue(dynamic_q);
     }
 
+#if configSUPPORT_STATIC_ALLOCATION
     {
         unsigned storage[10];
         freertos::queue<unsigned, true> static_q(storage, 10);
@@ -89,6 +90,7 @@ static void test_freertos_queue()
         freertos::layer1::queue<unsigned, 10> static_q2;
         test_freertos_queue(static_q2);
     }
+#endif
 }
 #endif
 

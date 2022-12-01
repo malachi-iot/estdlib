@@ -35,14 +35,15 @@ public:
         return xSemaphoreCreateBinary();
     }
 
-    inline static SemaphoreHandle_t create(binary_tag, StaticSemaphore_t* storage)
-    {
-        return xSemaphoreCreateBinaryStatic(storage);
-    }
-
     inline static SemaphoreHandle_t create(counting_tag, UBaseType_t maxCount, UBaseType_t initialCount)
     {
         return xSemaphoreCreateCounting(maxCount, initialCount);
+    }
+
+#if configSUPPORT_STATIC_ALLOCATION
+    inline static SemaphoreHandle_t create(binary_tag, StaticSemaphore_t* storage)
+    {
+        return xSemaphoreCreateBinaryStatic(storage);
     }
 
     inline static SemaphoreHandle_t create(counting_tag, UBaseType_t maxCount, UBaseType_t initialCount, StaticSemaphore_t* storage)
@@ -50,24 +51,26 @@ public:
         return xSemaphoreCreateCountingStatic(maxCount, initialCount, storage);
     }
 
-    inline static SemaphoreHandle_t create(mutex_tag)
-    {
-        return xSemaphoreCreateMutex();
-    }
-
     inline static SemaphoreHandle_t create(mutex_tag, StaticSemaphore_t* storage)
     {
         return xSemaphoreCreateMutexStatic(storage);
     }
 
-    SemaphoreHandle_t create_binary()
-    {
-        return s = create(binary_tag());
-    }
-
     SemaphoreHandle_t create_binary(StaticSemaphore_t* storage)
     {
         return s = create(binary_tag(), storage);
+    }
+#endif
+
+#if configSUPPORT_DYNAMIC_ALLOCATION
+    inline static SemaphoreHandle_t create(mutex_tag)
+    {
+        return xSemaphoreCreateMutex();
+    }
+
+    SemaphoreHandle_t create_binary()
+    {
+        return s = create(binary_tag());
     }
 
     SemaphoreHandle_t create_counting(
@@ -76,6 +79,18 @@ public:
         return s = create(counting_tag(), maxCount, initialCount);
     }
 
+    SemaphoreHandle_t create_mutex()
+    {
+        return s = xSemaphoreCreateMutex();
+    }
+
+    SemaphoreHandle_t create_recursive_mutex()
+    {
+        return s = xSemaphoreCreateRecursiveMutex();
+    }
+#endif // configSUPPORT_DYNAMIC_ALLOCATION
+
+#if configSUPPORT_STATIC_ALLOCATION
     SemaphoreHandle_t create_counting(
         UBaseType_t maxCount, UBaseType_t initialCount,
         StaticSemaphore_t* storage)
@@ -83,25 +98,16 @@ public:
         return s = create(counting_tag(), maxCount, initialCount, storage);
     }
 
-    SemaphoreHandle_t create_mutex()
-    {
-        return s = xSemaphoreCreateMutex();
-    }
-
     SemaphoreHandle_t create_mutex(StaticSemaphore_t* storage)
     {
         return s = xSemaphoreCreateMutexStatic(storage);
-    }
-
-    SemaphoreHandle_t create_recursive_mutex()
-    {
-        return s = xSemaphoreCreateRecursiveMutex();
     }
 
     SemaphoreHandle_t create_recursive_mutex(StaticSemaphore_t* storage)
     {
         return s = xSemaphoreCreateRecursiveMutexStatic(storage);
     }
+#endif
 
     BaseType_t give() const
     {
