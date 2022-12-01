@@ -25,7 +25,8 @@ static void thread_proving()
     // ---
     // DEBT: This won't compile because the std -> estd duration conversion
     // is not working
-    //estd::this_core::sleep_for(100ms);
+    estd::this_core::sleep_for(100ms);
+    estd::this_core::sleep_until(estd::chrono::experimental::pico_clock::now() + 1s);
 }
 
 

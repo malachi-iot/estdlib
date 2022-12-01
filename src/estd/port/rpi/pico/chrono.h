@@ -24,7 +24,7 @@ namespace chrono {
 
 namespace experimental {
 
-typedef internal::estd_chrono::duration<uint64_t, estd::micro> pico_duration;
+typedef internal::estd_chrono::duration<uint64_t, estd::micro> pico_duration_us;
 
 // Due to aforementioned ambiguity, implementing our own simplistic version
 // of steady/high_resolution clock.  Probably one of those actually does
@@ -69,15 +69,18 @@ typedef std::chrono::steady_clock steady_clock;
 // spec deviation, since we may not be in multithreaded environment
 namespace this_core {
 
-template< class Rep, class Period >
-void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
+inline void sleep_for(const estd::chrono::experimental::pico_duration_us& sleep_duration)
 {
-    typedef estd::chrono::experimental::pico_duration duration;
+    sleep_us(sleep_duration.count());
+}
 
-    auto count =
-            estd::chrono::duration_cast<duration>(sleep_duration).count();
 
-    sleep_us(count);
+template <class TDuration>
+inline void sleep_until(const estd::chrono::time_point<estd::chrono::experimental::pico_clock, TDuration>& sleep_time)
+{
+    estd::chrono::experimental::pico_duration_us converted(sleep_time.time_since_epoch());
+    absolute_time_t target = delayed_by_us(nil_time, converted.count());
+    ::sleep_until(target);
 }
 
 }

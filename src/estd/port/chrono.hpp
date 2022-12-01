@@ -108,6 +108,19 @@ CONSTEXPR operator+( const duration<Rep1,Period1>& lhs,
 }
 
 
+template< class Rep1, class Period, class Rep2>
+duration<typename estd::common_type<Rep1,Rep2>::type, Period>
+CONSTEXPR operator*( const duration<Rep1,Period>& lhs,
+                     const Rep2& rhs )
+{
+    typedef duration<
+        typename estd::common_type<Rep1,Rep2>::type, Period>
+        CT;
+
+    return CT(lhs.count() * rhs);
+}
+
+
 
 template <class Rep1, class Period1, class Rep2, class Period2>
 CONSTEXPR bool operator>(const duration<Rep1, Period1>& lhs,
