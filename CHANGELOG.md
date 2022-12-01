@@ -4,6 +4,7 @@ v 0.X.X - XXXXX22
 
 * Raspberry Pi Pico now tested and supported
     * Includes lightweight `estd::basic_pico_ostream`
+    * Includes experimental `chrono` support
 * Added official FreeRTOS support: 
     * `estd::freertos::mutex`
     * `estd::freertos::counting_semaphore`

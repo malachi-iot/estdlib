@@ -31,12 +31,12 @@ typedef internal::estd_chrono::duration<uint64_t, estd::micro> pico_duration_us;
 // this already
 struct pico_clock
 {
-    typedef uint64_t rep;
-    typedef estd::micro period;
-    typedef internal::estd_chrono::duration<rep, period> duration;
+    typedef pico_duration_us duration;
     typedef internal::estd_chrono::time_point<pico_clock> time_point;
+    typedef duration::rep rep;
+    typedef duration::period period;
 
-    static CONSTEXPR bool is_steady = true;
+    static constexpr bool is_steady = true;
 
     static time_point now()
     {
@@ -66,7 +66,8 @@ typedef std::chrono::steady_clock steady_clock;
 
 }
 
-// spec deviation, since we may not be in multithreaded environment
+// spec deviation - 'this_thread' seemed inappropriate., since we may not be in multithreaded environment
+// though not named as such, this is experimental
 namespace this_core {
 
 inline void sleep_for(const estd::chrono::experimental::pico_duration_us& sleep_duration)
