@@ -1,5 +1,5 @@
 if(NOT DEFINED FEATURE_ESTD_FREERTOS)
-    message(DEBUG "estdlib: defaulting FEATURE_ESTD_FREERTOS to 1")
+    message(DEBUG "estd: defaulting FEATURE_ESTD_FREERTOS to 1")
     set(FEATURE_ESTD_FREERTOS 1)
 endif()
 

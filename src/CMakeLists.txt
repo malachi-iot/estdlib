@@ -4,6 +4,7 @@ project(estd VERSION 0.3.3 LANGUAGES CXX)
 
 include(../tools/cmake/platform.cmake)
 
+# DEBT: Phase out inclusion of .h files
 set(SOURCE_FILES
         dummy.cpp
         estd/algorithm.h
@@ -156,9 +157,8 @@ set(SOURCE_FILES
         estd/exp/streambuf-traits.h
         estd/exp/memory_resource.h)
 
-if(ESTD_AS_INTERFACE)
+if(FEATURE_ESTD_INTERFACE)
     add_library(${PROJECT_NAME} INTERFACE)
-    add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
     target_sources(${PROJECT_NAME} INTERFACE ${SOURCES})
 
     target_include_directories(${PROJECT_NAME} INTERFACE .)
@@ -169,9 +169,10 @@ if(ESTD_AS_INTERFACE)
 else()
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
     add_library(estd_lib ALIAS ${PROJECT_NAME})
-    add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 
     target_include_directories(${PROJECT_NAME} PUBLIC .)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 endif()
+
+add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 

@@ -22,7 +22,15 @@ Enable or disable 'gcount' feature in istream
 
 # CMake level
 
+## FEATURE_ESTD_INTERFACE
+
+Default: `unset`
+
+When 1, estd compiles as a CMake interface library
+
 ## FEATURE_ESTD_FREERTOS
+
+Default: `1`
 
 Normally FreeRTOS, if detected as available, defaults to fully enabled.
 This means frequent extra includes into FreeRTOS headers including possibly
