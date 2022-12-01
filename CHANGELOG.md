@@ -1,3 +1,19 @@
+v 0.4.x - DDMMMYY
+
+## Added Features
+
+* FreeRTOS:
+    * `estd::freertos::timer`
+    * `estd::freertos::event_groups`
+
+## Quality Updates & Bug Fixes
+
+## Known Issues & Limitations
+
+* FreeRTOS:
+    * `estd::freertos::timer` static mode not well tested
+
+
 v 0.4.0 - 01DEC22
 
 ## Added Features
@@ -9,8 +25,6 @@ v 0.4.0 - 01DEC22
     * `estd::freertos::mutex`
     * `estd::freertos::counting_semaphore`
     * `estd::freertos::queue`
-    * `estd::freertos::timer`
-    * `estd::freertos::event_groups`
     * above has static and dynamic allocation variants
     * aliases of above to `estd::mutex` and `estd::counting_semaphore`
 * Added low level variant of `std::function`: `estd::detail::function`
@@ -28,7 +42,6 @@ v 0.4.0 - 01DEC22
 
 * FreeRTOS support:
     * `estd::freertos::recursive_mutex` not well tested or implemented
-    * `estd::freertos::timer` static mode not well tested
     * `estd::freertos::mutex` binary mode is confusing and might get removed.  Use `binary_semaphore`
 
 v 0.3.3 - 16AUG22
