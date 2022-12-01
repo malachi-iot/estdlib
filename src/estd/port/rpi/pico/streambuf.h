@@ -11,6 +11,10 @@ namespace internal { namespace impl {
 
 // DEBT: Use evaporators here
 
+template <stdio_driver_t* d = nullptr>
+class pico_stdio_streambuf_provider2;
+
+
 // NOTE: layer0 is nifty and viable, but when used within ostream it doesn't
 // save much since streambuf itself we don't attempt to evaporate yet (we
 // could, just haven't optimized that far)
@@ -36,11 +40,29 @@ protected:
 
 class pico_stdio_streambuf_provider
 {
+protected:
     stdio_driver_t* d;
 
-protected:
     stdio_driver_t* value() const { return d; }
 };
+
+
+template <stdio_driver_t* d>
+class pico_stdio_streambuf_provider2 : public layer0::pico_stdio_streambuf_provider<d>
+{
+
+};
+
+template <>
+class pico_stdio_streambuf_provider2<nullptr> : public pico_stdio_streambuf_provider
+{
+protected:
+    pico_stdio_streambuf_provider2(stdio_driver_t* d)
+    {
+        this->d = d;
+    }
+};
+
 
 
 template <class TTraits, class TProvider>
@@ -73,6 +95,12 @@ protected:
     }
 
 public:
+    pico_stdio_streambuf() = default;
+    pico_stdio_streambuf(stdio_driver_t* d) : provider(d) {}
+
+    //template <class ...TArgs>
+    //pico_stdio_streambuf(TArgs...args) : provider(std::forward<TArgs>(args)...) {}
+
     // EXPERIMENTAL, UNTESTED    
     int_type sbumpc()
     {
@@ -109,5 +137,10 @@ template <class TChar, class TTraits = estd::char_traits<TChar> >
 using basic_pico_stdio_streambuf = estd::internal::streambuf<
         internal::impl::pico_stdio_streambuf<TTraits,
             internal::impl::pico_stdio_streambuf_provider > >;
+
+template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
+using basic_pico_stdio_streambuf2 = estd::internal::streambuf<
+        internal::impl::pico_stdio_streambuf<TTraits,
+            internal::impl::pico_stdio_streambuf_provider2<d> > >;
 
 }
