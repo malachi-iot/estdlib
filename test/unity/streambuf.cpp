@@ -117,7 +117,7 @@ static void test_pico_ostream()
 
 static void test_pico_streambuf()
 {
-    basic_pico_stdio_streambuf<char> s;
+    basic_pico_stdio_streambuf<char> s(stdio_usb);
 }
 
 #endif

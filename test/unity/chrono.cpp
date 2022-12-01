@@ -77,7 +77,9 @@ static void test_estd_steady_clock()
 
 static void test_estd_system_clock()
 {
-    test_clock<estd::chrono::system_clock>();
+    // DEBT: Nobody seems to have this, but it feels out of alignment
+    // with estd::chrono::steady_clock presence
+    //test_clock<estd::chrono::system_clock>();
 }
 
 #endif

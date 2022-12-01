@@ -118,7 +118,7 @@ public:
 }}
 
 
-template <class TChar, stdio_driver_t* d, class TTraits = estd::char_traits<TChar> >
+template <class TChar, stdio_driver_t* d = nullptr, class TTraits = estd::char_traits<TChar> >
 using basic_pico_stdio_streambuf = estd::internal::streambuf<
         internal::impl::pico_stdio_streambuf<TTraits,
             internal::impl::pico_stdio_streambuf_provider<d> > >;
