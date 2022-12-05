@@ -2,6 +2,7 @@
 
 namespace freertos {
 
-void timer_test();
+volatile int* timer_test_begin();
+void timer_test_end();
 
 }

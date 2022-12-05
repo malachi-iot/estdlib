@@ -19,10 +19,21 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "Startup");
 
-    freertos::timer_test();
+    volatile int* counter = freertos::timer_test_begin();
 
     for(;;)
     {
-        estd::this_thread::sleep_for(estd::chrono::seconds(5));
+        static int counter2 = 0;
+
+        estd::this_thread::sleep_for(estd::chrono::seconds(1));
+
+        if(counter != nullptr && *counter == 0)
+        {
+            ESP_LOGI(TAG, "Finished tests, stopping and deallocating timers");
+            counter = nullptr;
+            freertos::timer_test_end();
+        }
+
+        ESP_LOGD(TAG, "counter2: %d", ++counter2);
     }
 }

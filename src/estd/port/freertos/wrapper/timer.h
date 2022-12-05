@@ -174,6 +174,11 @@ public:
         return t.start(block_time.count());
     }
 
+    BaseType_t stop(duration block_time)
+    {
+        return t.stop(block_time.count());
+    }
+
     BaseType_t reset(duration block_time)
     {
         return t.reset(block_time.count());
