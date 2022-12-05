@@ -91,6 +91,11 @@ public:
         return xTimerChangePeriod(h, xNewPeriod, xBlockTime);
     }
 
+    TickType_t get_expiry_time() const
+    {
+        return xTimerGetExpiryTime(h);
+    }
+
     TickType_t get_period() const
     {
         return xTimerGetPeriod(h);
@@ -99,6 +104,11 @@ public:
     BaseType_t reset(TickType_t xBlockTime)
     {
         return xTimerReset(h, xBlockTime);
+    }
+
+    BaseType_t reset_from_isr(BaseType_t* pxHigherPrioertyTaskWoken)
+    {
+        return xTimerResetFromISR(h, pxHigherPrioertyTaskWoken);
     }
 
     BaseType_t is_timer_active() const
@@ -134,10 +144,14 @@ class timer
 
 protected:
     typedef estd::chrono::freertos_clock::duration duration;
+    typedef estd::chrono::freertos_clock::time_point time_point;
 
     timer(const wrapper::timer& t) : t(t) {}
 
 public:
+    bool dormant() const { return t.is_timer_active() == pdFALSE; }
+    bool active() const { return !dormant(); }
+
     BaseType_t free(duration block_time)
     {
         return t.free(block_time.count());
@@ -164,6 +178,18 @@ public:
     {
         return t.reset(block_time.count());
     }
+
+
+    BaseType_t reset_from_isr(BaseType_t* pxHigherPrioertyTaskWoken)
+    {
+        return t.reset_from_isr(pxHigherPrioertyTaskWoken);
+    }
+
+    time_point expiry() const
+    {
+        return time_point(duration(t.get_expiry_time()));
+    }
+
 
     wrapper::timer& native() { return t; }
 
