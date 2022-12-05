@@ -166,6 +166,14 @@ public:
     }
 
     wrapper::timer& native() { return t; }
+
+    static BaseType_t pend_function_call(PendedFunction_t xFunctionToPend,
+        void* pvParameter1,
+        uint32_t ulParameter2,
+        duration wait_time)
+    {
+        return xTimerPendFunctionCall(xFunctionToPend, pvParameter1, ulParameter2, wait_time.count());
+    }
 };
 
 }
