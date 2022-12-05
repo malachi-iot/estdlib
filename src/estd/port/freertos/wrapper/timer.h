@@ -138,17 +138,17 @@ public:
 
 namespace internal {
 
+// Does no housekeeping, primarily sugars the API
 class timer
 {
     wrapper::timer t;
 
-protected:
+public:
     typedef estd::chrono::freertos_clock::duration duration;
     typedef estd::chrono::freertos_clock::time_point time_point;
 
     timer(const wrapper::timer& t) : t(t) {}
 
-public:
     bool dormant() const { return t.is_timer_active() == pdFALSE; }
     bool active() const { return !dormant(); }
 
