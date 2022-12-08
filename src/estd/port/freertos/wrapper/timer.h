@@ -71,6 +71,11 @@ public:
         return xTimerStop(h, xBlockTime);
     }
 
+    BaseType_t stop_from_isr(BaseType_t* pxHigherPriorityTaskWoken)
+    {
+        return xTimerStopFromISR(h, pxHigherPriorityTaskWoken);
+    }
+
     void set_timer_id(void* pvNewId)
     {
         vTimerSetTimerID(h, pvNewId);
@@ -184,6 +189,10 @@ public:
         return t.reset(block_time.count());
     }
 
+    BaseType_t stop_from_isr(BaseType_t* pxHigherPrioertyTaskWoken)
+    {
+        return t.stop_from_isr(pxHigherPrioertyTaskWoken);
+    }
 
     BaseType_t reset_from_isr(BaseType_t* pxHigherPrioertyTaskWoken)
     {
