@@ -9,11 +9,14 @@
 ## Quality Updates & Bug Fixes
 
 * CMake INTERFACE mode fixed
+* `estd::freertos::queue`
+    * aligning isr and non-isr send signatures (breaking change)
+    * adding convenience max-duration/timeout methods
 
 ## Known Issues & Limitations
 
 * FreeRTOS:
-    * `estd::freertos::timer` static mode not well tested
+    * `estd::freertos::timer` static mode lacks proper unit test
 
 # v0.4.0 - 01DEC22
 
