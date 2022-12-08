@@ -35,9 +35,9 @@ public:
         return q.messages_waiting();
     }
 
-    bool send(const_pointer v, duration timeout)
+    bool send(const_reference v, duration timeout)
     {
-        return q.send(v, timeout.count()) == pdTRUE;
+        return q.send(&v, timeout.count()) == pdTRUE;
     }
 
     bool receive(pointer v, duration timeout)
