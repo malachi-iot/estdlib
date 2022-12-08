@@ -40,9 +40,19 @@ public:
         return q.send(&v, timeout.count()) == pdTRUE;
     }
 
+    bool send(const_reference v)
+    {
+        return q.send(&v, portMAX_DELAY) == pdTRUE;
+    }
+
     bool receive(pointer v, duration timeout)
     {
         return q.receive(v, timeout.count()) == pdTRUE;
+    }
+
+    bool receive(pointer v)
+    {
+        return q.receive(v, portMAX_DELAY) == pdTRUE;
     }
 
     BaseType_t send_from_isr(const_reference v, BaseType_t* pxHigherPriorityTaskWoken = nullptr)
