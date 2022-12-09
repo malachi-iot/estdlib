@@ -188,6 +188,8 @@ public:
     {
         return c;
     }
+
+    explicit operator bool() const { return base_type::fail() == false; }
 };
 
 

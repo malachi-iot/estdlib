@@ -137,6 +137,9 @@ operator >>(
 
     n.get(it, end, in, err, value);
 
+    // DEBT: Think I'd prefer a friend operation and pass in 'in' directly on n.get
+    in.setstate(err);
+
     return in;
 }
 
