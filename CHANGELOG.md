@@ -12,6 +12,7 @@
 * `estd::freertos::queue`
     * aligning isr and non-isr send signatures (breaking change)
     * adding convenience max-duration/timeout methods
+* `estd::basic_istream` now reflects numeric parsing status in good() and has associated bool operator
 
 ## Known Issues & Limitations
 
