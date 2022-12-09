@@ -131,13 +131,15 @@ operator >>(
     in >> ws;
 
     iterator_type it(in.rdbuf()), end;
-    ios_base::iostate err;
+    ios_base::iostate err = in.rdstate();
 
     num_get<char_type, iterator_type> n;
 
     n.get(it, end, in, err, value);
 
     // DEBT: Think I'd prefer a friend operation and pass in 'in' directly on n.get
+    // DEBT: It's unclear whether we overwrite or OR state here, but I am betting it's OR and that's
+    // what code currently does.  When we find conclusive answer, document it
     in.setstate(err);
 
     return in;
