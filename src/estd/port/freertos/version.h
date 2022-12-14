@@ -18,9 +18,8 @@ extern "C" {
 
 #ifdef ESTD_OS_FREERTOS
 
-// DEBT: Special value to indicate ESTD_OS_FREERTOS was specified as
-// a compiler def (since we like it better than just FREERTOS) and 
-// to not complain about redefinition.  Really confusing though, so DEBT
+// See feature-flags.md 
+// ESTD_OS_FREERTOS was specified by CMake
 #if ESTD_OS_FREERTOS == 2 && FEATURE_ESTD_FREERTOS_VERSION
 #undef ESTD_OS_FREERTOS
 #else
