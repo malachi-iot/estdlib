@@ -4,7 +4,10 @@ cmake_minimum_required(VERSION 3.13)
 
 project(estd VERSION 0.4.0 LANGUAGES CXX)
 
-include(../tools/cmake/platform.cmake)
+set(TOOLS_DIR ../tools/cmake)
+
+include(${TOOLS_DIR}/platform.cmake)
+include(${TOOLS_DIR}/includes.cmake)
 
 set(SOURCE_FILES
     #dummy.cpp
@@ -13,154 +16,6 @@ set(SOURCE_FILES
     estd/port/posix/streambuf.cpp
     )
 
-# DEBT: Phasing out inclusion of .h files, but keeping this around just in case something needs it
-set(INCLUDE_FILES
-        estd/algorithm.h
-        estd/allocators/fixed.h
-        estd/allocators/generic.h
-        estd/allocators/handle_desc.h
-        estd/array.h
-
-        estd/c++03/tuple.h
-
-        estd/cctype.h
-        estd/charconv.h
-        estd/cstdint.h
-        estd/cstddef.h
-        estd/chrono.h
-        estd/deque.h
-
-        estd/exp/functional.h
-        estd/exp/memory/memory_pool.h
-        estd/exp/memory/memory_pool2.h
-        estd/exp/observer.h
-        estd/exp/tmr.h
-
-        estd/forward_list.h
-        estd/functional.h
-        estd/initializer_list.h
-
-        estd/iomanip.h
-        estd/ios.h
-        estd/iostream.h
-        estd/istream.h
-
-        estd/iterator.h
-
-        estd/internal/accessor.h
-        estd/internal/buffer.h
-        estd/internal/charconv.h
-        estd/internal/charconv.hpp
-        estd/internal/common_type.h
-        estd/internal/deduce_fixed_size.h
-        estd/internal/dynamic_array.h
-        estd/internal/enum.h
-        estd/internal/functional.h
-        estd/internal/handle_with_offset.h
-        estd/internal/impl/allocated_array.h
-        estd/internal/impl/dynamic_array.h
-        estd/internal/impl/handle_desc.h
-        estd/internal/impl/streambuf/pos.h
-        estd/internal/impl/streambuf/span.h
-        estd/internal/impl/streambuf/string.h
-        estd/internal/impl/streambuf.h
-        estd/internal/invoke_result.h
-        estd/internal/iterator_standalone.h
-        estd/internal/ios.h
-        estd/internal/iostream.h
-        estd/internal/is_base_of.h
-        estd/internal/is_function.h
-        estd/internal/istream.h
-        estd/internal/istream_runtimearray.hpp
-        estd/internal/list_node.h
-        estd/internal/locale.h
-        estd/internal/opts.h
-        estd/internal/ostream.h
-        estd/internal/ostream_basic_string.hpp
-        estd/internal/platform.h
-        estd/internal/priority_queue.h
-        estd/internal/promoted_type.h
-
-        estd/internal/raw/cstddef.h
-        estd/internal/raw/type_traits.h
-
-        estd/internal/reverse_list.h
-        estd/internal/runtime_array.h
-        estd/internal/string_convert.h
-        estd/internal/to_string.h
-        estd/internal/type_traits.h
-        estd/internal/llvm_type_traits.h
-        estd/internal/utility.h
-        estd/internal/value_evaporator.h
-
-        estd/iterator.h
-
-        estd/iterators/list.h
-        estd/limits.h
-        estd/list.h
-        estd/locale.h
-
-        estd/map.h
-        estd/memory.h
-        estd/mutex.h
-
-        estd/numeric.h
-
-        estd/optional.h
-        estd/ostream.h
-
-        estd/policy/list.h
-        estd/policy/string.h
-
-        estd/port/arch/esp-idf.h
-
-        estd/port/asf/chrono.h
-        estd/port/asf/thread.h
-
-        estd/port/chrono.h
-        estd/port/chrono.hpp
-        estd/port/identify_platform.h
-        estd/port/arduino/chrono.h
-        estd/port/arduino/string.h
-        estd/port/arduino/thread.h
-        estd/port/esp-idf/chrono.h
-        estd/port/mutex.h
-        estd/port/freertos/chrono.h
-        estd/port/freertos/thread.h
-        estd/port/freertos/mutex.h
-        estd/port/posix/chrono.h
-        estd/port/posix/streambuf.h
-        estd/port/posix/thread.h
-        estd/port/streambuf.h
-        estd/port/string.h
-        estd/port/thread.h
-
-        estd/port/toolchain/gnuc.h
-        estd/port/toolchain/msvc.h
-
-        estd/queue.h
-        estd/ratio.h
-        estd/span.h
-        estd/sstream.h
-        estd/stack.h
-        estd/streambuf.h
-        estd/string.h
-        estd/string_view.h
-        estd/system_error.h
-        estd/thread.h
-        estd/traits/char_traits.h
-        estd/traits/list_node.h
-        estd/traits/allocator_traits.h
-        estd/traits/string.h
-        estd/tuple.h
-        estd/type_traits.h
-        estd/utility.h
-        estd/variant.h
-        estd/vector.h
-
-        estd/exp/heap.h
-        estd/exp/streambuf-traits.h
-        estd/exp/memory_resource.h)
 
 # Guidance from [2.1], otherwise we get INTERFACE_INCLUDE_DIRECTORIES property error
 set(ESTD_INCLUDE_DIRECTORY
@@ -182,7 +37,7 @@ if(FEATURE_ESTD_INTERFACE)
     target_include_directories(${PROJECT_NAME} INTERFACE ${ESTD_INCLUDE_DIRECTORY})
     if(ESTD_OS_FREERTOS)
         message(DEBUG "estd: FreeRTOS compile defs")
-        target_compile_definitions(estd INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
+        target_compile_definitions(${PROJECT_NAME} INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
     endif()
 else()
     set(LIB_TYPE static)
@@ -197,28 +52,4 @@ message(VERBOSE "estd: LIB_TYPE=${LIB_TYPE}")
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 
-# Guidance from [1] and [1.1]
-
-include(CMakePackageConfigHelpers)
-
-write_basic_package_version_file(
-        ${PROJECT_NAME}Version.cmake
-        VERSION ${PACKAGE_VERSION}
-        COMPATIBILITY AnyNewerVersion
-)
-
-install(TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
-        #LIBRARY DESTINATION lib
-        DESTINATION lib/malachi-iot/${PROJECT_NAME}-${PROJECT_VERSION}
-        #DESTINATION lib
-        #ARCHIVE DESTINATION lib
-        #RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include/malachi-iot/${PROJECT_NAME}/${PROJECT_VERSION}
-        )
-
-install(EXPORT ${PROJECT_NAME}Targets
-        FILE ${PROJECT_NAME}-${LIB_TYPE}-Targets.cmake
-        NAMESPACE malachi-iot::
-        DESTINATION lib/cmake/${PROJECT_NAME}
-        )
+include(${TOOLS_DIR}/install.cmake)
