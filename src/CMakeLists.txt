@@ -10,7 +10,6 @@ include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)
 
 set(SOURCE_FILES
-    #dummy.cpp
     estd/internal/string_convert.cpp
     estd/internal/utility.cpp
     estd/port/posix/streambuf.cpp
@@ -22,12 +21,11 @@ set(ESTD_INCLUDE_DIRECTORY
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/.>
         $<INSTALL_INTERFACE:.>)
 
-message(DEBUG "estd: interface=${FEATURE_ESTD_INTERFACE}")
+message(DEBUG "estd: FEATURE_ESTD_INTERFACE=${FEATURE_ESTD_INTERFACE}")
 
 # Was strongly considering making parallel add_libraries here (-static and -interface flavors)
 # but article [2] has changed my mind
 if(FEATURE_ESTD_INTERFACE)
-    set(LIB_TYPE interface)
     add_library(${PROJECT_NAME} INTERFACE)
 
     # DEBT: direct interface compile of estd fails with this, though lib inclusion seems to work OK -
@@ -40,15 +38,12 @@ if(FEATURE_ESTD_INTERFACE)
         target_compile_definitions(${PROJECT_NAME} INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
     endif()
 else()
-    set(LIB_TYPE static)
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
     add_library(estd_lib ALIAS ${PROJECT_NAME})
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${ESTD_INCLUDE_DIRECTORY})
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 endif()
-
-message(VERBOSE "estd: LIB_TYPE=${LIB_TYPE}")
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 

@@ -1,5 +1,14 @@
 # Guidance from [1] and [1.1]
 
+# DEBT: Perhaps we can do this with a generator?
+if(FEATURE_ESTD_INTERFACE)
+    set(LIB_TYPE interface)
+else()
+    set(LIB_TYPE static)
+endif()
+
+message(VERBOSE "estd: LIB_TYPE=${LIB_TYPE}")
+
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
