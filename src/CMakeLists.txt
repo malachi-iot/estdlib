@@ -1,3 +1,5 @@
+# All references see /docs/references.md
+
 cmake_minimum_required(VERSION 3.13)
 
 project(estd VERSION 0.4.0 LANGUAGES CXX)
@@ -179,3 +181,28 @@ endif()
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 
+# Guidance from [1] and [1.1]
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+        ${PROJECT_NAME}Version.cmake
+        VERSION ${PACKAGE_VERSION}
+        COMPATIBILITY AnyNewerVersion
+)
+
+install(TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}Targets
+        #LIBRARY DESTINATION lib
+        DESTINATION lib/malachi-iot/${PROJECT_NAME}-${PROJECT_VERSION}
+        #DESTINATION lib
+        #ARCHIVE DESTINATION lib
+        #RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include/malachi-iot/${PROJECT_NAME}/${PROJECT_VERSION}
+        )
+
+install(EXPORT ${PROJECT_NAME}Targets
+        FILE ${ProjectName}Targets.cmake
+        NAMESPACE malachi-iot::
+        DESTINATION lib/cmake/${PROJECT_NAME}
+        )
