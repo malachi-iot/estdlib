@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.13)
 # initialize the SDK directly
 include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
 
-project(rpi-unit-tests LANGUAGES C CXX)
+project(unit-tests-app LANGUAGES C CXX)
 
 set(ROOT_DIR ../..)
 
@@ -20,6 +20,8 @@ add_executable(${PROJECT_NAME}
     proving.cpp
     rtos.cpp
 )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME unit-tests)
 
 target_include_directories(${PROJECT_NAME} PRIVATE .)
 
