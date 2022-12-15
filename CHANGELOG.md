@@ -1,4 +1,4 @@
-# v0.4.x - DDMMMYY
+# v0.4.1 - 14DEC22
 
 ## Added Features
 
@@ -8,7 +8,7 @@
 
 ## Quality Updates & Bug Fixes
 
-* CMake INTERFACE mode fixed
+* CMake: INTERFACE mode fixed, general cleanup, experimental `install` capability
 * `estd::freertos::queue`
     * aligning isr and non-isr send signatures (breaking change)
     * adding convenience max-duration/timeout methods
@@ -18,6 +18,7 @@
 
 * FreeRTOS:
     * `estd::freertos::timer` static mode lacks proper unit test
+* CMake: `install` capability not well tested
 
 # v0.4.0 - 01DEC22
 
