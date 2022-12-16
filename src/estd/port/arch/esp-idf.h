@@ -4,6 +4,9 @@
 // https://github.com/espressif/esp-idf/blob/v4.0/components/esp_common/include/esp_idf_version.h
 // NOTE: Our flavor has a minor advantage that we deduce version at build time, before compile
 // time
+// DEBT: This is probably actually also done by esp-idf as well, as per
+// https://docs.espressif.com/projects/esp-idf/en/v4.4.3/esp32/api-guides/build-system.html
+// which indicates the presence of IDF_VERSION_* at build time
 
 // Until we phase this out, dogfood ESTD_BUILD_SEMVER into here
 #include "version.h"
