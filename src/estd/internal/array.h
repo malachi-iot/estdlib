@@ -5,9 +5,10 @@ namespace estd { namespace internal {
 // NOTE: Replaces the unused experimental::aligned_storage_array which itself is dependent
 // on deprecated aligned_storage API
 
-// Guidance from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
+// Guidance from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf and pggcc-29
+// Turns out alignment isn't a critical issue here
 
-// DEBT: May not need to be layer1 explicitly, it seems span can cover the job of layer2 and layer3
+// DEBT: Move this part to impl area
 template <class T, unsigned N>
 struct uninitialized_array
 {
@@ -73,13 +74,14 @@ struct array_base2 : TBase
     typedef TBase base_type;
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
-    typedef typename base_type::pointer iterator;
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
     typedef typename base_type::value_type& reference;
     typedef const typename base_type::value_type& const_reference;
     typedef typename base_type::size_type size_type;
 
-    pointer begin() { return base_type::data(); }
-    ESTD_CPP_CONSTEXPR_RET const_pointer begin() const { return base_type::data(); }
+    iterator begin() { return base_type::data(); }
+    ESTD_CPP_CONSTEXPR_RET const_iterator begin() const { return base_type::data(); }
 
     reference front() { return *begin(); }
     ESTD_CPP_CONSTEXPR_RET const_reference front() const { return *begin(); }

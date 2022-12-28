@@ -242,12 +242,23 @@ TEST_CASE("array/vector tests")
 
             SECTION("vector")
             {
-                estd::vector<int, traits::allocator_type> v;
+                typedef estd::internal::single_fixedbuf_allocator<test::AlignmentTester, sz,
+                    uninitialized_array<test::AlignmentTester, sz> > allocator_type;
+                estd::vector<test::AlignmentTester, allocator_type> v;
 
                 v.push_back(7);
 
                 REQUIRE(v.size() == 1);
                 REQUIRE(v.max_size() == 10);
+
+                test::AlignmentTester& front = v.front();
+
+                REQUIRE(front.val1 == 7);
+
+                v.pop_back();
+
+                REQUIRE(v.size() == 0);
+                REQUIRE(v.empty());
             }
         }
     }
