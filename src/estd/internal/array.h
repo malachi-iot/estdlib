@@ -94,4 +94,20 @@ struct array_base2 : TBase
     }
 };
 
-}}
+// EXPERIMENTAL
+template <class T, unsigned N>
+struct layer1_allocator
+{
+    array_base2<uninitialized_array<T, N> > storage;
+};
+
+}
+
+// EXPERIMENTAL
+template <class T, unsigned N>
+struct allocator_traits<internal::layer1_allocator<T, N> >
+{
+
+};
+
+}

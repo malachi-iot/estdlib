@@ -224,5 +224,31 @@ TEST_CASE("array/vector tests")
             // Just to get debugger here
             array[0].val1 = 123;
         }
+        SECTION("adapted to allocator")
+        {
+            estd::internal::single_fixedbuf_allocator<int, sz, uninitialized_array<int, sz> > alloc;
+            typedef estd::allocator_traits<decltype(alloc)> traits;
+
+            auto h = traits::allocate(alloc, 10);
+            int& p = traits::lock(alloc, h);
+
+            //auto h = alloc.allocate(1);
+            //int* p = &alloc.lock(h);
+
+            REQUIRE(&p != nullptr);
+
+            // NOTE: noop
+            traits::unlock(alloc, h);
+
+            SECTION("vector")
+            {
+                estd::vector<int, traits::allocator_type> v;
+
+                v.push_back(7);
+
+                REQUIRE(v.size() == 1);
+                REQUIRE(v.max_size() == 10);
+            }
+        }
     }
 }
