@@ -3,6 +3,7 @@
 #include "generic.h"
 #include "../traits/allocator_traits.h"
 #include "../internal/accessor.h"
+#include "../internal/array.h"
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"
@@ -372,7 +373,8 @@ public:
 namespace layer1 {
 
 template <class T, size_t len>
-struct allocator : estd::internal::single_fixedbuf_allocator<T, len>
+struct allocator : estd::internal::single_fixedbuf_allocator<T, len,
+        estd::internal::array_base2<estd::internal::uninitialized_array<T, len> > >
 {
 
 };

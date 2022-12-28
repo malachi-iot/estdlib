@@ -96,11 +96,7 @@ TEST_CASE("vector tests")
         typedef vector_type::size_type size_type;
         vector_type v;
 
-        // Have to fiddle with size_type sizeof here probably due to padding
-        // NOTE: This passes whether or not FEATURE_ESTD_STRICT_DYNAMIC_ARRAY is enabled also
-        // due to padding (44 bytes in either case, even though technically it's 41 bytes
-        // in one case and 42 bytes in the other)
-        REQUIRE(sizeof(vector_type) == (sizeof(int) * 10) + (sizeof(size_type) + 3));
+        REQUIRE(sizeof(vector_type) == (sizeof(int) * 10) + (sizeof(size_type)));
 
         int size_type_size = sizeof(accessor_type::handle_with_offset::size_type);
 

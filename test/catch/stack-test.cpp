@@ -20,10 +20,7 @@ TEST_CASE("stack")
         int sz = sizeof(s);
 
         REQUIRE(sizeof(size_type) == 1);
-        // FIX: Want this to come out 41, clearly alignment and padding are at play
-        // this is not a specific failure, but kind of a 'loose screw' which I'd rather
-        // not completely fall out and cause other problems
-        REQUIRE(sizeof(container_type) == 44);
+        REQUIRE(sizeof(container_type) == 41);
         //REQUIRE(sz == sizeof(int) * 10 + sizeof(void*) * 2);
 
         int counter = 0;
