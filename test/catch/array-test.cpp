@@ -18,10 +18,29 @@ struct AlignmentTester
 {
     void* value2;
     uint16_t val1;
+
+    AlignmentTester(uint16_t val1) : val1{val1} {}
 };
+
+struct AlignmentTester2
+{
+    char cval1;
+    uint16_t val1;
+};
+
+#pragma pack(push, 1)
+struct AlignmentTester3
+{
+    uint16_t val1;
+    char cval1;
+};
+#pragma pack(pop)
 
 }}
 
+template <class T, unsigned sz>
+using aligned_array = estd::internal::_layer1::array_base2<
+        estd::internal::_layer1::aligned_array<T, sz> >;
 
 TEST_CASE("array/vector tests")
 {
@@ -174,18 +193,36 @@ TEST_CASE("array/vector tests")
     SECTION("aligned_array")
     {
         constexpr int sz = 10;
-        estd::internal::_layer1::array_base2<
-                estd::internal::_layer1::aligned_array<test::AlignmentTester, sz> > array;
-        estd::span<test::AlignmentTester, sz> span(array.data());
 
-        test::AlignmentTester& d5 = array[5];
+        SECTION("deep dive")
+        {
+            aligned_array<test::AlignmentTester, sz> array;
+            estd::span<test::AlignmentTester, sz> span(array.data());
 
-        d5.val1 = 123;
-        array[4].val1 = 456;
+            test::AlignmentTester& d5 = array[5];
 
-        REQUIRE(&d5 == &span[5]);
-        REQUIRE(d5.val1 == span[5].val1);
-        REQUIRE(d5.val1 != span[4].val1);
-        REQUIRE(span[4].val1 == 456);
+            d5.val1 = 123;
+            array[4].val1 = 456;
+
+            REQUIRE(&d5 == &span[5]);
+            REQUIRE(d5.val1 == span[5].val1);
+            REQUIRE(d5.val1 != span[4].val1);
+            REQUIRE(span[4].val1 == 456);
+        }
+        SECTION("various length checks")
+        {
+            REQUIRE(sizeof(aligned_array<int, sz>) == sizeof(int[sz]));
+            REQUIRE(sizeof(aligned_array<test::Dummy, sz>) == sizeof(test::Dummy[sz]));
+            REQUIRE(sizeof(aligned_array<test::AlignmentTester2, sz>) == sizeof(test::AlignmentTester2[sz]));
+            REQUIRE(sizeof(aligned_array<test::AlignmentTester3, sz>) == sizeof(test::AlignmentTester3[sz]));
+        }
+        SECTION("deep dive: odd size")
+        {
+            aligned_array<test::AlignmentTester3, sz> array;
+            test::AlignmentTester3 array2[sz];
+
+            // Just to get debugger here
+            array[0].val1 = 123;
+        }
     }
 }

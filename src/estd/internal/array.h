@@ -20,7 +20,13 @@ struct aligned_array
 
     struct container
     {
-        alignas(T) estd::byte data[sizeof(T)];
+#ifdef FEATURE_CPP_ALIGN
+        alignas(T)
+#elif defined(__GNUC__)
+        // FIX: This gets mad for odd sizes
+        __attribute__((aligned(sizeof(T))))
+#endif
+        estd::byte data[sizeof(T)];
     };
 
     container data_[N];
