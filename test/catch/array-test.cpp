@@ -39,8 +39,8 @@ struct AlignmentTester3
 }}
 
 template <class T, unsigned sz>
-using aligned_array = estd::internal::_layer1::array_base2<
-        estd::internal::_layer1::aligned_array<T, sz> >;
+using uninitialized_array = estd::internal::array_base2<
+        estd::internal::uninitialized_array<T, sz> >;
 
 TEST_CASE("array/vector tests")
 {
@@ -196,7 +196,7 @@ TEST_CASE("array/vector tests")
 
         SECTION("deep dive")
         {
-            aligned_array<test::AlignmentTester, sz> array;
+            uninitialized_array<test::AlignmentTester, sz> array;
             estd::span<test::AlignmentTester, sz> span(array.data());
 
             test::AlignmentTester& d5 = array[5];
@@ -211,14 +211,14 @@ TEST_CASE("array/vector tests")
         }
         SECTION("various length checks")
         {
-            REQUIRE(sizeof(aligned_array<int, sz>) == sizeof(int[sz]));
-            REQUIRE(sizeof(aligned_array<test::Dummy, sz>) == sizeof(test::Dummy[sz]));
-            REQUIRE(sizeof(aligned_array<test::AlignmentTester2, sz>) == sizeof(test::AlignmentTester2[sz]));
-            REQUIRE(sizeof(aligned_array<test::AlignmentTester3, sz>) == sizeof(test::AlignmentTester3[sz]));
+            REQUIRE(sizeof(uninitialized_array<int, sz>) == sizeof(int[sz]));
+            REQUIRE(sizeof(uninitialized_array<test::Dummy, sz>) == sizeof(test::Dummy[sz]));
+            REQUIRE(sizeof(uninitialized_array<test::AlignmentTester2, sz>) == sizeof(test::AlignmentTester2[sz]));
+            REQUIRE(sizeof(uninitialized_array<test::AlignmentTester3, sz>) == sizeof(test::AlignmentTester3[sz]));
         }
         SECTION("deep dive: odd size")
         {
-            aligned_array<test::AlignmentTester3, sz> array;
+            uninitialized_array<test::AlignmentTester3, sz> array;
             test::AlignmentTester3 array2[sz];
 
             // Just to get debugger here

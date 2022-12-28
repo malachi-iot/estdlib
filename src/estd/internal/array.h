@@ -2,8 +2,6 @@
 
 namespace estd { namespace internal {
 
-namespace _layer1 {
-
 // NOTE: Replaces the unused experimental::aligned_storage_array which itself is dependent
 // on deprecated aligned_storage API
 
@@ -11,7 +9,7 @@ namespace _layer1 {
 
 // DEBT: May not need to be layer1 explicitly, it seems span can cover the job of layer2 and layer3
 template <class T, unsigned N>
-struct aligned_array
+struct uninitialized_array
 {
     typedef T value_type;
     typedef value_type* pointer;
@@ -20,11 +18,14 @@ struct aligned_array
 
     struct container
     {
+        // as per pggcc-29, looks like arrays don't have to worry much about alignment
+#if UNUSED
 #ifdef FEATURE_CPP_ALIGN
         alignas(T)
 #elif defined(__GNUC__)
         // FIX: This gets mad for odd sizes
         __attribute__((aligned(sizeof(T))))
+#endif
 #endif
         estd::byte data[sizeof(T)];
     };
@@ -92,7 +93,5 @@ struct array_base2 : TBase
         return *base_type::get_at(pos);
     }
 };
-
-}
 
 }}
