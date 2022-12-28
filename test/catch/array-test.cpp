@@ -2,6 +2,7 @@
 
 #include "estd/vector.h"
 #include "estd/array.h"
+#include <estd/span.h>
 
 #include "test-data.h"
 #include "mem.h"
@@ -10,6 +11,16 @@ using namespace estd;
 
 static int static_values[] = { 1, 2, 3, 4 };
 static const uint8_t static_const_values[] = { 0x12, 0x34, 0x56, 0x78 };
+
+namespace estd { namespace test {
+
+struct AlignmentTester
+{
+    void* value2;
+    uint16_t val1;
+};
+
+}}
 
 
 TEST_CASE("array/vector tests")
@@ -159,5 +170,22 @@ TEST_CASE("array/vector tests")
 
         //experimental::layer0::make_array(static_values);
 #endif
+    }
+    SECTION("aligned_array")
+    {
+        constexpr int sz = 10;
+        estd::internal::_layer1::array_base2<
+                estd::internal::_layer1::aligned_array<test::AlignmentTester, sz> > array;
+        estd::span<test::AlignmentTester, sz> span(array.data());
+
+        test::AlignmentTester& d5 = array[5];
+
+        d5.val1 = 123;
+        array[4].val1 = 456;
+
+        REQUIRE(&d5 == &span[5]);
+        REQUIRE(d5.val1 == span[5].val1);
+        REQUIRE(d5.val1 != span[4].val1);
+        REQUIRE(span[4].val1 == 456);
     }
 }
