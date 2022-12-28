@@ -374,7 +374,7 @@ namespace layer1 {
 
 template <class T, size_t len>
 struct allocator : estd::internal::single_fixedbuf_allocator<T, len,
-        estd::internal::array_base2<estd::internal::uninitialized_array<T, len> > >
+        estd::internal::uninitialized_array<T, len> >
 {
 
 };

@@ -8,14 +8,28 @@ namespace estd { namespace internal {
 // Guidance from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf and pggcc-29
 // Turns out alignment isn't a critical issue here
 
+namespace impl {
+
+template <unsigned N>
+struct array_base_size
+{
+    typedef unsigned size_type;
+
+    ESTD_CPP_CONSTEXPR_RET bool empty() const { return N == 0; }
+    ESTD_CPP_CONSTEXPR_RET size_type size() const { return N; }
+    ESTD_CPP_CONSTEXPR_RET size_type max_size() const { return N; }
+};
+
+
 // DEBT: Move this part to impl area
 template <class T, unsigned N>
-struct uninitialized_array
+struct uninitialized_array : array_base_size<N>
 {
+    typedef array_base_size<N> base_type;
     typedef T value_type;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef unsigned size_type;
+    typedef typename base_type::size_type size_type;
 
     struct container
     {
@@ -50,10 +64,6 @@ struct uninitialized_array
     pointer end() { return data() + N; }
     ESTD_CPP_CONSTEXPR_RET const_pointer end() const { return data() + N; }
 
-    ESTD_CPP_CONSTEXPR_RET bool empty() const { return N == 0; }
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return N; }
-    ESTD_CPP_CONSTEXPR_RET size_type max_size() const { return N; }
-
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
@@ -67,6 +77,35 @@ protected:
         return reinterpret_cast<const_pointer>(data_[pos].data);
     }
 };
+
+template <class T, unsigned N>
+struct traditional_array : array_base_size<N>
+{
+    typedef array_base_size<N> base_type;
+    typedef T value_type;
+    typedef value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef typename base_type::size_type size_type;
+
+    T data_[N];
+
+    pointer data() { return data_; }
+    ESTD_CPP_CONSTEXPR_RET const_pointer data() const { return data_; }
+
+    pointer end() { return data() + N; }
+    ESTD_CPP_CONSTEXPR_RET const_pointer end() const { return data() + N; }
+
+protected:
+    // Making these internal/protected APIs so that we can dogfood and really test our
+    // alignment with the [] operator
+    pointer get_at(size_type pos) { return data_() + pos; }
+    ESTD_CPP_CONSTEXPR_RET const_pointer get_at(size_type pos) const
+    {
+        return data() + pos;
+    }
+};
+
+}
 
 template <class TBase>
 struct array_base2 : TBase
@@ -100,8 +139,13 @@ struct array_base2 : TBase
 template <class T, unsigned N>
 struct layer1_allocator
 {
-    array_base2<uninitialized_array<T, N> > storage;
+    array_base2<impl::uninitialized_array<T, N> > storage;
 };
+
+// Just like regular std::array except T constructor is not called
+template <class T, unsigned N>
+struct uninitialized_array : array_base2<impl::uninitialized_array<T, N> > {};
+
 
 }
 

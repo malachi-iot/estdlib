@@ -39,8 +39,7 @@ struct AlignmentTester3
 }}
 
 template <class T, unsigned sz>
-using uninitialized_array = estd::internal::array_base2<
-        estd::internal::uninitialized_array<T, sz> >;
+using uninitialized_array = estd::internal::uninitialized_array<T, sz>;
 
 TEST_CASE("array/vector tests")
 {
