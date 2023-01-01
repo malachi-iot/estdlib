@@ -4,7 +4,7 @@
 
 ## Quality Updates & Bug Fixes
 
-## Added Features
+* `estd::layer1::vector` no longer requires a default contructor in its managed types
 
 ## Known Issues & Limitations
 
