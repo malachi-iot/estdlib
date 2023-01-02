@@ -200,4 +200,12 @@ TEST_CASE("limits & common_type tests")
             REQUIRE(digits == 15);
         }
     }
+    SECTION("string length")
+    {
+        constexpr unsigned v = numeric_limits<int16_t>::length<10>::value;
+        constexpr unsigned v2 = numeric_limits<int16_t>::length<16>::value;
+
+        REQUIRE(v == 5);
+        REQUIRE(v2 == 4);
+    }
 }

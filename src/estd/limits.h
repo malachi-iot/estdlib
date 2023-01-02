@@ -52,12 +52,44 @@ namespace estd {
 
 namespace internal {
 
+// NOTE: Not doing a function for C++03 friendliness, though the days are numbered
+// that I'm gonna keep doing that.  I looked all over and couldn't find a std way
+// to do this
+template <unsigned base, unsigned bits>
+struct uint_strlen;
+
+// DEBT: I'm sure there's a more math-y way to do this
+
+template <> struct uint_strlen<10, 8> :
+        estd::integral_constant<unsigned, 3> {};
+
+template <> struct uint_strlen<10, 16> :
+        estd::integral_constant<unsigned, 5> {};
+
+template <> struct uint_strlen<10, 32> :
+        estd::integral_constant<unsigned, 10> {};
+
+template <> struct uint_strlen<10, 64> :
+        estd::integral_constant<unsigned, 20> {};
+
+template <unsigned bits>
+struct uint_strlen<16, bits> :
+        estd::integral_constant<unsigned, bits / 4> {};
+
 template <class T, bool _is_signed>
 struct integer_limits
 {
     static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = _is_signed;
-    static CONSTEXPR int digits = (sizeof(T) * 8) - (is_signed ? 1 : 0);
+    static CONSTEXPR int digits = (sizeof(T) * CHAR_BIT) - (is_signed ? 1 : 0);
+
+    /// Retrieves maximum length a string of this int can be in its
+    /// unsigned form.
+    /// NOTE: this is an estd extension, not part of std
+    /// DEBT: Does not yet account for sign bit, but should
+    /// \tparam base what numeric base is desired, base 10 and base 16 are supported at this time
+    template <unsigned base>
+    struct length : uint_strlen<base, sizeof(T) * CHAR_BIT> {};
 };
 
 
