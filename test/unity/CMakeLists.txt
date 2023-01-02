@@ -18,6 +18,7 @@ set(SOURCES
     locale.cpp
     map.cpp
     optional.cpp
+    ostream.cpp
     queue.cpp
     ratio.cpp
     span.cpp
