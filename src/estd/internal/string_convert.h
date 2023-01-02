@@ -66,6 +66,12 @@ template<> inline unsigned short fromString(const char* input)
     return (unsigned short) strtoul(input, NULL, 10);
 }
 
+// DEBT: Time to rework this whole maxStringLength arrangement.
+// 1.  Its silent failures cause problems.  Unsupported types should generate compile time
+//     errors, not a '0'
+// 2.  The whole specialization on int32 etc not working  for some CPUs is confusing and crusty.  Get to
+//     the bottom of that
+
 // EXCLUDES null termination but room for a - sign
 // a value of 0 indicates type not supported
 template<class T>
@@ -95,6 +101,13 @@ template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<double>() { return 64;
 #if ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32 && INT32_MAX == INT_MAX
 template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
 template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<unsigned>() { return 11; }
+#endif
+
+// https://github.com/brucehoult/riscv-meta/blob/master/doc/src/rv128.md
+// https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf
+#if __riscv
+template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
+template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<unsigned>() { return 10; }
 #endif
 
 

@@ -1,13 +1,30 @@
 #include "unit-test.h"
 
 #include <estd/ostream.h>
+#include <estd/sstream.h>
 
-// TODO: Bug during esp-idf int -> str conversion, dig into that here
+using namespace estd;
+
 // TODO: Move rpi pico ostream tests into here
 
 static void test_ostringstream()
 {
+    // DEBT: Until we overhaul it, maxStringLength runtime fails when
+    // it can't identify your integer type (yuck)
+    unsigned len = internal::maxStringLength<int>();
 
+    // 16 bits minimum size expected
+    TEST_ASSERT_GREATER_THAN(4, len);
+
+    experimental::ostringstream<32> out;
+
+    const int val1 = 123;
+
+    out << val1;
+
+    const char* s = out.rdbuf()->str().data();
+
+    TEST_ASSERT_EQUAL_STRING("123", s);
 }
 
 #ifdef ESP_IDF_TESTING

@@ -12,9 +12,9 @@ These tests are all for variants of Espressif ESP32
 | ------- | -------- | -------------------- | -------------- | -------  | ------ | ----- |
 | 05DEC22 | chrono   | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.0     | Pass   |
 | 07DEC22 | ios      | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
-| 02JAN23 | ios      | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0     | Fail   | Native int type confuses ostream.  Doubtless this applies to above 07DEC22 test too, just didn't retest that yet
+| 02JAN23 | ios      | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0     | Pass   | 
 | 07DEC22 | timer    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 07DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 05DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.0     | Pass   |
-| 01JAN23 | unity    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0     | Pass   |
+| 02JAN23 | unity    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0     | Pass   |
 | 16AUG22 | unity    | ESP32 Lolin Generic  |                | v5.1-dev | Pass   |

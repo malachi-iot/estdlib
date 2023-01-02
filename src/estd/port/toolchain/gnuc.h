@@ -51,6 +51,8 @@
 
 // Adapted from https://stackoverflow.com/questions/1505582/determining-32-vs-64-bit-in-c
 // more reference https://sourceforge.net/p/predef/wiki/Architectures/
+// DEBT: Document specifically what bitness means as far as estd is concerned
+// IIRC it's pointer size
 #if __x86_64__ || __ppc64__
 #define ESTD_ARCH_BITNESS   64
 #elif __aarch64__
@@ -65,6 +67,9 @@
 #ifndef ESTD_MCU_ARM
 #define ESTD_MCU_ARM        __ARM_ARCH
 #endif
+#elif __riscv
+// https://github.com/riscv-non-isa/riscv-c-api-doc/blob/master/riscv-c-api.md
+#define ESTD_MCU_RISCV
 #else
 #if FEATURE_ESTD_STRICT
 #warning "Assuming 32 bit architecture"

@@ -5,8 +5,12 @@
 ## Quality Updates & Bug Fixes
 
 * `estd::layer1::vector` no longer requires a default contructor in its managed types
+* RISC-V int -> string conversion repaired
 
 ## Known Issues & Limitations
+
+* internal `maxStringLength` needs an overhaul, easily breaks with new MPU architectures
+  (causes int -> string conversions to silently fail)
 
 # v0.4.1 - 14DEC22
 
