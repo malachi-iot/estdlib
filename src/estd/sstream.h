@@ -63,6 +63,13 @@ struct istringstream : basic_istringstream<char, N, null_terminated>
     typedef basic_istringstream<char, N, null_terminated> base_type;
     ESTD_CPP_FORWARDING_CTOR(istringstream)
 };
+
+template <size_t N, bool null_terminated = true>
+struct ostringstream : estd::internal::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> >
+{
+    typedef estd::internal::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> > base_type;
+    ESTD_CPP_FORWARDING_CTOR(ostringstream)
+};
 #endif
 
 }

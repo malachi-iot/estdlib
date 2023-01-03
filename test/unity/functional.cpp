@@ -60,7 +60,9 @@ TEST_CASE("runtime function tests", "[functional]")
 void test_functional()
 #endif
 {
+#if defined (FEATURE_CPP_VARIADIC)
     RUN_TEST(test_detail_function);
+#endif
 	RUN_TEST(test_inline_function);
 }
 

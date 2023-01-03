@@ -22,6 +22,7 @@ void test_functional();
 void test_limits();
 void test_locale();
 void test_optional();
+void test_ostream();
 void test_queue();
 void test_ratio();
 void test_span();

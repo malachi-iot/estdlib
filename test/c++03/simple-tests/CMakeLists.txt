@@ -12,37 +12,15 @@ set(UNITY_DIR ../../../ext/Unity)
 set(ESTDLIB_DIR ../../../src)
 set(TESTSRC_DIR ../../../test/unity)
 
-add_subdirectory(${ESTDLIB_DIR} estdlib)
-add_subdirectory(${UNITY_DIR} unity)
+add_subdirectory(${TESTSRC_DIR} src)
 
 include_directories(${TESTSRC_DIR})
-
-set(TESTSRC
-        ${TESTSRC_DIR}/align.cpp
-        ${TESTSRC_DIR}/array.cpp
-        ${TESTSRC_DIR}/chrono.cpp
-        ${TESTSRC_DIR}/cpp.cpp
-        ${TESTSRC_DIR}/cstddef.cpp
-        ${TESTSRC_DIR}/limits.cpp
-        ${TESTSRC_DIR}/locale.cpp
-        ${TESTSRC_DIR}/optional.cpp
-        ${TESTSRC_DIR}/queue.cpp
-        ${TESTSRC_DIR}/ratio.cpp
-        ${TESTSRC_DIR}/span.cpp
-        ${TESTSRC_DIR}/streambuf.cpp
-        ${TESTSRC_DIR}/string.cpp
-        ${TESTSRC_DIR}/tuple.cpp
-        )
-
-#   ${TESTSRC_DIR}/map.cpp
-#   ${TESTSRC_DIR}/thread.cpp
 
 add_executable(${PROJECT_NAME}
         "main.cpp"
         misc.cpp
         tuple-test.cpp
-        ${TESTSRC}
         )
 
-target_link_libraries(${PROJECT_NAME} unity estd)
+target_link_libraries(${PROJECT_NAME} unity estd unit-tests)
 

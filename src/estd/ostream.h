@@ -154,8 +154,10 @@ basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
     }
 }
 #else
+// DEBT: Move all this out to c++03 specific area
+
 template <class TStreambuf, class TInt>
-inline basic_ostream<TStreambuf>& out_int_helper3(basic_ostream<TStreambuf>& out, TInt value)
+inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, TInt value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework
     // support for that really would be useful
@@ -174,6 +176,30 @@ inline basic_ostream<TStreambuf>& out_int_helper3(basic_ostream<TStreambuf>& out
             // TODO: assert or log an error condition
             return out;
     }
+}
+
+template <class TStreambuf>
+inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, int value)
+{
+    return out_int_helper(out, value);
+}
+
+template <class TStreambuf>
+inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, unsigned value)
+{
+    return out_int_helper(out, value);
+}
+
+template <class TStreambuf>
+inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, long value)
+{
+    return out_int_helper(out, value);
+}
+
+template <class TStreambuf>
+inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, unsigned long value)
+{
+    return out_int_helper(out, value);
 }
 
 #endif

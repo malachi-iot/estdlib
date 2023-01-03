@@ -30,8 +30,10 @@
 
 #ifdef FEATURE_CPP_CONSTEXPR
 #define CONSTEXPR constexpr
+#define EXPLICIT explicit
 #else
 #define CONSTEXPR const
+#define EXPLICIT
 #endif
 
 #ifdef FEATURE_CPP_NOEXCEPT

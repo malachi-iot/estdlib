@@ -16,7 +16,6 @@ set(SOURCES
     functional.cpp
     limits.cpp
     locale.cpp
-    map.cpp
     optional.cpp
     ostream.cpp
     queue.cpp
@@ -24,9 +23,17 @@ set(SOURCES
     span.cpp
     streambuf.cpp
     string.cpp
-    thread.cpp
     tuple.cpp
     )
+
+message(STATUS "unit-test: CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
+
+if(NOT CMAKE_CXX_STANDARD EQUAL 98)
+    set(SOURCES ${SOURCES}
+        map.cpp
+        thread.cpp
+        )
+endif()
 
 # NOTE: Making this an INTERFACE library so that flags and compiler settings
 # of parent projects are picked up during compilation

@@ -35,6 +35,7 @@ int main()
     test_limits();
     test_locale();
     test_optional();
+    test_ostream();
     test_queue();
     test_ratio();
     test_span();
