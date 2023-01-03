@@ -13,6 +13,7 @@
 #include "streambuf.h"
 #include "ios.h"
 #include "charconv.h"
+#include "limits.h"
 #include "internal/string_convert.h"
 #include "traits/char_traits.h"
 #include "internal/ostream.h"
@@ -39,7 +40,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 
 // DEBT: Brute forcing this via a C++ version check, but I bet we can get this
 // functional with more finesse on earlier C++
-#if __cplusplus >= 201103L
+#if __cplusplus >= 2011034L
 // FIX: SFINAE works, but targets who aren't available for maxStringLength seem to be generating
 // warnings here
 template <class TStreambuf, class T,
@@ -84,6 +85,51 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
     }
 }
 #endif
+
+template <unsigned base, class TStreambuf, class T,
+        unsigned N = estd::numeric_limits<T>::template length<base>::value >
+inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, T value)
+{
+    // +1 for potential - sign
+    // +1 for null terminator
+    char buffer[N + 2];
+
+    // -1 here because to_chars doesn't care about null termination, but we do
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+
+    // DEBT: Check result for conversion failure
+
+    // remember, opt flavor specifies 'ptr' as beginning and we must manually
+    // null terminate the end (ala standard to_chars operation)
+    buffer[N] = 0;
+
+    return out << result.ptr;
+}
+
+template <class TStreambuf, class T, class TLimits = estd::numeric_limits<T>,
+        class enabled = typename enable_if<(TLimits::is_integer)>::type >
+basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
+{
+    // DEBT: another typical enum -> traits/template conversion - a framework
+    // support for that really would be useful
+    switch(out.flags() & ios_base::basefield)
+    {
+        /*
+        case ios_base::oct:
+            return out_int_helper<8>(out, value); */
+
+        case ios_base::dec:
+            return out_int_helper<10>(out, value);
+
+        case ios_base::hex:
+            return out_int_helper<16>(out, value);
+
+        default:
+            // TODO: assert or log an error condition
+            return out;
+    }
+}
+
 
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
