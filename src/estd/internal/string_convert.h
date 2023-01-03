@@ -66,6 +66,9 @@ template<> inline unsigned short fromString(const char* input)
     return (unsigned short) strtoul(input, NULL, 10);
 }
 
+
+namespace legacy {
+
 // DEBT: Time to rework this whole maxStringLength arrangement.
 // 1.  Its silent failures cause problems.  Unsupported types should generate compile time
 //     errors, not a '0'
@@ -74,29 +77,40 @@ template<> inline unsigned short fromString(const char* input)
 
 // EXCLUDES null termination but room for a - sign
 // a value of 0 indicates type not supported
-template<class T>
+template <class T>
 ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength() { return 0; }
 
 // DEBT: Unsure why exactly on some platforms int/int32_t seem to overlap and others
 // don't.  Pertains to ESTD_ARCH_BITNESS checks below
 
 
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<char>() { return 1; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint8_t>() { return 3; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int8_t>() { return 4; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint16_t>() { return 5; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int16_t>() { return 6; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<char>() { return 1; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint8_t>() { return 3; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int8_t>() { return 4; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint16_t>() { return 5; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int16_t>() { return 6; }
 
 // On 32-bit Raspbian we need to exclude this
 #if !(ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32 && INT32_MAX == INT_MAX)
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint32_t>() { return 10; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int32_t>() { return 11;}
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint32_t>() { return 10; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int32_t>() { return 11; }
 #endif
 
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint64_t>() { return 21;}
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int64_t>() { return 20;}
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<float>() { return 32; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<double>() { return 64; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint64_t>() { return 21; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int64_t>() { return 20; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<float>() { return 32; }
+template <>
+ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<double>() { return 64; }
 
 #if ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32 && INT32_MAX == INT_MAX
 template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
@@ -110,6 +124,7 @@ template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
 template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<unsigned>() { return 10; }
 #endif
 
+}
 
 extern const char VALIDATE_NULLSTR_ERROR[];
 extern const char VALIDATE_STRTOOLONG_ERROR[];

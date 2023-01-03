@@ -58,7 +58,7 @@ to_string(estd::internal::allocated_array<TStrImpl>& s, const T value)
 // That design decision exists so that your "64" byte allocations don't actually end up being "65"
 // and causing unexpected alignment issues
 // TODO: Move this explanation out to wiki
-template <class T, size_t N = (internal::maxStringLength<T>() + 1) >
+template <class T, size_t N = (internal::legacy::maxStringLength<T>() + 1) >
 inline layer1::string<N> to_string(const T& value)
 {
     layer1::string<N> s;

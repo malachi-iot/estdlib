@@ -636,9 +636,9 @@ TEST_CASE("string tests")
     }
     SECTION("internal")
     {
-        using namespace estd::internal;
+        using namespace estd::internal::legacy;
 
-        SECTION("maxStringLength")
+        SECTION("maxStringLength (legacy)")
         {
             REQUIRE(maxStringLength<uint8_t>() == 3);
             REQUIRE(maxStringLength<int8_t>() == 4);
