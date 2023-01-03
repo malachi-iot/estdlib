@@ -12,7 +12,7 @@ template<
         class Rep2,
         class Period2
 >
-CONSTEXPR Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
+ESTD_CPP_CONSTEXPR_RET Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
 {
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     typedef ratio_divide<Period2, Period> rd;

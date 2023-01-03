@@ -37,6 +37,41 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.write(s, traits_type::length(s));
 }
 
+// helper since we often convert a statically allocated string
+// NOTE: this will behave slightly differently than a regular string, see to_chars_opt
+// DEBT: Move this to charconv
+template <unsigned N, typename TInt>
+inline to_chars_result to_str_opt(char (&buffer)[N], TInt value, unsigned base)
+{
+    // -1 here because to_chars doesn't care about null termination, but we do
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
+
+    // DEBT: Check result for conversion failure
+
+    // remember, opt flavor specifies 'ptr' as beginning and we must manually
+    // null terminate the end (ala standard to_chars operation)
+    buffer[N - 1] = 0;
+
+    return result;
+}
+
+template <unsigned base, unsigned N, class TStreambuf, class T>
+inline basic_ostream<TStreambuf>& out_int_helper2(basic_ostream<TStreambuf>& out, T value)
+{
+    // +1 for potential - sign
+    // +1 for null terminator
+    char buffer[N + 2];
+
+    to_chars_result result = to_str_opt(buffer, value, base);
+
+    int sz = &buffer[N + 1] - result.ptr;
+
+    out.write(result.ptr, sz);
+
+    return out;
+}
+
+
 
 // DEBT: Brute forcing this via a C++ version check, but I bet we can get this
 // functional with more finesse on earlier C++
@@ -86,6 +121,8 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 }
 #endif
 
+// DEBT: Nearly c++03 compliant, this is totally doable without the default function template args
+#if __cplusplus >= 201103L
 template <unsigned base, class TStreambuf, class T,
         unsigned N = estd::numeric_limits<T>::template length<base>::value >
 inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, T value)
@@ -94,20 +131,17 @@ inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out,
     // +1 for null terminator
     char buffer[N + 2];
 
-    // -1 here because to_chars doesn't care about null termination, but we do
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+    to_chars_result result = to_str_opt(buffer, value, base);
 
-    // DEBT: Check result for conversion failure
+    int sz = &buffer[N + 1] - result.ptr;
 
-    // remember, opt flavor specifies 'ptr' as beginning and we must manually
-    // null terminate the end (ala standard to_chars operation)
-    buffer[N] = 0;
+    out.write(result.ptr, sz);
 
-    return out << result.ptr;
+    return out;
 }
 
-template <class TStreambuf, class T, class TLimits = estd::numeric_limits<T>,
-        class enabled = typename enable_if<(TLimits::is_integer)>::type >
+template <class TStreambuf, class T,
+        class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
 basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework
@@ -128,7 +162,7 @@ basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
             return out;
     }
 }
-
+#endif
 
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
