@@ -57,9 +57,10 @@ namespace estd {
 
 namespace internal {
 
-// NOTE: Not doing a function for C++03 friendliness, though the days are numbered
-// that I'm gonna keep doing that.  I looked all over and couldn't find a std way
-// to do this
+// DEBT: Strongly consider uint_strlen and integer_limits as candidates for 'detail' namespace
+// they are useful on their own and are approaching stability.  Also, consider a consumer of that
+// 'layer1::numeric_string'
+
 template <unsigned base, unsigned bits>
 struct uint_strlen;
 
@@ -89,17 +90,25 @@ struct uint_strlen<8, bits> :
 template <class T, bool _is_signed>
 struct integer_limits
 {
+    // non-standard, how many bits in this T
+    static CONSTEXPR unsigned bits = (sizeof(T) * CHAR_BIT);
+
     static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = _is_signed;
-    static CONSTEXPR int digits = (sizeof(T) * CHAR_BIT) - (is_signed ? 1 : 0);
+    static CONSTEXPR int digits = bits - (is_signed ? 1 : 0);
 
-    /// Retrieves maximum length a string of this int can be in its
-    /// unsigned form.
+    /// Retrieves maximum length a string of this int, accounting for
+    /// base representation
     /// NOTE: this is an estd extension, not part of std
-    /// DEBT: Does not yet account for sign bit, but should
-    /// \tparam base what numeric base is desired, base 10 and base 16 are supported at this time
+    /// DEBT: Only base 10 minus sign SHOULD be considered, but char conversion code doesn't
+    /// filter out the notion of negative hex, for example.  That really does need to be sorted out,
+    /// but in the meantime we overallocate here to avoid a stack corruption
+    /// \tparam base supported values: 8, 10, 16
     template <unsigned base>
-    struct length : uint_strlen<base, sizeof(T) * CHAR_BIT> {};
+    struct length :
+            integral_constant<unsigned, uint_strlen<base, bits>::value +
+                //((is_signed && base == 10) ? 1 : 0)> {};
+                (is_signed ? 1 : 0)> {};
 };
 
 

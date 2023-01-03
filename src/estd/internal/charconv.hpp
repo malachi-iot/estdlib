@@ -123,9 +123,8 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \param base
 /// \return
 /// \remarks
-/// DEBT: This function is nearly flexible to handle different character encodings as supported
-/// by cbase, it's the hard-wire to 'char' within 'to_char_result' which inhibits it
 /// NOTE: Not using default template arg to maintain c++03 compatibility
+/// DEBT: Strongly consider disallowing negative hex and oct renderings
 template <class TCbase, class TInt>
 detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
         typename TCbase::char_type* first,
