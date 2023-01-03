@@ -9,4 +9,7 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
   </component>
+  <component name="elmot.OpenOcdPlugin">
+    <option name="openOcdHome" value="$USER_HOME$/.espressif/tools/openocd-esp32/v0.11.0-esp32-20221026/openocd-esp32" />
+  </component>
 </project>
