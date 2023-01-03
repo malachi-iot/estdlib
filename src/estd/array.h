@@ -209,8 +209,10 @@ public:
 
 }
 
+namespace legacy {
+
 // See internal/fwd/array.h for TSize default
-template<class T, std::size_t N, typename TSize>
+template <class T, std::size_t N, typename TSize>
 struct array : public internal::array_base<T, T[N], size_t>
 {
     typedef internal::array_base<T, T[N], size_t> base_t;
@@ -252,7 +254,7 @@ public:
     }
 };
 
-
+}
 
 namespace layer1 {
 // TODO: alias estd::array into here

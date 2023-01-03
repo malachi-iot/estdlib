@@ -101,11 +101,20 @@ struct traditional_array : array_base_size<N>
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
-    pointer get_at(size_type pos) { return data_() + pos; }
+    pointer get_at(size_type pos) { return data() + pos; }
     ESTD_CPP_CONSTEXPR_RET const_pointer get_at(size_type pos) const
     {
         return data() + pos;
     }
+
+    ESTD_CPP_DEFAULT_CTOR(traditional_array)
+
+#ifdef FEATURE_CPP_INITIALIZER_LIST
+    constexpr traditional_array(::std::initializer_list<value_type> init) : data_(init)
+    {
+
+    }
+#endif
 };
 
 }
@@ -114,6 +123,7 @@ template <class TBase>
 struct array_base2 : TBase
 {
     typedef TBase base_type;
+
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
     typedef pointer iterator;
@@ -136,6 +146,8 @@ struct array_base2 : TBase
     {
         return *base_type::get_at(pos);
     }
+
+    ESTD_CPP_FORWARDING_CTOR(array_base2)
 };
 
 // EXPERIMENTAL
@@ -162,6 +174,14 @@ template <class T, unsigned N>
 struct allocator_traits<internal::layer1_allocator<T, N> >
 {
 
+};
+
+template<class T, std::size_t N, typename TSize>
+struct array : public internal::array_base2<internal::impl::traditional_array<T, N> >
+{
+    typedef internal::array_base2<internal::impl::traditional_array<T, N> > base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(array)
 };
 
 }
