@@ -66,7 +66,7 @@ TEST_CASE("array/vector tests")
     SECTION("Array layer2")
     {
         int buf[5];
-        layer2::array<int, 5> array1(buf);
+        legacy::layer2::array<int, 5> array1(buf);
 
         int i = 0;
 
@@ -85,7 +85,7 @@ TEST_CASE("array/vector tests")
 
         REQUIRE(sz == sizeof(int*));
 
-        auto array2 = layer2::make_array(static_values);
+        auto array2 = legacy::layer2::make_array(static_values);
 
         // compares entirety of static_values to subset of array1
         // (excluding first 0 and terminating early since array2 is smaller)
@@ -96,7 +96,7 @@ TEST_CASE("array/vector tests")
     SECTION("Array layer3")
     {
         int buf[5];
-        layer3::array<int> array1(buf);
+        legacy::layer3::array<int> array1(buf);
 
         int i = 0;
 
@@ -117,7 +117,7 @@ TEST_CASE("array/vector tests")
         // 'layer3::array<int>' commits us to a full size_t
         REQUIRE(sz == sizeof(int*) + sizeof(size_t));
 
-        auto array2 = layer3::make_array(static_values);
+        auto array2 = legacy::layer3::make_array(static_values);
 
         sz = sizeof(array2);
 

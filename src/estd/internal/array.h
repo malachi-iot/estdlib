@@ -3,6 +3,7 @@
 #include "fwd/array.h"
 #include "type_traits.h"
 #include "../algorithm.h"
+#include "fwd/memory.h"
 
 namespace estd { namespace internal {
 

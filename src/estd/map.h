@@ -176,11 +176,11 @@ namespace layer2 {
 // In the short term, no sorting actually is done or expected.  In the longer term we'll
 // definitely want that.  Consider a trait which indicates whether array is pre-sorted
 template <class Key, class T, std::size_t size, class Compare = estd::less<Key> >
-class map : public internal::map_base<layer2::array<pair<Key, T>, size>, Compare>
+class map : public internal::map_base<legacy::layer2::array<pair<Key, T>, size>, Compare>
 {
     typedef Key key_type;
     typedef T mapped_type;
-    typedef internal::map_base<layer2::array<pair<Key, T>, size>, Compare> base_t;
+    typedef internal::map_base<legacy::layer2::array<pair<Key, T>, size>, Compare> base_t;
 
 public:
     //typedef typename base_t::value_type value_type;
@@ -226,11 +226,11 @@ namespace layer3 {
 // In the short term, no sorting actually is done or expected.  In the longer term we'll
 // definitely want that.  Consider a trait which indicates whether array is pre-sorted
 template <class Key, class T, class Compare = estd::less<Key> >
-class map : public internal::map_base<layer3::array<pair<Key, T> >, Compare>
+class map : public internal::map_base<legacy::layer3::array<pair<Key, T> >, Compare>
 {
     typedef Key key_type;
     typedef T mapped_type;
-    typedef internal::map_base<layer3::array<pair<Key, T> >, Compare> base_t;
+    typedef internal::map_base<legacy::layer3::array<pair<Key, T> >, Compare> base_t;
 
 public:
     //typedef typename base_t::value_type value_type;

@@ -16,7 +16,7 @@ template <class T, ptrdiff_t Extent = -1,
                       estd::internal::layer3::buffer<T, size_t>,
                       // NOTE: Need explicit size_t trailing here because otherwise -1 sneaks
                       // its way in
-                      estd::layer2::array<T, static_cast<size_t>(Extent), size_t> >::type>
+                      estd::legacy::layer2::array<T, static_cast<size_t>(Extent), size_t> >::type>
 class span : public TBase
 {
     typedef TBase base_t;

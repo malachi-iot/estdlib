@@ -41,9 +41,9 @@ namespace layer2 {
  * @deprecated - use span instead
  */
 template <size_t size>
-class mutable_buffer : public estd::layer2::array<uint8_t, size>
+class mutable_buffer : public estd::legacy::layer2::array<uint8_t, size>
 {
-    typedef estd::layer2::array<uint8_t, size> base_t;
+    typedef estd::legacy::layer2::array<uint8_t, size> base_t;
 
 public:
 #ifdef FEATURE_CPP_DEFAULT_TARGS
@@ -68,10 +68,10 @@ namespace layer3 {
 // NOTE: being that this is the underlying code for span, we conform this to
 // span's signatures (index_type, for example instead of size_type)
 template <class T, class TSize = size_t>
-class buffer : public estd::layer3::array<T, size_t>
+class buffer : public estd::legacy::layer3::array<T, size_t>
 {
 protected:
-    typedef estd::layer3::array<T, size_t> base_t;
+    typedef estd::legacy::layer3::array<T, size_t> base_t;
 
 public:
     typedef T element_type;
