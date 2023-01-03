@@ -1,6 +1,8 @@
 #ifndef UTIL_EMBEDDED_OSTREAM_H
 #define UTIL_EMBEDDED_OSTREAM_H
 
+#include "iosfwd.h"
+
 #if __cplusplus >= 201103L
 // NOTE: Requirements manual enable because it's a fragile feature still
 // (steady_clock isn't automatically available everywhere)
@@ -8,6 +10,8 @@
 // as well (though it's default to on right now).  #ifdef'ing because chrono is currently
 // highly c++11 dependent
 //#define FEATURE_ESTD_OSTREAM_TIMEOUT
+#else
+#include "c++03/ostream.h"
 #endif
 
 #include "streambuf.h"
@@ -41,7 +45,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 // NOTE: this will behave slightly differently than a regular string, see to_chars_opt
 // DEBT: Move this to charconv
 template <unsigned N, typename TInt>
-inline to_chars_result to_str_opt(char (&buffer)[N], TInt value, unsigned base)
+inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base)
 {
     // -1 here because to_chars doesn't care about null termination, but we do
     to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
@@ -58,14 +62,14 @@ inline to_chars_result to_str_opt(char (&buffer)[N], TInt value, unsigned base)
 // Internal call - write an integer to the output stream with the specified
 // buffer size
 // DEBT: Doesn't heed or even use locale as it really should
-template <unsigned base, unsigned N, class TStreambuf, class T>
-inline basic_ostream<TStreambuf>& write_int(basic_ostream<TStreambuf>& out, T value)
+template <unsigned base, unsigned N, class TStreambuf, class TBase, class T>
+inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value)
 {
     // +1 for potential - sign
     // +1 for null terminator
     char buffer[N + 2];
 
-    to_chars_result result = to_str_opt(buffer, value, base);
+    to_chars_result result = to_string_opt(buffer, value, base);
 
     int sz = &buffer[N + 1] - result.ptr;
 
