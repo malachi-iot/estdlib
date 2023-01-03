@@ -55,8 +55,11 @@ inline to_chars_result to_str_opt(char (&buffer)[N], TInt value, unsigned base)
     return result;
 }
 
+// Internal call - write an integer to the output stream with the specified
+// buffer size
+// DEBT: Doesn't heed or even use locale as it really should
 template <unsigned base, unsigned N, class TStreambuf, class T>
-inline basic_ostream<TStreambuf>& out_int_helper2(basic_ostream<TStreambuf>& out, T value)
+inline basic_ostream<TStreambuf>& write_int(basic_ostream<TStreambuf>& out, T value)
 {
     // +1 for potential - sign
     // +1 for null terminator
@@ -66,9 +69,7 @@ inline basic_ostream<TStreambuf>& out_int_helper2(basic_ostream<TStreambuf>& out
 
     int sz = &buffer[N + 1] - result.ptr;
 
-    out.write(result.ptr, sz);
-
-    return out;
+    return out.write(result.ptr, sz);
 }
 
 
@@ -125,19 +126,9 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T v
 #if __cplusplus >= 201103L
 template <unsigned base, class TStreambuf, class T,
         unsigned N = estd::numeric_limits<T>::template length<base>::value >
-inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, T value)
+inline basic_ostream<TStreambuf>& out_int_helper2(basic_ostream<TStreambuf>& out, T value)
 {
-    // +1 for potential - sign
-    // +1 for null terminator
-    char buffer[N + 2];
-
-    to_chars_result result = to_str_opt(buffer, value, base);
-
-    int sz = &buffer[N + 1] - result.ptr;
-
-    out.write(result.ptr, sz);
-
-    return out;
+    return write_int<base, N>(out, value);
 }
 
 template <class TStreambuf, class T,
@@ -149,19 +140,42 @@ basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
     switch(out.flags() & ios_base::basefield)
     {
         case ios_base::oct:
-            return out_int_helper<8>(out, value);
+            return out_int_helper2<8>(out, value);
 
         case ios_base::dec:
-            return out_int_helper<10>(out, value);
+            return out_int_helper2<10>(out, value);
 
         case ios_base::hex:
-            return out_int_helper<16>(out, value);
+            return out_int_helper2<16>(out, value);
 
         default:
             // TODO: assert or log an error condition
             return out;
     }
 }
+#else
+template <class TStreambuf, class TInt>
+inline basic_ostream<TStreambuf>& out_int_helper3(basic_ostream<TStreambuf>& out, TInt value)
+{
+    // DEBT: another typical enum -> traits/template conversion - a framework
+    // support for that really would be useful
+    switch(out.flags() & ios_base::basefield)
+    {
+        case ios_base::oct:
+            return write_int<8, numeric_limits<TInt>::template length<8>::value >(out, value);
+
+        case ios_base::dec:
+            return write_int<10, numeric_limits<TInt>::template length<10>::value >(out, value);
+
+        case ios_base::hex:
+            return write_int<16, numeric_limits<TInt>::template length<16>::value >(out, value);
+
+        default:
+            // TODO: assert or log an error condition
+            return out;
+    }
+}
+
 #endif
 
 template <class TStreambuf, class TBase>
