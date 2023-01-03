@@ -209,11 +209,9 @@ public:
 
 }
 
-template<
-    class T,
-    std::size_t N,
-    typename TSize = typename internal::deduce_fixed_size_t<N>::size_type
-> struct array : public internal::array_base<T, T[N], size_t>
+// See internal/fwd/array.h for TSize default
+template<class T, std::size_t N, typename TSize>
+struct array : public internal::array_base<T, T[N], size_t>
 {
     typedef internal::array_base<T, T[N], size_t> base_t;
 

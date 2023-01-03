@@ -1,5 +1,8 @@
 #pragma once
 
+#include "fwd/array.h"
+#include "type_traits.h"
+
 namespace estd { namespace internal {
 
 // NOTE: Replaces the unused experimental::aligned_storage_array which itself is dependent
@@ -143,8 +146,13 @@ struct layer1_allocator
 };
 
 // Just like regular std::array except T constructor is not called
-template <class T, unsigned N>
-struct uninitialized_array : array_base2<impl::uninitialized_array<T, N> > {};
+template <class T, unsigned N, class TBase =
+        typename estd::conditional<
+            estd::is_integral<T>::value,
+            estd::array<T, N>,
+            typename estd::internal::array_base2<impl::uninitialized_array<T, N> > >
+            ::type >
+struct uninitialized_array : TBase {};
 
 
 }
