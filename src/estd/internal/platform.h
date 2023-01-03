@@ -7,6 +7,7 @@
 #include "feature/std.h"
 #include "feature/cpp.h"
 #include "feature/toolchain.h"
+#include "macros.h"
 
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)

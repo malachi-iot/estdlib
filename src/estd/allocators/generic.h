@@ -70,7 +70,19 @@ struct experimental_std_allocator : public ::std::allocator<T>
 {
     typedef ::std::allocator<T> base_t;
 
+    // DEBT: Shim in here to continue to provide 'pointer' after c++20 removes it.
+    // Really the whole wrapping of std allocator itself should be rethought, at a minimum
+    // one would think that moving all special locking behaviors into estd::allocator_traits
+    // would be adequate.
+    // Feature test against c++17 because despite setting CMAKE_CXX_STANDARD to c++20,
+    // __cplusplus reflects c++17
+#if __cplusplus >= 201703L
+    ESTD_CPP_STD_VALUE_TYPE(T)
+    typedef pointer handle_type;
+#else
     typedef typename base_t::pointer handle_type;
+#endif
+
     typedef handle_type handle_with_size;
     typedef typename estd::internal::handle_with_offset_raw<handle_type> handle_with_offset;
 #ifdef FEATURE_ESTD_ALLOCATOR_LOCKCOUNTER
