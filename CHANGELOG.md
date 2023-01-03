@@ -6,11 +6,15 @@
 
 * `estd::layer1::vector` no longer requires a default contructor in its managed types
 * RISC-V int -> string conversion repaired
+  * In process of this, overhauled int -> string length deduction
+* Fixed `char_traits` specialization glitch
+* Misc c++03 compatibility
 
 ## Known Issues & Limitations
 
-* internal `maxStringLength` needs an overhaul, easily breaks with new MPU architectures
-  (causes int -> string conversions to silently fail)
+* Enhanced `estd::layer1::vector` currently creates internal complexity for 
+  types like `basic_string`, etc when normal non-constructor types like
+  `char` are involved
 
 # v0.4.1 - 14DEC22
 
