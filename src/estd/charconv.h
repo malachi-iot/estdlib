@@ -50,7 +50,7 @@ inline estd::from_chars_result from_chars(const char* first,
 /// \param value
 /// \param base
 /// \return
-template <class TInt>
+template <class TInt, class enabled = typename enable_if<numeric_limits<TInt>::is_integer>::type>
 inline to_chars_result to_chars_opt(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)

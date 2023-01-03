@@ -17,6 +17,23 @@ struct from_chars_result
 #endif
 };
 
+namespace detail {
+
+template <class TChar>
+struct to_chars_result
+{
+    TChar* ptr;
+    estd::errc ec;
+
+#ifndef __cpp_initializer_lists
+    to_chars_result(char* ptr, estd::errc ec) :
+        ptr(ptr), ec(ec) {}
+#endif
+};
+
+}
+
+/*
 struct to_chars_result
 {
     char* ptr;
@@ -27,6 +44,9 @@ struct to_chars_result
         ptr(ptr), ec(ec) {}
 #endif
 };
+ */
+
+typedef detail::to_chars_result<char> to_chars_result;
 
 
 

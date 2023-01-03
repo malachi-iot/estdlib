@@ -122,8 +122,11 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \param value
 /// \param base
 /// \return
-template <class TCbase, class TInt>
-to_chars_result to_chars_integer_opt(char* first, char* last, TInt value, const int base)
+/// \remarks
+/// DEBT: This function is nearly flexible to handle different character encodings as supported
+/// by cbase, it's the hard-wire to 'char' within 'to_char_result' which inhibits it
+template <class TCbase, class TInt, class TChar = typename TCbase::char_type>
+detail::to_chars_result<TChar> to_chars_integer_opt(TChar* first, TChar* last, TInt value, const int base)
 {
     typedef TCbase cbase_type;
     typedef estd::numeric_limits<TInt> numeric_limits;

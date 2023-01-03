@@ -114,9 +114,8 @@ basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
     // support for that really would be useful
     switch(out.flags() & ios_base::basefield)
     {
-        /*
         case ios_base::oct:
-            return out_int_helper<8>(out, value); */
+            return out_int_helper<8>(out, value);
 
         case ios_base::dec:
             return out_int_helper<10>(out, value);

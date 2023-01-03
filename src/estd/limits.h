@@ -76,6 +76,11 @@ template <unsigned bits>
 struct uint_strlen<16, bits> :
         estd::integral_constant<unsigned, bits / 4> {};
 
+// DEBT: calculation approximate, higher the bitcount the more wasted space
+template <unsigned bits>
+struct uint_strlen<8, bits> :
+        estd::integral_constant<unsigned, (bits + 1) / 3> {};
+
 template <class T, bool _is_signed>
 struct integer_limits
 {
