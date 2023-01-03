@@ -2,6 +2,7 @@
 
 #include "fwd/array.h"
 #include "type_traits.h"
+#include "../algorithm.h"
 
 namespace estd { namespace internal {
 
@@ -13,10 +14,10 @@ namespace estd { namespace internal {
 
 namespace impl {
 
-template <unsigned N>
+template <unsigned N, typename TSize = typename internal::deduce_fixed_size_t<N>::size_type>
 struct array_base_size
 {
-    typedef unsigned size_type;
+    typedef TSize size_type;
 
     ESTD_CPP_CONSTEXPR_RET bool empty() const { return N == 0; }
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return N; }
@@ -110,9 +111,9 @@ protected:
     ESTD_CPP_DEFAULT_CTOR(traditional_array)
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-    constexpr traditional_array(::std::initializer_list<value_type> init) : data_(init)
+    inline traditional_array(::std::initializer_list<value_type> init)
     {
-
+        estd::copy(init.begin(), init.end(), data());
     }
 #endif
 };

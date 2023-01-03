@@ -25,13 +25,9 @@ protected:
     vector(const TImplParam& p) : base_t(p) {}
 
 public:
-    explicit vector(Allocator& alloc) : base_t(alloc) {}
+    EXPLICIT vector(Allocator& alloc) : base_t(alloc) {}
 
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-    vector() = default;
-#else
-    vector() {}
-#endif
+    ESTD_CPP_DEFAULT_CTOR(vector)
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<value_type> initlist) : base_t(initlist) {}
@@ -62,9 +58,7 @@ public:
     typedef typename base_t::reference reference;
     typedef typename base_t::const_reference const_reference;
 
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-    vector() = default;
-#endif
+    ESTD_CPP_DEFAULT_CTOR(vector)
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     vector(std::initializer_list<T> initlist) : base_t(initlist) {}

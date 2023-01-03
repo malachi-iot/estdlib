@@ -18,10 +18,12 @@ TEST_CASE("stack")
         s.push(3);
 
         int sz = sizeof(s);
+        //size_type sz = s.size();
 
         REQUIRE(sizeof(size_type) == 1);
-        REQUIRE(sizeof(container_type) == 41);
-        //REQUIRE(sz == sizeof(int) * 10 + sizeof(void*) * 2);
+
+        //REQUIRE(sizeof(container_type) == 41);
+        REQUIRE(sz == sizeof(int) * 10 + 4);
 
         int counter = 0;
 
