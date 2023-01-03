@@ -125,10 +125,14 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \remarks
 /// DEBT: This function is nearly flexible to handle different character encodings as supported
 /// by cbase, it's the hard-wire to 'char' within 'to_char_result' which inhibits it
-template <class TCbase, class TInt, class TChar = typename TCbase::char_type>
-detail::to_chars_result<TChar> to_chars_integer_opt(TChar* first, TChar* last, TInt value, const int base)
+/// NOTE: Not using default template arg to maintain c++03 compatibility
+template <class TCbase, class TInt>
+detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
+        typename TCbase::char_type* first,
+        typename TCbase::char_type* last, TInt value, const int base)
 {
     typedef TCbase cbase_type;
+    typedef typename TCbase::char_type char_type;
     typedef estd::numeric_limits<TInt> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
@@ -145,9 +149,9 @@ detail::to_chars_result<TChar> to_chars_integer_opt(TChar* first, TChar* last, T
                 *--last = '-';
 
 #ifdef __cpp_initializer_lists
-            return to_chars_result{last, estd::errc(0)};
+            return detail::to_chars_result<char_type>{last, estd::errc(0)};
 #else
-            return to_chars_result(last, estd::errc(0));
+            return detail::to_chars_result<char_type>(last, estd::errc(0));
 #endif
         }
 
@@ -155,9 +159,9 @@ detail::to_chars_result<TChar> to_chars_integer_opt(TChar* first, TChar* last, T
     }
 
 #ifdef __cpp_initializer_lists
-    return to_chars_result{last, estd::errc::value_too_large};
+    return detail::to_chars_result<char_type>{last, estd::errc::value_too_large};
 #else
-    return to_chars_result(last, estd::errc::value_too_large);
+    return detail::to_chars_result<char_type>(last, estd::errc::value_too_large);
 #endif
 }
 

@@ -9,6 +9,11 @@
 #include "cstdint.h"
 #include "cstddef.h"
 
+// Reduced-dependency flavor - for integral_constant only
+// DEBT: Might be better to make a new "traits/type/integral_constant.h" and friends to
+// more clearly provide that
+#include "internal/type_traits.h"
+
 #ifdef FEATURE_STD_CLIMITS
 #include <climits>
 #else
