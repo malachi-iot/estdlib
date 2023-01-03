@@ -1,13 +1,9 @@
 #pragma once
 
 #include "internal/iosfwd.h"
+#include "traits/char_traits.h"
 
 namespace estd {
-
-#if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
-template <class TChar>
-class char_traits;
-#endif
 
 template <class TState>
 class fpos;
