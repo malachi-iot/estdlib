@@ -5,7 +5,7 @@
 namespace estd { namespace internal {
 
 #if __cplusplus < 201103L
-// DEBT: Move all this out to c++03 specific area
+// DEBT: Change all these to just one using that filter-on-return trick
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, int value)
 {

@@ -9,8 +9,8 @@ namespace estd {
 
 namespace internal {
 
-template <unsigned N, typename TInt>
-inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base);
+//template <unsigned N, typename TInt>
+//inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base);
 
 template <unsigned base, unsigned N, class TStreambuf, class TBase, class T>
 inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value);

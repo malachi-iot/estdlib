@@ -49,15 +49,14 @@ to_string(estd::internal::allocated_array<TStrImpl>& s, const T value)
 }
 
 
-namespace internal {
-
 // DEBT: This works pretty well, I'm just getting nervous about TInt letting too many things flow
 // in - so hiding it in internal, which due to ADL won't help a whole lot
 
 // helper since we often convert a statically allocated string
 // NOTE: this will behave slightly differently than a regular string, see to_chars_opt
 template <unsigned N, typename TInt>
-inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base)
+inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, to_chars_result>::type
+    to_string_opt(char (&buffer)[N], TInt value, unsigned base)
 {
     // -1 here because to_chars doesn't care about null termination, but we do
     to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
@@ -69,8 +68,6 @@ inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned bas
     buffer[N - 1] = 0;
 
     return result;
-}
-
 }
 
 #ifdef FEATURE_CPP_DEFAULT_TARGS

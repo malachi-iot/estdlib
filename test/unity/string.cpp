@@ -89,6 +89,19 @@ static void test_to_chars()
     TEST_ASSERT_EQUAL('0', s[31]);
 }
 
+static void test_to_string_opt()
+{
+    char buffer[64];
+    int val = 123;
+
+    estd::to_chars_result r = estd::to_string_opt(buffer, val, 10);
+
+    // only support ints at this time
+    //estd::internal::to_string_opt(buffer, 3.4, 10);
+
+    TEST_ASSERT_EQUAL_STRING("123", r.ptr);
+}
+
 
 static void test_to_string()
 {
@@ -126,5 +139,6 @@ void test_string()
     RUN_TEST(test_from_chars);
     RUN_TEST(test_to_chars);
     RUN_TEST(test_to_string);
+    RUN_TEST(test_to_string_opt);
     RUN_TEST(test_char_traits);
 }
