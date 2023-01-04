@@ -71,6 +71,7 @@ struct iterator_traits<T*>
 };
 
 // NOTE: These are not tested and seem to need more work
+#if UNUSED
 namespace internal {
 
 template <class C>
@@ -92,5 +93,6 @@ inline typename C::const_iterator begin(const C& c)
 }
 
 }
+#endif
 
 }
