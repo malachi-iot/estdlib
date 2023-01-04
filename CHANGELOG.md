@@ -2,9 +2,15 @@
 
 ## Added Features
 
+* Added new `estd:: internal::undefined_array`.  This operates nearly 
+  identical to `estd::array` except that default constructor for elements is not invoked
+* Added non-standard `length` to `numeric_limits` to assist in finding
+  proper string length when doing conversions
+
 ## Quality Updates & Bug Fixes
 
 * `estd::layer1::vector` no longer requires a default contructor in its managed types
+* `estd::span` rework and quality improvement
 * RISC-V int -> string conversion repaired
   * In process of this, overhauled int -> string length deduction
 * Fixed `char_traits` specialization glitch
@@ -12,9 +18,10 @@
 
 ## Known Issues & Limitations
 
-* Enhanced `estd::layer1::vector` currently creates internal complexity for 
-  types like `basic_string`, etc when normal non-constructor types like
-  `char` are involved
+* Undecided what a good name for `undefined_array` really should be, thus
+  its internal status.  Considering strongly `estd::uarray`
+* Breaking changes: `layer2::array`, `layer3::array` are now deprecated and
+  moved to `estd::legacy` namespace.  `estd::span` is a much better fit
 
 # v0.4.1 - 14DEC22
 
