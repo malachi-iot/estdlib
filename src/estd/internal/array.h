@@ -149,6 +149,11 @@ struct array_base2 : TBase
         return *base_type::get_at(pos);
     }
 
+    void fill(const_reference value)
+    {
+        estd::fill_n(begin(), base_type::size(), value);
+    }
+
     ESTD_CPP_FORWARDING_CTOR(array_base2)
 };
 

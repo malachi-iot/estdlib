@@ -31,6 +31,7 @@ struct span_base
     ESTD_CPP_STD_VALUE_TYPE(T)
 
     typedef estd::size_t size_type;
+    typedef value_type* iterator;
 
 protected:
     T* const data_;
@@ -50,6 +51,7 @@ protected:
 
 public:
     ESTD_CPP_CONSTEXPR_RET pointer data() const { return data_; }
+    ESTD_CPP_CONSTEXPR_RET iterator begin() const { return data_; }
 
     ESTD_CPP_CONSTEXPR_RET const_reference operator[](size_type idx) const
     {
@@ -122,6 +124,7 @@ public:
     typedef typename base_type::size_type size_type;
     typedef typename base_type::size_type index_type;
     typedef typename estd::remove_cv<T>::type value_type;
+    typedef typename base_type::iterator iterator;
 
     ESTD_CPP_CONSTEXPR_RET index_type size_bytes() const
     { return base_type::size() * sizeof(element_type); }
@@ -130,6 +133,8 @@ public:
     {
         return base_type::size() == 0;
     }
+
+    ESTD_CPP_CONSTEXPR_RET iterator end() const { return base_type::data_ + base_type::size(); }
 
     // DEBT:
     // "This overload participates in overload resolution only if extent == 0 || extent == std::dynamic_extent."
