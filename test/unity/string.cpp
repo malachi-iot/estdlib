@@ -92,11 +92,13 @@ static void test_to_chars()
 
 static void test_to_string()
 {
+#ifdef FEATURE_CPP_DEFAULT_TARGS
     estd::layer1::string<64> buffer;
     int val1 = 123;
     buffer += estd::to_string(val1);
 
     TEST_ASSERT_EQUAL_STRING("123", buffer.data());
+#endif
 }
 
 
@@ -109,7 +111,7 @@ static void test_char_traits()
     TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, traits_type::length(TEST_STR));
 
     TEST_ASSERT_EQUAL(0, traits_type::compare(TEST_STR, TEST_STR2, 3));
-    TEST_ASSERT_EQUAL(1, traits_type::compare(TEST_STR, TEST_STR2, 5));
+    TEST_ASSERT_GREATER_THAN(0, traits_type::compare(TEST_STR, TEST_STR2, 5));
 }
 
 

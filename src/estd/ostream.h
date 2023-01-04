@@ -59,129 +59,56 @@ inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned bas
     return result;
 }
 
-// Internal call - write an integer to the output stream with the specified
-// buffer size
-// DEBT: Doesn't heed or even use locale as it really should
-template <unsigned base, unsigned N, class TStreambuf, class TBase, class T>
+// Internal call - write an integer of the specified base to the output stream
+// DEBT: No locale num_put available yet.
+// to_string_opt is less overhead so really we'd like to compile time choose
+// one or the other
+template <unsigned base, class TStreambuf, class TBase, class T>
 inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value)
 {
     // +1 for potential - sign
     // +1 for null terminator
-    char buffer[N + 2];
+    char buffer[estd::numeric_limits<T>::template length<base>::value + 2];
 
     to_chars_result result = to_string_opt(buffer, value, base);
 
-    int sz = &buffer[N + 1] - result.ptr;
+    int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
 
     return out.write(result.ptr, sz);
 }
 
-
-
-// DEBT: Brute forcing this via a C++ version check, but I bet we can get this
-// functional with more finesse on earlier C++
-#if __cplusplus >= 2011034L
-// FIX: SFINAE works, but targets who aren't available for maxStringLength seem to be generating
-// warnings here
-template <class TStreambuf, class T,
-          int N = internal::maxStringLength<T>(),
-          class enabled = typename enable_if<(N > 1)>::type >
-inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
+template <class TStreambuf, class TInt>
+basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, TInt value)
 {
-    /*
-    TStreambuf* rdbuf = out.rdbuf();
-    typedef typename TStreambuf::char_type char_type;
-    char_type* pptr = rdbuf->pptr(); */
-
-    estd::ios_base::fmtflags flags = out.flags();
-    // DEBT: Handle octal too. That will require a rework of maxStringLength.  hex
-    // could use it too - we're safe since hex is always a smaller conversion than
-    // dec but that's still an inefficiency/debt
-    int base = flags & estd::ios_base::hex ? 16 : 10;
-
-    /*
-     * impl::out_streambuf doesn't have ppbtr, pbase, etc due to abstract support
-     * for locking memory
-    if(rdbuf->epptr() - pptr >= N)
+    // DEBT: another typical enum -> traits/template conversion - a framework
+    // support for that really would be useful
+    switch(out.flags() & ios_base::basefield)
     {
-        to_chars_result result = to_chars(pptr, pptr + N, value, base);
+        case ios_base::oct:
+            return write_int<8>(out, value);
 
-        int size = result.ptr - pptr;
-        rdbuf->pbump(size);
-    }
-    else */
-    {
-        char buffer[N + 1];
+        case ios_base::dec:
+            return write_int<10>(out, value);
 
-        to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+        case ios_base::hex:
+            return write_int<16>(out, value);
 
-        // DEBT: Check result for conversion failure
-
-        // remember, opt flavor specifies 'ptr' as beginning and we must manually
-        // null terminate the end (ala standard to_chars operation)
-        buffer[N] = 0;
-
-        return out << result.ptr;
+        default:
+            // TODO: assert or log an error condition
+            return out;
     }
 }
-#endif
 
-// DEBT: Nearly c++03 compliant, this is totally doable without the default function template args
+
 #if __cplusplus >= 201103L
-template <unsigned base, class TStreambuf, class T,
-        unsigned N = estd::numeric_limits<T>::template length<base>::value >
-inline basic_ostream<TStreambuf>& out_int_helper2(basic_ostream<TStreambuf>& out, T value)
-{
-    return write_int<base, N>(out, value);
-}
-
 template <class TStreambuf, class T,
         class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
 basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
-    // DEBT: another typical enum -> traits/template conversion - a framework
-    // support for that really would be useful
-    switch(out.flags() & ios_base::basefield)
-    {
-        case ios_base::oct:
-            return out_int_helper2<8>(out, value);
-
-        case ios_base::dec:
-            return out_int_helper2<10>(out, value);
-
-        case ios_base::hex:
-            return out_int_helper2<16>(out, value);
-
-        default:
-            // TODO: assert or log an error condition
-            return out;
-    }
+    return out_int_helper(out, value);
 }
 #else
 // DEBT: Move all this out to c++03 specific area
-
-template <class TStreambuf, class TInt>
-inline basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, TInt value)
-{
-    // DEBT: another typical enum -> traits/template conversion - a framework
-    // support for that really would be useful
-    switch(out.flags() & ios_base::basefield)
-    {
-        case ios_base::oct:
-            return write_int<8, numeric_limits<TInt>::template length<8>::value >(out, value);
-
-        case ios_base::dec:
-            return write_int<10, numeric_limits<TInt>::template length<10>::value >(out, value);
-
-        case ios_base::hex:
-            return write_int<16, numeric_limits<TInt>::template length<16>::value >(out, value);
-
-        default:
-            // TODO: assert or log an error condition
-            return out;
-    }
-}
-
 template <class TStreambuf>
 inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, int value)
 {
