@@ -1,4 +1,5 @@
-// This file segregates out the mostly-standalone portion of iterator
+// This file segregates out the mostly-standalone portion of iterator as well
+// as freestanding iterator suppliers like estd::begin, etc.
 #pragma once
 
 #include "platform.h"
@@ -68,5 +69,28 @@ struct iterator_traits<T*>
     typedef T& reference;
     typedef std::random_access_iterator_tag iterator_category;
 };
+
+// NOTE: These are not tested and seem to need more work
+namespace internal {
+
+template <class C>
+inline typename C::iterator begin(C& c)
+{
+    return c.begin();
+}
+
+template <class C>
+inline typename C::const_iterator cbegin(const C& c)
+{
+    return c.begin();
+}
+
+template <class C>
+inline typename C::const_iterator begin(const C& c)
+{
+    return cbegin(c);
+}
+
+}
 
 }

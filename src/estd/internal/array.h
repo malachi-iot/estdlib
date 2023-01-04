@@ -4,6 +4,7 @@
 #include "type_traits.h"
 #include "../algorithm.h"
 #include "fwd/memory.h"
+#include "iterator_standalone.h"
 
 namespace estd { namespace internal {
 
