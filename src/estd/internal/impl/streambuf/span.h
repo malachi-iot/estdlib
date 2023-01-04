@@ -133,7 +133,7 @@ public:
 // be implemented in a derived class
 template <class TChar,
         class TCharTraits =  estd::char_traits<TChar>,
-        std::ptrdiff_t Extent = -1,
+        std::size_t Extent = detail::dynamic_extent::value,
         class TBase = estd::experimental::instance_provider<estd::span<TChar, Extent> > >
 struct in_span_streambuf :
         in_pos_streambuf_base<TCharTraits>,

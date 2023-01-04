@@ -1,4 +1,5 @@
 #include <estd/span.h>
+#include <estd/internal/buffer.h>
 
 #include "test-data.h"
 
