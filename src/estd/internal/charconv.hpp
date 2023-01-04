@@ -127,7 +127,7 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
 template <class TCbase, class TInt>
 detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
-        const typename TCbase::char_type* first,
+        typename TCbase::char_type* first,
         typename TCbase::char_type* last, TInt value, const int base)
 {
     typedef TCbase cbase_type;
