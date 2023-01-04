@@ -38,18 +38,18 @@ protected:
 
     ESTD_CPP_CONSTEXPR_RET span_base(pointer data) : data_(data) {}
 
+public:
     template <estd::size_t count>
     ESTD_CPP_CONSTEXPR_RET span<T, count> first() const
     {
-        return data_(data_);
+        return data_;
     }
 
     ESTD_CPP_CONSTEXPR_RET span<T> first(size_type count) const
     {
-        return data_(data_, count);
+        return span<T>(data_, count);
     }
 
-public:
     ESTD_CPP_CONSTEXPR_RET pointer data() const { return data_; }
     ESTD_CPP_CONSTEXPR_RET iterator begin() const { return data_; }
 

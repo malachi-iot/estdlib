@@ -112,7 +112,7 @@ protected:
 
     ESTD_CPP_DEFAULT_CTOR(traditional_array)
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
+#ifdef __cpp_initializer_lists
     inline traditional_array(::std::initializer_list<value_type> init)
     {
         estd::copy(init.begin(), init.end(), data());
@@ -131,7 +131,8 @@ struct array_base2 : TBase
     typedef typename base_type::const_pointer const_pointer;
     typedef pointer iterator;
     typedef const_pointer const_iterator;
-    typedef typename base_type::value_type& reference;
+    typedef typename base_type::value_type value_type;
+    typedef typename base_type::reference reference;
     typedef const typename base_type::value_type& const_reference;
     typedef typename base_type::size_type size_type;
 
@@ -156,6 +157,8 @@ struct array_base2 : TBase
     }
 
     ESTD_CPP_FORWARDING_CTOR(array_base2)
+    ESTD_CPP_FORWARDING_CTOR_LIST(value_type, array_base2)
+
 };
 
 // EXPERIMENTAL
@@ -193,6 +196,7 @@ struct array : public internal::array_base2<internal::impl::traditional_array<T,
     typedef internal::array_base2<internal::impl::traditional_array<T, N> > base_type;
 
     ESTD_CPP_FORWARDING_CTOR(array)
+    ESTD_CPP_FORWARDING_CTOR_LIST(T, array)
 };
 
 }

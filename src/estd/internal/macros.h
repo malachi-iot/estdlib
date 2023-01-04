@@ -13,7 +13,8 @@
 #define ESTD_CPP_DEFAULT_CTOR(class_name)   class_name() {}
 #endif
 
-// Only very lightly tested
+// Remember, initializer_lists are not forwarded!
+// https://stackoverflow.com/questions/28370970/forwarding-initializer-list-expressions
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
 #define ESTD_CPP_FORWARDING_CTOR(class_name)    \
     template <class ...TArgs>                   \
@@ -26,6 +27,13 @@
     template <class TParam1>                    \
     class_name(const TParam1& p1) :             \
         base_type(p1) {}
+#endif
+
+#ifdef __cpp_initializer_lists
+#define ESTD_CPP_FORWARDING_CTOR_LIST(T, class_name)    \
+    class_name(std::initializer_list<T> list) : base_type(list) {}
+#else
+#define ESTD_CPP_FORWARDING_CTOR_LIST(T, class_name)
 #endif
 
 #if __cpp_constexpr
