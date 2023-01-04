@@ -3,6 +3,7 @@
 ## Quality Updates & Bug Fixes
 
 * Fixed bug in `estd::to_string` inhibiting it from resolving certain integers
+* int -> string conversion general quality upgrades, better guard against non-int
 
 # v0.4.2 - 03JAN23
 
