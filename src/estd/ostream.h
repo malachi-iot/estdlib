@@ -77,8 +77,8 @@ inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBa
     return out.write(result.ptr, sz);
 }
 
-template <class TStreambuf, class TInt>
-basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, TInt value)
+template <class TStreambuf, class TBase, typename TInt>
+basic_ostream<TStreambuf, TBase>& out_int_helper(basic_ostream<TStreambuf, TBase>& out, TInt value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework
     // support for that really would be useful
@@ -101,34 +101,34 @@ basic_ostream<TStreambuf>& out_int_helper(basic_ostream<TStreambuf>& out, TInt v
 
 
 #if __cplusplus >= 201103L
-template <class TStreambuf, class T,
+template <class TStreambuf, class TBase, typename T,
         class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
-basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, T value)
+basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf>& out, T value)
 {
     return out_int_helper(out, value);
 }
 #else
 // DEBT: Move all this out to c++03 specific area
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, int value)
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, int value)
 {
     return out_int_helper(out, value);
 }
 
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, unsigned value)
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, unsigned value)
 {
     return out_int_helper(out, value);
 }
 
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, long value)
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, long value)
 {
     return out_int_helper(out, value);
 }
 
-template <class TStreambuf>
-inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, unsigned long value)
+template <class TStreambuf, class TBase>
+inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, unsigned long value)
 {
     return out_int_helper(out, value);
 }
