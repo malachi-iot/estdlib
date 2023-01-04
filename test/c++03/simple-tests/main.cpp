@@ -21,7 +21,6 @@ int main()
 
     cout << "Hello World: " << test_str << endl;
 
-    test();
 #if defined(FEATURE_CPP_VARIADIC)
     test_tuple_old();
 #endif

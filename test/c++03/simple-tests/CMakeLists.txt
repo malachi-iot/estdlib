@@ -18,7 +18,6 @@ include_directories(${TESTSRC_DIR})
 
 add_executable(${PROJECT_NAME}
         "main.cpp"
-        misc.cpp
         tuple-test.cpp
         )
 

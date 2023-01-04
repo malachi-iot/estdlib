@@ -31,9 +31,9 @@ template <class T, unsigned N>
 struct uninitialized_array : array_base_size<N>
 {
     typedef array_base_size<N> base_type;
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
+
+    ESTD_CPP_STD_VALUE_TYPE(T)
+
     typedef typename base_type::size_type size_type;
 
     struct container
@@ -87,9 +87,9 @@ template <class T, unsigned N>
 struct traditional_array : array_base_size<N>
 {
     typedef array_base_size<N> base_type;
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
+
+    ESTD_CPP_STD_VALUE_TYPE(T)
+
     typedef typename base_type::size_type size_type;
 
     T data_[N];

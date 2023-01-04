@@ -13,7 +13,7 @@ static void test_layer1_array()
 static void test_layer3_array()
 {
     int _a[10];
-    estd::layer3::array<int> a(_a);
+    estd::legacy::layer3::array<int> a(_a);
 
     TEST_ASSERT_EQUAL(10, a.size());
 }
