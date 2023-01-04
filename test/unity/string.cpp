@@ -90,6 +90,16 @@ static void test_to_chars()
 }
 
 
+static void test_to_string()
+{
+    estd::layer1::string<64> buffer;
+    int val1 = 123;
+    buffer += estd::to_string(val1);
+
+    TEST_ASSERT_EQUAL_STRING("123", buffer.data());
+}
+
+
 // NOTE: Depending on feature flags, estd::char_traits is either our implementation
 // or an alias for std::char_traits
 static void test_char_traits()
@@ -113,5 +123,6 @@ void test_string()
     RUN_TEST(test_layer2_string);
     RUN_TEST(test_from_chars);
     RUN_TEST(test_to_chars);
+    RUN_TEST(test_to_string);
     RUN_TEST(test_char_traits);
 }

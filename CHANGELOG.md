@@ -1,8 +1,14 @@
+# v0.4.x - XXJAN23
+
+## Quality Updates & Bug Fixes
+
+* Fixed bug in `estd::to_string` inhibiting it from resolving certain integers
+
 # v0.4.2 - 03JAN23
 
 ## Added Features
 
-* Added new `estd:: internal::undefined_array`.  This operates nearly identical to `estd::array` except that default constructor for elements is not invoked
+* Added new `estd::internal::undefined_array`.  This operates nearly identical to `estd::array` except that default constructor for elements is not invoked
 * Added non-standard `length` to `numeric_limits` which finds maximum string length for int conversions
 
 ## Quality Updates & Bug Fixes
@@ -15,10 +21,8 @@
 
 ## Known Issues & Limitations
 
-* Undecided what a good name for `undefined_array` really should be, thus
-  its internal status.  Considering strongly `estd::uarray`
-* Breaking changes: `layer2::array`, `layer3::array` are now deprecated and
-  moved to `estd::legacy` namespace.  `estd::span` is a much better fit
+* Undecided what a good name for `undefined_array` really should be, thus its internal status.  Considering strongly `estd::uarray`
+* Breaking changes: `layer2::array`, `layer3::array` are now deprecated and moved to `estd::legacy` namespace.  `estd::span` is a much better fit
 
 # v0.4.1 - 14DEC22
 
