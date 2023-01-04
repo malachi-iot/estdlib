@@ -41,98 +41,13 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.write(s, traits_type::length(s));
 }
 
-// helper since we often convert a statically allocated string
-// NOTE: this will behave slightly differently than a regular string, see to_chars_opt
-// DEBT: Move this to charconv
-template <unsigned N, typename TInt>
-inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base)
-{
-    // -1 here because to_chars doesn't care about null termination, but we do
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
-
-    // DEBT: Check result for conversion failure
-
-    // remember, opt flavor specifies 'ptr' as beginning and we must manually
-    // null terminate the end (ala standard to_chars operation)
-    buffer[N - 1] = 0;
-
-    return result;
-}
-
-// Internal call - write an integer of the specified base to the output stream
-// DEBT: No locale num_put available yet.
-// to_string_opt is less overhead so really we'd like to compile time choose
-// one or the other
-template <unsigned base, class TStreambuf, class TBase, class T>
-inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value)
-{
-    // +1 for potential - sign
-    // +1 for null terminator
-    char buffer[estd::numeric_limits<T>::template length<base>::value + 2];
-
-    to_chars_result result = to_string_opt(buffer, value, base);
-
-    int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
-
-    return out.write(result.ptr, sz);
-}
-
-template <class TStreambuf, class TBase, typename TInt>
-basic_ostream<TStreambuf, TBase>& out_int_helper(basic_ostream<TStreambuf, TBase>& out, TInt value)
-{
-    // DEBT: another typical enum -> traits/template conversion - a framework
-    // support for that really would be useful
-    switch(out.flags() & ios_base::basefield)
-    {
-        case ios_base::oct:
-            return write_int<8>(out, value);
-
-        case ios_base::dec:
-            return write_int<10>(out, value);
-
-        case ios_base::hex:
-            return write_int<16>(out, value);
-
-        default:
-            // TODO: assert or log an error condition
-            return out;
-    }
-}
-
-
 #if __cplusplus >= 201103L
 template <class TStreambuf, class TBase, typename T,
         class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
-basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf>& out, T value)
+basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, T value)
 {
     return out_int_helper(out, value);
 }
-#else
-// DEBT: Move all this out to c++03 specific area
-template <class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, int value)
-{
-    return out_int_helper(out, value);
-}
-
-template <class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, unsigned value)
-{
-    return out_int_helper(out, value);
-}
-
-template <class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, long value)
-{
-    return out_int_helper(out, value);
-}
-
-template <class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, unsigned long value)
-{
-    return out_int_helper(out, value);
-}
-
 #endif
 
 template <class TStreambuf, class TBase>

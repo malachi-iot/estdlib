@@ -2,7 +2,7 @@
 
 // string.h includes US, so this should never actually include anything,
 // just using it for tooltip help
-#include "../string.h"
+//#include "../string.h"
 #include "string_convert.h"
 #include "../charconv.h"
 #include "impl/allocated_array.h"
@@ -48,6 +48,30 @@ to_string(estd::internal::allocated_array<TStrImpl>& s, const T value)
     s.unlock();
 }
 
+
+namespace internal {
+
+// DEBT: This works pretty well, I'm just getting nervous about TInt letting too many things flow
+// in - so hiding it in internal, which due to ADL won't help a whole lot
+
+// helper since we often convert a statically allocated string
+// NOTE: this will behave slightly differently than a regular string, see to_chars_opt
+template <unsigned N, typename TInt>
+inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base)
+{
+    // -1 here because to_chars doesn't care about null termination, but we do
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
+
+    // DEBT: Check result for conversion failure
+
+    // remember, opt flavor specifies 'ptr' as beginning and we must manually
+    // null terminate the end (ala standard to_chars operation)
+    buffer[N - 1] = 0;
+
+    return result;
+}
+
+}
 
 #ifdef FEATURE_CPP_DEFAULT_TARGS
 // NOTE: Counting on return value optimization to eliminate the copy of 's'

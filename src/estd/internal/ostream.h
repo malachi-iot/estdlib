@@ -189,4 +189,45 @@ public:
 
 };
 
+// Internal call - write an integer of the specified base to the output stream
+// DEBT: No locale num_put available yet.
+// to_string_opt is less overhead so really we'd like to compile time choose
+// one or the other
+template <unsigned base, class TStreambuf, class TBase, class T>
+inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value)
+{
+    // +1 for potential - sign
+    // +1 for null terminator
+    char buffer[estd::numeric_limits<T>::template length<base>::value + 2];
+
+    to_chars_result result = to_string_opt(buffer, value, base);
+
+    int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
+
+    return out.write(result.ptr, sz);
+}
+
+template <class TStreambuf, class TBase, typename TInt>
+basic_ostream<TStreambuf, TBase>& out_int_helper(basic_ostream<TStreambuf, TBase>& out, TInt value)
+{
+    // DEBT: another typical enum -> traits/template conversion - a framework
+    // support for that really would be useful
+    switch(out.flags() & ios_base::basefield)
+    {
+        case ios_base::oct:
+            return write_int<8>(out, value);
+
+        case ios_base::dec:
+            return write_int<10>(out, value);
+
+        case ios_base::hex:
+            return write_int<16>(out, value);
+
+        default:
+            // TODO: assert or log an error condition
+            return out;
+    }
+}
+
+
 }}
