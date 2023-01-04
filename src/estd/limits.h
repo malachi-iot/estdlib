@@ -111,7 +111,9 @@ struct integer_limits
                 (is_signed ? 1 : 0)> {};
 };
 
-
+// We maintain this internal one because it helps quite a bit with int -> precision
+// mapping.
+// DEBT: Just as above, strongly consider making this into 'detail' namespace
 template <class T> struct numeric_limits;
 
 template <>

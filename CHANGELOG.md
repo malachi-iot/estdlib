@@ -2,17 +2,14 @@
 
 ## Added Features
 
-* Added new `estd:: internal::undefined_array`.  This operates nearly 
-  identical to `estd::array` except that default constructor for elements is not invoked
-* Added non-standard `length` to `numeric_limits` to assist in finding
-  proper string length when doing conversions
+* Added new `estd:: internal::undefined_array`.  This operates nearly identical to `estd::array` except that default constructor for elements is not invoked
+* Added non-standard `length` to `numeric_limits` which finds maximum string length for int conversions
 
 ## Quality Updates & Bug Fixes
 
 * `estd::layer1::vector` no longer requires a default contructor in its managed types
 * `estd::span` rework and quality improvement
-* RISC-V int -> string conversion repaired
-  * In process of this, overhauled int -> string length deduction
+* RISC-V int -> string conversion repaired, and general platform int -> string conversion improved
 * Fixed `char_traits` specialization glitch
 * Misc c++03 compatibility
 
