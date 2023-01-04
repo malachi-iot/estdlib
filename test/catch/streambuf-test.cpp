@@ -172,9 +172,9 @@ TEST_CASE("streambuf")
         }
         SECTION("sbumpc")
         {
-            REQUIRE(sb.sbumpc() == raw_str[0]);
-            REQUIRE(sb.sbumpc() == raw_str[1]);
-            REQUIRE(sb.sbumpc() == raw_str[2]);
+            REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[0]));
+            REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[1]));
+            REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[2]));
         }
         SECTION("pubseekoff")
         {
@@ -184,16 +184,16 @@ TEST_CASE("streambuf")
             REQUIRE(new_pos == 5);
             new_pos = sb.pubseekoff(5, ios_base::cur);
             REQUIRE(new_pos == 10);
-            REQUIRE(sb.sgetc() == raw_str[new_pos]);
+            REQUIRE(sb.sgetc() == traits_type::to_int_type(raw_str[new_pos]));
         }
         SECTION("sungetc")
         {
             sb.sbumpc();
             sb.sbumpc();
             sb.sbumpc();
-            REQUIRE(sb.sungetc() == raw_str[2]);
-            REQUIRE(sb.sungetc() == raw_str[1]);
-            REQUIRE(sb.sungetc() == raw_str[0]);
+            REQUIRE(sb.sungetc() == traits_type::to_int_type(raw_str[2]));
+            REQUIRE(sb.sungetc() == traits_type::to_int_type(raw_str[1]));
+            REQUIRE(sb.sungetc() == traits_type::to_int_type(raw_str[0]));
             REQUIRE(sb.sungetc() == traits_type::eof());
         }
     }

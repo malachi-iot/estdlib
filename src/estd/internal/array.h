@@ -160,6 +160,9 @@ struct layer1_allocator
 };
 
 // Just like regular std::array except T constructor is not called
+// NOTE: We flow through with TBase and fall back to regular estd::array if dealing
+// with integral types, since they have no constructor and it makes debugging easier and
+// likely the codebase slightly smaller since the optimizer works less hard
 template <class T, unsigned N, class TBase =
         typename estd::conditional<
             estd::is_integral<T>::value,
