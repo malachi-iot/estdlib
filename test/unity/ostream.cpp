@@ -1,5 +1,6 @@
 #include "unit-test.h"
 
+#include <estd/limits.h>
 #include <estd/ostream.h>
 #include <estd/sstream.h>
 
@@ -9,9 +10,7 @@ using namespace estd;
 
 static void test_ostringstream()
 {
-    // DEBT: Until we overhaul it, maxStringLength runtime fails when
-    // it can't identify your integer type (yuck)
-    unsigned len = internal::numeric_limits<int>::length<10>::value;
+    unsigned len = numeric_limits<int>::length<10>::value;
 
     // 16 bits minimum size expected
     TEST_ASSERT_GREATER_THAN(4, len);
