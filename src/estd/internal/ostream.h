@@ -168,25 +168,7 @@ public:
     }*/
 
 #ifndef FEATURE_IOS_STREAMBUF_FULL
-    //typedef typename base_t::stream_type stream_t;
-
-    basic_ostream() {}
-
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
-    template <class ...TArgs>
-    basic_ostream(TArgs&&...args) : base_type(std::forward<TArgs>(args)...) {}
-
-    basic_ostream(streambuf_type&& streambuf) :
-        base_type(std::move(streambuf)) {}
-#endif
-    basic_ostream(streambuf_type& streambuf) :
-        base_type(streambuf) {}
-
-    template <class TParam1>
-    basic_ostream(TParam1& p1) : base_type(p1) {}
-
-    template <class TParam1>
-    basic_ostream(TParam1* p1) : base_type(p1) {}
+    ESTD_CPP_FORWARDING_CTOR(basic_ostream)
 #endif
 
 };
