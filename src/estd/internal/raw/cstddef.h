@@ -115,8 +115,11 @@ namespace std {
 typedef ::size_t size_t;
 typedef ::ptrdiff_t ptrdiff_t;
 
-// TODO: Make our own nullptr_t here, if necessary
-//typedef ::nullptr_t nullptr_t;
+// DEBT: Not sure what it is about AVR which excludes a ton of things
+// but it would be better to ascertain that and flag that rather than AVR itself
+#if ESTD_MCU_ATMEL_AVR
+typedef ::nullptr_t nullptr_t;
+#endif
 
 }
 #endif

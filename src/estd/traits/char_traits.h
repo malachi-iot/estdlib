@@ -13,6 +13,9 @@
 
 namespace estd {
 
+template <class TChar>
+struct char_traits;
+
 template<>
 struct char_traits<char>
 {
@@ -21,7 +24,11 @@ struct char_traits<char>
     typedef int16_t int_type;
 
     // DEBT: Use fpos instead
+#if ESTD_MCU_ATMEL_AVR
+    typedef int pos_type;
+#else
     typedef streampos pos_type;
+#endif
     typedef int off_type;
 
     static CONSTEXPR char_type to_char_type(int_type ch) { return ch; }

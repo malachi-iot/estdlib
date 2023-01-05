@@ -9,7 +9,7 @@
 void test_layer1_map()
 {
     // adapted from catch.hpp unit tests
-    
+#if __cpp_initializer_lists
     estd::layer1::map<int, int, 4> map =
     {
         { 1, 77 },
@@ -21,6 +21,7 @@ void test_layer1_map()
     auto result = map[3];
 
     TEST_ASSERT_EQUAL(78, *result);
+#endif
 }
 
 #ifdef ESP_IDF_TESTING

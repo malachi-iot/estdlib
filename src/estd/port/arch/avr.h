@@ -17,3 +17,13 @@
 
 // Space is so limited on AVR we default this to on.
 #define FEATURE_ESTD_AGGRESIVE_BITFIELD 1
+
+// https://gcc.gnu.org/onlinedocs/gcc/AVR-Options.html
+#if __AVR_ARCH__
+#define ESTD_MCU_AVR 1
+#define ESTD_MCU_ATMEL_AVR 1
+#endif
+
+// DEBT: Someone correct me if I'm wrong, but AVR GCC compiler lies and says
+// initializer lists are present when they aren't
+#undef __cpp_initializer_lists

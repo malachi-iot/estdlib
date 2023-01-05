@@ -29,7 +29,7 @@
         base_type(p1) {}
 #endif
 
-#ifdef __cpp_initializer_lists
+#if __cpp_initializer_lists
 #define ESTD_CPP_FORWARDING_CTOR_LIST(T, class_name)    \
     class_name(std::initializer_list<T> list) : base_type(list) {}
 #else

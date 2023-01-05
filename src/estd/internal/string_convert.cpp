@@ -124,7 +124,7 @@ template<> char* toString(char* output, int32_t input)
 #if defined(__AVR__)
 template<> char* toString(char* output, float input)
 {
-    constexpr size_t len = maxStringLength<float>();
+    constexpr size_t len = legacy::maxStringLength<float>();
     // UNTESTED
     dtostrf(input, len, len / 2, output);
     return output;

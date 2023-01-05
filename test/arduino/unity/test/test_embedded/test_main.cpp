@@ -5,7 +5,9 @@
 #include <estd/cstddef.h>
 #include "unity/unit-test.h"
 
+#ifdef LED_BUILTIN
 CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
+#endif
 
 
 void setup()
@@ -14,7 +16,9 @@ void setup()
     // https://docs.platformio.org/en/stable/plus/unit-testing.html
     delay(5000);
 
+#ifdef LED_BUILTIN
     pinMode(LED_PIN, OUTPUT);
+#endif
 
     Serial.begin(9600);
     Serial.println("setup: begin");
@@ -31,6 +35,7 @@ void setup()
     test_locale();
     test_map();
     test_optional();
+    test_ostream();
     test_queue();
     test_ratio();
     test_span();
@@ -48,8 +53,10 @@ void setup()
 // Just to indicate we're not dead, we blink
 void loop()
 {
+#ifdef LED_BUILTIN
     digitalWrite(LED_PIN, HIGH);
     delay(100);
     digitalWrite(LED_PIN, LOW);
     delay(500);
+#endif
 }
