@@ -6,7 +6,7 @@ namespace estd { namespace internal {
 
 // DEBT: it's time to put this into 'detail' namespace, since it's used much more often
 // than estd::basic_ostream - is there a way to make TBase a little less confusing for consumers?
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+template <class TStreambuf, class TBase>
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual

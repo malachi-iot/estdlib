@@ -124,9 +124,8 @@ public:
 };
 
 
-//template<class TChar, class Traits = std::char_traits <TChar>>
-template<class TStreambuf, bool use_pointer = false,
-    class TPolicy = ios_base_policy<TStreambuf> >
+// See iosfwd for default values
+template<class TStreambuf, bool use_pointer, class TPolicy>
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
     estd::internal::struct_evaporator<TPolicy>,
     estd::internal::struct_evaporator<typename TPolicy::locale_type>

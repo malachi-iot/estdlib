@@ -10,7 +10,7 @@
 
 namespace estd { namespace internal {
 
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+template <class TStreambuf, class TBase>
 class basic_istream : public
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual

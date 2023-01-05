@@ -51,7 +51,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
     // adapted from GNUC
     static ESTD_CPP_CONSTEXPR_RET bool is_in_base(char_type c, const unsigned _base = b)
     {
-        return '0' <= c && c <= ('0' + (_base - 1));
+        return '0' <= c && c <= ('0' + (char_type)(_base - 1));
     }
 
     /// No bounds checking performed on conversion.
@@ -94,12 +94,12 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
     {
-        return 'A' <= c && c <= ('A' + (_base - 11));
+        return 'A' <= c && c <= ('A' + (char_type)(_base - 11));
     }
 
     static ESTD_CPP_CONSTEXPR_RET bool islower(char_type c, const unsigned _base = b)
     {
-        return 'a' <= c && c <= ('a' + (_base - 11));
+        return 'a' <= c && c <= ('a' + (char_type)(_base - 11));
     }
 
     static inline CONSTEXPR bool is_in_base(char_type c, const unsigned _base = b)
