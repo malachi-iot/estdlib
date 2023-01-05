@@ -30,7 +30,7 @@
 
 namespace estd {
 
-namespace internal {
+namespace detail {
 
 // Using TBase::char_type as it's the most reliable non-reference
 template <class TStreambuf, class TBase>
@@ -104,13 +104,13 @@ template <class TStreambuf, class TBase =
             typename estd::remove_reference<TStreambuf>::type::traits_type
             >, true>
         >
-struct wrapped_ostream : estd::internal::basic_ostream<
+struct wrapped_ostream : estd::detail::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
             typename TBase::traits_type>,
         TBase>
 {
-    typedef estd::internal::basic_ostream<
+    typedef estd::detail::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
             typename TBase::traits_type>,
@@ -134,7 +134,7 @@ struct wrapped_ostream : estd::internal::basic_ostream<
 
 template <class TStreambuf, class TBase>
 wrapped_ostream<TStreambuf&>
-convert(estd::internal::basic_ostream<TStreambuf, TBase>& os)
+convert(estd::detail::basic_ostream<TStreambuf, TBase>& os)
 {
     wrapped_ostream<TStreambuf&> wrapped_os(*os.rdbuf());
     return wrapped_os;
@@ -144,8 +144,8 @@ convert(estd::internal::basic_ostream<TStreambuf, TBase>& os)
 
 
 template <class TStreambuf, class TBase>
-inline internal::basic_ostream<TStreambuf, TBase>& endl(
-    internal::basic_ostream<TStreambuf, TBase>& os)
+inline detail::basic_ostream<TStreambuf, TBase>& endl(
+    detail::basic_ostream<TStreambuf, TBase>& os)
 {
     // uses specialized call to bypass sentry so that we don't needlessly check
     // unitbuf and potentially double-flush
@@ -155,15 +155,15 @@ inline internal::basic_ostream<TStreambuf, TBase>& endl(
 }
 
 // We have this out here rather than ios_base because of our deviation from virtual methods
-template <class TStreambuf>
-inline internal::basic_ostream<TStreambuf>& dec(internal::basic_ostream<TStreambuf>& __os)
+template <class TStreambuf, class TBase>
+inline detail::basic_ostream<TStreambuf, TBase>& dec(detail::basic_ostream<TStreambuf, TBase>& __os)
 {
     __os.setf(ios_base::dec, ios_base::basefield);
     return __os;
 }
 
-template <class TStreambuf>
-inline internal::basic_ostream<TStreambuf>& hex(internal::basic_ostream<TStreambuf>& __os)
+template <class TStreambuf, class TBase>
+inline detail::basic_ostream<TStreambuf, TBase>& hex(detail::basic_ostream<TStreambuf, TBase>& __os)
 {
     __os.setf(ios_base::hex, ios_base::basefield);
     return __os;
@@ -186,7 +186,7 @@ using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
 namespace experimental {
 typedef estd::internal::streambuf<estd::internal::impl::out_span_streambuf<char> > ospanbuf;
 
-typedef estd::internal::basic_ostream<ospanbuf> ospanstream;
+typedef estd::detail::basic_ostream<ospanbuf> ospanstream;
 }
 
 }

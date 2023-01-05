@@ -13,10 +13,10 @@ namespace internal {
 //inline to_chars_result to_string_opt(char (&buffer)[N], TInt value, unsigned base);
 
 template <unsigned base, unsigned N, class TStreambuf, class TBase, class T>
-inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value);
+inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream<TStreambuf, TBase>& out, T value);
 
 template <class TStreambuf, class TBase, typename TInt>
-basic_ostream<TStreambuf, TBase>& out_int_helper(basic_ostream<TStreambuf, TBase>& out, TInt value);
+detail::basic_ostream<TStreambuf, TBase>& out_int_helper(detail::basic_ostream<TStreambuf, TBase>& out, TInt value);
 
 }
 

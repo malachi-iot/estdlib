@@ -349,15 +349,15 @@ namespace internal {
 
 template <class TStreambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
 #if defined(FEATURE_CPP_ALIASTEMPLATE)
-using flagged_istream = basic_istream<TStreambuf,
+using flagged_istream = detail::basic_istream<TStreambuf,
             estd::internal::basic_ios<TStreambuf, false,
                 estd::internal::ios_base_policy<TStreambuf, flags> > >;
 #else
-class flagged_istream : public estd::internal::basic_istream
+class flagged_istream : public estd::detail::basic_istream
         <TStreambuf, estd::internal::basic_ios
             <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > >
 {
-    typedef estd::internal::basic_istream
+    typedef estd::detail::basic_istream
         <TStreambuf, estd::internal::basic_ios
             <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > > base_type;
 

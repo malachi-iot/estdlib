@@ -41,7 +41,7 @@ using basic_istream = detail::basic_istream<TStreambuf, TBase>;
 }
 
 template <class TStreambuf, class TBase>
-internal::basic_istream<TStreambuf, TBase>& 
-    ws(internal::basic_istream<TStreambuf, TBase>& __is);
+detail::basic_istream<TStreambuf, TBase>&
+    ws(detail::basic_istream<TStreambuf, TBase>& __is);
 
 }

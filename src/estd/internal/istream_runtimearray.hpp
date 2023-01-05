@@ -14,10 +14,10 @@ namespace estd {
 namespace internal {
 
 template <class TStreambuf, class TBase, class TStringImpl>
-void do_input(internal::basic_istream<TStreambuf, TBase>& in,
+void do_input(detail::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
-    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename detail::basic_istream<TStreambuf, TBase> istream_type;
     typedef typename estd::remove_reference<TStreambuf>::type impl_type;
     typedef typename impl_type::traits_type traits_type;
     //typedef typename impl_type::char_type char_type;
@@ -64,10 +64,10 @@ void do_input(internal::basic_istream<TStreambuf, TBase>& in,
 // Since using block_type policy at ios level, peek now blocks in that context
 // so regular input code works
 template <class TStreambuf, class TBase, class TStringImpl>
-void blocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
+void blocking_input_helper(detail::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
-    typedef typename internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef typename detail::basic_istream<TStreambuf, TBase> istream_type;
     typedef typename estd::remove_reference<TStreambuf>::type impl_type;
     typedef typename impl_type::traits_type traits_type;
     typedef typename impl_type::char_type char_type;
@@ -115,8 +115,8 @@ void blocking_input_helper(internal::basic_istream<TStreambuf, TBase>& in,
 
 // NOTE: This will work but doesn't filter specifically by string, which perhaps we want
 template <class TStreambuf, class TBase, class TStringImpl>
-internal::basic_istream<TStreambuf, TBase>& operator >>(
-        internal::basic_istream<TStreambuf, TBase>& in,
+detail::basic_istream<TStreambuf, TBase>& operator >>(
+        detail::basic_istream<TStreambuf, TBase>& in,
         internal::dynamic_array<TStringImpl>& value)
 {
     in >> ws;

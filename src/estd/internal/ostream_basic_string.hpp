@@ -6,8 +6,8 @@
 namespace estd {
 
 template <class TStreambuf, class TBase, class TStringAllocator, class TStringPolicy>
-inline internal::basic_ostream<TStreambuf, TBase>& operator <<(
-        internal::basic_ostream<TStreambuf, TBase>& out,
+inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
+        detail::basic_ostream<TStreambuf, TBase>& out,
         const estd::basic_string<
             typename TStreambuf::char_type,
             typename TStreambuf::traits_type,
@@ -27,8 +27,8 @@ inline internal::basic_ostream<TStreambuf, TBase>& operator <<(
 // and string.  However, useful for other dynamic_array
 // derived classes... likely including regular strings too
 template <class TStreambuf, class TBase, class TStringImpl>
-inline internal::basic_ostream<TStreambuf, TBase>& operator <<(
-        internal::basic_ostream<TStreambuf, TBase>& out,
+inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
+        detail::basic_ostream<TStreambuf, TBase>& out,
         const internal::dynamic_array<TStringImpl>& str)
 {
 #ifdef FEATURE_CPP_STATIC_ASSERT

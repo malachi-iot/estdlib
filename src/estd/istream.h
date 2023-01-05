@@ -87,10 +87,10 @@ inline basic_istream<char>& operator >>(basic_istream<char>& in, short& value)
  * Compiles but not runtime tested
  */
 template <class TStreambuf, class TBase>
-inline internal::basic_istream<TStreambuf, TBase>& ws(
-    internal::basic_istream<TStreambuf, TBase>& __is)
+inline detail::basic_istream<TStreambuf, TBase>& ws(
+    detail::basic_istream<TStreambuf, TBase>& __is)
 {
-    typedef typename internal::basic_istream<TStreambuf>::locale_type locale_type;
+    typedef typename detail::basic_istream<TStreambuf>::locale_type locale_type;
 
     locale_type loc = __is.getloc();
 
@@ -111,9 +111,9 @@ inline internal::basic_istream<TStreambuf, TBase>& ws(
 // NOTE: Works well, just needs more testing (and hopefully elevation of experimental::num_get
 // to non-experimental) before elevating to API level
 template <class TStreambuf, class TBase, class T>
-typename enable_if<is_arithmetic<T>::value, internal::basic_istream<TStreambuf, TBase>&>::type
+typename enable_if<is_arithmetic<T>::value, detail::basic_istream<TStreambuf, TBase>&>::type
 operator >>(
-    internal::basic_istream<TStreambuf, TBase>& in,
+    detail::basic_istream<TStreambuf, TBase>& in,
     T& value)
 {
     // NOTE:
@@ -122,7 +122,7 @@ operator >>(
     // Since gcount is mentioned nowhere else on the page, we don't update gcount.
     // A very specific gcount update is mentioned for scenario #11 in [1], which
     // is outside the scope of this method.
-    typedef internal::basic_istream<TStreambuf, TBase> istream_type;
+    typedef detail::basic_istream<TStreambuf, TBase> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     typedef typename istream_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
@@ -155,7 +155,7 @@ operator >>(
 namespace experimental {
 typedef estd::internal::streambuf<estd::internal::impl::in_span_streambuf<char> > ispanbuf;
 
-typedef estd::internal::basic_istream<ispanbuf> ispanstream;
+typedef estd::detail::basic_istream<ispanbuf> ispanstream;
 }
 
 // Working out best way for consumers to really configure their istreams

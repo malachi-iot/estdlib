@@ -182,7 +182,7 @@ namespace internal {
 // to_string_opt is less overhead so really we'd like to compile time choose
 // one or the other
 template <unsigned base, class TStreambuf, class TBase, class T>
-inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBase>& out, T value)
+inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream<TStreambuf, TBase>& out, T value)
 {
     // +1 for potential - sign
     // +1 for null terminator
@@ -196,7 +196,7 @@ inline basic_ostream<TStreambuf, TBase>& write_int(basic_ostream<TStreambuf, TBa
 }
 
 template <class TStreambuf, class TBase, typename TInt>
-basic_ostream<TStreambuf, TBase>& out_int_helper(basic_ostream<TStreambuf, TBase>& out, TInt value)
+detail::basic_ostream<TStreambuf, TBase>& out_int_helper(detail::basic_ostream<TStreambuf, TBase>& out, TInt value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework
     // support for that really would be useful

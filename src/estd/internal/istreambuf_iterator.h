@@ -61,7 +61,7 @@ public:
     }
 
     template <class TIstreamBase>
-    istreambuf_iterator(estd::internal::basic_istream<TStreambuf, TIstreamBase>& is) :
+    istreambuf_iterator(estd::detail::basic_istream<TStreambuf, TIstreamBase>& is) :
         rdbuf(is.rdbuf())
     {
     }

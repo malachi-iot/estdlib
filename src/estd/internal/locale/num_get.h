@@ -66,7 +66,7 @@ private:
     template <class TStreambuf, class TBase>
     struct helper : _helper
     {
-        typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
+        typedef estd::detail::basic_istream<TStreambuf, TBase> istream_type;
         typedef typename istream_type::locale_type locale_type;
 
         template <unsigned base, class T>
@@ -241,7 +241,7 @@ public:
 
     template <typename T, class TStreambuf, class TBase>
     iter_type get(iter_type in, iter_type end,
-        estd::internal::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
+        estd::detail::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
     {
         return helper<TStreambuf, TBase>::get(in, end, str, err, v,
            estd::is_integral<T>(), estd::is_signed<T>());

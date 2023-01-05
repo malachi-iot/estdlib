@@ -90,7 +90,7 @@ public:
     }
 
     template <class TBase>
-    ostreambuf_iterator(estd::internal::basic_ostream<TStreambuf, TBase>& stream) :
+    ostreambuf_iterator(estd::detail::basic_ostream<TStreambuf, TBase>& stream) :
         rdbuf(stream.rdbuf())
     {
 

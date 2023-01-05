@@ -51,9 +51,9 @@ template<size_t N, bool null_terminated = true>
 using istringstream = basic_istringstream<char, N, null_terminated>;
 #else
 template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
-struct basic_istringstream : estd::internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >
+struct basic_istringstream : estd::detail::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >
 {
-    typedef estd::internal::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> > base_type;
+    typedef estd::detail::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> > base_type;
     ESTD_CPP_FORWARDING_CTOR(basic_istringstream)
 };
 
@@ -65,9 +65,9 @@ struct istringstream : basic_istringstream<char, N, null_terminated>
 };
 
 template <size_t N, bool null_terminated = true>
-struct ostringstream : estd::internal::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> >
+struct ostringstream : estd::detail::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> >
 {
-    typedef estd::internal::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> > base_type;
+    typedef estd::detail::basic_ostream<layer1::basic_stringbuf<char, N, null_terminated> > base_type;
     ESTD_CPP_FORWARDING_CTOR(ostringstream)
 };
 #endif
