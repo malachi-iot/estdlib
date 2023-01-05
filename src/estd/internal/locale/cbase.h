@@ -49,7 +49,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
     typedef TChar char_type;
 
     // adapted from GNUC
-    static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
+    static ESTD_CPP_CONSTEXPR_RET bool is_in_base(char_type c, const unsigned _base = b)
     {
         return '0' <= c && c <= ('0' + (_base - 1));
     }
@@ -58,12 +58,12 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
     /// \param c
     /// \return Character value of 0-9 converted from char to int.  Any other character value
     /// results in an int_type either < 0 or > 10
-    static inline CONSTEXPR int_type from_char_raw(char_type c)
+    static ESTD_CPP_CONSTEXPR_RET int_type from_char_raw(char_type c)
     {
         return c - '0';
     }
 
-    static inline CONSTEXPR char_type to_char(int_type v)
+    static ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v)
     {
         return '0' + v;
     }
@@ -92,17 +92,17 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
     typedef typename base_type::int_type int_type;
     typedef TChar char_type;
 
-    static inline CONSTEXPR bool isupper(char_type c, const int _base = b)
+    static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
     {
         return 'A' <= c && c <= ('A' + (_base - 11));
     }
 
-    static inline CONSTEXPR bool islower(char_type c, const int _base = b)
+    static ESTD_CPP_CONSTEXPR_RET bool islower(char_type c, const unsigned _base = b)
     {
         return 'a' <= c && c <= ('a' + (_base - 11));
     }
 
-    static inline CONSTEXPR bool is_in_base(char_type c, const int _base = b)
+    static inline CONSTEXPR bool is_in_base(char_type c, const unsigned _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit here
         return estd::internal::ascii_isdigit(c) ||
