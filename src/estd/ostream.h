@@ -44,11 +44,15 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 #if __cplusplus >= 201103L
 template <class TStreambuf, class TBase, typename T,
         class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
-basic_ostream<TStreambuf, TBase>& operator<<(basic_ostream<TStreambuf, TBase>& out, T value)
+basic_ostream<TStreambuf, TBase>&
+#else
+template <class TStreambuf, class TBase, typename T>
+typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStreambuf, TBase>&>::type
+#endif
+    operator<<(basic_ostream<TStreambuf, TBase>& out, T value)
 {
     return out_int_helper(out, value);
 }
-#endif
 
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
@@ -85,7 +89,7 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
 template <class TChar, class CharTraits = estd::char_traits<TChar> >
-using basic_ostream = internal::basic_ostream<
+using basic_ostream = detail::basic_ostream<
     basic_streambuf<TChar, CharTraits>,
     internal::basic_ios<basic_streambuf<TChar, CharTraits>, true> >;
 
@@ -174,7 +178,7 @@ inline detail::basic_ostream<TStreambuf, TBase>& hex(detail::basic_ostream<TStre
 #ifdef FEATURE_POSIX_IOS
 #ifdef __cpp_alias_templates
 template<class TChar, class Traits = std::char_traits<TChar> >
-using posix_ostream = internal::basic_ostream< posix_streambuf<TChar, Traits> >;
+using posix_ostream = detail::basic_ostream< posix_streambuf<TChar, Traits> >;
 
 //typedef posix_ostream<char> ostream;
 #endif

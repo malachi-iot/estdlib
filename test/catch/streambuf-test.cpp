@@ -123,7 +123,7 @@ TEST_CASE("streambuf")
             typedef estd::internal::streambuf<sb_impl_type> sb_type;
 
             // Successfully cascades down 'val, 32' all the way down to out_span_streambuf
-            estd::internal::basic_ostream<sb_type> out(val, 32);
+            estd::detail::basic_ostream<sb_type> out(val, 32);
 
             REQUIRE(out.rdbuf()->value().size() == 32);
         }

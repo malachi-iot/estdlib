@@ -5,7 +5,7 @@
 
 namespace estd {
 
-typedef estd::internal::basic_ostream<estd::arduino_ostreambuf> arduino_ostream;
+typedef estd::detail::basic_ostream<estd::arduino_ostreambuf> arduino_ostream;
 
 namespace internal {
 

@@ -14,7 +14,7 @@ TEST_CASE("istream")
     {
         layer1::string<32> str = "hi2u";
 
-        internal::basic_istream<streambuf_type> _cin(str);
+        detail::basic_istream<streambuf_type> _cin(str);
 
         SECTION("readsome")
         {
@@ -34,7 +34,7 @@ TEST_CASE("istream")
     {
         layer1::string<32> str = "2 xyz";
 
-        internal::basic_istream<streambuf_type> _cin(str);
+        detail::basic_istream<streambuf_type> _cin(str);
 
         SECTION("integer conversion")
         {

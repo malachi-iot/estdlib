@@ -26,8 +26,6 @@ namespace estd { namespace iterated {
 template <unsigned base, typename TChar, class TLocale>
 struct num_get
 {
-    //typedef estd::internal::basic_istream<TStreambuf, TBase> istream_type;
-    //typedef typename istream_type::locale_type locale_type;
     typedef TLocale locale_type;
     typedef TChar char_type;
     typedef cbase<char_type, base, locale_type> cbase_type;

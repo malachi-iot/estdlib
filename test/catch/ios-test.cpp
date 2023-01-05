@@ -62,7 +62,7 @@ TEST_CASE("ios")
     {
         SECTION("wrap/convert")
         {
-            internal::basic_ostream<dummy_streambuf> _cout;
+            detail::basic_ostream<dummy_streambuf> _cout;
 
             auto wrapped_out = experimental::convert(_cout);
             ostream& out = wrapped_out;
@@ -148,7 +148,7 @@ TEST_CASE("ios")
             layer1::string<32> str = "hi2u";
 
             // wrap with a (basically) real ostream
-            internal::basic_ostream<streambuf_type> _cout;
+            detail::basic_ostream<streambuf_type> _cout;
             // extract the internal inline-value rdbuf
             streambuf_type* rdbuf = _cout.rdbuf();
 
@@ -179,11 +179,11 @@ TEST_CASE("ios")
         SECTION("whitespace on input")
         {
             // wrap with a (basically) real ostream
-            internal::basic_ostream<streambuf_type> _cout;
+            detail::basic_ostream<streambuf_type> _cout;
             // extract the internal inline-value rdbuf
             streambuf_type* rdbuf = _cout.rdbuf();
             // wrap reference to streambuf with (basically) real istream
-            internal::basic_istream<streambuf_type&> _cin(*rdbuf);
+            detail::basic_istream<streambuf_type&> _cin(*rdbuf);
 
             layer1::string<32> str;
             layer1::string<32> whitespace_str = "   ";
@@ -235,7 +235,7 @@ TEST_CASE("ios")
         SECTION("wrapped_ostream")
         {
             streambuf_type sb;
-            internal::basic_ostream<streambuf_type&> native_cout(sb);
+            detail::basic_ostream<streambuf_type&> native_cout(sb);
             experimental::wrapped_ostream<streambuf_type&> _cout(sb);
             ostream& __cout = _cout;
 

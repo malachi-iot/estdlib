@@ -142,7 +142,7 @@ TEST_CASE("locale")
         //ios_base fmt;
         // DEBT: Need to do this because we are basing on basic_ios, not ios_base, due
         // to moved getloc().  Can be any estd istream here
-        estd::internal::basic_istream<layer1::stringbuf<32>> fmt;
+        estd::detail::basic_istream<layer1::stringbuf<32>> fmt;
         ios_base fmt2;
         long v = -1;
 
@@ -393,7 +393,6 @@ TEST_CASE("locale")
                     ios_base::iostate err = ios_base::goodbit;
 
                     typedef experimental::istringstream<64> istream_type;
-                    //estd::internal::basic_istream<layer1::basic_stringbuf<char, 32>> istream(input);
                     istream_type istream(input);
                     typedef estd::istreambuf_iterator<decltype(istream)::streambuf_type>
                         iterator_type;
@@ -427,7 +426,7 @@ TEST_CASE("locale")
                     ios_base::iostate state = ios_base::goodbit;
 
                     // DEBT: Only used for format and locale specification
-                    estd::internal::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
+                    estd::detail::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
 
                     f.get(number, number + 4, fmt, state, value);
 
