@@ -2,7 +2,7 @@
 
 #include "ios.h"
 
-namespace estd { namespace internal {
+namespace estd { namespace detail {
 
 // DEBT: it's time to put this into 'detail' namespace, since it's used much more often
 // than estd::basic_ostream - is there a way to make TBase a little less confusing for consumers?
@@ -80,7 +80,7 @@ private:
     {
         streamsize written = this->rdbuf()->sputn(s, n);
 
-        if(written != n)
+        if (written != n)
             base_type::setstate(ios_base::failbit);
     }
 
@@ -96,7 +96,7 @@ public:
         inline static void destroy(basic_ostream& os)
         {
             //if(os.flags() & ios_base::unitbuf)
-            if(os.is_unitbuf_set() && os.good())
+            if (os.is_unitbuf_set() && os.good())
                 os.flush();
         }
 
@@ -112,7 +112,7 @@ public:
 
     __ostream_type& flush()
     {
-        if(this->rdbuf()->pubsync() == -1)
+        if (this->rdbuf()->pubsync() == -1)
             this->setstate(base_type::badbit);
 
         return *this;
@@ -135,10 +135,10 @@ public:
 
     __ostream_type& put(char_type ch, bool bypass_sentry = false)
     {
-        if(this->rdbuf()->sputc(ch) == estd::char_traits<char_type>::eof())
+        if (this->rdbuf()->sputc(ch) == estd::char_traits<char_type>::eof())
             this->setstate(base_type::eofbit);
 
-        if(!bypass_sentry)
+        if (!bypass_sentry)
             sentry::destroy(*this);
 
         return *this;
@@ -149,14 +149,14 @@ public:
     // fully implemented for that yet however (just string)
     pos_type tellp()
     {
-        if(this->fail() == true) return pos_type(-1);
+        if (this->fail() == true) return pos_type(-1);
 
         return this->rdbuf()->pubseekoff(0, ios_base::cur, ios_base::out);
     }
 
     //friend basic_ostream& operator<<(basic_ostream& (*__pf)(basic_ostream&));
 
-    __ostream_type& operator<<(__ostream_type& (*__pf)(__ostream_type&))
+    __ostream_type& operator<<(__ostream_type& (* __pf)(__ostream_type&))
     {
         return __pf(*this);
     }
@@ -172,6 +172,10 @@ public:
 #endif
 
 };
+
+} // detail
+
+namespace internal {
 
 // Internal call - write an integer of the specified base to the output stream
 // DEBT: No locale num_put available yet.

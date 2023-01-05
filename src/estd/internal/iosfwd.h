@@ -3,7 +3,7 @@
 #include "stream_flags.h"
 
 namespace estd {
-    
+
 namespace internal {
 
 template <class TStreambuf,
@@ -14,11 +14,29 @@ template<class TStreambuf, bool use_pointer = false,
         class TPolicy = ios_base_policy<TStreambuf> >
 class basic_ios;
 
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+}
+
+namespace detail {
+
+template <class TStreambuf, class TBase = internal::basic_ios<TStreambuf> >
 class basic_ostream;
 
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+template <class TStreambuf, class TBase = internal::basic_ios<TStreambuf> >
 class basic_istream;
+
+}
+    
+namespace internal {
+
+// Sorry c++03, for you this is a breaking change
+#if __cpp_alias_templates
+template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+using basic_ostream = detail::basic_ostream<TStreambuf, TBase>;
+
+template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
+using basic_istream = detail::basic_istream<TStreambuf, TBase>;
+
+#endif
 
 }
 

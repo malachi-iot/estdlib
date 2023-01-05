@@ -8,14 +8,14 @@
 #endif
 
 
-namespace estd { namespace internal {
+namespace estd { namespace detail {
 
 template <class TStreambuf, class TBase>
 class basic_istream : public
 #ifdef FEATURE_IOS_STREAMBUF_FULL
-        virtual
+                      virtual
 #endif
-        TBase
+                      TBase
 {
     typedef TBase base_type;
 
@@ -36,10 +36,10 @@ private:
         _gcount = 0;
 #endif
         return this->good() ?
-            // Alas, standard C++ has set the precedent where peek sometimes blocks.
-            // We can flip that behavior on and off at the istream level.
-            blocking_type::sgetc(*this, this->rdbuf()) :
-            traits_type::eof();
+               // Alas, standard C++ has set the precedent where peek sometimes blocks.
+               // We can flip that behavior on and off at the istream level.
+               blocking_type::sgetc(*this, this->rdbuf()) :
+               traits_type::eof();
     }
 
     /**
@@ -49,7 +49,7 @@ private:
     bool block_experimental()
     {
         // TODO: add timeout logic here
-        while(!this->rdbuf()->in_avail());
+        while (!this->rdbuf()->in_avail());
 
         return true;
     }
@@ -111,7 +111,7 @@ public:
 #if FEATURE_ESTD_IOS_GCOUNT
         _gcount = 0;
 #endif
-        if(this->rdbuf()->sungetc() == traits_type::eof())
+        if (this->rdbuf()->sungetc() == traits_type::eof())
             this->setstate(ios_base::badbit);
 
         return *this;
@@ -146,7 +146,7 @@ public:
         // TODO: optimization point.  We want to do something
         // so that we don't inline this (and other read/write operations like it)
         // all over the place
-        if(this->rdbuf()->sgetn(s, n) != n)
+        if (this->rdbuf()->sgetn(s, n) != n)
             // TODO: Consider setting _gcount here to what *was* returned
             this->setstate(base_type::eofbit);
 
@@ -166,17 +166,17 @@ public:
         _gcount = 0;
 #endif
 
-        for(;;)
+        for (;;)
         {
             int_type c = stream->sbumpc();
 
-            if(traits_type::eq(c, traits_type::eof()))
+            if (traits_type::eq(c, traits_type::eof()))
             {
                 this->setstate(base_type::eofbit);
                 break;
             }
 
-            if(!count-- || traits_type::eq(c, delim))
+            if (!count-- || traits_type::eq(c, delim))
             {
                 this->setstate(base_type::failbit);
                 break;
@@ -246,11 +246,11 @@ public:
     // delim test is disabled if delim is default value, which would be EOF
     basic_istream& ignore(streamsize count = 1)
     {
-        while(count--)
+        while (count--)
         {
             int_type ch = get();
 
-            if(ch == traits_type::eof())
+            if (ch == traits_type::eof())
             {
                 this->setstate(ios_base::eofbit);
                 return *this;
@@ -267,18 +267,18 @@ public:
     basic_istream& ignore(streamsize count, const int_type delim)
     {
         // "This [delimiter] test is disabled if delim is Traits::eof()"
-        if(delim == traits_type::eof()) return ignore(count);
+        if (delim == traits_type::eof()) return ignore(count);
 
-        while(count--)
+        while (count--)
         {
             int_type ch = get();
 
-            if(ch == traits_type::eof())
+            if (ch == traits_type::eof())
             {
                 this->setstate(ios_base::eofbit);
                 break;
             }
-            else if(ch == delim) break;
+            else if (ch == delim) break;
 
 #if FEATURE_ESTD_IOS_GCOUNT
             _gcount++;
@@ -290,13 +290,13 @@ public:
 
     basic_istream& sync()
     {
-        if(this->rdbuf()->pubsync() == -1)
+        if (this->rdbuf()->pubsync() == -1)
             this->setstate(base_type::badbit);
 
         return *this;
     }
 
-    basic_istream& operator>>(basic_istream& (*__pf)(basic_istream&))
+    basic_istream& operator>>(basic_istream& (* __pf)(basic_istream&))
     {
         return __pf(*this);
     }
@@ -309,14 +309,14 @@ public:
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
     template <class ... TArgs>
-    basic_istream(TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...)
+    basic_istream(TArgs&& ...args) :
+            base_type(std::forward<TArgs>(args)...)
     {
         gcount(0);
     }
 
     basic_istream(streambuf_type&& streambuf) :
-        base_type(std::move(streambuf))
+            base_type(std::move(streambuf))
     {
         gcount(0);
     }
@@ -336,12 +336,16 @@ public:
 #endif
 
     basic_istream(streambuf_type& streambuf) :
-        base_type(streambuf)
+            base_type(streambuf)
     {
         gcount(0);
     }
 #endif
 };
+
+} // detail
+
+namespace internal {
 
 template <class TStreambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
 #if defined(FEATURE_CPP_ALIASTEMPLATE)
