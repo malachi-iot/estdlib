@@ -167,6 +167,11 @@ public:
     // utilizing 'base_type' enables clever init constructors of compatible base to
     // widen field of how this span can initialize
     ESTD_CPP_CONSTEXPR_RET span(const base_type& copy_from) : base_type(copy_from) {}
+    // DEBT: This extra constructor is needed to quiet down deprecation warnings
+    // about implicitly defined constructor - apparently above base_type flavor
+    // doesn't fill all the roles
+    ESTD_CPP_CONSTEXPR_RET span(const span& copy_from) : base_type(copy_from) {}
+
     span& operator=(const span& copy_from)
     {
         return * new (this) span(copy_from);
