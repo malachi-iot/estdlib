@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <catch/catch.hpp>
 
 #define FEATURE_ESTD_ALGORITHM_OPT 0
 
