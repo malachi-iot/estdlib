@@ -29,6 +29,21 @@ struct ring_buffer
         vRingbufferDelete(h);
     }
 
+    size_t max_item_size() const
+    {
+        return xRingbufferGetMaxItemSize(h);
+    }
+
+    BaseType_t send(void* pvItem, size_t xItemSize, TickType_t xTicksToWait)
+    {
+        return xRingbufferSend(h, pvItem, xItemSize, xTicksToWait);
+    }
+
+    BaseType_t send_from_isr(void* pvItem, size_t xItemSize, BaseType_t *pxHigherPriorityTaskWoke)
+    {
+        return xRingbufferSendFromISR(h, pvItem, xItemSize, pxHigherPriorityTaskWoke);
+    }
+
     BaseType_t send_acquire(void **ppvItem, size_t xItemSize, TickType_t xTicksToWait)
     {
         return xRingbufferSendAcquire(h, ppvItem, xItemSize, xTicksToWait);
@@ -49,6 +64,16 @@ struct ring_buffer
         vRingbufferReturnItem(h, pvItem);
     }
 
+    void* receive_from_isr(size_t* sz)
+    {
+        return xRingbufferReceiveFromISR(h, sz);
+    }
+
+    void return_item_from_isr(void* pvItem, BaseType_t *pxHigherPriorityTaskWoken)
+    {
+        vRingbufferReturnItemFromISR(h, pvItem, pxHigherPriorityTaskWoken);
+    }
+    
     operator RingbufHandle_t() const { return h; }
 };
 
