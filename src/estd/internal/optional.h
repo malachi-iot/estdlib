@@ -27,9 +27,11 @@ protected:
 };
 
 template <class T>
-struct optional_base : optional_base_base
+struct optional_base : optional_base_base,
+    experimental::raw_instance_provider<T>
 {
-    typedef T value_type;
+    typedef typename experimental::raw_instance_provider<T> provider_type;
+    typedef typename provider_type::value_type value_type;
     typedef value_type& return_type;
     typedef const value_type& const_return_type;
 
@@ -37,10 +39,9 @@ struct optional_base : optional_base_base
 
     //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
     // TODO: will need attention on the alignment front
-    experimental::raw_instance_provider<T> provider;
 
-    value_type& value() { return provider.value(); }
-    const value_type& value() const { return provider.value(); }
+    value_type* operator->() { return &provider_type::value(); }
+    const value_type* operator->() const { return &provider_type::value(); }
 };
 
 
@@ -54,6 +55,7 @@ class optional_bitwise
     };
 
 protected:
+    void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
 
     ESTD_CPP_CONSTEXPR_RET optional_bitwise() :

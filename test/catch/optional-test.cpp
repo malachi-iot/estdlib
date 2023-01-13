@@ -11,6 +11,24 @@ estd::optional<int> returning_optional(int val)
     return val;
 }
 
+template <typename T, class TBase>
+static void suite(estd::optional<T, TBase> o, T compare_to)
+{
+    REQUIRE(!o);
+    bool result = o != T();
+    REQUIRE(result);
+    result = o == T();
+    REQUIRE(!result);
+    REQUIRE(!(o > compare_to));
+    REQUIRE(!(o < compare_to));
+
+    o = compare_to;
+
+    //REQUIRE(val > 4);
+    REQUIRE(o == compare_to);
+} 
+
+
 TEST_CASE("optional")
 {
     SECTION("simple")
@@ -130,15 +148,7 @@ TEST_CASE("optional")
         {
             estd::optional<int> val;
 
-            // comparisons should all be false
-            // when uninitialized
-            REQUIRE(!val);
-            bool result = val != 0;
-            REQUIRE(result);
-            result = val == 0;
-            REQUIRE(!result);
-            REQUIRE(!(val > 4));
-            REQUIRE(!(val < 4));
+            suite(val, 4);
 
             val = 5;
 
@@ -149,13 +159,9 @@ TEST_CASE("optional")
         {
             estd::optional<bool> val;
 
-            REQUIRE(!val);
-
-            bool result = val != false;
-
-            REQUIRE(result);
+            suite(val, true);
         }
-        SECTION("layer1")
+        SECTION("layer1: int")
         {
             estd::layer1::optional<int> val;
 
@@ -184,6 +190,13 @@ TEST_CASE("optional")
             val = val2;
 
             REQUIRE(!val);
+        }
+        SECTION("layer1: bool")
+        {
+            estd::layer1::optional<bool> val;
+
+            // breaks on operator=, and I'm glad it did - thats a bug
+            //suite(val, false);
         }
     }
     SECTION("function interaction/return value")

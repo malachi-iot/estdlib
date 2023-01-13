@@ -55,10 +55,7 @@ protected:
     void copy(const optional<U, TUBase>& copy_from)
     {
         base_type::has_value(copy_from.has_value());
-        if(copy_from.has_value())
-        {
-            new (&base_type::value()) value_type(copy_from.value());
-        }
+        base_type::value(copy_from.value());
     }
 
 public:
@@ -67,9 +64,11 @@ public:
     //typedef void optional_tag;
     typedef typename base_type::value_type value_type;
 
+/*
     //void value(value_type& v) { base_type::value(v); }
     value_type& value() { return base_type::value(); }
     const value_type& value() const { return base_type::value(); }
+*/
 
     // --- constructors
     // We depend on base class to initialize default to has_value() == false
@@ -82,7 +81,7 @@ public:
     optional(optional<U, TUBase>&& move_from )
     {
         base_type::has_value(move_from.has_value());
-        new (&value()) value_type(std::move(move_from.value()));
+        new (&base_type::value()) value_type(std::move(move_from.value()));
     }
 
     /**
@@ -102,7 +101,7 @@ public:
     optional(U&& move_from)
     {
         base_type::has_value(true);
-        new (&value()) value_type(std::move(move_from));
+        new (&base_type::value()) value_type(std::move(move_from));
     }
 #endif
 
@@ -142,7 +141,7 @@ public:
     optional& operator=(value_type&& v)
     {
         // FIX: ends up treating 'v' as a bool using bool operator
-        new (&value()) value_type(std::move(v));
+        new (&base_type::value()) value_type(std::move(v));
         base_type::has_value(true);
         return *this;
     }
@@ -153,7 +152,7 @@ public:
     // may be breaking things so stuffing this in here, for now
     optional& operator=(const value_type& v)
     {
-        new (&value()) value_type(v);
+        new (&base_type::value()) value_type(v);
         base_type::has_value(true);
         return *this;
     }
@@ -164,7 +163,7 @@ public:
     template< class... TArgs >
     T& emplace( TArgs&&... args )
     {
-        T& v = value();
+        T& v = base_type::value();
         new (&v) T(std::forward<TArgs>(args)...);
         return v;
     }
@@ -177,13 +176,13 @@ public:
 #endif
     T value_or( U&& default_value ) &&
     {
-        return base_type::has_value() ? value() : std::move(default_value);
+        return base_type::has_value() ? base_type::value() : std::move(default_value);
     }
 
     template <class U>
     constexpr T value_or( U&& default_value ) const&
     {
-        return base_type::has_value() ? value() : std::move(default_value);
+        return base_type::has_value() ? base_type::value() : std::move(default_value);
     }
 #else
     // Untested
@@ -202,10 +201,8 @@ public:
 #endif
     operator bool() const { return base_type::has_value(); }
 
-    value_type& operator*() { return value(); }
-    const value_type& operator*() const { return value(); }
-    value_type* operator->() { return &value(); }
-    const value_type* operator->() const { return &value(); }
+    value_type& operator*() { return base_type::value(); }
+    const value_type& operator*() const { return base_type::value(); }
 };
 
 
@@ -330,6 +327,18 @@ public:
     ESTD_CPP_CONSTEXPR_RET operator bool() const { return base_type::has_value(); }
 };
 
+
+template <>
+class optional<bool> : public estd::optional<bool, estd::internal::optional_bitwise<bool> >
+{
+    typedef estd::optional<bool, estd::internal::optional_bitwise<bool> > base_type;
+
+public:
+
+    ESTD_CPP_FORWARDING_CTOR(optional)
+};
+
+
 }
 
 template <class T, class U, class TBase>
@@ -365,6 +374,7 @@ ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& va
 {
     return opt.has_value() ? opt.value() < value : false;
 }
+
 
 
 }

@@ -245,7 +245,9 @@ struct instance_provider
 };
 
 
-// FIX: pretty sure std C++ has a thing akin to this
+// DEBT: std C++ has a thing akin to this, aligned_storage - but that is
+// deprecated.  Our particular flavor does not currently attempt to align
+// storage... but maybe it should?
 /**
  * Useful for scenarios where one can't do RAII pattern
  * @tparam T
@@ -261,8 +263,22 @@ struct raw_instance_provider
     estd::byte buf[size];
 #endif
 
+    typedef T value_type;
+
     T& value() { return *reinterpret_cast<T*>(buf); }
     const T& value() const { return *reinterpret_cast<const T*>(buf); }
+
+    void value(const T& copy_from)
+    {
+        *reinterpret_cast<T*>(buf) = copy_from;
+    }
+
+    // very specifically does a operator= move
+    // do a direct placement new on value() if you want that kind of move
+    void value(T&& move_from)
+    {
+        *reinterpret_cast<T*>(buf) = std::move(move_from);
+    }
 };
 
 // tracks as a pointer, but presents as an inline instance/reference
