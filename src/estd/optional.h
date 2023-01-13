@@ -5,50 +5,10 @@
 
 #include "utility.h"
 #include "memory.h"
-#include "new.h"
+
+#include "internal/optional.h"
 
 namespace estd {
-
-namespace internal {
-
-struct optional_tag_base
-{
-    typedef void optional_tag;
-
-    ESTD_FN_HAS_TYPEDEF_EXP(optional_tag)
-};
-
-struct optional_base_base
-{
-    bool m_initialized;
-
-    optional_base_base(bool initialized = false) :
-        m_initialized(initialized) {}
-
-    bool has_value() const { return m_initialized; }
-    void reset() { m_initialized = false; }
-
-protected:
-    void has_value(bool initialized) { m_initialized = initialized; }
-};
-
-template <class T>
-struct optional_base : optional_base_base
-{
-    typedef T value_type;
-
-    optional_base(bool initialized = false) : optional_base_base(initialized) {}
-
-    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
-    // TODO: will need attention on the alignment front
-    experimental::raw_instance_provider<T> provider;
-
-    value_type& value() { return provider.value(); }
-    const value_type& value() const { return provider.value(); }
-};
-
-
-}
 
 struct nullopt_t {
     explicit
@@ -66,6 +26,7 @@ struct nullopt_t {
 };
 
 
+// DEBT: Pretty sure this won't work with c++03.  If it does, document that
 #ifdef FEATURE_CPP_INLINE_VARIABLES
 inline
 #elif defined(FEATURE_CPP_INLINE_STATIC)
@@ -112,7 +73,7 @@ public:
 
     // --- constructors
     // We depend on base class to initialize default to has_value() == false
-    optional() {}
+    ESTD_CPP_DEFAULT_CTOR(optional)
 
     ESTD_CPP_CONSTEXPR_RET optional(nullopt_t) {}
 
@@ -404,5 +365,6 @@ ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& va
 {
     return opt.has_value() ? opt.value() < value : false;
 }
+
 
 }
