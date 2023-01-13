@@ -35,14 +35,15 @@ template <class T, class enabler = void>
 struct optional_value_provider;
 
 template <class T>
-struct optional_value_use_raw_provider :
+struct optional_use_raw_provider :
     estd::integral_constant<bool,
-            estd::is_integral<T>::value> {};
+        !(estd::is_integral<T>::value ||
+        estd::is_pointer<T>::value)> {};
 
 
 // intrinsic variety, no need to go crazy with raw_instance_provider
 template <class T>
-struct optional_value_provider<T, typename estd::enable_if<estd::is_integral<T>::value>::type >
+struct optional_value_provider<T, typename estd::enable_if<!optional_use_raw_provider<T>::value>::type >
 {
     typedef T value_type;
 
@@ -76,7 +77,7 @@ public:
 };
 
 template <class T>
-struct optional_value_provider<T, typename estd::enable_if<!estd::is_integral<T>::value>::type > :
+struct optional_value_provider<T, typename estd::enable_if<optional_use_raw_provider<T>::value>::type > :
     experimental::raw_instance_provider<T>
 {
     typedef typename experimental::raw_instance_provider<T> provider_type;

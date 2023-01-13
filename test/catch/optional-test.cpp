@@ -28,7 +28,27 @@ static void suite(estd::optional<T, TBase> o, T compare_to)
 
     //REQUIRE(val > 4);
     REQUIRE(result);
-} 
+}
+
+enum SpecializedEnum
+{
+    Value1,
+    Value2
+};
+
+// Any time SpecializedEnum is used in regular estd::optional, it routes to this base class
+// See below unit test
+namespace estd { namespace internal {
+
+template<>
+struct optional_base<SpecializedEnum> : optional_bitwise<SpecializedEnum, 4>
+{
+    typedef optional_bitwise<SpecializedEnum, 4> base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(optional_base)
+};
+
+}}
 
 
 TEST_CASE("optional")
@@ -218,5 +238,17 @@ TEST_CASE("optional")
             REQUIRE(!value);
             REQUIRE(value.value() == -1);
         }
+    }
+    SECTION("auto specializing based on traits/base")
+    {
+        // This experiment works quite well, it's a matter of naming/convention/usability to work out now
+
+        estd::optional<SpecializedEnum> o;
+
+        REQUIRE(o.has_value() == false);
+
+        o = Value1;
+
+        REQUIRE(o == Value1);
     }
 }
