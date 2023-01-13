@@ -26,8 +26,42 @@ protected:
     void has_value(bool initialized) { m_initialized = initialized; }
 };
 
+template <class T, class enabler = void>
+struct optional_value_provider;
+
+
+// intrinsic variety, no need to go crazy with raw_instance_provider
 template <class T>
-struct optional_base : optional_base_base,
+struct optional_value_provider<T, typename estd::enable_if<estd::is_integral<T>::value>::type >
+{
+    typedef T value_type;
+
+protected:
+    T value_;
+
+    void value(const T& value)
+    {
+        value_ = value;
+    }
+
+    void value(T&& value)
+    {
+        value_ = std::move(value);
+    }
+
+    ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
+    optional_value_provider(T value) : value_{value} {}
+
+public:
+    value_type& value() { return value_; }
+    ESTD_CPP_CONSTEXPR_RET const value_type& value() const { return value_; }
+
+    value_type* operator->() { return &value_; }
+    const value_type* operator->() const { return &value_; }
+};
+
+template <class T>
+struct optional_value_provider<T, typename estd::enable_if<!estd::is_integral<T>::value>::type > :
     experimental::raw_instance_provider<T>
 {
     typedef typename experimental::raw_instance_provider<T> provider_type;
@@ -35,7 +69,7 @@ struct optional_base : optional_base_base,
     typedef value_type& return_type;
     typedef const value_type& const_return_type;
 
-    optional_base(bool initialized = false) : optional_base_base(initialized) {}
+    optional_value_provider(bool initialized = false) : optional_base_base(initialized) {}
 
     //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
     // TODO: will need attention on the alignment front
@@ -44,6 +78,14 @@ struct optional_base : optional_base_base,
     const value_type* operator->() const { return &provider_type::value(); }
 };
 
+template <class T>
+struct optional_base : optional_value_provider<T>,
+   optional_base_base
+{
+    typedef optional_value_provider<T> base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(optional_base)
+};
 
 template <class T>
 class optional_bitwise
@@ -79,9 +121,9 @@ public:
 namespace layer1 { namespace internal {
 
 template <class T, T null_value_>
-class optional_base //: public estd::internal::optional_tag_base
+class optional_base : public estd::internal::optional_value_provider<T>
 {
-    T value_;
+    typedef estd::internal::optional_value_provider<T> base_type;
 
 protected:
 //public:
@@ -89,22 +131,14 @@ protected:
     // should always bool == true here
     optional_base(bool) {}
 
-    optional_base() : value_(null_value_) {}
-
-    void value(T& value)
-    {
-        value_ = value;
-    }
+    optional_base() : base_type(null_value_) {}
 
 public:
     typedef T value_type;
 
-    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return value_ != null_value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value_ != null_value_; }
     void has_value(bool) {}
-    void reset() { value_ = null_value_; }
-
-    value_type& value() { return value_; }
-    const value_type& value() const { return value_; }
+    void reset() { base_type::value_ = null_value_; }
 
     static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
 };

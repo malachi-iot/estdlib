@@ -68,7 +68,7 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
         return '0' + v;
     }
 
-    static inline CONSTEXPR typename base_type::optional_type
+    static ESTD_CPP_CONSTEXPR_RET typename base_type::optional_type
     from_char(char_type c, const int _base = b)
     {
         return is_in_base(c, _base) ?

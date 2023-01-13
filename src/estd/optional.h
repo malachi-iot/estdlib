@@ -210,9 +210,9 @@ public:
 namespace layer1 {
 
 template <class T, T null_value = T()>
-class optional : public estd::optional<T, internal::optional_base<T, null_value> >
+class optional : public estd::optional<T, layer1::internal::optional_base<T, null_value> >
 {
-    typedef estd::optional<T, internal::optional_base<T, null_value> > base_type;
+    typedef estd::optional<T, layer1::internal::optional_base<T, null_value> > base_type;
     typedef typename base_type::value_type value_type;
 
 protected:
