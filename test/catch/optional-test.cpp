@@ -126,7 +126,7 @@ TEST_CASE("optional")
     }
     SECTION("comparisons")
     {
-        SECTION("standard")
+        SECTION("int")
         {
             estd::optional<int> val;
 
@@ -134,7 +134,7 @@ TEST_CASE("optional")
             // when uninitialized
             REQUIRE(!val);
             bool result = val != 0;
-            REQUIRE(!result);
+            REQUIRE(result);
             result = val == 0;
             REQUIRE(!result);
             REQUIRE(!(val > 4));
@@ -145,6 +145,16 @@ TEST_CASE("optional")
             REQUIRE(val > 4);
             REQUIRE(val == 5);
         }
+        SECTION("bool")
+        {
+            estd::optional<bool> val;
+
+            REQUIRE(!val);
+
+            bool result = val != false;
+
+            REQUIRE(result);
+        }
         SECTION("layer1")
         {
             estd::layer1::optional<int> val;
@@ -153,7 +163,7 @@ TEST_CASE("optional")
             // when uninitialized
             REQUIRE(!val);
             bool result = val != 0;
-            REQUIRE(!result);
+            REQUIRE(result);
             result = val == 0;
             REQUIRE(!result);
             REQUIRE(!(val > 4));

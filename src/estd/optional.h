@@ -388,7 +388,7 @@ ESTD_CPP_CONSTEXPR_RET bool operator==(const U& value, const optional<T, TBase>&
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? opt.value() != value : false;
+    return opt.has_value() ? opt.value() != value : true;
 }
 
 
