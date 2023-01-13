@@ -48,27 +48,6 @@ struct optional_base : optional_base_base
 };
 
 
-// experimental: use this when we don't need an external flag, but instead some
-// specific value of T represents a NULL/not present.  To really work well this
-// needs specialization on T, which might not be easy since typedef's fall back
-// down to int, short, long, etc.
-// NOTE: This seems displaced by the layer1 optional_base
-template <class T, T null_value>
-struct optional_reserved_base
-{
-    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
-    // TODO: will need attention on the alignment front
-    experimental::raw_instance_provider<T> provider;
-
-    bool has_value() const { return provider.value() == null_value; }
-
-protected:
-    // FIX: this is a noop, but that is kind of clumsy in cases where
-    // it's passed in a false - except that currently never happens,
-    // therefore there's potential to clean this up
-    void has_value(bool) {}
-};
-
 }
 
 struct nullopt_t {
@@ -135,12 +114,9 @@ public:
     // We depend on base class to initialize default to has_value() == false
     optional() {}
 
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    optional(nullopt_t) {}
+    ESTD_CPP_CONSTEXPR_RET optional(nullopt_t) {}
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
     template < class U, class TUBase >
     optional(optional<U, TUBase>&& move_from )
     {
@@ -196,7 +172,7 @@ public:
         return *this;
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
     // FIX: disabling the template part of this because it's
     // getting too greedy and consuming other 'optional' , then
     // that results in the incorrect 'operator bool' cast
@@ -272,7 +248,6 @@ public:
 };
 
 
-// layer1 version considered experimental
 namespace layer1 {
 
 namespace internal {
@@ -298,14 +273,14 @@ protected:
 public:
     typedef T value_type;
 
-    bool has_value() const { return value_ != null_value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return value_ != null_value_; }
     void has_value(bool) {}
     void reset() { value_ = null_value_; }
 
     value_type& value() { return value_; }
     const value_type& value() const { return value_; }
 
-    static CONSTEXPR value_type null_value() { return null_value_; }
+    static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
 };
 
 }
@@ -339,7 +314,7 @@ protected:
 public:
     optional() {}
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
     // FIX: Not doing 'U' deduction for same reason that
     // we can't properly detect presence of 'optional' coming
     // in here
@@ -365,7 +340,7 @@ public:
         return *this;
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
     //template <class U = T>
     //optional& operator=(U&& value)
     optional& operator=(value_type&& value)
@@ -391,27 +366,27 @@ public:
         return *this;
     }
 
-    operator bool() const { return base_type::has_value(); }
+    ESTD_CPP_CONSTEXPR_RET operator bool() const { return base_type::has_value(); }
 };
 
 }
 
 template <class T, class U, class TBase>
-CONSTEXPR bool operator==(const optional<T, TBase>& opt, const U& value)
+ESTD_CPP_CONSTEXPR_RET bool operator==(const optional<T, TBase>& opt, const U& value)
 {
     return opt.has_value() ? opt.value() == value : false;
 }
 
 
 template <class T, class U, class TBase>
-CONSTEXPR bool operator==(const U& value, const optional<T, TBase>& opt)
+ESTD_CPP_CONSTEXPR_RET bool operator==(const U& value, const optional<T, TBase>& opt)
 {
     return opt.has_value() ? value == opt.value() : false;
 }
 
 
 template <class T, class U, class TBase>
-CONSTEXPR bool operator!=(const optional<T, TBase>& opt, const U& value)
+ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& value)
 {
     return opt.has_value() ? opt.value() != value : false;
 }
@@ -425,7 +400,7 @@ CONSTEXPR bool operator>(const optional<T, TBase>& opt, const U& value)
 
 
 template <class T, class U, class TBase>
-CONSTEXPR bool operator<(const optional<T, TBase>& opt, const U& value)
+ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& value)
 {
     return opt.has_value() ? opt.value() < value : false;
 }
