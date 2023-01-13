@@ -273,12 +273,14 @@ struct raw_instance_provider
         *reinterpret_cast<T*>(buf) = copy_from;
     }
 
+#if __cpp_rvalue_references
     // very specifically does a operator= move
     // do a direct placement new on value() if you want that kind of move
     void value(T&& move_from)
     {
         *reinterpret_cast<T*>(buf) = std::move(move_from);
     }
+#endif
 };
 
 // tracks as a pointer, but presents as an inline instance/reference

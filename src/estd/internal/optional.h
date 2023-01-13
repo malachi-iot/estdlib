@@ -34,6 +34,11 @@ protected:
 template <class T, class enabler = void>
 struct optional_value_provider;
 
+template <class T>
+struct optional_value_use_raw_provider :
+    estd::integral_constant<bool,
+            estd::is_integral<T>::value> {};
+
 
 // intrinsic variety, no need to go crazy with raw_instance_provider
 template <class T>
@@ -49,13 +54,15 @@ protected:
         value_ = value;
     }
 
+#if __cpp_rvalue_references
     void value(T&& value)
     {
         value_ = std::move(value);
     }
+#endif
 
     ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
-    optional_value_provider(T value) : value_{value} {}
+    optional_value_provider(T value) : value_(value) {}
 
     typedef value_type& return_type;
     typedef const value_type& const_return_type;
@@ -77,6 +84,13 @@ struct optional_value_provider<T, typename estd::enable_if<!estd::is_integral<T>
 
     typedef value_type& return_type;
     typedef const value_type& const_return_type;
+
+    ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
+
+    optional_value_provider(const value_type& copy_from)
+    {
+        provider_type::value(copy_from);
+    }
 
     //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
     // TODO: will need attention on the alignment front
@@ -112,11 +126,11 @@ protected:
     void has_value(bool initialized) { has_value_ = initialized; }
 
     ESTD_CPP_CONSTEXPR_RET optional_bitwise() :
-        has_value_{false}
+        has_value_(false)
     {}
 
     ESTD_CPP_CONSTEXPR_RET optional_bitwise(const T& copy_from) :
-        value_(copy_from), has_value_{true}
+        value_(copy_from), has_value_(true)
     {}
 
 public:

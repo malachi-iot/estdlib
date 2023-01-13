@@ -130,15 +130,13 @@ public:
     }
 
 #ifdef __cpp_rvalue_references
-    // FIX: disabling the template part of this because it's
+    // DEBT: disabling the template part of this because it's
     // getting too greedy and consuming other 'optional' , then
     // that results in the incorrect 'operator bool' cast
     //template< class U = T >
     //optional& operator=( U&& v )
     optional& operator=(value_type&& v)
     {
-        // FIX: in previous version of this code
-        // ends up treating 'v' as a bool using bool operator
         base_type::value(std::move(v));
         base_type::has_value(true);
         return *this;
@@ -188,7 +186,7 @@ public:
     template <class U>
     const T& value_or(const U& default_value) const
     {
-        return base_type::has_value() ? value() : default_value;
+        return base_type::has_value() ? base_type::value() : default_value;
     }
 #endif
 
@@ -255,7 +253,7 @@ public:
 
     optional& operator=(estd::nullopt_t)
     {
-        new (&base_type::value()) value_type(null_value);
+        base_type::value(null_value);
         return *this;
     }
 
