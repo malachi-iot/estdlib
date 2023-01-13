@@ -157,7 +157,8 @@ public:
 #endif
 
 
-#ifdef FEATURE_CPP_VARIADIC
+#ifdef __cpp_variadic_templates
+    // NOTE: This one won't work with bitwise version
     template< class... TArgs >
     T& emplace( TArgs&&... args )
     {
@@ -194,22 +195,19 @@ public:
 #if __cpp_constexpr >= 201304
     constexpr
 #endif
-#if __cplusplus >= 201103
-    explicit
-#endif
-    operator bool() const { return base_type::has_value(); }
+    EXPLICIT operator bool() const { return base_type::has_value(); }
 
-    value_type& operator*() { return base_type::value(); }
-    const value_type& operator*() const { return base_type::value(); }
+    typename base_type::return_type operator*() { return base_type::value(); }
+    typename base_type::const_return_type operator*() const { return base_type::value(); }
 };
 
 
 namespace layer1 {
 
 template <class T, T null_value = T()>
-class optional : public estd::optional<T, layer1::internal::optional_base<T, null_value> >
+class optional : public estd::optional<T, internal::layer1::optional_base<T, null_value> >
 {
-    typedef estd::optional<T, layer1::internal::optional_base<T, null_value> > base_type;
+    typedef estd::optional<T, internal::layer1::optional_base<T, null_value> > base_type;
     typedef typename base_type::value_type value_type;
 
 protected:
@@ -293,9 +291,9 @@ public:
 
 
 template <>
-class optional<bool> : public estd::optional<bool, estd::internal::optional_bitwise<bool> >
+class optional<bool> : public estd::optional<bool, estd::internal::optional_bitwise<bool, 1> >
 {
-    typedef estd::optional<bool, estd::internal::optional_bitwise<bool> > base_type;
+    typedef estd::optional<bool, estd::internal::optional_bitwise<bool, 1> > base_type;
 
 public:
 

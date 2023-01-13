@@ -167,15 +167,7 @@ TEST_CASE("optional")
         {
             estd::layer1::optional<int> val;
 
-            // comparisons should all be false
-            // when uninitialized
-            REQUIRE(!val);
-            bool result = val != 0;
-            REQUIRE(result);
-            result = val == 0;
-            REQUIRE(!result);
-            REQUIRE(!(val > 4));
-            REQUIRE(!(val < 4));
+            suite(val, 4);
 
             val = 5;
 
@@ -191,13 +183,13 @@ TEST_CASE("optional")
             val2 = 0;
             val = val2;
 
-            REQUIRE(val);
+            // layer1 flavor means 0 == null
+            REQUIRE(!val);
         }
         SECTION("layer1: bool")
         {
             estd::layer1::optional<bool> val;
 
-            // breaks on operator=, and I'm glad it did - thats a bug
             suite(val, false);
         }
     }
