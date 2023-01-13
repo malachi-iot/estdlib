@@ -196,7 +196,7 @@ TEST_CASE("optional")
             estd::layer1::optional<bool> val;
 
             // breaks on operator=, and I'm glad it did - thats a bug
-            //suite(val, false);
+            suite(val, false);
         }
     }
     SECTION("function interaction/return value")

@@ -40,7 +40,7 @@ CONSTEXPR nullopt_t nullopt(0);
 
 // Non-standard workaround for my own failing move semantic
 // however, it will come in handy for pre move semantic compilations as well
-#define FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
+//#define FEATURE_ESTD_OPTIONAL_LVALUE_ASSIGN
 
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
 template <class T, class TBase = internal::optional_base<T> >
@@ -140,8 +140,9 @@ public:
     //optional& operator=( U&& v )
     optional& operator=(value_type&& v)
     {
-        // FIX: ends up treating 'v' as a bool using bool operator
-        new (&base_type::value()) value_type(std::move(v));
+        // FIX: in previous version of this code
+        // ends up treating 'v' as a bool using bool operator
+        base_type::value(std::move(v));
         base_type::has_value(true);
         return *this;
     }
@@ -207,41 +208,6 @@ public:
 
 
 namespace layer1 {
-
-namespace internal {
-
-template <class T, T null_value_>
-class optional_base //: public estd::internal::optional_tag_base
-{
-    T value_;
-
-protected:
-//public:
-    //optional_base(T& value) : _value(value) {}
-    // should always bool == true here
-    optional_base(bool) {}
-
-    optional_base() : value_(null_value_) {}
-
-    void value(T& value)
-    {
-        value_ = value;
-    }
-
-public:
-    typedef T value_type;
-
-    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return value_ != null_value_; }
-    void has_value(bool) {}
-    void reset() { value_ = null_value_; }
-
-    value_type& value() { return value_; }
-    const value_type& value() const { return value_; }
-
-    static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
-};
-
-}
 
 template <class T, T null_value = T()>
 class optional : public estd::optional<T, internal::optional_base<T, null_value> >
@@ -318,11 +284,12 @@ public:
     }
 #endif
 
+/*
     optional& operator=(const estd::optional<value_type>& assign_from)
     {
         copy(assign_from);
         return *this;
-    }
+    } */
 
     ESTD_CPP_CONSTEXPR_RET operator bool() const { return base_type::has_value(); }
 };

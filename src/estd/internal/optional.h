@@ -74,4 +74,41 @@ public:
     ESTD_CPP_CONSTEXPR_RET value_type value() const { return value_; }
 };
 
+}
+
+namespace layer1 { namespace internal {
+
+template <class T, T null_value_>
+class optional_base //: public estd::internal::optional_tag_base
+{
+    T value_;
+
+protected:
+//public:
+    //optional_base(T& value) : _value(value) {}
+    // should always bool == true here
+    optional_base(bool) {}
+
+    optional_base() : value_(null_value_) {}
+
+    void value(T& value)
+    {
+        value_ = value;
+    }
+
+public:
+    typedef T value_type;
+
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return value_ != null_value_; }
+    void has_value(bool) {}
+    void reset() { value_ = null_value_; }
+
+    value_type& value() { return value_; }
+    const value_type& value() const { return value_; }
+
+    static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
+};
+
 }}
+
+}
