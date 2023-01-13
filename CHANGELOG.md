@@ -4,7 +4,7 @@
 
 * int -> string conversion general quality upgrades, better guard against non-int
   * Fixed bug in `estd::to_string` inhibiting it from resolving certain integers
-* `estd::optional` gets a revamp and a nifty bool specialization
+* `estd::optional` gets a revamp, some bugfixes, and a nifty bool specialization
 * `basic_istream` and `basic_ostream` are now moved from `internal` to `detail` namespace (breaking change)
 * AVR MPU compatibility
 
