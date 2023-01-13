@@ -170,7 +170,7 @@ TEST_CASE("functional")
             }
             SECTION("make_inline (deprecated)")
             {
-                auto i = estd::experimental::function<int(int)>::make_inline([](int x) { return x + 1; });
+                auto i = estd::experimental::function<int(int)>::make_model([](int x) { return x + 1; });
 
                 REQUIRE(i.exec(1) == 2);
 

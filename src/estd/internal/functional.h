@@ -228,16 +228,6 @@ public:
         return model<F>(std::move(f));
     }
 
-    // See above 'model' CTAD comments
-    template <typename F>
-#if __cplusplus >= 201402L
-    [[deprecated("Use make_model instead")]]
-#endif
-    inline static model<F> make_inline(F&& f)
-    {
-        return make_model(std::move(f));
-    }
-
     // EXPERIMENTAL
     const model_base* getm() const { return m; }
 

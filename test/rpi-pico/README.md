@@ -10,4 +10,4 @@ Config file comes from https://github.com/raspberrypi/pico-examples/blob/sdk-1.4
 | ------- | -------------------- | -------  | -------- | ------ | ----- |
 | 14DEC22 | Raspberry Pi Pico W  | v1.4.0   |  10.5.1  | Pass   | FreeRTOS dynamic only
 | 01DEC22 | Raspberry Pi Pico W  | v1.4.0   |  10.5.1  | Pass   | FreeRTOS static + dynamic
-| 04JAN23 | Raspberry Pi Pico W  | v1.4.0   |  none    | Pass   | 
+| 13JAN23 | Raspberry Pi Pico W  | v1.4.0   |  none    | Pass   | 

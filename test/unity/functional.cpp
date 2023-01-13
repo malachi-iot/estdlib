@@ -9,7 +9,7 @@ static void test_detail_function()
 
     estd::detail::function<void()> fb;
 
-    auto m = fb.make_inline([&](){++counter;});
+    auto m = fb.make_model([&](){++counter;});
 
     m._exec();
 
