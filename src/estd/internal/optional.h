@@ -84,7 +84,11 @@ struct optional_base : optional_value_provider<T>,
 {
     typedef optional_value_provider<T> base_type;
 
-    ESTD_CPP_FORWARDING_CTOR(optional_base)
+    ESTD_CPP_DEFAULT_CTOR(optional_base)
+    optional_base(const T& copy_from) :
+        base_type(copy_from),
+        optional_base_base(true)
+    {}
 };
 
 template <class T>
@@ -102,6 +106,10 @@ protected:
 
     ESTD_CPP_CONSTEXPR_RET optional_bitwise() :
         has_value_{false}
+    {}
+
+    ESTD_CPP_CONSTEXPR_RET optional_bitwise(const T& copy_from) :
+        value_(copy_from), has_value_{true}
     {}
 
 public:

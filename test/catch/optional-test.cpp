@@ -24,8 +24,10 @@ static void suite(estd::optional<T, TBase> o, T compare_to)
 
     o = compare_to;
 
+    result = o == compare_to;
+
     //REQUIRE(val > 4);
-    REQUIRE(o == compare_to);
+    REQUIRE(result);
 } 
 
 
@@ -189,7 +191,7 @@ TEST_CASE("optional")
             val2 = 0;
             val = val2;
 
-            REQUIRE(!val);
+            REQUIRE(val);
         }
         SECTION("layer1: bool")
         {

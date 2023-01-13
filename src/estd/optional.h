@@ -105,10 +105,7 @@ public:
     }
 #endif
 
-    optional(const value_type& copy_from)
-    {
-        operator=(copy_from);
-    }
+    optional(const value_type& copy_from) : base_type(copy_from) {}
 
     template < class U, class TUBase >
     optional( const optional<U, TUBase>& copy_from )
