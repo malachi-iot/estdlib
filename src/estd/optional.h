@@ -190,10 +190,7 @@ public:
     }
 #endif
 
-#if __cpp_constexpr >= 201304
-    constexpr
-#endif
-    EXPLICIT operator bool() const { return base_type::has_value(); }
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT operator bool() const { return base_type::has_value(); }
 
     typename base_type::return_type operator*() { return base_type::value(); }
     typename base_type::const_return_type operator*() const { return base_type::value(); }

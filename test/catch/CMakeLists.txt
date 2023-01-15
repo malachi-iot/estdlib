@@ -1,11 +1,18 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 project("estd-unit-tests")
 
-set(CMAKE_CXX_STANDARD 11)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    message(DEBUG "defaulting to c++11")
+    set(CMAKE_CXX_STANDARD 11)
+else()
+    message(STATUS "using c++${CMAKE_CXX_STANDARD}")
+endif()
 
-INCLUDE_DIRECTORIES(../../ext/Catch2/single_include/catch2)
-set(ESTD_DIR ../../src)
+set(ROOT_DIR ../..)
+
+INCLUDE_DIRECTORIES(${ROOT_DIR}/ext/Catch2/single_include/catch2)
+set(ESTD_DIR ${ROOT_DIR}/src)
 
 add_subdirectory(${ESTD_DIR} estd)
 
@@ -48,12 +55,14 @@ add_executable(${PROJECT_NAME} "main.cpp"
         internal-test.cpp charconv-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
+
 # TODO: Instead, filter by presence of GCC
 if (MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall /Zc:__cplusplus)
-else()
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
 endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+
 # -Wno-unused-variable want this too, remember .H files aren't compiled independently
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
