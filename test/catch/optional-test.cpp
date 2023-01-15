@@ -211,6 +211,10 @@ TEST_CASE("optional")
             estd::layer1::optional<bool> val;
 
             suite(val, false);
+
+            constexpr int sz = sizeof(val);
+
+            REQUIRE(sz == sizeof(bool));
         }
     }
     SECTION("function interaction/return value")

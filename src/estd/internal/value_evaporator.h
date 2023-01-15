@@ -266,7 +266,7 @@ struct raw_instance_provider
     typedef T value_type;
 
     T& value() { return *reinterpret_cast<T*>(buf); }
-    const T& value() const { return *reinterpret_cast<const T*>(buf); }
+    ESTD_CPP_CONSTEXPR_RET const T& value() const { return *reinterpret_cast<const T*>(buf); }
 
     void value(const T& copy_from)
     {
