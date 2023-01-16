@@ -1,13 +1,17 @@
 #pragma once
 
 #include "type_traits.h"
+// DEBT: Piecemeal out dependencies to reduce overall dependency footprint.
+// required: void_t, true_type, is_class, remove_cv, integral_constant
 #include "../utility.h"
 
 namespace estd {
 
+// DEBT: Piecemeal out dependencies rather than a c++11 check
+//#if __cpp_decltype
 #if __cplusplus >= 201103L
 
-namespace details {
+namespace internal {
     template <typename Base> estd::true_type is_base_of_test_func(const volatile Base*);
     template <typename Base> estd::false_type is_base_of_test_func(const volatile void*);
     template <typename Base, typename Derived>
@@ -28,7 +32,7 @@ template <typename Base, typename Derived>
 struct is_base_of :
     public estd::conditional_t<
         estd::is_class<Base>::value && estd::is_class<Derived>::value,
-        details::pre_is_base_of2<Base, Derived>,
+        internal::pre_is_base_of2<Base, Derived>,
         estd::false_type
     > { };
 
@@ -42,7 +46,7 @@ inline constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
 // Shamelessly copied from
 // https://code.woboq.org/gcc/libstdc++-v3/include/tr1/type_traits.html 
 
-namespace details {
+namespace internal {
 template<typename _Base, typename _Derived>
 struct __is_base_of_helper
 {
@@ -58,7 +62,7 @@ struct __is_base_of_helper
 template<typename _Base, typename _Derived>
 struct is_base_of
 : public integral_constant<bool,
-                            details::__is_base_of_helper<_Base, _Derived>::__value>
+                            internal::__is_base_of_helper<_Base, _Derived>::__value>
 { };
 
 #endif
