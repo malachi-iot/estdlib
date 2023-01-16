@@ -1,11 +1,11 @@
-# v0.4.x - XXJAN23
+# v0.5.0 - 16JAN23
 
 ## Quality Updates & Bug Fixes
 
 * int -> string conversion general quality upgrades, better guard against non-int
   * Fixed bug in `estd::to_string` inhibiting it from resolving certain integers
 * `estd::optional` gets a revamp, some bugfixes, and a nifty bool specialization
-* `basic_istream` and `basic_ostream` are now moved from `internal` to `detail` namespace (breaking change)
+* breaking change: `basic_istream` and `basic_ostream` are now moved from `internal` to `detail` namespace
 * AVR MPU compatibility
 
 # v0.4.2 - 03JAN23
