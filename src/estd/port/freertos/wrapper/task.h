@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../../internal/platform.h"
 #include "../../arch/freertos.h"
 
 extern "C" {
