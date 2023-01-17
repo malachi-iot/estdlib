@@ -6,8 +6,8 @@ Config file comes from https://github.com/raspberrypi/pico-examples/blob/sdk-1.4
 
 ## Results
 
-|   Date  | Board                | PICO_SDK | FreeRTOS | Result | Notes |
-| ------- | -------------------- | -------  | -------- | ------ | ----- |
-| 14DEC22 | Raspberry Pi Pico W  | v1.4.0   |  10.5.1  | Pass   | FreeRTOS dynamic only
-| 01DEC22 | Raspberry Pi Pico W  | v1.4.0   |  10.5.1  | Pass   | FreeRTOS static + dynamic
-| 13JAN23 | Raspberry Pi Pico W  | v1.4.0   |  none    | Pass   | 
+|   Date  | Board                | PICO_SDK     | FreeRTOS | Result | Notes |
+| ------- | -------------------- | ------------ | -------- | ------ | ----- |
+| 16JAN23 | Raspberry Pi Pico W  | v1.4.0       |  10.5.1  | Pass   | FreeRTOS dynamic only
+| 01DEC22 | Raspberry Pi Pico W  | v1.4.0       |  10.5.1  | Pass   | FreeRTOS static + dynamic
+| 16JAN23 | Raspberry Pi Pico W  | v1.4.0 (dev) |  none    | Pass   | latest `develop` branch 488bd

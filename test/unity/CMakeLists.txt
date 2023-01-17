@@ -26,7 +26,7 @@ set(SOURCES
     tuple.cpp
     )
 
-message(STATUS "unit-test: CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
+message(DEBUG "estd unity: CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
 
 if(NOT CMAKE_CXX_STANDARD EQUAL 98)
     set(SOURCES ${SOURCES}
