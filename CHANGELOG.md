@@ -1,3 +1,9 @@
+# v0.5.x - XXXXX23
+
+## Quality Updates & Bug Fixes
+
+* Fixing signed/unsigned mismatch in `out_span_streambuf`
+
 # v0.5.0 - 16JAN23
 
 ## Quality Updates & Bug Fixes
