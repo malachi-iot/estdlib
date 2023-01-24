@@ -1,13 +1,77 @@
 #pragma once
 
+#include <estd/cstddef.h>
+
 namespace estd {
+
+namespace internal {
+
+struct module_info_tag {};
+
+
+// DEBT: Turn this into an estd::string variety
+inline std::size_t hash_string(const char* s, std::size_t seed = 0)
+{
+    typedef char char_type;
+    const char* s_begin = s;
+    std::size_t hashed = seed;
+
+    for(; *s != 0; ++s)
+    {
+        char_type c = *s;
+        hashed <<= 1;
+        hashed += c;
+        hashed ^= c;
+    }
+
+    return hashed;
+}
+
+}
 
 struct module_info
 {
     const char* name;
+    const char* version;
+
+    int hash_code() const { return internal::hash_string(name); }
+
+    template <class TModule>
+    module_info(TModule m) :
+        name{m.name()}
+    {}
 };
 
+struct type_info
+{
+private:
+    const char* name_;
+    const module_info* module_;
+    const int id_;
+
+public:
+    const char* name() const { return name_; }
+    const module_info* module() const { return module_; }
+
+    int hash_code() const { return module_->hash_code() ^ id_; }
+
+    ESTD_CPP_CONSTEXPR_RET type_info(const char* name_, const module_info* module_, int id) :
+        name_(name_),
+        module_(module_),
+        id_(id)
+    {}
+};
+
+extern module_info _module_info;
+
 namespace layer0 {
+
+struct _module_info : internal::module_info_tag
+{
+    static constexpr const char* name() { return "estd"; }
+    static constexpr const char* version() { return "N/A"; }
+    static constexpr const module_info* module() { return &estd::_module_info; }
+};
 
 namespace experimental {
 
@@ -85,7 +149,8 @@ struct type_info<type_name> : type_info_tag  \
     static CONSTEXPR char* name_ = ESTD_Q(type_name); \
     static const char* name()       \
     { return name_; }        \
-                                    \
+                                                     \
+    typedef _module_info module;                 \
     ESTD_CPP_CONSTEXPR_RET                       \
     static std::size_t hash_code()   \
     { return experimental::encode_type_index(group, idx); }    \
@@ -99,7 +164,7 @@ template <> struct reverse_type_info<group, idx>    \
 };  \
 }
 
-template <class T, module_info* module = nullptr>
+template <class T>
 struct type_info;
 
 template <>
