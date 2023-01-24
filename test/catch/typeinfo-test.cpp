@@ -42,7 +42,7 @@ template <> struct reverse_type_info<0, 2>
 */
 
 template <typename T>
-static void dispatched(type_info<T> t)
+static void dispatched(layer0::type_info<T> t)
 {
 
 }
@@ -57,44 +57,44 @@ TEST_CASE("typeinfo tests")
 {
     SECTION("type_info")
     {
-        REQUIRE(type_info<int>::name() == "int");
-        REQUIRE(type_info<bool>::name() == "bool");
-        REQUIRE(type_info<bool>::hash_code() != type_info<int>::hash_code());
+        REQUIRE(layer0::type_info<int>::name() == "int");
+        REQUIRE(layer0::type_info<bool>::name() == "bool");
+        REQUIRE(layer0::type_info<bool>::hash_code() != layer0::type_info<int>::hash_code());
     }
     SECTION("type_index")
     {
-        type_info<bool> dummy;
-        type_index i_bool (dummy);
-        type_index i_int (type_info<int>{});
+        layer0::type_info<bool> dummy;
+        layer0::type_index i_bool (dummy);
+        layer0::type_index i_int (layer0::type_info<int>{});
 
         REQUIRE(i_int.name() == "int");
         REQUIRE(i_bool.name() == "bool");
     }
     SECTION("internal")
     {
-        const char* result = experimental::type_name_helper3(0);
+        const char* result = layer0::experimental::type_name_helper3(0);
         REQUIRE(result == "int");
-        result = experimental::type_name_helper3(2);
+        result = layer0::experimental::type_name_helper3(2);
         REQUIRE(result == "bool");
-        result = experimental::type_name_helper3(4);
-        result = experimental::type_name_helper3(8);
+        result = layer0::experimental::type_name_helper3(4);
+        result = layer0::experimental::type_name_helper3(8);
 
-        bool v = experimental::_reverse_type_in_range<
-            0, experimental::system_type_info_index::end, 10>::value;
+        bool v = layer0::experimental::_reverse_type_in_range<
+            0, layer0::experimental::system_type_info_index::end, 10>::value;
 
         REQUIRE(v == false);
 
-        v = experimental::_reverse_type_in_range<
+        v = layer0::experimental::_reverse_type_in_range<
             0,
-            experimental::system_type_info_index::i_uint8,
-            experimental::system_type_info_index::i_uint8 + 4>::value;
+            layer0::experimental::system_type_info_index::i_uint8,
+            layer0::experimental::system_type_info_index::i_uint8 + 4>::value;
 
         REQUIRE(v == true);
 
-        v = experimental::_reverse_type_in_range<
+        v = layer0::experimental::_reverse_type_in_range<
                 0,
-                experimental::system_type_info_index::i_uint8,
-                experimental::system_type_info_index::i_uint8>::value;
+            layer0::experimental::system_type_info_index::i_uint8,
+            layer0::experimental::system_type_info_index::i_uint8>::value;
 
         REQUIRE(v == false);
     }

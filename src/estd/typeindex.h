@@ -5,6 +5,8 @@
 
 namespace estd {
 
+namespace layer0 {
+
 struct type_index
 {
     const size_t index;
@@ -22,5 +24,7 @@ struct type_index
         return experimental::type_name_helper3(index);
     }
 };
+
+}
 
 }

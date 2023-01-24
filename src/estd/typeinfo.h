@@ -2,6 +2,13 @@
 
 namespace estd {
 
+struct module_info
+{
+    const char* name;
+};
+
+namespace layer0 {
+
 namespace experimental {
 
 template <unsigned group, unsigned idx>
@@ -69,9 +76,11 @@ struct system_type_info_index
 // DEBT: May need an alternate version if platform doesn't support
 // static CONSTEXPR char* name_ here.
 
+struct type_info_tag {};
+
 #define ESTD_TYPEINFO_HELPER(type_name, group, idx)  \
 template <>                         \
-struct type_info<type_name>              \
+struct type_info<type_name> : type_info_tag  \
 {                                               \
     static CONSTEXPR char* name_ = ESTD_Q(type_name); \
     static const char* name()       \
@@ -90,7 +99,7 @@ template <> struct reverse_type_info<group, idx>    \
 };  \
 }
 
-template <class T>
+template <class T, module_info* module = nullptr>
 struct type_info;
 
 template <>
@@ -326,5 +335,7 @@ const char* type_dispatcher(unsigned idx, F&& f)
 }
 
 }
+
+}   //layer0
 
 }
