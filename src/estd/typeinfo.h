@@ -1,12 +1,21 @@
 #pragma once
 
 #include <estd/cstddef.h>
+#include <estd/cstdint.h>
 
 namespace estd {
 
 namespace internal {
 
 struct module_info_tag {};
+
+struct semver
+{
+    uint32_t major : 9;
+    uint32_t minor : 9;
+    uint32_t patch : 9;
+    uint32_t suffix : 5;
+};
 
 
 // DEBT: Turn this into an estd::string variety
@@ -69,6 +78,7 @@ namespace layer0 {
 struct _module_info : internal::module_info_tag
 {
     static constexpr const char* name() { return "estd"; }
+    static constexpr const internal::semver semver() { return internal::semver{0, 0, 0, 0}; };
     static constexpr const char* version() { return "N/A"; }
     static constexpr const module_info* module() { return &estd::_module_info; }
 };
