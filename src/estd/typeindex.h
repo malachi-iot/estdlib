@@ -13,7 +13,7 @@ struct type_index
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
 #endif
-    type_index(type_info<T> v) : index(v.hashcode())
+    type_index(type_info<T> v) : index(v.hash_code())
     {
     }
 

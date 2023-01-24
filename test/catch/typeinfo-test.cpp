@@ -59,7 +59,7 @@ TEST_CASE("typeinfo tests")
     {
         REQUIRE(type_info<int>::name() == "int");
         REQUIRE(type_info<bool>::name() == "bool");
-        REQUIRE(type_info<bool>::hashcode() != type_info<int>::hashcode());
+        REQUIRE(type_info<bool>::hash_code() != type_info<int>::hash_code());
     }
     SECTION("type_index")
     {

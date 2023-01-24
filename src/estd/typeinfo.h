@@ -78,7 +78,7 @@ struct type_info<type_name>              \
     { return name_; }        \
                                     \
     ESTD_CPP_CONSTEXPR_RET                       \
-    static std::size_t hashcode()   \
+    static std::size_t hash_code()   \
     { return experimental::encode_type_index(group, idx); }    \
 };  \
                                                 \
@@ -98,7 +98,7 @@ struct type_info<int>
 {
     static const char* name() { return "int"; }
 
-    static std::size_t hashcode() { return experimental::system_type_info_index::i_int; }
+    static std::size_t hash_code() { return experimental::system_type_info_index::i_int; }
 };
 
 namespace experimental {
