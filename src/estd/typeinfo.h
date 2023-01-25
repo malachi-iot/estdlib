@@ -41,13 +41,20 @@ inline std::size_t hash_string(const char* s, std::size_t seed = 0)
 struct module_info
 {
     const char* name;
-    const char* version;
+    const internal::semver semver_;
+    const char* description_;
 
     int hash_code() const { return internal::hash_string(name); }
 
     template <class TModule>
     module_info(TModule m) :
         name{m.name()}
+    {}
+
+    ESTD_CPP_CONSTEXPR_RET module_info(const char* name, const internal::semver semver, const char* description = nullptr) :
+        name(name),
+        semver_(semver),
+        description_(description)
     {}
 };
 
