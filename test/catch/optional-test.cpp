@@ -36,6 +36,13 @@ enum SpecializedEnum
     Value2
 };
 
+enum PlainOldEnum
+{
+    POE_UNINITIALIZED = 0,
+    POE_1,
+    POE_2
+};
+
 // Any time SpecializedEnum is used in regular estd::optional, it routes to this base class
 // See below unit test
 namespace estd { namespace internal {
@@ -216,6 +223,12 @@ TEST_CASE("optional")
 
             REQUIRE(sz == sizeof(bool));
         }
+        SECTION("layer1: enum")
+        {
+            estd::layer1::optional<PlainOldEnum, POE_UNINITIALIZED> o;
+
+            o.reset();
+        }
     }
     SECTION("function interaction/return value")
     {
@@ -254,5 +267,7 @@ TEST_CASE("optional")
         o = Value1;
 
         REQUIRE(o == Value1);
+
+        o.reset();
     }
 }

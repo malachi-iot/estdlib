@@ -3,6 +3,7 @@
 ## Quality Updates & Bug Fixes
 
 * Fixing signed/unsigned mismatch in `out_span_streambuf`
+* Fixing `estd::optional` bug when using `reset` on enum type
 
 # v0.5.0 - 16JAN23
 

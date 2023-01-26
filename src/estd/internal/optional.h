@@ -38,6 +38,7 @@ template <class T>
 struct optional_use_raw_provider :
     estd::integral_constant<bool,
         !(estd::is_integral<T>::value ||
+        estd::is_enum<T>::value ||
         estd::is_pointer<T>::value)> {};
 
 
@@ -164,9 +165,9 @@ protected:
 public:
     typedef T value_type;
 
-    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value_ != null_value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value() != null_value_; }
     void has_value(bool) {}
-    void reset() { base_type::value_ = null_value_; }
+    void reset() { base_type::value(null_value_); }
 
     static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
 };
