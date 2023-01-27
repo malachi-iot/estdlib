@@ -56,14 +56,13 @@ template<int index, typename First, typename... Rest>
 struct GetImpl : GetImpl<index - 1, Rest...>
 {
     typedef GetImpl<index - 1, Rest...> base_type;
-    typedef typename base_type::first_type first_type;
 
-    static const first_type& value(const tuple<First, Rest...>& t)
+    static typename base_type::tuple_type::const_valref_type value(const tuple<First, Rest...>& t)
     {
         return base_type::value(t);
     }
 
-    static first_type& value(tuple<First, Rest...>& t)
+    static typename base_type::tuple_type::valref_type value(tuple<First, Rest...>& t)
     {
         return base_type::value(t);
     }
