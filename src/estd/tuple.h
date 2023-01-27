@@ -5,7 +5,7 @@
 
 #include "type_traits.h"
 
-#ifdef FEATURE_CPP_VARIADIC
+#if __cpp_alias_templates && __cpp_variadic_templates
 namespace estd {
 
 template <std::size_t I, class T>
@@ -19,8 +19,9 @@ struct tuple_element<I, estd::tuple<Head, Tail...>>
 
 // base case
 template< class Head, class... Tail >
-struct tuple_element<0, estd::tuple<Head, Tail...>> {
-   typedef Head type;
+struct tuple_element<0, estd::tuple<Head, Tail...>>
+{
+    typedef Head type;
 };
 
 template< std::size_t I, class T >
@@ -45,6 +46,9 @@ class tuple<T&, TArgs...> : public tuple<TArgs...>
     typedef tuple<TArgs...> base_type;
 
 public:
+    typedef T& return_type;
+    typedef const T& const_return_type;
+
     constexpr tuple(T& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
         value(value)
@@ -63,25 +67,32 @@ namespace internal {
 #define FEATURE_ESTD_SPARSE_TUPLE 1
 #endif
 
+// Needs 'index' to disambiguate from multiple base classes
 #if FEATURE_ESTD_IS_EMPTY && FEATURE_ESTD_SPARSE_TUPLE
-template <class T, unsigned index, class enabled = void>
+template <class T, std::size_t index, class enabled = void>
 struct sparse_tuple;
 
-template <class T, unsigned index>
+template <class T, std::size_t index>
 struct sparse_tuple<T, index, typename enable_if<is_empty<T>::value>::type>
 {
     static T first() { return T(); }
+
+    typedef T return_type;
+    typedef T const_return_type;
 };
 
 
-template <class T, unsigned index>
+template <class T, std::size_t index>
 struct sparse_tuple<T, index, typename enable_if<!is_empty<T>::value>::type>
 #else
-template <class T, unsigned index>
+template <class T, std::size_t index>
 struct sparse_tuple
 #endif
 {
     T value;
+
+    typedef T& return_type;
+    typedef const T& const_return_type;
 
     const T& first() const { return value; }
 
@@ -109,6 +120,8 @@ public:
     {}
 
     using storage_type::first;
+    using storage_type::return_type;
+    using storage_type::const_return_type;
 
     explicit tuple() {}
 
@@ -143,16 +156,24 @@ template<typename First, typename... Rest>
 struct GetImpl<0, First, Rest...>
 {
     typedef First first_type;
+    using return_type = typename tuple<First, Rest...>::return_type;
+    using const_return_type = typename tuple<First, Rest...>::const_return_type;
 
-    static const First& value(const tuple<First, Rest...>& t)
+    static const_return_type value(const tuple<First, Rest...>& t)
     {
         return t.first();
     }
 
+    static return_type value(tuple<First, Rest...>& t)
+    {
+        return t.first();
+    }
+
+    /*
     static First& value(tuple<First, Rest...>& t)
     {
         return t.first();
-    }
+    } */
 
     static First&& value(tuple<First, Rest...>&& t)
     {

@@ -209,7 +209,7 @@ TEST_CASE("tuple")
             REQUIRE(estd::is_empty<decltype(t)>::value);
 
             // FIX: As it should be, this can't convert a temporary to a reference
-            //auto v1 = estd::get<0>(t);
+            EmptyClass v1 = estd::get<0>(t);
         }
         SECTION("intermixed types")
         {
