@@ -16,9 +16,21 @@ Enable or disable estd::mutex and similar wrappers for freertos.
 Defaults to true.  Note that estd::freertos::mutex and similar are
 enabled always.
 
+## FEATURE_ESTD_IS_EMPTY
+
+LLVM and GCC support __is_empty extension, necessary for estd::is_empty
+implementation.  This flag indicates the presence of estd::is_empty based
+on that criteria
+
 ## FEATURE_ESTD_IOS_GCOUNT
 
 Enable or disable 'gcount' feature in istream
+
+## FEATURE_ESTD_SPARSE_TUPLE
+
+Enables non-standard behavior to reduce size of tuples when empty (0-byte)
+size elements are used.  Defaults to true.  'get' will end up returning
+a temporary in this case
 
 # CMake level
 

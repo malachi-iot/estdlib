@@ -130,7 +130,7 @@ enum class endian
 #endif
 
 // because is_function requires variadic
-#ifdef FEATURE_CPP_VARIADIC
+#ifdef __cpp_variadic_templates
 template< class T >
 struct decay {
 private:
@@ -148,7 +148,7 @@ public:
 };
 #endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template< class T >
 using decay_t = typename decay<T>::type;
 #endif
@@ -165,6 +165,7 @@ T* addressof(T& arg)
 #ifdef __llvm__
 // http://releases.llvm.org/3.5.1/tools/clang/docs/LanguageExtensions.html
 #if __has_extension(is_empty)
+#define FEATURE_ESTD_IS_EMPTY 1
 template<typename _Tp>
 struct is_empty
         : public integral_constant<bool, __is_empty(_Tp)>
@@ -176,6 +177,7 @@ struct is_empty
 // https://gcc.gnu.org/onlinedocs/gcc-4.5.4/gcc/Type-Traits.html
 // https://www.boost.org/doc/libs/1_65_1/boost/type_traits/intrinsics.hpp
 // /usr/include/c++/4.8/type_traits:516
+#define FEATURE_ESTD_IS_EMPTY 1
 template<typename _Tp>
 struct is_empty
         : public integral_constant<bool, __is_empty(_Tp)>

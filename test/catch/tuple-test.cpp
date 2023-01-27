@@ -204,7 +204,12 @@ TEST_CASE("tuple")
 
             int sz = sizeof(t);
 
-            REQUIRE(sz == 3);
+            // Now with sparse tuple support, this folds down to truly empty
+            REQUIRE(sz == 1);
+            REQUIRE(estd::is_empty<decltype(t)>::value);
+
+            // FIX: As it should be, this can't convert a temporary to a reference
+            //auto v1 = estd::get<0>(t);
         }
         SECTION("intermixed types")
         {

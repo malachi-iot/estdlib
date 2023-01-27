@@ -45,12 +45,12 @@ class tuple<T&, TArgs...> : public tuple<TArgs...>
     typedef tuple<TArgs...> base_type;
 
 public:
-    CONSTEXPR tuple(T& value, TArgs&&...args) :
+    constexpr tuple(T& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
         value(value)
     {}
 
-    static CONSTEXPR int index = sizeof...(TArgs);
+    static constexpr int index = sizeof...(TArgs);
 
     const T& first() const { return value; }
 
@@ -59,20 +59,36 @@ public:
 
 namespace internal {
 
-template <class T, class enabled = void>
+#ifndef FEATURE_ESTD_SPARSE_TUPLE
+#define FEATURE_ESTD_SPARSE_TUPLE 1
+#endif
+
+#if FEATURE_ESTD_IS_EMPTY && FEATURE_ESTD_SPARSE_TUPLE
+template <class T, unsigned index, class enabled = void>
 struct sparse_tuple;
 
-template <class T>
-struct sparse_tuple<T, typename enable_if<is_empty<T>::value>::type>
+template <class T, unsigned index>
+struct sparse_tuple<T, index, typename enable_if<is_empty<T>::value>::type>
 {
-
+    static T first() { return T(); }
 };
 
 
-template <class T>
-struct sparse_tuple<T, typename enable_if<!is_empty<T>::value>::type>
+template <class T, unsigned index>
+struct sparse_tuple<T, index, typename enable_if<!is_empty<T>::value>::type>
+#else
+template <class T, unsigned index>
+struct sparse_tuple
+#endif
 {
+    T value;
 
+    const T& first() const { return value; }
+
+    T& first() { return value; }
+
+    constexpr sparse_tuple(T&& value) : value(std::move(value)) {}
+    constexpr sparse_tuple() = default;
 };
 
 }
@@ -81,27 +97,24 @@ struct sparse_tuple<T, typename enable_if<!is_empty<T>::value>::type>
 template <class T, class ...TArgs>
 class tuple<T, TArgs...> :
     public tuple<TArgs...>,
-    public internal::sparse_tuple<T>
+    public internal::sparse_tuple<T, sizeof...(TArgs)>
 {
-    T value;
-
     typedef tuple<TArgs...> base_type;
+    typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
 
 public:
-    CONSTEXPR tuple(T&& value, TArgs&&...args) :
+    constexpr tuple(T&& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
-        value(std::move(value))
+        storage_type(std::move(value))
     {}
+
+    using storage_type::first;
 
     explicit tuple() {}
 
-    static CONSTEXPR int index = sizeof...(TArgs);
+    static constexpr int index = sizeof...(TArgs);
 
     typedef T element_type;
-
-    const T& first() const { return value; }
-
-    T& first() { return value; }
 };
 
 // lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
