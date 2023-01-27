@@ -4,6 +4,7 @@
 
 * Fixing signed/unsigned mismatch in `out_span_streambuf`
 * Fixing `estd::optional` bug when using `reset` on enum type
+* Adding edge case optimization to `estd::tuple` (see FEATURE_ESTD_SPARSE_TUPLE)
 
 # v0.5.0 - 16JAN23
 
