@@ -57,9 +57,31 @@ public:
     T& first() { return value; }
 };
 
+namespace internal {
+
+template <class T, class enabled = void>
+struct sparse_tuple;
+
+template <class T>
+struct sparse_tuple<T, typename enable_if<is_empty<T>::value>::type>
+{
+
+};
+
+
+template <class T>
+struct sparse_tuple<T, typename enable_if<!is_empty<T>::value>::type>
+{
+
+};
+
+}
+
 
 template <class T, class ...TArgs>
-class tuple<T, TArgs...> : public tuple<TArgs...>
+class tuple<T, TArgs...> :
+    public tuple<TArgs...>,
+    public internal::sparse_tuple<T>
 {
     T value;
 
