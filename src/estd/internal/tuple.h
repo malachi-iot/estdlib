@@ -23,8 +23,8 @@ struct sparse_tuple<T, index, typename enable_if<is_empty<T>::value>::type>
 {
     static T first() { return T(); }
 
-    typedef T return_type;
-    typedef T const_return_type;
+    typedef T valref_type;
+    typedef T const_valref_type;
 };
 
 
@@ -37,8 +37,8 @@ struct sparse_tuple
 {
     T value;
 
-    typedef T& return_type;
-    typedef const T& const_return_type;
+    typedef T& valref_type;
+    typedef const T& const_valref_type;
 
     const T& first() const { return value; }
 
@@ -75,24 +75,17 @@ template<typename First, typename... Rest>
 struct GetImpl<0, First, Rest...>
 {
     typedef First first_type;
-    using return_type = typename tuple<First, Rest...>::return_type;
-    using const_return_type = typename tuple<First, Rest...>::const_return_type;
+    using tuple_type = tuple<First, Rest...>;
 
-    static const_return_type value(const tuple<First, Rest...>& t)
+    static typename tuple_type::const_valref_type value(const tuple<First, Rest...>& t)
     {
         return t.first();
     }
 
-    static return_type value(tuple<First, Rest...>& t)
+    static typename tuple_type::valref_type value(tuple<First, Rest...>& t)
     {
         return t.first();
     }
-
-    /*
-    static First& value(tuple<First, Rest...>& t)
-    {
-        return t.first();
-    } */
 
     static First&& value(tuple<First, Rest...>&& t)
     {

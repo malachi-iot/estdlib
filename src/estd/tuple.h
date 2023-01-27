@@ -20,8 +20,8 @@ struct tuple_element<I, estd::tuple<Head, Tail...>>
 template< class Head, class... Tail >
 struct tuple_element<0, estd::tuple<Head, Tail...>>
 {
-    using return_type = typename estd::tuple<Head, Tail...>::return_type;
-    using const_return_type = typename estd::tuple<Head, Tail...>::return_type;
+    using valref_type = typename estd::tuple<Head, Tail...>::valref_type;
+    using const_valref_type = typename estd::tuple<Head, Tail...>::const_valref_type;
 
     typedef Head type;
 };
@@ -48,8 +48,8 @@ class tuple<T&, TArgs...> : public tuple<TArgs...>
     typedef tuple<TArgs...> base_type;
 
 public:
-    typedef T& return_type;
-    typedef const T& const_return_type;
+    typedef T& valref_type;
+    typedef const T& const_valref_type;
 
     constexpr tuple(T& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
@@ -81,8 +81,8 @@ public:
     {}
 
     using storage_type::first;
-    using storage_type::return_type;
-    using storage_type::const_return_type;
+    using storage_type::valref_type;
+    using storage_type::const_valref_type;
 
     explicit tuple() {}
 
@@ -108,13 +108,13 @@ typename tuple_element<I, tuple<Types...> >::type&
 
 
 template<int index, typename... Types>
-const tuple_element_t<index, tuple<Types...> >& get(const tuple<Types...>& t)
+typename tuple_element<index, tuple<Types...> >::const_valref_type get(const tuple<Types...>& t)
 {
     return internal::GetImpl<index, Types...>::value(t);
 }
 
 template<int index, typename... Types>
-typename tuple_element<index, tuple<Types...> >::return_type get(tuple<Types...>& t)
+typename tuple_element<index, tuple<Types...> >::valref_type get(tuple<Types...>& t)
 {
     return internal::GetImpl<index, Types...>::value(t);
 }
