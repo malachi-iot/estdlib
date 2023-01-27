@@ -1,7 +1,6 @@
 #pragma once
 
-#include "internal/platform.h"
-#include "internal/fwd/tuple.h"
+#include "internal/tuple.h"
 
 #include "type_traits.h"
 
@@ -21,13 +20,16 @@ struct tuple_element<I, estd::tuple<Head, Tail...>>
 template< class Head, class... Tail >
 struct tuple_element<0, estd::tuple<Head, Tail...>>
 {
+    using return_type = typename estd::tuple<Head, Tail...>::return_type;
+    using const_return_type = typename estd::tuple<Head, Tail...>::return_type;
+
     typedef Head type;
 };
 
 template< std::size_t I, class T >
-struct tuple_element< I, const T > {
-  typedef typename
-      estd::add_const<typename estd::tuple_element<I, T>::type>::type type;
+struct tuple_element< I, const T >
+{
+    typedef typename estd::add_const<typename estd::tuple_element<I, T>::type>::type type;
 };
 
 
@@ -61,48 +63,7 @@ public:
     T& first() { return value; }
 };
 
-namespace internal {
 
-#ifndef FEATURE_ESTD_SPARSE_TUPLE
-#define FEATURE_ESTD_SPARSE_TUPLE 1
-#endif
-
-// Needs 'index' to disambiguate from multiple base classes
-#if FEATURE_ESTD_IS_EMPTY && FEATURE_ESTD_SPARSE_TUPLE
-template <class T, std::size_t index, class enabled = void>
-struct sparse_tuple;
-
-template <class T, std::size_t index>
-struct sparse_tuple<T, index, typename enable_if<is_empty<T>::value>::type>
-{
-    static T first() { return T(); }
-
-    typedef T return_type;
-    typedef T const_return_type;
-};
-
-
-template <class T, std::size_t index>
-struct sparse_tuple<T, index, typename enable_if<!is_empty<T>::value>::type>
-#else
-template <class T, std::size_t index>
-struct sparse_tuple
-#endif
-{
-    T value;
-
-    typedef T& return_type;
-    typedef const T& const_return_type;
-
-    const T& first() const { return value; }
-
-    T& first() { return value; }
-
-    constexpr sparse_tuple(T&& value) : value(std::move(value)) {}
-    constexpr sparse_tuple() = default;
-};
-
-}
 
 
 template <class T, class ...TArgs>
@@ -130,59 +91,6 @@ public:
     typedef T element_type;
 };
 
-// lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
-namespace internal {
-
-template<int index, typename First, typename... Rest>
-struct GetImpl : GetImpl<index - 1, Rest...>
-{
-    typedef GetImpl<index - 1, Rest...> base_type;
-    typedef typename base_type::first_type first_type;
-
-    static const first_type& value(const tuple<First, Rest...>& t)
-    {
-        return base_type::value(t);
-    }
-
-    static first_type& value(tuple<First, Rest...>& t)
-    {
-        return base_type::value(t);
-    }
-};
-
-// cascades down eventually to this particular specialization
-// to retrieve the 'first' item
-template<typename First, typename... Rest>
-struct GetImpl<0, First, Rest...>
-{
-    typedef First first_type;
-    using return_type = typename tuple<First, Rest...>::return_type;
-    using const_return_type = typename tuple<First, Rest...>::const_return_type;
-
-    static const_return_type value(const tuple<First, Rest...>& t)
-    {
-        return t.first();
-    }
-
-    static return_type value(tuple<First, Rest...>& t)
-    {
-        return t.first();
-    }
-
-    /*
-    static First& value(tuple<First, Rest...>& t)
-    {
-        return t.first();
-    } */
-
-    static First&& value(tuple<First, Rest...>&& t)
-    {
-        return t.first();
-    }
-};
-
-
-}
 
 /*
 template< std::size_t I, class... Types >
@@ -206,7 +114,7 @@ const tuple_element_t<index, tuple<Types...> >& get(const tuple<Types...>& t)
 }
 
 template<int index, typename... Types>
-tuple_element_t<index, tuple<Types...> >& get(tuple<Types...>& t)
+typename tuple_element<index, tuple<Types...> >::return_type get(tuple<Types...>& t)
 {
     return internal::GetImpl<index, Types...>::value(t);
 }
