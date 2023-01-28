@@ -81,8 +81,8 @@ public:
     {}
 
     using storage_type::first;
-    using storage_type::valref_type;
-    using storage_type::const_valref_type;
+    using typename storage_type::valref_type;
+    using typename storage_type::const_valref_type;
 
     explicit tuple() {}
 
