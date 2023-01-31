@@ -111,7 +111,7 @@ public:
     void fill_n(char_type c, streamsize n)
     {
         // DEBT: Does n - 1 'c' characters
-        while(--n > 0) put(c);
+        while(n-- > 0) put(c);
     }
 
     // DEBT: Make protected, and also -- I really think std has something like this already
@@ -254,6 +254,10 @@ inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream
     to_chars_result result = to_string_opt(buffer, value, base);
 
     int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
+
+    const streamsize pad = out.width();
+
+    out.fill_n(pad - sz);
 
     return out.write(result.ptr, sz);
 }
