@@ -34,6 +34,8 @@ TEST_CASE("ostream")
     {
         out << setw(5);
 
+        // TODO: Work with out_int_helper/write_int
+
         SECTION("fill")
         {
             out << setfill('0');
@@ -42,7 +44,7 @@ TEST_CASE("ostream")
 
             auto s = out.rdbuf()->str();
 
-            REQUIRE(s.length() == 6);
+            REQUIRE(s.length() == 5);
 
             REQUIRE(s[0] == '0');
         }
@@ -52,7 +54,7 @@ TEST_CASE("ostream")
 
             auto s = out.rdbuf()->str();
 
-            REQUIRE(s.length() == 6);
+            REQUIRE(s.length() == 5);
         }
     }
 }

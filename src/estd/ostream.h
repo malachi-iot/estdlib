@@ -62,7 +62,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     streamsize pad = out.width();
     const char_type fill = out.fill();
 
-    while(pad-- > 0)    out.put(fill);
+    while(--pad > 0)    out.put(fill);
 
     return out.put(ch);
 }
