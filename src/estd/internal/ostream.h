@@ -85,9 +85,9 @@ private:
     }
 
 #if FEATURE_ESTD_OSTREAM_SETW
-    // DEBT: Move this into ostream proper
     struct
     {
+        // DEBT: Width applies to istream *and* ostream
         unsigned width : 4;
         unsigned alignment : 1;         // 1 = left, 0 = right
         char fillchar : 6;          // + 32

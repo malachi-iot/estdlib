@@ -40,21 +40,44 @@ TEST_CASE("ostream")
         {
             out << setfill('0');
 
-            out << 'H';
+            SECTION("char")
+            {
+                out << 'H';
 
-            auto s = out.rdbuf()->str();
+                auto s = out.rdbuf()->str();
 
-            REQUIRE(s.length() == 5);
+                REQUIRE(s.length() == 5);
 
-            REQUIRE(s[0] == '0');
+                REQUIRE(s[0] == '0');
+            }
+            SECTION("int")
+            {
+                out << 12;
+
+                auto s = out.rdbuf()->str();
+
+                REQUIRE(s[0] == '0');
+            }
         }
         SECTION("setw")
         {
-            out << 'H';
+            SECTION("char")
+            {
+                out << 'H';
 
-            auto s = out.rdbuf()->str();
+                auto s = out.rdbuf()->str();
 
-            REQUIRE(s.length() == 5);
+                REQUIRE(s.length() == 5);
+            }
+            SECTION("int")
+            {
+                out << 12;
+
+                auto s = out.rdbuf()->str();
+
+                REQUIRE(s.length() == 5);
+                REQUIRE(s[0] == ' ');
+            }
         }
     }
 }
