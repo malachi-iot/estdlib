@@ -12,6 +12,15 @@ namespace estd {
 #endif
 
 
+// DEBT: Move ostream feature flags elsewhere
+#ifndef FEATURE_ESTD_OSTREAM_SETW
+#define FEATURE_ESTD_OSTREAM_SETW 1
+#define FEATURE_ESTD_OSTREAM_SETFILL 1
+#define FEATURE_ESTD_OSTREAM_SETIOSALIGN 1
+#endif
+
+
+
 class ios_base
 {
 public:
@@ -74,6 +83,17 @@ private:
 #endif
 
     }   state_;
+
+#if FEATURE_ESTD_OSTREAM_SETW
+    // DEBT: Move this into ostream proper
+    struct
+    {
+        unsigned width : 4;
+        unsigned alignment : 1;         // 1 = left, 0 = right
+        unsigned fillchar : 6;          // + 32
+
+    }   ostream_;
+#endif
 
 protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'

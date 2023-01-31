@@ -171,6 +171,33 @@ public:
     ESTD_CPP_FORWARDING_CTOR(basic_ostream)
 #endif
 
+#ifdef FEATURE_ESTD_OSTREAM_SETW
+    streamsize width() const
+    {
+        return base_type::ostream_.width;
+    }
+
+    streamsize width(streamsize new_width)
+    {
+        streamsize old_width = width();
+        base_type::ostream_.width = new_width;
+        return old_width;
+    }
+
+    char_type fill() const
+    {
+        return 0x20 + base_type::ostream_.fillchar;
+    }
+
+    char_type fill(char_type ch)
+    {
+        char_type old_fill = fill();
+        base_type::ostream_.fillchar = 0x20 + ch;
+        return old_fill;
+    }
+
+#endif
+
 };
 
 } // detail
