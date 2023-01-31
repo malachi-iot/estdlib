@@ -84,6 +84,7 @@ private:
 
     }   state_;
 
+protected:
 #if FEATURE_ESTD_OSTREAM_SETW
     // DEBT: Move this into ostream proper
     struct
@@ -95,7 +96,6 @@ private:
     }   ostream_;
 #endif
 
-protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
 
     // remove state, not official call

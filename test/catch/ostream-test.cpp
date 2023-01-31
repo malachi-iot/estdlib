@@ -2,6 +2,7 @@
 
 #include <estd/ostream.h>
 #include <estd/sstream.h>
+#include <estd/iomanip.h>
 
 using namespace estd;
 
@@ -28,5 +29,16 @@ TEST_CASE("ostream")
         out << v;
 
         REQUIRE(out.rdbuf()->str()[0] == '7');
+    }
+    SECTION("formatting")
+    {
+        SECTION("fill")
+        {
+            out << setfill('0');
+        }
+        SECTION("setw")
+        {
+            
+        }
     }
 }
