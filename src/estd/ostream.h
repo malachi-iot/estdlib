@@ -58,6 +58,12 @@ template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
                                                         typename TBase::char_type ch)
 {
+    typedef typename TBase::char_type char_type;
+    streamsize pad = out.width();
+    const char_type fill = out.fill();
+
+    while(pad-- > 0)    out.put(fill);
+
     return out.put(ch);
 }
 

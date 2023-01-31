@@ -91,7 +91,7 @@ protected:
     {
         unsigned width : 4;
         unsigned alignment : 1;         // 1 = left, 0 = right
-        unsigned fillchar : 6;          // + 32
+        char fillchar : 6;          // + 32
 
     }   ostream_;
 #endif
@@ -112,6 +112,11 @@ public:
     {
         state_.fmtfl_ = dec;
         state_.iostate_ = goodbit;
+#if FEATURE_ESTD_OSTREAM_SETW
+        ostream_.width = 0;
+        ostream_.fillchar = (char) (' ' - 0x20); // DEBT
+        ostream_.alignment = 0;
+#endif
     }
 
     fmtflags setf(fmtflags flags)
