@@ -58,10 +58,12 @@ template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
                                                         typename TBase::char_type ch)
 {
+#if FEATURE_ESTD_OSTREAM_SETW
     streamsize pad = out.width();
 
     out.fill_n(pad - 1);
     out.width(0);
+#endif
 
     return out.put(ch);
 }

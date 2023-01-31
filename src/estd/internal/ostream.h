@@ -228,7 +228,7 @@ public:
     ESTD_CPP_FORWARDING_CTOR(basic_ostream)
 #endif
 
-#ifdef FEATURE_ESTD_OSTREAM_SETW
+#if FEATURE_ESTD_OSTREAM_SETW
     streamsize width() const
     {
         return ostream_.width;
@@ -264,10 +264,12 @@ inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream
 
     int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
 
+#if FEATURE_ESTD_OSTREAM_SETW
     const streamsize pad = out.width();
 
     out.fill_n(pad - sz);
     out.width(0);
+#endif
 
     return out.write(result.ptr, sz);
 }
