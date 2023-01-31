@@ -38,7 +38,7 @@ TEST_CASE("ostream")
         }
         SECTION("setw")
         {
-            
+            out << setw(10);
         }
     }
 }
