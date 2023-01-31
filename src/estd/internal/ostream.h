@@ -84,7 +84,41 @@ private:
             base_type::setstate(ios_base::failbit);
     }
 
+#if FEATURE_ESTD_OSTREAM_SETW
+    // DEBT: Move this into ostream proper
+    struct
+    {
+        unsigned width : 4;
+        unsigned alignment : 1;         // 1 = left, 0 = right
+        char fillchar : 6;          // + 32
+
+    }   ostream_;
+
 public:
+    char_type fill() const
+    {
+        return 0x20 + ostream_.fillchar;
+    }
+
+    char_type fill(char_type ch)
+    {
+        char_type old_fill = fill();
+        ostream_.fillchar = 0x20 + ch;
+        return old_fill;
+    }
+#endif
+
+
+public:
+#if FEATURE_ESTD_OSTREAM_SETW
+    inline basic_ostream()
+    {
+        ostream_.width = 0;
+        ostream_.alignment = 0;
+        fill(' ');
+    }
+#endif
+
     struct sentry
     {
         explicit sentry(basic_ostream&) {}
@@ -174,26 +208,14 @@ public:
 #ifdef FEATURE_ESTD_OSTREAM_SETW
     streamsize width() const
     {
-        return base_type::ostream_.width;
+        return ostream_.width;
     }
 
     streamsize width(streamsize new_width)
     {
         streamsize old_width = width();
-        base_type::ostream_.width = new_width;
+        ostream_.width = new_width;
         return old_width;
-    }
-
-    char_type fill() const
-    {
-        return 0x20 + base_type::ostream_.fillchar;
-    }
-
-    char_type fill(char_type ch)
-    {
-        char_type old_fill = fill();
-        base_type::ostream_.fillchar = 0x20 + ch;
-        return old_fill;
     }
 
 #endif

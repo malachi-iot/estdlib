@@ -32,13 +32,27 @@ TEST_CASE("ostream")
     }
     SECTION("formatting")
     {
+        out << setw(5);
+
         SECTION("fill")
         {
             out << setfill('0');
+
+            out << 'H';
+
+            auto s = out.rdbuf()->str();
+
+            REQUIRE(s.length() == 6);
+
+            REQUIRE(s[0] == '0');
         }
         SECTION("setw")
         {
-            out << setw(10);
+            out << 'H';
+
+            auto s = out.rdbuf()->str();
+
+            REQUIRE(s.length() == 6);
         }
     }
 }

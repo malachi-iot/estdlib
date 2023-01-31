@@ -85,17 +85,6 @@ private:
     }   state_;
 
 protected:
-#if FEATURE_ESTD_OSTREAM_SETW
-    // DEBT: Move this into ostream proper
-    struct
-    {
-        unsigned width : 4;
-        unsigned alignment : 1;         // 1 = left, 0 = right
-        char fillchar : 6;          // + 32
-
-    }   ostream_;
-#endif
-
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
 
     // remove state, not official call
@@ -112,11 +101,6 @@ public:
     {
         state_.fmtfl_ = dec;
         state_.iostate_ = goodbit;
-#if FEATURE_ESTD_OSTREAM_SETW
-        ostream_.width = 0;
-        ostream_.fillchar = (char) (' ' - 0x20); // DEBT
-        ostream_.alignment = 0;
-#endif
     }
 
     fmtflags setf(fmtflags flags)
