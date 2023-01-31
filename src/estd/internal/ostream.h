@@ -85,12 +85,21 @@ private:
     }
 
 #if FEATURE_ESTD_OSTREAM_SETW
+    // NOTE: Deviates from spec - std wants this in ios_base as part of setf
+    enum class positioning
+    {
+        left = 0,
+        right,
+        internal
+    };
+
     struct
     {
         // DEBT: Width applies to istream *and* ostream
         unsigned width : 4;
-        unsigned alignment : 1;         // 1 = left, 0 = right
-        char fillchar : 6;          // + 32
+        positioning alignment : 2;  // DEBT: Unused
+        char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
+        bool showbase : 1;          // DEBT: Unused
 
     }   ostream_;
 
@@ -128,7 +137,7 @@ public:
     inline basic_ostream()
     {
         ostream_.width = 0;
-        ostream_.alignment = 0;
+        ostream_.alignment = positioning::left;
         fill(' ');
     }
 #endif
