@@ -1,5 +1,9 @@
 # v0.5.x - XXXXX23
 
+## Added Features
+
+* Adding `setw` and `setfill` to ostream
+
 ## Quality Updates & Bug Fixes
 
 * Fixing signed/unsigned mismatch in `out_span_streambuf`
