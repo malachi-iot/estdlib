@@ -32,12 +32,9 @@ TEST_CASE("ostream")
     }
     SECTION("formatting")
     {
-        out << setw(5);
-
-        // TODO: Work with out_int_helper/write_int
-
         SECTION("fill")
         {
+            out << setw(5);
             out << setfill('0');
 
             SECTION("char")
@@ -61,6 +58,8 @@ TEST_CASE("ostream")
         }
         SECTION("setw")
         {
+            out << setw(5);
+
             SECTION("char")
             {
                 out << 'H';
@@ -78,6 +77,15 @@ TEST_CASE("ostream")
                 REQUIRE(s.length() == 5);
                 REQUIRE(s[0] == ' ');
             }
+        }
+        SECTION("clock style")
+        {
+            out << setfill('0');
+            out << setw(2) << 1 << ':' << setw(2) << 30;
+
+            auto s = out.rdbuf()->str();
+
+            REQUIRE(s == "01:30");
         }
     }
 }

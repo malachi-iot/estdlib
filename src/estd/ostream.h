@@ -61,6 +61,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     streamsize pad = out.width();
 
     out.fill_n(pad - 1);
+    out.width(0);
 
     return out.put(ch);
 }

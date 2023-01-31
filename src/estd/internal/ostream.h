@@ -267,6 +267,7 @@ inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream
     const streamsize pad = out.width();
 
     out.fill_n(pad - sz);
+    out.width(0);
 
     return out.write(result.ptr, sz);
 }
