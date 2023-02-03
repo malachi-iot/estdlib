@@ -546,13 +546,22 @@ TEST_CASE("functional")
 
         REQUIRE(val == 2);
 
-        m.exec();
-
-        REQUIRE(val == 3);
-
         estd::detail::impl::function_fnptr1<void()>::
                 copyable_model<sizeof(f)>
                 copyable_m(f);
+
+        copyable_m._exec();
+
+        REQUIRE(val == 3);
+
+        estd::byte raw[256];
+
+        auto c2 = new (raw) estd::detail::impl::function_fnptr1<void()>::
+                copyable_model<>(&copyable_m, sizeof(copyable_m));
+
+        c2->_exec();
+
+        REQUIRE(val == 4);
 
         //copyable_m.helper(copyable_m);
     }

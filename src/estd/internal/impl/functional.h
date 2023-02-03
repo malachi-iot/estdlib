@@ -4,6 +4,8 @@
 #include "../fwd/functional.h"
 #include <estd/tuple.h>
 
+#include <string.h> // for memcpy
+
 namespace estd {
 
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
@@ -74,9 +76,9 @@ struct function_fnptr1<TResult(TArgs...)>
     };
 
     template <int sz = 0>
-    struct copyable_model //: model_base
+    struct copyable_model : model_base
     {
-        //typedef model_base base_type;
+        typedef model_base base_type;
 
         estd::byte unsafe_closure[sz];
 
@@ -89,7 +91,8 @@ struct function_fnptr1<TResult(TArgs...)>
         }
 
         template <class F>
-        copyable_model(const F& f) //: base_type()
+        copyable_model(const F& f) :
+            base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>))
         {
             static_assert(sz == sizeof(f), "Specified sz and sizeof(F) must match");
             F* copy_to = (F*) unsafe_closure;
@@ -97,9 +100,15 @@ struct function_fnptr1<TResult(TArgs...)>
         }
 
 
-        copyable_model(const copyable_model& copy_from, unsigned sz_) //: base_type()
+        template <int sz__>
+        copyable_model(const copyable_model<sz__>* copy_from, unsigned sz_) :
+            base_type(copy_from->f)
         {
-
+            // DEBT: Doing this because we would rather re-copy 'f' as pointer types
+            // are trivial rather than dance around possible padding issues.  That said,
+            // doing that dance would be a good optimization - that, or place a
+            // 'unsafe_closure[]' right into model_base
+            memcpy(this, copy_from, sz_);
         }
 
         template <class F>
