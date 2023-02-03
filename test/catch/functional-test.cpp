@@ -521,6 +521,10 @@ TEST_CASE("functional")
         // https://gcc.gnu.org/legacy-ml/gcc-patches/2014-10/msg01007.html
         // TLDR; Not really, but we can copy via their copy constructor (but no assignment operator)
 
+        // Q: Can we memcpy closure types?
+        // https://github.com/habanero-rice/hclib/issues/12
+        // A: Since they aren't POD/trivial, not officially.
+
         int val = 0;
         //int val2 = 0;
         //int val3 = 0;

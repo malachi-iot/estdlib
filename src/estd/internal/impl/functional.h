@@ -82,6 +82,17 @@ struct function_fnptr1<TResult(TArgs...)>
 
         estd::byte unsafe_closure[sz];
 
+        // Copy may be safe, but underlying unsafe_closure still sort of isn't!
+        template <class F>
+        static void copy_by_constructor(const estd::byte* from, estd::byte* to)
+        {
+            auto f = (F*) from;
+
+            new (to) F(*f);
+        }
+
+        void (*copy)(const estd::byte* from, estd::byte* to);
+
         template <class F>
         static TResult helper(estd::byte* unsafe_closure, TArgs...args)
         {
@@ -95,6 +106,7 @@ struct function_fnptr1<TResult(TArgs...)>
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>))
         {
             static_assert(sz == sizeof(f), "Specified sz and sizeof(F) must match");
+            copy = copy_by_constructor<F>;
             F* copy_to = (F*) unsafe_closure;
             new (copy_to) F(f);
         }
@@ -102,13 +114,16 @@ struct function_fnptr1<TResult(TArgs...)>
 
         template <int sz__>
         copyable_model(const copyable_model<sz__>* copy_from, unsigned sz_) :
-            base_type(copy_from->f)
+            base_type(copy_from->f),
+            copy(copy_from->copy)
         {
             // DEBT: Doing this because we would rather re-copy 'f' as pointer types
             // are trivial rather than dance around possible padding issues.  That said,
             // doing that dance would be a good optimization - that, or place a
             // 'unsafe_closure[]' right into model_base
-            memcpy(this, copy_from, sz_);
+            //memcpy(this, copy_from, sz_);
+
+            copy(copy_from->unsafe_closure, unsafe_closure);
         }
 
         template <class F>
