@@ -514,6 +514,13 @@ TEST_CASE("functional")
     }
     SECTION("copyable")
     {
+        // Q: Can we trivially copy closure types (lambda objects) around?
+        // https://en.cppreference.com/w/cpp/language/lambda
+        // https://baites.github.io/computer-science/idioms/closure-series/2017/12/11/are-closures-trivial.html
+        // https://stackoverflow.com/questions/32986193/when-is-a-lambda-trivial
+        // https://gcc.gnu.org/legacy-ml/gcc-patches/2014-10/msg01007.html
+        // TLDR; Not really, but we can copy via their copy constructor (but no assignment operator)
+
         int val = 0;
         //int val2 = 0;
         //int val3 = 0;
@@ -536,6 +543,10 @@ TEST_CASE("functional")
         f();
 
         REQUIRE(val == 2);
+
+        m.exec();
+
+        REQUIRE(val == 3);
     }
 }
 
