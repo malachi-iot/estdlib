@@ -512,6 +512,31 @@ TEST_CASE("functional")
 
         REQUIRE(value == 5);
     }
+    SECTION("copyable")
+    {
+        int val = 0;
+        //int val2 = 0;
+        //int val3 = 0;
+
+        auto m = estd::detail::function<void()>::make_model([&]
+        {
+            ++val;
+            //val3 = val2 + 1;
+        });
+
+        m.exec();
+
+        auto f = m.f;
+
+        int sz = sizeof(f);
+
+        REQUIRE(&f != &m.f);
+        REQUIRE(val == 1);
+
+        f();
+
+        REQUIRE(val == 2);
+    }
 }
 
 #endif

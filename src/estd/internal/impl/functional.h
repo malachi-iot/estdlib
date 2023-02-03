@@ -52,6 +52,7 @@ struct function_fnptr1<TResult(TArgs...)>
     };
 
 
+    // Inline flavor
     template <typename F>
     struct model : model_base
     {
