@@ -72,6 +72,44 @@ struct function_fnptr1<TResult(TArgs...)>
             return f(std::forward<TArgs>(args)...);
         }
     };
+
+    template <int sz = 0>
+    struct copyable_model //: model_base
+    {
+        //typedef model_base base_type;
+
+        estd::byte unsafe_closure[sz];
+
+        template <class F>
+        static TResult helper(estd::byte* unsafe_closure, TArgs...args)
+        {
+            auto& f = *(F*)unsafe_closure;
+
+            return f(std::forward<TArgs>(args)...);
+        }
+
+        template <class F>
+        copyable_model(const F& f) //: base_type()
+        {
+            static_assert(sz == sizeof(f), "Specified sz and sizeof(F) must match");
+            F* copy_to = (F*) unsafe_closure;
+            new (copy_to) F(f);
+        }
+
+
+        copyable_model(const copyable_model& copy_from, unsigned sz_) //: base_type()
+        {
+
+        }
+
+        template <class F>
+        TResult exec_(TArgs...args)
+        {
+            auto& f = *(F*)unsafe_closure;
+
+            return f(std::forward<TArgs>(args)...);
+        }
+    };
 };
 
 

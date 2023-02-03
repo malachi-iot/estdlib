@@ -525,7 +525,9 @@ TEST_CASE("functional")
         //int val2 = 0;
         //int val3 = 0;
 
-        auto m = estd::detail::function<void()>::make_model([&]
+        typedef estd::detail::function<void()> function_type;
+
+        auto m = function_type::make_model([&]
         {
             ++val;
             //val3 = val2 + 1;
@@ -547,6 +549,12 @@ TEST_CASE("functional")
         m.exec();
 
         REQUIRE(val == 3);
+
+        estd::detail::impl::function_fnptr1<void()>::
+                copyable_model<sizeof(f)>
+                copyable_m(f);
+
+        //copyable_m.helper(copyable_m);
     }
 }
 
