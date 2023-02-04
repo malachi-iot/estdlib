@@ -80,6 +80,18 @@ struct function_fnptr1<TResult(TArgs...)>
     {
         typedef model_base base_type;
 
+        // EXPERIMENTAL - if we like this, spin off a psueod model
+        // without the regular function pointer at its base, just for
+        // limited scenarios where we'd prefer only one fnptr here
+        // instead of 2
+        union util_param
+        {
+            estd::tuple<TArgs...>* params;
+            const estd::byte* copy_from;
+        };
+
+        void (*util)(int mode, util_param);
+
         estd::byte unsafe_closure[sz];
 
         // Copy may be safe, but underlying unsafe_closure still sort of isn't!
@@ -102,6 +114,29 @@ struct function_fnptr1<TResult(TArgs...)>
         }
 
         template <class F>
+        void util_impl(int mode, util_param p)
+        {
+            switch(mode)
+            {
+                case 0:
+                {
+                    auto f = (F*)unsafe_closure;
+
+                    // FIX: How do we invoke
+                    // 'f' with a tuple?
+                    break;
+                }
+
+                case 1:
+                    copy_by_constructor<F>(p.copy_from);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        template <class F>
         copyable_model(const F& f) :
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>))
         {
@@ -118,11 +153,14 @@ struct function_fnptr1<TResult(TArgs...)>
             copy(copy_from->copy)
         {
             // DEBT: Doing this because we would rather re-copy 'f' as pointer types
-            // are trivial rather than dance around possible padding issues.  That said,
+            // are trivial rather than dance around possible padding issues.  Specifically,
+            // identifying correct sz_ for JUST unsafe_closure involves those issues. That said,
             // doing that dance would be a good optimization - that, or place a
             // 'unsafe_closure[]' right into model_base
             //memcpy(this, copy_from, sz_);
 
+            // Since assuming POD/trivial appears to be dangerous sometimes,
+            // doing proper copy via fnptr
             copy(copy_from->unsafe_closure, unsafe_closure);
         }
 
