@@ -106,7 +106,8 @@ struct function_fnptr1<TResult(TArgs...)>
             new (to) F(*f);
         }
 
-        void (*copy)(const estd::byte* from, estd::byte* to);
+        // Specifically copies the unsafe_closure portion via F copy constructor
+        void (* const copy)(const estd::byte* from, estd::byte* to);
 
         template <class F>
         static TResult helper(estd::byte* unsafe_closure, TArgs...args)
@@ -144,12 +145,17 @@ struct function_fnptr1<TResult(TArgs...)>
         // space big enough to hold all of 'f'
         template <class F>
         copyable_model(const F& f) :
-            base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>))
+            base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>)),
+            copy{copy_by_constructor<F>}
         {
-            static_assert(sz >= sizeof(f), "Specified sz MUST be greated than sizeof(F) and SHOULD match");
-            copy = copy_by_constructor<F>;
-            F* copy_to = (F*) unsafe_closure;
-            new (copy_to) F(f);
+            static_assert(sz >= sizeof(f), "sz MUST be greater than sizeof(F) and SHOULD match");
+            new (unsafe_closure) F(f);
+        }
+
+        template <class F>
+        copyable_model(const model<F>& copy_from) : copyable_model(copy_from.f)
+        {
+
         }
 
 
