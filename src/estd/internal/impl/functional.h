@@ -136,11 +136,13 @@ struct function_fnptr1<TResult(TArgs...)>
             }
         }
 
+        // NOTE: This relies on an external party placing 'copyable_model' in a memory
+        // space big enough to hold all of 'f'
         template <class F>
         copyable_model(const F& f) :
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>))
         {
-            static_assert(sz == sizeof(f), "Specified sz and sizeof(F) must match");
+            static_assert(sz >= sizeof(f), "Specified sz MUST be greated than sizeof(F) and SHOULD match");
             copy = copy_by_constructor<F>;
             F* copy_to = (F*) unsafe_closure;
             new (copy_to) F(f);

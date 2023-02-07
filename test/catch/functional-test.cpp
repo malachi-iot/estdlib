@@ -3,6 +3,7 @@
 #include <estd/functional.h>
 
 #include "test-data.h"
+#include "test-functional.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -526,7 +527,7 @@ TEST_CASE("functional")
         // A: Since they aren't POD/trivial, not officially.
 
         int val = 0;
-        //int val2 = 0;
+        int val2 = 0;
         //int val3 = 0;
 
         typedef estd::detail::function<void()> function_type;
@@ -537,37 +538,57 @@ TEST_CASE("functional")
             //val3 = val2 + 1;
         });
 
-        m.exec();
+        SECTION("core")
+        {
 
-        auto f = m.f;
+            m.exec();
 
-        int sz = sizeof(f);
+            auto f = m.f;
 
-        REQUIRE(&f != &m.f);
-        REQUIRE(val == 1);
+            int sz = sizeof(f);
 
-        f();
+            REQUIRE(&f != &m.f);
+            REQUIRE(val == 1);
 
-        REQUIRE(val == 2);
+            f();
 
-        estd::detail::impl::function_fnptr1<void()>::
-                copyable_model<sizeof(f)>
-                copyable_m(f);
+            REQUIRE(val == 2);
 
-        copyable_m._exec();
+            estd::detail::impl::function_fnptr1<void()>::
+                    copyable_model<sizeof(f)>
+                    copyable_m(f);
 
-        REQUIRE(val == 3);
+            copyable_m._exec();
 
-        estd::byte raw[256];
+            REQUIRE(val == 3);
 
-        auto c2 = new (raw) estd::detail::impl::function_fnptr1<void()>::
-                copyable_model<>(&copyable_m, sizeof(copyable_m));
+            estd::byte raw[256];
 
-        c2->_exec();
+            auto c2 = new (raw) estd::detail::impl::function_fnptr1<void()>::
+                    copyable_model<>(&copyable_m, sizeof(copyable_m));
 
-        REQUIRE(val == 4);
+            c2->_exec();
 
-        //copyable_m.helper(copyable_m);
+            REQUIRE(val == 4);
+
+            //copyable_m.helper(copyable_m);
+        }
+        SECTION("list")
+        {
+            FunctionList l;
+
+            l.list.push_back([&]{ ++val2; });
+
+            l.invoke();
+
+            REQUIRE(val2 == 1);
+
+            l.list.push_back([&]{ ++val2; });
+
+            l.invoke();
+
+            REQUIRE(val2 == 3);
+        }
     }
 }
 
