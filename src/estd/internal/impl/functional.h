@@ -75,6 +75,9 @@ struct function_fnptr1<TResult(TArgs...)>
         }
     };
 
+    // Inline flavor which can be copied around without foreknowledge of 'F'
+    // Not merged with regular model because this one is less safe so unless
+    // this level of copyability is really needed, use 'model'
     template <int sz = 0>
     struct copyable_model : model_base
     {
@@ -113,6 +116,7 @@ struct function_fnptr1<TResult(TArgs...)>
             return f(std::forward<TArgs>(args)...);
         }
 
+        // EXPERIMENTAL
         template <class F>
         void util_impl(int mode, util_param p)
         {
