@@ -538,7 +538,8 @@ TEST_CASE("functional")
         typedef estd::detail::function<void()> function_type;
         typedef estd::detail::impl::function_fnptr1<void()> impl_type;
 
-        // DEBT: Somewhat surprisingly, this method pointer is 16 bytes on x64
+        // As per https://stackoverflow.com/questions/29188190/function-pointer-memory-usage
+        // It turns out that member function pointers do take more space.
         //REQUIRE(sizeof(impl_type::model_base::function_type) == 8);
 
         auto m = function_type::make_model([&]

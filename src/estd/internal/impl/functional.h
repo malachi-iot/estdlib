@@ -240,7 +240,9 @@ struct function_fnptr1<TResult(TArgs...)>
     }
 };
 
-
+// BEWARE
+// https://stackoverflow.com/questions/29188190/function-pointer-memory-usage implies
+// this approach may not work directly as is
 template <typename TResult, typename... TArgs>
 struct function_fnptr2<TResult(TArgs...)>
 {
