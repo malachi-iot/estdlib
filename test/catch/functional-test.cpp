@@ -315,6 +315,11 @@ TEST_CASE("functional")
             {
                 typedef estd::detail::function<void(int), estd::detail::impl::function_fnptr2<void(
                     int)> > _fb;
+                typedef estd::detail::function<void(void), estd::detail::impl::function_fnptr2<void(
+                    void)> > _fb2;
+
+                REQUIRE(sizeof(_fb::model_base) == sizeof(void*));
+                REQUIRE(sizeof(_fb2::model_base) == sizeof(void*));
 
                 struct model : _fb::model_base
                 {
@@ -532,6 +537,9 @@ TEST_CASE("functional")
 
         typedef estd::detail::function<void()> function_type;
         typedef estd::detail::impl::function_fnptr1<void()> impl_type;
+
+        // DEBT: Somewhat surprisingly, this method pointer is 16 bytes on x64
+        //REQUIRE(sizeof(impl_type::model_base::function_type) == 8);
 
         auto m = function_type::make_model([&]
         {
