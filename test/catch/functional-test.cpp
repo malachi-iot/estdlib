@@ -538,6 +538,11 @@ TEST_CASE("functional")
             //val3 = val2 + 1;
         });
 
+        auto m2 = function_type::make_model([=]
+        {
+
+        });
+
         SECTION("core")
         {
 
@@ -557,6 +562,10 @@ TEST_CASE("functional")
             estd::detail::impl::function_fnptr1<void()>::
                     copyable_model<sizeof(f)>
                     copyable_m(f);
+
+            estd::detail::impl::function_fnptr1<void()>::
+                copyable_model<sizeof(f)>
+                copyable_m2(m2.f);
 
             copyable_m._exec();
 

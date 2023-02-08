@@ -152,17 +152,17 @@ struct function_fnptr1<TResult(TArgs...)>
             new (unsafe_closure) F(f);
         }
 
-        /*
-         * error: new cannot be applied to a reference type -
-         * it seems to be pushing in what we hope was a const F& into here
-        template <class F>
+        // DEBT: I find it odd that rvalue is always favored , even when an lvalue is supplied,
+        // unless incoming F is itself a const.  Perhaps if it detects no difference between a copy
+        // and a move, it implies a move?
+        template <class F, class F2 = estd::remove_reference_t<F> >
         copyable_model(F&& f) :
-            base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>)),
-            copy{copy_by_constructor<F>}
+            base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F2>)),
+            copy{copy_by_constructor<F2>}
         {
             static_assert(sz >= sizeof(f), "sz MUST be greater than sizeof(F) and SHOULD match");
-            new (unsafe_closure) F(std::move(f));
-        }   */
+            new (unsafe_closure) F2(std::move(f));
+        }
 
         template <class F>
         copyable_model(const model<F>& copy_from) : copyable_model(copy_from.f)
