@@ -184,6 +184,9 @@ public:
     template <class F>
     using model = typename impl_type::template model<F>;
 
+    template <class F>
+    using sparse_model = typename impl_type::template sparse_model<F>;
+
 protected:
     // DEBT: child class constructors need this to not be const, for now.  Also, nullability demands it
     //concept* const m;
@@ -222,10 +225,18 @@ public:
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
 
     // See above 'model' CTAD comments
-    template <typename F>
+    template <class F, class F2 = estd::remove_reference_t<F>,
+        estd::enable_if_t<!estd::is_empty<F>::value, bool> = true>
     inline static model<F> make_model(F&& f)
     {
         return model<F>(std::move(f));
+    }
+
+    template <class F, class F2 = estd::remove_reference_t<F>,
+        estd::enable_if_t<estd::is_empty<F>::value, bool> = true>
+    inline static sparse_model<F2> make_model(F&& f)
+    {
+        return sparse_model<F2>(std::move(f));
     }
 
     // EXPERIMENTAL

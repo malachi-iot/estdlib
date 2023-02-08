@@ -564,7 +564,7 @@ TEST_CASE("functional")
                     copyable_model<sizeof(f)>
                     copyable_m(f);
 
-            impl_type::copyable_model<sizeof(m2.f)>
+            impl_type::copyable_model<>
                 copyable_m2(m2);
 
             copyable_m._exec();

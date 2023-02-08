@@ -36,13 +36,13 @@ struct function_fnptr1<TResult(TArgs...)>
 
         const function_type f;
 
-        model_base(function_type f) : f(f) {}
+        constexpr model_base(function_type f) : f(f) {}
 
         model_base(const model_base& copy_from) = default;
         // just like concept_fnptr2, default move constructor somehow
         // results in make_inline2 leaving f uninitialized
         //concept_fnptr1(concept_fnptr1&& move_from) = default;
-        model_base(model_base&& move_from) :
+        constexpr model_base(model_base&& move_from) :
             f(move_from.f)
         {}
 
@@ -61,18 +61,42 @@ struct function_fnptr1<TResult(TArgs...)>
         typedef model_base base_type;
 
         //template <typename U>
-        model(F&& u) :
+        constexpr model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
             f(std::forward<F>(u))
         {
         }
 
-        // TODO: Optimization - for empty closures, find a way to eliminate this 1-byte guy
         F f;
 
         TResult exec(TArgs...args)
         {
             return f(std::forward<TArgs>(args)...);
+        }
+    };
+
+
+    // Inline also, for when empty closure is present
+    template <typename F>
+    struct sparse_model : model_base
+    {
+        typedef model_base base_type;
+
+        constexpr sparse_model(F&&) :
+            base_type(static_cast<typename base_type::function_type>(&sparse_model::exec))
+        {
+            static_assert(estd::is_empty<F>::value, "Must only operate on empty closures");
+        }
+
+        // NOTE: Scary stuff, but our constructor ensures careful usage of this is safe
+        constexpr static F& f()
+        {
+            return *(F*) nullptr;
+        }
+
+        TResult exec(TArgs...args)
+        {
+            return f()(std::forward<TArgs>(args)...);
         }
     };
 
@@ -175,6 +199,13 @@ struct function_fnptr1<TResult(TArgs...)>
 
         }
 
+        // EXPERIMENTAL
+        template <class F>
+        copyable_model(const sparse_model<F>& copy_from) : copyable_model(copy_from.f())
+        {
+
+        }
+
 
         template <int sz__>
         copyable_model(const copyable_model<sz__>& copy_from) :
@@ -194,7 +225,7 @@ struct function_fnptr1<TResult(TArgs...)>
         }
 
         template <class F>
-        TResult exec_(TArgs...args)
+        TResult exec_(TArgs&&...args)
         {
             auto f = (F*)unsafe_closure;
 
@@ -272,6 +303,11 @@ struct function_fnptr2<TResult(TArgs...)>
             return __this->f(std::forward<TArgs>(args)...);
         }
     };
+
+    // DEBT: This alias isn't a sparse model, just saving this optimization
+    // for another day
+    template <class F>
+    using sparse_model = model<F>;
 };
 
 
@@ -299,6 +335,11 @@ struct function_virtual<TResult(TArgs...)>
             return f(std::forward<TArgs>(args)...);
         }
     };
+
+    // DEBT: This alias isn't a sparse model, just saving this optimization
+    // for another day
+    template <class F>
+    using sparse_model = model<F>;
 };
 
 }}
