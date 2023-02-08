@@ -531,6 +531,7 @@ TEST_CASE("functional")
         //int val3 = 0;
 
         typedef estd::detail::function<void()> function_type;
+        typedef estd::detail::impl::function_fnptr1<void()> impl_type;
 
         auto m = function_type::make_model([&]
         {
@@ -563,8 +564,7 @@ TEST_CASE("functional")
                     copyable_model<sizeof(f)>
                     copyable_m(f);
 
-            estd::detail::impl::function_fnptr1<void()>::
-                copyable_model<sizeof(m2.f)>
+            impl_type::copyable_model<sizeof(m2.f)>
                 copyable_m2(m2);
 
             copyable_m._exec();
@@ -582,6 +582,16 @@ TEST_CASE("functional")
             REQUIRE(val == 4);
 
             //copyable_m.helper(copyable_m);
+
+            auto copyable_m3 = impl_type::make_copyable([]
+            {
+
+            });
+
+            copyable_m3._exec();
+
+            sz = sizeof(copyable_m3);
+            REQUIRE(sz == sizeof(impl_type::model_base) + sizeof(void*));
         }
         SECTION("list")
         {

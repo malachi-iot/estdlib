@@ -67,6 +67,7 @@ struct function_fnptr1<TResult(TArgs...)>
         {
         }
 
+        // TODO: Optimization - for empty closures, find a way to eliminate this 1-byte guy
         F f;
 
         TResult exec(TArgs...args)
@@ -93,7 +94,7 @@ struct function_fnptr1<TResult(TArgs...)>
             const estd::byte* copy_from;
         };
 
-        void (*util)(int mode, util_param);
+        //void (*util)(int mode, util_param);
 
         estd::byte unsafe_closure[sz];
 
@@ -149,7 +150,8 @@ struct function_fnptr1<TResult(TArgs...)>
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>)),
             copy{copy_by_constructor<F>}
         {
-            static_assert(sz >= sizeof(f), "sz MUST be greater than sizeof(F) and SHOULD match");
+            static_assert((sz + estd::is_empty<F>::value) >= sizeof(f),
+                "sz MUST be greater than sizeof(F) and SHOULD match");
             new (unsafe_closure) F(f);
         }
 
@@ -162,7 +164,8 @@ struct function_fnptr1<TResult(TArgs...)>
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F2>)),
             copy{copy_by_constructor<F2>}
         {
-            static_assert(sz >= sizeof(f), "sz MUST be greater than sizeof(F) and SHOULD match");
+            static_assert((sz + estd::is_empty<F2>::value) >= sizeof(f),
+                "sz MUST be greater than sizeof(F) and SHOULD match");
             new (unsafe_closure) F2(std::move(f));
         }
 
@@ -193,11 +196,17 @@ struct function_fnptr1<TResult(TArgs...)>
         template <class F>
         TResult exec_(TArgs...args)
         {
-            auto& f = *(F*)unsafe_closure;
+            auto f = (F*)unsafe_closure;
 
-            return f(std::forward<TArgs>(args)...);
+            return (*f)(std::forward<TArgs>(args)...);
         }
     };
+
+    template <class F, int sz = sizeof(F) - estd::is_empty<F>::value>
+    static inline auto make_copyable(F f) -> copyable_model<sz>
+    {
+        return copyable_model<sz>(f);
+    }
 };
 
 
