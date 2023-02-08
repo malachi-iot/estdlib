@@ -143,7 +143,8 @@ struct function_fnptr1<TResult(TArgs...)>
 
         // NOTE: This relies on an external party placing 'copyable_model' in a memory
         // space big enough to hold all of 'f'
-        template <class F>
+        template <class F,
+            estd::enable_if_t<!estd::is_base_of<model_base, F>::value, bool> = true>
         copyable_model(const F& f) :
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F>)),
             copy{copy_by_constructor<F>}
@@ -155,7 +156,8 @@ struct function_fnptr1<TResult(TArgs...)>
         // DEBT: I find it odd that rvalue is always favored , even when an lvalue is supplied,
         // unless incoming F is itself a const.  Perhaps if it detects no difference between a copy
         // and a move, it implies a move?
-        template <class F, class F2 = estd::remove_reference_t<F> >
+        template <class F, class F2 = estd::remove_reference_t<F>,
+            estd::enable_if_t<!estd::is_base_of<model_base, F2>::value, bool> = true>
         copyable_model(F&& f) :
             base_type(static_cast<typename base_type::function_type>(&copyable_model::exec_<F2>)),
             copy{copy_by_constructor<F2>}
@@ -172,9 +174,9 @@ struct function_fnptr1<TResult(TArgs...)>
 
 
         template <int sz__>
-        copyable_model(const copyable_model<sz__>* copy_from, unsigned sz_) :
-            base_type(copy_from->f),
-            copy(copy_from->copy)
+        copyable_model(const copyable_model<sz__>& copy_from) :
+            base_type(copy_from.f),
+            copy(copy_from.copy)
         {
             // DEBT: Doing this because we would rather re-copy 'f' as pointer types
             // are trivial rather than dance around possible padding issues.  Specifically,
@@ -185,7 +187,7 @@ struct function_fnptr1<TResult(TArgs...)>
 
             // Since assuming POD/trivial appears to be dangerous sometimes,
             // doing proper copy via fnptr
-            copy(copy_from->unsafe_closure, unsafe_closure);
+            copy(copy_from.unsafe_closure, unsafe_closure);
         }
 
         template <class F>

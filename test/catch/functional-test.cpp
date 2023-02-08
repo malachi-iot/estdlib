@@ -564,17 +564,18 @@ TEST_CASE("functional")
                     copyable_m(f);
 
             estd::detail::impl::function_fnptr1<void()>::
-                copyable_model<sizeof(f)>
-                copyable_m2(m2.f);
+                copyable_model<sizeof(m2.f)>
+                copyable_m2(m2);
 
             copyable_m._exec();
+            copyable_m2._exec();    // NOTE: Doesn't do anything at the moment
 
             REQUIRE(val == 3);
 
             estd::byte raw[256];
 
             auto c2 = new (raw) estd::detail::impl::function_fnptr1<void()>::
-                    copyable_model<>(&copyable_m, sizeof(copyable_m));
+                    copyable_model<>(copyable_m);//, sizeof(copyable_m));
 
             c2->_exec();
 
