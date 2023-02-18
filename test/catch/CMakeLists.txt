@@ -11,11 +11,16 @@ endif()
 
 include(../../tools/cmake/setvars.cmake)
 
+include(${TOOLS_DIR}/extras.cmake)
+
 INCLUDE_DIRECTORIES(${ROOT_DIR}/ext/Catch2/single_include/catch2)
 
 add_subdirectory(${ESTD_DIR} estd)
 
-add_executable(${PROJECT_NAME} "main.cpp"
+message(STATUS "INFORMATIONAL_FILES=${INFORMATIONAL_FILES}")
+
+add_executable(${PROJECT_NAME} ${INFORMATIONAL_FILES} "main.cpp"
+    ../../README.md
     algorithm-test.cpp
     allocator-test.cpp
     array-test.cpp
