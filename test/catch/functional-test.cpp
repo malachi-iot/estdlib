@@ -288,6 +288,12 @@ TEST_CASE("functional")
                     {
                         counter += v;
                     }
+
+                    // EXPERIMENTAL, not applicable for this test
+                    virtual bool copy(void*, unsigned) override
+                    {
+                        return false;
+                    }
                 };
 
                 model m;
@@ -518,7 +524,7 @@ TEST_CASE("functional")
 
         REQUIRE(value == 5);
     }
-    SECTION("copyable")
+    SECTION("copyable (fnptr1)")
     {
         // Q: Can we trivially copy closure types (lambda objects) around?
         // https://en.cppreference.com/w/cpp/language/lambda
@@ -617,6 +623,31 @@ TEST_CASE("functional")
             l.invoke();
 
             REQUIRE(val2 == 3);
+        }
+    }
+    SECTION("copyable (virtual)")
+    {
+        int val = 0;
+        int val2 = 0;
+
+        typedef estd::detail::impl::function_virtual<void()> impl_type;
+        typedef estd::detail::function<void(), impl_type> function_type;
+
+        auto m = function_type::make_model([&]
+        {
+            ++val;
+        });
+
+        SECTION("core")
+        {
+            estd::byte unsafe_closure[64];
+            auto m_unsafe = (impl_type::model_base*) unsafe_closure;
+
+            m.copy(unsafe_closure, 64);
+
+            m_unsafe->_exec();
+
+            REQUIRE(val == 1);
         }
     }
 }

@@ -320,15 +320,25 @@ struct function_virtual<TResult(TArgs...)>
     {
         virtual TResult _exec(TArgs...args) = 0;
         virtual ~model_base() = default;
+
+        // EXPERIMENTAL
+        // Performs a placement new into copy_to
+        // sz indicates size of copy_to buffer, checked at runtime
+        // to ensure copy_to is big enough
+        virtual bool copy(void* copy_to, unsigned sz) = 0;
     };
 
     template <class F>
     struct model : model_base
     {
-        model(F&& u) :
+        constexpr model(F&& u) :
+            // DEBT: Shouldn't this be move, not fwd?
             f(std::forward<F>(u))
         {
         }
+
+        constexpr model(const F& u) :
+            f(u) {}
 
         F f;
 
@@ -336,12 +346,40 @@ struct function_virtual<TResult(TArgs...)>
         {
             return f(std::forward<TArgs>(args)...);
         }
+
+        virtual bool copy(void* copy_to, unsigned sz) override
+        {
+            if(sz < sizeof(model)) return false;
+
+            new (copy_to) model(f);
+
+            return true;
+        }
     };
 
     // DEBT: This alias isn't a sparse model, just saving this optimization
     // for another day
     template <class F>
     using sparse_model = model<F>;
+
+    // EXPERIMENTAL
+    // See fnptr1::copyable_model
+    // I don't think virtual flavor wants this, as model_base
+    // may have a more inherent copyability from the get go
+    template <int sz = 0>
+    struct copyable_model_exp1 : model_base
+    {
+        typedef model_base base_type;
+
+        estd::byte unsafe_closure[sz];
+    };
+
+    template <int sz = 0>
+    union copyable_model_exp2
+    {
+        //model_base m;
+        estd::byte unsafe_closure[sz];
+    };
 };
 
 }}
