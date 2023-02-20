@@ -290,7 +290,7 @@ TEST_CASE("functional")
                     }
 
                     // EXPERIMENTAL, not applicable for this test
-                    virtual bool copy(void*, unsigned) override
+                    virtual bool copy(void*, unsigned) const override
                     {
                         return false;
                     }
@@ -640,14 +640,20 @@ TEST_CASE("functional")
 
         SECTION("core")
         {
-            estd::byte unsafe_closure[64];
-            auto m_unsafe = (impl_type::model_base*) unsafe_closure;
+            impl_type::copyable_model<64> m_unsafe(m);
 
-            m.copy(unsafe_closure, 64);
-
-            m_unsafe->_exec();
+            m_unsafe._exec();
 
             REQUIRE(val == 1);
+
+            // NOTE: Goal is to feed m_unsafe direct into function_type
+            // Doesn't quite hit it.  May be good enough though.
+            impl_type::model_base& m_unsafe2 = m_unsafe;
+            function_type f(m_unsafe.model());
+
+            f();
+
+            REQUIRE(val == 2);
         }
     }
 }

@@ -325,7 +325,7 @@ struct function_virtual<TResult(TArgs...)>
         // Performs a placement new into copy_to
         // sz indicates size of copy_to buffer, checked at runtime
         // to ensure copy_to is big enough
-        virtual bool copy(void* copy_to, unsigned sz) = 0;
+        virtual bool copy(void* copy_to, unsigned sz) const = 0;
     };
 
     template <class F>
@@ -347,7 +347,7 @@ struct function_virtual<TResult(TArgs...)>
             return f(std::forward<TArgs>(args)...);
         }
 
-        virtual bool copy(void* copy_to, unsigned sz) override
+        virtual bool copy(void* copy_to, unsigned sz) const override
         {
             if(sz < sizeof(model)) return false;
 
@@ -374,11 +374,32 @@ struct function_virtual<TResult(TArgs...)>
         estd::byte unsafe_closure[sz];
     };
 
+    // EXPERIMENTAL
     template <int sz = 0>
-    union copyable_model_exp2
+    union copyable_model
     {
         //model_base m;
         estd::byte unsafe_closure[sz];
+
+        model_base* model() const { return (model_base*)unsafe_closure; }
+
+        bool copy(const model_base& copy_from)
+        {
+            return copy_from.copy(unsafe_closure, sz);
+        }
+
+        copyable_model() = default;
+        copyable_model(const model_base& copy_from)
+        {
+            copy(copy_from);
+        }
+
+        TResult _exec(TArgs...args)
+        {
+            return model()->_exec(std::forward<TArgs>(args)...);
+        }
+
+        operator model_base& () { return *model(); }
     };
 };
 
