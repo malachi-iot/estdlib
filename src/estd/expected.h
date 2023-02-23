@@ -9,14 +9,45 @@ namespace internal {
 template <class E>
 class unexpected
 {
+private:
+    E error_;
 
+protected:
+    typedef E error_type;
+
+    ESTD_CPP_CONSTEXPR_RET unexpected(error_type e) : error_(e) {}
 };
 
 
-template <class T, class E, class TBase>
-class expected : public TBase
+template <class T, class E>
+class expected
 {
+public:
+    typedef T value_type;
+    typedef unexpected<E> error_type;
 
+protected:
+    union
+    {
+        const value_type value_;
+        const error_type error_;
+    };
+
+    ESTD_CPP_CONSTEXPR_RET expected(error_type e) : error_(e) {}
+    ESTD_CPP_CONSTEXPR_RET expected(value_type v) : value_(v) {}
+};
+
+template <class E>
+class expected<void, E> : unexpected<E>
+{
+    typedef unexpected<E> base_type;
+
+public:
+    typedef void value_type;
+    typedef E error_type;
+
+protected:
+    ESTD_CPP_CONSTEXPR_RET expected(error_type e) : base_type(e) {}
 };
 
 }
