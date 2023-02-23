@@ -38,9 +38,9 @@ TEST_CASE("expected")
         }
         SECTION("error state")
         {
-            expected_type e(estd::errc::invalid_argument);
+            expected_type e(estd::unexpect_t{}, estd::errc::invalid_argument);
 
-            //REQUIRE(e.has_value() == false);
+            REQUIRE(e.has_value() == false);
         }
     }
     SECTION("void value_type")

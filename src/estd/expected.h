@@ -5,6 +5,13 @@
 
 namespace estd {
 
+struct unexpect_t
+{
+#if __cplusplus >= 201103L
+    explicit unexpect_t() = default;
+#endif
+};
+
 namespace internal {
 
 template <class E>
@@ -41,7 +48,8 @@ protected:
     };
 
     ESTD_CPP_DEFAULT_CTOR(expected)
-    ESTD_CPP_CONSTEXPR_RET expected(const error_type& e) : error_(e) {}
+
+    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const error_type& e) : error_(e) {}
     ESTD_CPP_CONSTEXPR_RET expected(const value_type& v) : value_(v) {}
 
 public:
@@ -72,7 +80,7 @@ public:
 
 protected:
     ESTD_CPP_DEFAULT_CTOR(expected)
-    ESTD_CPP_CONSTEXPR_RET expected(error_type e) : base_type(e) {}
+    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, error_type e) : base_type(e) {}
 
 public:
     static void value() { }
@@ -110,13 +118,13 @@ public:
         has_value_(true)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET expected(const E& e) :
-        base_type(e),
+    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const E& e) :
+        base_type(unexpect_t{}, e),
         has_value_(false)
     {}
 
     ESTD_CPP_CONSTEXPR_RET expected(const unexpected_type& u) :
-        base_type(u.error()),
+        base_type(unexpect_t{}, u.error()),
         has_value_(false)
     {}
 
