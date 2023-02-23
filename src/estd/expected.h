@@ -4,6 +4,23 @@
 
 namespace estd {
 
+namespace internal {
+
+template <class E>
+class unexpected
+{
+
+};
+
+
+template <class T, class E, class TBase>
+class expected : public TBase
+{
+
+};
+
+}
+
 template <class E>
 class unexpected
 {
@@ -11,7 +28,9 @@ private:
     const E error_;
 
 protected:
-    ESTD_CPP_DEFAULT_CTOR(unexpected)
+    // DEBT: In this scenario, we actually probably prefer error_ totally uninitialized, but const
+    // prevents compiler from allowing that
+    unexpected() : error_() {}
 
 public:
     unexpected(E e) : error_(e) {}
@@ -77,11 +96,20 @@ class expected<void, E> : public unexpected<E>
 {
     typedef unexpected<E> base_type;
 
+    bool has_value_;
+
 public:
-    ESTD_CPP_DEFAULT_CTOR(expected)
-    ESTD_CPP_CONSTEXPR_RET expected(E e) : unexpected<E>(e) {}
+    ESTD_CPP_CONSTEXPR_RET expected() : has_value_(true) {}
+    ESTD_CPP_CONSTEXPR_RET expected(E e) :
+        unexpected<E>(e),
+        has_value_(false)
+    {}
 
     static void value() {}
+#if __cpp_constexpr
+    constexpr explicit
+#endif
+    operator bool() const { return has_value_; }
 };
 
 }

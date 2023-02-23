@@ -12,10 +12,12 @@ struct enum_class : TEnumClass
 {
     typedef typename TEnumClass::values values;
 
-protected:
+private:
     values value;
 
 public:
+    ESTD_CPP_DEFAULT_CTOR(enum_class)
+
     // DEBT: We need to do a safer typecast here
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
@@ -26,6 +28,12 @@ public:
     constexpr
 #endif
     enum_class(values value) : value(value) {}
+
+    enum_class& operator=(values v)
+    {
+        value = v;
+        return *this;
+    }
 
     bool operator == (values compare_to) const
     {
