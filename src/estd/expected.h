@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/variant.h"
 
 namespace estd {
 
@@ -31,6 +32,8 @@ public:
     typedef E error_type;
 
 protected:
+    typedef T nonvoid_value_type;
+
     union
     {
         value_type value_;
@@ -38,8 +41,8 @@ protected:
     };
 
     ESTD_CPP_DEFAULT_CTOR(expected)
-    ESTD_CPP_CONSTEXPR_RET expected(error_type e) : error_(e) {}
-    ESTD_CPP_CONSTEXPR_RET expected(value_type v) : value_(v) {}
+    ESTD_CPP_CONSTEXPR_RET expected(const error_type& e) : error_(e) {}
+    ESTD_CPP_CONSTEXPR_RET expected(const value_type& v) : value_(v) {}
 
 public:
     T& value() { return value_; }
@@ -49,6 +52,11 @@ public:
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 
     const T& operator*() const { return value_; }
+
+    expected& operator=(value_type&& v)
+    {
+        value_ = v;
+    }
 };
 
 // DEBT: We'd like to do a const E here, but that demands initializing error()
@@ -59,6 +67,7 @@ class expected<void, E> : public unexpected<E>
 
 public:
     typedef void value_type;
+    typedef estd::monostate nonvoid_value_type;
     typedef E error_type;
 
 protected:
@@ -95,18 +104,18 @@ public:
         has_value_(true)
     {}
 
-    template <class T2>
-    ESTD_CPP_CONSTEXPR_RET expected(T2 v) :
+    //template <class T2>
+    ESTD_CPP_CONSTEXPR_RET expected(const typename base_type::nonvoid_value_type& v) :
         base_type(v),
         has_value_(true)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET expected(E e) :
+    ESTD_CPP_CONSTEXPR_RET expected(const E& e) :
         base_type(e),
         has_value_(false)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET expected(unexpected_type u) :
+    ESTD_CPP_CONSTEXPR_RET expected(const unexpected_type& u) :
         base_type(u.error()),
         has_value_(false)
     {}

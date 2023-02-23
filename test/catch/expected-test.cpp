@@ -20,23 +20,27 @@ TEST_CASE("expected")
 {
     SECTION("int value_type")
     {
+        typedef estd::expected<int, estd::errc> expected_type;
+
         SECTION("default")
         {
-            estd::expected<int, estd::errc> e;
+            expected_type e;
 
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
         }
         SECTION("specific value initialized")
         {
-            estd::expected<int, estd::errc> e(10);
+            expected_type e(10);
 
             REQUIRE(e.has_value());
             REQUIRE(*e == 10);
         }
         SECTION("error state")
         {
-            
+            expected_type e(estd::errc::invalid_argument);
+
+            //REQUIRE(e.has_value() == false);
         }
     }
     SECTION("void value_type")
