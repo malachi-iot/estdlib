@@ -15,7 +15,11 @@ private:
 protected:
     typedef E error_type;
 
+    ESTD_CPP_DEFAULT_CTOR(unexpected)
     ESTD_CPP_CONSTEXPR_RET unexpected(error_type e) : error_(e) {}
+
+public:
+    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 };
 
 
@@ -33,12 +37,23 @@ protected:
         const error_type error_;
     };
 
+    ESTD_CPP_DEFAULT_CTOR(expected)
     ESTD_CPP_CONSTEXPR_RET expected(error_type e) : error_(e) {}
     ESTD_CPP_CONSTEXPR_RET expected(value_type v) : value_(v) {}
+
+public:
+    T& value() { return value_; }
+    ESTD_CPP_CONSTEXPR_RET const T& value() const { return value_; }
+
+    E& error() { return error_; }
+    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
+
+    const T& operator*() const { return value_; }
 };
 
+// DEBT: We'd like to do a const E here, but that demands initializing error()
 template <class E>
-class expected<void, E> : unexpected<E>
+class expected<void, E> : public unexpected<E>
 {
     typedef unexpected<E> base_type;
 
@@ -47,100 +62,59 @@ public:
     typedef E error_type;
 
 protected:
+    ESTD_CPP_DEFAULT_CTOR(expected)
     ESTD_CPP_CONSTEXPR_RET expected(error_type e) : base_type(e) {}
+
+public:
+    static void value() { }
 };
 
 }
 
 template <class E>
-class unexpected
+class unexpected : public internal::unexpected<const E>
 {
-private:
-    const E error_;
-
-protected:
-    // DEBT: In this scenario, we actually probably prefer error_ totally uninitialized, but const
-    // prevents compiler from allowing that
-    unexpected() : error_() {}
+    typedef internal::unexpected<const E> base_type;
 
 public:
-    unexpected(E e) : error_(e) {}
-
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
+    ESTD_CPP_CONSTEXPR_RET unexpected(E e) : base_type(e) {}
 };
 
-template <class T, class E>
-class expected
-{
-public:
-    typedef T value_type;
-    typedef E error_type;
-    typedef unexpected<E> unexpected_type;
 
-private:
-    union
-    {
-        const value_type value_;
-        const error_type error_;
-    };
+template <class T, class E>
+class expected : public internal::expected<T, E>
+{
+    typedef internal::expected<T, E> base_type;
 
     const bool has_value_;
 
 public:
     ESTD_CPP_CONSTEXPR_RET expected() :
-        value_(),
-        has_value_(false)
+        has_value_(true)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET expected(T v) :
-        value_(v),
+    template <class T2>
+    ESTD_CPP_CONSTEXPR_RET expected(T2 v) :
+        base_type(v),
         has_value_(true)
     {}
 
     ESTD_CPP_CONSTEXPR_RET expected(E e) :
-        error_(e),
+        base_type(e),
         has_value_(false)
     {}
 
     ESTD_CPP_CONSTEXPR_RET expected(unexpected<E> u) :
-        error_(u.error()),
+        base_type(u.error()),
         has_value_(false)
     {}
-
-    T& value() { return value_; }
-    E& error() { return error_; }
-    ESTD_CPP_CONSTEXPR_RET const T& value() const { return value_; }
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 
     bool has_value() const { return has_value_; }
 #if __cpp_constexpr
     constexpr explicit
 #endif
     operator bool() const { return has_value_; }
-
-    const T& operator*() const { return value_; }
 };
 
-
-template <class E>
-class expected<void, E> : public unexpected<E>
-{
-    typedef unexpected<E> base_type;
-
-    bool has_value_;
-
-public:
-    ESTD_CPP_CONSTEXPR_RET expected() : has_value_(true) {}
-    ESTD_CPP_CONSTEXPR_RET expected(E e) :
-        unexpected<E>(e),
-        has_value_(false)
-    {}
-
-    static void value() {}
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-    operator bool() const { return has_value_; }
-};
 
 }

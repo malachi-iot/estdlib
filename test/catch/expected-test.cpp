@@ -23,4 +23,10 @@ TEST_CASE("expected")
     {
         estd::expected<void, estd::errc> e;
     }
+    SECTION("unexpected")
+    {
+        estd::unexpected<estd::errc> ue(estd::errc::invalid_argument);
+
+        REQUIRE(ue.error() == estd::errc::invalid_argument);
+    }
 }
