@@ -51,7 +51,26 @@ TEST_CASE("expected")
     }
     SECTION("Dummy (struct) type")
     {
-        //estd::expected<estd::test::Dummy, estd::errc> e;
+        typedef estd::expected<estd::test::Dummy, estd::errc> expected_type;
+
+        SECTION("default")
+        {
+            expected_type e;
+
+            REQUIRE(e.has_value());
+        }
+        SECTION("specific constructor init")
+        {
+            expected_type e(estd::in_place_t{}, 1, "hello");
+
+            REQUIRE(e.has_value());
+        }
+        SECTION("error type")
+        {
+            expected_type e(estd::unexpect_t{}, estd::errc::invalid_argument);
+
+            REQUIRE(e.has_value() == false);
+        }
     }
     SECTION("unexpected")
     {
@@ -61,5 +80,6 @@ TEST_CASE("expected")
 
         infuse_unexpected<int>(estd::errc::invalid_argument);
         infuse_unexpected<void>(estd::errc::invalid_argument);
+        infuse_unexpected<estd::test::Dummy>(estd::errc::invalid_argument);
     }
 }

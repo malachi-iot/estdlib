@@ -3,12 +3,21 @@
 ## Added Features
 
 * Adding `setw` and `setfill` to ostream
+* Adding `estd::expected` and `estd::unexpected`
 
 ## Quality Updates & Bug Fixes
 
 * Fixing signed/unsigned mismatch in `out_span_streambuf`
 * Fixing `estd::optional` bug when using `reset` on enum type
 * Adding edge case optimization to `estd::tuple` (see FEATURE_ESTD_SPARSE_TUPLE)
+
+## Known Issues & Limitations
+
+* `estd::expected`:
+    * Only limited support for non-trivial types
+    * Assumes trivial type if it can't determine triviality
+    * Not well tested outside of c++11 GCC, though designed to be compatible with c++03
+    * Various edge cases like returning && value() not yet implemented
 
 # v0.5.0 - 16JAN23
 
