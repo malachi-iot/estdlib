@@ -28,13 +28,13 @@ class expected
 {
 public:
     typedef T value_type;
-    typedef unexpected<E> error_type;
+    typedef E error_type;
 
 protected:
     union
     {
-        const value_type value_;
-        const error_type error_;
+        value_type value_;
+        error_type error_;
     };
 
     ESTD_CPP_DEFAULT_CTOR(expected)
@@ -89,6 +89,8 @@ class expected : public internal::expected<T, E>
     const bool has_value_;
 
 public:
+    typedef unexpected<E> unexpected_type;
+
     ESTD_CPP_CONSTEXPR_RET expected() :
         has_value_(true)
     {}
@@ -104,7 +106,7 @@ public:
         has_value_(false)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET expected(unexpected<E> u) :
+    ESTD_CPP_CONSTEXPR_RET expected(unexpected_type u) :
         base_type(u.error()),
         has_value_(false)
     {}

@@ -4,29 +4,58 @@
 
 #include <estd/expected.h>
 
+#include "test-data.h"
+
+template <class T, class E>
+void infuse_unexpected(E err)
+{
+    estd::unexpected<E> ue(err);
+    estd::expected<T, E> e(ue);
+
+    REQUIRE(e.error() == err);
+    REQUIRE(e.error() == ue.error());
+}
+
 TEST_CASE("expected")
 {
     SECTION("int value_type")
     {
         SECTION("default")
         {
+            estd::expected<int, estd::errc> e;
 
+            REQUIRE(e.has_value());
+            REQUIRE(*e == 0);
         }
         SECTION("specific value initialized")
         {
             estd::expected<int, estd::errc> e(10);
 
+            REQUIRE(e.has_value());
             REQUIRE(*e == 10);
+        }
+        SECTION("error state")
+        {
+            
         }
     }
     SECTION("void value_type")
     {
         estd::expected<void, estd::errc> e;
+
+        REQUIRE(e.has_value());
+    }
+    SECTION("Dummy (struct) type")
+    {
+        //estd::expected<estd::test::Dummy, estd::errc> e;
     }
     SECTION("unexpected")
     {
         estd::unexpected<estd::errc> ue(estd::errc::invalid_argument);
 
         REQUIRE(ue.error() == estd::errc::invalid_argument);
+
+        infuse_unexpected<int>(estd::errc::invalid_argument);
+        infuse_unexpected<void>(estd::errc::invalid_argument);
     }
 }
