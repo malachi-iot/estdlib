@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.h"
+#include "type_traits.h"
 #include "variant.h"
 
 #include "raw/utility.h"
@@ -36,9 +37,17 @@ public:
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 };
 
+template <class T, class E, class enabled = void>
+class expected;
+
 
 template <class T, class E>
-class expected
+class expected<T, E,
+#if FEATURE_ESTD_IS_TRIVIAL
+    typename enable_if<estd::is_trivial<T>::value>::type >
+#else
+    typename enable_if<std::is_trivial<T>::value>::type >
+#endif
 {
 public:
     typedef T value_type;

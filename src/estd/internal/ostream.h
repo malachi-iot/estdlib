@@ -97,6 +97,10 @@ private:
     {
         // DEBT: Width applies to istream *and* ostream
         unsigned width : 4;
+
+        // NOTE: Hitting compiler warning bug
+        // https://stackoverflow.com/questions/36005063/gcc-suppress-warning-too-small-to-hold-all-values-of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
         positioning alignment : 2;  // DEBT: Unused
         char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
         bool showbase : 1;          // DEBT: Unused
