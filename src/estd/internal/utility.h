@@ -75,6 +75,8 @@ struct has_typedef { typedef void type; };
 } }
 
 
+// DEBT: The following ESTD_FN are phased out/obsolete
+
 // semi-formalization of https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
 #define ESTD_FN_HAS_TYPEDEF_EXP(typedef_name) \
 template<typename T, typename = void>   \
