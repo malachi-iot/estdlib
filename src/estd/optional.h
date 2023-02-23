@@ -190,7 +190,10 @@ public:
     }
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT operator bool() const { return base_type::has_value(); }
+#if __cpp_constexpr
+    constexpr explicit
+#endif
+    operator bool() const { return base_type::has_value(); }
 
     typename base_type::return_type operator*() { return base_type::value(); }
     typename base_type::const_return_type operator*() const { return base_type::value(); }
@@ -281,7 +284,10 @@ public:
         return *this;
     } */
 
-    ESTD_CPP_CONSTEXPR_RET operator bool() const { return base_type::has_value(); }
+#if __cpp_constexpr
+    constexpr explicit
+#endif
+    operator bool() const { return base_type::has_value(); }
 };
 
 

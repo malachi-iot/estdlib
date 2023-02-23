@@ -27,6 +27,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     experimental/memory-pool1-test.cpp
     experimental/memory-pool2-test.cpp
     experimental/memory-pool3-test.cpp
+    expected-test.cpp
     experimental-test.cpp
     functional-test.cpp
     ios-test.cpp
