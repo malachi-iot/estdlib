@@ -102,7 +102,7 @@ protected:
         error_type error_;
     };
 
-    ESTD_CPP_DEFAULT_CTOR(expected)
+    ESTD_CPP_CONSTEXPR_RET expected() : value_{} {}
 
 #if __cpp_variadic_templates
     template <class... TArgs>
