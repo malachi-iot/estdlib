@@ -24,6 +24,10 @@ TEST_CASE("expected")
 
         SECTION("default")
         {
+            // FIX: this is supposed to be value initialized/default initialized -
+            // but does that mean int should be 0?  Get to the bottom of this, because
+            // it's not initializing at all at the moment (0 was only accidentally working
+            // below)
             expected_type e;
 
             REQUIRE(e.has_value());
