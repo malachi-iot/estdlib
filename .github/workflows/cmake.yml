@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [ "dev/*", "alpha" ]
+    branches: [ "dev/**", "alpha" ]
   pull_request:
     branches: [ "master", "alpha" ]
 
