@@ -616,7 +616,9 @@ TEST_CASE("string tests")
             // which is a runtime length tracker rather than compile time.  And,
             // not surprisingly, it doesn't have length 4 but rather value of 0 -
             // and that might be accidental/undefined.
-            estd::layer2::string<4, false> val = "1234";
+            // DEBT: should be using basic_string<const char> here, but instead brute forcing
+            // char* cast
+            estd::layer2::string<4, false> val = (char*)"1234";
             /*
             char buf[128];
             val.copy(buf, sizeof(buf));
