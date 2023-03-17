@@ -138,6 +138,8 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
 }
 
+// DEBT: Try to move this 'std' portion to an internal or other reduced-dependency
+// area
 #if defined(FEATURE_STD_UTILITY)
 // Utilize stock-standard std version of this if it's available
 #include <utility>
@@ -189,6 +191,7 @@ forward(typename estd::remove_reference<_Tp>::type&& __t) noexcept
 
 
 // more or less copy/pasted from GNU reference
+// DEBT: __declval seems like a GNU extension, so put guards around the following 
 
  /**
    *  @brief  Utility to simplify expressions used in unevaluated operands

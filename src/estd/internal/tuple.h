@@ -5,6 +5,11 @@
 #include "type_traits.h"
 #include "fwd/tuple.h"
 
+#if defined(FEATURE_STD_UTILITY)
+// rpi-pico needs an explicit include of this here for std::move
+#include <utility>
+#endif
+
 namespace estd { namespace internal {
 
 #ifndef FEATURE_ESTD_SPARSE_TUPLE
