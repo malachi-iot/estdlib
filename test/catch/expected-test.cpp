@@ -16,6 +16,13 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
+struct ExplicitError
+{
+    const int code_;
+
+    explicit ExplicitError(int code) : code_{code} {}
+};
+
 TEST_CASE("expected")
 {
     SECTION("int value_type")
@@ -41,6 +48,15 @@ TEST_CASE("expected")
             expected_type e(estd::unexpect_t{}, estd::errc::invalid_argument);
 
             REQUIRE(e.has_value() == false);
+        }
+        SECTION("non trivial error type")
+        {
+            typedef estd::expected<int, ExplicitError> expected_type;
+
+            expected_type e;
+
+            REQUIRE(e.has_value());
+            REQUIRE(*e == 0);
         }
     }
     SECTION("void value_type")

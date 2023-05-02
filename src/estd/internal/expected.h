@@ -9,6 +9,8 @@
 
 namespace estd { namespace internal {
 
+// Doesn't need to play with uninitialized storage
+// since it's always required that E is initialized somehow
 template <class E>
 class unexpected
 {
@@ -37,35 +39,70 @@ public:
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 };
 
-template <class T, class E, class enabled = void>
-class expected;
-
-template <class T, class E, class enabled = void>
+template <class T, class E, bool trivial>
 union expected_storage;
 
 template <class T, class E>
-union expected_storage<T, E,
-#if FEATURE_ESTD_IS_TRIVIAL
-    typename enable_if<estd::is_trivial<T>::value>::type >
-#elif FEATURE_STD_TYPE_TRAITS
-typename enable_if<std::is_trivial<T>::value>::type >
-#else
-    int>
-#endif
-{
+struct expected_is_trivial;
 
+
+template <class T, class E, bool trivial =
+          expected_is_trivial<T, E>::is_trivial>
+class expected;
+
+template <class T, class E>
+struct expected_is_trivial
+{
+    // DEBT: Do this all with an integral constant, just having a brain
+    // fart how to do an or operation in that context
+    static CONSTEXPR bool is_trivial =
+#if FEATURE_ESTD_IS_TRIVIAL
+        estd::is_trivial<T>::value & estd::is_trivial<E>::value;
+#elif FEATURE_STD_TYPE_TRAITS
+        std::is_trivial<T>::value & std::is_trivial<E>::value;
+#else
+        false;
+#endif
+};
+
+template <class E>
+struct expected_is_trivial<void, E>
+{
+    static CONSTEXPR bool is_trivial =
+#if FEATURE_ESTD_IS_TRIVIAL
+        estd::is_trivial<E>::value;
+#elif FEATURE_STD_TYPE_TRAITS
+        std::is_trivial<E>::value;
+#else
+        false;
+#endif
+};
+
+// DEBT: We can't really use estd::layer1::optional here as E and T
+// overlap, but perhaps we can use a high-bit filter in controlled
+// circumstances
+
+template <class E>
+union expected_storage<void, E, true>
+{
+    E error_;
+
+    E* error() { return &error_; }
+};
+
+template <class T, class E>
+union expected_storage<T, E, true>
+{
+    T value_;
+    E error_;
+
+    T* value() { return &value_; }
+    E* error() { return &error_; }
 };
 
 
 template <class T, class E>
-union expected_storage<T, E,
-#if FEATURE_ESTD_IS_TRIVIAL
-    typename enable_if<!estd::is_trivial<T>::value>::type >
-#elif FEATURE_STD_TYPE_TRAITS
-    typename enable_if<!std::is_trivial<T>::value>::type >
-#else
-    void>
-#endif
+union expected_storage<T, E, false>
 {
     typedef estd::byte value_placeholder_type[sizeof(T)];
     typedef estd::byte error_placeholder_type[sizeof(E)];
@@ -73,21 +110,15 @@ union expected_storage<T, E,
     value_placeholder_type value_;
     error_placeholder_type error_;
 
+    const T* value() const { return (const T*)&value_; }
     T* value() { return (T*)&value_; }
     E* error() { return (E*)&error_; }
 };
 
 
+// Trivial flavor
 template <class T, class E>
-class expected<T, E,
-#if FEATURE_ESTD_IS_TRIVIAL
-    typename enable_if<estd::is_trivial<T>::value>::type >
-#elif FEATURE_STD_TYPE_TRAITS
-    typename enable_if<std::is_trivial<T>::value>::type >
-#else
-    // When not able to determine triviality, default to assuming it IS trivial
-    void>
-#endif
+class expected<T, E, true>
 {
 public:
     typedef T value_type;
@@ -137,17 +168,11 @@ public:
 };
 
 
+// Non trivial flavor
 template <class T, class E>
-class expected<T, E,
-#if FEATURE_ESTD_IS_TRIVIAL
-    typename enable_if<!estd::is_trivial<T>::value>::type >
-#elif FEATURE_STD_TYPE_TRAITS
-    typename enable_if<!std::is_trivial<T>::value>::type >
-#else
-    int>
-#endif
+class expected<T, E, false>
 {
-    expected_storage<T, E> storage;
+    expected_storage<T, E, false> storage;
 
 protected:
     typedef T nonvoid_value_type;
@@ -164,12 +189,12 @@ protected:
     {
         new (storage.error()) E(std::forward<TArgs>(args)...);
     }
+#endif
 
     explicit expected()
     {
         new (storage.value()) T();
     }
-#endif
 
 public:
     typedef T value_type;
@@ -177,11 +202,14 @@ public:
 
     T& value() { return *storage.value(); }
     E& error() { return *storage.error(); }
+
+    const T& operator*() const { return *storage.value(); }
 };
 
 // DEBT: We'd like to do a const E here, but that demands initializing error()
+// DEBT: trivial not truly handled here, assumes always trivial really
 template <class E>
-class expected<void, E> : public unexpected<E>
+class expected<void, E, true> : public unexpected<E>
 {
     typedef unexpected<E> base_type;
 
