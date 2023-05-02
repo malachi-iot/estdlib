@@ -113,6 +113,12 @@ union expected_storage<T, E, false>
     const T* value() const { return (const T*)&value_; }
     T* value() { return (T*)&value_; }
     E* error() { return (E*)&error_; }
+
+    expected_storage() = default;
+    /*
+    expected_storage(const T& copy_t) :
+        (*((T*)&value_)){copy_t}
+    {} */
 };
 
 
@@ -190,6 +196,13 @@ protected:
         new (storage.error()) E(std::forward<TArgs>(args)...);
     }
 #endif
+
+    // DEBT: Figure out how to make this and others work on initializing list line
+    // so that we can constexpr it
+    explicit expected(const nonvoid_value_type& v)
+    {
+        *storage.value() = v;
+    }
 
     explicit expected()
     {
