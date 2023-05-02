@@ -38,12 +38,25 @@ if(FEATURE_ESTD_INTERFACE)
         target_compile_definitions(${PROJECT_NAME} INTERFACE ESTD_OS_FREERTOS=${ESTD_OS_FREERTOS})
     endif()
 else()
+    # DEBT: Strongly consider making this STATIC all the time (rather than implicitly SHARED)
+    # since actual .cpp content is rather small
     add_library(${PROJECT_NAME} ${SOURCE_FILES})
     add_library(estd_lib ALIAS ${PROJECT_NAME})
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${ESTD_INCLUDE_DIRECTORY})
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+    # DEBT: Make a macro/function so we can compare "GNU-like" and include Clang, LLVM, etc.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Kind of a blunt tool, but we're exporting so little anyway it's not too bad
+        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+        # As per https://developercommunity.visualstudio.com/t/msvc-incorrectly-defines-cplusplus/139261
+        # DEBT: We'll likely want this PUBLIC or INTERFACE
+        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
+    endif()
 endif()
+
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 

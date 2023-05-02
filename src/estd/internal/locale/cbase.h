@@ -33,7 +33,15 @@ struct cbase_utf_base
     //typedef int_type optional_type;
     //inline static CONSTEXPR int_type eol() { return -1; }
 
+    // DEBT: Unsure why MSVC hates our layer1 flavor, but for now regular
+    // optional compiles.
+    // DEBT: Something a little weird going on with eol reaching into optional_type.
+    // Document it to undo debt
+#if defined(_MSC_VER)
+    typedef const estd::optional<int_type> optional_type;
+#else
     typedef const estd::layer1::optional<int_type, -1> optional_type;
+#endif
 
     inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 

@@ -202,6 +202,7 @@ public:
 
 namespace layer1 {
 
+// DEBT: Has some kind of MSVC compatibility
 template <class T, T null_value = T()>
 class optional : public estd::optional<T, internal::layer1::optional_base<T, null_value> >
 {

@@ -2,6 +2,11 @@
 
 #include "../../port/toolchain.h"
 
+// feature area different from toolchain/gnuc.h - the latter focuses more
+// on compiler compatibility
+
+#if defined(__GNUC_PREREQ)
+
 // AVR compiler appears to have incomplete implementation of __has_builtin
 // DEBT: According to https://stackoverflow.com/questions/3944505/detecting-signed-overflow-in-c-c
 // contents of the result (&__val in this case) are undefined on overflow.  That might be an
@@ -14,4 +19,6 @@
 #ifndef FEATURE_TOOLCHAIN_OVERFLOW_BUILTIN
 #define FEATURE_TOOLCHAIN_OVERFLOW_BUILTIN 1
 #endif
+#endif
+
 #endif
