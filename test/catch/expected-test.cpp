@@ -129,4 +129,15 @@ TEST_CASE("expected")
         infuse_unexpected<void>(estd::errc::invalid_argument);
         infuse_unexpected<estd::test::Dummy>(estd::errc::invalid_argument);
     }
+    // DEBT: Put this elsewhere
+    SECTION("variant")
+    {
+        estd::internal::variant_storage<true, int, int> vs;
+
+        vs.t1 = 7;
+
+        auto& v = estd::internal::get<0>(vs);
+
+        REQUIRE(v == 7);
+    }
 }

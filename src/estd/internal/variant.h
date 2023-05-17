@@ -3,7 +3,7 @@
 #include "platform.h"
 #include "fwd/functional.h"
 #include "raw/variant.h"
-#include "tuple.h"
+#include "../tuple.h"
 
 namespace estd {
 
@@ -87,16 +87,28 @@ struct get_variant_storage_helper;
 template <bool trivial, class ...TArgs>
 struct get_variant_storage_helper<0, trivial, TArgs...>
 {
-    static type_at_index<0, TArgs...>& get(const variant_storage<trivial>& vs)
+    static type_at_index<0, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
     {
-        return vs.get0();
+        return * vs.get0();
     }
 };
 
 
-// NOTE: This will need a struct helper since partial specialization is not allowed
+template <bool trivial, class ...TArgs>
+struct get_variant_storage_helper<1, trivial, TArgs...>
+{
+    static type_at_index<1, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
+    {
+        return * vs.get1();
+    }
+};
+
+
 template <int index, bool trivial, class ...TArgs>
-type_at_index<index, TArgs...> get(const variant_storage<trivial, TArgs...>&);
+type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
+{
+    return get_variant_storage_helper<index, trivial, TArgs...>::get(vs);
+}
 
 
 }
