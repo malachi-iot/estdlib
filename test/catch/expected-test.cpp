@@ -61,9 +61,40 @@ TEST_CASE("expected")
     }
     SECTION("void value_type")
     {
-        estd::expected<void, estd::errc> e;
+        typedef estd::expected<void, estd::errc> expected_type;
 
-        REQUIRE(e.has_value());
+        SECTION("non-error")
+        {
+            expected_type e;
+
+            REQUIRE(e.has_value());
+        }
+        SECTION("with error")
+        {
+            expected_type e(estd::unexpect_t{}, estd::errc::invalid_argument);
+
+            REQUIRE(!e.has_value());
+            REQUIRE(e.error() == estd::errc::invalid_argument);
+        }
+    }
+    SECTION("non-trivial vaue_type")
+    {
+        typedef estd::expected<ExplicitError, int> expected_type;
+
+        SECTION("with value")
+        {
+            expected_type e(estd::in_place_t{}, 5);
+
+            REQUIRE(e.has_value());
+            REQUIRE(e.value().code_ == 5);
+        }
+        SECTION("with error")
+        {
+            expected_type e(estd::unexpect_t{}, 4);
+
+            REQUIRE(!e.has_value());
+            REQUIRE(e.error() == 4);
+        }
     }
     SECTION("Dummy (struct) type")
     {
