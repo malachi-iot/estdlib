@@ -11,6 +11,11 @@ namespace estd { namespace internal {
 
 // Doesn't need to play with uninitialized storage
 // since it's always required that E is initialized somehow
+// when using this directly as 'unexpected'
+// However, when using it indirectly from the expected void specialization,
+// it DOES want to keep this uninitialized sometimes.  So, what we really
+// need is that flavor of expected to have a specialized expected_storage
+// to match (to handle trivial and non trivial)
 template <class E>
 class unexpected
 {
@@ -21,6 +26,9 @@ protected:
     typedef E error_type;
 
     ESTD_CPP_DEFAULT_CTOR(unexpected)
+
+    // If we were to  do const E, this is needed
+    //ESTD_CPP_CONSTEXPR_RET unexpected() : error_() {}
 
 #if __cpp_variadic_templates
     template <class Err = E>
@@ -88,6 +96,7 @@ union expected_storage<void, E, true>
     E error_;
 
     E* error() { return &error_; }
+    void value() {}
 };
 
 template <class T, class E>
@@ -99,6 +108,20 @@ union expected_storage<T, E, true>
     T* value() { return &value_; }
     E* error() { return &error_; }
 };
+
+
+// DEBT: Not yet used
+template <class E>
+union expected_storage<void, E, false>
+{
+    typedef estd::byte error_placeholder_type[sizeof(E)];
+
+    error_placeholder_type error_;
+
+    E* error() { return (E*)&error_; }
+    void value() {}
+};
+
 
 
 template <class T, class E>
@@ -220,7 +243,8 @@ public:
 };
 
 // DEBT: We'd like to do a const E here, but that demands initializing error()
-// DEBT: trivial not truly handled here, assumes always trivial really
+// DEBT: trivial not truly handled here, assumes always trivial really.  Use
+// expected_storage instead of deriving from 'unexpected'
 template <class E>
 class expected<void, E, true> : public unexpected<E>
 {

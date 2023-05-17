@@ -65,7 +65,8 @@ public:
         has_value_(false)
     {}
 
-    bool has_value() const { return has_value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
+
 #if __cpp_constexpr
     constexpr explicit
 #endif
