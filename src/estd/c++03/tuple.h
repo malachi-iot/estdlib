@@ -207,6 +207,8 @@ public:
         impl(v1, v2, v3, v4) {};
 };
 
+// DEBT: Need to narrow down 'get' here so that non-tuple flavors of get don't collide
+
 template <std::size_t I, class TTuple>
 inline typename internal::tuple_navigator<I, TTuple>::reference get(TTuple& tuple)
 {

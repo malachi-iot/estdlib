@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../variant.h"
+#include "../platform.h"
+#include "../fwd/functional.h"
+#include "../raw/variant.h"
 #include "tuple-shared.h"
 
 namespace estd {
