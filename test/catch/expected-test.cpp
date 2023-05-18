@@ -132,12 +132,44 @@ TEST_CASE("expected")
     // DEBT: Put this elsewhere
     SECTION("variant")
     {
-        estd::internal::variant_storage<true, int, int> vs;
+        SECTION("largest_type")
+        {
+            constexpr int v = sizeof(estd::internal::largest_type<ExplicitError, char>::type);
 
-        vs.t1 = 7;
+            REQUIRE(v == sizeof(ExplicitError));
+        }
+        SECTION("storage")
+        {
+            SECTION("monostate, int")
+            {
+                estd::internal::variant_storage2<estd::monostate, int> vs;
 
-        auto& v = estd::internal::get<0>(vs);
+                REQUIRE(vs.is_trivial);
+            }
+            SECTION("int, int")
+            {
+                estd::internal::variant_storage2<int, int> vs;
 
-        REQUIRE(v == 7);
+                REQUIRE(vs.is_trivial);
+
+                vs.t1 = 7;
+
+                auto& v = estd::internal::get<0>(vs);
+
+                REQUIRE(v == 7);
+            }
+            SECTION("ExplicitError, int")
+            {
+                estd::internal::variant_storage2<ExplicitError, int> vs;
+
+                REQUIRE(!vs.is_trivial);
+            }
+        }
+        SECTION("are_trivial")
+        {
+            REQUIRE(estd::internal::are_trivial<int, int>::value);
+            REQUIRE(estd::is_trivial<ExplicitError>::value == false);
+            REQUIRE(estd::internal::are_trivial<int, ExplicitError>::value == false);
+        }
     }
 }
