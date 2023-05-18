@@ -3,10 +3,14 @@
 
 #include <estd/expected.h>
 
-// FIX: File not yet picked up by anyone
+using namespace estd;
 
 static void test_expected_1()
 {
+    expected<void, int> e;
+
+    TEST_ASSERT_TRUE(e.has_value());
+    TEST_ASSERT_EQUAL(sizeof(e), sizeof(int) * 2);
 }
 
 #ifdef ESP_IDF_TESTING
