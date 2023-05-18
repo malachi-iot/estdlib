@@ -133,15 +133,6 @@ TEST_CASE("expected")
 
             REQUIRE(v == sizeof(ExplicitError));
         }
-        SECTION("storage")
-        {
-            SECTION("ExplicitError, int")
-            {
-                estd::internal::variant_storage2<ExplicitError, int> vs;
-
-                REQUIRE(!vs.is_trivial);
-            }
-        }
         SECTION("are_trivial")
         {
             // TODO: Move these out to proper algorithm/type_traits area

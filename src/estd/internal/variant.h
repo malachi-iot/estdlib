@@ -82,6 +82,22 @@ inline static monostate construct_at(void* placement, TArgs&&...args)
 }
 
 
+template <bool trivial, class ...TArgs>
+union variant_union;
+
+template <class ...TArgs>
+union variant_union<false, TArgs...>
+{
+    monostate dummy;
+};
+
+template <class T1, class T2>
+union variant_union<true, T1, T2>
+{
+    T1 t1;
+    T2 t2;
+    byte raw[0];
+};
 
 
 template <class T1, class T2>
@@ -98,25 +114,16 @@ struct variant_storage<true, T1, T2>
         monostate dummy;
     };
 
+    //variant_union<true, T1, T2> storage;
+
     variant_storage() = default;
 
-    /*
     template <unsigned index, class ...TArgs>
-    variant_storage(estd::in_place_index_t<index>, TArgs&&...args)
-    {
-        typedef type_at_index<index, T1, T2> type;
-        new (& get<index>(*this)) type(std::forward<TArgs>(args)...);
-    } */
-
-    template <class ...TArgs>
-    constexpr variant_storage(estd::in_place_index_t<0>, TArgs&&...args) :
-        t1(std::forward<TArgs>(args)...)
-    {
-    }
-
-    template <class ...TArgs>
-    constexpr variant_storage(estd::in_place_index_t<1>, TArgs&&...args) :
-        t2(std::forward<TArgs>(args)...)
+    constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
+        dummy{
+            construct_at<type_at_index<index, T1, T2>>
+                //(storage.raw, std::forward<TArgs>(args)...)}
+                (raw, std::forward<TArgs>(args)...)}
     {
     }
 };

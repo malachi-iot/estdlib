@@ -28,5 +28,11 @@ TEST_CASE("variant")
 
             REQUIRE(v == 7);
         }
+        SECTION("NonTrivial, int")
+        {
+            estd::internal::variant_storage2<estd::test::NonTrivial, int> vs;
+
+            REQUIRE(!vs.is_trivial);
+        }
     }
 }
