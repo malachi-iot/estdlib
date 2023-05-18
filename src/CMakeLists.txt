@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(estd VERSION 0.5.0 LANGUAGES CXX)
+project(estd VERSION 0.5.1 LANGUAGES CXX)
 
 set(TOOLS_DIR ../tools/cmake)
 
