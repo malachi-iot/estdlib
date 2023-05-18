@@ -11,43 +11,8 @@ namespace estd {
 #if __cpp_variadic_templates
 namespace internal {
 
-// largest_type lifted from
-// https://stackoverflow.com/questions/16803814/how-do-i-return-the-largest-type-in-a-list-of-types
-// DEBT: Put this helper elsewhere
-template <typename... Ts>
-struct largest_type;
 
-template <typename T>
-struct largest_type<T>
-{
-    using type = T;
-};
-
-template <typename T, typename U, typename... Ts>
-struct largest_type<T, U, Ts...>
-{
-    using type = typename largest_type<typename std::conditional<
-        (sizeof(U) <= sizeof(T)), T, U>::type, Ts...
-    >::type;
-};
-
-template <class ...TArgs>
-struct are_trivial;
-
-template <>
-struct are_trivial<>
-{
-    static constexpr bool value = true;
-};
-
-template <class T, class ...TArgs>
-struct are_trivial<T, TArgs...>
-{
-    static constexpr bool value = estd::is_trivial<T>::value &
-        are_trivial<TArgs...>::value;
-};
-
-
+// Very similar to std::variant_alternative
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 

@@ -94,8 +94,6 @@ public:
     E& error() { return get<1>(storage); }
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<1>(storage); }
 
-    const nonvoid_value_type& operator*() const { return value(); }
-
     expected& operator=(nonvoid_value_type&& v)
     {
         // FIX: Should we be doing std::move here?  And if not, document why not

@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "raw/utility.h"
 #include "legacy/utility.h"
+#include "type_traits.h"
 
 #ifdef FEATURE_STD_UTILITY
 #include <utility>
@@ -76,6 +77,46 @@ struct has_member_base
 
 template <typename>
 struct has_typedef { typedef void type; };
+
+#if __cpp_variadic_templates
+// largest_type lifted from
+// https://stackoverflow.com/questions/16803814/how-do-i-return-the-largest-type-in-a-list-of-types
+template <typename... Ts>
+struct largest_type;
+
+template <typename T>
+struct largest_type<T>
+{
+    using type = T;
+};
+
+template <typename T, typename U, typename... Ts>
+struct largest_type<T, U, Ts...>
+{
+    using type = typename largest_type<typename estd::conditional<
+        (sizeof(U) <= sizeof(T)), T, U>::type, Ts...
+    >::type;
+};
+
+// Plural of is_trivial
+// DEBT: Consider putting out into main estd namespace
+template <class ...TArgs>
+struct are_trivial;
+
+template <>
+struct are_trivial<>
+{
+    static constexpr bool value = true;
+};
+
+template <class T, class ...TArgs>
+struct are_trivial<T, TArgs...>
+{
+    static constexpr bool value = estd::is_trivial<T>::value &
+        are_trivial<TArgs...>::value;
+};
+
+#endif
 
 
 } }

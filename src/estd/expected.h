@@ -28,9 +28,9 @@ class expected : public internal::expected<T, E>
 
 public:
     typedef unexpected<E> unexpected_type;
+    typedef typename base_type::nonvoid_value_type nonvoid_value_type;
 
-    //ESTD_CPP_CONSTEXPR_RET
-    expected() :
+    ESTD_CPP_CONSTEXPR_RET expected() :
         has_value_(true)
     {}
 
@@ -69,10 +69,28 @@ public:
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
 
+    const nonvoid_value_type& operator*() const
+    {
+        return base_type::value();
+    }
+
+    const T* operator->() const
+    {
+        return & base_type::value();
+    }
+
 #if __cpp_constexpr
     constexpr explicit
 #endif
     operator bool() const { return has_value_; }
+
+#if __cpp_rvalue_references
+    template <class U>
+    ESTD_CPP_CONSTEXPR_RET T value_or(U&& default_value) const&
+    {
+        return has_value_ ? base_type::value() : default_value;
+    }
+#endif
 };
 
 
