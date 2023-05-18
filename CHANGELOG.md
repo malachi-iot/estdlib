@@ -1,4 +1,4 @@
-# v0.5.x - XXXXX23
+# v0.5.1 - 18MAY23
 
 ## Added Features
 
@@ -14,8 +14,6 @@
 ## Known Issues & Limitations
 
 * `estd::expected`:
-    * Only limited support for non-trivial types
-    * Assumes trivial type if it can't determine triviality
     * Not well tested outside of c++11 GCC, though designed to be compatible with c++03
     * Various edge cases like returning && value() not yet implemented
 
