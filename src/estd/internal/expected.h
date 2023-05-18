@@ -46,28 +46,20 @@ public:
 };
 
 
-// Silently promote void to monostate so that it registers as 'trivial'
-template <class T, class E>
-using expected_is_trivial =
-    are_trivial<conditional_t<is_void<T>::value, monostate, T>, E>;
-
-
-template <class T, class E, bool trivial = expected_is_trivial<T, E>::value>
-class expected;
-
 // DEBT: We can't really use estd::layer1::optional here as E and T
 // overlap, but perhaps we can use a high-bit filter in controlled
 // circumstances
 
-// Trivial flavor
 template <class T, class E>
-class expected<T, E, true>
+class expected
 {
 public:
     typedef T value_type;
     typedef E error_type;
 
 protected:
+    // Silently promote void to monostate so that it registers as 'trivial'
+    // and plays nice with variant_storage
     typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
 
     variant_storage2<nonvoid_value_type, E> storage;
@@ -82,8 +74,7 @@ protected:
     {}
 
     template <class... TArgs>
-    //constexpr
-    explicit expected(unexpect_t, TArgs&&...args) :
+    constexpr explicit expected(unexpect_t, TArgs&&...args) :
         storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
     {}
 #else
@@ -112,54 +103,6 @@ public:
     }
 };
 
-
-// Non trivial flavor, mainly need this because we can't
-// do constexprs so easily with non trivial one
-template <class T, class E>
-class expected<T, E, false>
-{
-    variant_storage<false, T, E> storage;
-
-protected:
-    typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
-
-#if __cpp_variadic_templates
-    template <class... TArgs>
-    constexpr explicit expected(in_place_t, TArgs&&...args) :
-        storage(in_place_index_t<0>{}, std::forward<TArgs>(args)...)
-    {
-    }
-
-    template <class... TArgs>
-    constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
-    {
-    }
-#endif
-
-    // DEBT: Figure out how to make this and others work on initializing list line
-    // so that we can constexpr it
-    constexpr explicit expected(const nonvoid_value_type& v) :
-        storage(in_place_index_t<0>{}, v)
-    {
-    }
-
-    constexpr explicit expected() :
-        storage(in_place_index_t<0>{}, T{})
-    {
-    }
-
-public:
-    typedef T value_type;
-    typedef E error_type;
-
-    nonvoid_value_type& value() { return get<0>(storage); }
-    const nonvoid_value_type& value() const { return get<0>(storage); }
-    E& error() { return get<1>(storage); }
-    const E& error() const { return get<1>(storage); }
-
-    const nonvoid_value_type& operator*() const { return value(); }
-};
 
 
 }}

@@ -51,10 +51,6 @@ struct are_trivial<T, TArgs...>
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
-template <int index, bool trivial, class ...TArgs>
-struct get_variant_storage_helper;
-
-
 
 template <bool trivial, class ...T>
 struct variant_storage;
@@ -62,13 +58,15 @@ struct variant_storage;
 template <int index, bool trivial, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
 {
-    return get_variant_storage_helper<index, trivial, TArgs...>::get(vs);
+    typedef type_at_index<index, TArgs...>* pointer;
+    return * (pointer)vs.raw;
 }
 
 template <int index, bool trivial, class ...TArgs>
 const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
 {
-    return get_variant_storage_helper<index, trivial, TArgs...>::get(vs);
+    typedef const type_at_index<index, TArgs...>* const_pointer;
+    return * (const_pointer)vs.raw;
 }
 
 
@@ -86,13 +84,8 @@ struct variant_storage<true, T1, T2>
     {
         T1 t1;
         T2 t2;
+        byte raw[0];
     };
-
-    T1* get0() { return &t1; }
-    T2* get1() { return &t2; }
-
-    const T1* get0() const { return &t1; }
-    const T2* get1() const { return &t2; }
 
     variant_storage() = default;
 
@@ -121,20 +114,9 @@ template <class ...T>
 struct variant_storage<false, T...>
 {
     typedef tuple<T...> tuple_type;
-    typedef tuple_element_t<0, tuple_type> t1_type;
-    typedef tuple_element_t<1, tuple_type> t2_type;
-    //typedef tuple_element_t<2, tuple_type> t3_type;
     static constexpr bool is_trivial = false;
 
     estd::byte raw[sizeof(typename largest_type<T...>::type)];
-
-    t1_type* get0() { return (t1_type*)raw; }
-    t2_type* get1() { return (t2_type*)raw; }
-    //t3_type* get2() { return (t3_type*)raw; }
-
-    const t1_type* get0() const { return (t1_type*)raw; }
-    const t2_type* get1() const { return (t2_type*)raw; }
-    //const t3_type* get2() const { return (t3_type*)raw; }
 
     variant_storage() = default;
 
@@ -148,39 +130,6 @@ struct variant_storage<false, T...>
 
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
-
-
-
-template <bool trivial, class ...TArgs>
-struct get_variant_storage_helper<0, trivial, TArgs...>
-{
-    static type_at_index<0, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
-    {
-        return * vs.get0();
-    }
-
-    static const type_at_index<0, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
-    {
-        return * vs.get0();
-    }
-};
-
-
-template <bool trivial, class ...TArgs>
-struct get_variant_storage_helper<1, trivial, TArgs...>
-{
-    static type_at_index<1, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
-    {
-        return * vs.get1();
-    }
-
-    static const type_at_index<1, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
-    {
-        return * vs.get1();
-    }
-};
-
-
 
 
 }
