@@ -35,4 +35,25 @@ TEST_CASE("variant")
             REQUIRE(!vs.is_trivial);
         }
     }
+    SECTION("misc")
+    {
+        SECTION("index_of_type")
+        {
+            SECTION("basic")
+            {
+                typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
+                constexpr int idx = iot::index;
+
+                REQUIRE(idx == 2);
+            }
+            SECTION("not found")
+            {
+                typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
+
+                constexpr int idx = iot::index;
+
+                REQUIRE(idx == -1);
+            }
+        }
+    }
 }

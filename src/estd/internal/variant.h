@@ -70,8 +70,27 @@ const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs..
 }
 
 
+template <class T, unsigned I, class ...TArgs>
+struct index_of_type_helper;
+
+template <class T>
+struct index_of_type_helper<T, 0>
+{
+    static constexpr bool match = false;
+    static constexpr int index = -1;
+};
+
+template <class T, unsigned I, class T2, class ...TArgs>
+struct index_of_type_helper<T, I, T2, TArgs...>
+{
+    typedef index_of_type_helper<T, I - 1, TArgs...> up_one;
+
+    static constexpr bool match = is_same<T, T2>::value;
+    static constexpr int index = match ? I : up_one::index;
+};
+
 template <class T, class ...TArgs>
-struct index_of_type;
+using index_of_type = index_of_type_helper<T, sizeof...(TArgs), TArgs...>;
 
 
 // DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
