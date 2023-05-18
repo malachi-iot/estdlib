@@ -65,6 +65,13 @@ type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
     return get_variant_storage_helper<index, trivial, TArgs...>::get(vs);
 }
 
+template <int index, bool trivial, class ...TArgs>
+const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
+{
+    return get_variant_storage_helper<index, trivial, TArgs...>::get(vs);
+}
+
+
 // DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
 // 'expected'
 
@@ -84,13 +91,29 @@ struct variant_storage<true, T1, T2>
     T1* get0() { return &t1; }
     T2* get1() { return &t2; }
 
+    const T1* get0() const { return &t1; }
+    const T2* get1() const { return &t2; }
+
     variant_storage() = default;
 
-    template <estd::size_t index, class ...TArgs>
+    /*
+    template <unsigned index, class ...TArgs>
     variant_storage(estd::in_place_index_t<index>, TArgs&&...args)
     {
         typedef type_at_index<index, T1, T2> type;
         new (& get<index>(*this)) type(std::forward<TArgs>(args)...);
+    } */
+
+    template <class ...TArgs>
+    constexpr variant_storage(estd::in_place_index_t<0>, TArgs&&...args) :
+        t1(std::forward<TArgs>(args)...)
+    {
+    }
+
+    template <class ...TArgs>
+    constexpr variant_storage(estd::in_place_index_t<1>, TArgs&&...args) :
+        t2(std::forward<TArgs>(args)...)
+    {
     }
 };
 
@@ -108,6 +131,10 @@ struct variant_storage<false, T...>
     t1_type* get0() { return (t1_type*)raw; }
     t2_type* get1() { return (t2_type*)raw; }
     t3_type* get2() { return (t3_type*)raw; }
+
+    const t1_type* get0() const { return (t1_type*)raw; }
+    const t2_type* get1() const { return (t2_type*)raw; }
+    const t3_type* get2() const { return (t3_type*)raw; }
 
     variant_storage() = default;
 
@@ -131,6 +158,11 @@ struct get_variant_storage_helper<0, trivial, TArgs...>
     {
         return * vs.get0();
     }
+
+    static const type_at_index<0, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
+    {
+        return * vs.get0();
+    }
 };
 
 
@@ -138,6 +170,11 @@ template <bool trivial, class ...TArgs>
 struct get_variant_storage_helper<1, trivial, TArgs...>
 {
     static type_at_index<1, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
+    {
+        return * vs.get1();
+    }
+
+    static const type_at_index<1, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
     {
         return * vs.get1();
     }

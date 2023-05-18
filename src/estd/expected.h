@@ -29,12 +29,14 @@ class expected : public internal::expected<T, E>
 public:
     typedef unexpected<E> unexpected_type;
 
-    ESTD_CPP_CONSTEXPR_RET expected() :
+    //ESTD_CPP_CONSTEXPR_RET
+    expected() :
         has_value_(true)
     {}
 
     //template <class T2>
-    ESTD_CPP_CONSTEXPR_RET expected(const typename base_type::nonvoid_value_type& v) :
+    //ESTD_CPP_CONSTEXPR_RET
+    expected(const typename base_type::nonvoid_value_type& v) :
         base_type(v),
         has_value_(true)
     {}

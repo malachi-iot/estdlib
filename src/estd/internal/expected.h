@@ -156,45 +156,47 @@ public:
 protected:
     typedef T nonvoid_value_type;
 
-    //variant_storage2<T, E> storage;
+    variant_storage2<T, E> storage;
 
-    union
-    {
-        value_type value_;
-        error_type error_;
-    };
-
-    ESTD_CPP_CONSTEXPR_RET expected() : value_{} {}
+    //ESTD_CPP_CONSTEXPR_RET
+    expected() :
+        storage(in_place_index_t<0>{}, T{}) {}
 
 #if __cpp_variadic_templates
     template <class... TArgs>
     constexpr explicit expected(in_place_t, TArgs&&...args) :
-        value_(std::forward<TArgs>(args)...)
+        storage(in_place_index_t<0>{}, std::forward<TArgs>(args)...)
     {}
 
     template <class... TArgs>
-    constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        error_(std::forward<TArgs>(args)...)
+    //constexpr
+    explicit expected(unexpect_t, TArgs&&...args) :
+        storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
     {}
 #else
     template <class TE1>
     ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) : error_(e) {}
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET expected(const value_type& v) : value_(v) {}
+    // DEBT: Bring this back
+    //ESTD_CPP_CONSTEXPR_RET
+    expected(const value_type& v) :
+        storage(in_place_index_t<0>{}, v)
+    {}
 
 public:
-    T& value() { return value_; }
-    ESTD_CPP_CONSTEXPR_RET const T& value() const { return value_; }
+    T& value() { return get<0>(storage); }
+    ESTD_CPP_CONSTEXPR_RET const T& value() const { return get<0>(storage); }
 
-    E& error() { return error_; }
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
+    E& error() { return get<1>(storage); }
+    ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<1>(storage); }
 
-    const T& operator*() const { return value_; }
+    const T& operator*() const { return value(); }
 
     expected& operator=(value_type&& v)
     {
-        value_ = v;
+        // FIX: Should we be doing std::move here?  And if not, document why not
+        value() = v;
     }
 };
 
