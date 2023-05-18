@@ -59,15 +59,19 @@ template <int index, bool trivial, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
 {
     typedef type_at_index<index, TArgs...>* pointer;
-    return * (pointer)vs.raw;
+    return * (pointer)vs.storage.raw;
 }
 
 template <int index, bool trivial, class ...TArgs>
 const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
 {
     typedef const type_at_index<index, TArgs...>* const_pointer;
-    return * (const_pointer)vs.raw;
+    return * (const_pointer)vs.storage.raw;
 }
+
+
+template <class T, class ...TArgs>
+struct index_of_type;
 
 
 // DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
@@ -85,12 +89,14 @@ inline static monostate construct_at(void* placement, TArgs&&...args)
 template <bool trivial, class ...TArgs>
 union variant_union;
 
-template <class ...TArgs>
-union variant_union<false, TArgs...>
+template <class ...T>
+union variant_union<false, T...>
 {
-    monostate dummy;
+    estd::byte raw[sizeof(typename largest_type<T...>::type)];
 };
 
+// Not 100% needed, but I like that I can see values more
+// easily in the debugger this way
 template <class T1, class T2>
 union variant_union<true, T1, T2>
 {
@@ -99,44 +105,25 @@ union variant_union<true, T1, T2>
     byte raw[0];
 };
 
-
-template <class T1, class T2>
-struct variant_storage<true, T1, T2>
+template <class T1, class T2, class T3>
+union variant_union<true, T1, T2, T3>
 {
-    typedef tuple<T1, T2> tuple_type;
-    static constexpr bool is_trivial = true;
-
-    union
-    {
-        T1 t1;
-        T2 t2;
-        byte raw[0];
-        monostate dummy;
-    };
-
-    //variant_union<true, T1, T2> storage;
-
-    variant_storage() = default;
-
-    template <unsigned index, class ...TArgs>
-    constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
-        dummy{
-            construct_at<type_at_index<index, T1, T2>>
-                //(storage.raw, std::forward<TArgs>(args)...)}
-                (raw, std::forward<TArgs>(args)...)}
-    {
-    }
+    T1 t1;
+    T2 t2;
+    T3 t3;
+    byte raw[0];
 };
 
-template <class ...T>
-struct variant_storage<false, T...>
+
+template <bool trivial, class ...T>
+struct variant_storage
 {
     typedef tuple<T...> tuple_type;
-    static constexpr bool is_trivial = false;
+    static constexpr bool is_trivial = trivial;
 
     union
     {
-        estd::byte raw[sizeof(typename largest_type<T...>::type)];
+        variant_union<trivial, T...> storage;
         monostate dummy;
     };
 
@@ -146,7 +133,7 @@ struct variant_storage<false, T...>
     constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
         dummy{
             construct_at<type_at_index<index, T...>>
-                (raw, std::forward<TArgs>(args)...)}
+                (storage.raw, std::forward<TArgs>(args)...)}
     {
     }
 };
