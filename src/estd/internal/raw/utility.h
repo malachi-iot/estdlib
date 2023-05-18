@@ -13,6 +13,8 @@ struct in_place_type_t
 
 };
 
-// NOTE: No in_place_index_t because that may need a cross-include for std::size
+// DEBT: in_place_index_t wants std::size_t, but that may need a cross-include
+template <unsigned>
+struct in_place_index_t {};
 
 }

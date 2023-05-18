@@ -156,6 +156,8 @@ public:
 protected:
     typedef T nonvoid_value_type;
 
+    //variant_storage2<T, E> storage;
+
     union
     {
         value_type value_;
