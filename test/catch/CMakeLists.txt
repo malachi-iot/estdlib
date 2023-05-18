@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     array-test.cpp
     buffer-test.cpp
     c++03-test.cpp
+    charconv-test.cpp
     chrono-test.cpp
 	cstddef-test.cpp
     experimental/memory-pool1-test.cpp
@@ -53,7 +54,8 @@ add_executable(${PROJECT_NAME} "main.cpp"
     tuple-test.cpp
     vector-test.cpp
     utility-test.cpp
-        internal-test.cpp charconv-test.cpp)
+    variant-test.cpp
+        internal-test.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 

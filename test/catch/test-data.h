@@ -118,6 +118,14 @@ struct provider_test : TBase
 };
 
 
+struct NonTrivial
+{
+    const int code_;
+
+    explicit NonTrivial(int code) : code_{code} {}
+};
+
+
 }}
 
 #pragma GCC diagnostic pop

@@ -16,12 +16,7 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
-struct ExplicitError
-{
-    const int code_;
-
-    explicit ExplicitError(int code) : code_{code} {}
-};
+typedef estd::test::NonTrivial ExplicitError;
 
 TEST_CASE("expected")
 {
@@ -140,24 +135,6 @@ TEST_CASE("expected")
         }
         SECTION("storage")
         {
-            SECTION("monostate, int")
-            {
-                estd::internal::variant_storage2<estd::monostate, int> vs;
-
-                REQUIRE(vs.is_trivial);
-            }
-            SECTION("int, int")
-            {
-                estd::internal::variant_storage2<int, int> vs;
-
-                REQUIRE(vs.is_trivial);
-
-                vs.t1 = 7;
-
-                auto& v = estd::internal::get<0>(vs);
-
-                REQUIRE(v == 7);
-            }
             SECTION("ExplicitError, int")
             {
                 estd::internal::variant_storage2<ExplicitError, int> vs;

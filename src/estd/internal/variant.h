@@ -73,6 +73,16 @@ const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs..
 // DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
 // 'expected'
 
+// Very similar to c++20 flavor, but importantly returns monostate instead
+template <class T2, class ...TArgs>
+inline static monostate construct_at(void* placement, TArgs&&...args)
+{
+    new (placement) T2(std::forward<TArgs>(args)...);
+    return {};
+}
+
+
+
 
 template <class T1, class T2>
 struct variant_storage<true, T1, T2>
@@ -85,6 +95,7 @@ struct variant_storage<true, T1, T2>
         T1 t1;
         T2 t2;
         byte raw[0];
+        monostate dummy;
     };
 
     variant_storage() = default;
@@ -116,15 +127,20 @@ struct variant_storage<false, T...>
     typedef tuple<T...> tuple_type;
     static constexpr bool is_trivial = false;
 
-    estd::byte raw[sizeof(typename largest_type<T...>::type)];
+    union
+    {
+        estd::byte raw[sizeof(typename largest_type<T...>::type)];
+        monostate dummy;
+    };
 
     variant_storage() = default;
 
     template <unsigned index, class ...TArgs>
-    variant_storage(estd::in_place_index_t<index>, TArgs&&...args)
+    constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
+        dummy{
+            construct_at<type_at_index<index, T...>>
+                (raw, std::forward<TArgs>(args)...)}
     {
-        typedef type_at_index<index, T...> type;
-        new (& get<index>(*this)) type(std::forward<TArgs>(args)...);
     }
 };
 
