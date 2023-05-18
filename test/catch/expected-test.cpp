@@ -167,9 +167,13 @@ TEST_CASE("expected")
         }
         SECTION("are_trivial")
         {
-            REQUIRE(estd::internal::are_trivial<int, int>::value);
+            // TODO: Move these out to proper algorithm/type_traits area
+            REQUIRE(estd::is_trivial<void>::value == false);    // DEBT: Unclear to me what to expect from void here
             REQUIRE(estd::is_trivial<ExplicitError>::value == false);
+
+            REQUIRE(estd::internal::are_trivial<int, int>::value);
             REQUIRE(estd::internal::are_trivial<int, ExplicitError>::value == false);
+            REQUIRE(estd::internal::are_trivial<void, int>::value == false);
         }
     }
 }

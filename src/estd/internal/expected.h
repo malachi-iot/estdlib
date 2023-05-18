@@ -12,23 +12,16 @@ namespace estd { namespace internal {
 // Doesn't need to play with uninitialized storage
 // since it's always required that E is initialized somehow
 // when using this directly as 'unexpected'
-// However, when using it indirectly from the expected void specialization,
-// it DOES want to keep this uninitialized sometimes.  So, what we really
-// need is that flavor of expected to have a specialized expected_storage
-// to match (to handle trivial and non trivial)
 template <class E>
 class unexpected
 {
 private:
-    E error_;
+    const E error_;
 
 protected:
     typedef E error_type;
 
     ESTD_CPP_DEFAULT_CTOR(unexpected)
-
-    // If we were to  do const E, this is needed
-    //ESTD_CPP_CONSTEXPR_RET unexpected() : error_() {}
 
 #if __cpp_variadic_templates
     template <class Err = E>
@@ -47,15 +40,19 @@ public:
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 };
 
-template <class T, class E, bool trivial>
-union expected_storage;
 
 template <class T, class E>
 struct expected_is_trivial;
 
+template <class T, class E>
+using expected_is_trivial2 =
+    are_trivial<conditional_t<is_void<T>::value, monostate, T>, E>;
+
 
 template <class T, class E, bool trivial =
-          expected_is_trivial<T, E>::is_trivial>
+        //expected_is_trivial<T, E>::is_trivial>
+        expected_is_trivial2<T, E>::value>
+        //are_trivial<T, E>::value>
 class expected;
 
 template <class T, class E>
@@ -89,60 +86,6 @@ struct expected_is_trivial<void, E>
 // DEBT: We can't really use estd::layer1::optional here as E and T
 // overlap, but perhaps we can use a high-bit filter in controlled
 // circumstances
-
-template <class E>
-union expected_storage<void, E, true>
-{
-    E error_;
-
-    E* error() { return &error_; }
-    void value() {}
-};
-
-template <class T, class E>
-union expected_storage<T, E, true>
-{
-    T value_;
-    E error_;
-
-    T* value() { return &value_; }
-    E* error() { return &error_; }
-};
-
-
-// DEBT: Not yet used
-template <class E>
-union expected_storage<void, E, false>
-{
-    typedef estd::byte error_placeholder_type[sizeof(E)];
-
-    error_placeholder_type error_;
-
-    E* error() { return (E*)&error_; }
-    void value() {}
-};
-
-
-
-template <class T, class E>
-union expected_storage<T, E, false>
-{
-    typedef estd::byte value_placeholder_type[sizeof(T)];
-    typedef estd::byte error_placeholder_type[sizeof(E)];
-
-    value_placeholder_type value_;
-    error_placeholder_type error_;
-
-    const T* value() const { return (const T*)&value_; }
-    T* value() { return (T*)&value_; }
-    E* error() { return (E*)&error_; }
-
-    expected_storage() = default;
-    /*
-    expected_storage(const T& copy_t) :
-        (*((T*)&value_)){copy_t}
-    {} */
-};
 
 
 // Trivial flavor
@@ -247,13 +190,11 @@ public:
     const T& operator*() const { return value(); }
 };
 
-// DEBT: We'd like to do a const E here, but that demands initializing error()
-// DEBT: trivial not truly handled here, assumes always trivial really.  Use
-// expected_storage instead of deriving from 'unexpected'
+
 template <class E>
-class expected<void, E, true> : public unexpected<E>
+class expected<void, E, true>
 {
-    typedef unexpected<E> base_type;
+    variant_storage<true, monostate, E> storage;
 
 public:
     typedef void value_type;
@@ -266,7 +207,7 @@ protected:
 #if __cpp_variadic_templates
     template <class... TArgs>
     constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...)
+        storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
     {}
 #else
     template <class TE1>
@@ -275,6 +216,9 @@ protected:
 
 public:
     static void value() { }
+
+    E& error() { return get<1>(storage); }
+    const E& error() const { return get<1>(storage); }
 };
 
 }}
