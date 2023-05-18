@@ -59,10 +59,16 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
 # TODO: Instead, filter by presence of GCC
 if (MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
-endif()
+    target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+    # As per
+    # https://stackoverflow.com/questions/31890021/mingw-too-many-sections-bug-while-compiling-huge-header-file-in-qt
+    if(MSYS)
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wa,-mbig-obj)
+    endif()
+endif()
 
 # -Wno-unused-variable want this too, remember .H files aren't compiled independently
 #   so we have to report unused variables in unit tests fused with headers
