@@ -205,45 +205,46 @@ public:
 template <class T, class E>
 class expected<T, E, false>
 {
-    expected_storage<T, E, false> storage;
+    variant_storage<false, T, E> storage;
 
 protected:
     typedef T nonvoid_value_type;
 
 #if __cpp_variadic_templates
     template <class... TArgs>
-    explicit expected(in_place_t, TArgs&&...args)
+    explicit expected(in_place_t, TArgs&&...args) :
+        storage(in_place_index_t<0>{}, std::forward<TArgs>(args)...)
     {
-        new (storage.value()) T(std::forward<TArgs>(args)...);
     }
 
     template <class... TArgs>
-    explicit expected(unexpect_t, TArgs&&...args)
+    explicit expected(unexpect_t, TArgs&&...args) :
+        storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
     {
-        new (storage.error()) E(std::forward<TArgs>(args)...);
     }
 #endif
 
     // DEBT: Figure out how to make this and others work on initializing list line
     // so that we can constexpr it
-    explicit expected(const nonvoid_value_type& v)
+    explicit expected(const nonvoid_value_type& v) :
+        storage(in_place_index_t<0>{}, v)
     {
-        *storage.value() = v;
     }
 
-    explicit expected()
+    explicit expected() :
+        storage(in_place_index_t<0>{}, T{})
     {
-        new (storage.value()) T();
     }
 
 public:
     typedef T value_type;
     typedef E error_type;
 
-    T& value() { return *storage.value(); }
-    E& error() { return *storage.error(); }
+    T& value() { return get<0>(storage); }
+    const T& value() const { return get<0>(storage); }
+    E& error() { return get<1>(storage); }
 
-    const T& operator*() const { return *storage.value(); }
+    const T& operator*() const { return value(); }
 };
 
 // DEBT: We'd like to do a const E here, but that demands initializing error()

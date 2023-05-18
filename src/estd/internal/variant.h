@@ -121,24 +121,24 @@ template <class ...T>
 struct variant_storage<false, T...>
 {
     typedef tuple<T...> tuple_type;
-    typedef tuple_element<0, tuple_type> t1_type;
-    typedef tuple_element<1, tuple_type> t2_type;
-    typedef tuple_element<2, tuple_type> t3_type;
+    typedef tuple_element_t<0, tuple_type> t1_type;
+    typedef tuple_element_t<1, tuple_type> t2_type;
+    //typedef tuple_element_t<2, tuple_type> t3_type;
     static constexpr bool is_trivial = false;
 
     estd::byte raw[sizeof(typename largest_type<T...>::type)];
 
     t1_type* get0() { return (t1_type*)raw; }
     t2_type* get1() { return (t2_type*)raw; }
-    t3_type* get2() { return (t3_type*)raw; }
+    //t3_type* get2() { return (t3_type*)raw; }
 
     const t1_type* get0() const { return (t1_type*)raw; }
     const t2_type* get1() const { return (t2_type*)raw; }
-    const t3_type* get2() const { return (t3_type*)raw; }
+    //const t3_type* get2() const { return (t3_type*)raw; }
 
     variant_storage() = default;
 
-    template <estd::size_t index, class ...TArgs>
+    template <unsigned index, class ...TArgs>
     variant_storage(estd::in_place_index_t<index>, TArgs&&...args)
     {
         typedef type_at_index<index, T...> type;
