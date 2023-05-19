@@ -1,7 +1,5 @@
 #include <catch.hpp>
 
-#include <estd/system_error.h>
-
 #include <estd/internal/variant.h>
 
 #include "test-data.h"

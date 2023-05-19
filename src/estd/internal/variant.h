@@ -39,15 +39,19 @@ const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs..
 template <class T, bool trivial, class ...Types>
 T& get(variant_storage<trivial, Types...>& vs)
 {
-    typedef typename add_pointer<T>::type pointer;
-    return * (pointer) vs.storage.raw;
+    return * vs.template get<T>();
+}
+
+template <class T, bool trivial, class ...Types>
+constexpr const T& get(const variant_storage<trivial, Types...>& vs)
+{
+    return * vs.template get<T>();
 }
 
 template <class T, bool trivial, class ...Types>
 typename add_pointer<T>::type get_if(variant_storage<trivial, Types...>& vs)
 {
-    typedef typename add_pointer<T>::type pointer;
-    return (pointer) vs.storage.raw;
+    return vs.template get<T>();
 }
 
 template <class T, unsigned I, class ...TArgs>
@@ -140,10 +144,10 @@ struct variant_storage
     }
 
     template <class T>
-    T* get()
-    {
-        return (T*) storage.raw;
-    }
+    T* get() { return (T*) storage.raw; }
+
+    template <class T>
+    constexpr T* get() const { return (T*) storage.raw; }
 };
 
 template <class ...T>
@@ -164,6 +168,14 @@ class variant : public variant_storage2<Types...>
     using index_of_type = estd::internal::index_of_type<T2, Types...>;
 
     size_type index_;
+
+    // DEBT: Not a great name
+    template <class T>
+    T* set_index()
+    {
+        index_ = index_of_type<T>::index;
+        return base_type::template get<T>();
+    }
 
 public:
     constexpr variant() :
@@ -188,7 +200,7 @@ public:
     template <class T>
     variant& operator=(T&& v)
     {
-        get<T>(*this) = v;
+        *set_index<T>() = v;
         return *this;
     }
 
@@ -197,8 +209,7 @@ public:
     template <class T, class ...TArgs>
     T& emplace(TArgs&&...args)
     {
-        index_ = index_of_type<T>::index;
-        T* v = get_if<T>(*this);
+        T* v = set_index<T>();
 
         new (v) T(std::forward<TArgs>(args)...);
 
@@ -210,6 +221,7 @@ public:
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
+    // DEBT: index is unsigned, and should stay that way - rework -1 treatment
     return v.index() != -1;
 }
 
