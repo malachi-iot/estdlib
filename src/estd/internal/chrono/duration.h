@@ -45,16 +45,16 @@ public:
     ESTD_CPP_DEFAULT_CTOR(duration)
 
     template <class Rep2>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
+#if __cpp_constexpr
+    constexpr explicit
 #endif
-        explicit duration(const Rep2& r) : ticks(r)
+        duration(const Rep2& r) : ticks(r)
     {
 
     }
 
     template <class Rep2, class Period2>
-#ifdef FEATURE_CPP_CONSTEXPR
+#if __cpp_constexpr
     constexpr
 #endif
         duration(const duration<Rep2, Period2>& d);
@@ -97,7 +97,7 @@ public:
         return *this;
     }
 
-    CONSTEXPR duration operator-() const
+    ESTD_CPP_CONSTEXPR_RET duration operator-() const
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert (numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
@@ -106,11 +106,11 @@ public:
         return duration(-ticks);
     }
 
-    CONSTEXPR duration operator+() const { return *this; }
+    ESTD_CPP_CONSTEXPR_RET duration operator+() const { return *this; }
 
-    static CONSTEXPR duration min() { return duration(duration_values<rep>::min()); }
-    static CONSTEXPR duration max() { return duration(duration_values<rep>::max()); }
-    static CONSTEXPR duration zero() { return duration(duration_values<rep>::zero()); }
+    static ESTD_CPP_CONSTEXPR_RET duration min() { return duration(duration_values<rep>::min()); }
+    static ESTD_CPP_CONSTEXPR_RET duration max() { return duration(duration_values<rep>::max()); }
+    static ESTD_CPP_CONSTEXPR_RET duration zero() { return duration(duration_values<rep>::zero()); }
 };
 #endif
 

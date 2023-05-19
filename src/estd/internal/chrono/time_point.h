@@ -94,7 +94,7 @@ public:
     }
 
     // DEBT: Spec calls for this operation as outside of class
-    time_point operator+(const duration& d)
+    time_point operator+(const duration& d) const
     {
         time_point copied(*this);
         copied += d;
@@ -102,7 +102,7 @@ public:
     }
 
     // DEBT: Spec calls for this operation as outside of class
-    time_point operator-(const duration& d)
+    time_point operator-(const duration& d) const
     {
         time_point copied(*this);
         copied -= d;
