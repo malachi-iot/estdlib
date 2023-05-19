@@ -12,12 +12,37 @@ TEST_CASE("variant")
 {
     SECTION("main")
     {
+        typedef internal::variant<int, test::NonTrivial> variant1_type;
+
         SECTION("default ctor")
         {
-            internal::variant<int, test::NonTrivial> v;
+            variant1_type v;
+            // Properly doesn't compile, since default value init goes for
+            // first item
             //internal::variant<test::NonTrivial, int> v2;
 
+            int& vref = get<int>(v);
+
             REQUIRE(v.index() == 0);
+            REQUIRE(vref == 0);
+            REQUIRE(internal::holds_alternative<int>(v));
+        }
+        SECTION("emplace")
+        {
+            variant1_type v;
+
+            v.emplace<test::NonTrivial>(7);
+
+            REQUIRE(v.index() == 1);
+            REQUIRE(get<test::NonTrivial>(v).code_ == 7);
+        }
+        SECTION("assign")
+        {
+            variant1_type v;
+
+            v = 8;
+
+            REQUIRE(get<int>(v) == 8);
         }
     }
     SECTION("storage")

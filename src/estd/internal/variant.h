@@ -36,6 +36,19 @@ const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs..
     return * (const_pointer)vs.storage.raw;
 }
 
+template <class T, bool trivial, class ...Types>
+T& get(variant_storage<trivial, Types...>& vs)
+{
+    typedef typename add_pointer<T>::type pointer;
+    return * (pointer) vs.storage.raw;
+}
+
+template <class T, bool trivial, class ...Types>
+typename add_pointer<T>::type get_if(variant_storage<trivial, Types...>& vs)
+{
+    typedef typename add_pointer<T>::type pointer;
+    return (pointer) vs.storage.raw;
+}
 
 template <class T, unsigned I, class ...TArgs>
 struct index_of_type_helper;
@@ -59,6 +72,8 @@ struct index_of_type_helper<T, I, T2, TArgs...>
 
 template <class T, class ...TArgs>
 using index_of_type = index_of_type_helper<T, sizeof...(TArgs), TArgs...>;
+
+
 
 
 // DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
@@ -128,14 +143,19 @@ struct variant_storage
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
 
-template <class ...T>
-class variant : public variant_storage2<T...>
+template <class ...Types>
+class variant;
+
+
+
+template <class ...Types>
+class variant : public variant_storage2<Types...>
 {
-    using base_type = variant_storage2<T...>;
+    using base_type = variant_storage2<Types...>;
     using size_type = std::size_t;
 
     template <class T2>
-    using index_of_type = estd::internal::index_of_type<T2, T...>;
+    using index_of_type = estd::internal::index_of_type<T2, Types...>;
 
     size_type index_;
 
@@ -159,9 +179,33 @@ public:
         index_{index_of_type<T2>::index}
     {}
 
+    template <class T>
+    variant& operator=(T&& v)
+    {
+        get<T>(*this) = v;
+        return *this;
+    }
+
     constexpr size_type index() const { return index_; }
+
+    template <class T, class ...TArgs>
+    T& emplace(TArgs&&...args)
+    {
+        index_ = index_of_type<T>::index;
+        T* v = get_if<T>(*this);
+
+        new (v) T(std::forward<TArgs>(args)...);
+
+        return *v;
+    }
 };
 
+
+template< class T, class... Types >
+constexpr bool holds_alternative(const variant<Types...>& v) noexcept
+{
+    return v.index() != -1;
+}
 
 }
 #endif
