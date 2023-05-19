@@ -12,6 +12,8 @@ namespace estd {
 namespace internal {
 
 
+// DEBT: Move type_at_index and index_of_type elsewhere
+
 // Very similar to std::variant_alternative
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
@@ -52,6 +54,7 @@ struct index_of_type_helper<T, I, T2, TArgs...>
 
     static constexpr bool match = is_same<T, T2>::value;
     static constexpr int index = match ? I : up_one::index;
+    static constexpr bool multiple = match & up_one::index != -1;
 };
 
 template <class T, class ...TArgs>
@@ -124,6 +127,40 @@ struct variant_storage
 
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
+
+template <class ...T>
+class variant : public variant_storage2<T...>
+{
+    using base_type = variant_storage2<T...>;
+    using size_type = std::size_t;
+
+    template <class T2>
+    using index_of_type = estd::internal::index_of_type<T2, T...>;
+
+    size_type index_;
+
+public:
+    constexpr variant() :
+        base_type(in_place_index_t<0>{}),
+        index_{0}
+    {}
+
+    template <unsigned index, class ...TArgs>
+    constexpr explicit variant(in_place_index_t<index>, TArgs&&...args) :
+        base_type(in_place_index_t<index>{}, std::forward<TArgs>(args)...),
+        index_{index}
+    {}
+
+    template <class T2, class ...TArgs>
+    constexpr explicit variant(in_place_type_t<T2>, TArgs&&...args) :
+        base_type(
+            in_place_index_t<index_of_type<T2>::index>{},
+            std::forward<TArgs>(args)...),
+        index_{index_of_type<T2>::index}
+    {}
+
+    constexpr size_type index() const { return index_; }
+};
 
 
 }

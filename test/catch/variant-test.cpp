@@ -6,8 +6,20 @@
 
 #include "test-data.h"
 
+using namespace estd;
+
 TEST_CASE("variant")
 {
+    SECTION("main")
+    {
+        SECTION("default ctor")
+        {
+            internal::variant<int, test::NonTrivial> v;
+            //internal::variant<test::NonTrivial, int> v2;
+
+            REQUIRE(v.index() == 0);
+        }
+    }
     SECTION("storage")
     {
         SECTION("monostate, int")
