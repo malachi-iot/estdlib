@@ -170,6 +170,8 @@ TEST_CASE("array/vector tests")
     {
         // something about gcc doesn't like how I'm doing static values here
 #ifndef __GNUC__
+        // I think this code is obsolete now
+#if UNUSED
         experimental::layer0::array_exp2<int, static_values, 4> array1;
         int counter = 1;
 
@@ -187,6 +189,7 @@ TEST_CASE("array/vector tests")
         REQUIRE(sz == 1);
 
         //experimental::layer0::make_array(static_values);
+#endif
 #endif
     }
     SECTION("aligned_array")

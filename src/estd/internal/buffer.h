@@ -40,7 +40,7 @@ namespace layer2 {
  * @tparam size
  * @deprecated - use span instead
  */
-template <size_t size>
+template <std::size_t size>
 class mutable_buffer : public estd::legacy::layer2::array<uint8_t, size>
 {
     typedef estd::legacy::layer2::array<uint8_t, size> base_t;

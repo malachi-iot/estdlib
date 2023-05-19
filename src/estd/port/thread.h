@@ -22,6 +22,8 @@
 #include "posix/thread.h"
 #elif defined(ESTD_MCU_BLACKFIN)
 #include "vdk/thread.h"
+#elif FEATURE_STD_THREAD
+#include "std/thread.h"
 #else
 // indicating threading API so as to indicate not even sleep_for etc can
 // be deduced
