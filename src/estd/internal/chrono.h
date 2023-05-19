@@ -1,15 +1,8 @@
 #pragma once
 
 #include "fwd/chrono.h"
+#include "chrono/features.h"
 #include "common_type.h"
-
-// While developing, leave this on
-#define FEATURE_ESTD_CHRONO
-
-// Fully activating more advanced common_type/promoted_type fused
-// duration conversions
-#define FEATURE_ESTD_CHRONO_EXP
-
 
 namespace estd { namespace chrono {
 
