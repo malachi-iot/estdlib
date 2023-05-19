@@ -117,15 +117,15 @@ union variant_union<true, T1, T2, T3>
 };
 
 
-template <bool trivial, class ...T>
+template <bool trivial, class ...Types>
 struct variant_storage
 {
-    typedef tuple<T...> tuple_type;
+    typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
     union
     {
-        variant_union<trivial, T...> storage;
+        variant_union<trivial, Types...> storage;
         monostate dummy;
     };
 
@@ -134,9 +134,15 @@ struct variant_storage
     template <unsigned index, class ...TArgs>
     constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
         dummy{
-            construct_at<type_at_index<index, T...>>
+            construct_at<type_at_index<index, Types...>>
                 (storage.raw, std::forward<TArgs>(args)...)}
     {
+    }
+
+    template <class T>
+    T* get()
+    {
+        return (T*) storage.raw;
     }
 };
 
