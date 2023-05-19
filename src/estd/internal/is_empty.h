@@ -28,6 +28,12 @@ struct is_empty
     : public integral_constant<bool, __is_empty(_Tp)>
 {};
 #endif  // GCC exp/4.3
+#elif _MSC_VER
+#define FEATURE_ESTD_IS_EMPTY 1
+template<typename _Tp>
+struct is_empty
+    : public integral_constant<bool, __is_empty(_Tp)>
+{};
 #elif 0 // LLVM
 #endif
 
