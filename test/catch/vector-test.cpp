@@ -5,6 +5,8 @@
 
 #include "mem.h"
 
+#include "macro/push.h"
+
 using namespace estd;
 
 
@@ -316,3 +318,6 @@ TEST_CASE("vector tests")
         }
     }
 }
+
+#include "macro/pop.h"
+

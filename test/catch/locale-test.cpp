@@ -6,6 +6,7 @@
 #include <estd/sstream.h>
 
 #include "test-data.h"
+#include "macro/push.h"
 
 #include <estd/internal/locale/cbase.h>
 
@@ -508,3 +509,5 @@ TEST_CASE("locale")
         REQUIRE(facet.truename() == "teH");
     }
 }
+
+#include "macro/pop.h"

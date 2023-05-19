@@ -4,11 +4,7 @@
 
 #include "test-data.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#if __has_warning("-Wunused-but-set-variable")
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
+#include "macro/push.h"
 
 static const char* got_something = NULLPTR;
 
@@ -516,4 +512,4 @@ TEST_CASE("functional")
 
 #endif
 
-#pragma GCC diagnostic pop
+#include "macro/pop.h"

@@ -4,6 +4,8 @@
 
 #include "test-data.h"
 
+#include "macro/push.h"
+
 using namespace estd;
 using namespace estd::test;
 
@@ -272,3 +274,5 @@ TEST_CASE("tuple")
         }
     }
 }
+
+#include "macro/pop.h"

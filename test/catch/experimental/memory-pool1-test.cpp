@@ -1,7 +1,9 @@
 #include <catch.hpp>
 
 #include <estd/exp/memory/memory_pool.h>
+
 #include "../test-data.h"
+#include "../macro/push.h"
 
 TEST_CASE("experimental: memory pool v1 tests")
 {
@@ -286,3 +288,5 @@ TEST_CASE("experimental: memory pool v1 tests")
         //list.push_front(item);
     }
 }
+
+#include "../macro/pop.h"
