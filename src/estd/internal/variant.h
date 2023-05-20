@@ -2,7 +2,8 @@
 
 #include "platform.h"
 #include "fwd/functional.h"
-#include "utility.h"
+#include "raw/utility.h"
+#include "variadic.h"
 #include "raw/variant.h"
 #include "../tuple.h"
 
@@ -11,35 +12,6 @@ namespace estd {
 #if __cpp_variadic_templates
 namespace internal {
 
-
-// DEBT: Move type_at_index and index_of_type elsewhere
-
-// Very similar to std::variant_alternative
-template <int index, class ...TArgs>
-using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
-
-template <class T, int I, class ...TArgs>
-struct index_of_type_helper;
-
-template <class T, int I>
-struct index_of_type_helper<T, I>
-{
-    static constexpr bool match = false;
-    static constexpr int index = -1;
-};
-
-template <class T, int I, class T2, class ...TArgs>
-struct index_of_type_helper<T, I, T2, TArgs...>
-{
-    typedef index_of_type_helper<T, I + 1, TArgs...> up_one;
-
-    static constexpr bool match = is_same<T, T2>::value;
-    static constexpr int index = match ? I : up_one::index;
-    static constexpr bool multiple = match & up_one::index != -1;
-};
-
-template <class T, class ...TArgs>
-using index_of_type = index_of_type_helper<T, 0, TArgs...>;
 
 template <bool trivial, class ...T>
 struct variant_storage;
