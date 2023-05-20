@@ -67,9 +67,6 @@ typename add_pointer<T>::type get_if(variant<Types...>& vs)
 
 
 
-// DEBT: Currently variant_storage is clunky and fine-tuned for consumption by
-// 'expected'
-
 // Very similar to c++20 flavor, but importantly returns monostate instead
 template <class T2, class ...TArgs>
 inline static monostate construct_at(void* placement, TArgs&&...args)
@@ -120,6 +117,9 @@ struct variant_storage
     typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
+    template <class T>
+    using ensure_type_t = typename ensure_type<T, Types...>::type;
+
 private:
     union
     {
@@ -151,10 +151,10 @@ public:
     }
 
     template <class T>
-    T* get() { return (T*) storage.raw; }
+    ensure_type_t<T>* get() { return (T*) storage.raw; }
 
     template <class T>
-    constexpr T* get() const { return (T*) storage.raw; }
+    constexpr ensure_type_t<T>* get() const { return (T*) storage.raw; }
 
     template <int I, typename F, typename enabled = estd::enable_if_t<I == 0, bool> >
     static constexpr bool visit_old(F&&, int) { return{}; }
@@ -166,7 +166,7 @@ public:
         if(I - 1 == index)
             f(get<I - 1>());
         else
-            visit_old<I - 1>(std::move(f), index);
+            visit_old<I - 1>(std::forward<F>(f), index);
     }
 
     template <int I, typename F>
@@ -178,13 +178,13 @@ public:
         if(I == index)
             f(get<T>());
         else
-            visit<I + 1, F, TArgs...>(std::move(f), index);
+            visit<I + 1, F, TArgs...>(std::forward<F>(f), index);
     }
 
     template <typename F>
     void visit(F&& f, int index)
     {
-        visit<0, F, Types...>(std::move(f), index);
+        visit<0, F, Types...>(std::forward<F>(f), index);
     }
 };
 

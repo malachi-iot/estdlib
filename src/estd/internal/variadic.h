@@ -94,5 +94,16 @@ public:
 template <class T, class ...TArgs>
 using index_of_type = index_of_type_helper<T, 0, TArgs...>;
 
+// Evaluate true or false whether a variadic contains a particular type
+template <class T, class ...Types>
+using contains_type = conditional_t<
+        index_of_type<T, Types...>::index == -1,
+        false_type,
+        true_type>;
+
+// Only enables if type T is contained in Types
+template <class T, class ...Types>
+using ensure_type = enable_if<contains_type<T, Types...>::value, T>;
+
 }}
 #endif

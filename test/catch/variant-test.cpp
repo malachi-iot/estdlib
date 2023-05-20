@@ -66,6 +66,18 @@ TEST_CASE("variant")
     }
     SECTION("storage")
     {
+        SECTION("ensure")
+        {
+            typedef estd::internal::variant_storage2<estd::monostate, int> vs_type;
+            vs_type vs;
+
+            vs_type::ensure_type_t<int> v1;
+            vs.get<monostate>();
+
+            // As expected, does not and should not compile
+            //vs_type::ensure_type_t<float> v2;
+            //vs.get<float>();
+        }
         SECTION("monostate, int")
         {
             estd::internal::variant_storage2<estd::monostate, int> vs;
