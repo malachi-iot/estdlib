@@ -191,6 +191,23 @@ public:
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
 
+template <class T>
+struct variant_size;
+
+template <class... Types>
+struct variant_size<variant_storage2<Types...> > :
+    variadic_size<Types...> {};
+
+template <unsigned I, class T>
+struct variant_alternative;
+
+template <unsigned I, class... Types>
+struct variant_alternative<I, variant_storage2<Types...> > :
+    type_identity<type_at_index<I, Types...>> { };
+
+template <unsigned I, class T>
+using variant_alternative_t = typename variant_alternative<I, T>::type;
+
 // NOTE: Using regular functions for F&& style functors doesn't
 // seem to work, perhaps in particular due to class T parameter?
 struct destroyer_functor

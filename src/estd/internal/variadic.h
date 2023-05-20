@@ -105,5 +105,9 @@ using contains_type = conditional_t<
 template <class T, class ...Types>
 using ensure_type = enable_if<contains_type<T, Types...>::value, T>;
 
+// Wrapper to help return specifically as an integral constant
+template <class ...Types>
+using variadic_size = integral_constant<std::size_t, sizeof...(Types)>;
+
 }}
 #endif
