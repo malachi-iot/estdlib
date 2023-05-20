@@ -162,6 +162,9 @@ class variant : public variant_storage2<Types...>
     template <class T2>
     using index_of_type = estd::internal::index_of_type<T2, Types...>;
 
+    template <int I>
+    using type_at_index = estd::internal::type_at_index<I, Types...>;
+
     size_type index_;
 
     // DEBT: Not a great name
@@ -170,6 +173,25 @@ class variant : public variant_storage2<Types...>
     {
         index_ = index_of_type<T>::index;
         return base_type::template get<T>();
+    }
+
+    template <int I, typename enabled = estd::enable_if_t<I == -1, bool> >
+    void destroy()
+    {
+
+    }
+
+    template <int I, typename enabled = estd::enable_if_t<I >= 0, bool> >
+    void destroy(bool = true)
+    {
+        if(I == index_)
+        {
+            typedef type_at_index<I> value_type;
+            value_type* v = base_type::template get<I>();
+            v->~value_type();
+        }
+        else
+            destroy<I - 1>();
     }
 
 public:
@@ -191,6 +213,12 @@ public:
             std::forward<TArgs>(args)...),
         index_{index_of_type<T2>::index}
     {}
+
+    ~variant()
+    {
+        //auto v = base_type::template get<index_>();
+        destroy<sizeof...(Types) - 1>();
+    }
 
     variant(variant&& move_from) noexcept:
         index_{move_from.index()}

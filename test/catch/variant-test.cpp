@@ -27,19 +27,23 @@ TEST_CASE("variant")
         }
         SECTION("emplace")
         {
-            variant1_type v;
+            {
+                variant1_type v;
 
-            v.emplace<test::NonTrivial>(7);
+                v.emplace<test::NonTrivial>(7);
 
-            REQUIRE(v.index() == 1);
-            REQUIRE(get<test::NonTrivial>(v).code_ == 7);
+                REQUIRE(v.index() == 1);
+                REQUIRE(get<test::NonTrivial>(v).code_ == 7);
 
-            REQUIRE(internal::get_if<0>(v) == nullptr);
-            REQUIRE(internal::get_if<1>(v) != nullptr);
-            REQUIRE(internal::get_if<1>(v)->code_ == 7);
+                REQUIRE(internal::get_if<0>(v) == nullptr);
+                REQUIRE(internal::get_if<1>(v) != nullptr);
+                REQUIRE(internal::get_if<1>(v)->code_ == 7);
 
-            REQUIRE(internal::get_if<int>(v) == nullptr);
-            REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
+                REQUIRE(internal::get_if<int>(v) == nullptr);
+                REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
+            }
+
+            REQUIRE(test::NonTrivial::dtor_counter == 1);
         }
         SECTION("assign")
         {

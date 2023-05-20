@@ -122,8 +122,13 @@ struct provider_test : TBase
 struct NonTrivial
 {
     const int code_;
+    static unsigned dtor_counter;
 
     explicit NonTrivial(int code) : code_{code} {}
+    ~NonTrivial()
+    {
+        ++dtor_counter;
+    }
 };
 
 
