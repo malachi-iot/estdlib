@@ -78,7 +78,7 @@ TEST_CASE("variant")
 
             REQUIRE(vs.is_trivial);
 
-            vs.storage.t1 = 7;
+            *vs.get<0>() = 7;
 
             auto& v = estd::internal::get<0>(vs);
 

@@ -120,12 +120,14 @@ struct variant_storage
     typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
+private:
     union
     {
         variant_union<trivial, Types...> storage;
         monostate dummy;
     };
 
+public:
     variant_storage() = default;
 
     template <unsigned index, class ...TArgs>
@@ -153,6 +155,37 @@ struct variant_storage
 
     template <class T>
     constexpr T* get() const { return (T*) storage.raw; }
+
+    template <int I, typename F, typename enabled = estd::enable_if_t<I == 0, bool> >
+    static constexpr bool visit_old(F&&, int) { return{}; }
+
+    template <int I = sizeof...(Types), typename F,
+             typename enabled = estd::enable_if_t<(I > 0), bool> >
+    void visit_old(F&& f, const int index, bool = true)
+    {
+        if(I - 1 == index)
+            f(get<I - 1>());
+        else
+            visit_old<I - 1>(std::move(f), index);
+    }
+
+    template <int I, typename F>
+    static constexpr bool visit(F&&, int) { return{}; }
+
+    template <int I, typename F, class T, class... TArgs>
+    void visit(F&& f, int index)
+    {
+        if(I == index)
+            f(get<T>());
+        else
+            visit<I + 1, F, TArgs...>(std::move(f), index);
+    }
+
+    template <typename F>
+    void visit(F&& f, int index)
+    {
+        visit<0, F, Types...>(std::move(f), index);
+    }
 };
 
 template <class ...T>
@@ -210,19 +243,6 @@ class variant : public variant_storage2<Types...>
         t->~T();
     }   */
 
-    template <int I, typename F, typename enabled = estd::enable_if_t<I == 0, bool> >
-    static constexpr bool apply(F&&) { return{}; }
-
-    template <int I = sizeof...(Types), typename F,
-        typename enabled = estd::enable_if_t<(I > 0), bool> >
-    void apply(F&& f, bool = true)
-    {
-        if(I - 1 == index_)
-            f(base_type::template get<I - 1>());
-        else
-            apply<I - 1>(std::move(f));
-    }
-
 public:
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
@@ -248,20 +268,26 @@ public:
         return index_ == variant_npos();
     }
 
+    template <class F>
+    void visit(F&& f)
+    {
+        base_type::visit(std::move(f), index_);
+    }
+
     ~variant()
     {
         //auto v = base_type::template get<index_>();
         //apply<sizeof...(Types) - 1>(destroyer_functor{});
         //apply<sizeof...(Types) - 1>(&destroy);
         if(!valueless_by_exception())
-            apply(destroyer_functor{});
+            visit(destroyer_functor{});
     }
 
     variant(variant&& move_from) noexcept:
         index_{move_from.index()}
     {
         mover_functor f{this};
-        move_from.apply(f);
+        move_from.visit(f);
 
         // DEBT: Setting to 'valueless_by_exception'.  Docs don't indicate to do this,
         // but if we don't then the move_from variant destructor will try to run the dtor

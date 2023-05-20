@@ -7,9 +7,25 @@
 
 #include "../tuple.h"
 #include "raw/type_traits.h"
+#include "raw/utility.h"
 
 namespace estd { namespace internal {
 
+template <unsigned I, class F>
+constexpr bool variadic_visitor_helper(F&&) { return {}; }
+
+template <unsigned I, class F, class T, typename... Ts>
+void variadic_visitor_helper(F&& f)
+{
+    f(in_place_index_t<I>{}, in_place_type_t<T>{});
+    variadic_visitor_helper<I + 1, F, Ts...>(std::move(f));
+}
+
+template <class F, typename... Ts>
+void variadic_visitor(F&& f)
+{
+    return variadic_visitor_helper<0, F, Ts...>(std::move(f));
+}
 
 // largest_type lifted from
 // https://stackoverflow.com/questions/16803814/how-do-i-return-the-largest-type-in-a-list-of-types
