@@ -54,20 +54,19 @@ constexpr type_at_index<index, TArgs...>* get_if(variant<TArgs...>& vs)
     return vs.index() != (unsigned)index ? nullptr : vs.template get<index>();
 }
 
+
 // DEBT: true std code throws exception on index mismatch here - we need to reflect error
 // state somehow
 template <int index, bool trivial, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
 {
-    typedef type_at_index<index, TArgs...>* pointer;
-    return * (pointer)vs.storage.raw;
+    return * vs.template get<index>();
 }
 
 template <int index, bool trivial, class ...TArgs>
 const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
 {
-    typedef const type_at_index<index, TArgs...>* const_pointer;
-    return * (const_pointer)vs.storage.raw;
+    return * vs.template get<index>();
 }
 
 template <class T, bool trivial, class ...Types>
@@ -161,6 +160,12 @@ struct variant_storage
 
     template <unsigned index>
     type_at_index<index, Types...>* get()
+    {
+        return (type_at_index<index, Types...>*) storage.raw;
+    }
+
+    template <unsigned index>
+    constexpr type_at_index<index, Types...>* get() const
     {
         return (type_at_index<index, Types...>*) storage.raw;
     }
