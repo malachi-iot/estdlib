@@ -60,6 +60,8 @@ TEST_CASE("variant")
             v = 8;
 
             variant1_type v2(std::move(v));
+
+            REQUIRE(test::NonTrivial::dtor_counter == 1);
         }
     }
     SECTION("storage")

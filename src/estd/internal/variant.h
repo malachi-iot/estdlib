@@ -78,6 +78,12 @@ inline static monostate construct_at(void* placement, TArgs&&...args)
     return {};
 }
 
+// DEBT: Supposed to be an inline variable, but we want c++11 compat
+constexpr unsigned variant_npos()
+{
+    return (unsigned)-1;
+}
+
 
 template <bool trivial, class ...TArgs>
 union variant_union;
@@ -152,12 +158,34 @@ struct variant_storage
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
 
+// NOTE: Using regular functions for F&& style functors doesn't
+// seem to work, perhaps in particular due to class T parameter?
+struct destroyer_functor
+{
+    template <class T>
+    void operator()(T* t) const
+    {
+        t->~T();
+    }
+};
 
 template <class ...Types>
 class variant : public variant_storage2<Types...>
 {
     using base_type = variant_storage2<Types...>;
     using size_type = std::size_t;
+
+    struct mover_functor
+    {
+        variant* const parent;
+
+        template <class T>
+        void operator()(T* move_from)
+        {
+            T* move_to = parent->template get<T>();
+            new (move_to) T(std::move(*move_from));
+        }
+    };
 
     template <class T2>
     using index_of_type = estd::internal::index_of_type<T2, Types...>;
@@ -175,23 +203,24 @@ class variant : public variant_storage2<Types...>
         return base_type::template get<T>();
     }
 
-    template <int I, typename enabled = estd::enable_if_t<I == -1, bool> >
-    void destroy()
+    /*
+    template <class T>
+    static void destroy(T* t)
     {
+        t->~T();
+    }   */
 
-    }
+    template <int I, typename F, typename enabled = estd::enable_if_t<I == 0, bool> >
+    static constexpr bool apply(F&&) { return{}; }
 
-    template <int I, typename enabled = estd::enable_if_t<I >= 0, bool> >
-    void destroy(bool = true)
+    template <int I = sizeof...(Types), typename F,
+        typename enabled = estd::enable_if_t<(I > 0), bool> >
+    void apply(F&& f, bool = true)
     {
-        if(I == index_)
-        {
-            typedef type_at_index<I> value_type;
-            value_type* v = base_type::template get<I>();
-            v->~value_type();
-        }
+        if(I - 1 == index_)
+            f(base_type::template get<I - 1>());
         else
-            destroy<I - 1>();
+            apply<I - 1>(std::move(f));
     }
 
 public:
@@ -214,18 +243,30 @@ public:
         index_{index_of_type<T2>::index}
     {}
 
+    constexpr bool valueless_by_exception() const
+    {
+        return index_ == variant_npos();
+    }
+
     ~variant()
     {
         //auto v = base_type::template get<index_>();
-        destroy<sizeof...(Types) - 1>();
+        //apply<sizeof...(Types) - 1>(destroyer_functor{});
+        //apply<sizeof...(Types) - 1>(&destroy);
+        if(!valueless_by_exception())
+            apply(destroyer_functor{});
     }
 
     variant(variant&& move_from) noexcept:
         index_{move_from.index()}
     {
-        //constexpr unsigned i = move_from.index();
-        //auto& v = get<i>(*this);
-        // TODO: Need to std::move on the particular idx/type
+        mover_functor f{this};
+        move_from.apply(f);
+
+        // DEBT: Setting to 'valueless_by_exception'.  Docs don't indicate to do this,
+        // but if we don't then the move_from variant destructor will try to run the dtor
+        // of the alternative again - which I suppose is safe, but feels wrong somehow
+        move_from.index_ = variant_npos();
     }
 
 
