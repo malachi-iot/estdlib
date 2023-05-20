@@ -18,10 +18,44 @@ namespace internal {
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
+template <class T, int I, class ...TArgs>
+struct index_of_type_helper;
+
+template <class T, int I>
+struct index_of_type_helper<T, I>
+{
+    static constexpr bool match = false;
+    static constexpr int index = -1;
+};
+
+template <class T, int I, class T2, class ...TArgs>
+struct index_of_type_helper<T, I, T2, TArgs...>
+{
+    typedef index_of_type_helper<T, I + 1, TArgs...> up_one;
+
+    static constexpr bool match = is_same<T, T2>::value;
+    static constexpr int index = match ? I : up_one::index;
+    static constexpr bool multiple = match & up_one::index != -1;
+};
+
+template <class T, class ...TArgs>
+using index_of_type = index_of_type_helper<T, 0, TArgs...>;
 
 template <bool trivial, class ...T>
 struct variant_storage;
 
+template <class ...Types>
+class variant;
+
+
+template <int index, class ...TArgs>
+constexpr type_at_index<index, TArgs...>* get_if(variant<TArgs...>& vs)
+{
+    return vs.index() != (unsigned)index ? nullptr : vs.template get<index>();
+}
+
+// DEBT: true std code throws exception on index mismatch here - we need to reflect error
+// state somehow
 template <int index, bool trivial, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
 {
@@ -48,34 +82,16 @@ constexpr const T& get(const variant_storage<trivial, Types...>& vs)
     return * vs.template get<T>();
 }
 
-template <class T, bool trivial, class ...Types>
-typename add_pointer<T>::type get_if(variant_storage<trivial, Types...>& vs)
+template <class T, class ...Types>
+typename add_pointer<T>::type get_if(variant<Types...>& vs)
 {
+    int i = index_of_type<T, Types...>::index;
+
+    if(i == -1 || vs.index() != (unsigned)i) return nullptr;
+
     return vs.template get<T>();
 }
 
-template <class T, unsigned I, class ...TArgs>
-struct index_of_type_helper;
-
-template <class T>
-struct index_of_type_helper<T, 0>
-{
-    static constexpr bool match = false;
-    static constexpr int index = -1;
-};
-
-template <class T, unsigned I, class T2, class ...TArgs>
-struct index_of_type_helper<T, I, T2, TArgs...>
-{
-    typedef index_of_type_helper<T, I - 1, TArgs...> up_one;
-
-    static constexpr bool match = is_same<T, T2>::value;
-    static constexpr int index = match ? I : up_one::index;
-    static constexpr bool multiple = match & up_one::index != -1;
-};
-
-template <class T, class ...TArgs>
-using index_of_type = index_of_type_helper<T, sizeof...(TArgs), TArgs...>;
 
 
 
@@ -143,6 +159,12 @@ struct variant_storage
     {
     }
 
+    template <unsigned index>
+    type_at_index<index, Types...>* get()
+    {
+        return (type_at_index<index, Types...>*) storage.raw;
+    }
+
     template <class T>
     T* get() { return (T*) storage.raw; }
 
@@ -152,10 +174,6 @@ struct variant_storage
 
 template <class ...T>
 using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
-
-template <class ...Types>
-class variant;
-
 
 
 template <class ...Types>
@@ -197,6 +215,15 @@ public:
         index_{index_of_type<T2>::index}
     {}
 
+    variant(variant&& move_from) noexcept:
+        index_{move_from.index()}
+    {
+        //constexpr unsigned i = move_from.index();
+        //auto& v = get<i>(*this);
+        // TODO: Need to std::move on the particular idx/type
+    }
+
+
     template <class T>
     variant& operator=(T&& v)
     {
@@ -221,8 +248,7 @@ public:
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
-    // DEBT: index is unsigned, and should stay that way - rework -1 treatment
-    return v.index() != -1;
+    return v.index() == (unsigned) index_of_type<T, Types...>::index;
 }
 
 }

@@ -33,6 +33,13 @@ TEST_CASE("variant")
 
             REQUIRE(v.index() == 1);
             REQUIRE(get<test::NonTrivial>(v).code_ == 7);
+
+            REQUIRE(internal::get_if<0>(v) == nullptr);
+            REQUIRE(internal::get_if<1>(v) != nullptr);
+            REQUIRE(internal::get_if<1>(v)->code_ == 7);
+            // FIX: NonTrivial test should be nullptr, since it's not at position 0
+            REQUIRE(internal::get_if<int>(v) == nullptr);
+            REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
         }
         SECTION("assign")
         {
@@ -41,6 +48,14 @@ TEST_CASE("variant")
             v = 8;
 
             REQUIRE(get<int>(v) == 8);
+        }
+        SECTION("move")
+        {
+            variant1_type v;
+
+            v = 8;
+
+            variant1_type v2(std::move(v));
         }
     }
     SECTION("storage")
@@ -78,16 +93,30 @@ TEST_CASE("variant")
             {
                 typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
                 constexpr int idx = iot::index;
+                constexpr bool multiple = iot::multiple;
 
-                REQUIRE(idx == 2);
+                REQUIRE(idx == 1);
+                REQUIRE(multiple == false);
             }
             SECTION("not found")
             {
                 typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
 
                 constexpr int idx = iot::index;
+                constexpr bool multiple = iot::multiple;
 
                 REQUIRE(idx == -1);
+                REQUIRE(multiple == false);
+            }
+            SECTION("multiple")
+            {
+                typedef estd::internal::index_of_type<int, int, int> iot;
+
+                constexpr int idx = iot::index;
+                constexpr bool multiple = iot::multiple;
+
+                REQUIRE(idx == 0);
+                REQUIRE(multiple == true);
             }
         }
     }
