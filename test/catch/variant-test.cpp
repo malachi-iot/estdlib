@@ -101,19 +101,26 @@ TEST_CASE("variant")
         }
         SECTION("NonTrivial, int")
         {
-            estd::internal::variant_storage2<estd::test::NonTrivial, int> vs;
+            internal::variant_storage2<estd::test::NonTrivial, int> vs;
 
             REQUIRE(!vs.is_trivial);
         }
         SECTION("variant_size")
         {
-            constexpr unsigned size = estd::internal::variant_size<vs_type>::value;
+            constexpr unsigned size = internal::variant_size<vs_type>::value;
 
             REQUIRE(size == 2);
         }
         SECTION("variant_alternative")
         {
-            internal::variant_alternative_t<0, vs_type> i;
+            typedef internal::variant_alternative_t<0, vs_type> type0;
+            typedef internal::variant_alternative_t<1, vs_type> type1;
+
+            internal::ensure_type_t<monostate, type0> dummy;
+            internal::ensure_type_t<int, type1> dummy2 = 0;
+
+            REQUIRE(is_same<monostate, type0>::value);
+            REQUIRE(is_same<int, type1>::value);
         }
     }
     SECTION("misc")
