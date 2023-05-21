@@ -4,6 +4,8 @@
 
 #include "test-data.h"
 
+#include "macro/push.h"
+
 using namespace estd;
 
 TEST_CASE("variant")
@@ -150,3 +152,5 @@ TEST_CASE("variant")
         }
     }
 }
+
+#include "macro/pop.h"

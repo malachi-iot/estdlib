@@ -3,6 +3,7 @@
 #include "../internal/chrono.h"
 #include "../internal/chrono/duration.h"
 #include "../internal/chrono/time_point.h"
+#include "../internal/chrono/literals.h"
 #include "../ratio.h"
 #include "../limits.h"
 
@@ -24,11 +25,6 @@ inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
     return duration_cast<ToDuration>(our_d);
 }
 #endif
-
-#endif // FEATURE_ESTD_CHRONO
-
-#ifdef FEATURE_ESTD_CHRONO
-
 
 
 }

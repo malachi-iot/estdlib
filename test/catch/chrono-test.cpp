@@ -60,7 +60,6 @@ TEST_CASE("chrono tests")
     }
     SECTION("common_type specialization")
     {
-#ifdef FEATURE_ESTD_CHRONO_EXP
         typedef estd::common_type<estd::chrono::seconds, estd::chrono::milliseconds>::type common;
         typedef common::period period;
         int num = period::num;
@@ -118,7 +117,6 @@ TEST_CASE("chrono tests")
 
             REQUIRE(digits == 15);
         }
-#endif
     }
     SECTION("fake_clock tests")
     {
@@ -146,7 +144,6 @@ TEST_CASE("chrono tests")
 
         REQUIRE(count == 333);
 
-#ifdef FEATURE_ESTD_CHRONO_EXP
         fake_clock::duration delta = clock.now() - second;
         // needs this https://en.cppreference.com/w/cpp/chrono/duration/common_type specialization
         // which in turns needs greatest common divider for the two ratios
@@ -163,7 +160,6 @@ TEST_CASE("chrono tests")
         result = delta < estd::chrono::milliseconds(334);
 
         REQUIRE(result);
-#endif
 
         second = first;
 
@@ -209,7 +205,6 @@ TEST_CASE("chrono tests")
         REQUIRE(abs(mp) == abs(mn));
 
         // needs enhanced common_type to operate and switch between precisions
-#ifdef FEATURE_ESTD_CHRONO_EXP
         SECTION("abs + bool")
         {
             typedef estd::chrono::duration<int8_t, estd::milli> milliseconds_st;
@@ -220,7 +215,6 @@ TEST_CASE("chrono tests")
 
             REQUIRE(result);
         }
-#endif
         SECTION("unsigned abs")
         {
             typedef estd::chrono::duration<uint16_t, estd::micro> microseconds_st;
@@ -255,12 +249,10 @@ TEST_CASE("chrono tests")
         REQUIRE(value3.count() == -5);
 
         // needs enhanced common_type to operate and switch between precisions
-#ifdef FEATURE_ESTD_CHRONO_EXP
         //value3 = (microseconds_st)value1 - value2;    // actually works, but generates warning
         value3 = estd::chrono::duration_cast<microseconds_st>(value1) - value2;
 
         REQUIRE(value3.count() == -5);
-#endif
     }
     SECTION("precision loss")
     {

@@ -200,43 +200,5 @@ CONSTEXPR duration<Rep, Period> abs(duration<Rep, Period> d)
 
 }}
 
-namespace estd {
-
-#ifdef FEATURE_ESTD_CHRONO_EXP
-
-/*
-// TODO: move this to better location
-template<std::intmax_t Denom1, std::intmax_t Denom2>
-static CONSTEXPR std::intmax_t ratio_dividenum */
-
-/*
-// for duration to be a common type, we need the same denominator.  This means
-// one of the ratio's numerators must increase, thus reducing the precision on the
-// other ratio.
-template <typename Dur1Int, typename Dur2Int, int Num1, int Num2, int Denom1, int Denom2>
-struct common_type<
-        chrono::duration<Dur1Int, ratio<Num1, Denom1> >,
-        chrono::duration<Dur2Int, ratio<Num2, Denom2> > >
-{
-private:
-    static CONSTEXPR int gcd_den = internal::gcd<Denom2, Denom1>::value;
-    static CONSTEXPR int _Num1 = Num1 * (Denom2 / gcd_den);
-    static CONSTEXPR int _Num2 = Num2 * (Denom1 / gcd_den);
-    static CONSTEXPR bool num1gtnum2 = _Num1 > _Num2;
-    static CONSTEXPR int NewNum = num1gtnum2 ? _Num1 : _Num2;
-    static CONSTEXPR int NewDenom = (Denom1 * Denom2) / gcd_den;
-    //static CONSTEXPR int gcd = internal::gcd<NewNum, NewDenom>::value;
-    static CONSTEXPR int gcd = 1;
-
-public:
-    // dummy type, for now
-    typedef chrono::duration<unsigned, estd::ratio<NewNum / gcd, NewDenom / gcd> > type;
-}; */
-
-
-
-#endif
-
-}
 
 #include "../internal/macro/pop.h"

@@ -25,6 +25,7 @@
 // not present in VC2008, but hopefully now years later it is in VC
 #define FEATURE_STD_CSTDINT 1
 #define FEATURE_STD_CASSERT 1
+#define FEATURE_STD_CHRONO 1
 #define FEATURE_STD_INITIALIZER_LIST 1
 #define FEATURE_STD_RATIO 1
 #define FEATURE_STD_THREAD 1
