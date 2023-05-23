@@ -260,6 +260,16 @@ class variant : public variant_storage2<Types...>
         t->~T();
     }   */
 
+    constexpr bool valid() const { return index_ != variant_npos(); }
+
+    // IDEA: Consider a feature flag to track the particular destructor of interest
+    // via a function pointer instead of this visitor pattern.  Would be a pretty specific
+    // speed vs size edge case
+    void destroy_if_valid()
+    {
+        if(valid()) visit(destroyer_functor{});
+    }
+
 public:
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
@@ -288,7 +298,7 @@ public:
     template <class F>
     void visit(F&& f)
     {
-        base_type::visit(std::move(f), index_);
+        base_type::visit(std::forward<F>(f), index_);
     }
 
     ~variant()
@@ -296,8 +306,7 @@ public:
         //auto v = base_type::template get<index_>();
         //apply<sizeof...(Types) - 1>(destroyer_functor{});
         //apply<sizeof...(Types) - 1>(&destroy);
-        if(!valueless_by_exception())
-            visit(destroyer_functor{});
+        destroy_if_valid();
     }
 
     variant(variant&& move_from) noexcept:
@@ -325,6 +334,8 @@ public:
     template <class T, class ...TArgs>
     T& emplace(TArgs&&...args)
     {
+        destroy_if_valid();
+
         T* v = set_index<T>();
 
         new (v) T(std::forward<TArgs>(args)...);

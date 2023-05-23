@@ -46,6 +46,15 @@ TEST_CASE("variant")
             }
 
             REQUIRE(test::NonTrivial::dtor_counter == 1);
+
+            {
+                variant1_type v(estd::in_place_type_t<test::NonTrivial>{}, 7);
+
+                v.emplace<int>(10);
+                v.emplace<test::NonTrivial>(9);
+            }
+
+            REQUIRE(test::NonTrivial::dtor_counter == 3);
         }
         SECTION("assign")
         {
@@ -63,7 +72,7 @@ TEST_CASE("variant")
 
             variant1_type v2(std::move(v));
 
-            REQUIRE(test::NonTrivial::dtor_counter == 1);
+            REQUIRE(test::NonTrivial::dtor_counter == 3);
         }
     }
     SECTION("storage")
