@@ -77,7 +77,7 @@ TEST_CASE("variant")
     }
     SECTION("storage")
     {
-        typedef estd::internal::variant_storage2<estd::monostate, int> vs_type;
+        typedef estd::internal::variant_storage<estd::monostate, int> vs_type;
 
         SECTION("ensure")
         {
@@ -92,13 +92,13 @@ TEST_CASE("variant")
         }
         SECTION("monostate, int")
         {
-            estd::internal::variant_storage2<estd::monostate, int> vs;
+            estd::internal::variant_storage<estd::monostate, int> vs;
 
             REQUIRE(vs.is_trivial);
         }
         SECTION("int, int")
         {
-            estd::internal::variant_storage2<int, int> vs;
+            estd::internal::variant_storage<int, int> vs;
 
             REQUIRE(vs.is_trivial);
 
@@ -110,7 +110,7 @@ TEST_CASE("variant")
         }
         SECTION("NonTrivial, int")
         {
-            internal::variant_storage2<estd::test::NonTrivial, int> vs;
+            internal::variant_storage<estd::test::NonTrivial, int> vs;
 
             REQUIRE(!vs.is_trivial);
         }

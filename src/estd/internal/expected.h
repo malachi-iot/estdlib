@@ -62,7 +62,7 @@ protected:
     // and plays nice with variant_storage
     typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
 
-    variant_storage2<nonvoid_value_type, E> storage;
+    variant_storage<nonvoid_value_type, E> storage;
 
     ESTD_CPP_CONSTEXPR_RET expected() :
         storage(in_place_index_t<0>{}, nonvoid_value_type{}) {}

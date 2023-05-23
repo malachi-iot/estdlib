@@ -14,7 +14,7 @@ namespace internal {
 
 
 template <bool trivial, class ...T>
-struct variant_storage;
+struct variant_storage_base;
 
 template <class ...Types>
 class variant;
@@ -30,25 +30,25 @@ constexpr type_at_index<index, TArgs...>* get_if(variant<TArgs...>& vs)
 // DEBT: true std code throws exception on index mismatch here - we need to reflect error
 // state somehow
 template <int index, bool trivial, class ...TArgs>
-type_at_index<index, TArgs...>& get(variant_storage<trivial, TArgs...>& vs)
+type_at_index<index, TArgs...>& get(variant_storage_base<trivial, TArgs...>& vs)
 {
     return * vs.template get<index>();
 }
 
 template <int index, bool trivial, class ...TArgs>
-const type_at_index<index, TArgs...>& get(const variant_storage<trivial, TArgs...>& vs)
+const type_at_index<index, TArgs...>& get(const variant_storage_base<trivial, TArgs...>& vs)
 {
     return * vs.template get<index>();
 }
 
 template <class T, bool trivial, class ...Types>
-T& get(variant_storage<trivial, Types...>& vs)
+T& get(variant_storage_base<trivial, Types...>& vs)
 {
     return * vs.template get<T>();
 }
 
 template <class T, bool trivial, class ...Types>
-constexpr const T& get(const variant_storage<trivial, Types...>& vs)
+constexpr const T& get(const variant_storage_base<trivial, Types...>& vs)
 {
     return * vs.template get<T>();
 }
@@ -112,7 +112,7 @@ union variant_union<true, T1, T2, T3>
 
 
 template <bool trivial, class ...Types>
-struct variant_storage
+struct variant_storage_base
 {
     typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
@@ -128,10 +128,10 @@ private:
     };
 
 public:
-    variant_storage() = default;
+    variant_storage_base() = default;
 
     template <unsigned index, class ...TArgs>
-    constexpr variant_storage(estd::in_place_index_t<index>, TArgs&&...args) :
+    constexpr variant_storage_base(estd::in_place_index_t<index>, TArgs&&...args) :
         dummy{
             construct_at<type_at_index<index, Types...>>
                 (storage.raw, std::forward<TArgs>(args)...)}
@@ -189,20 +189,20 @@ public:
 };
 
 template <class ...T>
-using variant_storage2 = variant_storage<are_trivial<T...>::value, T...>;
+using variant_storage = variant_storage_base<are_trivial<T...>::value, T...>;
 
 template <class T>
 struct variant_size;
 
 template <class... Types>
-struct variant_size<variant_storage2<Types...> > :
+struct variant_size<variant_storage<Types...> > :
     variadic_size<Types...> {};
 
 template <unsigned I, class T>
 struct variant_alternative;
 
 template <unsigned I, class... Types>
-struct variant_alternative<I, variant_storage2<Types...> > :
+struct variant_alternative<I, variant_storage<Types...> > :
     type_identity<type_at_index<I, Types...>> { };
 
 template <unsigned I, class T>
@@ -220,9 +220,9 @@ struct destroyer_functor
 };
 
 template <class ...Types>
-class variant : public variant_storage2<Types...>
+class variant : public variant_storage<Types...>
 {
-    using base_type = variant_storage2<Types...>;
+    using base_type = variant_storage<Types...>;
     using size_type = std::size_t;
 
     struct mover_functor
