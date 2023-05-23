@@ -50,6 +50,7 @@ public:
 // overlap, but perhaps we can use a high-bit filter in controlled
 // circumstances
 
+// DEBT: Deviates from spec when T=void, it is treated as 'monostate'
 template <class T, class E>
 class expected
 {
@@ -57,13 +58,14 @@ public:
     typedef T value_type;
     typedef E error_type;
 
-protected:
     // Silently promote void to monostate so that it registers as 'trivial'
-    // and plays nice with variant_storage
+    // and plays nice with variant_storage.  Deviates from std approach
     typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
 
+private:
     variant_storage<nonvoid_value_type, E> storage;
 
+protected:
     ESTD_CPP_CONSTEXPR_RET expected() :
         storage(in_place_index_t<0>{}, nonvoid_value_type{}) {}
 
@@ -82,12 +84,14 @@ protected:
     ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) : error_(e) {}
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET expected(const nonvoid_value_type& v) :
-        storage(in_place_index_t<0>{}, v)
+#if __cpp_constexpr
+    constexpr explicit
+#endif
+    expected(nonvoid_value_type&& v) :
+        storage(in_place_index_t<0>{}, std::forward<nonvoid_value_type>(v))
     {}
 
 public:
-    // DEBT: Deviates from spec when void is involved, returns monostate
     nonvoid_value_type& value() { return get<0>(storage); }
     ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<0>(storage); }
 

@@ -34,10 +34,12 @@ public:
         has_value_(true)
     {}
 
-    //template <class T2>
-    //ESTD_CPP_CONSTEXPR_RET
-    expected(const typename base_type::nonvoid_value_type& v) :
-        base_type(v),
+    // DEBT: Doesn't do U -> T conversion as per spec
+#if __cpp_constexpr
+    constexpr explicit
+#endif
+    expected(nonvoid_value_type&& v) :
+        base_type(std::forward<nonvoid_value_type>(v)),
         has_value_(true)
     {}
 
