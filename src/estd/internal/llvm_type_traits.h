@@ -1,7 +1,8 @@
 #pragma once
 
 // just for tooltips/really type_traits in fact includes llvm_type_traits
-#include "../type_traits.h"
+#include "type_traits.h"
+#include "llvm/is_void.h"
 
 // code chunks yanked and adapted straight from LLVM
 
@@ -67,9 +68,6 @@ struct __apply_cv<_Tp&, _Up, true, true>
 };
 
 
-template <class _Tp> struct __libcpp_is_void       : public false_type {};
-template <>          struct __libcpp_is_void<void> : public true_type {};
-
 template <class _Hp, class _Tp>
 struct __type_list
 {
@@ -130,9 +128,6 @@ typedef
 #endif
     > > > > > __signed_types;
 }
-
-template <class _Tp> struct is_void
-    : public internal::__libcpp_is_void<typename remove_cv<_Tp>::type> {};
 
 // original also had a clang-specific check to use an inbuild __is_enum
 // but we don't follow suit, at least not for now

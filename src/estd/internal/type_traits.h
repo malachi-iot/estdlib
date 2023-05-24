@@ -12,6 +12,7 @@
 #include "platform.h"
 #include "raw/type_traits.h"
 #include "../port/type_traits.h"
+#include "is_convertible.h"
 
 // Semi-hack to get arduino/Print.h to auto include more smoothly
 // Only a little kludgey
