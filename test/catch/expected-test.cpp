@@ -16,6 +16,11 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
+static estd::expected<int, estd::errc> err_return()
+{
+    return estd::unexpected<estd::errc>(estd::errc::invalid_argument);
+}
+
 
 typedef estd::test::NonTrivial ExplicitError;
 

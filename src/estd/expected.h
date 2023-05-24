@@ -65,8 +65,12 @@ public:
 #endif
 
     template <class G>
+#if __cpp_conditional_explicit || FEATURE_ESTD_STRICT_EXPECTED
     CONSTEXPR_EXPLICIT((!is_convertible<const G&, E>::value)) expected(
         const unexpected<G>& u) :
+#else
+    ESTD_CPP_CONSTEXPR_RET expected(const unexpected<G>& u) :
+#endif
         base_type(unexpect_t{}, u.error()),
         has_value_(false)
     {}

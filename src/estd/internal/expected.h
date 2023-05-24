@@ -7,6 +7,10 @@
 
 #include "raw/expected.h"
 
+#ifndef FEATURE_ESTD_STRICT_EXPECTED
+#define FEATURE_ESTD_STRICT_EXPECTED 0
+#endif
+
 // DEBT: At first we made an effort to be c++03 compliant, but now things like
 // 'are_trivial' and 'variant_storage' are very much c++11 onward.  So, either
 // make THEM also c++03 compliant, or remove the sprinkling of __cpp_variadic_templates
