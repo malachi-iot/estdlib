@@ -36,6 +36,14 @@
 #define EXPLICIT
 #endif
 
+#ifdef __cpp_conditional_explicit
+#define CONSTEXPR_EXPLICIT(conditional) constexpr explicit(conditional)
+#elif __cpp_constexpr
+#define CONSTEXPR_EXPLICIT(conditional) constexpr explicit
+#else
+#define CONSTEXPR_EXPLICIT(conditional) inline
+#endif
+
 #ifdef FEATURE_CPP_NOEXCEPT
 #define NOEXCEPT noexcept
 #else

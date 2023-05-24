@@ -64,7 +64,7 @@ public:
     {}
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET expected(const unexpected_type& u) :
+    CONSTEXPR_EXPLICIT(true) expected(const unexpected_type& u) :
         base_type(unexpect_t{}, u.error()),
         has_value_(false)
     {}
