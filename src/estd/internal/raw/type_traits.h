@@ -165,10 +165,35 @@ struct aligned_storage {
 };
 #endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template< class... >
+#ifdef __cpp_alias_templates
+template<class...>
 using void_t = void;
+
+template< bool B, class T = void >
+using enable_if_t = typename enable_if<B,T>::type;
+
+template< bool B, class T, class F >
+using conditional_t = typename conditional<B,T,F>::type;
+#else
+// UNTESTED
+template< bool B, class T = void >
+class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
+
+#if __cpp_variadic_templates
+// Shamelessly lifted from https://en.cppreference.com/w/cpp/types/conjunction
+template<class...> struct conjunction : true_type {};
+
+template<class B1> struct conjunction<B1> : B1 {};
+template<class B1, class... Bn>
+struct conjunction<B1, Bn...>
+    : conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+#endif
+
+#if __cpp_inline_variables
+template< class... B >
+inline constexpr bool conjunction_v = conjunction<B...>::value;
+#endif
 
 }

@@ -15,19 +15,6 @@ namespace estd {
 
 
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template< bool B, class T = void >
-using enable_if_t = typename enable_if<B,T>::type;
-
-template< bool B, class T, class F >
-using conditional_t = typename conditional<B,T,F>::type;
-#else
-// UNTESTED
-template< bool B, class T = void >
-class enable_if_t : public enable_if<B, T>::type {};
-#endif
-
-
 namespace internal {
 
 template <class T> char is_class_test(int T::*);

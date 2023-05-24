@@ -48,6 +48,8 @@ struct Dummy
     }
 };
 
+struct ChildOfDummy : Dummy {};
+
 
 struct NonCopyable
 {

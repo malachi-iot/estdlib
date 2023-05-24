@@ -64,7 +64,9 @@ public:
     {}
 #endif
 
-    CONSTEXPR_EXPLICIT(true) expected(const unexpected_type& u) :
+    template <class G>
+    CONSTEXPR_EXPLICIT((!is_convertible<const G&, E>::value)) expected(
+        const unexpected<G>& u) :
         base_type(unexpect_t{}, u.error()),
         has_value_(false)
     {}

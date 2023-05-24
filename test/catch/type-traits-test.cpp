@@ -8,12 +8,7 @@
 
 using namespace estd;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#if __has_warning("-Wunused-but-set-variable")
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#include "macro/push.h"
 
 TEST_CASE("type traits tests")
 {
@@ -98,6 +93,13 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v == true);
     }
+    SECTION("is_convertible")
+    {
+        REQUIRE(is_convertible<test::ChildOfDummy, test::Dummy>::value == true);
+        REQUIRE(is_convertible<test::Dummy, test::ChildOfDummy>::value == false);
+        REQUIRE(is_convertible<test::ChildOfDummy*, test::Dummy*>::value == true);
+        REQUIRE(is_convertible<test::Dummy*, test::ChildOfDummy*>::value == false);
+    }
 }
 
-#pragma GCC diagnostic pop
+#include "macro/pop.h"
