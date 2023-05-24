@@ -16,7 +16,8 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
-static estd::expected<int, estd::errc> err_return()
+template <class T>
+static estd::expected<T, estd::errc> err_return()
 {
     return estd::unexpected<estd::errc>(estd::errc::invalid_argument);
 }
@@ -71,6 +72,10 @@ TEST_CASE("expected")
 
             //expected_type2 e3("hello");
             expected_type2 e4(estd::unexpected<const char*>("hello"));
+        }
+        SECTION("implicit conversion to E")
+        {
+            REQUIRE(err_return<int>().error() == estd::errc::invalid_argument);
         }
     }
     SECTION("void value_type")

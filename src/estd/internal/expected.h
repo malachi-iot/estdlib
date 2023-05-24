@@ -18,11 +18,13 @@
 
 namespace estd { namespace internal {
 
+struct unexpected_tag {};
+
 // Doesn't need to play with uninitialized storage
 // since it's always required that E is initialized somehow
 // when using this directly as 'unexpected'
 template <class E>
-class unexpected
+class unexpected : public unexpected_tag
 {
 private:
     const E error_;
@@ -30,9 +32,10 @@ private:
 protected:
     typedef E error_type;
 
-    ESTD_CPP_DEFAULT_CTOR(unexpected)
-
 #if __cpp_variadic_templates
+    constexpr unexpected(const unexpected&) = default;
+    constexpr unexpected(unexpected&&) NOEXCEPT = default;
+
     template <class Err = E>
     constexpr explicit unexpected(Err&& e) : error_(std::forward<Err>(e)) {}
 
@@ -46,6 +49,7 @@ protected:
 #endif
 
 public:
+    E& error() { return error_; }
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
 };
 
