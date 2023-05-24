@@ -12,7 +12,7 @@ class unexpected : public internal::unexpected<const E>
 public:
 #if __cpp_variadic_templates
     template <class Err = E>
-    constexpr explicit unexpected(Err&& e) : base_type(std::move(e)) {}
+    constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
 #else
     ESTD_CPP_CONSTEXPR_RET unexpected(const E& e) : base_type(e) {}
 #endif

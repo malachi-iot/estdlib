@@ -16,6 +16,7 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
+
 typedef estd::test::NonTrivial ExplicitError;
 
 TEST_CASE("expected")
@@ -46,12 +47,25 @@ TEST_CASE("expected")
         }
         SECTION("non trivial error type")
         {
-            typedef estd::expected<int, ExplicitError> expected_type;
+            typedef estd::expected<int, ExplicitError> expected_type2;
 
-            expected_type e;
+            expected_type2 e;
 
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
+        }
+        SECTION("explicit converting E")
+        {
+            typedef estd::expected<int, const char*> expected_type2;
+
+            //expected_type e(estd::errc::invalid_argument);    // Beware, this cascades out to non-error value
+            expected_type e2(estd::unexpected<int>(0));
+
+            REQUIRE(e2.has_value() == false);
+            REQUIRE(e2.error() == 0);
+
+            //expected_type2 e3("hello");
+            expected_type2 e4(estd::unexpected<const char*>("hello"));
         }
     }
     SECTION("void value_type")

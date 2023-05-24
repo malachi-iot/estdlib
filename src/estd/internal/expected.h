@@ -30,7 +30,7 @@ protected:
 
 #if __cpp_variadic_templates
     template <class Err = E>
-    constexpr explicit unexpected(Err&& e) : error_(std::move(e)) {}
+    constexpr explicit unexpected(Err&& e) : error_(std::forward<Err>(e)) {}
 
     template <class ...TArgs>
     constexpr explicit unexpected(in_place_t, TArgs&&...args) :
