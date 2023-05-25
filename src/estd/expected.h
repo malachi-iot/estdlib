@@ -37,6 +37,7 @@ public:
         has_value_(true)
     {}
 
+#if UNUSED
     // DEBT: Doesn't do U -> T conversion as per spec
 #if __cpp_constexpr
     constexpr explicit
@@ -44,6 +45,12 @@ public:
     expected(nonvoid_value_type&& v) :
         base_type(std::forward<nonvoid_value_type>(v)),
         has_value_(true)
+    {}
+#endif
+    template <class U, class enabled = enable_if_t<internal::expected_ctor_6<U>::value> >
+    constexpr expected(U&& v) :
+        base_type(in_place_t{}, std::forward<U>(v)),
+        has_value_{true}
     {}
 
 

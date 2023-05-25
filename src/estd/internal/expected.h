@@ -24,10 +24,10 @@ struct unexpected_tag {};
 template <class T>
 using expected_ctor_6 = bool_constant<
     is_void<T>::value == false &&
-    is_same<remove_cvref_t<T>, in_place_t>::value == false &&  // DEBT: Is supposed to be remove_cvref_t
+    is_same<remove_cvref_t<T>, in_place_t>::value == false &&
     // DEBT: is_constructible
-    is_base_of<expected_tag, T>::value == false &&
-    is_base_of<unexpected_tag, T>::value == false
+    is_base_of<expected_tag, remove_cvref_t<T>>::value == false &&
+    is_base_of<unexpected_tag, remove_cvref_t<T>>::value == false
     >;
 
 // Doesn't need to play with uninitialized storage
@@ -70,7 +70,7 @@ public:
 
 // DEBT: Deviates from spec when T=void, it is treated as 'monostate'
 template <class T, class E>
-class expected
+class expected : public expected_tag
 {
 public:
     typedef T value_type;

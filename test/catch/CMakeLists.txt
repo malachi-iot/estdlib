@@ -68,7 +68,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # As per
     # https://stackoverflow.com/questions/31890021/mingw-too-many-sections-bug-while-compiling-huge-header-file-in-qt
     if(MSYS OR MINGW)
-        message(STATUS "Got here~")
+        message(STATUS "MSYS mode")
         target_compile_options(${PROJECT_NAME} PRIVATE -Wa,-mbig-obj)
     endif()
 endif()
