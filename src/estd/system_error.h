@@ -15,7 +15,11 @@ typedef std::errc errc;
 
 #else
 
+#if FEATURE_STD_CERRNO
+#include <cerrno>
+#else
 #include <errno.h>
+#endif
 
 namespace estd {
 
