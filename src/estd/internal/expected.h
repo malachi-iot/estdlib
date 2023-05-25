@@ -18,7 +18,17 @@
 
 namespace estd { namespace internal {
 
+struct expected_tag {};
 struct unexpected_tag {};
+
+template <class T>
+using expected_ctor_6 = bool_constant<
+    is_void<T>::value == false &&
+    is_same<remove_cvref_t<T>, in_place_t>::value == false &&  // DEBT: Is supposed to be remove_cvref_t
+    // DEBT: is_constructible
+    is_base_of<expected_tag, T>::value == false &&
+    is_base_of<unexpected_tag, T>::value == false
+    >;
 
 // Doesn't need to play with uninitialized storage
 // since it's always required that E is initialized somehow
@@ -113,6 +123,11 @@ public:
     }
 };
 
+#if __cpp_concepts
+template <class T>
+concept expected_ctor_6_ = expected_ctor_6<T>::value;
+
+#endif
 
 
 }}

@@ -21,7 +21,7 @@ struct integral_constant {
     //constexpr value_type operator()() const noexcept { return value; } //since c++14
 };
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template <bool B>
 using bool_constant = integral_constant<bool, B>;
 #endif
@@ -61,18 +61,26 @@ using remove_reference_t = typename remove_reference<T>::type;
 
 template< class T >
 struct remove_cv {
-    typedef typename estd::remove_volatile<typename remove_const<T>::type>::type type;
+    typedef typename remove_volatile<typename remove_const<T>::type>::type type;
 };
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
 template< class T >
-using remove_cv_t = typename remove_cv<T>::type;
+struct remove_cvref {
+    typedef typename remove_cv<typename remove_reference<T>::type>::type type;
+};
 
+#ifdef __cpp_alias_templates
 template< class T >
 using remove_const_t = typename remove_const<T>::type;
 
 template< class T >
 using remove_volatile_t = typename remove_volatile<T>::type;
+
+template< class T >
+using remove_cv_t = typename remove_cv<T>::type;
+
+template< class T >
+using remove_cvref_t = typename remove_cvref<T>::type;
 #endif
 
 template< class T >
@@ -169,14 +177,14 @@ struct aligned_storage {
 template<class...>
 using void_t = void;
 
-template< bool B, class T = void >
+template< bool B, class T = void>
 using enable_if_t = typename enable_if<B,T>::type;
 
 template< bool B, class T, class F >
 using conditional_t = typename conditional<B,T,F>::type;
 #else
 // UNTESTED
-template< bool B, class T = void >
+template< bool B, class T = void>
 class enable_if_t : public enable_if<B, T>::type {};
 #endif
 

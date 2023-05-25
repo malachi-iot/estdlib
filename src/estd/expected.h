@@ -10,10 +10,10 @@ class unexpected : public internal::unexpected<const E>
     typedef internal::unexpected<const E> base_type;
 
 public:
-#if __cpp_variadic_templates
     constexpr unexpected(const unexpected&) = default;
     constexpr unexpected(unexpected&&) NOEXCEPT = default;
 
+#if __cpp_rvalue_references
     template <class Err = E>
     constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
 #else
@@ -103,6 +103,7 @@ public:
     }
 #endif
 };
+
 
 
 }
