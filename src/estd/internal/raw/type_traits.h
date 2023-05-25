@@ -88,7 +88,7 @@ struct add_cv { typedef const volatile T type; };
 
 template< class T> struct add_const { typedef const T type; };
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template< class T >
 using add_const_t = typename add_const<T>::type;
 #endif
@@ -100,7 +100,7 @@ template<class T> struct is_const<const T> : true_type {};
 
 template <class T> struct is_reference      : false_type {};
 template <class T> struct is_reference<T&>  : true_type {};
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
 template <class T> struct is_reference<T&&> : true_type {};
 #endif
 
