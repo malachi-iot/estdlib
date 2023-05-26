@@ -136,6 +136,7 @@ public:
     {
         destroy();
         new (&base_type::value()) T(std::forward<TArgs>(args)...);
+        has_value_ = true;
         return base_type::value();
     }
 
