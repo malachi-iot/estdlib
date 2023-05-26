@@ -53,6 +53,20 @@ TEST_CASE("expected")
 
             REQUIRE(e.has_value() == false);
         }
+        SECTION("assignment operator")
+        {
+            expected_type e;
+
+            e = 10;
+
+            REQUIRE(e.has_value());
+            REQUIRE(*e == 10);
+
+            e = unexpected<errc>(errc::invalid_argument);
+
+            REQUIRE(!e.has_value());
+            REQUIRE(e.error() == errc::invalid_argument);
+        }
         SECTION("non trivial error type")
         {
             typedef estd::expected<int, ExplicitError> expected_type2;

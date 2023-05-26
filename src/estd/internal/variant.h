@@ -120,6 +120,9 @@ struct variant_storage_base
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
 
+    template <int I>
+    using type_at_index = estd::internal::type_at_index<I, Types...>;
+
 private:
     union
     {
@@ -133,21 +136,28 @@ public:
     template <unsigned index, class ...TArgs>
     constexpr variant_storage_base(estd::in_place_index_t<index>, TArgs&&...args) :
         dummy{
-            construct_at<type_at_index<index, Types...>>
+            construct_at<type_at_index<index>>
                 (storage.raw, std::forward<TArgs>(args)...)}
     {
     }
 
     template <unsigned index>
-    type_at_index<index, Types...>* get()
+    type_at_index<index>* get()
     {
-        return (type_at_index<index, Types...>*) storage.raw;
+        return (type_at_index<index>*) storage.raw;
     }
 
     template <unsigned index>
-    constexpr type_at_index<index, Types...>* get() const
+    constexpr type_at_index<index>* get() const
     {
-        return (type_at_index<index, Types...>*) storage.raw;
+        return (type_at_index<index>*) storage.raw;
+    }
+
+    template <unsigned index>
+    void destruct()
+    {
+        typedef type_at_index<index> t;
+        ((t*) storage.raw)->~t();
     }
 
     template <class T>
@@ -239,9 +249,6 @@ class variant : public variant_storage<Types...>
 
     template <class T2>
     using index_of_type = estd::internal::index_of_type<T2, Types...>;
-
-    template <int I>
-    using type_at_index = estd::internal::type_at_index<I, Types...>;
 
     size_type index_;
 

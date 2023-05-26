@@ -109,12 +109,14 @@ protected:
         storage(in_place_index_t<0>{}, std::forward<nonvoid_value_type>(v))
     {}
 
-    void destroy(bool has_value)
+    void destroy_value()
     {
-        if(has_value)
-            storage.template get<0>()->~nonvoid_value_type();
-        else
-            storage.template get<1>()->~error_type();
+        storage.template destruct<0>();
+    }
+
+    void destroy_error()
+    {
+        storage.template destruct<1>();
     }
 
 public:
@@ -123,12 +125,6 @@ public:
 
     E& error() { return get<1>(storage); }
     ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<1>(storage); }
-
-    expected& operator=(nonvoid_value_type&& v)
-    {
-        // FIX: Should we be doing std::move here?  And if not, document why not
-        value() = v;
-    }
 };
 
 #if __cpp_concepts

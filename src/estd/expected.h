@@ -27,11 +27,12 @@ class expected : public internal::expected<T, E>
 {
     typedef internal::expected<T, E> base_type;
 
-    const bool has_value_;
+    bool has_value_;
 
 public:
     typedef unexpected<E> unexpected_type;
     typedef typename base_type::nonvoid_value_type nonvoid_value_type;
+    typedef typename base_type::error_type error_type;
 
     ESTD_CPP_CONSTEXPR_RET expected() :
         has_value_(true)
@@ -85,9 +86,44 @@ public:
         has_value_(false)
     {}
 
+
+    expected& operator=(nonvoid_value_type&& v)
+    {
+        if(has_value_)
+            base_type::value() = std::forward<nonvoid_value_type>(v);
+        else
+        {
+            base_type::destroy_error();
+            new (&base_type::value()) nonvoid_value_type(std::forward<nonvoid_value_type>(v));
+            has_value_ = true;
+        }
+
+        return *this;
+    }
+
+    expected& operator=(const unexpected_type& copy_from)
+    {
+        const error_type& e = copy_from.error();
+
+        if(!has_value_)
+            base_type::error() = e;
+        else
+        {
+            base_type::destroy_value();
+            new (&base_type::error()) error_type(e);
+            has_value_ = false;
+        }
+        return *this;
+    }
+
+    // DEBT: Spec doesn't mention whether a move where neither a value or error is present
+    // but I have a feeling we'll need to address that
     ~expected()
     {
-        base_type::destroy(has_value_);
+        if(has_value_)
+            base_type::destroy_value();
+        else
+            base_type::destroy_error();
     }
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
