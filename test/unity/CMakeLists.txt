@@ -13,6 +13,7 @@ set(SOURCES
     chrono.cpp
     cpp.cpp
     cstddef.cpp
+    expected.cpp
     functional.cpp
     limits.cpp
     locale.cpp
@@ -24,6 +25,7 @@ set(SOURCES
     streambuf.cpp
     string.cpp
     tuple.cpp
+    variant.cpp
     )
 
 message(DEBUG "estd unity: CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")

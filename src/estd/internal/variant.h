@@ -7,6 +7,10 @@
 #include "raw/variant.h"
 #include "../tuple.h"
 
+#if __cpp_exceptions
+#include <exception>
+#endif
+
 namespace estd {
 
 #if __cpp_variadic_templates
@@ -52,6 +56,31 @@ constexpr const T& get(const variant_storage_base<trivial, Types...>& vs)
 {
     return * vs.template get<T>();
 }
+
+#if __cpp_exceptions
+class bad_variant_access : std::exception
+{
+public:
+};
+
+
+template <int index, class ...TArgs>
+type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
+{
+    if(vs.index() != index) throw bad_variant_access;
+
+    return * vs.template get<index>();
+}
+
+
+template <int index, class ...TArgs>
+const type_at_index<index, TArgs...>& get(const variant<TArgs...>& vs)
+{
+    if(vs.index() != index) throw bad_variant_access;
+
+    return * vs.template get<index>();
+}
+#endif
 
 template <class T, class ...Types>
 typename add_pointer<T>::type get_if(variant<Types...>& vs)
