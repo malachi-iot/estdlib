@@ -29,6 +29,14 @@ class expected : public internal::expected<T, E>
 
     bool has_value_;
 
+    void destroy()
+    {
+        if(has_value_)
+            base_type::destroy_value();
+        else
+            base_type::destroy_error();
+    }
+
 public:
     typedef unexpected<E> unexpected_type;
     typedef typename base_type::nonvoid_value_type nonvoid_value_type;
@@ -120,10 +128,15 @@ public:
     // but I have a feeling we'll need to address that
     ~expected()
     {
-        if(has_value_)
-            base_type::destroy_value();
-        else
-            base_type::destroy_error();
+        destroy();
+    }
+
+    template <class ...TArgs>
+    nonvoid_value_type& emplace(TArgs&&...args)
+    {
+        destroy();
+        new (&base_type::value()) T(std::forward<TArgs>(args)...);
+        return base_type::value();
     }
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
