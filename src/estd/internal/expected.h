@@ -109,6 +109,14 @@ protected:
         storage(in_place_index_t<0>{}, std::forward<nonvoid_value_type>(v))
     {}
 
+    void destroy(bool has_value)
+    {
+        if(has_value)
+            storage.template get<0>()->~nonvoid_value_type();
+        else
+            storage.template get<1>()->~error_type();
+    }
+
 public:
     nonvoid_value_type& value() { return get<0>(storage); }
     ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<0>(storage); }

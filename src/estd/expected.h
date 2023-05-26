@@ -85,6 +85,11 @@ public:
         has_value_(false)
     {}
 
+    ~expected()
+    {
+        base_type::destroy(has_value_);
+    }
+
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
 
     const nonvoid_value_type& operator*() const

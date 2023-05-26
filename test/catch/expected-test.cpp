@@ -22,6 +22,8 @@ static estd::expected<T, estd::errc> err_return()
     return estd::unexpected<estd::errc>(estd::errc::invalid_argument);
 }
 
+using namespace estd;
+
 
 typedef estd::test::NonTrivial ExplicitError;
 
@@ -114,6 +116,8 @@ TEST_CASE("expected")
             REQUIRE(!e.has_value());
             REQUIRE(e.error() == 4);
         }
+
+        REQUIRE(test::NonTrivial::dtor_counter == 1);
     }
     SECTION("Dummy (struct) type")
     {

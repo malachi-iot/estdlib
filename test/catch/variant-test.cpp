@@ -45,7 +45,9 @@ TEST_CASE("variant")
                 REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
             }
 
-            REQUIRE(test::NonTrivial::dtor_counter == 1);
+            // DEBT: Was already 1 from expected-test, now 2 - cross testing globals like this
+            // a potential headache
+            REQUIRE(test::NonTrivial::dtor_counter == 2);
 
             {
                 variant1_type v(estd::in_place_type_t<test::NonTrivial>{}, 7);
@@ -54,7 +56,7 @@ TEST_CASE("variant")
                 v.emplace<test::NonTrivial>(9);
             }
 
-            REQUIRE(test::NonTrivial::dtor_counter == 3);
+            REQUIRE(test::NonTrivial::dtor_counter == 4);
         }
         SECTION("assign")
         {
@@ -72,7 +74,7 @@ TEST_CASE("variant")
 
             variant1_type v2(std::move(v));
 
-            REQUIRE(test::NonTrivial::dtor_counter == 3);
+            REQUIRE(test::NonTrivial::dtor_counter == 4);
         }
     }
     SECTION("storage")
