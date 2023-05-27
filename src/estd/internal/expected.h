@@ -87,8 +87,6 @@ protected:
     template <class U, class G>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT expected(const expected<U, G>& copy_from, bool has_value)
     {
-        // TODO: Need to destroy previous value/error
-
         if(has_value)
         {
             new (storage.raw()) U(copy_from.value());

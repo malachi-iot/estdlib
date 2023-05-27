@@ -134,6 +134,10 @@ struct NonTrivial
 };
 
 
+constexpr unsigned dtor_count_1() { return 3; }
+constexpr unsigned dtor_count_2() { return dtor_count_1() + 1; }
+
+
 }}
 
 #include "macro/pop.h"

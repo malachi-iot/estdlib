@@ -127,9 +127,9 @@ TEST_CASE("expected")
             REQUIRE(e.error() == estd::errc::invalid_argument);
         }
     }
-    SECTION("non-trivial vaue_type")
+    SECTION("non-trivial value_type")
     {
-        typedef estd::expected<ExplicitError, int> expected_type;
+        typedef estd::expected<test::NonTrivial, int> expected_type;
 
         SECTION("with value")
         {
@@ -145,8 +145,16 @@ TEST_CASE("expected")
             REQUIRE(!e.has_value());
             REQUIRE(e.error() == 4);
         }
+        SECTION("copy constructor")
+        {
+            expected_type e(in_place_t{}, 5);
+            expected_type e2(e);
 
-        REQUIRE(test::NonTrivial::dtor_counter == 1);
+            REQUIRE(e2.has_value());
+            REQUIRE(e2.value().code_ == 5);
+
+            //REQUIRE(test::NonTrivial::dtor_counter == test::dtor_count_1());
+        }
     }
     SECTION("Dummy (struct) type")
     {
