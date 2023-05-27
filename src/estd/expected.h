@@ -46,6 +46,22 @@ public:
         has_value_(true)
     {}
 
+#if __cpp_concepts
+    template <class U, class G>
+    constexpr explicit expected(const expected<U, G>& copy_from)
+        requires(
+        (is_void<T>::value && is_void<U>::value) ||
+                (is_constructible<T, std::add_lvalue_reference_t<const U> >::value )
+        )
+
+#else
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT(const expected& copy_from)
+#endif
+        : has_value_(copy_from.has_value())
+    {
+
+    }
+
 #if UNUSED
     // DEBT: Doesn't do U -> T conversion as per spec
 #if __cpp_constexpr
