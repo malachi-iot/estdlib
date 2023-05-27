@@ -67,7 +67,7 @@ public:
 template <int index, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
 {
-    if(vs.index() != index) throw bad_variant_access;
+    if(vs.index() != index) throw bad_variant_access();
 
     return * vs.template get<index>();
 }
@@ -76,7 +76,7 @@ type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
 template <int index, class ...TArgs>
 const type_at_index<index, TArgs...>& get(const variant<TArgs...>& vs)
 {
-    if(vs.index() != index) throw bad_variant_access;
+    if(vs.index() != index) throw bad_variant_access();
 
     return * vs.template get<index>();
 }
