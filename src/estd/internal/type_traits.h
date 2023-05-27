@@ -21,6 +21,18 @@
 #if __cpp_alias_templates
 template <class T, class ...TArgs>
 using is_constructible = std::is_constructible<T, TArgs...>;
+
+template <class T, class ...TArgs>
+using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
+
+#if __cpp_inline_variables
+template <class T, class ...TArgs>
+inline constexpr bool is_constructible_v = is_constructible<T, TArgs...>::value;
+
+template <class T, class ...TArgs>
+inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<T, TArgs...>::value;
+#endif
+
 #endif
 
 #endif

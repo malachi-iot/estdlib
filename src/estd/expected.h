@@ -50,14 +50,16 @@ public:
     template <class U, class G>
     constexpr explicit expected(const expected<U, G>& copy_from)
         requires(
-        (is_void<T>::value && is_void<U>::value) ||
-                (is_constructible<T, std::add_lvalue_reference_t<const U> >::value )
+        ((is_void<T>::value && is_void<U>::value) ||
+                (is_constructible_v<T, add_lvalue_reference_t<const U> >)) &&
+                is_constructible_v<E, const G&>
         )
 
 #else
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT(const expected& copy_from)
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT expected(const expected& copy_from)
 #endif
-        : has_value_(copy_from.has_value())
+        : base_type(copy_from, copy_from.has_value()),
+        has_value_(copy_from.has_value())
     {
 
     }

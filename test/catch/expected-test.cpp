@@ -93,6 +93,21 @@ TEST_CASE("expected")
         {
             REQUIRE(err_return<int>().error() == estd::errc::invalid_argument);
         }
+        SECTION("copy constructor")
+        {
+            expected_type e1;
+
+            e1 = unexpected<errc>(errc::invalid_argument);
+
+            // FIX: This seems to be doing trivial copy constructor
+            expected_type e2(e1);
+
+            REQUIRE(e2.has_value() == false);
+
+            e2 = 7;
+
+            REQUIRE(e2.has_value() == true);
+        }
     }
     SECTION("void value_type")
     {

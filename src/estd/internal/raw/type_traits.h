@@ -30,7 +30,7 @@ using bool_constant = integral_constant<bool, B>;
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#if __cpp_alias_templates
 template< class T >
 struct type_identity { using type = T; };
 
@@ -88,9 +88,18 @@ struct add_cv { typedef const volatile T type; };
 
 template< class T> struct add_const { typedef const T type; };
 
+template <class T>
+struct add_lvalue_reference : type_identity<T&> {};
+
+template <>
+struct add_lvalue_reference<void> : type_identity<void> {};
+
 #ifdef __cpp_alias_templates
-template< class T >
+template <class T>
 using add_const_t = typename add_const<T>::type;
+
+template <class T>
+using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 #endif
 
 template< class T> struct add_volatile { typedef volatile T type; };

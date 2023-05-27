@@ -189,6 +189,15 @@ public:
         ((t*) storage.raw)->~t();
     }
 
+    // More or less an emplace
+    template <unsigned index, class ...TArgs>
+    void construct(TArgs&&...args)
+    {
+        typedef type_at_index<index> t;
+
+        new (storage.raw) t(std::forward<TArgs>(args)...);
+    }
+
     template <class T>
     ensure_type_t<T>* get() { return (T*) storage.raw; }
 
@@ -225,6 +234,8 @@ public:
     {
         visit<0, F, Types...>(std::forward<F>(f), index);
     }
+
+    byte* raw() { return storage.raw; }
 };
 
 template <class ...T>

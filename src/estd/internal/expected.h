@@ -84,6 +84,21 @@ private:
     variant_storage<nonvoid_value_type, E> storage;
 
 protected:
+    template <class U, class G>
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT expected(const expected<U, G>& copy_from, bool has_value)
+    {
+        // TODO: Need to destroy previous value/error
+
+        if(has_value)
+        {
+            new (storage.raw()) U(copy_from.value());
+        }
+        else
+        {
+            new (storage.raw()) G(copy_from.error());
+        }
+    }
+
     ESTD_CPP_CONSTEXPR_RET expected() :
         storage(in_place_index_t<0>{}, nonvoid_value_type{}) {}
 
