@@ -20,6 +20,15 @@ struct test_init_functor
     }
 };
 
+struct test_functor
+{
+    template <class T>
+    bool operator()(in_place_type_t<T>)
+    {
+        return true;
+    }
+};
+
 TEST_CASE("variant")
 {
     SECTION("main")
@@ -195,6 +204,12 @@ TEST_CASE("variant")
                 REQUIRE(idx == 0);
                 REQUIRE(multiple == true);
             }
+        }
+        SECTION("visitor")
+        {
+            typedef internal::variadic_visitor_helper2<monostate, int, float> vh_type;
+
+            vh_type::visit(test_functor{});
         }
     }
 }

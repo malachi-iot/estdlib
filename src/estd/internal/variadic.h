@@ -11,6 +11,35 @@
 
 namespace estd { namespace internal {
 
+// Very similar to std::variant_alternative
+template <int index, class ...TArgs>
+using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
+
+
+template <unsigned I, class T>
+struct visitor_index  :
+    in_place_index_t<I>,
+    in_place_type_t<T>
+{};
+
+template <typename... Types>
+struct variadic_visitor_helper2
+{
+    template <int I, class F,
+            class enabled = enable_if_t<(I == sizeof...(Types))>,
+            class... TArgs>
+    static constexpr bool visit(F&&, TArgs&&...) { return {}; }
+
+    template <int I = sizeof...(Types) - 1, class F,
+            class enabled = enable_if_t<(I < sizeof...(Types))>,
+            class... TArgs>
+    static bool visit(F&& f, TArgs&&...args, bool = true)
+    {
+        f(visitor_index<I, type_at_index<I, Types...>>{}, std::forward<TArgs>(args)...);
+        return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+    }
+};
+
 template <unsigned I, class F>
 constexpr bool variadic_visitor_helper(F&&) { return {}; }
 
@@ -64,10 +93,6 @@ struct are_trivial<T, TArgs...>
         are_trivial<TArgs...>::value;
 };
 
-
-// Very similar to std::variant_alternative
-template <int index, class ...TArgs>
-using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
 template <class T, int I, class ...TArgs>
 struct index_of_type_helper;
