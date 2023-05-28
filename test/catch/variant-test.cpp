@@ -119,6 +119,17 @@ TEST_CASE("variant")
 
             REQUIRE(get<int>(v) == 8);
         }
+        SECTION("copy")
+        {
+            variant1_type v;
+
+            v = 8;
+
+            variant1_type v2(v);
+
+            REQUIRE(v2.index() == v.index());
+            REQUIRE(get<int>(v2) == 8);
+        }
         SECTION("move")
         {
             variant1_type v;

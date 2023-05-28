@@ -358,6 +358,23 @@ struct converting_constructor_functor2
     }
 };
 
+struct copying_constructor_functor
+{
+    template <unsigned I, class T_i, class ...TArgs>
+    bool operator()(visitor_index<I, T_i>, variant_storage<TArgs...>& v,
+        const variant<TArgs...>& copy_from)
+    {
+        if(copy_from.index() != I) return false;
+
+        // DEBT: This should work, but 'get' somehow glitches during compile.
+        // Technically however we prefer the low level get
+        //new (v.template get<I>()) T_i(get<I>(copy_from));
+
+        new (v.template get<I>()) T_i(* copy_from.template get<I>());
+        return true;
+    }
+};
+
 template <class ...Types>
 class variant : public variant_storage<Types...>
 {
@@ -413,6 +430,7 @@ public:
     {}
 
     constexpr variant(const variant& copy_from) :
+        base_type(in_place_visit_t{}, copying_constructor_functor{}, &index_, copy_from),
         index_{copy_from.index()}
     {
 
