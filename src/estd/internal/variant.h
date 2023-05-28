@@ -140,6 +140,9 @@ union variant_union<true, T1, T2, T3>
 };
 
 
+struct in_place_visit_t : in_place_tag {};
+
+
 template <bool trivial, class ...Types>
 struct variant_storage_base
 {
@@ -236,6 +239,10 @@ public:
     }
 
     byte* raw() { return storage.raw; }
+
+    template <class F>
+    variant_storage_base(in_place_visit_t, F&& f)
+    {}
 };
 
 template <class ...T>
@@ -322,6 +329,13 @@ public:
         base_type(in_place_index_t<0>{}),
         index_{0}
     {}
+
+    constexpr variant(const variant& copy_from) :
+        index_{copy_from.index()}
+    {
+
+    }
+
 
     template <unsigned index, class ...TArgs>
     constexpr explicit variant(in_place_index_t<index>, TArgs&&...args) :
