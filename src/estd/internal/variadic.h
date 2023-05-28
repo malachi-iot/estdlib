@@ -31,12 +31,46 @@ struct visitor_instance  : visitor_index<I, T>
     constexpr explicit visitor_instance(T& value) : value{value} {}
 };
 
+
+#if __cpp_concepts
+#include <concepts>
+
+namespace concepts {
+
+template <class T, class TProvider>
+concept GetterFunctor = requires(T f, TProvider& provider)
+{
+    f(visitor_index<0, int>{}, provider);
+};
+
+template <class T, class ...TArgs>
+concept ClassVisitorFunctor = requires(T f, TArgs&&...args)
+{
+    { f(visitor_index<0, int>{}, std::forward<TArgs>(args)...) } -> std::same_as<bool>;
+};
+
+
+template <class T, class ...TArgs>
+concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
+{
+    { f(visitor_instance<0, int>(v), std::forward<TArgs>(args)...) } -> std::same_as<bool>;
+};
+
+}
+#endif
+
+
 template <typename... Types>
 struct variadic_visitor_helper2
 {
-    template <int I, class F,
+    template <int I,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
-            class... TArgs>
+            class... TArgs,
+#if __cpp_concepts
+            concepts::ClassVisitorFunctor<TArgs...> F>
+#else
+            class F>
+#endif
     static constexpr short visit(F&&, TArgs&&...) { return -1; }
 
     template <int I = 0, class F,
@@ -51,9 +85,14 @@ struct variadic_visitor_helper2
     }
 
 
-    template <int I, class F, class Fg, class T,
-            class enabled = enable_if_t<(I == sizeof...(Types))>,
-            class... TArgs>
+#if __cpp_concepts
+    template <int I, class... TArgs,
+        concepts::InstanceVisitorFunctor<TArgs...> F, class T,
+        concepts::GetterFunctor<T&> Fg,
+#else
+    template <int I, class F, class Fg, class T, class... TArgs,
+#endif
+            class enabled = enable_if_t<(I == sizeof...(Types))> >
     static constexpr short visit_instance(F&&, Fg&&, T&, TArgs&&...) { return -1; }
 
     template <int I = 0, class F, class Fg, class T,
