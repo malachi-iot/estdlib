@@ -375,23 +375,25 @@ struct copying_constructor_functor
     }
 };
 
+
 template <class ...Types>
 class variant : public variant_storage<Types...>
 {
     using base_type = variant_storage<Types...>;
     using size_type = typename base_type::size_type;
 
-    struct mover_functor
+    struct moving_constructor_functor
     {
-        variant* const parent;
-
-        template <class T>
-        void operator()(T* move_from)
+        template <unsigned I, class T_i>
+        bool operator()(visitor_index<I, T_i>, base_type& v, variant&& move_from)
         {
-            T* move_to = parent->template get<T>();
-            new (move_to) T(std::move(*move_from));
+            if(move_from.index() != I) return false;
+
+            new (v.template get<I>()) T_i(std::move(* move_from.template get<I>()));
+            return true;
         }
     };
+
 
     template <class T2>
     using index_of_type = estd::internal::index_of_type<T2, Types...>;
@@ -489,12 +491,10 @@ public:
         destroy_if_valid();
     }
 
-    variant(variant&& move_from) noexcept:
+    variant(variant&& move_from) noexcept :
+        base_type(in_place_visit_t{}, moving_constructor_functor{}, &index_, std::move(move_from)),
         index_{move_from.index()}
     {
-        mover_functor f{this};
-        move_from.visit(f);
-
         // DEBT: Setting to 'valueless_by_exception'.  Docs don't indicate to do this,
         // but if we don't then the move_from variant destructor will try to run the dtor
         // of the alternative again - which I suppose is safe, but feels wrong somehow

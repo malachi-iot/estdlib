@@ -23,7 +23,7 @@ struct visitor_index  :
 {};
 
 template <unsigned I, class T>
-struct visitor_instance  : visitor_index<I, T>
+struct visitor_instance : visitor_index<I, T>
 {
     T& value;
 
