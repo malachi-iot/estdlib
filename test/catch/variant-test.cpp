@@ -8,6 +8,18 @@
 
 using namespace estd;
 
+struct test_init_functor
+{
+    template <class T>
+    constexpr bool operator()(T* v) const { return false; }
+
+    bool operator()(int* v)
+    {
+        *v = 10;
+        return true;
+    }
+};
+
 TEST_CASE("variant")
 {
     SECTION("main")
@@ -132,6 +144,14 @@ TEST_CASE("variant")
 
             REQUIRE(is_same<monostate, type0>::value);
             REQUIRE(is_same<int, type1>::value);
+        }
+        SECTION("visitor constructor")
+        {
+            int index = -2;
+            vs_type v(internal::in_place_visit_t{}, test_init_functor{}, &index);
+
+            REQUIRE(index == 1);
+            REQUIRE(get<1>(v) == 10);
         }
     }
     SECTION("misc")

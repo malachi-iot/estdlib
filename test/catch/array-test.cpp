@@ -7,6 +7,8 @@
 #include "test-data.h"
 #include "mem.h"
 
+#include "macro/push.h"
+
 using namespace estd;
 
 static int static_values[] = { 1, 2, 3, 4 };
@@ -265,3 +267,5 @@ TEST_CASE("array/vector tests")
         }
     }
 }
+
+#include "macro/pop.h"

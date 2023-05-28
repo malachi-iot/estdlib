@@ -11,8 +11,7 @@
 
 using namespace estd;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+#include "macro/push.h"
 
 using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
 
@@ -224,4 +223,4 @@ TEST_CASE("streambuf")
     }
 }
 
-#pragma GCC diagnostic pop
+#include "macro/pop.h"

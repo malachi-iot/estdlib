@@ -2,6 +2,8 @@
 
 #include <estd/c++03/tuple.h>
 
+#include "macro/push.h"
+
 // Sometimes we have whole distinct c++03 code areas/files.  This is a catch-all unit test for that
 TEST_CASE("c++03 sanity check")
 {
@@ -59,3 +61,5 @@ TEST_CASE("c++03 sanity check")
         }
     }
 }
+
+#include "macro/pop.h"

@@ -62,12 +62,24 @@ class bad_variant_access : std::exception
 {
 public:
 };
+#endif
+
+template <int index, class ...Types>
+void assert_index_matches(const variant<Types...>& v)
+{
+#if __cpp_exceptions
+    if(v.index() != index) throw bad_variant_access();
+#else
+    // NOTE: Not tested yet
+    if(v.index() != index) std::abort();
+#endif
+}
 
 
 template <int index, class ...TArgs>
 type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
 {
-    if(vs.index() != index) throw bad_variant_access();
+    assert_index_matches(vs);
 
     return * vs.template get<index>();
 }
@@ -76,11 +88,17 @@ type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
 template <int index, class ...TArgs>
 const type_at_index<index, TArgs...>& get(const variant<TArgs...>& vs)
 {
-    if(vs.index() != index) throw bad_variant_access();
+    assert_index_matches(vs);
 
     return * vs.template get<index>();
 }
-#endif
+
+// DEBT: Supposed to be an inline variable, but we want c++11 compat
+constexpr unsigned variant_npos()
+{
+    return (unsigned)-1;
+}
+
 
 template <class T, class ...Types>
 typename add_pointer<T>::type get_if(variant<Types...>& vs)
@@ -103,13 +121,6 @@ inline static monostate construct_at(void* placement, TArgs&&...args)
     new (placement) T2(std::forward<TArgs>(args)...);
     return {};
 }
-
-// DEBT: Supposed to be an inline variable, but we want c++11 compat
-constexpr unsigned variant_npos()
-{
-    return (unsigned)-1;
-}
-
 
 template <bool trivial, class ...TArgs>
 union variant_union;
@@ -238,10 +249,30 @@ public:
         visit<0, F, Types...>(std::forward<F>(f), index);
     }
 
+
+    template <int I, typename F>
+    static constexpr int visit(F&&) { return -1; }
+
+    template <int I, typename F, class T, class... TArgs>
+    int visit(F&& f)
+    {
+        if(f(get<T>())) return I;
+        return visit<I + 1, F, TArgs...>(std::forward<F>(f));
+    }
+
+    template <typename F>
+    monostate visit(F&& f, int* index)
+    {
+        int i = visit<0, F, Types...>(std::forward<F>(f));
+        if(index != nullptr) *index = i;
+        return {};
+    }
+
     byte* raw() { return storage.raw; }
 
     template <class F>
-    variant_storage_base(in_place_visit_t, F&& f)
+    variant_storage_base(in_place_visit_t, F&& f, int* index = nullptr) :
+        dummy{visit(std::forward<F>(f), index)}
     {}
 };
 
