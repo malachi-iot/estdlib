@@ -7,6 +7,8 @@
 
 #include "macro/push.h"
 
+#include "test/nontrivial.h"
+
 namespace estd { namespace test {
 
 struct Dummy
@@ -119,23 +121,6 @@ struct provider_test : TBase
 
     provider_test(int v) : value_provider (v) {}
 };
-
-
-struct NonTrivial
-{
-    const int code_;
-    static unsigned dtor_counter;
-
-    explicit NonTrivial(int code) : code_{code} {}
-    ~NonTrivial()
-    {
-        ++dtor_counter;
-    }
-};
-
-
-constexpr unsigned dtor_count_1() { return 3; }
-constexpr unsigned dtor_count_2() { return dtor_count_1() + 1; }
 
 
 }}

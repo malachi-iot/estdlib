@@ -12,30 +12,9 @@
 #include "platform.h"
 #include "raw/type_traits.h"
 #include "../port/type_traits.h"
+#include "constructible.h"
 #include "is_convertible.h"
 
-#if FEATURE_STD_TYPE_TRAITS
-#include <type_traits>
-
-// DEBT: Copy/paste inline version of this from LLVM, GNU, etc.
-#if __cpp_alias_templates
-template <class T, class ...TArgs>
-using is_constructible = std::is_constructible<T, TArgs...>;
-
-template <class T, class ...TArgs>
-using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
-
-#if __cpp_inline_variables
-template <class T, class ...TArgs>
-inline constexpr bool is_constructible_v = is_constructible<T, TArgs...>::value;
-
-template <class T, class ...TArgs>
-inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<T, TArgs...>::value;
-#endif
-
-#endif
-
-#endif
 
 // Semi-hack to get arduino/Print.h to auto include more smoothly
 // Only a little kludgey
