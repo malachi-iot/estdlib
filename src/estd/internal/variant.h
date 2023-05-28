@@ -320,8 +320,7 @@ struct converting_constructor_functor
     template <class T_i>
     constexpr bool operator()(T_i*) const { return false; }
 
-    template <class T_i>
-            requires estd::is_constructible_v<T_i, T>
+    template <class T_i, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
     bool operator()(T_i* t_i)
     {
         new (t_i) T_i(std::forward<T>(t));
