@@ -267,12 +267,11 @@ public:
     template <typename F, class ...TArgs>
     monostate visit(F&& f, size_type* index, TArgs&&...args)
     {
-        /*
         int i = visitor::template visit<0>(std::forward<F>(f),
                 //std::forward<variant_storage_base>(*this),
-                std::forward<TArgs>(args)...); */
+                std::forward<TArgs>(args)...);
 
-        int i = visit<0, F, Types...>(std::forward<F>(f));
+        //int i = visit<0, F, Types...>(std::forward<F>(f));
         if(index != nullptr) *index = (std::size_t)i;
         return {};
     }
@@ -338,13 +337,14 @@ struct converting_constructor_functor
 
 struct converting_constructor_functor2
 {
-    template <unsigned I>
-    constexpr bool operator()(in_place_index_t<I>) const { return {}; }
+    template <unsigned I, class TVariant, class T>
+    constexpr bool operator()(in_place_index_t<I>, TVariant, T&&) const { return false; }
 
     template <unsigned I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
-    void operator()(visitor_index<I, T_i>, TVariant v, T&& t)
+    bool operator()(visitor_index<I, T_i>, TVariant& v, T&& t)
     {
         new (v.template get<I>()) T_i(std::forward<T>(t));
+        return true;
     }
 };
 
@@ -433,10 +433,10 @@ public:
             !is_same_v<remove_cvref_t<T>, variant> &&
             !is_base_of_v<in_place_tag, remove_cvref_t<T>>
             ) :
-        base_type(in_place_visit_t{}, converting_constructor_functor<T>{t}, &index_)
-        //base_type(in_place_visit_t{}, converting_constructor_functor2{},
-                  //&index_,
-                  //std::forward<T>(t))
+        //base_type(in_place_visit_t{}, converting_constructor_functor<T>{t}, &index_)
+        base_type(in_place_visit_t{}, converting_constructor_functor2{},
+                  &index_,
+                  std::forward<T>(t))
     {
 
     }

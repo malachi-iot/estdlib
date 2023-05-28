@@ -10,12 +10,13 @@ using namespace estd;
 
 struct test_init_functor
 {
-    template <class T>
-    constexpr bool operator()(T* v) const { return false; }
+    template <class T, class TVariant>
+    constexpr bool operator()(in_place_type_t<T>, TVariant) const { return false; }
 
-    bool operator()(int* v)
+    template <class TVariant>
+    bool operator()(in_place_type_t<int>, TVariant& v)
     {
-        *v = 10;
+        get<int>(v) = 10;
         return true;
     }
 };
