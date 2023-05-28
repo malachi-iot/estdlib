@@ -22,6 +22,15 @@ struct visitor_index  :
     in_place_type_t<T>
 {};
 
+template <unsigned I, class T>
+struct visitor_instance  : visitor_index<I, T>
+{
+    T& value;
+
+    visitor_instance(const visitor_instance&) = default;
+    constexpr explicit visitor_instance(T& value) : value{value} {}
+};
+
 template <typename... Types>
 struct variadic_visitor_helper2
 {
@@ -39,6 +48,30 @@ struct variadic_visitor_helper2
             return I;
 
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+    }
+
+
+    template <int I, class F, class Fg, class T,
+            class enabled = enable_if_t<(I == sizeof...(Types))>,
+            class... TArgs>
+    static constexpr short visit_instance(F&&, Fg&&, T&, TArgs&&...) { return -1; }
+
+    template <int I = 0, class F, class Fg, class T,
+            class enabled = enable_if_t<(I < sizeof...(Types))>,
+            class... TArgs>
+    static int visit_instance(F&& f, Fg&& getter, T& t, TArgs&&...args)
+    {
+        typedef type_at_index<I, Types...> value_type;
+        visitor_instance<I, value_type> vi{getter(visitor_index<I, value_type>{}, t)};
+
+        if(f(vi, std::forward<TArgs>(args)...))
+            return I;
+
+        return visit_instance<I + 1>(
+            std::forward<F>(f),
+            std::forward<Fg>(getter),
+            t,
+            std::forward<TArgs>(args)...);
     }
 };
 

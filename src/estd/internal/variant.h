@@ -150,6 +150,16 @@ union variant_union<true, T1, T2, T3>
     byte raw[0];
 };
 
+template <class T1, class T2, class T3, class T4>
+union variant_union<true, T1, T2, T3, T4>
+{
+    T1 t1;
+    T2 t2;
+    T3 t3;
+    T4 t4;
+    byte raw[0];
+};
+
 
 struct in_place_visit_t : in_place_tag {};
 
