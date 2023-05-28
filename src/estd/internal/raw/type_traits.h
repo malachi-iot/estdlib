@@ -211,6 +211,9 @@ struct conjunction<B1, Bn...>
 #if __cpp_inline_variables
 template< class... B >
 inline constexpr bool conjunction_v = conjunction<B...>::value;
+
+template <class T, class U>
+inline constexpr bool is_same_v = is_same<T, U>::value;
 #endif
 
 }

@@ -337,6 +337,23 @@ public:
         index_{index_of_type<T2>::index}
     {}
 
+#if __cpp_concepts
+    // DEBT: Not really a converting constructor, as spec calls for.
+    // Just a direct-initializer at the moment.  Will need to 'visit'
+    // each constructor to truly conform to spec
+    template <class T>
+    constexpr variant(T&& t)
+        requires(
+            !is_same_v<remove_cvref_t<T>, variant> &&
+            !is_base_of_v<in_place_tag, remove_cvref_t<T>>
+            ) :
+        base_type(in_place_type_t<T>{}, std::forward<T>(t)),
+        index_{index_of_type<T>::index}
+    {
+
+    }
+#endif
+
     constexpr bool valueless_by_exception() const
     {
         return index_ == variant_npos();
