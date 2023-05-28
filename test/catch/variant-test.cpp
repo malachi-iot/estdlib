@@ -24,7 +24,7 @@ TEST_CASE("variant")
 {
     SECTION("main")
     {
-        typedef internal::variant<int, test::NonTrivial> variant1_type;
+        typedef internal::variant<int, test::NonTrivial, const char*> variant1_type;
 
         SECTION("default ctor")
         {
@@ -88,6 +88,14 @@ TEST_CASE("variant")
 
             REQUIRE(test::NonTrivial::dtor_counter == test::dtor_count_2() + 2);
         }
+#if __cpp_concepts
+        SECTION("converting constructor")
+        {
+            variant1_type v("hello");
+
+            REQUIRE(v.index() == 2);
+        }
+#endif
     }
     SECTION("storage")
     {
@@ -147,7 +155,7 @@ TEST_CASE("variant")
         }
         SECTION("visitor constructor")
         {
-            int index = -2;
+            std::size_t index = -2;
             vs_type v(internal::in_place_visit_t{}, test_init_functor{}, &index);
 
             REQUIRE(index == 1);

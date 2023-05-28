@@ -157,6 +157,8 @@ struct in_place_visit_t : in_place_tag {};
 template <bool trivial, class ...Types>
 struct variant_storage_base
 {
+    using size_type = std::size_t;
+
     typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
@@ -251,27 +253,29 @@ public:
 
 
     template <int I, typename F>
-    static constexpr int visit(F&&) { return -1; }
+    static constexpr size_type visit(F&&) { return variant_npos(); }
 
     template <int I, typename F, class T, class... TArgs>
-    int visit(F&& f)
+    size_type visit(F&& f)
     {
         if(f(get<T>())) return I;
         return visit<I + 1, F, TArgs...>(std::forward<F>(f));
     }
 
     template <typename F>
-    monostate visit(F&& f, int* index)
+    monostate visit(F&& f, size_type* index)
     {
         int i = visit<0, F, Types...>(std::forward<F>(f));
-        if(index != nullptr) *index = i;
+        if(index != nullptr) *index = (std::size_t)i;
         return {};
     }
 
     byte* raw() { return storage.raw; }
 
+    // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
+    // continue to be a thorn in our side otherwise
     template <class F>
-    variant_storage_base(in_place_visit_t, F&& f, int* index = nullptr) :
+    variant_storage_base(in_place_visit_t, F&& f, size_type* index = nullptr) :
         dummy{visit(std::forward<F>(f), index)}
     {}
 };
@@ -307,11 +311,29 @@ struct destroyer_functor
     }
 };
 
+
+template <class T>
+struct converting_constructor_functor
+{
+    T& t;
+
+    template <class T_i>
+    constexpr bool operator()(T_i*) const { return false; }
+
+    template <class T_i>
+            requires estd::is_constructible_v<T_i, T>
+    bool operator()(T_i* t_i)
+    {
+        new (t_i) T_i(std::forward<T>(t));
+        return true;
+    }
+};
+
 template <class ...Types>
 class variant : public variant_storage<Types...>
 {
     using base_type = variant_storage<Types...>;
-    using size_type = std::size_t;
+    using size_type = typename base_type::size_type;
 
     struct mover_functor
     {
@@ -392,8 +414,7 @@ public:
             !is_same_v<remove_cvref_t<T>, variant> &&
             !is_base_of_v<in_place_tag, remove_cvref_t<T>>
             ) :
-        base_type(in_place_type_t<T>{}, std::forward<T>(t)),
-        index_{index_of_type<T>::index}
+        base_type(in_place_visit_t{}, converting_constructor_functor<T>{t}, &index_)
     {
 
     }
