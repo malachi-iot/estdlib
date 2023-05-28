@@ -22,10 +22,10 @@ struct test_init_functor
 
 struct test_functor
 {
-    template <class T>
-    bool operator()(in_place_type_t<T>)
+    template <unsigned I, class T>
+    bool operator()(internal::visitor_index<I, T>, int&& param)
     {
-        return true;
+        return param == I;
     }
 };
 
@@ -209,7 +209,9 @@ TEST_CASE("variant")
         {
             typedef internal::variadic_visitor_helper2<monostate, int, float> vh_type;
 
-            vh_type::visit(test_functor{});
+            int result = vh_type::visit(test_functor{}, 1);
+
+            REQUIRE(result == 1);
         }
     }
 }

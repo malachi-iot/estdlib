@@ -28,14 +28,16 @@ struct variadic_visitor_helper2
     template <int I, class F,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
             class... TArgs>
-    static constexpr bool visit(F&&, TArgs&&...) { return {}; }
+    static constexpr int visit(F&&, TArgs&&...) { return -1; }
 
-    template <int I = sizeof...(Types) - 1, class F,
+    template <int I = 0, class F,
             class enabled = enable_if_t<(I < sizeof...(Types))>,
             class... TArgs>
-    static bool visit(F&& f, TArgs&&...args, bool = true)
+    static bool visit(F&& f, TArgs&&...args)
     {
-        f(visitor_index<I, type_at_index<I, Types...>>{}, std::forward<TArgs>(args)...);
+        if(f(visitor_index<I, type_at_index<I, Types...>>{}, std::forward<TArgs>(args)...))
+            return I;
+
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
     }
 };

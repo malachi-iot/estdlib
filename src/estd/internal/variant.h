@@ -251,6 +251,8 @@ public:
         visit<0, F, Types...>(std::forward<F>(f), index);
     }
 
+    using visitor = variadic_visitor_helper2<Types...>;
+
 
     template <int I, typename F>
     static constexpr size_type visit(F&&) { return variant_npos(); }
@@ -262,9 +264,14 @@ public:
         return visit<I + 1, F, TArgs...>(std::forward<F>(f));
     }
 
-    template <typename F>
-    monostate visit(F&& f, size_type* index)
+    template <typename F, class ...TArgs>
+    monostate visit(F&& f, size_type* index, TArgs&&...args)
     {
+        /*
+        int i = visitor::template visit<0>(std::forward<F>(f),
+                //std::forward<variant_storage_base>(*this),
+                std::forward<TArgs>(args)...); */
+
         int i = visit<0, F, Types...>(std::forward<F>(f));
         if(index != nullptr) *index = (std::size_t)i;
         return {};
@@ -274,9 +281,9 @@ public:
 
     // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
     // continue to be a thorn in our side otherwise
-    template <class F>
-    variant_storage_base(in_place_visit_t, F&& f, size_type* index = nullptr) :
-        dummy{visit(std::forward<F>(f), index)}
+    template <class F, class ...TArgs>
+    variant_storage_base(in_place_visit_t, F&& f, size_type* index, TArgs&&...args) :
+        dummy{visit(std::forward<F>(f), index, *this, std::forward<TArgs>(args)...)}
     {}
 };
 
@@ -325,6 +332,19 @@ struct converting_constructor_functor
     {
         new (t_i) T_i(std::forward<T>(t));
         return true;
+    }
+};
+
+
+struct converting_constructor_functor2
+{
+    template <unsigned I>
+    constexpr bool operator()(in_place_index_t<I>) const { return {}; }
+
+    template <unsigned I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
+    void operator()(visitor_index<I, T_i>, TVariant v, T&& t)
+    {
+        new (v.template get<I>()) T_i(std::forward<T>(t));
     }
 };
 
@@ -414,6 +434,9 @@ public:
             !is_base_of_v<in_place_tag, remove_cvref_t<T>>
             ) :
         base_type(in_place_visit_t{}, converting_constructor_functor<T>{t}, &index_)
+        //base_type(in_place_visit_t{}, converting_constructor_functor2{},
+                  //&index_,
+                  //std::forward<T>(t))
     {
 
     }
