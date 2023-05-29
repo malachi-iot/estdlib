@@ -126,14 +126,28 @@ TEST_CASE("variadic")
 
                 const char* output = nullptr;
 
-                int result = vh_type::visit_instance(
-                    identify_type_functor<const char*>{},
-                    internal::variant_storage_getter_functor{}, v,
-                    &output);
+                SECTION("direct")
+                {
+                    int result = vh_type::visit_instance(
+                        identify_type_functor<const char*>{},
+                        internal::variant_storage_getter_functor{}, v,
+                        &output);
 
-                REQUIRE(result == 3);
-                REQUIRE(output != nullptr);
-                REQUIRE(output == test::str_hello);
+                    REQUIRE(result == 3);
+                    REQUIRE(output == test::str_hello);
+                }
+                SECTION("helper")
+                {
+                    std::size_t result = -2;
+
+                    v.visit_instance(
+                        identify_type_functor<const char*>{},
+                        &result,
+                        &output);
+
+                    REQUIRE(result == 3);
+                    REQUIRE(output == test::str_hello);
+                }
             }
         }
     }
