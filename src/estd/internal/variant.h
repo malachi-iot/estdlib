@@ -17,7 +17,7 @@ namespace estd {
 namespace internal {
 
 
-template <bool trivial, class ...T>
+template <bool trivial, class ...Types>
 struct variant_storage_base;
 
 template <class ...Types>
@@ -161,6 +161,8 @@ union variant_union<true, T1, T2, T3, T4>
 };
 
 
+// Indicates the function/constructor expects a functor for iterating
+// over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
 
@@ -169,7 +171,7 @@ struct variant_storage_base
 {
     using size_type = std::size_t;
 
-    typedef tuple<Types...> tuple_type;
+    //typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
     template <class T>
@@ -229,19 +231,6 @@ public:
 
     template <class T>
     constexpr ensure_type_t<T>* get() const { return (T*) storage.raw; }
-
-    template <int I, typename F, typename enabled = estd::enable_if_t<I == 0, bool> >
-    static constexpr bool visit_old(F&&, int) { return{}; }
-
-    template <int I = sizeof...(Types), typename F,
-             typename enabled = estd::enable_if_t<(I > 0), bool> >
-    void visit_old(F&& f, const int index, bool = true)
-    {
-        if(I - 1 == index)
-            f(get<I - 1>());
-        else
-            visit_old<I - 1>(std::forward<F>(f), index);
-    }
 
     template <int I, typename F>
     static constexpr bool visit(F&&, int) { return{}; }
@@ -406,8 +395,8 @@ class variant : public variant_storage<Types...>
     };
 
 
-    template <class T2>
-    using index_of_type = estd::internal::index_of_type<T2, Types...>;
+    template <class T>
+    using index_of_type = estd::internal::index_of_type<T, Types...>;
 
     size_type index_;
 
@@ -419,12 +408,6 @@ class variant : public variant_storage<Types...>
         return base_type::template get<T>();
     }
 
-    /*
-    template <class T>
-    static void destroy(T* t)
-    {
-        t->~T();
-    }   */
 
     constexpr bool valid() const { return index_ != variant_npos(); }
 
@@ -433,7 +416,7 @@ class variant : public variant_storage<Types...>
     // speed vs size edge case
     void destroy_if_valid()
     {
-        if(valid()) visit(destroyer_functor{});
+        if(valid()) base_type::visit(destroyer_functor{}, index_);
     }
 
 public:
@@ -456,12 +439,12 @@ public:
         index_{index}
     {}
 
-    template <class T2, class ...TArgs>
-    constexpr explicit variant(in_place_type_t<T2>, TArgs&&...args) :
+    template <class T, class ...TArgs>
+    constexpr explicit variant(in_place_type_t<T>, TArgs&&...args) :
         base_type(
-            in_place_index_t<index_of_type<T2>::index>{},
+            in_place_index_t<index_of_type<T>::index>{},
             std::forward<TArgs>(args)...),
-        index_{index_of_type<T2>::index}
+        index_{index_of_type<T>::index}
     {}
 
 #if __cpp_concepts
@@ -474,7 +457,6 @@ public:
             !is_same_v<remove_cvref_t<T>, variant> &&
             !is_base_of_v<in_place_tag, remove_cvref_t<T>>
             ) :
-        //base_type(in_place_visit_t{}, converting_constructor_functor<T>{t}, &index_)
         base_type(in_place_visit_t{}, converting_constructor_functor2{},
                   &index_,
                   std::forward<T>(t))
@@ -486,12 +468,6 @@ public:
     constexpr bool valueless_by_exception() const
     {
         return index_ == variant_npos();
-    }
-
-    template <class F>
-    void visit(F&& f)
-    {
-        base_type::visit(std::forward<F>(f), index_);
     }
 
     ~variant()
