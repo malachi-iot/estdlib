@@ -38,10 +38,10 @@ template <class T>
 struct identify_type_functor
 {
     template <unsigned I>
-    constexpr bool operator()(in_place_index_t<I>, T* = nullptr) const { return false; }
+    constexpr bool operator()(in_place_index_t<I>, T*) const { return false; }
 
     template <unsigned I>
-    bool operator()(internal::visitor_instance<I, T> v, T* output = nullptr) const
+    bool operator()(internal::visitor_instance<I, T> v, T* output) const
     {
         // output = const char**
         if(output)  *output = v.value;
@@ -102,10 +102,14 @@ TEST_CASE("variadic")
                 typedef internal::variadic_visitor_helper2<float, const char*, int> vh_type;
 
                 tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
+                const char* output = nullptr;
 
-                int result = vh_type::visit_instance(identify_type_functor<const char*>{}, tuple_getter_functor{}, t);
+                int result = vh_type::visit_instance(identify_type_functor<const char*>{},
+                    tuple_getter_functor{}, t,
+                    &output);
 
                 REQUIRE(result == 1);
+                REQUIRE(output == test::str_hello);
             }
             SECTION("variant instance")
             {
@@ -117,9 +121,11 @@ TEST_CASE("variadic")
                 typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
 
                 internal::variant<monostate, int, float, const char*> v;
+
+                v = (const char*)test::str_hello;
+
                 const char* output = nullptr;
 
-                // FIX: 'output' never truly passed into identify_type_functor
                 int result = vh_type::visit_instance(
                     identify_type_functor<const char*>{},
                     internal::variant_storage_getter_functor{}, v,
@@ -127,7 +133,7 @@ TEST_CASE("variadic")
 
                 REQUIRE(result == 3);
                 REQUIRE(output != nullptr);
-                //REQUIRE(v.raw() == (byte*)output);
+                REQUIRE(output == test::str_hello);
             }
         }
     }
