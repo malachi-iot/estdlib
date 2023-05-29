@@ -127,6 +127,12 @@ struct variadic_visitor_helper2
     using visit_struct = visitor_helper_struct<TEval, Types...>;
 };
 
+template <class ...Types>
+struct variadic_first;
+
+template <class T, class ...Types>
+struct variadic_first<T, Types...> : type_identity<T> {};
+
 template <class TEval, class ...Types>
 struct visitor_helper_struct2;
 
@@ -158,9 +164,9 @@ struct visitor_helper_struct
 {
     typedef visitor_helper_struct2<TEval, Types...> vh_type;
 
-    static constexpr int selected = vh_type::selected == -1 ?
+    static constexpr ptrdiff_t selected = vh_type::selected == -1 ?
         -1 : ((sizeof...(Types) -1) - vh_type::selected);
-    static constexpr int index = selected;
+    static constexpr ptrdiff_t index = selected;
     static constexpr unsigned found = vh_type::found;
     static constexpr bool multiple = found > 1;
 

@@ -166,6 +166,13 @@ TEST_CASE("variadic")
 
         REQUIRE(selected == 0);
     }
+    SECTION("variadic_first")
+    {
+        typedef internal::variadic_first<float, int, monostate>::type first_type;
+        bool v = is_same<float, first_type>::value;
+
+        REQUIRE(v);
+    }
 }
 
 #include "macro/pop.h"

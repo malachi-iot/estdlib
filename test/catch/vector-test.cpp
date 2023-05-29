@@ -4,6 +4,7 @@
 #include <estd/functional.h>
 
 #include "mem.h"
+#include "test-data.h"
 
 #include "macro/push.h"
 
@@ -174,12 +175,12 @@ TEST_CASE("vector tests")
 
         estd::layer1::vector<complex, 10> v;
 
-        v.push_back(complex { 3, "hello" });
+        v.push_back(complex { 3, test::str_hello });
 
         auto it = std::find_if(v.begin(), v.end(), [](const complex& value) { return value.value == 3; });
 
         REQUIRE((*it).value == 3);
-        REQUIRE((*it).s == "hello");
+        REQUIRE((*it).s == test::str_hello);
     }
     SECTION("vector with actual default std::allocator")
     {
