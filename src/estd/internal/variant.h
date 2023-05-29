@@ -502,10 +502,26 @@ public:
     }
 
 
+    // DEBT: Not nearly built out enough
     template <class T>
     variant& operator=(T&& v)
     {
         *set_index<T>() = v;
+        return *this;
+    }
+
+    // DEBT: Not nearly built out enough
+    variant& operator=(const variant& rhs)
+    {
+        if(rhs.valueless_by_exception())
+        {
+            destroy_if_valid();
+        }
+        else
+        {
+            
+        }
+
         return *this;
     }
 
