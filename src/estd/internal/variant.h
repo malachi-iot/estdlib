@@ -175,9 +175,16 @@ union variant_union<true, T1, T2, T3, T4>
 };
 
 
-// Indicates the function/constructor expects a functor for iterating
-// over all the variadic possibilities
-struct in_place_visit_t : in_place_tag {};
+struct variant_storage_getter_functor
+{
+    template <unsigned I, class T, bool trivial, class ...TArgs>
+    T& operator()(internal::visitor_index<I, T>, internal::variant_storage_base<trivial, TArgs...>& vs)
+    {
+        return get<I>(vs);
+    }
+};
+
+
 
 struct variant_storage_tag {};
 
@@ -248,6 +255,7 @@ public:
     template <class T>
     constexpr ensure_type_t<T>* get() const { return (T*) storage.raw; }
 
+    /*
     template <int I, typename F>
     static constexpr bool visit(F&&, int) { return{}; }
 
@@ -264,11 +272,12 @@ public:
     void visit(F&& f, int index)
     {
         visit<0, F, Types...>(std::forward<F>(f), index);
-    }
+    } */
 
     using visitor = variadic_visitor_helper2<Types...>;
 
 
+    /*
     template <int I, typename F>
     static constexpr size_type visit(F&&) { return variant_npos(); }
 
@@ -277,6 +286,19 @@ public:
     {
         if(f(get<T>())) return I;
         return visit<I + 1, F, TArgs...>(std::forward<F>(f));
+    } */
+
+    // DEBT: visit_instance auto adds 'this', visit doesn't
+    template <typename F, class ...TArgs>
+    monostate visit_instance(F&& f, size_type* index, TArgs&&...args)
+    {
+        int i = visitor::visit_instance(std::forward<F>(f),
+            variant_storage_getter_functor{},
+            *this,
+            std::forward<TArgs>(args)...);
+
+        if(index != nullptr) *index = (std::size_t)i;
+        return {};
     }
 
     template <typename F, class ...TArgs>
@@ -320,24 +342,18 @@ template <unsigned I, class T>
 using variant_alternative_t = typename variant_alternative<I, T>::type;
 
 
-struct variant_storage_getter_functor
-{
-    template <unsigned I, class T, class ...TArgs>
-    T& operator()(internal::visitor_index<I, T>, internal::variant_storage<TArgs...>& t)
-    {
-        return get<I>(t);
-    }
-};
-
-
 // NOTE: Using regular functions for F&& style functors doesn't
 // seem to work, perhaps in particular due to class T parameter?
 struct destroyer_functor
 {
-    template <class T>
-    void operator()(T* t) const
+    template <unsigned I, class T>
+    bool operator()(visitor_instance<I, T> vi, unsigned index)
     {
-        t->~T();
+        if(I != index) return false;
+
+        vi.value.~T();
+
+        return true;
     }
 };
 
@@ -464,7 +480,7 @@ class variant : public variant_storage<Types...>
     // speed vs size edge case
     void destroy_if_valid()
     {
-        if(valid()) base_type::visit(destroyer_functor{}, index_);
+        if(valid()) base_type::visit_instance(destroyer_functor{}, nullptr, index_);
     }
 
 public:

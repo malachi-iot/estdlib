@@ -4,3 +4,6 @@
 #include "internal/functional.h"
 #include "internal/variant.h"
 
+namespace estd {
+
+}

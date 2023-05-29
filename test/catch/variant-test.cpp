@@ -1,6 +1,6 @@
 #include <catch.hpp>
 
-#include <estd/internal/variant.h>
+#include <estd/variant.h>
 
 #include "test-data.h"
 

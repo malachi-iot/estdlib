@@ -11,6 +11,11 @@
 
 namespace estd { namespace internal {
 
+// Indicates the function/constructor expects a functor for iterating
+// over all the variadic possibilities
+struct in_place_visit_t : in_place_tag {};
+
+
 // Very similar to std::variant_alternative
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
