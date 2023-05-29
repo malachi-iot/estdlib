@@ -312,6 +312,7 @@ public:
     }
 
     byte* raw() { return storage.raw; }
+    const byte* raw() const { return storage.raw; }
 
     // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
     // continue to be a thorn in our side otherwise
