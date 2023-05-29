@@ -15,13 +15,25 @@ struct NonTrivial
     static unsigned dtor_counter;
 
     explicit NonTrivial(int code) : code_{code} {}
-    explicit NonTrivial(const NonTrivial& copy_from) :
-        code_{copy_from.code_}, copied_{true}
+
+    template <class F>
+    explicit NonTrivial(int code, F&& f) :
+        code_{code}, on_dtor(std::move(f))
+    {}
+
+    NonTrivial(const NonTrivial& copy_from) :
+        code_{copy_from.code_}, copied_{true},
+        on_dtor(copy_from.on_dtor)
+    {}
+    NonTrivial(NonTrivial&& move_from) :
+        code_{move_from.code_}, moved_{true},
+        on_dtor(std::move(move_from.on_dtor))
     {}
 
     ~NonTrivial()
     {
         ++dtor_counter;
+        if(on_dtor) on_dtor();
     }
 };
 

@@ -82,10 +82,13 @@ TEST_CASE("variant")
         }
         SECTION("emplace")
         {
+            int counter = 0;
+            auto dtor_fn = [&]{ ++counter; };
+
             {
                 variant1_type v;
 
-                v.emplace<test::NonTrivial>(7);
+                v.emplace<test::NonTrivial>(7, dtor_fn);
 
                 REQUIRE(v.index() == 1);
                 REQUIRE(get<test::NonTrivial>(v).code_ == 7);
@@ -98,18 +101,14 @@ TEST_CASE("variant")
                 REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
             }
 
-            // DEBT: Was already 1 from expected-test, now 2 - cross testing globals like this
-            // a potential headache
-            REQUIRE(test::NonTrivial::dtor_counter == test::dtor_count_2());
-
             {
-                variant1_type v(estd::in_place_type_t<test::NonTrivial>{}, 7);
+                variant1_type v(estd::in_place_type_t<test::NonTrivial>{}, 7, dtor_fn);
 
                 v.emplace<int>(10);
-                v.emplace<test::NonTrivial>(9);
+                v.emplace<test::NonTrivial>(9, dtor_fn);
             }
 
-            REQUIRE(test::NonTrivial::dtor_counter == test::dtor_count_2() + 2);
+            REQUIRE(counter == 3);
         }
         SECTION("assign")
         {
@@ -132,13 +131,14 @@ TEST_CASE("variant")
         }
         SECTION("move")
         {
+            int counter = 0;
+            auto dtor_fn = [&]{ ++counter; };
+
             variant1_type v;
 
             v = 8;
 
             variant1_type v2(std::move(v));
-
-            REQUIRE(test::NonTrivial::dtor_counter == test::dtor_count_2() + 2);
         }
 #if __cpp_concepts
         SECTION("converting constructor")
