@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include "../macro/c++11_emul.h"
+
 namespace estd {
 
 #ifdef FEATURE_CPP_ENUM_CLASS

@@ -65,6 +65,10 @@ concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
 }
 #endif
 
+template <class TEval, class ...Types>
+struct visitor_helper_struct;
+
+
 
 template <typename... Types>
 struct variadic_visitor_helper2
@@ -118,26 +122,51 @@ struct variadic_visitor_helper2
             t,
             std::forward<TArgs>(args)...);
     }
+
+    template <class TEval>
+    using visit_struct = visitor_helper_struct<TEval, Types...>;
 };
 
 template <class TEval, class ...Types>
-struct visitor_helper_struct;
+struct visitor_helper_struct2;
 
 template <class TEval>
-struct visitor_helper_struct<TEval>
+struct visitor_helper_struct2<TEval>
 {
     static constexpr int selected = -1;
+
+    // DEBT: Monostate may collide with seeked-for types
+    typedef monostate selected_type;
+    static constexpr unsigned found = 0;
 };
 
 
 template <class TEval, class T, class ...Types>
-struct visitor_helper_struct<TEval, T, Types...>
+struct visitor_helper_struct2<TEval, T, Types...>
 {
-    typedef visitor_helper_struct<TEval, Types...> upward;
-    static constexpr int index = sizeof...(Types) - 1;
+    typedef visitor_helper_struct2<TEval, Types...> upward;
+    static constexpr int index = sizeof...(Types);
     static constexpr bool eval = TEval::template evaluator<T>::value;
     static constexpr int selected = eval ? index : upward::selected;
+    static constexpr unsigned found = upward::found + (eval ? 1 : 0);
+
+    using selected_type = conditional_t<eval, T, typename upward::selected_type>;
 };
+
+template <class TEval, class ...Types>
+struct visitor_helper_struct
+{
+    typedef visitor_helper_struct2<TEval, Types...> vh_type;
+
+    static constexpr int selected = vh_type::selected == -1 ?
+        -1 : ((sizeof...(Types) -1) - vh_type::selected);
+    static constexpr int index = selected;
+    static constexpr unsigned found = vh_type::found;
+    static constexpr bool multiple = found > 1;
+
+    using selected_type = typename vh_type::selected_type;
+};
+
 
 
 // EXPERIMENTAL
@@ -145,7 +174,24 @@ template <class T>
 struct converting_selector
 {
     template <class T_j>
-    using evaluator = is_convertible<T_j, T>;
+    using evaluator = is_convertible<T, T_j>;
+};
+
+
+// EXPERIMENTAL
+template <class T>
+struct constructable_selector
+{
+    template <class T_j>
+    using evaluator = is_constructible<T_j, T>;
+};
+
+
+template <class T>
+struct is_same_selector
+{
+    template <class T_j>
+    using evaluator = is_same<T_j, T>;
 };
 
 
@@ -212,7 +258,8 @@ public:
 };
 
 template <class T, class ...TArgs>
-using index_of_type = index_of_type_helper<T, 0, TArgs...>;
+using index_of_type = visitor_helper_struct<is_same_selector<T>, TArgs...>;
+//using index_of_type = index_of_type_helper<T, 0, TArgs...>;
 
 // Evaluate true or false whether a variadic contains a particular type
 template <class T, class ...Types>

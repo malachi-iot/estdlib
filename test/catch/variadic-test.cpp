@@ -151,13 +151,20 @@ TEST_CASE("variadic")
     SECTION("visitor struct")
     {
         typedef internal::visitor_helper_struct<internal::converting_selector<int>, int, float, monostate> vhs_type;
-        constexpr int selected = vhs_type::selected;
+        int selected = vhs_type::selected;
 
-        REQUIRE(selected == 1);
+        REQUIRE(selected == 0);
 
         typedef internal::visitor_helper_struct<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
+        selected = vhs_type2::selected;
 
         REQUIRE(selected == 1);
+
+        //typedef internal::visitor_helper_struct<internal::converting_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        typedef internal::visitor_helper_struct<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        selected = vhs_type3::selected;
+
+        REQUIRE(selected == 0);
     }
 }
 
