@@ -8,6 +8,7 @@
 #include "../tuple.h"
 #include "raw/type_traits.h"
 #include "raw/utility.h"
+#include "raw/variant.h"
 
 namespace estd { namespace internal {
 

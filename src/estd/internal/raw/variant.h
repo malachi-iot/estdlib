@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../fwd/functional.h"
+#include "../macro/c++11_emul.h"
+
 namespace estd {
 
 struct monostate {};
