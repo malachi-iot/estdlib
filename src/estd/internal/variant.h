@@ -77,21 +77,35 @@ void assert_index_matches(const variant<Types...>& v)
 
 
 template <int index, class ...TArgs>
-type_at_index<index, TArgs...>& get(variant<TArgs...>& vs)
+type_at_index<index, TArgs...>& get(variant<TArgs...>& v)
 {
-    assert_index_matches(vs);
+    assert_index_matches<index>(v);
 
-    return * vs.template get<index>();
+    return * v.template get<index>();
 }
 
 
 template <int index, class ...TArgs>
-const type_at_index<index, TArgs...>& get(const variant<TArgs...>& vs)
+const type_at_index<index, TArgs...>& get(const variant<TArgs...>& v)
 {
-    assert_index_matches(vs);
+    assert_index_matches<index>(v);
 
-    return * vs.template get<index>();
+    return * v.template get<index>();
 }
+
+template <class T, class ...TArgs>
+T& get(variant<TArgs...>& v)
+{
+    return get<index_of_type<T, TArgs...>::index>(v);
+}
+
+template <class T, class ...TArgs>
+const T& get(const variant<TArgs...>& v)
+{
+    return get<index_of_type<T, TArgs...>::index>(v);
+}
+
+
 
 // DEBT: Supposed to be an inline variable, but we want c++11 compat
 constexpr unsigned variant_npos()
@@ -165,9 +179,11 @@ union variant_union<true, T1, T2, T3, T4>
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
+struct variant_storage_tag {};
+
 
 template <bool trivial, class ...Types>
-struct variant_storage_base
+struct variant_storage_base : variant_storage_tag
 {
     using size_type = std::size_t;
 
@@ -264,13 +280,11 @@ public:
     }
 
     template <typename F, class ...TArgs>
-    monostate visit(F&& f, size_type* index, TArgs&&...args)
+    static monostate visit(F&& f, size_type* index, TArgs&&...args)
     {
-        int i = visitor::template visit<0>(std::forward<F>(f),
-                //std::forward<variant_storage_base>(*this),
+        int i = visitor::visit(std::forward<F>(f),
                 std::forward<TArgs>(args)...);
 
-        //int i = visit<0, F, Types...>(std::forward<F>(f));
         if(index != nullptr) *index = (std::size_t)i;
         return {};
     }
@@ -394,6 +408,40 @@ class variant : public variant_storage<Types...>
         }
     };
 
+    struct assignment_functor
+    {
+        template <unsigned I, class T_i,
+            class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
+        bool operator()(visitor_index<I, T_i>, base_type& v, const variant& assign_from)
+        {
+            if(assign_from.index() != I) return false;
+
+            //(v.template get<I>())->operator =(* assign_from.template get<I>());
+            (*v.template get<I>()) = * assign_from.template get<I>();
+            return true;
+        }
+
+        // NOTE: This whole direct-init flavor doesn't seem to conform, so this might
+        // go away.  Convenient though for non trivial types which don't have an assignment
+        // operator.  Probably should feature flag it
+        template <unsigned I, class T_i,
+            class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
+        bool operator()(visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
+        {
+            if(copy_from.index() != I) return false;
+
+            T_i* obj = v.template get<I>();
+
+            // DEBT: Technically would be more efficient to run the dtor
+            // directly and not abort when index is found - however, that
+            // breaks our burgeoning paradigm, so holding off
+            v.destroy_if_valid();
+
+            new (obj) T_i(* copy_from.template get<I>());
+            return true;
+        }
+    };
+
 
     template <class T>
     using index_of_type = estd::internal::index_of_type<T, Types...>;
@@ -490,23 +538,26 @@ public:
 
 
     // DEBT: Not nearly built out enough
-    template <class T>
+    template <
+        class T,
+        class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& v)
     {
         *set_index<T>() = v;
         return *this;
     }
 
-    // DEBT: Not nearly built out enough
+    // DEBT: Needs more work, but coming along
     variant& operator=(const variant& rhs)
     {
         if(rhs.valueless_by_exception())
         {
             destroy_if_valid();
+            index_ = variant_npos();
         }
         else
         {
-            
+            base_type::visit(assignment_functor{}, &index_, *this, rhs);
         }
 
         return *this;

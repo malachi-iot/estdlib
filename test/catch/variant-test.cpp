@@ -72,11 +72,26 @@ TEST_CASE("variant")
         }
         SECTION("assign")
         {
+            int counter = 0;
+            auto dtor_fn = [&]{ ++counter; };
+
             variant1_type v;
 
             v = 8;
 
             REQUIRE(get<int>(v) == 8);
+
+            {
+                variant1_type v2(estd::in_place_type_t<test::NonTrivial>{}, 7, dtor_fn);
+
+                v = v2;
+
+                auto _v = get<test::NonTrivial>(v);
+
+                REQUIRE(_v.code_ == 7);
+            }
+
+            REQUIRE(counter == 2);
         }
         SECTION("copy")
         {

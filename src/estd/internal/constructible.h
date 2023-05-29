@@ -13,6 +13,9 @@ template <class T, class ...TArgs>
 using is_constructible = std::is_constructible<T, TArgs...>;
 
 template <class T>
+using is_copy_assignable = std::is_copy_assignable<T>;
+
+template <class T>
 using is_copy_constructible = std::is_copy_constructible<T>;
 
 template <class T, class ...TArgs>
