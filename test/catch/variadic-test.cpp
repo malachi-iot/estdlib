@@ -53,103 +53,111 @@ struct identify_type_functor
 
 TEST_CASE("variadic")
 {
-    SECTION("misc")
+    SECTION("index_of_type")
     {
-        SECTION("index_of_type")
+        SECTION("basic")
         {
-            SECTION("basic")
-            {
-                typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
-                constexpr int idx = iot::index;
-                constexpr bool multiple = iot::multiple;
+            typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
+            constexpr int idx = iot::index;
+            constexpr bool multiple = iot::multiple;
 
-                REQUIRE(idx == 1);
-                REQUIRE(multiple == false);
-            }
-            SECTION("not found")
-            {
-                typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
-
-                constexpr int idx = iot::index;
-                constexpr bool multiple = iot::multiple;
-
-                REQUIRE(idx == -1);
-                REQUIRE(multiple == false);
-            }
-            SECTION("multiple")
-            {
-                typedef estd::internal::index_of_type<int, int, int> iot;
-
-                constexpr int idx = iot::index;
-                constexpr bool multiple = iot::multiple;
-
-                REQUIRE(idx == 0);
-                REQUIRE(multiple == true);
-            }
+            REQUIRE(idx == 1);
+            REQUIRE(multiple == false);
         }
-        SECTION("visitor")
+        SECTION("not found")
         {
-            SECTION("static")
+            typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
+
+            constexpr int idx = iot::index;
+            constexpr bool multiple = iot::multiple;
+
+            REQUIRE(idx == -1);
+            REQUIRE(multiple == false);
+        }
+        SECTION("multiple")
+        {
+            typedef estd::internal::index_of_type<int, int, int> iot;
+
+            constexpr int idx = iot::index;
+            constexpr bool multiple = iot::multiple;
+
+            REQUIRE(idx == 0);
+            REQUIRE(multiple == true);
+        }
+    }
+    SECTION("visitor")
+    {
+        SECTION("static")
+        {
+            typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
+
+            int result = vh_type::visit(identify_index_functor{}, 1);
+
+            REQUIRE(result == 1);
+        }
+        SECTION("tuple instance")
+        {
+            typedef internal::variadic_visitor_helper2<float, const char*, int> vh_type;
+
+            tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
+            const char* output = nullptr;
+
+            int result = vh_type::visit_instance(identify_type_functor<const char*>{},
+                tuple_getter_functor{}, t,
+                &output);
+
+            REQUIRE(result == 1);
+            REQUIRE(output == test::str_hello);
+        }
+        SECTION("variant instance")
+        {
+            // TODO: Do flavor of this calling direct 'visit_instance' on
+            // variant itself and consider making a freestanding one
+            // which takes variant as an input (so as to be slightly
+            // more std-like)
+
+            typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
+
+            internal::variant<monostate, int, float, const char*> v;
+
+            v = (const char*)test::str_hello;
+
+            const char* output = nullptr;
+
+            SECTION("direct")
             {
-                typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
-
-                int result = vh_type::visit(identify_index_functor{}, 1);
-
-                REQUIRE(result == 1);
-            }
-            SECTION("tuple instance")
-            {
-                typedef internal::variadic_visitor_helper2<float, const char*, int> vh_type;
-
-                tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
-                const char* output = nullptr;
-
-                int result = vh_type::visit_instance(identify_type_functor<const char*>{},
-                    tuple_getter_functor{}, t,
+                int result = vh_type::visit_instance(
+                    identify_type_functor<const char*>{},
+                    internal::variant_storage_getter_functor{}, v,
                     &output);
 
-                REQUIRE(result == 1);
+                REQUIRE(result == 3);
                 REQUIRE(output == test::str_hello);
             }
-            SECTION("variant instance")
+            SECTION("helper")
             {
-                // TODO: Do flavor of this calling direct 'visit_instance' on
-                // variant itself and consider making a freestanding one
-                // which takes variant as an input (so as to be slightly
-                // more std-like)
+                std::size_t result = -2;
 
-                typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
+                v.visit_instance(
+                    identify_type_functor<const char*>{},
+                    &result,
+                    &output);
 
-                internal::variant<monostate, int, float, const char*> v;
-
-                v = (const char*)test::str_hello;
-
-                const char* output = nullptr;
-
-                SECTION("direct")
-                {
-                    int result = vh_type::visit_instance(
-                        identify_type_functor<const char*>{},
-                        internal::variant_storage_getter_functor{}, v,
-                        &output);
-
-                    REQUIRE(result == 3);
-                    REQUIRE(output == test::str_hello);
-                }
-                SECTION("helper")
-                {
-                    std::size_t result = -2;
-
-                    v.visit_instance(
-                        identify_type_functor<const char*>{},
-                        &result,
-                        &output);
-
-                    REQUIRE(result == 3);
-                    REQUIRE(output == test::str_hello);
-                }
+                REQUIRE(result == 3);
+                REQUIRE(output == test::str_hello);
             }
         }
+    }
+    SECTION("visitor struct")
+    {
+        typedef internal::visitor_helper_struct<internal::converting_selector<int>, int, float, monostate> vhs_type;
+        constexpr int selected = vhs_type::selected;
+
+        REQUIRE(selected == 1);
+
+        typedef internal::visitor_helper_struct<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
+
+        REQUIRE(selected == 1);
     }
 }
 

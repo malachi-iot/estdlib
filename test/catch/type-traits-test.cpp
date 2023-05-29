@@ -3,6 +3,7 @@
 #include <estd/type_traits.h>
 #include <estd/limits.h>
 #include <estd/string.h>
+#include <estd/internal/raw/variant.h>
 
 #include "test-data.h"
 
@@ -99,6 +100,15 @@ TEST_CASE("type traits tests")
         REQUIRE(is_convertible<test::Dummy, test::ChildOfDummy>::value == false);
         REQUIRE(is_convertible<test::ChildOfDummy*, test::Dummy*>::value == true);
         REQUIRE(is_convertible<test::Dummy*, test::ChildOfDummy*>::value == false);
+
+        bool v1 = std::is_convertible<monostate, float>::value;
+
+        REQUIRE(v1 == false);
+
+        v1 = std::is_convertible<float, monostate>::value;
+
+        REQUIRE(v1 == false);
+
     }
 }
 

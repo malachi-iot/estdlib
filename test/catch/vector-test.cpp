@@ -107,7 +107,7 @@ TEST_CASE("vector tests")
 
         REQUIRE(size_type_size == 1); // not actually used much in this context (but maybe could be?)
 
-        int accessor_size = sizeof(accessor_type);
+        unsigned accessor_size = sizeof(accessor_type);
 
         // should be relatively small, comprised of an offset and
         // a reference to underlying fixed allocator.  As an

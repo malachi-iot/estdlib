@@ -120,6 +120,37 @@ struct variadic_visitor_helper2
     }
 };
 
+template <class TEval, class ...Types>
+struct visitor_helper_struct;
+
+template <class TEval>
+struct visitor_helper_struct<TEval>
+{
+    static constexpr int selected = -1;
+};
+
+
+template <class TEval, class T, class ...Types>
+struct visitor_helper_struct<TEval, T, Types...>
+{
+    typedef visitor_helper_struct<TEval, Types...> upward;
+    static constexpr int index = sizeof...(Types) - 1;
+    static constexpr bool eval = TEval::template evaluator<T>::value;
+    static constexpr int selected = eval ? index : upward::selected;
+};
+
+
+// EXPERIMENTAL
+template <class T>
+struct converting_selector
+{
+    template <class T_j>
+    using evaluator = is_convertible<T_j, T>;
+};
+
+
+
+
 // largest_type lifted from
 // https://stackoverflow.com/questions/16803814/how-do-i-return-the-largest-type-in-a-list-of-types
 template <typename... Ts>

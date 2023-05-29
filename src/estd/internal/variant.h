@@ -460,6 +460,15 @@ class variant : public variant_storage<Types...>
     };
 
 
+    struct converting_assignment_functor
+    {
+        template <unsigned I, class T_i>
+        bool operator()(visitor_instance<I, T_i> vi)
+        {
+            return false;
+        }
+    };
+
     template <class T>
     using index_of_type = estd::internal::index_of_type<T, Types...>;
 
