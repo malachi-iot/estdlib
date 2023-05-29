@@ -80,25 +80,43 @@ TEST_CASE("variant")
         }
         SECTION("copy")
         {
-            variant1_type v;
+            int counter = 0;
+            auto dtor_fn = [&]{ ++counter; };
 
-            v = 8;
+            {
+                variant1_type v;
 
-            variant1_type v2(v);
+                v = 8;
 
-            REQUIRE(v2.index() == v.index());
-            REQUIRE(get<int>(v2) == 8);
+                variant1_type v2(v);
+
+                REQUIRE(v2.index() == v.index());
+                REQUIRE(get<int>(v2) == 8);
+
+                v.emplace<test::NonTrivial>(1, dtor_fn);
+                v2.emplace<test::NonTrivial>(2, dtor_fn);
+                variant1_type v3(v);
+
+                REQUIRE(v3.get<test::NonTrivial>()->code_ == 1);
+                REQUIRE(v3.get<test::NonTrivial>()->copied_);
+            }
+
+            REQUIRE(counter == 3);
         }
         SECTION("move")
         {
             int counter = 0;
             auto dtor_fn = [&]{ ++counter; };
 
-            variant1_type v;
+            {
+                variant1_type v;
 
-            v = 8;
+                v.emplace<test::NonTrivial>(8, dtor_fn);
 
-            variant1_type v2(std::move(v));
+                variant1_type v2(std::move(v));
+            }
+
+            REQUIRE(counter == 1);
         }
 #if __cpp_concepts
         SECTION("converting constructor")
@@ -126,7 +144,7 @@ TEST_CASE("variant")
         }
         SECTION("monostate, int")
         {
-            estd::internal::variant_storage<estd::monostate, int> vs;
+            vs_type vs;
 
             REQUIRE(vs.is_trivial);
         }
