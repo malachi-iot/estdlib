@@ -316,6 +316,17 @@ struct variant_alternative<I, variant_storage<Types...> > :
 template <unsigned I, class T>
 using variant_alternative_t = typename variant_alternative<I, T>::type;
 
+
+struct variant_storage_getter_functor
+{
+    template <unsigned I, class T, class ...TArgs>
+    T& operator()(internal::visitor_index<I, T>, internal::variant_storage<TArgs...>& t)
+    {
+        return get<I>(t);
+    }
+};
+
+
 // NOTE: Using regular functions for F&& style functors doesn't
 // seem to work, perhaps in particular due to class T parameter?
 struct destroyer_functor

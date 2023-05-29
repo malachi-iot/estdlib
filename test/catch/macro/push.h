@@ -9,6 +9,7 @@
 #endif
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #if __has_warning("-Wunused-but-set-variable")

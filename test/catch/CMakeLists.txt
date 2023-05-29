@@ -54,6 +54,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     tuple-test.cpp
     vector-test.cpp
     utility-test.cpp
+    variadic-test.cpp
     variant-test.cpp
         internal-test.cpp)
 
