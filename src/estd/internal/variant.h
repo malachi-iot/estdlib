@@ -209,6 +209,7 @@ template <bool trivial, class ...Types>
 struct variant_storage_base : variant_storage_tag
 {
     using size_type = std::size_t;
+    typedef variant_storage_base<trivial, Types...> this_type;
 
     //typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
@@ -223,6 +224,24 @@ struct variant_storage_base : variant_storage_tag
 
     template <class T>
     using constructable_selector = typename visitor::template visit_struct<internal::constructable_selector<T> >;
+
+    struct copying_constructor_functor
+    {
+        template <unsigned I, class T_i, class ...TArgs>
+        bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
+        {
+            if(index != I) return false;
+
+            // DEBT: This should work, but 'get' somehow glitches during compile.
+            // Technically however we prefer the low level get
+            //new (v.template get<I>()) T_i(get<I>(copy_from));
+
+            new (v.template get<I>()) T_i(* copy_from.template get<I>());
+            return true;
+        }
+    };
+
+
 
 private:
     union
@@ -350,6 +369,10 @@ public:
     variant_storage_base(in_place_visit_t, F&& f, size_type* index, TArgs&&...args) :
         dummy{visit(std::forward<F>(f), index, *this, std::forward<TArgs>(args)...)}
     {}
+
+    constexpr variant_storage_base(const variant_storage_base& copy_from, size_type index) :
+        dummy{visit(copying_constructor_functor{}, nullptr, *this, copy_from, index)}
+    {}
 };
 
 template <class ...T>
@@ -406,24 +429,6 @@ struct converting_constructor_functor2
         return true;
     }
 };
-
-struct copying_constructor_functor
-{
-    template <unsigned I, class T_i, class ...TArgs>
-    bool operator()(visitor_index<I, T_i>, variant_storage<TArgs...>& v,
-        const variant<TArgs...>& copy_from)
-    {
-        if(copy_from.index() != I) return false;
-
-        // DEBT: This should work, but 'get' somehow glitches during compile.
-        // Technically however we prefer the low level get
-        //new (v.template get<I>()) T_i(get<I>(copy_from));
-
-        new (v.template get<I>()) T_i(* copy_from.template get<I>());
-        return true;
-    }
-};
-
 
 template <class ...Types>
 class variant : public variant_storage<Types...>
@@ -510,7 +515,7 @@ public:
     {}
 
     constexpr variant(const variant& copy_from) :
-        base_type(in_place_visit_t{}, copying_constructor_functor{}, &index_, copy_from),
+        base_type(copy_from, copy_from.index()),
         index_{copy_from.index()}
     {
 

@@ -86,16 +86,9 @@ private:
 protected:
     template <class U, class G>
     //ESTD_CPP_CONSTEXPR_RET EXPLICIT
-    expected(const expected<U, G>& copy_from, bool has_value)
+    constexpr expected(const expected<U, G>& copy_from, bool has_value) :
+        storage(copy_from.storage, has_value ? 0 : 1)
     {
-        if(has_value)
-        {
-            new (storage.raw()) U(copy_from.value());
-        }
-        else
-        {
-            new (storage.raw()) G(copy_from.error());
-        }
     }
 
     ESTD_CPP_CONSTEXPR_RET expected() :
