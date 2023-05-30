@@ -592,7 +592,7 @@ public:
         emplace<T_j>(T_j(std::forward<T>(t)));
     }
 
-    template <class T_j, class T>//, class enabled = enable_if_t<is_assignable<T_j, T>::value> >
+    template <class T_j, class T, class enabled = enable_if_t<is_assignable<T_j&, T>::value> >
     void assignment_helper(T&& t)
     {
         *base_type::template get<T_j>() = std::forward<T>(t);

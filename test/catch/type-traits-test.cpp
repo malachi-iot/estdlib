@@ -118,6 +118,16 @@ TEST_CASE("type traits tests")
         REQUIRE(v1 == false);
 
     }
+    SECTION("is_assignable")
+    {
+        bool v1 = is_assignable<const char*&, char*>::value;
+
+        REQUIRE(v1);
+
+        v1 = is_assignable<test::NonTrivial&, test::NonTrivial>::value;
+
+        REQUIRE(v1 == false);
+    }
 }
 
 #include "macro/pop.h"

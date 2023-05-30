@@ -4,6 +4,8 @@
 
 namespace estd { namespace test {
 
+// NOTE: Specifically excludes assignment (operator =) to more deeply
+// exercise consuming API
 struct NonTrivial
 {
     const int code_;
