@@ -69,6 +69,14 @@ template <class TEval, class ...Types>
 struct visitor_helper_struct;
 
 
+// EXPERIMENTAL, perhaps we prefer this specialization over functor?
+template <class TProvider>
+struct visitor_instance_factory
+{
+    template <unsigned I, class T>
+    visitor_instance<I, T> create(visitor_index<I, T>) { return {}; }
+};
+
 
 template <typename... Types>
 struct variadic_visitor_helper2

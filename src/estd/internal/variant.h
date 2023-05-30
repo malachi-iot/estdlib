@@ -227,16 +227,28 @@ struct variant_storage_base : variant_storage_tag
 
     struct copying_constructor_functor
     {
-        template <unsigned I, class T_i, class ...TArgs>
+        template <unsigned I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
+        constexpr bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
+        {
+            return false;
+        }
+
+        template <unsigned I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
         bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
         {
             if(index != I) return false;
 
-            // DEBT: This should work, but 'get' somehow glitches during compile.
-            // Technically however we prefer the low level get
-            //new (v.template get<I>()) T_i(get<I>(copy_from));
+            v.emplace<I>(internal::get<I>(copy_from));
+            return true;
+        }
 
-            new (v.template get<I>()) T_i(* copy_from.template get<I>());
+        template <unsigned I, class T_i>
+        bool operator()(visitor_instance<I, T_i> vi, const this_type& copy_from, const size_type index)
+        {
+            if(index != I) return false;
+
+            new (&vi.value) T_i(internal::get<I>(copy_from));
+
             return true;
         }
     };
@@ -294,7 +306,7 @@ public:
     }
 
     template <unsigned I, class ...TArgs>
-    void emplace(TArgs&&...args)
+    type_at_index<I>* emplace(TArgs&&...args)
     {
         typedef type_at_index<I> T_i;
         return emplace<T_i>(std::forward<TArgs>(args)...);
@@ -371,6 +383,7 @@ public:
     {}
 
     constexpr variant_storage_base(const variant_storage_base& copy_from, size_type index) :
+        //dummy{visit_instance(copying_constructor_functor{}, nullptr, copy_from, index)}
         dummy{visit(copying_constructor_functor{}, nullptr, *this, copy_from, index)}
     {}
 };
