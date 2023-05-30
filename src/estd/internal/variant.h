@@ -213,11 +213,16 @@ struct variant_storage_base : variant_storage_tag
     //typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
+    using visitor = variadic_visitor_helper2<Types...>;
+
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
 
     template <int I>
     using type_at_index = estd::internal::type_at_index<I, Types...>;
+
+    template <class T>
+    using constructable_selector = typename visitor::template visit_struct<internal::constructable_selector<T> >;
 
 private:
     union
@@ -301,9 +306,6 @@ public:
     {
         visit<0, F, Types...>(std::forward<F>(f), index);
     } */
-
-    using visitor = variadic_visitor_helper2<Types...>;
-
 
     /*
     template <int I, typename F>
@@ -598,19 +600,21 @@ public:
         *base_type::template get<T_j>() = std::forward<T>(t);
     }
 
-/*
-    template <class T_j, class T, class enabled = enable_if_t<is_assignable<T_j, T>::value> >
-    void assignment_helper(T&& t)
+    template <class T_j, class T, class enabled = enable_if_t<!is_assignable<T_j&, T>::value> >
+    void assignment_helper(T&& t, bool = true)
     {
-        *base_type::template get<T_j>() = std::forward<T>(t);
-    } */
+        // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
+        // but we do.  Consider feature-flagging
+        // DEBT: Fix up dummy index
+        assignment_emplace_helper<0, T_j, T>(std::forward<T>(t));
+    }
 
     template <
         class T,
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        typedef typename base_type::visitor::visit_struct<constructable_selector<T> > finder_type;
+        typedef typename base_type::template constructable_selector<T> finder_type;
         typedef typename finder_type::selected_type T_j;
 
         if(finder_type::index == index_)

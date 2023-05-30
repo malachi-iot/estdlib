@@ -97,10 +97,10 @@ TEST_CASE("variant")
 
                 test::NonTrivial v3(7, dtor_fn);
 
-                //v = v3;
+                v = v3;
             }
 
-            REQUIRE(counter == 3);
+            REQUIRE(counter == 4);
         }
         SECTION("copy")
         {
