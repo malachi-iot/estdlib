@@ -261,21 +261,19 @@ public:
         visit_instance(destroyer_functor{}, nullptr, index);
     }
 
-    // More or less an emplace
-    template <unsigned index, class ...TArgs>
-    void construct(TArgs&&...args)
-    {
-        typedef type_at_index<index> t;
-
-        new (storage.raw) t(std::forward<TArgs>(args)...);
-    }
-
     template <class T, class ...TArgs>
     T* emplace(TArgs&&...args)
     {
         T* const t = get<T>();
         new (t) T(std::forward<TArgs>(args)...);
         return t;
+    }
+
+    template <unsigned I, class ...TArgs>
+    void emplace(TArgs&&...args)
+    {
+        typedef type_at_index<I> T_i;
+        return emplace<T_i>(std::forward<TArgs>(args)...);
     }
 
 
@@ -367,6 +365,10 @@ struct variant_alternative;
 
 template <unsigned I, class... Types>
 struct variant_alternative<I, variant_storage<Types...> > :
+    type_identity<type_at_index<I, Types...>> { };
+
+template <unsigned I, class... Types>
+struct variant_alternative<I, variant<Types...> > :
     type_identity<type_at_index<I, Types...>> { };
 
 template <unsigned I, class T>
@@ -572,7 +574,7 @@ public:
         class enabled = enable_if_t<
             is_nothrow_constructible<T_j, T>::value ||
             !is_nothrow_move_constructible<T_j>::value> >
-    void assignment_helper(T&& t, bool = true)
+    void assignment_emplace_helper(T&& t, bool = true)
     {
         // DEBT: Make this emplace<index> instead as per spec.
         // Should be OK as type for now though
@@ -583,13 +585,25 @@ public:
         class enabled = enable_if_t<
                 !(is_nothrow_constructible<T_j, T>::value ||
                 !is_nothrow_move_constructible<T_j>::value)> >
-    void assignment_helper(T&& t)
+    void assignment_emplace_helper(T&& t)
     {
         // DEBT: Make this emplace<index> instead as per spec.
         // Should be OK as type for now though
         emplace<T_j>(T_j(std::forward<T>(t)));
     }
 
+    template <class T_j, class T>//, class enabled = enable_if_t<is_assignable<T_j, T>::value> >
+    void assignment_helper(T&& t)
+    {
+        *base_type::template get<T_j>() = std::forward<T>(t);
+    }
+
+/*
+    template <class T_j, class T, class enabled = enable_if_t<is_assignable<T_j, T>::value> >
+    void assignment_helper(T&& t)
+    {
+        *base_type::template get<T_j>() = std::forward<T>(t);
+    } */
 
     template <
         class T,
@@ -601,12 +615,11 @@ public:
 
         if(finder_type::index == index_)
         {
-            *base_type::template get<T_j>() = std::forward<T>(t);
+            assignment_helper<T_j>(std::forward<T>(t));
         }
         else
         {
-            assignment_helper<finder_type::index, T_j>(std::forward<T>(t));
-            index_ = finder_type::index;
+            assignment_emplace_helper<finder_type::index, T_j>(std::forward<T>(t));
         }
 
         return *this;
@@ -642,11 +655,19 @@ public:
         // Unset index just in case expection is thrown during construction
         index_ = variant_npos();
 
-        T* v = base_type::template emplace<T>(std::forward<TArgs>(args)...);
+        T* const v = base_type::template emplace<T>(std::forward<TArgs>(args)...);
 
         index_ = index_of_type<T>::index;
 
         return *v;
+    }
+
+    template <unsigned I, class... TArgs>
+    variant_alternative_t<I, variant>& emplace(TArgs&&...args)
+    {
+        typedef variant_alternative_t<I, variant> T_i;
+
+        return emplace<T_i>(std::forward<TArgs>(args)...);
     }
 };
 

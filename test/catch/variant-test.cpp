@@ -66,6 +66,11 @@ TEST_CASE("variant")
 
                 v.emplace<int>(10);
                 v.emplace<test::NonTrivial>(9, dtor_fn);
+
+                v.emplace<2>(test::str_hello);
+
+                REQUIRE(v.index() == 2);
+                REQUIRE(get<2>(v) == test::str_hello);
             }
 
             REQUIRE(counter == 3);
@@ -89,9 +94,13 @@ TEST_CASE("variant")
                 auto _v = get<test::NonTrivial>(v);
 
                 REQUIRE(_v.code_ == 7);
+
+                test::NonTrivial v3(7, dtor_fn);
+
+                //v = v3;
             }
 
-            REQUIRE(counter == 2);
+            REQUIRE(counter == 3);
         }
         SECTION("copy")
         {

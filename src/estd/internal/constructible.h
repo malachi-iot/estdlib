@@ -9,6 +9,9 @@ namespace estd {
 
 // DEBT: Copy/paste inline version of this from LLVM, GNU, etc.
 #if __cpp_alias_templates
+template <class T, class U>
+using is_assignable = std::is_assignable<T, U>;
+
 template <class T, class ...TArgs>
 using is_constructible = std::is_constructible<T, TArgs...>;
 

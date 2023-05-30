@@ -146,6 +146,11 @@ TEST_CASE("variadic")
                 REQUIRE(result == 3);
                 REQUIRE(output == test::str_hello);
             }
+
+            // NOTE: *might* go through emplace chain, we'll see
+            v = test::str_simple;
+
+            REQUIRE(get<const char*>(v) == test::str_simple);
         }
     }
     SECTION("visitor struct")
