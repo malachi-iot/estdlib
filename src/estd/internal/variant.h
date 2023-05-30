@@ -185,6 +185,22 @@ struct variant_storage_getter_functor
 };
 
 
+// NOTE: Using regular functions for F&& style functors doesn't
+// seem to work, perhaps in particular due to class T parameter?
+struct destroyer_functor
+{
+    template <unsigned I, class T>
+    bool operator()(visitor_instance<I, T> vi, unsigned index)
+    {
+        if(I != index) return false;
+
+        vi.value.~T();
+
+        return true;
+    }
+};
+
+
 
 struct variant_storage_tag {};
 
@@ -240,6 +256,11 @@ public:
         ((t*) storage.raw)->~t();
     }
 
+    void destroy(unsigned index)
+    {
+        visit_instance(destroyer_functor{}, nullptr, index);
+    }
+
     // More or less an emplace
     template <unsigned index, class ...TArgs>
     void construct(TArgs&&...args)
@@ -248,6 +269,15 @@ public:
 
         new (storage.raw) t(std::forward<TArgs>(args)...);
     }
+
+    template <class T, class ...TArgs>
+    T* emplace(TArgs&&...args)
+    {
+        T* const t = get<T>();
+        new (t) T(std::forward<TArgs>(args)...);
+        return t;
+    }
+
 
     template <class T>
     ensure_type_t<T>* get() { return (T*) storage.raw; }
@@ -341,22 +371,6 @@ struct variant_alternative<I, variant_storage<Types...> > :
 
 template <unsigned I, class T>
 using variant_alternative_t = typename variant_alternative<I, T>::type;
-
-
-// NOTE: Using regular functions for F&& style functors doesn't
-// seem to work, perhaps in particular due to class T parameter?
-struct destroyer_functor
-{
-    template <unsigned I, class T>
-    bool operator()(visitor_instance<I, T> vi, unsigned index)
-    {
-        if(I != index) return false;
-
-        vi.value.~T();
-
-        return true;
-    }
-};
 
 
 template <class T>
@@ -462,8 +476,9 @@ class variant : public variant_storage<Types...>
 
     struct converting_assignment_functor
     {
-        template <unsigned I, class T_i>
-        bool operator()(visitor_instance<I, T_i> vi)
+        template <unsigned I, class T_i, class T, class enabled =
+            enable_if_t<is_constructible<T_i, T>::value> >
+        bool operator()(visitor_instance<I, T_i> vi, size_type index, T&& t)
         {
             return false;
         }
@@ -474,15 +489,6 @@ class variant : public variant_storage<Types...>
 
     size_type index_;
 
-    // DEBT: Not a great name
-    template <class T>
-    T* set_index()
-    {
-        index_ = index_of_type<T>::index;
-        return base_type::template get<T>();
-    }
-
-
     constexpr bool valid() const { return index_ != variant_npos(); }
 
     // IDEA: Consider a feature flag to track the particular destructor of interest
@@ -490,7 +496,7 @@ class variant : public variant_storage<Types...>
     // speed vs size edge case
     void destroy_if_valid()
     {
-        if(valid()) base_type::visit_instance(destroyer_functor{}, nullptr, index_);
+        if(valid()) base_type::destroy(index_);
     }
 
 public:
@@ -562,14 +568,47 @@ public:
         move_from.index_ = variant_npos();
     }
 
+    template <unsigned I, class T_j, class T,
+        class enabled = enable_if_t<
+            is_nothrow_constructible<T_j, T>::value ||
+            !is_nothrow_move_constructible<T_j>::value> >
+    void assignment_helper(T&& t, bool = true)
+    {
+        // DEBT: Make this emplace<index> instead as per spec.
+        // Should be OK as type for now though
+        emplace<T_j>(std::forward<T>(t));
+    }
 
-    // DEBT: Not nearly built out enough
+    template <unsigned I, class T_j, class T,
+        class enabled = enable_if_t<
+                !(is_nothrow_constructible<T_j, T>::value ||
+                !is_nothrow_move_constructible<T_j>::value)> >
+    void assignment_helper(T&& t)
+    {
+        // DEBT: Make this emplace<index> instead as per spec.
+        // Should be OK as type for now though
+        emplace<T_j>(T_j(std::forward<T>(t)));
+    }
+
+
     template <
         class T,
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
-    variant& operator=(T&& v)
+    variant& operator=(T&& t)
     {
-        *set_index<T>() = v;
+        typedef typename base_type::visitor::visit_struct<constructable_selector<T> > finder_type;
+        typedef typename finder_type::selected_type T_j;
+
+        if(finder_type::index == index_)
+        {
+            *base_type::template get<T_j>() = std::forward<T>(t);
+        }
+        else
+        {
+            assignment_helper<finder_type::index, T_j>(std::forward<T>(t));
+            index_ = finder_type::index;
+        }
+
         return *this;
     }
 
@@ -591,14 +630,21 @@ public:
 
     constexpr size_type index() const { return index_; }
 
-    template <class T, class ...TArgs>
+    template <class T, class ...TArgs,
+        class enabled = enable_if_t<is_constructible<T, TArgs...>::value> >
     T& emplace(TArgs&&...args)
     {
         destroy_if_valid();
 
-        T* v = set_index<T>();
+        //typedef typename base_type::visitor::visit_struct<constructable_selector<T> > finder_type;
+        //typedef typename finder_type::selected_type T_i;
 
-        new (v) T(std::forward<TArgs>(args)...);
+        // Unset index just in case expection is thrown during construction
+        index_ = variant_npos();
+
+        T* v = base_type::template emplace<T>(std::forward<TArgs>(args)...);
+
+        index_ = index_of_type<T>::index;
 
         return *v;
     }

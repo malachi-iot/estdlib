@@ -171,6 +171,7 @@ struct visitor_helper_struct
     static constexpr bool multiple = found > 1;
 
     using selected_type = typename vh_type::selected_type;
+    using visitor_index = internal::visitor_index<index, selected_type>;
 };
 
 
@@ -185,11 +186,11 @@ struct converting_selector
 
 
 // EXPERIMENTAL
-template <class T>
+template <class ...Types>
 struct constructable_selector
 {
     template <class T_j>
-    using evaluator = is_constructible<T_j, T>;
+    using evaluator = is_constructible<T_j, Types...>;
 };
 
 

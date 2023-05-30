@@ -19,6 +19,15 @@ template <class T>
 using is_copy_constructible = std::is_copy_constructible<T>;
 
 template <class T, class ...TArgs>
+using is_nothrow_constructible = std::is_nothrow_constructible<T, TArgs...>;
+
+template <class T>
+using is_nothrow_move_assignable = std::is_nothrow_move_assignable<T>;
+
+template <class T>
+using is_nothrow_move_constructible = std::is_nothrow_move_constructible<T>;
+
+template <class T, class ...TArgs>
 using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
 
 #if __cpp_inline_variables
