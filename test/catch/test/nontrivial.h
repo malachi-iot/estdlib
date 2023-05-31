@@ -14,27 +14,24 @@ struct NonTrivial
 
     std::function<void()> on_dtor;
 
-    static unsigned dtor_counter;
-
     explicit NonTrivial(int code) : code_{code} {}
 
     template <class F>
     explicit NonTrivial(int code, F&& f) :
-        code_{code}, on_dtor(std::move(f))
+        code_{code}, on_dtor(std::forward<F>(f))
     {}
 
     NonTrivial(const NonTrivial& copy_from) :
         code_{copy_from.code_}, copied_{true},
         on_dtor(copy_from.on_dtor)
     {}
-    NonTrivial(NonTrivial&& move_from) :
+    NonTrivial(NonTrivial&& move_from) noexcept :
         code_{move_from.code_}, moved_{true},
         on_dtor(std::move(move_from.on_dtor))
     {}
 
     ~NonTrivial()
     {
-        ++dtor_counter;
         if(on_dtor) on_dtor();
     }
 };

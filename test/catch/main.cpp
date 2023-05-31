@@ -10,6 +10,4 @@
 
 namespace estd { namespace test {
 
-unsigned NonTrivial::dtor_counter = 0;
-
 }}
