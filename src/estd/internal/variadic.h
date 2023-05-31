@@ -56,10 +56,10 @@ struct indices<I, Is...> : indices<Is...>
     using get = get_index_finder<pos, I, Is...>;
 
     template <int I2>
-    using prepend = indices<I2, Is...>;
+    using prepend = indices<I2, I, Is...>;
 
     template <int I2>
-    using append = indices<Is..., I2>;
+    using append = indices<I, Is..., I2>;
 };
 
 template <int I, int ...Is>
@@ -249,7 +249,7 @@ struct visitor_helper_struct2<TEval, T, Types...>
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
     using selected_indices = conditional_t<eval,
-        typename upward::selected_indices::template prepend<index>,
+        typename upward::selected_indices::template append<index>,
         typename upward::selected_indices>;
 };
 

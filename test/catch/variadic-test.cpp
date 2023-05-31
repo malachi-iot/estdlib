@@ -58,6 +58,7 @@ TEST_CASE("variadic")
         SECTION("basic")
         {
             typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
+            typedef iot::selected_indices selected_indices;
             constexpr int idx = iot::index;
             constexpr bool multiple = iot::multiple;
 
@@ -67,6 +68,7 @@ TEST_CASE("variadic")
         SECTION("not found")
         {
             typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
+            typedef iot::selected_indices selected_indices;
 
             constexpr int idx = iot::index;
             constexpr bool multiple = iot::multiple;
@@ -76,14 +78,14 @@ TEST_CASE("variadic")
         }
         SECTION("multiple")
         {
-            typedef estd::internal::index_of_type<int, int, int> iot;
+            typedef estd::internal::index_of_type<int, int, int, int> iot;
+            typedef iot::selected_indices selected_indices;
 
             constexpr int idx = iot::index;
             constexpr bool multiple = iot::multiple;
 
             REQUIRE(idx == 0);
-            // FIX: With introduction of 'indices', this is now broken
-            //REQUIRE(multiple == true);
+            REQUIRE(multiple == true);
         }
     }
     SECTION("visitor")
@@ -182,10 +184,11 @@ TEST_CASE("variadic")
     SECTION("indices")
     {
         typedef internal::indices<0, 7, 77, 777> i_type;
+        int value;
 
         SECTION("get_index")
         {
-            int value = internal::get_index<0, i_type>::value;
+            value = internal::get_index<0, i_type>::value;
 
             REQUIRE(value == 0);
 
@@ -200,6 +203,22 @@ TEST_CASE("variadic")
             value = i_type::size;
 
             REQUIRE(value == 4);
+        }
+        SECTION("prepend")
+        {
+            typedef i_type::prepend<-7> i2_type;
+
+            value = i2_type::get<0>::value;
+
+            REQUIRE(value == -7);
+        }
+        SECTION("append")
+        {
+            typedef i_type::append<7777> i2_type;
+
+            value = i2_type::get<4>::value;
+
+            REQUIRE(value == 7777);
         }
         SECTION("reverse")
         {
