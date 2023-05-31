@@ -21,8 +21,13 @@ struct in_place_visit_t : in_place_tag {};
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
+// DEBT: Overlaps functionality with 'integer_sequence' - strongly
+// consider combining
 template <int ...Is>
 struct indices;
+
+template <int ...Is>
+struct indices_reverser;
 
 template <int pos, int ...Is>
 struct get_index_finder;
@@ -31,7 +36,13 @@ struct get_index_finder;
 template <>
 struct indices<>
 {
+    template <int I>
+    using prepend = indices<I>;
 
+    template <int I>
+    using append = indices<I>;
+
+    static constexpr unsigned size = 0;
 };
 
 template <int I, int ...Is>
@@ -39,6 +50,7 @@ struct indices<I, Is...> : indices<Is...>
 {
     static constexpr int value = I;
     static constexpr int position = sizeof...(Is);
+    static constexpr unsigned size = sizeof...(Is) + 1;
 
     template <int pos>
     using get = get_index_finder<pos, I, Is...>;
@@ -61,6 +73,23 @@ template <int pos, int I, int ...Is>
 struct get_index_finder<pos, I, Is...> :
     get_index_finder<pos - 1, Is...>
 {
+};
+
+
+template <>
+struct indices_reverser<>
+{
+    using reversed = indices<>;
+};
+
+
+template <int I, int ...Is>
+struct indices_reverser<I, Is...>
+{
+    typedef indices_reverser<Is...> next;
+
+    // NOTE: Not proven or tested yet
+    using reversed = typename next::reversed::template append<I>;
 };
 
 template <int pos, class TIndices>
@@ -205,7 +234,6 @@ struct visitor_helper_struct2<TEval>
 
     // DEBT: Monostate may collide with seeked-for types
     typedef monostate selected_type;
-    static constexpr unsigned found = 0;
 
     using selected_indices = indices<>;
 };
@@ -218,11 +246,10 @@ struct visitor_helper_struct2<TEval, T, Types...>
     static constexpr int index = sizeof...(Types);
     static constexpr bool eval = TEval::template evaluator<T>::value;
     static constexpr int selected = eval ? index : upward::selected;
-    static constexpr unsigned found = upward::found + (eval ? 1 : 0);
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
     using selected_indices = conditional_t<eval,
-        typename upward::selected_indices::template prepend<T>,
+        typename upward::selected_indices::template prepend<index>,
         typename upward::selected_indices>;
 };
 
@@ -234,10 +261,12 @@ struct visitor_helper_struct
     static constexpr ptrdiff_t selected = vh_type::selected == -1 ?
         -1 : ((sizeof...(Types) -1) - vh_type::selected);
     static constexpr ptrdiff_t index = selected;
-    static constexpr unsigned found = vh_type::found;
-    static constexpr bool multiple = found > 1;
 
     using selected_type = typename vh_type::selected_type;
+    using selected_indices = typename vh_type::selected_indices;
+
+    static constexpr unsigned found = selected_indices::size;
+    static constexpr bool multiple = found > 1;
 
     // DEBT: fix signed/unsigned here
     using visitor_index = internal::visitor_index<(unsigned)index, selected_type>;
