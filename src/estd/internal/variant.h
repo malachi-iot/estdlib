@@ -129,13 +129,15 @@ constexpr unsigned variant_npos()
 
 
 template <class T, class ...Types>
-typename add_pointer<T>::type get_if(variant<Types...>& vs)
+typename add_pointer<T>::type get_if(variant<Types...>* vs)
 {
+    if(vs == nullptr) return nullptr;
+
     int i = index_of_type<T, Types...>::index;
 
-    if(i == -1 || vs.index() != (unsigned)i) return nullptr;
+    if(i == -1 || vs->index() != (unsigned)i) return nullptr;
 
-    return vs.template get<T>();
+    return vs->template get<T>();
 }
 
 

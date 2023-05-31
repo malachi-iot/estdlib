@@ -61,8 +61,8 @@ TEST_CASE("variant")
                 REQUIRE(internal::get_if<1>(v) != nullptr);
                 REQUIRE(internal::get_if<1>(v)->code_ == 7);
 
-                REQUIRE(internal::get_if<int>(v) == nullptr);
-                REQUIRE(internal::get_if<test::NonTrivial>(v) != nullptr);
+                REQUIRE(internal::get_if<int>(&v) == nullptr);
+                REQUIRE(internal::get_if<test::NonTrivial>(&v) != nullptr);
             }
 
             {
