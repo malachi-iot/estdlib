@@ -178,6 +178,22 @@ TEST_CASE("variadic")
 
         REQUIRE(v);
     }
+    SECTION("get_index")
+    {
+        typedef internal::indices<0, 7, 77, 777> i_type;
+
+        int value = internal::get_index<0, i_type>::value;
+
+        REQUIRE(value == 0);
+
+        value = internal::get_index<3, i_type>::value;
+
+        REQUIRE(value == 777);
+
+        value = i_type::get<2>::value;
+
+        REQUIRE(value == 77);
+    }
 }
 
 #include "macro/pop.h"

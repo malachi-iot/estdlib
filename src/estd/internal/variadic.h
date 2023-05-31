@@ -21,6 +21,60 @@ struct in_place_visit_t : in_place_tag {};
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
+template <int ...Is>
+struct indices;
+
+template <int pos, int ...Is>
+struct get_index_finder;
+
+
+template <>
+struct indices<>
+{
+
+};
+
+template <int I, int ...Is>
+struct indices<I, Is...> : indices<Is...>
+{
+    static constexpr int value = I;
+    static constexpr int position = sizeof...(Is);
+
+    template <int pos>
+    using get = get_index_finder<pos, I, Is...>;
+
+    template <int I2>
+    using prepend = indices<I2, Is...>;
+
+    template <int I2>
+    using append = indices<Is..., I2>;
+};
+
+template <int I, int ...Is>
+struct get_index_finder<0, I, Is...>
+{
+    static constexpr int value = I;
+};
+
+
+template <int pos, int I, int ...Is>
+struct get_index_finder<pos, I, Is...> :
+    get_index_finder<pos - 1, Is...>
+{
+};
+
+template <int pos, class TIndices>
+struct get_index;
+
+template <int pos, int ...Is>
+struct get_index<pos, indices<Is...> > : get_index_finder<pos, Is...>
+{
+};
+
+//template <int pos, int ...Is>
+//using get_index = get_index_finder<pos, sizeof...(Is), Is...>;
+
+
 
 template <unsigned I, class T>
 struct visitor_index  :
@@ -152,6 +206,8 @@ struct visitor_helper_struct2<TEval>
     // DEBT: Monostate may collide with seeked-for types
     typedef monostate selected_type;
     static constexpr unsigned found = 0;
+
+    using selected_indices = indices<>;
 };
 
 
@@ -165,6 +221,9 @@ struct visitor_helper_struct2<TEval, T, Types...>
     static constexpr unsigned found = upward::found + (eval ? 1 : 0);
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
+    using selected_indices = conditional_t<eval,
+        typename upward::selected_indices::template prepend<T>,
+        typename upward::selected_indices>;
 };
 
 template <class TEval, class ...Types>
@@ -179,7 +238,9 @@ struct visitor_helper_struct
     static constexpr bool multiple = found > 1;
 
     using selected_type = typename vh_type::selected_type;
-    using visitor_index = internal::visitor_index<index, selected_type>;
+
+    // DEBT: fix signed/unsigned here
+    using visitor_index = internal::visitor_index<(unsigned)index, selected_type>;
 };
 
 
