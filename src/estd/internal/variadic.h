@@ -2,6 +2,7 @@
 // Non-standard type_traits-like tools for parameter pack
 
 #include "platform.h"
+#include "variadic/integer_sequence.h"
 
 #if __cpp_variadic_templates
 
@@ -21,55 +22,13 @@ struct in_place_visit_t : in_place_tag {};
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
-// DEBT: Continue to combine this with already-existing integer_sequence
-template <typename T, T ...Is>
-struct integer_sequence;
-
 template <int ...Is>
 struct indices_reverser;
 
-template <size_t pos, typename T, T ...Is>
-struct get_index_finder;
 
-
-// NOTE: Superset of regular integer_sequence, this one has get, append
-// and prepend too
-template <typename T, T ...Is>
-struct integer_sequence
-{
-    //static constexpr int value = I;
-    //static constexpr int position = sizeof...(Is);
-    static constexpr size_t size() { return sizeof...(Is); }
-
-    template <int pos>
-    using get = get_index_finder<pos, T, Is...>;
-
-    template <int I2>
-    using prepend = integer_sequence<T, I2, Is...>;
-
-    template <int I2>
-    using append = integer_sequence<T, Is..., I2>;
-};
 
 template <int ...Is>
 using indices = integer_sequence<int, Is...>;
-
-template <size_t ...Is>
-using index_sequence = integer_sequence<size_t, Is...>;
-
-template <typename T, T I, T ...Is>
-struct get_index_finder<0, T, I, Is...>
-{
-    static constexpr int value = I;
-};
-
-
-template <size_t pos, typename T, T I, T ...Is>
-struct get_index_finder<pos, T, I, Is...> :
-    get_index_finder<pos - 1, T, Is...>
-{
-};
-
 
 template <>
 struct indices_reverser<>
@@ -85,14 +44,6 @@ struct indices_reverser<I, Is...>
 
     // NOTE: Not proven or tested yet
     using reversed = typename next::reversed::template append<I>;
-};
-
-template <int pos, class TIndices>
-struct get_index;
-
-template <int pos, class T, T ...Is>
-struct get_index<pos, integer_sequence<T, Is...> > : get_index_finder<pos, T, Is...>
-{
 };
 
 //template <int pos, int ...Is>
