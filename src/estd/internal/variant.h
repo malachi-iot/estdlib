@@ -93,6 +93,15 @@ const type_at_index<index, TArgs...>& get(const variant<TArgs...>& v)
     return * v.template get<index>();
 }
 
+template <int index, class ...TArgs>
+type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
+{
+    assert_index_matches<index>(v);
+
+    return * v.template get<index>();
+}
+
+
 template <class T, class ...TArgs>
 T& get(variant<TArgs...>& v)
 {
@@ -105,6 +114,11 @@ const T& get(const variant<TArgs...>& v)
     return get<index_of_type<T, TArgs...>::index>(v);
 }
 
+template <class T, class ...TArgs>
+const T&& get(variant<TArgs...>&& v)
+{
+    return get<index_of_type<T, TArgs...>::index>(v);
+}
 
 
 // DEBT: Supposed to be an inline variable, but we want c++11 compat
@@ -144,6 +158,13 @@ union variant_union<false, T...>
 {
     estd::byte raw[sizeof(typename largest_type<T...>::type)];
 };
+
+template <>
+union variant_union<true>
+{
+
+};
+
 
 // Not 100% needed, but I like that I can see values more
 // easily in the debugger this way
@@ -266,7 +287,7 @@ public:
     variant_storage_base() = default;
 
     template <unsigned index, class ...TArgs>
-    constexpr variant_storage_base(estd::in_place_index_t<index>, TArgs&&...args) :
+    constexpr variant_storage_base(in_place_index_t<index>, TArgs&&...args) :
         dummy{
             construct_at<type_at_index<index>>
                 (storage.raw, std::forward<TArgs>(args)...)}
@@ -506,9 +527,6 @@ class variant : public variant_storage<Types...>
         }
     };
 
-    template <class T>
-    using index_of_type = estd::internal::index_of_type<T, Types...>;
-
     size_type index_;
 
     constexpr bool valid() const { return index_ != variant_npos(); }
@@ -522,6 +540,9 @@ class variant : public variant_storage<Types...>
     }
 
 public:
+    template <class T>
+    using index_of_type = estd::internal::index_of_type<T, Types...>;
+
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
         index_{0}

@@ -21,6 +21,10 @@ struct test_init_functor
     }
 };
 
+
+template <class ...Types>
+using variant = internal::variant<Types...>;
+
 TEST_CASE("variant")
 {
     SECTION("main")
@@ -150,11 +154,37 @@ TEST_CASE("variant")
             REQUIRE(v.index() == 2);
         }
 #endif
+        SECTION("duplicate type")
+        {
+            variant<int, int, const int> v;
+
+            REQUIRE(get<0>(v) == 0);
+
+            get<int>(v) = 1;
+
+            int index = decltype(v)::index_of_type<const int>::index;
+
+            REQUIRE(index == 2);
+
+            // the getter doesn't seem to have any way to "cheat" and get at const int
+            // without throwing an exception.  Therefore, I'm not sure why variants can
+            // even support duplicates - unless it's to accomodate scnearios where Types...
+            // somehow wasn't that controlled in the first place (auto generate for example)
+            //REQUIRE(get<const int>(v) == 1);
+        }
     }
     SECTION("storage")
     {
         typedef estd::internal::variant_storage<estd::monostate, int> vs_type;
 
+        SECTION("empty")
+        {
+            internal::variant_storage<> vs;
+
+            unsigned sz = internal::variant_size<decltype(vs)>::value;
+
+            REQUIRE(sz == 0);
+        }
         SECTION("ensure")
         {
             vs_type vs;

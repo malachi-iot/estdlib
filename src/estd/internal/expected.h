@@ -81,28 +81,33 @@ public:
     typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
 
 private:
+    enum Positions
+    {
+        VALUE = 0,
+        ERROR = 1
+    };
+
     variant_storage<nonvoid_value_type, E> storage;
 
 protected:
     template <class U, class G>
-    //ESTD_CPP_CONSTEXPR_RET EXPLICIT
     constexpr expected(const expected<U, G>& copy_from, bool has_value) :
-        storage(copy_from.storage, has_value ? 0 : 1)
+        storage(copy_from.storage, has_value ? VALUE : ERROR)
     {
     }
 
     ESTD_CPP_CONSTEXPR_RET expected() :
-        storage(in_place_index_t<0>{}, nonvoid_value_type{}) {}
+        storage(in_place_index_t<0>{}) {}
 
 #if __cpp_variadic_templates
     template <class... TArgs>
     constexpr explicit expected(in_place_t, TArgs&&...args) :
-        storage(in_place_index_t<0>{}, std::forward<TArgs>(args)...)
+        storage(in_place_index_t<VALUE>{}, std::forward<TArgs>(args)...)
     {}
 
     template <class... TArgs>
     constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        storage(in_place_index_t<1>{}, std::forward<TArgs>(args)...)
+        storage(in_place_index_t<ERROR>{}, std::forward<TArgs>(args)...)
     {}
 #else
     template <class TE1>
@@ -113,25 +118,25 @@ protected:
     constexpr explicit
 #endif
     expected(nonvoid_value_type&& v) :
-        storage(in_place_index_t<0>{}, std::forward<nonvoid_value_type>(v))
+        storage(in_place_index_t<VALUE>{}, std::forward<nonvoid_value_type>(v))
     {}
 
     void destroy_value()
     {
-        storage.template destruct<0>();
+        storage.template destruct<VALUE>();
     }
 
     void destroy_error()
     {
-        storage.template destruct<1>();
+        storage.template destruct<ERROR>();
     }
 
 public:
-    nonvoid_value_type& value() { return get<0>(storage); }
-    ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<0>(storage); }
+    nonvoid_value_type& value() { return get<VALUE>(storage); }
+    ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<VALUE>(storage); }
 
-    E& error() { return get<1>(storage); }
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<1>(storage); }
+    E& error() { return get<ERROR>(storage); }
+    ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<ERROR>(storage); }
 };
 
 #if __cpp_concepts
