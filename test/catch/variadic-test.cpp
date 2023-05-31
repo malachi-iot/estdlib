@@ -81,11 +81,15 @@ TEST_CASE("variadic")
             typedef estd::internal::index_of_type<int, int, int, int> iot;
             typedef iot::selected_indices selected_indices;
 
-            constexpr int idx = iot::index;
+            int idx = iot::index;
             constexpr bool multiple = iot::multiple;
 
             REQUIRE(idx == 0);
             REQUIRE(multiple == true);
+
+            idx = selected_indices::get<0>::value;
+
+            REQUIRE(idx == 0);
         }
     }
     SECTION("visitor")

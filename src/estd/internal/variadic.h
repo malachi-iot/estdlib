@@ -224,11 +224,11 @@ struct variadic_first;
 template <class T, class ...Types>
 struct variadic_first<T, Types...> : type_identity<T> {};
 
-template <class TEval, class ...Types>
+template <unsigned size, class TEval, class ...Types>
 struct visitor_helper_struct2;
 
-template <class TEval>
-struct visitor_helper_struct2<TEval>
+template <unsigned size, class TEval>
+struct visitor_helper_struct2<size, TEval>
 {
     static constexpr int selected = -1;
 
@@ -239,27 +239,26 @@ struct visitor_helper_struct2<TEval>
 };
 
 
-template <class TEval, class T, class ...Types>
-struct visitor_helper_struct2<TEval, T, Types...>
+template <unsigned size, class TEval, class T, class ...Types>
+struct visitor_helper_struct2<size, TEval, T, Types...>
 {
-    typedef visitor_helper_struct2<TEval, Types...> upward;
-    static constexpr int index = sizeof...(Types);
+    typedef visitor_helper_struct2<size, TEval, Types...> upward;
+    static constexpr int index = ((size - 1) - sizeof...(Types));
     static constexpr bool eval = TEval::template evaluator<T>::value;
     static constexpr int selected = eval ? index : upward::selected;
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
     using selected_indices = conditional_t<eval,
-        typename upward::selected_indices::template append<index>,
+        typename upward::selected_indices::template prepend<index>,
         typename upward::selected_indices>;
 };
 
 template <class TEval, class ...Types>
 struct visitor_helper_struct
 {
-    typedef visitor_helper_struct2<TEval, Types...> vh_type;
+    typedef visitor_helper_struct2<sizeof...(Types), TEval, Types...> vh_type;
 
-    static constexpr ptrdiff_t selected = vh_type::selected == -1 ?
-        -1 : ((sizeof...(Types) -1) - vh_type::selected);
+    static constexpr ptrdiff_t selected = vh_type::selected;
     static constexpr ptrdiff_t index = selected;
 
     using selected_type = typename vh_type::selected_type;
