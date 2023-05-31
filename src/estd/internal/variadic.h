@@ -21,10 +21,9 @@ struct in_place_visit_t : in_place_tag {};
 template <int index, class ...TArgs>
 using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
 
-// DEBT: Overlaps functionality with 'integer_sequence' - strongly
-// consider combining
-template <int ...Is>
-struct indices;
+// DEBT: Continue to combine this with already-existing integer_sequence
+template <typename T, T ...Is>
+struct integer_sequence;
 
 template <int ...Is>
 struct indices_reverser;
@@ -33,34 +32,27 @@ template <int pos, int ...Is>
 struct get_index_finder;
 
 
-template <>
-struct indices<>
+// NOTE: Superset of regular integer_sequence, this one has get, append
+// and prepend too
+template <typename T, T ...Is>
+struct integer_sequence
 {
-    template <int I>
-    using prepend = indices<I>;
-
-    template <int I>
-    using append = indices<I>;
-
-    static constexpr unsigned size = 0;
-};
-
-template <int I, int ...Is>
-struct indices<I, Is...> : indices<Is...>
-{
-    static constexpr int value = I;
-    static constexpr int position = sizeof...(Is);
-    static constexpr unsigned size = sizeof...(Is) + 1;
+    //static constexpr int value = I;
+    //static constexpr int position = sizeof...(Is);
+    static constexpr size_t size() { return sizeof...(Is); }
 
     template <int pos>
-    using get = get_index_finder<pos, I, Is...>;
+    using get = get_index_finder<pos, Is...>;
 
     template <int I2>
-    using prepend = indices<I2, I, Is...>;
+    using prepend = integer_sequence<T, I2, Is...>;
 
     template <int I2>
-    using append = indices<I, Is..., I2>;
+    using append = integer_sequence<T, Is..., I2>;
 };
+
+template <int ...Is>
+using indices = integer_sequence<int, Is...>;
 
 template <int I, int ...Is>
 struct get_index_finder<0, I, Is...>
@@ -264,7 +256,7 @@ struct visitor_helper_struct
     using selected_type = typename vh_type::selected_type;
     using selected_indices = typename vh_type::selected_indices;
 
-    static constexpr unsigned found = selected_indices::size;
+    static constexpr unsigned found = selected_indices::size();
     static constexpr bool multiple = found > 1;
 
     // DEBT: fix signed/unsigned here

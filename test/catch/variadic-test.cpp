@@ -204,7 +204,7 @@ TEST_CASE("variadic")
 
             REQUIRE(value == 77);
 
-            value = i_type::size;
+            value = i_type::size();
 
             REQUIRE(value == 4);
         }
