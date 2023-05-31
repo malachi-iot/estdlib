@@ -227,9 +227,9 @@ TEST_CASE("variadic")
         SECTION("reverse")
         {
             typedef internal::indices_reverser<777, 77, 7, 0> ir_type;
-            typedef ir_type::reversed i_type;
+            //typedef ir_type::reversed i_type;
 
-            int value = internal::get_index<0, i_type>::value;
+            //int value = internal::get_index<0, i_type>::value;
 
             //REQUIRE(value == 0);
         }

@@ -28,7 +28,7 @@ struct integer_sequence;
 template <int ...Is>
 struct indices_reverser;
 
-template <int pos, int ...Is>
+template <size_t pos, typename T, T ...Is>
 struct get_index_finder;
 
 
@@ -42,7 +42,7 @@ struct integer_sequence
     static constexpr size_t size() { return sizeof...(Is); }
 
     template <int pos>
-    using get = get_index_finder<pos, Is...>;
+    using get = get_index_finder<pos, T, Is...>;
 
     template <int I2>
     using prepend = integer_sequence<T, I2, Is...>;
@@ -54,16 +54,19 @@ struct integer_sequence
 template <int ...Is>
 using indices = integer_sequence<int, Is...>;
 
-template <int I, int ...Is>
-struct get_index_finder<0, I, Is...>
+template <size_t ...Is>
+using index_sequence = integer_sequence<size_t, Is...>;
+
+template <typename T, T I, T ...Is>
+struct get_index_finder<0, T, I, Is...>
 {
     static constexpr int value = I;
 };
 
 
-template <int pos, int I, int ...Is>
-struct get_index_finder<pos, I, Is...> :
-    get_index_finder<pos - 1, Is...>
+template <size_t pos, typename T, T I, T ...Is>
+struct get_index_finder<pos, T, I, Is...> :
+    get_index_finder<pos - 1, T, Is...>
 {
 };
 
@@ -87,8 +90,8 @@ struct indices_reverser<I, Is...>
 template <int pos, class TIndices>
 struct get_index;
 
-template <int pos, int ...Is>
-struct get_index<pos, indices<Is...> > : get_index_finder<pos, Is...>
+template <int pos, class T, T ...Is>
+struct get_index<pos, integer_sequence<T, Is...> > : get_index_finder<pos, T, Is...>
 {
 };
 
@@ -222,12 +225,12 @@ struct visitor_helper_struct2;
 template <unsigned size, class TEval>
 struct visitor_helper_struct2<size, TEval>
 {
-    static constexpr int selected = -1;
+    static constexpr ptrdiff_t selected = -1;
 
     // DEBT: Monostate may collide with seeked-for types
     typedef monostate selected_type;
 
-    using selected_indices = indices<>;
+    using selected_indices = index_sequence<>;
 };
 
 
@@ -235,9 +238,9 @@ template <unsigned size, class TEval, class T, class ...Types>
 struct visitor_helper_struct2<size, TEval, T, Types...>
 {
     typedef visitor_helper_struct2<size, TEval, Types...> upward;
-    static constexpr int index = ((size - 1) - sizeof...(Types));
+    static constexpr size_t index = ((size - 1) - sizeof...(Types));
     static constexpr bool eval = TEval::template evaluator<T>::value;
-    static constexpr int selected = eval ? index : upward::selected;
+    static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
     using selected_indices = conditional_t<eval,
