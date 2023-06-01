@@ -177,6 +177,13 @@ TEST_CASE("variadic")
         selected = vhs_type3::selected;
 
         REQUIRE(selected == 0);
+
+        typedef internal::visitor_helper_struct<internal::index_selector<1>, int, float, monostate> vhs_type4;
+        selected = vhs_type4::selected;
+        bool v = is_same<vhs_type4::selected_type, float>::value;
+
+        REQUIRE(selected == 1);
+        REQUIRE(v);
     }
     SECTION("variadic_first")
     {
@@ -185,9 +192,10 @@ TEST_CASE("variadic")
 
         REQUIRE(v);
     }
-    SECTION("indices")
+    // TODO: Move this out to 'utility' test area
+    SECTION("integer_sequence")
     {
-        typedef internal::indices<0, 7, 77, 777> i_type;
+        typedef integer_sequence<int, 0, 7, 77, 777> i_type;
         int value;
 
         SECTION("get_index")
@@ -215,6 +223,10 @@ TEST_CASE("variadic")
             value = i2_type::get<0>::value;
 
             REQUIRE(value == -7);
+
+            value = i2_type::size();
+
+            REQUIRE(value == 5);
         }
         SECTION("append")
         {
@@ -223,6 +235,10 @@ TEST_CASE("variadic")
             value = i2_type::get<4>::value;
 
             REQUIRE(value == 7777);
+
+            value = i2_type::size();
+
+            REQUIRE(value == 5);
         }
         SECTION("reverse")
         {
