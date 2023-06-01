@@ -17,6 +17,8 @@ namespace estd { namespace internal {
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
+struct eval_result_tag {};
+
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
@@ -48,8 +50,8 @@ struct type_sequence
 
 
 // Very similar to std::variant_alternative
-template <int index, class ...TArgs>
-using type_at_index = typename tuple_element<index, tuple<TArgs...> >::type;
+template <size_t index, class ...Types>
+using type_at_index = typename get_type_finder<index, Types...>::type;
 
 template <int ...Is>
 struct indices_reverser;
@@ -212,6 +214,7 @@ struct visitor_helper_struct2<size, TEval>
 
     using selected_indices = index_sequence<>;
     using selected_types = type_sequence<>;
+    using projected_types = type_sequence<>;
 };
 
 
@@ -219,11 +222,17 @@ template <unsigned size, class TEval, class T, class ...Types>
 struct visitor_helper_struct2<size, TEval, T, Types...>
 {
     typedef visitor_helper_struct2<size, TEval, Types...> upward;
+
     static constexpr size_t index = ((size - 1) - sizeof...(Types));
-    static constexpr bool eval = TEval::template evaluator<T>::value;
+
+    using evaluated = typename TEval::template evaluator<T, index>;
+    static constexpr bool eval = evaluated::value;
     static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
-    using selected_type = conditional_t<eval, T, typename upward::selected_type>;
+    using projected_type = conditional_t<
+            is_base_of<eval_result_tag, evaluated>::value,
+            typename evaluated::type, T>;
+    using selected_type = conditional_t<eval, projected_type, typename upward::selected_type>;
 
     using selected_indices = conditional_t<eval,
         typename upward::selected_indices::template prepend<index>,
@@ -232,6 +241,10 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
     using selected_types = conditional_t<eval,
         typename upward::selected_types::template prepend<T>,
         typename upward::selected_types>;
+
+    using projected_types = conditional_t<eval,
+        typename upward::projected_types::template prepend<projected_type>,
+        typename upward::projected_types>;
 };
 
 template <class TEval, class ...Types>
@@ -252,13 +265,18 @@ struct visitor_helper_struct
     using visitor_index = internal::visitor_index<(unsigned)index, selected_type>;
 };
 
-
+template <bool v, class T>
+struct projected_result :
+    type_identity<T>
+{
+    constexpr static bool value = v;
+};
 
 // EXPERIMENTAL
 template <class T>
 struct converting_selector
 {
-    template <class T_j>
+    template <class T_j, size_t>
     using evaluator = is_convertible<T, T_j>;
 };
 
@@ -267,7 +285,7 @@ struct converting_selector
 template <class ...Types>
 struct constructable_selector
 {
-    template <class T_j>
+    template <class T_j, size_t>
     using evaluator = is_constructible<T_j, Types...>;
 };
 
@@ -275,11 +293,26 @@ struct constructable_selector
 template <class T>
 struct is_same_selector
 {
-    template <class T_j>
+    template <class T_j, size_t>
     using evaluator = is_same<T_j, T>;
 };
 
-
+/*
+ * Actually works, but more complicated than it needs to be since we're
+ * not really projecting
+template <size_t I>
+struct index_selector
+{
+    template <class T_j, size_t J>
+    using evaluator = projected_result<I == J, T_j>;
+};
+*/
+template <size_t I>
+struct index_selector
+{
+    template <class, size_t J>
+    using evaluator = bool_constant<I == J>;
+};
 
 
 // largest_type lifted from
