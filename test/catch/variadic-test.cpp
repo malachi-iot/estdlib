@@ -53,13 +53,13 @@ struct identify_type_functor
 
 TEST_CASE("variadic")
 {
-    SECTION("index_of_type")
+    SECTION("select_type")
     {
         SECTION("basic")
         {
-            typedef estd::internal::index_of_type<int, estd::monostate, int, float> iot;
+            typedef estd::internal::select_type<int, estd::monostate, int, float> iot;
             typedef iot::selected_indices selected_indices;
-            constexpr int idx = iot::index;
+            constexpr int idx = selected_indices::first();
             constexpr bool multiple = iot::multiple;
 
             REQUIRE(idx == 1);
@@ -67,10 +67,10 @@ TEST_CASE("variadic")
         }
         SECTION("not found")
         {
-            typedef estd::internal::index_of_type<int, estd::monostate, float> iot;
+            typedef estd::internal::select_type<int, estd::monostate, float> iot;
             typedef iot::selected_indices selected_indices;
 
-            constexpr int idx = iot::index;
+            constexpr int idx = iot::selected;
             constexpr bool multiple = iot::multiple;
 
             REQUIRE(idx == -1);
@@ -78,25 +78,21 @@ TEST_CASE("variadic")
         }
         SECTION("multiple")
         {
-            typedef estd::internal::index_of_type<int, int, int, int> iot;
+            typedef estd::internal::select_type<int, int, int, int> iot;
             typedef iot::selected_indices selected_indices;
 
-            int idx = iot::index;
+            unsigned idx = selected_indices::first();
             constexpr bool multiple = iot::multiple;
 
             REQUIRE(idx == 0);
             REQUIRE(multiple == true);
-
-            idx = selected_indices::get<0>::value;
-
-            REQUIRE(idx == 0);
         }
     }
     SECTION("visitor")
     {
         SECTION("static")
         {
-            typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
+            typedef internal::variadic_visitor<monostate, int, float, const char*> vh_type;
 
             int result = vh_type::visit(identify_index_functor{}, 1);
 
@@ -104,7 +100,7 @@ TEST_CASE("variadic")
         }
         SECTION("tuple instance")
         {
-            typedef internal::variadic_visitor_helper2<float, const char*, int> vh_type;
+            typedef internal::variadic_visitor<float, const char*, int> vh_type;
 
             tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
             const char* output = nullptr;
@@ -123,7 +119,7 @@ TEST_CASE("variadic")
             // which takes variant as an input (so as to be slightly
             // more std-like)
 
-            typedef internal::variadic_visitor_helper2<monostate, int, float, const char*> vh_type;
+            typedef internal::variadic_visitor<monostate, int, float, const char*> vh_type;
 
             internal::variant<monostate, int, float, const char*> v;
 

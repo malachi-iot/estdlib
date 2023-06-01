@@ -136,14 +136,11 @@ struct are_trivial<T, TArgs...>
 
 
 template <class T, class ...TArgs>
-using index_of_type = visitor_helper_struct<is_same_selector<T>, TArgs...>;
+using select_type = visitor_helper_struct<is_same_selector<T>, TArgs...>;
 
 // Evaluate true or false whether a variadic contains a particular type
 template <class T, class ...Types>
-using contains_type = conditional_t<
-        index_of_type<T, Types...>::index == -1,
-        false_type,
-        true_type>;
+using contains_type = bool_constant<select_type<T, Types...>::found != 0>;
 
 // Only enables if type T is contained in Types
 template <class T, class ...Types>

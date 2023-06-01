@@ -58,6 +58,8 @@ struct integer_sequence
 
     template <int I2>
     using append = integer_sequence<T, Is..., I2>;
+
+    static constexpr T first() { return get<0>::value; }
 };
 
 template <size_t ...Is>

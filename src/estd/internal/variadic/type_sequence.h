@@ -21,6 +21,8 @@ struct get_type_finder<pos, T, Types...> :
 template <class ...Types>
 struct type_sequence
 {
+    static constexpr size_t size() { return sizeof...(Types); }
+
     template <class T>
     using prepend = type_sequence<T, Types...>;
 
@@ -30,7 +32,9 @@ struct type_sequence
     template <size_t pos>
     using get = get_type_finder<pos, Types...>;
 
-    static constexpr size_t size() { return sizeof...(Types); }
+    using first = get<0>;
+
+    using last = get<size() - 1>;
 };
 
 

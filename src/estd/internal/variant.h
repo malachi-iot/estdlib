@@ -105,19 +105,19 @@ type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
 template <class T, class ...TArgs>
 T& get(variant<TArgs...>& v)
 {
-    return get<index_of_type<T, TArgs...>::index>(v);
+    return get<select_type<T, TArgs...>::index>(v);
 }
 
 template <class T, class ...TArgs>
 const T& get(const variant<TArgs...>& v)
 {
-    return get<index_of_type<T, TArgs...>::index>(v);
+    return get<select_type<T, TArgs...>::index>(v);
 }
 
 template <class T, class ...TArgs>
 const T&& get(variant<TArgs...>&& v)
 {
-    return get<index_of_type<T, TArgs...>::index>(v);
+    return get<select_type<T, TArgs...>::index>(v);
 }
 
 
@@ -133,7 +133,7 @@ typename add_pointer<T>::type get_if(variant<Types...>* vs)
 {
     if(vs == nullptr) return nullptr;
 
-    int i = index_of_type<T, Types...>::index;
+    int i = select_type<T, Types...>::index;
 
     if(i == -1 || vs->index() != (unsigned)i) return nullptr;
 
@@ -237,7 +237,7 @@ struct variant_storage_base : variant_storage_tag
     //typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
-    using visitor = variadic_visitor_helper2<Types...>;
+    using visitor = variadic_visitor<Types...>;
 
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
@@ -543,7 +543,7 @@ class variant : public variant_storage<Types...>
 
 public:
     template <class T>
-    using index_of_type = estd::internal::index_of_type<T, Types...>;
+    using index_of_type = estd::internal::select_type<T, Types...>;
 
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
@@ -658,13 +658,13 @@ public:
         typedef typename base_type::template constructable_selector<T> finder_type;
         typedef typename finder_type::selected_type T_j;
 
-        if(finder_type::index == index_)
+        if(finder_type::selected == index_)
         {
             assignment_helper<T_j>(std::forward<T>(t));
         }
         else
         {
-            assignment_emplace_helper<finder_type::index, T_j>(std::forward<T>(t));
+            assignment_emplace_helper<finder_type::selected, T_j>(std::forward<T>(t));
         }
 
         return *this;
@@ -720,7 +720,7 @@ public:
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
-    return v.index() == (unsigned) index_of_type<T, Types...>::index;
+    return v.index() == (unsigned) select_type<T, Types...>::selected_indices::first();
 }
 
 }

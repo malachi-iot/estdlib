@@ -66,7 +66,7 @@ concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
 
 
 template <typename... Types>
-struct variadic_visitor_helper2
+struct variadic_visitor
 {
     template <int I,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
@@ -175,13 +175,14 @@ struct visitor_helper_struct
     static constexpr ptrdiff_t index = selected;
 
     using selected_type = typename vh_type::selected_type;
+    using selected_types = typename vh_type::selected_types;
     using selected_indices = typename vh_type::selected_indices;
 
     static constexpr unsigned found = selected_indices::size();
     static constexpr bool multiple = found > 1;
 
     // DEBT: fix signed/unsigned here
-    using visitor_index = internal::visitor_index<(unsigned)index, selected_type>;
+    using visitor_index = internal::visitor_index<(unsigned)selected, selected_type>;
 };
 
 }}
