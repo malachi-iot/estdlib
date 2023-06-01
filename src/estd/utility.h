@@ -8,7 +8,7 @@
 // internal type_traits has no dependencies, so that's safe
 #include "internal/fwd/tuple-shared.h"
 #include "internal/type_traits.h"
-//#include "internal/variadic/integer_sequence.h"
+#include "internal/variadic/integer_sequence.h"
 
 #include "cstddef.h"
 
@@ -113,16 +113,6 @@ typename estd::add_rvalue_reference<T>::type declval() */
 
 #ifdef FEATURE_CPP_VARIADIC
 // adapted from https://gist.github.com/ntessore/dc17769676fb3c6daa1f
-template<typename T, T... Ints>
-struct integer_sequence
-{
-    typedef T value_type;
-    static constexpr std::size_t size() { return sizeof...(Ints); }
-};
-
-template<std::size_t... Ints>
-using index_sequence = integer_sequence<std::size_t, Ints...>;
-
 template<typename T, std::size_t N, T... Is>
 struct make_integer_sequence : make_integer_sequence<T, N-1, N-1, Is...> {};
 
