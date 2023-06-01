@@ -17,6 +17,35 @@ namespace estd { namespace internal {
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
+template <size_t pos, class ...Types>
+struct get_type_finder;
+
+template <class T, class ...Types>
+struct get_type_finder<0, T, Types...> : type_identity<T>
+{
+};
+
+
+template <size_t pos, class T, class ...Types>
+struct get_type_finder<pos, T, Types...> :
+    get_type_finder<pos - 1, Types...>
+{
+};
+
+
+template <class ...Types>
+struct type_sequence
+{
+    template <class T>
+    using prepend = type_sequence<T, Types...>;
+
+    template <class T>
+    using append = type_sequence<Types..., T>;
+
+    template <size_t pos>
+    using get = get_type_finder<pos, Types...>;
+};
+
 
 // Very similar to std::variant_alternative
 template <int index, class ...TArgs>
@@ -182,6 +211,7 @@ struct visitor_helper_struct2<size, TEval>
     typedef monostate selected_type;
 
     using selected_indices = index_sequence<>;
+    using selected_types = type_sequence<>;
 };
 
 
@@ -194,9 +224,14 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
     static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
     using selected_type = conditional_t<eval, T, typename upward::selected_type>;
+
     using selected_indices = conditional_t<eval,
         typename upward::selected_indices::template prepend<index>,
         typename upward::selected_indices>;
+
+    using selected_types = conditional_t<eval,
+        typename upward::selected_types::template prepend<T>,
+        typename upward::selected_types>;
 };
 
 template <class TEval, class ...Types>

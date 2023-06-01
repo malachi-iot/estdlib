@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../raw/cstddef.h"
+#include "../raw/type_traits.h"
 
 #if __cpp_variadic_templates
 
@@ -19,9 +20,8 @@ template <size_t pos, typename T, T ...Is>
 struct get_index_finder;
 
 template <typename T, T I, T ...Is>
-struct get_index_finder<0, T, I, Is...>
+struct get_index_finder<0, T, I, Is...> : integral_constant<T, I>
 {
-    static constexpr T value = I;
 };
 
 
