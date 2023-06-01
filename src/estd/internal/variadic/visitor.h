@@ -176,6 +176,7 @@ struct visitor_helper_struct
 
     using selected_type = typename vh_type::selected_type;
     using selected_types = typename vh_type::selected_types;
+    using projected_types = typename vh_type::projected_types;
     using selected_indices = typename vh_type::selected_indices;
 
     static constexpr unsigned found = selected_indices::size();

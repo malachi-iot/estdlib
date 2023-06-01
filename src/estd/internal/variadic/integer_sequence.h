@@ -7,7 +7,6 @@
 
 namespace estd {
 
-// DEBT: Continue to combine this with already-existing integer_sequence
 template <typename T, T ...Is>
 struct integer_sequence;
 
@@ -46,8 +45,6 @@ struct get_index<pos, integer_sequence<T, Is...> > : get_index_finder<pos, T, Is
 template <typename T, T ...Is>
 struct integer_sequence
 {
-    //static constexpr int value = I;
-    //static constexpr int position = sizeof...(Is);
     static constexpr size_t size() { return sizeof...(Is); }
 
     template <int pos>

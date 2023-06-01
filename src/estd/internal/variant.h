@@ -3,9 +3,8 @@
 #include "platform.h"
 #include "fwd/functional.h"
 #include "raw/utility.h"
-#include "variadic.h"
 #include "raw/variant.h"
-#include "../tuple.h"
+#include "variadic.h"
 
 #if __cpp_exceptions
 #include <exception>
@@ -131,11 +130,14 @@ constexpr unsigned variant_npos()
 template <class T, class ...Types>
 typename add_pointer<T>::type get_if(variant<Types...>* vs)
 {
-    if(vs == nullptr) return nullptr;
+    typedef typename select_type<T, Types...>::selected_indices selected;
 
-    int i = select_type<T, Types...>::index;
+    // NOTE: Redundant, because compile time check for 'first()' below fails
+    // if no items are present.  This does not clash with spec, which indicates
+    // this is "ill-formed if T is not a unique element"
+    if(selected::size() == 0) return nullptr;
 
-    if(i == -1 || vs->index() != (unsigned)i) return nullptr;
+    if(vs == nullptr || vs->index() != selected::first()) return nullptr;
 
     return vs->template get<T>();
 }
@@ -234,7 +236,6 @@ struct variant_storage_base : variant_storage_tag
     using size_type = std::size_t;
     typedef variant_storage_base<trivial, Types...> this_type;
 
-    //typedef tuple<Types...> tuple_type;
     static constexpr bool is_trivial = trivial;
 
     using visitor = variadic_visitor<Types...>;

@@ -172,6 +172,15 @@ TEST_CASE("variant")
             // somehow wasn't that controlled in the first place (auto generate for example)
             //REQUIRE(get<const int>(v) == 1);
         }
+        SECTION("get_if")
+        {
+            variant1_type* v = nullptr;
+
+            REQUIRE(internal::get_if<int>(v) == nullptr);
+
+            // "ill-formed"
+            //REQUIRE(internal::get_if<float>(v) == nullptr);
+        }
     }
     SECTION("storage")
     {
