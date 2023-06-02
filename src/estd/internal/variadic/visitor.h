@@ -1,15 +1,12 @@
 #pragma once
 
 #include "fwd.h"
+#include "type_sequence.h"
 #include "../is_base_of.h"
 
 
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
-
-// Indicates the function/constructor expects a functor for iterating
-// over all the variadic possibilities
-struct in_place_visit_t : in_place_tag {};
 
 struct eval_result_tag {};
 

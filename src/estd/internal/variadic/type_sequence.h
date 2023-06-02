@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "../raw/type_traits.h"
 
 #if __cpp_variadic_templates
 namespace estd { namespace internal {

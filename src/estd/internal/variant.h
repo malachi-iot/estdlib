@@ -16,9 +16,24 @@
 #include <exception>
 #endif
 
+#if __cpp_variadic_templates
 namespace estd {
 
-#if __cpp_variadic_templates
+#if __cpp_exceptions
+class bad_variant_access : std::exception
+{
+public:
+};
+#endif
+
+template <class... Types>
+struct variant_size<internal::variant_storage<Types...> > :
+    internal::variadic_size<Types...> {};
+
+template <unsigned I, class... Types>
+struct variant_alternative<I, internal::variant_storage<Types...> > :
+    type_identity<internal::type_at_index<I, Types...>> { };
+
 namespace internal {
 
 template <size_t index, class ...Types>
@@ -41,20 +56,6 @@ constexpr bool holds_type(const variant<Types...>* vs)
 }
 
 
-
-
-template <unsigned index, class ...TArgs>
-constexpr add_pointer_t<type_at_index<index, TArgs...>> get_if(variant<TArgs...>* vs)
-{
-    return holds_index<index>(vs) ? vs->template get<index>() : nullptr;
-}
-
-
-template <unsigned index, class ...TArgs>
-constexpr add_pointer_t<const type_at_index<index, TArgs...>> get_if(const variant<TArgs...>* vs)
-{
-    return holds_index<index>(vs) ? vs->template get<index>() : nullptr;
-}
 
 
 // DEBT: true std code throws exception on index mismatch here - we need to reflect error
@@ -83,13 +84,6 @@ constexpr const T& get(const variant_storage_base<trivial, Types...>& vs)
     return * vs.template get<T>();
 }
 
-#if __cpp_exceptions
-class bad_variant_access : std::exception
-{
-public:
-};
-#endif
-
 template <int index, class ...Types>
 void assert_index_matches(const variant<Types...>& v)
 {
@@ -102,69 +96,11 @@ void assert_index_matches(const variant<Types...>& v)
 }
 
 
-template <int index, class ...TArgs>
-type_at_index<index, TArgs...>& get(variant<TArgs...>& v)
-{
-    assert_index_matches<index>(v);
-
-    return * v.template get<index>();
-}
-
-
-template <int index, class ...TArgs>
-const type_at_index<index, TArgs...>& get(const variant<TArgs...>& v)
-{
-    assert_index_matches<index>(v);
-
-    return * v.template get<index>();
-}
-
-template <int index, class ...TArgs>
-type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
-{
-    assert_index_matches<index>(v);
-
-    return * v.template get<index>();
-}
-
-
-template <class T, class ...TArgs>
-constexpr T& get(variant<TArgs...>& v)
-{
-    return get<select_type<T, TArgs...>::index>(v);
-}
-
-template <class T, class ...TArgs>
-constexpr const T& get(const variant<TArgs...>& v)
-{
-    return get<select_type<T, TArgs...>::index>(v);
-}
-
-template <class T, class ...TArgs>
-const T&& get(variant<TArgs...>&& v)
-{
-    return get<select_type<T, TArgs...>::index>(v);
-}
-
-
 // DEBT: Supposed to be an inline variable, but we want c++11 compat
 constexpr unsigned variant_npos()
 {
     return (unsigned)-1;
 }
-
-template <class T, class ...Types>
-constexpr add_pointer_t<T> get_if(variant<Types...>* vs) noexcept
-{
-    return holds_type<T>(vs) ? vs->template get<T>() : nullptr;
-}
-
-template <class T, class ...Types>
-constexpr add_pointer_t<const T> get_if(const variant<Types...>* vs) noexcept
-{
-    return holds_type<T>(vs) ? vs->template get<T>() : nullptr;
-}
-
 
 
 
@@ -434,17 +370,6 @@ public:
     {}
 };
 
-template <class... Types>
-struct variant_size<variant_storage<Types...> > :
-    variadic_size<Types...> {};
-
-template <unsigned I, class... Types>
-struct variant_alternative<I, variant_storage<Types...> > :
-    type_identity<type_at_index<I, Types...>> { };
-
-template <unsigned I, class... Types>
-struct variant_alternative<I, variant<Types...> > :
-    type_identity<type_at_index<I, Types...>> { };
 
 
 template <class T>
@@ -565,6 +490,9 @@ class variant : public variant_storage<Types...>
     {
         if(valid()) base_type::destroy(index_);
     }
+
+    template <size_t I>
+    using variant_alternative_t = estd::variant_alternative_t<I, variant>;
 
 public:
     template <class T>
@@ -739,22 +667,13 @@ public:
     }
 
     template <unsigned I, class... TArgs>
-    variant_alternative_t<I, variant>& emplace(TArgs&&...args)
+    variant_alternative_t<I>& emplace(TArgs&&...args)
     {
-        typedef variant_alternative_t<I, variant> T_i;
+        typedef variant_alternative_t<I> T_i;
 
         return emplace<T_i>(std::forward<TArgs>(args)...);
     }
 };
 
-
-template< class T, class... Types >
-constexpr bool holds_alternative(const variant<Types...>& v) noexcept
-{
-    return v.index() == select_type<T, Types...>::selected_indices::first();
-}
-
-}
+}}
 #endif
-
-}

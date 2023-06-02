@@ -24,5 +24,9 @@ struct variadic_first;
 template <class ...TArgs>
 struct are_trivial;
 
+// Indicates the function/constructor expects a functor for iterating
+// over all the variadic possibilities
+struct in_place_visit_t : in_place_tag {};
+
 }}
 #endif

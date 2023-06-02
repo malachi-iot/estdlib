@@ -22,9 +22,6 @@ struct test_init_functor
 };
 
 
-template <class ...Types>
-using variant = internal::variant<Types...>;
-
 TEST_CASE("variant")
 {
     SECTION("main")
@@ -42,7 +39,7 @@ TEST_CASE("variant")
 
             REQUIRE(v.index() == 0);
             REQUIRE(vref == 0);
-            REQUIRE(internal::holds_alternative<int>(v));
+            REQUIRE(holds_alternative<int>(v));
         }
         SECTION("emplace")
         {
@@ -57,12 +54,12 @@ TEST_CASE("variant")
                 REQUIRE(v.index() == 1);
                 REQUIRE(get<test::NonTrivial>(v).code_ == 7);
 
-                REQUIRE(internal::get_if<0>(&v) == nullptr);
-                REQUIRE(internal::get_if<1>(&v) != nullptr);
-                REQUIRE(internal::get_if<1>(&v)->code_ == 7);
+                REQUIRE(get_if<0>(&v) == nullptr);
+                REQUIRE(get_if<1>(&v) != nullptr);
+                REQUIRE(get_if<1>(&v)->code_ == 7);
 
-                REQUIRE(internal::get_if<int>(&v) == nullptr);
-                REQUIRE(internal::get_if<test::NonTrivial>(&v) != nullptr);
+                REQUIRE(get_if<int>(&v) == nullptr);
+                REQUIRE(get_if<test::NonTrivial>(&v) != nullptr);
             }
 
             {
@@ -183,8 +180,8 @@ TEST_CASE("variant")
         {
             variant1_type* v = nullptr;
 
-            REQUIRE(internal::get_if<int>(v) == nullptr);
-            REQUIRE(internal::get_if<0>(v) == nullptr);
+            REQUIRE(get_if<int>(v) == nullptr);
+            REQUIRE(get_if<0>(v) == nullptr);
 
             // "ill-formed"
             //REQUIRE(internal::get_if<float>(v) == nullptr);
@@ -198,7 +195,7 @@ TEST_CASE("variant")
         {
             internal::variant_storage<> vs;
 
-            unsigned sz = internal::variant_size<decltype(vs)>::value;
+            unsigned sz = variant_size<decltype(vs)>::value;
 
             REQUIRE(sz == 0);
         }
@@ -239,14 +236,14 @@ TEST_CASE("variant")
         }
         SECTION("variant_size")
         {
-            constexpr unsigned size = internal::variant_size<vs_type>::value;
+            constexpr unsigned size = variant_size<vs_type>::value;
 
             REQUIRE(size == 2);
         }
         SECTION("variant_alternative")
         {
-            typedef internal::variant_alternative_t<0, vs_type> type0;
-            typedef internal::variant_alternative_t<1, vs_type> type1;
+            typedef variant_alternative_t<0, vs_type> type0;
+            typedef variant_alternative_t<1, vs_type> type1;
 
             internal::ensure_type_t<monostate, type0> dummy;
             internal::ensure_type_t<int, type1> dummy2 = 0;

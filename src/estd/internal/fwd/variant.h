@@ -4,6 +4,19 @@
 
 namespace estd {
 
+template <class T>
+struct variant_size;
+
+template <unsigned I, class T>
+struct variant_alternative;
+
+template <unsigned I, class T>
+using variant_alternative_t = typename variant_alternative<I, T>::type;
+
+#if __cpp_exceptions
+class bad_variant_access;
+#endif
+
 namespace internal {
 
 template <bool trivial, class ...TArgs>
@@ -20,15 +33,6 @@ struct variant_storage_tag {};
 
 template <class ...T>
 using variant_storage = variant_storage_base<are_trivial<T...>::value, T...>;
-
-template <class T>
-struct variant_size;
-
-template <unsigned I, class T>
-struct variant_alternative;
-
-template <unsigned I, class T>
-using variant_alternative_t = typename variant_alternative<I, T>::type;
 
 }
 
