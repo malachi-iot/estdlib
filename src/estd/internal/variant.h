@@ -5,6 +5,7 @@
 #include "fwd/variant.h"
 #include "raw/utility.h"
 #include "raw/variant.h"
+#include "feature/variant.h"
 
 #include "variadic.h"
 
@@ -20,13 +21,39 @@ namespace estd {
 #if __cpp_variadic_templates
 namespace internal {
 
+template <size_t index, class ...Types>
+constexpr bool holds_index(const variant<Types...>* vs)
+{
+    return vs != nullptr && vs->index() == index;
+}
+
+
+template <class T, class ...Types>
+constexpr bool holds_type(const variant<Types...>* vs)
+{
+    typedef typename select_type<T, Types...>::selected_indices selected;
+
+    // NOTE: size() check is redundant, because compile time check for 'first()' below fails
+    // if no items are present.  This does not clash with spec, which indicates
+    // this is "ill-formed if T is not a unique element"
+    return selected::size() != 0 &&
+           (vs != nullptr && vs->index() == selected::first());
+}
+
+
+
 
 template <unsigned index, class ...TArgs>
 constexpr add_pointer_t<type_at_index<index, TArgs...>> get_if(variant<TArgs...>* vs)
 {
-    return vs == nullptr ?
-        nullptr :
-        (vs->index() != index ? nullptr : vs->template get<index>());
+    return holds_index<index>(vs) ? vs->template get<index>() : nullptr;
+}
+
+
+template <unsigned index, class ...TArgs>
+constexpr add_pointer_t<const type_at_index<index, TArgs...>> get_if(const variant<TArgs...>* vs)
+{
+    return holds_index<index>(vs) ? vs->template get<index>() : nullptr;
 }
 
 
@@ -102,13 +129,13 @@ type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
 
 
 template <class T, class ...TArgs>
-T& get(variant<TArgs...>& v)
+constexpr T& get(variant<TArgs...>& v)
 {
     return get<select_type<T, TArgs...>::index>(v);
 }
 
 template <class T, class ...TArgs>
-const T& get(const variant<TArgs...>& v)
+constexpr const T& get(const variant<TArgs...>& v)
 {
     return get<select_type<T, TArgs...>::index>(v);
 }
@@ -127,28 +154,15 @@ constexpr unsigned variant_npos()
 }
 
 template <class T, class ...Types>
-constexpr bool get_if_validator(const variant<Types...>* vs)
-{
-    typedef typename select_type<T, Types...>::selected_indices selected;
-
-    // NOTE: size() check is redundant, because compile time check for 'first()' below fails
-    // if no items are present.  This does not clash with spec, which indicates
-    // this is "ill-formed if T is not a unique element"
-    return selected::size() != 0 &&
-        (vs != nullptr && vs->index() == selected::first());
-}
-
-
-template <class T, class ...Types>
 constexpr add_pointer_t<T> get_if(variant<Types...>* vs) noexcept
 {
-    return get_if_validator<T>(vs) ? vs->template get<T>() : nullptr;
+    return holds_type<T>(vs) ? vs->template get<T>() : nullptr;
 }
 
 template <class T, class ...Types>
 constexpr add_pointer_t<const T> get_if(const variant<Types...>* vs) noexcept
 {
-    return get_if_validator<T>(vs) ? vs->template get<T>() : nullptr;
+    return holds_type<T>(vs) ? vs->template get<T>() : nullptr;
 }
 
 
@@ -248,6 +262,12 @@ struct variant_storage_base : variant_storage_tag
     template <int I>
     using type_at_index = estd::internal::type_at_index<I, Types...>;
 
+    template <int I>
+    using pointer_at_index = add_pointer_t<type_at_index<I>>;
+
+    template <int I>
+    using const_pointer_at_index = add_pointer_t<const type_at_index<I>>;
+
     template <class T>
     using constructable_selector = typename visitor::template visit_struct<internal::constructable_selector<T> >;
 
@@ -300,15 +320,15 @@ public:
     }
 
     template <unsigned index>
-    type_at_index<index>* get()
+    pointer_at_index<index> get()
     {
-        return (type_at_index<index>*) storage.raw;
+        return (pointer_at_index<index>) storage.raw;
     }
 
     template <unsigned index>
-    constexpr type_at_index<index>* get() const
+    const_pointer_at_index<index> get() const
     {
-        return (type_at_index<index>*) storage.raw;
+        return (const_pointer_at_index<index>) storage.raw;
     }
 
     template <unsigned index>
@@ -332,7 +352,7 @@ public:
     }
 
     template <unsigned I, class ...TArgs>
-    type_at_index<I>* emplace(TArgs&&...args)
+    pointer_at_index<I> emplace(TArgs&&...args)
     {
         typedef type_at_index<I> T_i;
         return emplace<T_i>(std::forward<TArgs>(args)...);
@@ -456,6 +476,7 @@ struct converting_constructor_functor2
         return true;
     }
 };
+
 
 template <class ...Types>
 class variant : public variant_storage<Types...>
@@ -588,7 +609,6 @@ public:
 
     ~variant()
     {
-        //auto v = base_type::template get<index_>();
         //apply<sizeof...(Types) - 1>(destroyer_functor{});
         //apply<sizeof...(Types) - 1>(&destroy);
         destroy_if_valid();
@@ -646,16 +666,20 @@ public:
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        typedef typename base_type::template constructable_selector<T> finder_type;
-        typedef typename finder_type::selected_type T_j;
+        typedef typename base_type::template constructable_selector<T> selector;
+        typedef typename selector::selected_type T_j;
 
-        if(finder_type::selected == index_)
+        // DEBT: Multiple constructable T_j could be found.  Spec implies this is not
+        // allowed.  However, in our case, we choose the first one.  Find a tighter
+        // spec to indicate what we should really do here and consider a feature flag
+
+        if(selector::selected == index_)
         {
             assignment_helper<T_j>(std::forward<T>(t));
         }
         else
         {
-            assignment_emplace_helper<finder_type::selected, T_j>(std::forward<T>(t));
+            assignment_emplace_helper<selector::selected, T_j>(std::forward<T>(t));
         }
 
         return *this;
