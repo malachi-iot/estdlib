@@ -158,23 +158,23 @@ TEST_CASE("variadic")
     }
     SECTION("visitor struct")
     {
-        typedef internal::visitor_helper_struct<internal::converting_selector<int>, int, float, monostate> vhs_type;
+        typedef variadic::selector<internal::converting_selector<int>, int, float, monostate> vhs_type;
         int selected = vhs_type::selected;
 
         REQUIRE(selected == 0);
 
-        typedef internal::visitor_helper_struct<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
+        typedef variadic::selector<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
         selected = vhs_type2::selected;
 
         REQUIRE(selected == 1);
 
         //typedef internal::visitor_helper_struct<internal::converting_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
-        typedef internal::visitor_helper_struct<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        typedef variadic::selector<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
         selected = vhs_type3::selected;
 
         REQUIRE(selected == 0);
 
-        typedef internal::visitor_helper_struct<internal::index_selector<1>, int, float, monostate> vhs_type4;
+        typedef variadic::selector<internal::index_selector<1>, int, float, monostate> vhs_type4;
         selected = vhs_type4::selected;
         bool v = is_same<vhs_type4::selected_type, float>::value;
 

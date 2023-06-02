@@ -116,7 +116,7 @@ struct variadic_visitor
     }
 
     template <class TEval>
-    using visit_struct = visitor_helper_struct<TEval, Types...>;
+    using select = variadic::selector<TEval, Types...>;
 };
 
 
@@ -163,10 +163,14 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
             typename upward::projected_types>;
 };
 
+}
+
+namespace variadic {
+
 template <class TEval, class ...Types>
-struct visitor_helper_struct
+struct selector
 {
-    typedef visitor_helper_struct2<sizeof...(Types), TEval, Types...> vh_type;
+    typedef internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...> vh_type;
 
     static constexpr ptrdiff_t selected = vh_type::selected;
     static constexpr ptrdiff_t index = selected;
@@ -178,10 +182,16 @@ struct visitor_helper_struct
 
     static constexpr unsigned found = selected_indices::size();
     static constexpr bool multiple = found > 1;
+    static constexpr bool all = found == sizeof...(Types);
 
     // DEBT: fix signed/unsigned here
     using visitor_index = internal::visitor_index<(unsigned)selected, selected_type>;
 };
 
-}}
+template <class ...Types>
+using visitor = internal::variadic_visitor<Types...>;
+
+}
+
+}
 #endif

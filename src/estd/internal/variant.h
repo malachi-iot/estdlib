@@ -190,7 +190,10 @@ struct variant_storage_base : variant_storage_tag
 
     static constexpr bool is_trivial = trivial;
 
-    using visitor = variadic_visitor<Types...>;
+    using visitor = variadic::visitor<Types...>;
+
+    template <class TEval>
+    using selector = variadic::selector<TEval, Types...>;
 
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
@@ -205,7 +208,10 @@ struct variant_storage_base : variant_storage_tag
     using const_pointer_at_index = add_pointer_t<const type_at_index<I>>;
 
     template <class T>
-    using constructable_selector = typename visitor::template visit_struct<internal::constructable_selector<T> >;
+    using constructable_selector = selector<internal::constructable_selector<T> >;
+
+    using is_copy_constructible_selector =
+        selector<internal::is_copy_constructible_selector>;
 
     struct copying_constructor_functor
     {
@@ -503,7 +509,11 @@ public:
         index_{0}
     {}
 
-    constexpr variant(const variant& copy_from) :
+    constexpr variant(const variant& copy_from)
+#if __cpp_concepts
+        requires(base_type::is_copy_constructible_selector::all)
+#endif
+        :
         base_type(copy_from, copy_from.index()),
         index_{copy_from.index()}
     {

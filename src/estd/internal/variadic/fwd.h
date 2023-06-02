@@ -10,9 +10,6 @@ namespace estd { namespace internal {
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
-template <class TEval, class ...Types>
-struct visitor_helper_struct;
-
 template <unsigned size, class TEval, class ...Types>
 struct visitor_helper_struct2;
 
@@ -28,5 +25,14 @@ struct are_trivial;
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
-}}
+}
+
+namespace variadic {
+
+template <class TEval, class ...Types>
+struct selector;
+
+}
+
+}
 #endif
