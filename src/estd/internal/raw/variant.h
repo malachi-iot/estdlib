@@ -13,7 +13,7 @@ ESTD_CPP_CONSTEXPR_RET bool operator!=(monostate, monostate) NOEXCEPT { return t
 template <>
 struct hash<monostate>
 {
-    std::size_t operator ()(monostate) const { return 0; }
+    ESTD_CPP_CONSTEXPR_RET std::size_t operator ()(monostate) const { return 0; }
 };
 
 

@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "fwd/functional.h"
+#include "fwd/variant.h"
 #include "raw/utility.h"
 #include "raw/variant.h"
 #include "variadic.h"
@@ -16,17 +17,12 @@ namespace estd {
 namespace internal {
 
 
-template <bool trivial, class ...Types>
-struct variant_storage_base;
-
-template <class ...Types>
-class variant;
-
-
-template <int index, class ...TArgs>
-constexpr type_at_index<index, TArgs...>* get_if(variant<TArgs...>& vs)
+template <unsigned index, class ...TArgs>
+constexpr add_pointer_t<type_at_index<index, TArgs...>> get_if(variant<TArgs...>* vs)
 {
-    return vs.index() != (unsigned)index ? nullptr : vs.template get<index>();
+    return vs == nullptr ?
+        nullptr :
+        (vs->index() != index ? nullptr : vs->template get<index>());
 }
 
 
@@ -126,22 +122,30 @@ constexpr unsigned variant_npos()
     return (unsigned)-1;
 }
 
-
 template <class T, class ...Types>
-typename add_pointer<T>::type get_if(variant<Types...>* vs)
+constexpr bool get_if_validator(const variant<Types...>* vs)
 {
     typedef typename select_type<T, Types...>::selected_indices selected;
 
-    // NOTE: Redundant, because compile time check for 'first()' below fails
+    // NOTE: size() check is redundant, because compile time check for 'first()' below fails
     // if no items are present.  This does not clash with spec, which indicates
     // this is "ill-formed if T is not a unique element"
-    if(selected::size() == 0) return nullptr;
-
-    if(vs == nullptr || vs->index() != selected::first()) return nullptr;
-
-    return vs->template get<T>();
+    return selected::size() != 0 &&
+        (vs != nullptr && vs->index() == selected::first());
 }
 
+
+template <class T, class ...Types>
+constexpr add_pointer_t<T> get_if(variant<Types...>* vs) noexcept
+{
+    return get_if_validator<T>(vs) ? vs->template get<T>() : nullptr;
+}
+
+template <class T, class ...Types>
+constexpr add_pointer_t<const T> get_if(const variant<Types...>* vs) noexcept
+{
+    return get_if_validator<T>(vs) ? vs->template get<T>() : nullptr;
+}
 
 
 
@@ -153,9 +157,6 @@ inline static monostate construct_at(void* placement, TArgs&&...args)
     new (placement) T2(std::forward<TArgs>(args)...);
     return {};
 }
-
-template <bool trivial, class ...TArgs>
-union variant_union;
 
 template <class ...T>
 union variant_union<false, T...>
@@ -225,9 +226,6 @@ struct destroyer_functor
     }
 };
 
-
-
-struct variant_storage_tag {};
 
 
 template <bool trivial, class ...Types>
@@ -412,18 +410,9 @@ public:
     {}
 };
 
-template <class ...T>
-using variant_storage = variant_storage_base<are_trivial<T...>::value, T...>;
-
-template <class T>
-struct variant_size;
-
 template <class... Types>
 struct variant_size<variant_storage<Types...> > :
     variadic_size<Types...> {};
-
-template <unsigned I, class T>
-struct variant_alternative;
 
 template <unsigned I, class... Types>
 struct variant_alternative<I, variant_storage<Types...> > :
@@ -432,9 +421,6 @@ struct variant_alternative<I, variant_storage<Types...> > :
 template <unsigned I, class... Types>
 struct variant_alternative<I, variant<Types...> > :
     type_identity<type_at_index<I, Types...>> { };
-
-template <unsigned I, class T>
-using variant_alternative_t = typename variant_alternative<I, T>::type;
 
 
 template <class T>
@@ -721,7 +707,7 @@ public:
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
-    return v.index() == (unsigned) select_type<T, Types...>::selected_indices::first();
+    return v.index() == select_type<T, Types...>::selected_indices::first();
 }
 
 }

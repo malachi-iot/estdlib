@@ -70,17 +70,13 @@ struct is_floating_point
 
 
 
-#if defined(FEATURE_CPP_ALIASTEMPLATE)
 namespace detail {
 template< class T, bool is_function_type = false >
-struct add_pointer {
-    using type = typename estd::remove_reference<T>::type*;
-};
- 
+struct add_pointer :
+    type_identity<typename estd::remove_reference<T>::type*> {};
+
 template< class T >
-struct add_pointer<T, true> {
-    using type = T;
-};
+struct add_pointer<T, true> : type_identity<T> {};
 
 #if defined(FEATURE_CPP_VARIADIC)
 template< class T, class... Args >
@@ -99,6 +95,9 @@ struct add_pointer<T(Args..., ...), true> {
 template< class T >
 struct add_pointer : detail::add_pointer<T, estd::is_function<T>::value> {};
 
+#if __cpp_alias_templates
+template <class T>
+using add_pointer_t = typename add_pointer<T>::type;
 #endif
 
 #ifdef FEATURE_CPP_ENUM_CLASS

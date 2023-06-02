@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../raw/cstddef.h"
 #include "../raw/utility.h"
 #include "../raw/variant.h"
 
@@ -18,6 +19,10 @@ struct visitor_helper_struct2;
 template <class ...Types>
 struct variadic_first;
 
+// Plural of is_trivial
+// DEBT: Consider putting out into main estd namespace
+template <class ...TArgs>
+struct are_trivial;
 
 }}
 #endif

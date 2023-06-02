@@ -118,13 +118,9 @@ struct largest_type<T, U, Ts...>
 
 // Plural of is_trivial
 // DEBT: Consider putting out into main estd namespace
-template <class ...TArgs>
-struct are_trivial;
-
 template <>
-struct are_trivial<>
+struct are_trivial<> : bool_constant<true>
 {
-    static constexpr bool value = true;
 };
 
 template <class T, class ...TArgs>

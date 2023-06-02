@@ -57,9 +57,9 @@ TEST_CASE("variant")
                 REQUIRE(v.index() == 1);
                 REQUIRE(get<test::NonTrivial>(v).code_ == 7);
 
-                REQUIRE(internal::get_if<0>(v) == nullptr);
-                REQUIRE(internal::get_if<1>(v) != nullptr);
-                REQUIRE(internal::get_if<1>(v)->code_ == 7);
+                REQUIRE(internal::get_if<0>(&v) == nullptr);
+                REQUIRE(internal::get_if<1>(&v) != nullptr);
+                REQUIRE(internal::get_if<1>(&v)->code_ == 7);
 
                 REQUIRE(internal::get_if<int>(&v) == nullptr);
                 REQUIRE(internal::get_if<test::NonTrivial>(&v) != nullptr);
@@ -177,6 +177,7 @@ TEST_CASE("variant")
             variant1_type* v = nullptr;
 
             REQUIRE(internal::get_if<int>(v) == nullptr);
+            REQUIRE(internal::get_if<0>(v) == nullptr);
 
             // "ill-formed"
             //REQUIRE(internal::get_if<float>(v) == nullptr);
