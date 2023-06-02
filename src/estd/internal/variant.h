@@ -158,7 +158,7 @@ union variant_union<true, T1, T2, T3, T4>
 struct variant_storage_getter_functor
 {
     template <unsigned I, class T, bool trivial, class ...TArgs>
-    T& operator()(internal::visitor_index<I, T>, internal::variant_storage_base<trivial, TArgs...>& vs)
+    T& operator()(variadic::visitor_index<I, T>, internal::variant_storage_base<trivial, TArgs...>& vs)
     {
         return get<I>(vs);
     }
@@ -170,7 +170,7 @@ struct variant_storage_getter_functor
 struct destroyer_functor
 {
     template <unsigned I, class T>
-    bool operator()(visitor_instance<I, T> vi, unsigned index)
+    bool operator()(variadic::visitor_instance<I, T> vi, unsigned index)
     {
         if(I != index) return false;
 
@@ -213,6 +213,9 @@ struct variant_storage_base : variant_storage_tag
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
 
+    template <size_t I, class T>
+    using visitor_index = variadic::visitor_index<I, T>;
+
     struct copying_constructor_functor
     {
         template <unsigned I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
@@ -231,7 +234,7 @@ struct variant_storage_base : variant_storage_tag
         }
 
         template <unsigned I, class T_i>
-        bool operator()(visitor_instance<I, T_i> vi, const this_type& copy_from, const size_type index)
+        bool operator()(variadic::visitor_instance<I, T_i> vi, const this_type& copy_from, const size_type index)
         {
             if(index != I) return false;
 
@@ -401,7 +404,7 @@ struct converting_constructor_functor2
     constexpr bool operator()(in_place_index_t<I>, TVariant, T&&) const { return false; }
 
     template <unsigned I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
-    bool operator()(visitor_index<I, T_i>, TVariant& v, T&& t)
+    bool operator()(variadic::visitor_index<I, T_i>, TVariant& v, T&& t)
     {
         new (v.template get<I>()) T_i(std::forward<T>(t));
         return true;
@@ -414,6 +417,9 @@ class variant : public variant_storage<Types...>
 {
     using base_type = variant_storage<Types...>;
     using size_type = typename base_type::size_type;
+
+    template <size_t I, class T>
+    using visitor_index = variadic::visitor_index<I, T>;
 
     struct moving_constructor_functor
     {
@@ -479,7 +485,7 @@ class variant : public variant_storage<Types...>
     {
         template <unsigned I, class T_i, class T, class enabled =
             enable_if_t<is_constructible<T_i, T>::value> >
-        bool operator()(visitor_instance<I, T_i> vi, size_type index, T&& t)
+        bool operator()(variadic::visitor_instance<I, T_i> vi, size_type index, T&& t)
         {
             return false;
         }

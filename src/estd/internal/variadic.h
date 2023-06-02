@@ -44,7 +44,7 @@ template <class TProvider>
 struct visitor_instance_factory
 {
     template <unsigned I, class T>
-    visitor_instance<I, T> create(visitor_index<I, T>) { return {}; }
+    variadic::visitor_instance<I, T> create(variadic::visitor_index<I, T>) { return {}; }
 };
 
 

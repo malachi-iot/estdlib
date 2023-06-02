@@ -14,7 +14,7 @@ using namespace estd;
 struct identify_index_functor
 {
     template <unsigned I, class T>
-    bool operator()(internal::visitor_index<I, T>, int&& param)
+    bool operator()(variadic::visitor_index<I, T>, int&& param)
     {
         return param == I;
     }
@@ -24,7 +24,7 @@ struct identify_index_functor
 struct tuple_getter_functor
 {
     template <unsigned I, class T, class ...TArgs>
-    T& operator()(internal::visitor_index<I, T>, tuple<TArgs...>& t)
+    T& operator()(variadic::visitor_index<I, T>, tuple<TArgs...>& t)
     {
         return get<I>(t);
     }
@@ -41,7 +41,7 @@ struct identify_type_functor
     constexpr bool operator()(in_place_index_t<I>, T*) const { return false; }
 
     template <unsigned I>
-    bool operator()(internal::visitor_instance<I, T> v, T* output) const
+    bool operator()(variadic::visitor_instance<I, T> v, T* output) const
     {
         // output = const char**
         if(output)  *output = v.value;
@@ -92,7 +92,7 @@ TEST_CASE("variadic")
     {
         SECTION("static")
         {
-            typedef internal::variadic_visitor<monostate, int, float, const char*> vh_type;
+            typedef variadic::visitor<monostate, int, float, const char*> vh_type;
 
             int result = vh_type::visit(identify_index_functor{}, 1);
 
@@ -100,7 +100,7 @@ TEST_CASE("variadic")
         }
         SECTION("tuple instance")
         {
-            typedef internal::variadic_visitor<float, const char*, int> vh_type;
+            typedef variadic::visitor<float, const char*, int> vh_type;
 
             tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
             const char* output = nullptr;
@@ -119,7 +119,7 @@ TEST_CASE("variadic")
             // which takes variant as an input (so as to be slightly
             // more std-like)
 
-            typedef internal::variadic_visitor<monostate, int, float, const char*> vh_type;
+            typedef variadic::visitor<monostate, int, float, const char*> vh_type;
 
             internal::variant<monostate, int, float, const char*> v;
 
