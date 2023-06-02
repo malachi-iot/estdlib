@@ -5,7 +5,11 @@
 #include "fwd/variant.h"
 #include "raw/utility.h"
 #include "raw/variant.h"
+
 #include "variadic.h"
+
+#include <cstdlib>
+#include <new>
 
 #if __cpp_exceptions
 #include <exception>

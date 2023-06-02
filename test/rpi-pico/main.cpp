@@ -32,6 +32,7 @@ void main_task(__unused void *params)
     test_string();
     test_thread();
     test_tuple();
+    test_variant();
     UNITY_END();
 
     while (true) {

@@ -31,6 +31,7 @@ void test_string();
 void test_thread();
 void test_tuple();
 void test_map();
+void test_variant();
 
 struct TestStruct
 {

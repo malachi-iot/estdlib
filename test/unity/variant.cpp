@@ -5,6 +5,10 @@
 
 using namespace estd;
 
+// NOTE: ADL doesn't seem to quite do what we expect with GCC 8.3.1 (rpi pico)
+// so we include this namespace too
+using namespace estd::internal;
+
 static void test_variant_1()
 {
     internal::variant<int, const char*> v;

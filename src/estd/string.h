@@ -13,8 +13,7 @@
 #include "port/string.h"
 #include "algorithm.h"
 #include "span.h"
-// NOTE: Dormant, always using old-style stdlib.h for now
-#ifdef FEATURE_STD_CSDLIB
+#if FEATURE_STD_CSTDLIB
 #include <cstdlib>
 #else
 #include <stdlib.h>
