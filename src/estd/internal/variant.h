@@ -491,7 +491,20 @@ class variant : public variant_storage<Types...>
         {
             if(move_from.index() != I) return false;
 
-            new (v.template get<I>()) T_i(std::move(* move_from.template get<I>()));
+            T_i& t = *move_from.template get<I>();
+
+            new (v.template get<I>()) T_i(std::move(t));
+
+            // Now that it's moved, we opt to immediately destroy it.  Alternatively,
+            // we could let the moved object linger and keep the index set, thus running
+            // the destructor more "naturally".
+            // pros: immediate dtor suggests more immediate availability of resources
+            // cons: a tiny bit more time and code to check/assign index
+            t.~T_i();
+
+            // NOTE: Not setting index_ here becuase we need it to stay put for
+            // intiialization list to pick it up
+
             return true;
         }
     };
@@ -585,22 +598,25 @@ public:
     {}
 
 #if __cpp_concepts
-    // DEBT: Not really a converting constructor, as spec calls for.
-    // Just a direct-initializer at the moment.  Will need to 'visit'
-    // each constructor to truly conform to spec
     template <class T>
     constexpr variant(T&& t)
         requires(
             !is_same_v<remove_cvref_t<T>, variant> &&
             !is_base_of_v<in_place_tag, remove_cvref_t<T>>
             ) :
+#else
+    template <class T, class enabled =
+        enable_if_t<
+            !is_same<remove_cvref_t<T>, variant>::value &&
+            !is_base_of<in_place_tag, remove_cvref_t<T>>::value> >
+    constexpr variant(T&& t) :
+#endif
         base_type(in_place_visit_t{}, converting_constructor_functor2{},
                   &index_,
                   std::forward<T>(t))
     {
 
     }
-#endif
 
     constexpr bool valueless_by_exception() const
     {
@@ -618,9 +634,9 @@ public:
         base_type(in_place_visit_t{}, moving_constructor_functor{}, &index_, std::move(move_from)),
         index_{move_from.index()}
     {
-        // DEBT: Setting to 'valueless_by_exception'.  Docs don't indicate to do this,
-        // but if we don't then the move_from variant destructor will try to run the dtor
-        // of the alternative again - which I suppose is safe, but feels wrong somehow
+        // moving_constructo_functor will do the bulk of the move, but leaves
+        // index clearing for constructor
+        // DEBT: May need extra legwork in cases where move constructor didn't find the index
         move_from.index_ = variant_npos();
     }
 

@@ -146,14 +146,21 @@ TEST_CASE("variant")
 
             REQUIRE(counter == 1);
         }
-#if __cpp_concepts
         SECTION("converting constructor")
         {
-            variant1_type v("hello");
+            SECTION("integer")
+            {
+                variant1_type v{1};
 
-            REQUIRE(v.index() == 2);
+                REQUIRE(v.index() == 0);
+            }
+            SECTION("string")
+            {
+                variant1_type v{"hello"};
+
+                REQUIRE(v.index() == 2);
+            }
         }
-#endif
         SECTION("duplicate type")
         {
             variant<int, int, const int> v;
