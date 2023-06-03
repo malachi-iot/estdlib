@@ -80,6 +80,17 @@ struct is_same_selector
     using evaluator = is_same<T_j, T>;
 };
 
+
+template <template <class, class...> class T, class ...TArgs>
+struct projector_selector
+{
+    template <class T_j, size_t>
+    using evaluator = projected_result<T<T_j, TArgs...>>;
+};
+
+template <class T>
+using is_same_projector = projector_selector<is_same, T>;
+
 /*
  * Actually works, but more complicated than it needs to be since we're
  * not really projecting
@@ -96,6 +107,10 @@ struct index_selector
     template <class, size_t J>
     using evaluator = bool_constant<I == J>;
 };
+
+
+template <class ...Types>
+struct conjunction<type_sequence<Types...>> : estd::conjunction<Types...> {};
 
 
 // largest_type lifted from
@@ -130,6 +145,10 @@ struct are_trivial<T, TArgs...>
     static constexpr bool value = estd::is_trivial<T>::value &
         are_trivial<TArgs...>::value;
 };
+
+
+template <class T, class ...TArgs>
+using are_same = conjunction<variadic::projector<is_same_projector<T>, TArgs...>>;
 
 
 template <class T, class ...TArgs>

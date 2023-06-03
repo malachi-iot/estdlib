@@ -25,12 +25,19 @@ struct are_trivial;
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
 
+// internal = specialization version, since std indicates it's undefined to specialize conjunction
+template <class T>
+struct conjunction;
+
 }
 
 namespace variadic {
 
 template <class TEval, class ...Types>
 using selector = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::selected;
+
+template <class TEval, class ...Types>
+using projector = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::projected;
 
 template <size_t I, class T>
 struct visitor_index;

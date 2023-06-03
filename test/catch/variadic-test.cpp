@@ -258,6 +258,18 @@ TEST_CASE("variadic")
             //REQUIRE(value == 0);
         }
     }
+    SECTION("projector")
+    {
+        SECTION("basic")
+        {
+            typedef variadic::projector<internal::is_same_projector<int>, int, int, int> type;
+
+            REQUIRE(type::size() == 3);
+            REQUIRE(type::get<0>::value);
+
+            REQUIRE(internal::conjunction<type>::value);
+        }
+    }
 }
 
 #include "macro/pop.h"

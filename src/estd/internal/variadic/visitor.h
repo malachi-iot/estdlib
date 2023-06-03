@@ -12,7 +12,7 @@ namespace internal {
 
 struct eval_result_tag {};
 
-template <bool v, class T>
+template <class T, bool v = true>
 struct projected_result :
         type_identity<T>,
         eval_result_tag
@@ -31,7 +31,7 @@ struct visitor_helper_struct2<size, TEval>
 
     using selected_indices = index_sequence<>;
     using selected_types = type_sequence<>;
-    using projected_types = type_sequence<>;
+    using projected = type_sequence<>;
 
     using selected = type_sequence<>;
 };
@@ -61,9 +61,9 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
             typename upward::selected_types::template prepend<T>,
             typename upward::selected_types>;
 
-    using projected_types = conditional_t<eval,
-            typename upward::projected_types::template prepend<projected_type>,
-            typename upward::projected_types>;
+    using projected = conditional_t<eval,
+            typename upward::projected::template prepend<projected_type>,
+            typename upward::projected>;
 
     using selected = conditional_t<eval,
             typename upward::selected::template prepend<variadic::visitor_index<index, projected_type> >,
@@ -188,7 +188,7 @@ struct selector_legacy
 
     //using selected_type = typename vh_type::selected_type;
     using selected_types = typename vh_type::selected_types;
-    using projected_types = typename vh_type::projected_types;
+    using projected_types = typename vh_type::projected;
     using selected_indices = typename vh_type::selected_indices;
 
     using selected = typename vh_type::selected;

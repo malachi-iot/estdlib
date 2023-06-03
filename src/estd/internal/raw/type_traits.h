@@ -206,7 +206,12 @@ template<class B1> struct conjunction<B1> : B1 {};
 template<class B1, class... Bn>
 struct conjunction<B1, Bn...>
     : conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
-#endif
+
+template<class...> struct disjunction : false_type {};
+template<class B1> struct disjunction<B1> : B1 {};
+template<class B1, class... Bn>
+struct disjunction<B1, Bn...>
+    : conditional_t<bool(B1::value), B1, disjunction<Bn...>>  {};
 
 #if __cpp_inline_variables
 template< class... B >
@@ -214,6 +219,7 @@ inline constexpr bool conjunction_v = conjunction<B...>::value;
 
 template <class T, class U>
 inline constexpr bool is_same_v = is_same<T, U>::value;
+#endif
 #endif
 
 }
