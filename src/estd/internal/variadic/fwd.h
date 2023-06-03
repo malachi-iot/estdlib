@@ -13,9 +13,6 @@ struct type_sequence;
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
-template <size_t size, class TEval, class ...Types>
-struct visitor_helper_struct2;
-
 // Plural of is_trivial
 // DEBT: Consider putting out into main estd namespace
 template <class ...TArgs>
@@ -33,15 +30,21 @@ struct conjunction;
 
 namespace variadic {
 
-template <class TEval, class ...Types>
-using selector = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::selected;
+namespace detail {
+
+template <size_t size, class TEval, class ...Types>
+struct selector;
+
+}
 
 template <class TEval, class ...Types>
-using projector = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::projected;
+using selector = typename detail::selector<sizeof...(Types), TEval, Types...>::selected;
+
+template <class TEval, class ...Types>
+using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::projected;
 
 template <size_t I, class T>
 struct visitor_index;
-
 
 }
 
