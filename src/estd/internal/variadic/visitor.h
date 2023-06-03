@@ -2,7 +2,6 @@
 
 #include "fwd.h"
 #include "selector.h"
-#include "type_sequence.h"
 #include "../is_base_of.h"
 
 

@@ -85,7 +85,7 @@ template <template <class, class...> class T, class ...TArgs>
 struct projector_selector
 {
     template <class T_j, size_t>
-    using evaluator = projected_result<T<T_j, TArgs...>>;
+    using evaluator = variadic::projected_result<T<T_j, TArgs...>>;
 };
 
 template <class T>

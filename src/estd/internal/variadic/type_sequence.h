@@ -48,21 +48,6 @@ struct type_sequence_single<T>
 };
 
 
-template <class ...Types>
-struct type_sequence :
-    type_sequence_accessor<Types...>,
-    type_sequence_single<Types...>
-{
-    template <class T>
-    using prepend = type_sequence<T, Types...>;
-
-    template <class T>
-    using append = type_sequence<Types..., T>;
-
-    static constexpr bool empty() { return sizeof...(Types) == 0; }
-};
-
-
 // Very similar to std::variant_alternative
 template <size_t index, class ...Types>
 using type_at_index = typename get_type_finder<index, Types...>::type;
@@ -75,5 +60,25 @@ using prepend_if = conditional_t<B,
     TSequence>;
 
 
-}}
+}
+
+namespace variadic {
+
+template <class ...Types>
+struct types :
+        internal::type_sequence_accessor<Types...>,
+        internal::type_sequence_single<Types...>
+{
+    template <class T>
+    using prepend = types<T, Types...>;
+
+    template <class T>
+    using append = types<Types..., T>;
+
+    static constexpr bool empty() { return sizeof...(Types) == 0; }
+};
+
+}
+
+}
 #endif

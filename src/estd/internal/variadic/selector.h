@@ -12,34 +12,28 @@ namespace internal {
 
 struct projected_result_tag {};
 
-template <class T, bool v = true>
-struct projected_result :
-                          type_identity<T>,
-                          projected_result_tag
-{
-    constexpr static bool value = v;
-};
-
-
 }
 
 namespace variadic {
+
+template <class T, bool v = true>
+struct projected_result :
+        type_identity<T>,
+        internal::projected_result_tag
+{
+    constexpr static bool value = v;
+};
 
 namespace detail {
 
 template <size_t size, class TEval>
 struct selector<size, TEval>
 {
-    //static constexpr ptrdiff_t selected = -1;
-
-    // DEBT: Monostate may collide with seeked-for types
-    //typedef monostate selected_type;
-
     using indices = index_sequence<>;
-    using types = internal::type_sequence<>;
-    using projected = internal::type_sequence<>;
+    using types = variadic::types<>;
+    using projected = variadic::types<>;
 
-    using selected = internal::type_sequence<>;
+    using selected = variadic::types<>;
 };
 
 
@@ -53,12 +47,11 @@ private:
 
     using evaluated = typename TEval::template evaluator<T, index>;
     static constexpr bool eval = evaluated::value;
-    //static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
     using projected_type = conditional_t<
         is_base_of<internal::projected_result_tag, evaluated>::value,
         typename evaluated::type, T>;
-    //using selected_type = conditional_t<eval, projected_type, typename upward::selected_type>;
+
     using visitor_index = variadic::visitor_index<index, projected_type>;
 
     template <class TSequence, class T2>

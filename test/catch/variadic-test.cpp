@@ -53,7 +53,7 @@ struct identify_type_functor
 struct synthetic_projector
 {
     template <class T, size_t>
-    using evaluator = internal::projected_result<double, is_same<T, float>::value>;
+    using evaluator = variadic::projected_result<double, is_same<T, float>::value>;
 };
 
 
@@ -140,7 +140,7 @@ TEST_CASE("variadic")
 
             typedef variadic::visitor<monostate, int, float, const char*> vh_type;
 
-            internal::variant<monostate, int, float, const char*> v;
+            variant<monostate, int, float, const char*> v;
 
             v = (const char*)test::str_hello;
 
@@ -168,6 +168,8 @@ TEST_CASE("variadic")
                 REQUIRE(result == 3);
                 REQUIRE(output == test::str_hello);
             }
+
+            v = 0;
 
             // NOTE: *might* go through emplace chain, we'll see
             v = test::str_simple;
@@ -272,6 +274,8 @@ TEST_CASE("variadic")
     }
     SECTION("projector")
     {
+        size_t v;
+
         SECTION("basic")
         {
             typedef variadic::projector<internal::is_same_projector<int>, int, int, int> type;
@@ -290,7 +294,9 @@ TEST_CASE("variadic")
 
             typedef type::select<synthetic_projector>::selected projected;
 
-            REQUIRE(projected::single::index == 1);
+            v = projected::single::index;
+
+            REQUIRE(v == 1);
             REQUIRE(is_same<projected::single::type, double>::value);
         }
     }

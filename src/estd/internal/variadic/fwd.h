@@ -7,9 +7,6 @@
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
 
-template <class ...Types>
-struct type_sequence;
-
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
@@ -46,7 +43,13 @@ using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::
 template <size_t I, class T>
 struct visitor_index;
 
+template <class ...Types>
+struct types;
+
 }
+
+template <class ...Types>
+using type_sequence = variadic::types<Types...>;
 
 }
 #endif
