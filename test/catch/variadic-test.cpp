@@ -257,6 +257,11 @@ TEST_CASE("variadic")
 
             //REQUIRE(value == 0);
         }
+        SECTION("not integer: nullptr")
+        {
+            // NOTE: It seems floats and doubles are not supported by compilers in this case
+            typedef integer_sequence<void*, nullptr> type;
+        }
     }
     SECTION("projector")
     {

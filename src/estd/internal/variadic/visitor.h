@@ -10,18 +10,18 @@ namespace estd {
 
 namespace internal {
 
-struct eval_result_tag {};
+struct projected_result_tag {};
 
 template <class T, bool v = true>
 struct projected_result :
         type_identity<T>,
-        eval_result_tag
+        projected_result_tag
 {
     constexpr static bool value = v;
 };
 
 
-template <unsigned size, class TEval>
+template <size_t size, class TEval>
 struct visitor_helper_struct2<size, TEval>
 {
     //static constexpr ptrdiff_t selected = -1;
@@ -29,17 +29,18 @@ struct visitor_helper_struct2<size, TEval>
     // DEBT: Monostate may collide with seeked-for types
     //typedef monostate selected_type;
 
-    using selected_indices = index_sequence<>;
-    using selected_types = type_sequence<>;
+    using indices = index_sequence<>;
+    using types = type_sequence<>;
     using projected = type_sequence<>;
 
     using selected = type_sequence<>;
 };
 
 
-template <unsigned size, class TEval, class T, class ...Types>
+template <size_t size, class TEval, class T, class ...Types>
 struct visitor_helper_struct2<size, TEval, T, Types...>
 {
+private:
     typedef visitor_helper_struct2<size, TEval, Types...> upward;
 
     static constexpr size_t index = ((size - 1) - sizeof...(Types));
@@ -49,25 +50,21 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
     //static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
     using projected_type = conditional_t<
-            is_base_of<eval_result_tag, evaluated>::value,
+            is_base_of<projected_result_tag, evaluated>::value,
             typename evaluated::type, T>;
     //using selected_type = conditional_t<eval, projected_type, typename upward::selected_type>;
+    using visitor_index = variadic::visitor_index<index, projected_type>;
 
-    using selected_indices = conditional_t<eval,
-            typename upward::selected_indices::template prepend<index>,
-            typename upward::selected_indices>;
+public:
+    using indices = conditional_t<eval,
+            typename upward::indices::template prepend<index>,
+            typename upward::indices>;
 
-    using selected_types = conditional_t<eval,
-            typename upward::selected_types::template prepend<T>,
-            typename upward::selected_types>;
+    using types = prepend_if<eval, typename upward::types, T>;
+    using projected = prepend_if<eval, typename upward::projected, projected_type>;
+    using selected = prepend_if<eval, typename upward::selected, visitor_index>;
 
-    using projected = conditional_t<eval,
-            typename upward::projected::template prepend<projected_type>,
-            typename upward::projected>;
-
-    using selected = conditional_t<eval,
-            typename upward::selected::template prepend<variadic::visitor_index<index, projected_type> >,
-            typename upward::selected>;
+    static constexpr bool all = selected::size() == sizeof...(Types);
 };
 
 
@@ -175,6 +172,9 @@ struct visitor
                 t,
                 std::forward<TArgs>(args)...);
     }
+
+    template <class TEval>
+    using select = internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>;
 };
 
 

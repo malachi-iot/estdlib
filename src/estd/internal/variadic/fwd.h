@@ -13,7 +13,7 @@ struct type_sequence;
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
-template <unsigned size, class TEval, class ...Types>
+template <size_t size, class TEval, class ...Types>
 struct visitor_helper_struct2;
 
 // Plural of is_trivial
