@@ -513,7 +513,7 @@ public:
 
     constexpr variant(const variant& copy_from)
 #if __cpp_concepts
-        requires(base_type::is_copy_constructible_selector::all)
+        requires(base_type::is_copy_constructible_selector::size() == sizeof...(Types))
 #endif
         :
         base_type(copy_from, copy_from.index()),
@@ -622,8 +622,8 @@ public:
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        typedef variadic::selector2<internal::constructable_selector<T>, Types...> selector2;
-        typedef typename selector2::first selected;
+        typedef variadic::selector<internal::constructable_selector<T>, Types...> selector;
+        typedef typename selector::first selected;
         typedef typename selected::type T_j;
         //typedef typename base_type::template constructable_selector<T> selector;
         //typedef typename selector::selected_type T_j;

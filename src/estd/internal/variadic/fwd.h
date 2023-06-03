@@ -30,7 +30,7 @@ struct in_place_visit_t : in_place_tag {};
 namespace variadic {
 
 template <class TEval, class ...Types>
-struct selector;
+using selector = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::selected;
 
 template <size_t I, class T>
 struct visitor_index;

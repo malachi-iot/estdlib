@@ -133,7 +133,7 @@ struct are_trivial<T, TArgs...>
 
 
 template <class T, class ...TArgs>
-using select_type = variadic::selector2<is_same_selector<T>, TArgs...>;
+using select_type = variadic::selector<is_same_selector<T>, TArgs...>;
 
 // Evaluate true or false whether a variadic contains a particular type
 template <class T, class ...Types>

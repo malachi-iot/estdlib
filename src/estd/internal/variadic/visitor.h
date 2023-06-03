@@ -24,17 +24,16 @@ struct projected_result :
 template <unsigned size, class TEval>
 struct visitor_helper_struct2<size, TEval>
 {
-    static constexpr ptrdiff_t selected = -1;
+    //static constexpr ptrdiff_t selected = -1;
 
     // DEBT: Monostate may collide with seeked-for types
-    typedef monostate selected_type;
+    //typedef monostate selected_type;
 
     using selected_indices = index_sequence<>;
     using selected_types = type_sequence<>;
     using projected_types = type_sequence<>;
 
-    // EXPERIMENTAL
-    using selected2 = type_sequence<>;
+    using selected = type_sequence<>;
 };
 
 
@@ -47,12 +46,12 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
 
     using evaluated = typename TEval::template evaluator<T, index>;
     static constexpr bool eval = evaluated::value;
-    static constexpr ptrdiff_t selected = eval ? index : upward::selected;
+    //static constexpr ptrdiff_t selected = eval ? index : upward::selected;
 
     using projected_type = conditional_t<
             is_base_of<eval_result_tag, evaluated>::value,
             typename evaluated::type, T>;
-    using selected_type = conditional_t<eval, projected_type, typename upward::selected_type>;
+    //using selected_type = conditional_t<eval, projected_type, typename upward::selected_type>;
 
     using selected_indices = conditional_t<eval,
             typename upward::selected_indices::template prepend<index>,
@@ -66,10 +65,9 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
             typename upward::projected_types::template prepend<projected_type>,
             typename upward::projected_types>;
 
-    // EXPERIMENTAL
-    using selected2 = conditional_t<eval,
-            typename upward::selected2::template prepend<variadic::visitor_index<index, projected_type> >,
-            typename upward::selected2>;
+    using selected = conditional_t<eval,
+            typename upward::selected::template prepend<variadic::visitor_index<index, projected_type> >,
+            typename upward::selected>;
 };
 
 
@@ -177,37 +175,30 @@ struct visitor
                 t,
                 std::forward<TArgs>(args)...);
     }
-
-    //template <class TEval>
-    //using select = variadic::selector<TEval, Types...>;
 };
 
-template <class TEval, class ...Types>
-using selector2 = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::selected2;
-
 
 template <class TEval, class ...Types>
-struct selector
+struct selector_legacy
 {
     typedef internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...> vh_type;
 
-    static constexpr ptrdiff_t selected = vh_type::selected;
-    static constexpr ptrdiff_t index = selected;
+    //static constexpr ptrdiff_t selected = vh_type::selected;
+    //static constexpr ptrdiff_t index = selected;
 
-    using selected_type = typename vh_type::selected_type;
+    //using selected_type = typename vh_type::selected_type;
     using selected_types = typename vh_type::selected_types;
     using projected_types = typename vh_type::projected_types;
     using selected_indices = typename vh_type::selected_indices;
 
-    // EXPERIMENTAL
-    using selected2 = typename vh_type::selected2;
+    using selected = typename vh_type::selected;
 
     static constexpr unsigned found = selected_indices::size();
     static constexpr bool multiple = found > 1;
     static constexpr bool all = found == sizeof...(Types);
 
     // DEBT: fix signed/unsigned here
-    using visitor_index = variadic::visitor_index<(unsigned)selected, selected_type>;
+    //using visitor_index = variadic::visitor_index<(unsigned)selected, selected_type>;
 };
 
 }
