@@ -206,9 +206,6 @@ struct variant_storage_base : variant_storage_tag
     template <size_t I>
     using const_pointer_at_index = add_pointer_t<const type_at_index<I>>;
 
-    template <class T>
-    using constructable_selector = selector<internal::constructable_selector<T> >;
-
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
 
@@ -625,23 +622,23 @@ public:
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        //typedef variadic::selector2<internal::constructable_selector<T>, Types...> selector2;
-        //typedef typename selector2::first selected;
-        //typedef selected::type T_j;
-        typedef typename base_type::template constructable_selector<T> selector;
-        typedef typename selector::selected_type T_j;
+        typedef variadic::selector2<internal::constructable_selector<T>, Types...> selector2;
+        typedef typename selector2::first selected;
+        typedef typename selected::type T_j;
+        //typedef typename base_type::template constructable_selector<T> selector;
+        //typedef typename selector::selected_type T_j;
 
         // DEBT: Multiple constructable T_j could be found.  Spec implies this is not
         // allowed.  However, in our case, we choose the first one.  Find a tighter
         // spec to indicate what we should really do here and consider a feature flag
 
-        if(selector::selected == index_)
+        if(selected::index == index_)
         {
             assignment_helper<T_j>(std::forward<T>(t));
         }
         else
         {
-            assignment_emplace_helper<selector::selected, T_j>(std::forward<T>(t));
+            assignment_emplace_helper<selected::index, T_j>(std::forward<T>(t));
         }
 
         return *this;

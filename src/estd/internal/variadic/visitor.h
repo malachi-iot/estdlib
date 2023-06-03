@@ -178,8 +178,8 @@ struct visitor
                 std::forward<TArgs>(args)...);
     }
 
-    template <class TEval>
-    using select = variadic::selector<TEval, Types...>;
+    //template <class TEval>
+    //using select = variadic::selector<TEval, Types...>;
 };
 
 template <class TEval, class ...Types>
