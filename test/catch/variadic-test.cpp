@@ -9,7 +9,7 @@
 
 using namespace estd;
 
-// variadic utils are inteneral and do not directly match up to 'std'
+// variadic utils are our own, do not directly match up to 'std'
 
 struct identify_index_functor
 {
@@ -86,6 +86,19 @@ TEST_CASE("variadic")
 
             REQUIRE(idx == 0);
             REQUIRE(multiple == true);
+
+            SECTION("experimental")
+            {
+                typedef iot::selected2 selected;
+
+                unsigned v = selected::size();
+
+                REQUIRE(v == 3);
+
+                v = selected::get_t<1>::value;
+
+                REQUIRE(v == 1);
+            }
         }
     }
     SECTION("visitor")

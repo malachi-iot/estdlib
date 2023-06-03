@@ -32,6 +32,10 @@ namespace variadic {
 template <class TEval, class ...Types>
 struct selector;
 
+template <unsigned I, class T>
+struct visitor_index;
+
+
 }
 
 }

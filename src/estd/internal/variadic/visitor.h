@@ -32,6 +32,9 @@ struct visitor_helper_struct2<size, TEval>
     using selected_indices = index_sequence<>;
     using selected_types = type_sequence<>;
     using projected_types = type_sequence<>;
+
+    // EXPERIMENTAL
+    using selected2 = type_sequence<>;
 };
 
 
@@ -62,6 +65,11 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
     using projected_types = conditional_t<eval,
             typename upward::projected_types::template prepend<projected_type>,
             typename upward::projected_types>;
+
+    // EXPERIMENTAL
+    using selected2 = conditional_t<eval,
+            typename upward::selected2::template prepend<variadic::visitor_index<index, projected_type> >,
+            typename upward::selected2>;
 };
 
 
@@ -72,13 +80,18 @@ namespace variadic {
 template <unsigned I, class T>
 struct visitor_index  :
         in_place_index_t<I>,
-        in_place_type_t<T>
+        in_place_type_t<T>,
+        type_identity<T>,
+        integral_constant<unsigned, I>
 {};
 
 template <unsigned I, class T>
 struct visitor_instance : visitor_index<I, T>
 {
+    // DEBT: This collides with inherited integral_constant
     T& value;
+
+    typedef T value_type;
 
     visitor_instance(const visitor_instance&) = default;
     constexpr explicit visitor_instance(T& value) : value{value} {}
@@ -121,7 +134,7 @@ struct visitor
 #if __cpp_concepts
             concepts::ClassVisitorFunctor<TArgs...> F>
 #else
-    class F>
+            class F>
 #endif
     static constexpr short visit(F&&, TArgs&&...) { return -1; }
 
@@ -182,6 +195,9 @@ struct selector
     using selected_types = typename vh_type::selected_types;
     using projected_types = typename vh_type::projected_types;
     using selected_indices = typename vh_type::selected_indices;
+
+    // EXPERIMENTAL
+    using selected2 = typename vh_type::selected2;
 
     static constexpr unsigned found = selected_indices::size();
     static constexpr bool multiple = found > 1;
