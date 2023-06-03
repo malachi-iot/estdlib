@@ -2,7 +2,6 @@
 
 #include "../raw/cstddef.h"
 #include "../raw/utility.h"
-#include "../raw/variant.h"
 
 #if __cpp_variadic_templates
 namespace estd { namespace internal {

@@ -2,7 +2,6 @@
 
 #include "fwd.h"
 #include "selector.h"
-#include "../is_base_of.h"
 
 
 #if __cpp_variadic_templates

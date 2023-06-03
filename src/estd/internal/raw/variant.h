@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../fwd/functional.h"
-#include "../macro/c++11_emul.h"
+#include "cstddef.h"
 
 namespace estd {
 
@@ -13,7 +13,7 @@ ESTD_CPP_CONSTEXPR_RET bool operator!=(monostate, monostate) NOEXCEPT { return t
 template <>
 struct hash<monostate>
 {
-    ESTD_CPP_CONSTEXPR_RET std::size_t operator ()(monostate) const { return 0; }
+    ESTD_CPP_CONSTEXPR_RET size_t operator ()(monostate) const { return 0; }
 };
 
 
