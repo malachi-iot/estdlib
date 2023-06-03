@@ -66,26 +66,26 @@ internal::type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
 template <class T, class ...TArgs>
 constexpr T& get(variant<TArgs...>& v)
 {
-    return get<internal::select_type<T, TArgs...>::index>(v);
+    return get<internal::select_type<T, TArgs...>::first::index>(v);
 }
 
 template <class T, class ...TArgs>
 constexpr const T& get(const variant<TArgs...>& v)
 {
-    return get<internal::select_type<T, TArgs...>::index>(v);
+    return get<internal::select_type<T, TArgs...>::first::index>(v);
 }
 
 template <class T, class ...TArgs>
 const T&& get(variant<TArgs...>&& v)
 {
-    return get<internal::select_type<T, TArgs...>::index>(v);
+    return get<internal::select_type<T, TArgs...>::first::index>(v);
 }
 
 
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
-    return v.index() == internal::select_type2<T, Types...>::first::index;
+    return v.index() == internal::select_type<T, Types...>::first::index;
 }
 
 

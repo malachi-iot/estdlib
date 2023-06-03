@@ -46,7 +46,7 @@ constexpr bool holds_index(const variant<Types...>* vs)
 template <class T, class ...Types>
 constexpr bool holds_type(const variant<Types...>* vs)
 {
-    typedef select_type2<T, Types...> selected;
+    typedef select_type<T, Types...> selected;
 
     // NOTE: size() check is redundant, because compile time check for 'first()' below fails
     // if no items are present.  This does not clash with spec, which indicates
@@ -508,8 +508,7 @@ class variant : public variant_storage<Types...>
 
 public:
     template <class T>
-    //using index_of_type = estd::internal::select_type<T, Types...>;
-    using select_type = typename estd::internal::select_type2<T, Types...>::first;
+    using select_type = typename estd::internal::select_type<T, Types...>::first;
 
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
@@ -627,6 +626,9 @@ public:
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
+        //typedef variadic::selector2<internal::constructable_selector<T>, Types...> selector2;
+        //typedef typename selector2::first selected;
+        //typedef selected::type T_j;
         typedef typename base_type::template constructable_selector<T> selector;
         typedef typename selector::selected_type T_j;
 

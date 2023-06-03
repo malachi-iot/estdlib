@@ -58,9 +58,9 @@ TEST_CASE("variadic")
         SECTION("basic")
         {
             typedef estd::internal::select_type<int, estd::monostate, int, float> iot;
-            typedef iot::selected_indices selected_indices;
-            constexpr int idx = selected_indices::first();
-            constexpr bool multiple = iot::multiple;
+
+            constexpr int idx = iot::first::index;
+            constexpr bool multiple = iot::size() > 1;
 
             REQUIRE(idx == 1);
             REQUIRE(multiple == false);
@@ -68,41 +68,36 @@ TEST_CASE("variadic")
         SECTION("not found")
         {
             typedef estd::internal::select_type<int, estd::monostate, float> iot;
-            typedef iot::selected_indices selected_indices;
 
-            constexpr int idx = iot::selected;
-            constexpr bool multiple = iot::multiple;
+            constexpr bool empty = iot::empty();
+            constexpr bool multiple = iot::size() > 1;
 
-            REQUIRE(idx == -1);
+            REQUIRE(empty);
             REQUIRE(multiple == false);
         }
         SECTION("multiple")
         {
             typedef estd::internal::select_type<int, int, int, int> iot;
-            typedef iot::selected_indices selected_indices;
 
-            unsigned idx = selected_indices::first();
-            constexpr bool multiple = iot::multiple;
+            unsigned idx = iot::first::index;
+            constexpr bool multiple = iot::size() > 1;
 
             REQUIRE(idx == 0);
             REQUIRE(multiple == true);
 
-            SECTION("experimental")
-            {
-                typedef iot::selected2 selected;
+            typedef iot selected;
 
-                unsigned v = selected::size();
+            unsigned v = selected::size();
 
-                REQUIRE(v == 3);
+            REQUIRE(v == 3);
 
-                v = selected::get<1>::index;
+            v = selected::get<1>::index;
 
-                REQUIRE(v == 1);
+            REQUIRE(v == 1);
 
-                bool match = is_same<selected::get<1>::type, int>::value;
+            bool match = is_same<selected::get<1>::type, int>::value;
 
-                REQUIRE(match);
-            }
+            REQUIRE(match);
         }
     }
     SECTION("visitor")
