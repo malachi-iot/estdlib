@@ -27,8 +27,7 @@ public:
 #endif
 
 template <class... Types>
-struct variant_size<internal::variant_storage<Types...> > :
-    internal::variadic_size<Types...> {};
+struct variant_size<internal::variant_storage<Types...> > : variadic::size<Types...> {};
 
 template <size_t I, class... Types>
 struct variant_alternative<I, internal::variant_storage<Types...> > :

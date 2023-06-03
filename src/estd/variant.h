@@ -90,8 +90,7 @@ constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 
 
 template <class... Types>
-struct variant_size<variant<Types...> > :
-    internal::variadic_size<Types...> {};
+struct variant_size<variant<Types...> > : variadic::size<Types...> {};
 
 template <size_t I, class... Types>
 struct variant_alternative<I, internal::variant<Types...> > :
