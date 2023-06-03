@@ -49,11 +49,6 @@ struct visitor_instance_factory
 
 
 
-template <class T, class ...Types>
-struct variadic_first<T, Types...> : type_identity<T> {};
-
-
-
 // EXPERIMENTAL
 template <class T>
 struct converting_selector
@@ -158,6 +153,10 @@ namespace variadic {
 // Wrapper to help return specifically as an integral constant
 template <class ...Types>
 using size = integral_constant<size_t, sizeof...(Types)>;
+
+// DEBT: Consider this should return the contained ::type, ala type_sequence
+template <class T, class ...Types>
+using first = type_identity<T>;
 
 }
 

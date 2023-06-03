@@ -16,9 +16,6 @@ struct get_type_finder;
 template <unsigned size, class TEval, class ...Types>
 struct visitor_helper_struct2;
 
-template <class ...Types>
-struct variadic_first;
-
 // Plural of is_trivial
 // DEBT: Consider putting out into main estd namespace
 template <class ...TArgs>

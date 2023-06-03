@@ -170,32 +170,32 @@ TEST_CASE("variadic")
     }
     SECTION("visitor struct")
     {
-        typedef variadic::selector<internal::converting_selector<int>, int, float, monostate> vhs_type;
-        int selected = vhs_type::selected;
+        typedef variadic::selector2<internal::converting_selector<int>, int, float, monostate> vhs_type;
+        int selected = vhs_type::first::index;
 
         REQUIRE(selected == 0);
 
-        typedef variadic::selector<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
-        selected = vhs_type2::selected;
+        typedef variadic::selector2<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
+        selected = vhs_type2::first::index;
 
         REQUIRE(selected == 1);
 
         //typedef internal::visitor_helper_struct<internal::converting_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
-        typedef variadic::selector<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
-        selected = vhs_type3::selected;
+        typedef variadic::selector2<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        selected = vhs_type3::first::index;
 
         REQUIRE(selected == 0);
 
-        typedef variadic::selector<internal::index_selector<1>, int, float, monostate> vhs_type4;
-        selected = vhs_type4::selected;
-        bool v = is_same<vhs_type4::selected_type, float>::value;
+        typedef variadic::selector2<internal::index_selector<1>, int, float, monostate> vhs_type4;
+        selected = vhs_type4::first::index;
+        bool v = is_same<vhs_type4::first::type, float>::value;
 
         REQUIRE(selected == 1);
         REQUIRE(v);
     }
     SECTION("variadic_first")
     {
-        typedef internal::variadic_first<float, int, monostate>::type first_type;
+        typedef variadic::first<float, int, monostate>::type first_type;
         bool v = is_same<float, first_type>::value;
 
         REQUIRE(v);
