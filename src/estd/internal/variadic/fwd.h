@@ -7,6 +7,9 @@
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
 
+template <class ...Types>
+struct type_sequence;
+
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
@@ -32,7 +35,7 @@ namespace variadic {
 template <class TEval, class ...Types>
 struct selector;
 
-template <unsigned I, class T>
+template <size_t I, class T>
 struct visitor_index;
 
 

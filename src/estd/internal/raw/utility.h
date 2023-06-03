@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cstddef.h"
+
 namespace estd {
 
 namespace internal {
@@ -19,8 +21,7 @@ struct in_place_type_t : internal::in_place_tag
 
 };
 
-// DEBT: in_place_index_t wants std::size_t, but that may need a cross-include
-template <unsigned>
+template <size_t>
 struct in_place_index_t : internal::in_place_tag
 {};
 

@@ -18,6 +18,18 @@ struct get_type_finder<pos, T, Types...> :
 {
 };
 
+template <>
+struct type_sequence<>
+{
+    static constexpr size_t size() { return 0; }
+
+    template <class T>
+    using prepend = type_sequence<T>;
+
+    template <class T>
+    using append = type_sequence<T>;
+};
+
 
 template <class ...Types>
 struct type_sequence
@@ -30,14 +42,8 @@ struct type_sequence
     template <class T>
     using append = type_sequence<Types..., T>;
 
-    // DEBT: Not yet doing typename ::type treatment here because it seems 'expected' code
-    // somehow tries to grab pos=0 from an empty Types...
     template <size_t pos>
-    using get = get_type_finder<pos, Types...>;
-
-    // DEBT: Temporary until above is resolved
-    template <size_t pos>
-    using get_t = typename get_type_finder<pos, Types...>::type;
+    using get = typename get_type_finder<pos, Types...>::type;
 
     using first = get<0>;
 

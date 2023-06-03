@@ -93,7 +93,7 @@ template <class... Types>
 struct variant_size<variant<Types...> > :
     internal::variadic_size<Types...> {};
 
-template <unsigned I, class... Types>
+template <size_t I, class... Types>
 struct variant_alternative<I, internal::variant<Types...> > :
     type_identity<internal::type_at_index<I, Types...>> { };
 

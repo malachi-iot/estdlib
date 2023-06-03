@@ -7,10 +7,10 @@ namespace estd {
 template <class T>
 struct variant_size;
 
-template <unsigned I, class T>
+template <size_t I, class T>
 struct variant_alternative;
 
-template <unsigned I, class T>
+template <size_t I, class T>
 using variant_alternative_t = typename variant_alternative<I, T>::type;
 
 #if __cpp_exceptions

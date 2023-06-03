@@ -30,7 +30,7 @@ template <class... Types>
 struct variant_size<internal::variant_storage<Types...> > :
     internal::variadic_size<Types...> {};
 
-template <unsigned I, class... Types>
+template <size_t I, class... Types>
 struct variant_alternative<I, internal::variant_storage<Types...> > :
     type_identity<internal::type_at_index<I, Types...>> { };
 
@@ -157,7 +157,7 @@ union variant_union<true, T1, T2, T3, T4>
 
 struct variant_storage_getter_functor
 {
-    template <unsigned I, class T, bool trivial, class ...TArgs>
+    template <size_t I, class T, bool trivial, class ...TArgs>
     T& operator()(variadic::visitor_index<I, T>, internal::variant_storage_base<trivial, TArgs...>& vs)
     {
         return get<I>(vs);
@@ -169,7 +169,7 @@ struct variant_storage_getter_functor
 // seem to work, perhaps in particular due to class T parameter?
 struct destroyer_functor
 {
-    template <unsigned I, class T>
+    template <size_t I, class T>
     bool operator()(variadic::visitor_instance<I, T> vi, unsigned index)
     {
         if(I != index) return false;
@@ -198,13 +198,13 @@ struct variant_storage_base : variant_storage_tag
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
 
-    template <int I>
+    template <size_t I>
     using type_at_index = estd::internal::type_at_index<I, Types...>;
 
-    template <int I>
+    template <size_t I>
     using pointer_at_index = add_pointer_t<type_at_index<I>>;
 
-    template <int I>
+    template <size_t I>
     using const_pointer_at_index = add_pointer_t<const type_at_index<I>>;
 
     template <class T>
@@ -218,13 +218,13 @@ struct variant_storage_base : variant_storage_tag
 
     struct copying_constructor_functor
     {
-        template <unsigned I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
+        template <size_t I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
         constexpr bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
         {
             return false;
         }
 
-        template <unsigned I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
+        template <size_t I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
         bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
         {
             if(index != I) return false;
@@ -233,7 +233,7 @@ struct variant_storage_base : variant_storage_tag
             return true;
         }
 
-        template <unsigned I, class T_i>
+        template <size_t I, class T_i>
         bool operator()(variadic::visitor_instance<I, T_i> vi, const this_type& copy_from, const size_type index)
         {
             if(index != I) return false;
@@ -256,7 +256,7 @@ private:
 public:
     variant_storage_base() = default;
 
-    template <unsigned index, class ...TArgs>
+    template <size_t index, class ...TArgs>
     constexpr variant_storage_base(in_place_index_t<index>, TArgs&&...args) :
         dummy{
             construct_at<type_at_index<index>>
@@ -264,19 +264,19 @@ public:
     {
     }
 
-    template <unsigned index>
+    template <size_t index>
     pointer_at_index<index> get()
     {
         return (pointer_at_index<index>) storage.raw;
     }
 
-    template <unsigned index>
+    template <size_t index>
     const_pointer_at_index<index> get() const
     {
         return (const_pointer_at_index<index>) storage.raw;
     }
 
-    template <unsigned index>
+    template <size_t index>
     void destruct()
     {
         typedef type_at_index<index> t;
@@ -296,7 +296,7 @@ public:
         return t;
     }
 
-    template <unsigned I, class ...TArgs>
+    template <size_t I, class ...TArgs>
     pointer_at_index<I> emplace(TArgs&&...args)
     {
         typedef type_at_index<I> T_i;
@@ -400,10 +400,10 @@ struct converting_constructor_functor
 
 struct converting_constructor_functor2
 {
-    template <unsigned I, class TVariant, class T>
+    template <size_t I, class TVariant, class T>
     constexpr bool operator()(in_place_index_t<I>, TVariant, T&&) const { return false; }
 
-    template <unsigned I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
+    template <size_t I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
     bool operator()(variadic::visitor_index<I, T_i>, TVariant& v, T&& t)
     {
         new (v.template get<I>()) T_i(std::forward<T>(t));
@@ -423,7 +423,7 @@ class variant : public variant_storage<Types...>
 
     struct moving_constructor_functor
     {
-        template <unsigned I, class T_i>
+        template <size_t I, class T_i>
         bool operator()(visitor_index<I, T_i>, base_type& v, variant&& move_from)
         {
             if(move_from.index() != I) return false;
@@ -448,7 +448,7 @@ class variant : public variant_storage<Types...>
 
     struct assignment_functor
     {
-        template <unsigned I, class T_i,
+        template <size_t I, class T_i,
             class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
         bool operator()(visitor_index<I, T_i>, base_type& v, const variant& assign_from)
         {
@@ -462,7 +462,7 @@ class variant : public variant_storage<Types...>
         // NOTE: This whole direct-init flavor doesn't seem to conform, so this might
         // go away.  Convenient though for non trivial types which don't have an assignment
         // operator.  Probably should feature flag it
-        template <unsigned I, class T_i,
+        template <size_t I, class T_i,
             class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
         bool operator()(visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
@@ -483,7 +483,7 @@ class variant : public variant_storage<Types...>
 
     struct converting_assignment_functor
     {
-        template <unsigned I, class T_i, class T, class enabled =
+        template <size_t I, class T_i, class T, class enabled =
             enable_if_t<is_constructible<T_i, T>::value> >
         bool operator()(variadic::visitor_instance<I, T_i> vi, size_type index, T&& t)
         {
@@ -527,7 +527,7 @@ public:
     }
 
 
-    template <unsigned index, class ...TArgs>
+    template <size_t index, class ...TArgs>
     constexpr explicit variant(in_place_index_t<index>, TArgs&&...args) :
         base_type(in_place_index_t<index>{}, std::forward<TArgs>(args)...),
         index_{index}

@@ -77,18 +77,18 @@ struct visitor_helper_struct2<size, TEval, T, Types...>
 
 namespace variadic {
 
-template <unsigned I, class T>
+template <size_t I, class T>
 struct visitor_index  :
         in_place_index_t<I>,
         in_place_type_t<T>,
-        type_identity<T>,
-        integral_constant<unsigned, I>
-{};
+        type_identity<T>
+{
+    static constexpr size_t index = I;
+};
 
-template <unsigned I, class T>
+template <size_t I, class T>
 struct visitor_instance : visitor_index<I, T>
 {
-    // DEBT: This collides with inherited integral_constant
     T& value;
 
     typedef T value_type;
@@ -128,7 +128,7 @@ concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
 template <typename... Types>
 struct visitor
 {
-    template <int I,
+    template <size_t I,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
             class... TArgs,
 #if __cpp_concepts
@@ -138,7 +138,7 @@ struct visitor
 #endif
     static constexpr short visit(F&&, TArgs&&...) { return -1; }
 
-    template <int I = 0, class F,
+    template <size_t I = 0, class F,
             class enabled = enable_if_t<(I < sizeof...(Types))>,
             class... TArgs>
     static int visit(F&& f, TArgs&&...args)
@@ -151,16 +151,16 @@ struct visitor
 
 
 #if __cpp_concepts
-    template <int I, class... TArgs,
+    template <size_t I, class... TArgs,
             concepts::InstanceVisitorFunctor<TArgs...> F, class T,
             concepts::GetterFunctor<T&> Fg,
 #else
-            template <int I, class F, class Fg, class T, class... TArgs,
+            template <size_t I, class F, class Fg, class T, class... TArgs,
 #endif
             class enabled = enable_if_t<(I == sizeof...(Types))> >
     static constexpr short visit_instance(F&&, Fg&&, T&, TArgs&&...) { return -1; }
 
-    template <int I = 0, class F, class Fg, class T,
+    template <size_t I = 0, class F, class Fg, class T,
             class enabled = enable_if_t<(I < sizeof...(Types))>,
             class... TArgs>
     static int visit_instance(F&& f, Fg&& getter, T& t, TArgs&&...args)

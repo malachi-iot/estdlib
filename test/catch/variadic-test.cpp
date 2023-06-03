@@ -13,7 +13,7 @@ using namespace estd;
 
 struct identify_index_functor
 {
-    template <unsigned I, class T>
+    template <size_t I, class T>
     bool operator()(variadic::visitor_index<I, T>, int&& param)
     {
         return param == I;
@@ -23,7 +23,7 @@ struct identify_index_functor
 // NOTE: Works well enough we might put it out into tuple area
 struct tuple_getter_functor
 {
-    template <unsigned I, class T, class ...TArgs>
+    template <size_t I, class T, class ...TArgs>
     T& operator()(variadic::visitor_index<I, T>, tuple<TArgs...>& t)
     {
         return get<I>(t);
@@ -37,10 +37,10 @@ struct tuple_getter_functor
 template <class T>
 struct identify_type_functor
 {
-    template <unsigned I>
+    template <size_t I>
     constexpr bool operator()(in_place_index_t<I>, T*) const { return false; }
 
-    template <unsigned I>
+    template <size_t I>
     bool operator()(variadic::visitor_instance<I, T> v, T* output) const
     {
         // output = const char**
@@ -95,9 +95,11 @@ TEST_CASE("variadic")
 
                 REQUIRE(v == 3);
 
-                v = selected::get_t<1>::value;
+                v = selected::get<1>::index;
 
                 REQUIRE(v == 1);
+
+                bool match = is_same<selected::get<1>::type, int>::value;
             }
         }
     }
