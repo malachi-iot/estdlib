@@ -166,7 +166,7 @@ TEST_CASE("variant")
 
             get<int>(v) = 1;
 
-            int index = decltype(v)::index_of_type<const int>::index;
+            int index = decltype(v)::select_type<const int>::index;
 
             REQUIRE(index == 2);
 

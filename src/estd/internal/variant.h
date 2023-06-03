@@ -46,13 +46,13 @@ constexpr bool holds_index(const variant<Types...>* vs)
 template <class T, class ...Types>
 constexpr bool holds_type(const variant<Types...>* vs)
 {
-    typedef typename select_type<T, Types...>::selected_indices selected;
+    typedef select_type2<T, Types...> selected;
 
     // NOTE: size() check is redundant, because compile time check for 'first()' below fails
     // if no items are present.  This does not clash with spec, which indicates
     // this is "ill-formed if T is not a unique element"
     return selected::size() != 0 &&
-           (vs != nullptr && vs->index() == selected::first());
+           (vs != nullptr && vs->index() == selected::first::index);
 }
 
 
@@ -508,7 +508,8 @@ class variant : public variant_storage<Types...>
 
 public:
     template <class T>
-    using index_of_type = estd::internal::select_type<T, Types...>;
+    //using index_of_type = estd::internal::select_type<T, Types...>;
+    using select_type = typename estd::internal::select_type2<T, Types...>::first;
 
     constexpr variant() :
         base_type(in_place_index_t<0>{}),
@@ -536,9 +537,9 @@ public:
     template <class T, class ...TArgs>
     constexpr explicit variant(in_place_type_t<T>, TArgs&&...args) :
         base_type(
-            in_place_index_t<index_of_type<T>::index>{},
+            in_place_index_t<select_type<T>::index>{},
             std::forward<TArgs>(args)...),
-        index_{index_of_type<T>::index}
+        index_{select_type<T>::index}
     {}
 
 #if __cpp_concepts
@@ -677,7 +678,7 @@ public:
 
         T* const v = base_type::template emplace<T>(std::forward<TArgs>(args)...);
 
-        index_ = index_of_type<T>::index;
+        index_ = select_type<T>::index;
 
         return *v;
     }

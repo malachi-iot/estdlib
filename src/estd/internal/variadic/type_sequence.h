@@ -18,29 +18,11 @@ struct get_type_finder<pos, T, Types...> :
 {
 };
 
-template <>
-struct type_sequence<>
-{
-    static constexpr size_t size() { return 0; }
-
-    template <class T>
-    using prepend = type_sequence<T>;
-
-    template <class T>
-    using append = type_sequence<T>;
-};
-
 
 template <class ...Types>
-struct type_sequence
+struct type_sequence_accessor
 {
     static constexpr size_t size() { return sizeof...(Types); }
-
-    template <class T>
-    using prepend = type_sequence<T, Types...>;
-
-    template <class T>
-    using append = type_sequence<Types..., T>;
 
     template <size_t pos>
     using get = typename get_type_finder<pos, Types...>::type;
@@ -48,6 +30,36 @@ struct type_sequence
     using first = get<0>;
 
     using last = get<size() - 1>;
+};
+
+template <>
+struct type_sequence_accessor<>
+{
+    static constexpr size_t size() { return 0; }
+};
+
+template <class ...Types>
+struct type_sequence_single {};
+
+template <class T>
+struct type_sequence_single<T>
+{
+    using single = T;
+};
+
+
+template <class ...Types>
+struct type_sequence :
+    type_sequence_accessor<Types...>,
+    type_sequence_single<Types...>
+{
+    template <class T>
+    using prepend = type_sequence<T, Types...>;
+
+    template <class T>
+    using append = type_sequence<Types..., T>;
+
+    static constexpr bool empty() { return sizeof...(Types) == 0; }
 };
 
 

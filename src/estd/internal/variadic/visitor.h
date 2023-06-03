@@ -182,6 +182,9 @@ struct visitor
     using select = variadic::selector<TEval, Types...>;
 };
 
+template <class TEval, class ...Types>
+using selector2 = typename internal::visitor_helper_struct2<sizeof...(Types), TEval, Types...>::selected2;
+
 
 template <class TEval, class ...Types>
 struct selector

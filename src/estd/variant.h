@@ -85,7 +85,7 @@ const T&& get(variant<TArgs...>&& v)
 template< class T, class... Types >
 constexpr bool holds_alternative(const variant<Types...>& v) noexcept
 {
-    return v.index() == internal::select_type<T, Types...>::selected_indices::first();
+    return v.index() == internal::select_type2<T, Types...>::first::index;
 }
 
 

@@ -100,6 +100,8 @@ TEST_CASE("variadic")
                 REQUIRE(v == 1);
 
                 bool match = is_same<selected::get<1>::type, int>::value;
+
+                REQUIRE(match);
             }
         }
     }
