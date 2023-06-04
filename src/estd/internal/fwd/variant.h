@@ -34,6 +34,12 @@ struct variant_storage_tag {};
 template <class ...T>
 using variant_storage = variant_storage_base<are_trivial<T...>::value, T...>;
 
+template <int index, class ...Types>
+type_at_index<index, Types...>* get_ll(variant<Types...>& vs) noexcept;
+
+template <int index, class ...Types>
+constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& vs) noexcept;
+
 }
 
 }

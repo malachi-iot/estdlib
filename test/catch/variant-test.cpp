@@ -152,8 +152,8 @@ TEST_CASE("variant")
                 v2.emplace<test::NonTrivial>(2, dtor_fn);
                 variant1_type v3(v);
 
-                REQUIRE(v3.get<test::NonTrivial>()->code_ == 1);
-                REQUIRE(v3.get<test::NonTrivial>()->copied_);
+                REQUIRE(get<test::NonTrivial>(v3).code_ == 1);
+                REQUIRE(get<test::NonTrivial>(v3).copied_);
             }
 
             REQUIRE(counter == 3);

@@ -9,6 +9,10 @@ namespace estd { namespace internal {
 template <size_t pos, class ...Types>
 struct get_type_finder;
 
+// Very similar to std::variant_alternative
+template <size_t index, class ...Types>
+using type_at_index = typename get_type_finder<index, Types...>::type;
+
 // Plural of is_trivial
 // DEBT: Consider putting out into main estd namespace
 template <class ...TArgs>

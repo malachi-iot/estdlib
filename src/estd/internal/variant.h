@@ -95,14 +95,14 @@ void assert_index_matches(const variant<Types...>& v)
 }
 
 template <int index, class ...Types>
-type_at_index<index, Types...>* get_ll(variant<Types...>& vs)
+type_at_index<index, Types...>* get_ll(variant<Types...>& vs) noexcept
 {
     return vs.template get<index>();
 }
 
 
 template <int index, class ...Types>
-constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& vs)
+constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& vs) noexcept
 {
     return vs.template get<index>();
 }
@@ -173,8 +173,8 @@ union variant_union<true, T1, T2, T3, T4>
 
 struct variant_storage_getter_functor
 {
-    template <size_t I, class T, bool trivial, class ...TArgs>
-    T& operator()(variadic::visitor_index<I, T>, internal::variant_storage_base<trivial, TArgs...>& vs)
+    template <size_t I, class T, class ...Types>
+    T& operator()(variadic::visitor_index<I, T>, internal::variant_storage<Types...>& vs)
     {
         return get<I>(vs);
     }
@@ -508,6 +508,21 @@ class variant : public variant_storage<Types...>
 
     template <size_t I>
     using variant_alternative_t = estd::variant_alternative_t<I, variant>;
+
+    // These friends are necessary because we plan to make variant_storage base
+    // protected
+    template <int index, class ...Types2>
+    friend type_at_index<index, Types2...>* get_ll(variant<Types2...>& vs) noexcept;
+
+    template <int index, class ...Types2>
+    friend constexpr const type_at_index<index, Types2...>* get_ll(const variant<Types2...>& vs) noexcept;
+
+    // DEBT: I think we can isolate this into storage_getter and get rid of
+    // the friend
+    friend struct variant_storage_getter_functor;
+
+    // DEBT: I'd like to phase this one out if we can
+    friend struct variadic::visitor<Types...>;
 
 public:
     template <class T>

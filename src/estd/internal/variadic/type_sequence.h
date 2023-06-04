@@ -48,10 +48,6 @@ struct type_sequence_single<T>
 };
 
 
-// Very similar to std::variant_alternative
-template <size_t index, class ...Types>
-using type_at_index = typename get_type_finder<index, Types...>::type;
-
 // DEBT: Filter this out by concept/enabled
 // DEBT: We'd like this for integer_sequence too
 template <bool B, class TSequence, class T>
