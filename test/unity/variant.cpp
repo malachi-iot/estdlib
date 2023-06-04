@@ -11,7 +11,7 @@ using namespace estd::internal;
 
 static void test_variant_1()
 {
-    internal::variant<int, const char*> v;
+    variant<int, const char*> v;
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
 

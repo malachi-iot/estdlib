@@ -26,7 +26,7 @@ TEST_CASE("variant")
 {
     SECTION("main")
     {
-        typedef internal::variant<int, test::NonTrivial, const char*> variant1_type;
+        typedef variant<int, test::NonTrivial, const char*> variant1_type;
 
         SECTION("default ctor")
         {
