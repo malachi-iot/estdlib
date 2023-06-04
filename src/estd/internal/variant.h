@@ -420,18 +420,15 @@ struct converting_constructor_functor2
 
 
 template <class ...Types>
-class variant : public variant_storage<Types...>
+class variant : protected variant_storage<Types...>
 {
     using base_type = variant_storage<Types...>;
     using size_type = typename base_type::size_type;
 
-    template <size_t I, class T>
-    using visitor_index = variadic::visitor_index<I, T>;
-
     struct moving_constructor_functor
     {
         template <size_t I, class T_i>
-        bool operator()(visitor_index<I, T_i>, base_type& v, variant&& move_from)
+        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, variant&& move_from)
         {
             if(move_from.index() != I) return false;
 
@@ -455,7 +452,7 @@ class variant : public variant_storage<Types...>
     {
         template <size_t I, class T_i,
             class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
-        bool operator()(visitor_index<I, T_i>, base_type& v, const variant& assign_from)
+        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, const variant& assign_from)
         {
             if(assign_from.index() != I) return false;
 
@@ -468,7 +465,7 @@ class variant : public variant_storage<Types...>
         // operator.  Probably should feature flag it
         template <size_t I, class T_i,
             class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
-        bool operator()(visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
+        bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
             if(copy_from.index() != I) return false;
 
@@ -527,6 +524,17 @@ class variant : public variant_storage<Types...>
 public:
     template <class T>
     using select_type = typename estd::internal::select_type<T, Types...>::first;
+
+    template <class F, class ...TArgs>
+    size_type visit(F&& f, TArgs&&...args)
+    {
+        size_type selected;
+        base_type::visit_instance(
+            std::forward<F>(f),
+            &selected,
+            std::forward<TArgs>(args)...);
+        return selected;
+    }
 
     constexpr variant() :
         base_type(in_place_index_t<0>{}),

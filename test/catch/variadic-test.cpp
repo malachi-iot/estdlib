@@ -158,11 +158,8 @@ TEST_CASE("variadic")
             }
             SECTION("helper")
             {
-                std::size_t result = -2;
-
-                v.visit_instance(
+                std::size_t result = v.visit(
                     identify_type_functor<const char*>{},
-                    &result,
                     &output);
 
                 REQUIRE(result == 3);
