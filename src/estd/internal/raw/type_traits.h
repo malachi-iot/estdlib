@@ -116,6 +116,9 @@ template <class T> struct is_reference<T&&> : true_type {};
 template<class T> struct is_lvalue_reference     : false_type {};
 template<class T> struct is_lvalue_reference<T&> : true_type {};
 
+template<class T> struct is_volatile             : false_type {};
+template<class T> struct is_volatile<volatile T> : true_type {};
+
 #ifdef FEATURE_CPP_MOVESEMANTIC
 template <class T> struct is_rvalue_reference      : false_type {};
 template <class T> struct is_rvalue_reference<T&&> : true_type {};

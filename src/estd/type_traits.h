@@ -3,6 +3,7 @@
 #include "internal/platform.h"
 #include "internal/is_empty.h"
 #include "internal/type_traits.h"
+#include "internal/is_base_of.h"
 
 #include "internal/raw/cstddef.h"
 
@@ -55,9 +56,6 @@ struct is_signed : internal::is_signed<T>::type {};
 
 template< class T > struct is_pointer : internal::___is_pointer<typename remove_cv<T>::type> {};
 
-template<class T> struct is_volatile             : false_type {};
-template<class T> struct is_volatile<volatile T> : true_type {};
-
 template< class T >
 struct is_floating_point
      : integral_constant<
@@ -94,11 +92,6 @@ struct add_pointer<T(Args..., ...), true> {
 
 template< class T >
 struct add_pointer : detail::add_pointer<T, estd::is_function<T>::value> {};
-
-#if __cpp_alias_templates
-template <class T>
-using add_pointer_t = typename add_pointer<T>::type;
-#endif
 
 #ifdef FEATURE_CPP_ENUM_CLASS
 // Obviously a simplistic implementation, but it's a start
@@ -151,7 +144,6 @@ T* addressof(T& arg)
 }
 
 #include "internal/llvm_type_traits.h"
-#include "internal/is_base_of.h"
 
 #ifdef FEATURE_CPP_VARIADIC
 #include "internal/invoke_result.h"
