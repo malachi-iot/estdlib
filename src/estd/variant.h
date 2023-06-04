@@ -10,15 +10,15 @@ namespace estd {
 template <class ...Types>
 using variant = internal::variant<Types...>;
 
-template <unsigned index, class ...TArgs>
-constexpr add_pointer_t<internal::type_at_index<index, TArgs...>> get_if(variant<TArgs...>* vs)
+template <unsigned index, class ...Types>
+constexpr add_pointer_t<internal::type_at_index<index, Types...>> get_if(variant<Types...>* vs)
 {
     return internal::holds_index<index>(vs) ? vs->template get<index>() : nullptr;
 }
 
 
-template <unsigned index, class ...TArgs>
-constexpr add_pointer_t<const internal::type_at_index<index, TArgs...>> get_if(const variant<TArgs...>* vs)
+template <unsigned index, class ...Types>
+constexpr add_pointer_t<const internal::type_at_index<index, Types...>> get_if(const variant<Types...>* vs)
 {
     return internal::holds_index<index>(vs) ? vs->template get<index>() : nullptr;
 }
@@ -37,8 +37,8 @@ constexpr add_pointer_t<const T> get_if(const variant<Types...>* vs) noexcept
 }
 
 
-template <int index, class ...TArgs>
-internal::type_at_index<index, TArgs...>& get(variant<TArgs...>& v)
+template <int index, class ...Types>
+internal::type_at_index<index, Types...>& get(variant<Types...>& v)
 {
     internal::assert_index_matches<index>(v);
 
@@ -46,16 +46,16 @@ internal::type_at_index<index, TArgs...>& get(variant<TArgs...>& v)
 }
 
 
-template <int index, class ...TArgs>
-const internal::type_at_index<index, TArgs...>& get(const variant<TArgs...>& v)
+template <int index, class ...Types>
+const internal::type_at_index<index, Types...>& get(const variant<Types...>& v)
 {
     internal::assert_index_matches<index>(v);
 
     return * v.template get<index>();
 }
 
-template <int index, class ...TArgs>
-internal::type_at_index<index, TArgs...>&& get(variant<TArgs...>&& v)
+template <int index, class ...Types>
+internal::type_at_index<index, Types...>&& get(variant<Types...>&& v)
 {
     internal::assert_index_matches<index>(v);
 

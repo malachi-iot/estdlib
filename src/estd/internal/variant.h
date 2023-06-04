@@ -59,26 +59,26 @@ constexpr bool holds_type(const variant<Types...>* vs)
 
 // DEBT: true std code throws exception on index mismatch here - we need to reflect error
 // state somehow
-template <int index, bool trivial, class ...TArgs>
-type_at_index<index, TArgs...>& get(variant_storage_base<trivial, TArgs...>& vs)
+template <int index, class ...Types>
+type_at_index<index, Types...>& get(variant_storage<Types...>& vs)
 {
     return * vs.template get<index>();
 }
 
-template <int index, bool trivial, class ...TArgs>
-const type_at_index<index, TArgs...>& get(const variant_storage_base<trivial, TArgs...>& vs)
+template <int index, class ...Types>
+const type_at_index<index, Types...>& get(const variant_storage<Types...>& vs)
 {
     return * vs.template get<index>();
 }
 
-template <class T, bool trivial, class ...Types>
-T& get(variant_storage_base<trivial, Types...>& vs)
+template <class T, class ...Types>
+T& get(variant_storage<Types...>& vs)
 {
     return * vs.template get<T>();
 }
 
-template <class T, bool trivial, class ...Types>
-constexpr const T& get(const variant_storage_base<trivial, Types...>& vs)
+template <class T, class ...Types>
+constexpr const T& get(const variant_storage<Types...>& vs)
 {
     return * vs.template get<T>();
 }
@@ -256,7 +256,7 @@ public:
     variant_storage_base() = default;
 
     template <size_t index, class ...TArgs>
-    constexpr variant_storage_base(in_place_index_t<index>, TArgs&&...args) :
+    constexpr explicit variant_storage_base(in_place_index_t<index>, TArgs&&...args) :
         dummy{
             construct_at<type_at_index<index>>
                 (storage.raw, std::forward<TArgs>(args)...)}

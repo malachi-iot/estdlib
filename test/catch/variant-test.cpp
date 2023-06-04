@@ -21,6 +21,32 @@ struct test_init_functor
     }
 };
 
+template <class ...Types>
+struct access_experiment;
+
+template <int I, class ...Types>
+internal::type_at_index<I, Types...>& get_exp(access_experiment<Types...>& v)
+{
+    return * v.template get<I>();
+}
+
+
+template <class ...Types>
+struct access_experiment : protected internal::variant_storage<Types...>
+{
+    using this_type = access_experiment;
+    typedef internal::variant_storage<Types...> base_type;
+
+    ESTD_CPP_FORWARDING_CTOR(access_experiment);
+
+    // Not good enough, compiler doesn't resolve this friend
+    //template <int I>
+    //friend internal::type_at_index<I, Types...>& ::get_exp(access_experiment<Types...>& v);
+
+    template <int I, class ...Types2>
+    friend internal::type_at_index<I, Types2...>& ::get_exp(access_experiment<Types2...>& v);
+};
+
 
 TEST_CASE("variant")
 {
@@ -259,6 +285,13 @@ TEST_CASE("variant")
             REQUIRE(index == 1);
             REQUIRE(get<1>(v) == 10);
         }
+    }
+    SECTION("experimental")
+    {
+        access_experiment<int, monostate> v(in_place_index_t<0>{}, 0);
+
+        //int value = internal::get<0>(v);
+        int value = get_exp<0>(v);
     }
 }
 
