@@ -123,12 +123,12 @@ protected:
 
     void destroy_value()
     {
-        storage.template destruct<VALUE>();
+        storage.template destroy<VALUE>();
     }
 
     void destroy_error()
     {
-        storage.template destruct<ERROR>();
+        storage.template destroy<ERROR>();
     }
 
 public:

@@ -276,7 +276,7 @@ public:
     }
 
     template <size_t index>
-    void destruct()
+    void destroy()
     {
         typedef type_at_index<index> t;
         ((t*) storage.raw)->~t();
@@ -309,35 +309,29 @@ public:
     template <class T>
     constexpr ensure_type_t<T>* get() const { return (T*) storage.raw; }
 
-    /*
-    template <int I, typename F>
-    static constexpr bool visit(F&&, int) { return{}; }
-
-    template <int I, typename F, class T, class... TArgs>
-    void visit(F&& f, int index)
+    // Same operation as operator=, but more explicit since
+    // type safety is up to programmer
+    template <size_t I>
+    void assign(const this_type& assign_from)
     {
-        if(I == index)
-            f(get<T>());
-        else
-            visit<I + 1, F, TArgs...>(std::forward<F>(f), index);
+        *get<I>() = *assign_from.get<I>();
     }
 
-    template <typename F>
-    void visit(F&& f, int index)
+    // Same operation as copy constructor, but more explicit since
+    // type safety is up to programmer
+    template <size_t I>
+    void copy(const this_type& copy_from)
     {
-        visit<0, F, Types...>(std::forward<F>(f), index);
-    } */
+        new (get<I>()) type_at_index<I> (*copy_from.get<I>());
+    }
 
-    /*
-    template <int I, typename F>
-    static constexpr size_type visit(F&&) { return variant_npos(); }
-
-    template <int I, typename F, class T, class... TArgs>
-    size_type visit(F&& f)
+    // Same operation as move constructor, but more explicit since
+    // type safety is up to programmer
+    template <size_t I>
+    void move(this_type&& move_from)
     {
-        if(f(get<T>())) return I;
-        return visit<I + 1, F, TArgs...>(std::forward<F>(f));
-    } */
+        new (get<I>()) type_at_index<I> (std::move(*move_from.get<I>()));
+    }
 
     // DEBT: visit_instance auto adds 'this', visit doesn't
     template <typename F, class ...TArgs>
@@ -427,16 +421,14 @@ class variant : public variant_storage<Types...>
         {
             if(move_from.index() != I) return false;
 
-            T_i& t = *move_from.template get<I>();
-
-            new (v.template get<I>()) T_i(std::move(t));
+            v.template move<I>(std::move(move_from));
 
             // Now that it's moved, we opt to immediately destroy it.  Alternatively,
             // we could let the moved object linger and keep the index set, thus running
             // the destructor more "naturally".
             // pros: immediate dtor suggests more immediate availability of resources
             // cons: a tiny bit more time and code to check/assign index
-            t.~T_i();
+            move_from.template destroy<I>();
 
             // NOTE: Not setting index_ here becuase we need it to stay put for
             // intiialization list to pick it up
@@ -453,8 +445,7 @@ class variant : public variant_storage<Types...>
         {
             if(assign_from.index() != I) return false;
 
-            //(v.template get<I>())->operator =(* assign_from.template get<I>());
-            (*v.template get<I>()) = * assign_from.template get<I>();
+            v.template assign<I>(assign_from);
             return true;
         }
 
@@ -467,14 +458,13 @@ class variant : public variant_storage<Types...>
         {
             if(copy_from.index() != I) return false;
 
-            T_i* obj = v.template get<I>();
-
             // DEBT: Technically would be more efficient to run the dtor
             // directly and not abort when index is found - however, that
             // breaks our burgeoning paradigm, so holding off
             v.destroy_if_valid();
 
-            new (obj) T_i(* copy_from.template get<I>());
+            v.template copy<I>(copy_from);
+
             return true;
         }
     };
