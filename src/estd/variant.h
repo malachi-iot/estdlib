@@ -13,27 +13,27 @@ using variant = internal::variant<Types...>;
 template <unsigned index, class ...Types>
 constexpr add_pointer_t<internal::type_at_index<index, Types...>> get_if(variant<Types...>* vs)
 {
-    return internal::holds_index<index>(vs) ? vs->template get<index>() : nullptr;
+    return internal::holds_index<index>(vs) ? internal::get_ll<index>(*vs) : nullptr;
 }
 
 
 template <unsigned index, class ...Types>
 constexpr add_pointer_t<const internal::type_at_index<index, Types...>> get_if(const variant<Types...>* vs)
 {
-    return internal::holds_index<index>(vs) ? vs->template get<index>() : nullptr;
+    return internal::holds_index<index>(vs) ? internal::get_ll<index>(*vs) : nullptr;
 }
 
 
 template <class T, class ...Types>
 constexpr add_pointer_t<T> get_if(variant<Types...>* vs) noexcept
 {
-    return internal::holds_type<T>(vs) ? vs->template get<T>() : nullptr;
+    return get_if<internal::select_type<T, Types...>::first::index>(vs);
 }
 
 template <class T, class ...Types>
 constexpr add_pointer_t<const T> get_if(const variant<Types...>* vs) noexcept
 {
-    return internal::holds_type<T>(vs) ? vs->template get<T>() : nullptr;
+    return get_if<internal::select_type<T, Types...>::first::index>(vs);
 }
 
 
@@ -42,7 +42,7 @@ internal::type_at_index<index, Types...>& get(variant<Types...>& v)
 {
     internal::assert_index_matches<index>(v);
 
-    return * v.template get<index>();
+    return * internal::get_ll<index>(v);
 }
 
 
@@ -51,7 +51,7 @@ const internal::type_at_index<index, Types...>& get(const variant<Types...>& v)
 {
     internal::assert_index_matches<index>(v);
 
-    return * v.template get<index>();
+    return * internal::get_ll<index>(v);
 }
 
 template <int index, class ...Types>
@@ -59,26 +59,26 @@ internal::type_at_index<index, Types...>&& get(variant<Types...>&& v)
 {
     internal::assert_index_matches<index>(v);
 
-    return * v.template get<index>();
+    return * internal::get_ll<index>(v);
 }
 
 
-template <class T, class ...TArgs>
-constexpr T& get(variant<TArgs...>& v)
+template <class T, class ...Types>
+constexpr T& get(variant<Types...>& v)
 {
-    return get<internal::select_type<T, TArgs...>::first::index>(v);
+    return get<internal::select_type<T, Types...>::first::index>(v);
 }
 
-template <class T, class ...TArgs>
-constexpr const T& get(const variant<TArgs...>& v)
+template <class T, class ...Types>
+constexpr const T& get(const variant<Types...>& v)
 {
-    return get<internal::select_type<T, TArgs...>::first::index>(v);
+    return get<internal::select_type<T, Types...>::first::index>(v);
 }
 
-template <class T, class ...TArgs>
-const T&& get(variant<TArgs...>&& v)
+template <class T, class ...Types>
+T&& get(variant<Types...>&& v)
 {
-    return get<internal::select_type<T, TArgs...>::first::index>(v);
+    return get<internal::select_type<T, Types...>::first::index>(v);
 }
 
 

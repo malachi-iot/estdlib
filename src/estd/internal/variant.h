@@ -94,6 +94,20 @@ void assert_index_matches(const variant<Types...>& v)
 #endif
 }
 
+template <int index, class ...Types>
+type_at_index<index, Types...>* get_ll(variant<Types...>& vs)
+{
+    return vs.template get<index>();
+}
+
+
+template <int index, class ...Types>
+constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& vs)
+{
+    return vs.template get<index>();
+}
+
+
 
 // DEBT: Supposed to be an inline variable, but we want c++11 compat
 constexpr unsigned variant_npos()

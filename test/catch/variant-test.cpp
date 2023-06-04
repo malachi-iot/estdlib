@@ -45,6 +45,10 @@ struct access_experiment : protected internal::variant_storage<Types...>
 
     template <int I, class ...Types2>
     friend internal::type_at_index<I, Types2...>& ::get_exp(access_experiment<Types2...>& v);
+
+    // No dice, because implicit cast down to variant_storage happens "just before" call
+    template <int I, class ...Types2>
+    friend internal::type_at_index<I, Types2...>& estd::internal::get(internal::variant_storage<Types2...>& vs);
 };
 
 
@@ -292,6 +296,8 @@ TEST_CASE("variant")
 
         //int value = internal::get<0>(v);
         int value = get_exp<0>(v);
+
+        //value = internal::get<0>(v);
     }
 }
 
