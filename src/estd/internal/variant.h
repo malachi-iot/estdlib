@@ -126,6 +126,9 @@ union variant_union<true>
 
 // Not 100% needed, but I like that I can see values more
 // easily in the debugger this way
+// Because this t1, t2 and friends are only used in this manner,
+// https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c183-dont-use-a-union-for-type-punning
+// is not violated, though debugger may produce garbage results.
 template <class T1, class T2>
 union variant_union<true, T1, T2>
 {
