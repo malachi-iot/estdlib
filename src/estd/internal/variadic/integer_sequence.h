@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fwd.h"
 #include "../raw/cstddef.h"
 #include "../raw/type_traits.h"
 
@@ -7,16 +8,9 @@
 
 namespace estd {
 
-namespace variadic {
-
-template <typename T, T ...Is>
-struct values;
-
-}
-
 namespace internal {
 
-template <int pos, class TIndices>
+template <size_t pos, class TIndices>
 struct get_index;
 
 template <size_t pos, typename T, T ...Is>
@@ -36,7 +30,7 @@ struct get_index_finder<pos, T, I, Is...> :
 
 
 
-template <int pos, class T, T ...Is>
+template <size_t pos, class T, T ...Is>
 struct get_index<pos, variadic::values<T, Is...> > : get_index_finder<pos, T, Is...>
 {
 };
@@ -56,14 +50,14 @@ struct value_sequence_single<T, I>
 
 namespace variadic {
 
-// Since we can track pointers and references too, I prefer the name value_sequence
-// rather than integer sequence
+// Since we can track pointers and references too, I prefer the name variadic::values
+// rather than integer_sequence
 template <typename T, T ...Is>
 struct values : internal::value_sequence_single<T, Is...>
 {
     static constexpr size_t size() { return sizeof...(Is); }
 
-    template <int pos>
+    template <size_t pos>
     using get = internal::get_index_finder<pos, T, Is...>;
 
     template <int I2>

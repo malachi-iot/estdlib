@@ -45,6 +45,9 @@ struct visitor_index;
 template <class ...Types>
 struct types;
 
+template <typename T, T ...Is>
+struct values;
+
 }
 
 template <class ...Types>
