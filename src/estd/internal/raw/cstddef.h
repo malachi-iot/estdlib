@@ -27,6 +27,9 @@ struct byte
 #endif
 
 // TODO: Only allow overloads which conform to is_integral, as per spec
+// TODO: Optimize by doing direct unsigned char bit in-place operations
+// (i.e. |= doesn't devolve into l | r) - make sure we don't violate aliasing
+// rules in the process
 
 template <class IntegerType>
 //#if defined(FEATURE_CPP_DEDUCE_RETURN) and defined(FEATURE_CPP_CONSTEXPR)
@@ -84,7 +87,12 @@ ESTD_CPP_CONSTEXPR_RET byte operator|(byte l, byte r) NOEXCEPT
     return to_byte(static_cast<unsigned int>(l) | static_cast<unsigned int>(r));
 }
 
-ESTD_CPP_CONSTEXPR_RET byte& operator|=(byte& l, byte r) NOEXCEPT
+#if __cpp_constexpr >= 201304L  // For relaxed constraints so we can change 'l'
+constexpr
+#else
+inline
+#endif
+byte& operator|=(byte& l, byte r) NOEXCEPT
 {
     return l = l | r;
 }
