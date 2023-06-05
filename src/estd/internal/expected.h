@@ -7,6 +7,9 @@
 
 #include "raw/expected.h"
 
+// c++20 gives us conditional explicits - before that, we generally
+// have to leave explicit out.  However, one may force explicit ctors
+// by enabling this flag.
 #ifndef FEATURE_ESTD_STRICT_EXPECTED
 #define FEATURE_ESTD_STRICT_EXPECTED 0
 #endif
@@ -68,7 +71,9 @@ public:
 // overlap, but perhaps we can use a high-bit filter in controlled
 // circumstances
 
-// DEBT: Deviates from spec when T=void, it is treated as 'monostate'
+// DEBT: Deviates from spec when T=void, it is treated as 'monostate'.
+// If this is an issue, we can specialize this internal::expected.  However,
+// even in that case we may need monostate if E is not default constructible
 template <class T, class E>
 class expected : public expected_tag
 {
@@ -77,7 +82,7 @@ public:
     typedef E error_type;
 
     // Silently promote void to monostate so that it registers as 'trivial'
-    // and plays nice with variant_storage.  Deviates from std approach
+    // and plays nice with variant_storage.  Deviates from std approach.
     typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
 
 private:
@@ -87,6 +92,8 @@ private:
         ERROR = 1
     };
 
+    // DEBT: Consider putting a variant directly here.  Not 100% sure
+    // yet whether it's fully compatible (probably though)
     variant_storage<nonvoid_value_type, E> storage;
 
 protected:
