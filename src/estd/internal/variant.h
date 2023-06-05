@@ -214,6 +214,9 @@ struct variant_storage_base : variant_storage_tag
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
 
+    template <class T>
+    using ensure_pointer = add_pointer_t<ensure_type_t<T>>;
+
     template <size_t I>
     using type_at_index = estd::internal::type_at_index<I, Types...>;
 
@@ -226,19 +229,16 @@ struct variant_storage_base : variant_storage_tag
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
 
-    template <size_t I, class T>
-    using visitor_index = variadic::visitor_index<I, T>;
-
     struct copying_constructor_functor
     {
         template <size_t I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
-        constexpr bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
+        constexpr bool operator()(variadic::visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
         {
             return false;
         }
 
         template <size_t I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
-        bool operator()(visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
+        bool operator()(variadic::visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
         {
             if(index != I) return false;
 
@@ -265,6 +265,10 @@ private:
         variant_union<trivial, Types...> storage;
         monostate dummy;
     };
+
+protected:
+    byte* raw() { return storage.raw; }
+    const byte* raw() const { return storage.raw; }
 
 public:
     variant_storage_base() = default;
@@ -293,7 +297,7 @@ public:
     void destroy()
     {
         typedef type_at_index<index> t;
-        ((t*) storage.raw)->~t();
+        get<index>()->~t();
     }
 
     void destroy(unsigned index)
@@ -302,11 +306,9 @@ public:
     }
 
     template <class T, class ...TArgs>
-    T* emplace(TArgs&&...args)
+    constexpr ensure_pointer<T> emplace(TArgs&&...args)
     {
-        T* const t = get<T>();
-        new (t) T(std::forward<TArgs>(args)...);
-        return t;
+        return new (storage.raw) T(std::forward<TArgs>(args)...);
     }
 
     template <size_t I, class ...TArgs>
@@ -318,10 +320,13 @@ public:
 
 
     template <class T>
-    ensure_type_t<T>* get() { return (T*) storage.raw; }
+    ensure_pointer<T> get() { return (T*) storage.raw; }
 
     template <class T>
-    constexpr ensure_type_t<T>* get() const { return (T*) storage.raw; }
+    constexpr add_pointer_t<ensure_type<const T>> get() const
+    {
+        return reinterpret_cast<add_pointer_t<const T>>(storage.raw);
+    }
 
     // Same operation as operator=, but more explicit since
     // type safety is up to programmer
@@ -336,7 +341,7 @@ public:
     template <size_t I>
     void copy(const this_type& copy_from)
     {
-        new (get<I>()) type_at_index<I> (*copy_from.get<I>());
+        new (storage.raw) type_at_index<I> (*copy_from.get<I>());
     }
 
     // Same operation as move constructor, but more explicit since
@@ -344,7 +349,7 @@ public:
     template <size_t I>
     void move(this_type&& move_from)
     {
-        new (get<I>()) type_at_index<I> (std::move(*move_from.get<I>()));
+        new (storage.raw) type_at_index<I> (std::move(*move_from.get<I>()));
     }
 
     // DEBT: visit_instance auto adds 'this', visit doesn't
@@ -369,9 +374,6 @@ public:
         if(index != nullptr) *index = (std::size_t)i;
         return {};
     }
-
-    byte* raw() { return storage.raw; }
-    const byte* raw() const { return storage.raw; }
 
     // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
     // continue to be a thorn in our side otherwise
