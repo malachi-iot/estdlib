@@ -12,11 +12,72 @@ namespace internal {
 
 struct projected_result_tag {};
 
+template <class T>
+struct converting_selector
+{
+    template <class T_j, size_t>
+    using evaluator = is_convertible<T, T_j>;
+};
+
+
+template <class ...Types>
+struct constructable_selector
+{
+    template <class T_j, size_t>
+    using evaluator = is_constructible<T_j, Types...>;
+};
+
+struct is_copy_constructible_selector
+{
+    template <class T_j, size_t>
+    using evaluator = is_copy_constructible<T_j>;
+};
+
+
+template <class T>
+struct is_same_selector
+{
+    template <class T_j, size_t>
+    using evaluator = is_same<T_j, T>;
+};
+
+
+/*
+ * Actually works, but more complicated than it needs to be since we're
+ * not really projecting
+template <size_t I>
+struct index_selector
+{
+    template <class T_j, size_t J>
+    using evaluator = projected_result<I == J, T_j>;
+};
+*/
+
+
+template <size_t I>
+struct index_selector
+{
+    template <class, size_t J>
+    using evaluator = bool_constant<I == J>;
+};
+
+
+template <template <class, class...> class T, class ...TArgs>
+struct projector_selector
+{
+    template <class T_j, size_t>
+    using evaluator = variadic::projected_result<T<T_j, TArgs...>>;
+};
+
+template <class T>
+using is_same_projector = projector_selector<is_same, T>;
+
+
 }
 
 namespace variadic {
 
-template <class T, bool v = true>
+template <class T, bool v>
 struct projected_result :
         type_identity<T>,
         internal::projected_result_tag

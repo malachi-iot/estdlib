@@ -52,6 +52,9 @@ struct types;
 template <typename T, T ...Is>
 struct values;
 
+template <class T, bool v = true>
+struct projected_result;
+
 }
 
 template <class ...Types>

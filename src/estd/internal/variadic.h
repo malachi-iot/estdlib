@@ -34,9 +34,6 @@ struct indices_reverser<I, Is...>
     using reversed = typename next::reversed::template append<I>;
 };
 
-//template <int pos, int ...Is>
-//using get_index = get_index_finder<pos, sizeof...(Is), Is...>;
-
 
 
 // EXPERIMENTAL, perhaps we prefer this specialization over functor?
@@ -47,66 +44,6 @@ struct visitor_instance_factory
     variadic::visitor_instance<I, T> create(variadic::visitor_index<I, T>) { return {}; }
 };
 
-
-
-// EXPERIMENTAL
-template <class T>
-struct converting_selector
-{
-    template <class T_j, size_t>
-    using evaluator = is_convertible<T, T_j>;
-};
-
-
-// EXPERIMENTAL
-template <class ...Types>
-struct constructable_selector
-{
-    template <class T_j, size_t>
-    using evaluator = is_constructible<T_j, Types...>;
-};
-
-struct is_copy_constructible_selector
-{
-    template <class T_j, size_t>
-    using evaluator = is_copy_constructible<T_j>;
-};
-
-
-template <class T>
-struct is_same_selector
-{
-    template <class T_j, size_t>
-    using evaluator = is_same<T_j, T>;
-};
-
-
-template <template <class, class...> class T, class ...TArgs>
-struct projector_selector
-{
-    template <class T_j, size_t>
-    using evaluator = variadic::projected_result<T<T_j, TArgs...>>;
-};
-
-template <class T>
-using is_same_projector = projector_selector<is_same, T>;
-
-/*
- * Actually works, but more complicated than it needs to be since we're
- * not really projecting
-template <size_t I>
-struct index_selector
-{
-    template <class T_j, size_t J>
-    using evaluator = projected_result<I == J, T_j>;
-};
-*/
-template <size_t I>
-struct index_selector
-{
-    template <class, size_t J>
-    using evaluator = bool_constant<I == J>;
-};
 
 
 template <class ...Types>
@@ -147,6 +84,8 @@ struct are_trivial<T, TArgs...>
 };
 
 
+// DEBT: Naming not clear, in conflict with above convention from are_trivial
+// Projects an is_same per item in TArgs
 template <class T, class ...TArgs>
 using are_same = conjunction<variadic::projector<is_same_projector<T>, TArgs...>>;
 
