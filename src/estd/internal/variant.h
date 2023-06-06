@@ -306,7 +306,8 @@ public:
     }
 
     template <class T, class ...TArgs>
-    constexpr ensure_pointer<T> emplace(TArgs&&...args)
+    //constexpr
+    ensure_pointer<T> emplace(TArgs&&...args)
     {
         return new (storage.raw) T(std::forward<TArgs>(args)...);
     }
