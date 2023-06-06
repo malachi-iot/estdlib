@@ -10,11 +10,7 @@
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
 
-#ifdef FEATURE_CPP_VARIADIC
 #include "internal/is_function.h"
-#endif
-
-
 
 namespace internal {
 
@@ -76,7 +72,7 @@ struct add_pointer :
 template< class T >
 struct add_pointer<T, true> : type_identity<T> {};
 
-#if defined(FEATURE_CPP_VARIADIC)
+#if __cpp_variadic_templates
 template< class T, class... Args >
 struct add_pointer<T(Args...), true> {
     using type = T(*)(Args...);

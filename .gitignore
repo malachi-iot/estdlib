@@ -43,6 +43,7 @@ build-catch-*/
 src/build/
 test/**/build/
 *.user
+build-*/
 
 # Visual Studio specific
 .vs/

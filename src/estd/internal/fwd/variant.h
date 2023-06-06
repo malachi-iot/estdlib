@@ -1,10 +1,11 @@
 #pragma once
 
 #include "../variadic/fwd.h"
-
-#if __cpp_variadic_templates
+#include "../raw/variant.h"
 
 namespace estd {
+
+#if __cpp_variadic_templates
 
 template <class T>
 struct variant_size;
@@ -47,6 +48,18 @@ constexpr size_t variant_npos() { return (unsigned)-1; }
 
 }
 
+#else
+
+namespace internal {
+
+template <class T1 = monostate, class T2 = monostate, class T3 = monostate>
+union variant_union;
+
+template <class T1 = monostate, class T2 = monostate, class T3 = monostate>
+struct variant_storage;
+
 }
 
 #endif
+
+}

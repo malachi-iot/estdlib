@@ -16,8 +16,9 @@
 #include <exception>
 #endif
 
-#if __cpp_variadic_templates
 namespace estd {
+
+#if __cpp_variadic_templates
 
 #if __cpp_exceptions
 class bad_variant_access : std::exception
@@ -717,5 +718,35 @@ public:
     }
 };
 
-}}
+}
+
+#else
+
+namespace internal {
+
+template <class T1, class T2, class T3>
+struct variant_storage
+{
+    template <size_t I, class T>
+    variant_storage(in_place_index_t<I>, const T&)
+    {
+
+    }
+
+    template <size_t I>
+    variant_storage(in_place_index_t<I>)
+    {
+
+    }
+
+    template <size_t I>
+    void destroy()
+    {
+
+    }
+};
+
+}
+
 #endif
+}

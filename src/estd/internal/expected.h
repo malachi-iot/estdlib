@@ -24,6 +24,7 @@ namespace estd { namespace internal {
 struct expected_tag {};
 struct unexpected_tag {};
 
+#if __cplusplus >= 201103L
 template <class T>
 using expected_ctor_6 = bool_constant<
     is_void<T>::value == false &&
@@ -32,6 +33,8 @@ using expected_ctor_6 = bool_constant<
     is_base_of<expected_tag, remove_cvref_t<T>>::value == false &&
     is_base_of<unexpected_tag, remove_cvref_t<T>>::value == false
     >;
+#endif
+
 
 // Doesn't need to play with uninitialized storage
 // since it's always required that E is initialized somehow
@@ -83,7 +86,7 @@ public:
 
     // Silently promote void to monostate so that it registers as 'trivial'
     // and plays nice with variant_storage.  Deviates from std approach.
-    typedef conditional_t<is_void<T>::value, monostate, T> nonvoid_value_type;
+    typedef typename conditional<is_void<T>::value, monostate, T>::type nonvoid_value_type;
 
 private:
     enum Positions
@@ -98,13 +101,13 @@ private:
 
 protected:
     template <class U, class G>
-    constexpr expected(const expected<U, G>& copy_from, bool has_value) :
+    ESTD_CPP_CONSTEXPR_RET expected(const expected<U, G>& copy_from, bool has_value) :
         storage(copy_from.storage, has_value ? VALUE : ERROR)
     {
     }
 
     ESTD_CPP_CONSTEXPR_RET expected() :
-        storage(in_place_index_t<0>{}) {}
+        storage(in_place_index_t<0>()) {}
 
 #if __cpp_variadic_templates
     template <class... TArgs>
@@ -118,14 +121,18 @@ protected:
     {}
 #else
     template <class TE1>
-    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) : error_(e) {}
+    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) :
+        storage(in_place_index_t<ERROR>(), e)
+    {}
 #endif
 
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-    expected(nonvoid_value_type&& v) :
+#if __cpp_constexpr && __cpp_rvalue_references
+    constexpr explicit expected(nonvoid_value_type&& v) :
         storage(in_place_index_t<VALUE>{}, std::forward<nonvoid_value_type>(v))
+#else
+    expected(const nonvoid_value_type& v) :
+        storage(in_place_index_t<VALUE>(), v)
+#endif
     {}
 
     void destroy_value()

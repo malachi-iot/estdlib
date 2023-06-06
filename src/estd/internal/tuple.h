@@ -49,12 +49,17 @@ struct sparse_tuple
 
     T& first() { return value; }
 
+#if __cpp_constexpr
     constexpr sparse_tuple(T&& value) : value(std::move(value)) {}
     constexpr sparse_tuple() = default;
+#else
+    sparse_tuple(const T& value) : value(value) {}
+    sparse_tuple() {};
+#endif
 };
 
 
-
+#if __cpp_variadic_templates
 // 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
 
 template<int index, typename First, typename... Rest>
@@ -96,5 +101,6 @@ struct GetImpl<0, First, Rest...>
         return t.first();
     }
 };
+#endif
 
 }}

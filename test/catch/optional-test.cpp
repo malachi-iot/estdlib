@@ -8,6 +8,8 @@ estd::optional<int> returning_optional(int val)
 {
     if(val == 10) return estd::nullopt;
 
+    if(val == 20) return {};
+
     return val;
 }
 
