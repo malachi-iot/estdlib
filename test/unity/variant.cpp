@@ -11,6 +11,7 @@ using namespace estd::internal;
 
 static void test_variant_1()
 {
+#if __cplusplus >= 201103L
     variant<int, const char*> v;
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
@@ -24,6 +25,7 @@ static void test_variant_1()
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
     TEST_ASSERT_EQUAL(7, get<0>(v));
+#endif
 }
 
 #ifdef ESP_IDF_TESTING

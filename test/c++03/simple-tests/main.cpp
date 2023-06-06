@@ -31,6 +31,7 @@ int main()
     test_chrono();
     test_cpp();
     test_cstddef();
+    test_expected();
     test_limits();
     test_locale();
     test_optional();
@@ -41,6 +42,7 @@ int main()
     test_streambuf();
     test_string();
     test_tuple();
+    test_variant();
     UNITY_END();
 
     return 0;

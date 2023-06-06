@@ -86,14 +86,26 @@ private:
 
 #if FEATURE_ESTD_OSTREAM_SETW
     // NOTE: Deviates from spec - std wants this in ios_base as part of setf
-    enum class positioning
+    // DEBT: Super clumsy, may want additional layer of wrappers for enum class
+#ifdef FEATURE_CPP_ENUM_CLASS
+    enum class positioning_type
+#else
+    struct positioning_type { enum values
+#endif
     {
         left = 0,
         right,
         internal
     };
+#ifdef FEATURE_CPP_ENUM_CLASS
+    using positioning = positioning_type;
+#else
+    };
 
-    struct
+    typedef typename positioning_type::values positioning;
+#endif
+
+    struct ostream_internal
     {
         // DEBT: Width applies to istream *and* ostream
         unsigned width : 4;
@@ -104,6 +116,12 @@ private:
         positioning alignment : 2;  // DEBT: Unused
         char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
         bool showbase : 1;          // DEBT: Unused
+
+        ESTD_CPP_CONSTEXPR_RET ostream_internal() :
+            width(0), alignment(positioning_type::left),
+            fillchar(0) // equivalent to space ' '
+        {
+        }
 
     }   ostream_;
 
@@ -137,15 +155,6 @@ public:
 
 
 public:
-#if FEATURE_ESTD_OSTREAM_SETW
-    inline basic_ostream()
-    {
-        ostream_.width = 0;
-        ostream_.alignment = positioning::left;
-        fill(' ');
-    }
-#endif
-
     struct sentry
     {
         explicit sentry(basic_ostream&) {}
