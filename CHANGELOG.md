@@ -2,7 +2,13 @@
 
 ## Added Features
 
+* Added `estd::variant`
+* Added `estd::variadic` namespace
+    * `variadic::visitor` for assistance moving through variadic
+
 ## Quality Updates & Bug Fixes
+
+* `is_base_of` no longer caught up on access modifierrs
 
 # v0.5.1 - 18MAY23
 
