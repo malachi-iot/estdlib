@@ -612,41 +612,37 @@ public:
         move_from.index_ = variant_npos();
     }
 
-    template <unsigned I, class T_j, class T,
+    template <size_t I, class T_j, class T,
         class enabled = enable_if_t<
             is_nothrow_constructible<T_j, T>::value ||
             !is_nothrow_move_constructible<T_j>::value> >
     void assignment_emplace_helper(T&& t, bool = true)
     {
-        // DEBT: Make this emplace<index> instead as per spec.
-        // Should be OK as type for now though
-        emplace<T_j>(std::forward<T>(t));
+        emplace<I>(std::forward<T>(t));
     }
 
-    template <unsigned I, class T_j, class T,
+    template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
-                !(is_nothrow_constructible<T_j, T>::value ||
-                !is_nothrow_move_constructible<T_j>::value)> >
+                !(is_nothrow_constructible<T_i, T>::value ||
+                !is_nothrow_move_constructible<T_i>::value)> >
     void assignment_emplace_helper(T&& t)
     {
-        // DEBT: Make this emplace<index> instead as per spec.
-        // Should be OK as type for now though
-        emplace<T_j>(T_j(std::forward<T>(t)));
+        emplace<I>(T_i(std::forward<T>(t)));
     }
 
-    template <class T_j, class T, class enabled = enable_if_t<is_assignable<T_j&, T>::value> >
+    template <size_t I, class T_i, class T, class enabled = enable_if_t<is_assignable<T_i&, T>::value> >
     void assignment_helper(T&& t)
     {
-        *base_type::template get<T_j>() = std::forward<T>(t);
+        *get_ll<I>(*this) = std::forward<T>(t);
     }
 
-    template <class T_j, class T, class enabled = enable_if_t<!is_assignable<T_j&, T>::value> >
+    template <size_t I, class T_i, class T, class enabled = enable_if_t<!is_assignable<T_i&, T>::value> >
     void assignment_helper(T&& t, bool = true)
     {
         // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
         // but we do.  Consider feature-flagging
-        // DEBT: Fix up dummy index
-        assignment_emplace_helper<0, T_j, T>(std::forward<T>(t));
+        // DEBT: Assigns index_ when it doesn't need to
+        assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
     }
 
     template <
@@ -657,8 +653,6 @@ public:
         typedef variadic::selector<internal::constructable_selector<T>, Types...> selector;
         typedef typename selector::first selected;
         typedef typename selected::type T_j;
-        //typedef typename base_type::template constructable_selector<T> selector;
-        //typedef typename selector::selected_type T_j;
 
         // DEBT: Multiple constructable T_j could be found.  Spec implies this is not
         // allowed.  However, in our case, we choose the first one.  Find a tighter
@@ -666,7 +660,7 @@ public:
 
         if(selected::index == index_)
         {
-            assignment_helper<T_j>(std::forward<T>(t));
+            assignment_helper<selected::index, T_j>(std::forward<T>(t));
         }
         else
         {
