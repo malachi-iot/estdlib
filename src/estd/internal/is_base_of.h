@@ -7,6 +7,9 @@
 
 namespace estd {
 
+// Shameless lifted from various places including
+// https://en.cppreference.com/w/cpp/types/is_base_of
+
 // DEBT: Piecemeal out dependencies rather than a c++11 check
 //#if __cpp_decltype
 #if __cplusplus >= 201103L
@@ -14,6 +17,8 @@ namespace estd {
 namespace internal {
     template <typename Base> estd::true_type is_base_of_test_func(const volatile Base*);
     template <typename Base> estd::false_type is_base_of_test_func(const volatile void*);
+
+#if LEGACY
     template <typename Base, typename Derived>
     using pre_is_base_of = decltype(is_base_of_test_func<Base>(std::declval<Derived*>()));
 
@@ -26,14 +31,25 @@ namespace internal {
     template <typename Base, typename Derived>
     struct pre_is_base_of2<Base, Derived, estd::void_t<pre_is_base_of<Base, Derived>>> :
         public pre_is_base_of<Base, Derived> { };
+#else
+    template<typename B, typename D>
+    auto test_is_base_of(int) -> decltype(is_base_of_test_func<B>(static_cast<D*>(nullptr)));
+    template<typename, typename>
+    auto test_is_base_of(...) -> std::true_type; // private or ambiguous base
+#endif
 }
 
 template <typename Base, typename Derived>
 struct is_base_of :
+#if LEGACY
     public estd::conditional_t<
         estd::is_class<Base>::value && estd::is_class<Derived>::value,
         internal::pre_is_base_of2<Base, Derived>,
         estd::false_type
+#else
+    bool_constant<is_class<Base>::value && is_class<Derived>::value &&
+    decltype(internal::test_is_base_of<Base, Derived>(0))::value
+#endif
     > { };
 
 #if __cplusplus >= 201703L
