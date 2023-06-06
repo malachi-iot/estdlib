@@ -725,18 +725,6 @@ public:
 
 namespace internal {
 
-template <size_t index, class T1, class T2, class T3>
-struct get_type_at_index;
-
-template <class T1, class T2, class T3>
-struct get_type_at_index<0, T1, T2, T3> : type_identity<T1> {};
-
-template <class T1, class T2, class T3>
-struct get_type_at_index<1, T1, T2, T3> : type_identity<T2> {};
-
-template <class T1, class T2, class T3>
-struct get_type_at_index<2, T1, T2, T3> : type_identity<T3> {};
-
 template <class T1, class T2, class T3>
 union variant_union<true, T1, T2, T3>
 {
@@ -781,10 +769,22 @@ struct variant_storage
     {
         return (typename type_at_index<I>::type*) storage.raw;
     }
+
+    template <size_t I>
+    const typename type_at_index<I>::type* get() const
+    {
+        return (typename type_at_index<I>::type*) storage.raw;
+    }
 };
 
 template <size_t I, class T1, class T2, class T3>
 typename get_type_at_index<I, T1, T2, T3>::type& get(variant_storage<T1, T2, T3>& vs)
+{
+    return * vs.template get<I>();
+}
+
+template <size_t I, class T1, class T2, class T3>
+const typename get_type_at_index<I, T1, T2, T3>::type& get(const variant_storage<T1, T2, T3>& vs)
 {
     return * vs.template get<I>();
 }

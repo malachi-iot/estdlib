@@ -4,11 +4,15 @@
 
 * Added `estd::variant`
 * Added `estd::variadic` namespace
-    * `variadic::visitor` for assistance moving through variadic
+    * `variadic::types` for compile-time management of `class ...Types`
+    * `variadic::values` for compile-time management of `T ...Values` (overlaps with `estd::index_sequence`)
+    * `variadic::selector` for compile-time evaluation of `class ...Types`
+    * `variadic::visitor` for runtime visitor pattern applied to `class ...Types`
 
 ## Quality Updates & Bug Fixes
 
 * `is_base_of` no longer caught up on access modifierrs
+* General c++03 compatibility
 
 # v0.5.1 - 18MAY23
 

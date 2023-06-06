@@ -120,6 +120,11 @@ protected:
         storage(in_place_index_t<ERROR>{}, std::forward<TArgs>(args)...)
     {}
 #else
+    template <class T1>
+    ESTD_CPP_CONSTEXPR_RET expected(in_place_t, const T1& v) :
+        storage(in_place_index_t<VALUE>(), v)
+    {}
+
     template <class TE1>
     ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) :
         storage(in_place_index_t<ERROR>(), e)

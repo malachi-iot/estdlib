@@ -2,6 +2,25 @@
   <code_scheme name="Project" version="173">
     <Objective-C>
       <option name="INDENT_NAMESPACE_MEMBERS" value="0" />
+      <option name="KEEP_NESTED_NAMESPACES_IN_ONE_LINE" value="true" />
+      <option name="FUNCTION_BRACE_PLACEMENT" value="5" />
+      <option name="BLOCK_BRACE_PLACEMENT" value="5" />
     </Objective-C>
+    <files>
+      <extensions>
+        <pair source="cpp" header="h" fileNamingConvention="NONE" />
+        <pair source="c" header="h" fileNamingConvention="NONE" />
+      </extensions>
+    </files>
+    <codeStyleSettings language="ObjectiveC">
+      <option name="BLANK_LINES_AROUND_METHOD" value="0" />
+      <option name="BLANK_LINES_AROUND_METHOD_IN_INTERFACE" value="0" />
+      <option name="BRACE_STYLE" value="2" />
+      <option name="CLASS_BRACE_STYLE" value="2" />
+      <option name="ELSE_ON_NEW_LINE" value="true" />
+      <indentOptions>
+        <option name="LABEL_INDENT_SIZE" value="-4" />
+      </indentOptions>
+    </codeStyleSettings>
   </code_scheme>
 </component>

@@ -7,11 +7,11 @@
 namespace estd { namespace internal {
 
 template <size_t pos, class ...Types>
-struct get_type_finder;
+struct get_type_at_index;
 
 // Very similar to std::variant_alternative
 template <size_t index, class ...Types>
-using type_at_index = typename get_type_finder<index, Types...>::type;
+using type_at_index = typename get_type_at_index<index, Types...>::type;
 
 // Plural of is_trivial
 // DEBT: Consider putting out into main estd namespace
@@ -59,6 +59,17 @@ struct projected_result;
 
 template <class ...Types>
 using type_sequence = variadic::types<Types...>;
+
+}
+#else
+namespace estd {
+
+namespace internal {
+
+template <size_t index, class T1, class T2, class T3>
+struct get_type_at_index;
+
+}
 
 }
 #endif

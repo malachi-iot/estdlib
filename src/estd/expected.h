@@ -97,6 +97,12 @@ public:
         has_value_(false)
     {}
 #else
+    template <class T1>
+    ESTD_CPP_CONSTEXPR_RET expected(in_place_t, const T1& v) :
+        base_type(in_place_t(), v),
+        has_value_(true)
+    {}
+
     template <class TE1>
     ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) :
         base_type(unexpect_t(), e),

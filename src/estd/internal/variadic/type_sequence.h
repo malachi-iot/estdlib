@@ -7,14 +7,14 @@
 namespace estd { namespace internal {
 
 template <class T, class ...Types>
-struct get_type_finder<0, T, Types...> : type_identity<T>
+struct get_type_at_index<0, T, Types...> : type_identity<T>
 {
 };
 
 
 template <size_t pos, class T, class ...Types>
-struct get_type_finder<pos, T, Types...> :
-        get_type_finder<pos - 1, Types...>
+struct get_type_at_index<pos, T, Types...> :
+        get_type_at_index<pos - 1, Types...>
 {
 };
 
@@ -25,7 +25,7 @@ struct type_sequence_accessor
     static constexpr size_t size() { return sizeof...(Types); }
 
     template <size_t pos>
-    using get = typename get_type_finder<pos, Types...>::type;
+    using get = type_at_index<pos, Types...>;
 
     using first = get<0>;
 
@@ -77,4 +77,17 @@ struct types :
 }
 
 }
+#else
+namespace estd { namespace internal {
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<0, T1, T2, T3> : type_identity<T1> {};
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<1, T1, T2, T3> : type_identity<T2> {};
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<2, T1, T2, T3> : type_identity<T3> {};
+
+}}
 #endif
