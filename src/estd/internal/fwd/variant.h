@@ -52,7 +52,7 @@ constexpr size_t variant_npos() { return (unsigned)-1; }
 
 namespace internal {
 
-template <class T1 = monostate, class T2 = monostate, class T3 = monostate>
+template <bool trivial, class T1 = monostate, class T2 = monostate, class T3 = monostate>
 union variant_union;
 
 template <class T1 = monostate, class T2 = monostate, class T3 = monostate>

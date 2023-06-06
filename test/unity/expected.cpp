@@ -5,11 +5,20 @@
 
 using namespace estd;
 
-static void test_expected_1()
+static void test_expected_void()
 {
     expected<void, int> e;
 
     TEST_ASSERT_TRUE(e.has_value());
+    TEST_ASSERT_EQUAL(sizeof(e), sizeof(int) * 2);
+}
+
+static void test_expected_int()
+{
+    expected<int, int> e;
+
+    TEST_ASSERT_TRUE(e.has_value());
+    TEST_ASSERT_TRUE(e.value() == 0);
     TEST_ASSERT_EQUAL(sizeof(e), sizeof(int) * 2);
 }
 
@@ -19,6 +28,7 @@ TEST_CASE("expected", "[expected]")
 void test_expected()
 #endif
 {
-    RUN_TEST(test_expected_1);
+    RUN_TEST(test_expected_void);
+    RUN_TEST(test_expected_int);
 }
 

@@ -725,27 +725,69 @@ public:
 
 namespace internal {
 
+template <size_t index, class T1, class T2, class T3>
+struct get_type_at_index;
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<0, T1, T2, T3> : type_identity<T1> {};
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<1, T1, T2, T3> : type_identity<T2> {};
+
+template <class T1, class T2, class T3>
+struct get_type_at_index<2, T1, T2, T3> : type_identity<T3> {};
+
+template <class T1, class T2, class T3>
+union variant_union<true, T1, T2, T3>
+{
+    T1 t1;
+    T2 t2;
+    T3 t3;
+    unsigned char raw[0];
+};
+
+
 template <class T1, class T2, class T3>
 struct variant_storage
 {
-    template <size_t I, class T>
-    variant_storage(in_place_index_t<I>, const T&)
-    {
+    variant_union<true, T1, T2, T3> storage;
 
+    template <size_t I>
+    struct type_at_index : get_type_at_index<I, T1, T2, T3> {};
+
+    template <size_t I, class T>
+    variant_storage(in_place_index_t<I>, const T& v)
+    {
+        typedef typename type_at_index<I>::type type;
+        new (storage.raw) type(v);
     }
 
     template <size_t I>
     variant_storage(in_place_index_t<I>)
     {
-
+        typedef typename type_at_index<I>::type type;
+        new (storage.raw) type();
     }
 
     template <size_t I>
     void destroy()
     {
+        typedef typename type_at_index<I>::type type;
+        ((type*)storage.raw)->~type();
+    }
 
+    template <size_t I>
+    typename type_at_index<I>::type* get()
+    {
+        return (typename type_at_index<I>::type*) storage.raw;
     }
 };
+
+template <size_t I, class T1, class T2, class T3>
+typename get_type_at_index<I, T1, T2, T3>::type& get(variant_storage<T1, T2, T3>& vs)
+{
+    return * vs.template get<I>();
+}
 
 }
 
