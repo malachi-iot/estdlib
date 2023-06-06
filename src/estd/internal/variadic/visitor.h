@@ -1,7 +1,9 @@
 #pragma once
 
 #include "fwd.h"
+//#include "../fwd/variant.h"
 #include "selector.h"
+//#include "../../optional.h"
 
 
 #if __cpp_variadic_templates
@@ -60,6 +62,8 @@ concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
 template <typename... Types>
 struct visitor
 {
+    //typedef layer1::optional<size_t, internal::variant_npos()> return_type;
+
     template <size_t I,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
             class... TArgs,
@@ -76,7 +80,7 @@ struct visitor
     static int visit(F&& f, TArgs&&...args)
     {
         if(f(visitor_index<I, internal::type_at_index<I, Types...>>{}, std::forward<TArgs>(args)...))
-        return I;
+            return I;
 
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
     }

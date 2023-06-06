@@ -56,9 +56,6 @@ constexpr bool holds_type(const variant<Types...>* vs)
 
 
 
-
-// DEBT: true std code throws exception on index mismatch here - we need to reflect error
-// state somehow
 template <int index, class ...Types>
 type_at_index<index, Types...>& get(variant_storage<Types...>& vs)
 {
@@ -94,6 +91,7 @@ void assert_index_matches(const variant<Types...>& v)
 #endif
 }
 
+// Bypasses runtime index check
 template <int index, class ...Types>
 type_at_index<index, Types...>* get_ll(variant<Types...>& vs) noexcept
 {
@@ -107,13 +105,6 @@ constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& 
     return vs.template get<index>();
 }
 
-
-
-// DEBT: Supposed to be an inline variable, but we want c++11 compat
-constexpr unsigned variant_npos()
-{
-    return (unsigned)-1;
-}
 
 
 
@@ -143,6 +134,14 @@ union variant_union<true>
 // Because this t1, t2 and friends are only used in this manner,
 // https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c183-dont-use-a-union-for-type-punning
 // is not violated, though debugger may produce garbage results.
+template <class T1>
+union variant_union<true, T1>
+{
+    T1 t1;
+    byte raw[0];
+};
+
+
 template <class T1, class T2>
 union variant_union<true, T1, T2>
 {
@@ -425,7 +424,8 @@ template <class ...Types>
 class variant : protected variant_storage<Types...>
 {
     using base_type = variant_storage<Types...>;
-    using size_type = typename base_type::size_type;
+    using typename base_type::size_type;
+    using typename base_type::visitor;
 
     struct moving_constructor_functor
     {
@@ -680,7 +680,8 @@ public:
         }
         else
         {
-            base_type::visit(assignment_functor{}, &index_, *this, rhs);
+            int index = visitor::visit(assignment_functor{}, *this, rhs);
+            index_ = index == -1 ? variant_npos() : (size_type)index;
         }
 
         return *this;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../new.h"
+#include "type_traits.h"
 
 namespace estd { namespace internal {
 
@@ -77,6 +78,7 @@ public:
     const value_type* operator->() const { return &value_; }
 };
 
+// TODO: Consider using a flavor of variant_storage here
 template <class T>
 struct optional_value_provider<T, typename estd::enable_if<optional_use_raw_provider<T>::value>::type > :
     experimental::raw_instance_provider<T>
