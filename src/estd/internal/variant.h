@@ -423,7 +423,14 @@ struct converting_constructor_functor2
 
 
 template <class ...Types>
-class variant : protected variant_storage<Types...>
+class variant :
+#if __clang__
+// DEBT: Almost at FIX level, but it does work 100% so just major debt
+#warning clang is more strict, currently requiring variant_storage base as public
+    public variant_storage<Types...>
+#else
+    protected variant_storage<Types...>
+#endif
 {
     using base_type = variant_storage<Types...>;
     using typename base_type::size_type;
