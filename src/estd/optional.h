@@ -85,18 +85,15 @@ public:
      * class itself here was working.  In the spec, c++17 utilizes
      * deduction guides for this purpose
      **/
-    template <class U = value_type
-            ,
-            //class = estd::enable_if_t<!estd::is_base_of<internal::optional_tag_base, U>::value >
-            class = typename estd::enable_if_t<
-                  //!has_optional_tag_typedef<U>::value &&
-                    estd::is_same<U, value_type>::value
-                    >
-              >
-    optional(U&& move_from)
+    template <class U, class enabled = enable_if_t<
+        is_constructible<T, U&&>::value &&
+        is_same<remove_cvref_t<U>, in_place_t>::value == false &&
+        is_base_of<optional_tag_base, U>::value == false &&
+        is_same<remove_cvref_t<U>, bool>::value == false
+        > >
+    optional(U&& move_from) : base_type(std::move(move_from))
     {
         base_type::has_value(true);
-        new (&base_type::value()) value_type(std::move(move_from));
     }
 #endif
 
