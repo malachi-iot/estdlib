@@ -753,7 +753,9 @@ union variant_union<true, T1, T2, T3>
 template <class T1, class T2, class T3>
 struct variant_storage
 {
-    variant_union<true, T1, T2, T3> storage;
+    typedef are_trivial<T1, T2, T3> trivial;
+
+    variant_union<trivial::value, T1, T2, T3> storage;
 
     template <size_t I>
     struct type_at_index : get_type_at_index<I, T1, T2, T3> {};

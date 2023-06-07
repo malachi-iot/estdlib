@@ -3,6 +3,12 @@
 #include "../new.h"
 #include "type_traits.h"
 
+// Old optional code worked pretty well, despite some clunkiness and debt,
+// so keeping it around in case bugs show up in new one
+#ifndef FEATURE_ESTD_OPTIONAL_LEGACY
+#define FEATURE_ESTD_OPTIONAL_LEGACY 0
+#endif
+
 namespace estd { namespace internal {
 
 // TODO: Not yet used yet, used to signal that particular type T is a layer1

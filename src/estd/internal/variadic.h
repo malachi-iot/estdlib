@@ -119,4 +119,24 @@ using first = type_identity<T>;
 }
 
 }
+#else
+namespace estd { namespace internal {
+
+template <class T1>
+struct are_trivial<T1, void, void> :
+    is_trivial<T1>
+{
+
+};
+
+// TODO: Consider making a c++03 'conjunction' if we can
+template <class T1, class T2>
+struct are_trivial<T1, T2, void> :
+    integral_constant<bool, is_trivial<T1>::value & is_trivial<T2>::value>
+{
+
+};
+
+
+}}
 #endif

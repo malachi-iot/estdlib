@@ -69,6 +69,9 @@ namespace internal {
 template <size_t index, class T1, class T2, class T3>
 struct get_type_at_index;
 
+template <class T1, class T2, class T3>
+struct are_trivial;
+
 }
 
 }
