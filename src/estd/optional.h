@@ -38,7 +38,7 @@ CONSTEXPR nullopt_t nullopt(0);
 #endif
 
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
-template <class T, class TBase = internal::optional_base<T> >
+template <class T, class TBase>
 class optional :
         public internal::optional_tag_base,
         public TBase
@@ -88,21 +88,21 @@ public:
     template <class U, class enabled = enable_if_t<
         is_constructible<T, U&&>::value &&
         is_same<remove_cvref_t<U>, in_place_t>::value == false &&
-        is_base_of<optional_tag_base, U>::value == false &&
-        is_same<remove_cvref_t<U>, bool>::value == false
+        is_base_of<optional_tag_base, remove_cvref_t<U>>::value == false
         > >
     optional(U&& move_from) : base_type(std::move(move_from))
     {
         base_type::has_value(true);
     }
+#else
+    optional(const value_type& copy_from) : base_type(copy_from) {}
 #endif
 
-    optional(const value_type& copy_from) : base_type(copy_from) {}
-
     template < class U, class TUBase >
-    optional( const optional<U, TUBase>& copy_from )
+    optional( const optional<U, TUBase>& copy_from ) :
+        base_type(copy_from)
     {
-        copy(copy_from);
+        //copy(copy_from);
     }
 
     // --- assignment operators
@@ -129,13 +129,15 @@ public:
     //optional& operator=( U&& v )
     optional& operator=(value_type&& v)
     {
-        base_type::value(std::move(v));
+        //if(base_type::has_value())
+            base_type::value(std::forward<value_type>(v));
+        //else
+            //new (&base_type::value()) value_type(std::forward<value_type>(v));
         base_type::has_value(true);
+
         return *this;
     }
 #else
-    // FIX: spec doesn't have this, but I think my lack of class U = T
-    // may be breaking things so stuffing this in here, for now
     optional& operator=(const value_type& v)
     {
         new (&base_type::value()) value_type(v);
@@ -200,6 +202,7 @@ class optional : public estd::optional<T, internal::layer1::optional_base<T, nul
     typedef typename base_type::value_type value_type;
 
 protected:
+    /*
     template < class U, class TUBase >
     void copy(const estd::optional<U, TUBase>& copy_from)
     {
@@ -217,10 +220,10 @@ protected:
         {
             new (&base_type::value()) value_type(null_value);
         }
-    }
+    } */
 
 public:
-    optional() {}
+    ESTD_CPP_DEFAULT_CTOR(optional)
 
 #ifdef __cpp_rvalue_references
     // FIX: Not doing 'U' deduction for same reason that
@@ -229,15 +232,16 @@ public:
     //template <class U>
     optional(value_type&& v) : base_type(std::move(v))
     { }
-#endif
-
+#else
     optional(const value_type& copy_from) : base_type(copy_from)
     { }
+#endif
 
     template < class U, class TUBase >
-    optional( const estd::optional<U, TUBase>& copy_from )
+    optional( const estd::optional<U, TUBase>& copy_from ) :
+        base_type(copy_from)
     {
-        copy(copy_from);
+        //copy(copy_from);
     }
 
     optional(estd::nullopt_t no) : base_type(no) {}
@@ -253,16 +257,18 @@ public:
     //optional& operator=(U&& value)
     optional& operator=(value_type&& value)
     {
-        base_type::operator=(std::move(value));
+        base_type::operator=(std::forward<value_type>(value));
         return *this;
     }
-#else
+#endif
+
+    // DEBT: Spec doesn't have this, I don't think lvalues are
+    // supposed to be supported
     optional& operator=(const value_type& value)
     {
         base_type::operator=(value);
         return *this;
     }
-#endif
 
 /*
     optional& operator=(const estd::optional<value_type>& assign_from)

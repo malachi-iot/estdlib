@@ -10,7 +10,19 @@
 #define FEATURE_ESTD_OPTIONAL_LEGACY 0
 #endif
 
-namespace estd { namespace internal {
+namespace estd {
+
+namespace internal {
+
+template <class T>
+struct optional_base;
+
+}
+
+template <class T, class TBase = internal::optional_base<T> >
+class optional;
+
+namespace internal {
 
 // TODO: Not yet used yet, used to signal that particular type T is a layer1
 // creature as well as bit size
@@ -135,8 +147,15 @@ protected:
     {
 
     }
+#else
+    template <class T1>
+    optional_value_provider(in_place_t, const T1& v1) :
+        storage(in_place_index_t<0>(), v1)
+    {}
 #endif
 
+    // DEBT: This should only be used internally for intrinsic-ish initialization
+    // and phased out over time in favor of above in_place_t to avoid confusion
     optional_value_provider(const_reference value) :
         storage(in_place_index_t<0>(), value)
     {
@@ -173,9 +192,23 @@ struct optional_base : optional_value_provider<T>,
     typedef optional_value_provider<T> base_type;
 
     ESTD_CPP_DEFAULT_CTOR(optional_base)
+
+#if __cpp_rvalue_references
+    explicit optional_base(T&& value) :
+        base_type(in_place_t{}, std::forward<T>(value)),
+        optional_has_value(true)
+    {}
+#else
     optional_base(const T& copy_from) :
         base_type(copy_from),
         optional_has_value(true)
+    {}
+#endif
+
+    template <class T2, class TBase>
+    optional_base(const optional<T2, TBase>& copy_from) :
+        base_type(in_place_t(), copy_from.value()),
+        optional_has_value(copy_from.has_value())
     {}
 };
 
@@ -191,6 +224,11 @@ class optional_bitwise
 protected:
     void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
+
+    ESTD_CPP_CONSTEXPR_RET optional_bitwise(const optional_bitwise& copy_from) :
+        value_(copy_from.value_),
+        has_value_(copy_from.has_value_)
+    {}
 
     ESTD_CPP_CONSTEXPR_RET optional_bitwise() :
         has_value_(false)
@@ -221,11 +259,28 @@ class optional_base : public optional_value_provider<T>
 
 protected:
 //public:
+
+#if __cpp_rvalue_references
+    explicit optional_base(T&& value) :
+        base_type(in_place_t{}, std::forward<T>(value))
+    {}
+#endif
+
     optional_base(const T& value) : base_type(value) {}
     // should always bool == true here
     //optional_base(bool) {}
 
     optional_base() : base_type(null_value_) {}
+
+    optional_base(const optional_base& copy_from) :
+        base_type(in_place_t(), copy_from.value())
+    {}
+
+    template <class T2, class TBase>
+    optional_base(const optional<T2, TBase>& copy_from) :
+        base_type(in_place_t(),
+            copy_from.has_value() ? copy_from.value() : null_value_)
+    {}
 
 public:
     typedef T value_type;
