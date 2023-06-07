@@ -13,6 +13,7 @@
 
 * `is_base_of` no longer caught up on access modifierrs
 * General c++03 compatibility
+* `estd::optional` and `estd::expected` much more robust, shares code base with `estd::variant`
 
 # v0.5.1 - 18MAY23
 
