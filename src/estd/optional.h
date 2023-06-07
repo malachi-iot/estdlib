@@ -54,16 +54,7 @@ protected:
     }
 
 public:
-    // even this doesn't help de-selecting this for value-initializer type
-    // constructor
-    //typedef void optional_tag;
     typedef typename base_type::value_type value_type;
-
-/*
-    //void value(value_type& v) { base_type::value(v); }
-    value_type& value() { return base_type::value(); }
-    const value_type& value() const { return base_type::value(); }
-*/
 
     // --- constructors
     // We depend on base class to initialize default to has_value() == false
@@ -73,36 +64,45 @@ public:
 
 #ifdef __cpp_rvalue_references
     template < class U, class TUBase >
-    optional(optional<U, TUBase>&& move_from )
+    constexpr optional(optional<U, TUBase>&& move_from ) :
+        base_type(std::move(move_from))
     {
-        base_type::has_value(move_from.has_value());
-        new (&base_type::value()) value_type(std::move(move_from.value()));
     }
 
     /**
-     * FIX: really do not like brute forcing the is_same here, but
-     * no provision to detect (and reject) presence of 'optional'
-     * class itself here was working.  In the spec, c++17 utilizes
-     * deduction guides for this purpose
+     * DEBT: In the spec, c++17 utilizes deduction guides here.
+     * So should we
+     * DEBT: Replace this move with a forward
      **/
     template <class U, class enabled = enable_if_t<
         is_constructible<T, U&&>::value &&
         is_same<remove_cvref_t<U>, in_place_t>::value == false &&
         is_base_of<optional_tag_base, remove_cvref_t<U>>::value == false
         > >
-    optional(U&& move_from) : base_type(std::move(move_from))
+    optional(U&& value) : base_type(in_place_t{}, std::move(value))
     {
-        base_type::has_value(true);
     }
 #else
-    optional(const value_type& copy_from) : base_type(copy_from) {}
+    optional(const value_type& copy_from) :
+        base_type(in_place_t(), copy_from) {}
+#endif
+
+#if __cpp_variadic_templates
+    template <class ...TArgs>
+    constexpr explicit optional(in_place_t, TArgs&&...args) :
+        base_type(in_place_t{}, std::forward<TArgs>(args)...)
+    {}
+#else
+    template <class T1>
+    optional(in_place_t, const T1& v1) :
+        base_type(in_place_t(), v1)
+    {}
 #endif
 
     template < class U, class TUBase >
     optional( const optional<U, TUBase>& copy_from ) :
         base_type(copy_from)
     {
-        //copy(copy_from);
     }
 
     // --- assignment operators
@@ -122,17 +122,20 @@ public:
     }
 
 #ifdef __cpp_rvalue_references
-    // DEBT: disabling the template part of this because it's
-    // getting too greedy and consuming other 'optional' , then
-    // that results in the incorrect 'operator bool' cast
-    //template< class U = T >
-    //optional& operator=( U&& v )
-    optional& operator=(value_type&& v)
+    template<class U = T, class enabled = enable_if_t<
+        is_assignable<T&, U>::value &&
+        is_constructible<T, U>::value &&
+        is_base_of<optional_tag_base, remove_cvref_t<U>>::value == false> >
+    optional& operator=(U&& v)
     {
-        //if(base_type::has_value())
-            base_type::value(std::forward<value_type>(v));
-        //else
-            //new (&base_type::value()) value_type(std::forward<value_type>(v));
+        // DEBT: Optimize this so that when direct initialize and
+        // assignment are identical and/or trivial, we don't even
+        // do the has_value runtime check
+        if(base_type::has_value())
+            base_type::value(std::forward<U>(v));
+        else
+            base_type::direct_initialize(std::forward<U>(v));
+
         base_type::has_value(true);
 
         return *this;
@@ -140,7 +143,8 @@ public:
 #else
     optional& operator=(const value_type& v)
     {
-        new (&base_type::value()) value_type(v);
+        // DEBT: Do same has_value interrogation as c++11 version above
+        base_type::direct_initialize(v);
         base_type::has_value(true);
         return *this;
     }
@@ -152,8 +156,13 @@ public:
     template< class... TArgs >
     T& emplace( TArgs&&... args )
     {
-        T& v = base_type::value();
-        new (&v) T(std::forward<TArgs>(args)...);
+        if(base_type::has_value())
+            base_type::destroy();
+
+        T& v = base_type::emplace(std::forward<TArgs>(args)...);
+
+        base_type::has_value(true);
+
         return v;
     }
 #endif
@@ -230,7 +239,7 @@ public:
     // we can't properly detect presence of 'optional' coming
     // in here
     //template <class U>
-    optional(value_type&& v) : base_type(std::move(v))
+    optional(value_type&& v) : base_type(in_place_t{}, std::move(v))
     { }
 #else
     optional(const value_type& copy_from) : base_type(copy_from)
@@ -244,7 +253,7 @@ public:
         //copy(copy_from);
     }
 
-    optional(estd::nullopt_t no) : base_type(no) {}
+    ESTD_CPP_CONSTEXPR_RET optional(estd::nullopt_t no) : base_type(no) {}
 
     optional& operator=(estd::nullopt_t)
     {

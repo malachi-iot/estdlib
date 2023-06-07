@@ -2,6 +2,8 @@
 
 #include <estd/optional.h>
 
+#include "test-data.h"
+
 using namespace estd;
 
 estd::optional<int> returning_optional(int val)
@@ -271,5 +273,23 @@ TEST_CASE("optional")
         REQUIRE(o == Value1);
 
         o.reset();
+    }
+    SECTION("non trivial")
+    {
+        estd::optional<test::NonTrivial> o;
+        int counter = 0;
+
+        REQUIRE(o.has_value() == false);
+
+        o.emplace(7, [&]{ ++counter; });
+
+        REQUIRE(o.has_value());
+        REQUIRE(o->code_ == 7);
+        REQUIRE(o->copied_ == false);
+        REQUIRE(counter == 0);
+
+        o.reset();
+
+        REQUIRE(counter == 1);
     }
 }

@@ -783,6 +783,13 @@ struct variant_storage
         ((type*)storage.raw)->~type();
     }
 
+    template <size_t I, class T_i_1>
+    typename type_at_index<I>::type* emplace(T_i_1& v1)
+    {
+        typedef typename type_at_index<I>::type type;
+        return new (storage.raw) type(v1);
+    }
+
     template <size_t I>
     typename type_at_index<I>::type* get()
     {

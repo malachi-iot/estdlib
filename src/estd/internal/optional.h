@@ -37,18 +37,20 @@ struct optional_tag_base
     ESTD_FN_HAS_TYPEDEF_EXP(optional_tag)
 };
 
-struct optional_has_value
+class optional_has_value
 {
     bool m_initialized;
 
+protected:
     optional_has_value(bool initialized = false) :
         m_initialized(initialized) {}
 
-    bool has_value() const { return m_initialized; }
     void reset() { m_initialized = false; }
 
-protected:
     void has_value(bool initialized) { m_initialized = initialized; }
+
+public:
+    bool has_value() const { return m_initialized; }
 };
 
 template <class T, class enabler = void>
@@ -154,20 +156,41 @@ protected:
     {}
 #endif
 
-    // DEBT: This should only be used internally for intrinsic-ish initialization
-    // and phased out over time in favor of above in_place_t to avoid confusion
-    optional_value_provider(const_reference value) :
-        storage(in_place_index_t<0>(), value)
-    {
-
-    }
-
 #if __cpp_rvalue_references
     void value(value_type&& v)
     {
         get<0>(storage) = std::forward<value_type>(v);
     }
+
+    template <class ...TArgs>
+    reference emplace(TArgs&&...args)
+    {
+        return * storage.template emplace<0>(std::forward<TArgs>(args)...);
+    }
+
+    template <class T2>
+    void direct_initialize(T2&& v)
+    {
+        emplace(std::forward<T2>(v));
+    }
+#else
+    template <class T1>
+    reference emplace(T1& v)
+    {
+        return *storage.template emplace<0>(v);
+    }
+
+    template <class T1>
+    void direct_initialize(T1& v)
+    {
+        emplace(v);
+    }
 #endif
+
+    void destroy()
+    {
+        storage.template destroy<0>();
+    }
 
     void value(const_reference v)
     {
@@ -194,13 +217,13 @@ struct optional_base : optional_value_provider<T>,
     ESTD_CPP_DEFAULT_CTOR(optional_base)
 
 #if __cpp_rvalue_references
-    explicit optional_base(T&& value) :
+    explicit optional_base(in_place_t, T&& value) :
         base_type(in_place_t{}, std::forward<T>(value)),
         optional_has_value(true)
     {}
 #else
-    optional_base(const T& copy_from) :
-        base_type(copy_from),
+    optional_base(in_place_t, const T& copy_from) :
+        base_type(in_place_t(), copy_from),
         optional_has_value(true)
     {}
 #endif
@@ -210,6 +233,14 @@ struct optional_base : optional_value_provider<T>,
         base_type(in_place_t(), copy_from.value()),
         optional_has_value(copy_from.has_value())
     {}
+
+    void reset()
+    {
+        if(optional_has_value::has_value())
+            base_type::destroy();
+
+        optional_has_value::reset();
+    }
 };
 
 template <class T, unsigned bit_count>
@@ -225,6 +256,13 @@ protected:
     void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
 
+    template <class U>
+    void direct_initialize(const U& u)
+    {
+        value_ = u;
+    }
+
+    // DEBT: Make a converting constructor also
     ESTD_CPP_CONSTEXPR_RET optional_bitwise(const optional_bitwise& copy_from) :
         value_(copy_from.value_),
         has_value_(copy_from.has_value_)
@@ -234,8 +272,8 @@ protected:
         has_value_(false)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET optional_bitwise(const T& copy_from) :
-        value_(copy_from), has_value_(true)
+    ESTD_CPP_CONSTEXPR_RET optional_bitwise(in_place_t, const T& v) :
+        value_(v), has_value_(true)
     {}
 
 public:
@@ -243,7 +281,7 @@ public:
     typedef value_type return_type;
     typedef value_type const_return_type;
 
-    bool has_value() const { return has_value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
     void reset() { has_value_ = false; }
 
     // Deviates from spec here, since bitfield precludes returning a reference    
@@ -261,16 +299,18 @@ protected:
 //public:
 
 #if __cpp_rvalue_references
-    explicit optional_base(T&& value) :
+    constexpr explicit optional_base(in_place_t, T&& value) :
         base_type(in_place_t{}, std::forward<T>(value))
     {}
 #endif
 
-    optional_base(const T& value) : base_type(value) {}
+    // DEBT: #ifdef this out for scenarios only when rvalue is not available
+    optional_base(in_place_t, const T& value) : base_type(in_place_t(), value) {}
+
     // should always bool == true here
     //optional_base(bool) {}
 
-    optional_base() : base_type(null_value_) {}
+    optional_base() : base_type(in_place_t(), null_value_) {}
 
     optional_base(const optional_base& copy_from) :
         base_type(in_place_t(), copy_from.value())
