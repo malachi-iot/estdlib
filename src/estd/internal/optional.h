@@ -2,6 +2,7 @@
 
 #include "../new.h"
 #include "type_traits.h"
+#include "variant.h"
 
 // Old optional code worked pretty well, despite some clunkiness and debt,
 // so keeping it around in case bugs show up in new one
@@ -41,6 +42,7 @@ protected:
 template <class T, class enabler = void>
 struct optional_value_provider;
 
+#if FEATURE_ESTD_OPTIONAL_LEGACY
 template <class T>
 struct optional_use_raw_provider :
     estd::integral_constant<bool,
@@ -109,6 +111,54 @@ struct optional_value_provider<T, typename estd::enable_if<optional_use_raw_prov
     value_type* operator->() { return &provider_type::value(); }
     const value_type* operator->() const { return &provider_type::value(); }
 };
+#else
+template <class T>
+struct optional_value_provider<T>
+{
+    typedef optional_value_provider this_type;
+
+    ESTD_CPP_STD_VALUE_TYPE(T)
+
+    typedef reference return_type;
+    typedef const_reference const_return_type;
+
+private:
+    variant_storage<T> storage;
+
+protected:
+    ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
+
+#if __cpp_variadic_templates
+    template <class ...TArgs>
+    constexpr explicit optional_value_provider(in_place_t, TArgs&&...args) :
+        storage(in_place_index_t<0>{}, std::forward<TArgs>(args)...)
+    {
+
+    }
+#endif
+
+    optional_value_provider(const_reference value) :
+        storage(in_place_index_t<0>(), value)
+    {
+
+    }
+
+    // DEBT: Need an rvalue version
+    void value(const_reference v)
+    {
+        get<0>(storage) = v;
+    }
+
+public:
+    pointer operator->() { return storage.template get<0>(); }
+    const_pointer operator->() const { return storage.template get<0>(); }
+
+    reference value() { return get<0>(storage); }
+    ESTD_CPP_CONSTEXPR_RET const_reference value() const
+    { return get<0>(storage); }
+};
+
+#endif
 
 template <class T>
 struct optional_base : optional_value_provider<T>,

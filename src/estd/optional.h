@@ -11,9 +11,8 @@
 namespace estd {
 
 struct nullopt_t {
-    explicit
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
+#ifdef __cpp_constexpr
+    explicit constexpr
 #endif
     nullopt_t(int) {}
 
