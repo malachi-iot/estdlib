@@ -143,7 +143,13 @@ protected:
 
     }
 
-    // DEBT: Need an rvalue version
+#if __cpp_rvalue_references
+    void value(value_type&& v)
+    {
+        get<0>(storage) = std::forward<value_type>(v);
+    }
+#endif
+
     void value(const_reference v)
     {
         get<0>(storage) = v;

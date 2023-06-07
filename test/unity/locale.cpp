@@ -79,7 +79,7 @@ static void test_num_get_alt()
 
 static void test_num_get_istream1()
 {
-    typedef typename istream_type::streambuf_type streambuf_type;
+    typedef istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
     typedef istreambuf_iterator<streambuf_type> iterator_type;
 
@@ -94,7 +94,7 @@ static void test_num_get_istream1()
 
 static void test_num_get_istream2()
 {
-    typedef typename istream_type::streambuf_type streambuf_type;
+    typedef istream_type::streambuf_type streambuf_type;
     istream_type istream(input);
 
 #ifdef FEATURE_CPP_AUTO

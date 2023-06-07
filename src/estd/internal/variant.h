@@ -760,6 +760,8 @@ struct variant_storage
     template <size_t I>
     struct type_at_index : get_type_at_index<I, T1, T2, T3> {};
 
+    variant_storage() {}
+
     template <size_t I, class T>
     variant_storage(in_place_index_t<I>, const T& v)
     {
