@@ -725,6 +725,21 @@ public:
 
 namespace internal {
 
+template <class T1>
+union variant_union<true, T1, void, void>
+{
+    T1 t1;
+    unsigned char raw[0];
+};
+
+template <class T1, class T2>
+union variant_union<true, T1, T2, void>
+{
+    T1 t1;
+    T2 t2;
+    unsigned char raw[0];
+};
+
 template <class T1, class T2, class T3>
 union variant_union<true, T1, T2, T3>
 {

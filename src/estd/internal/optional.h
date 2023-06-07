@@ -93,6 +93,7 @@ struct optional_value_provider<T, typename estd::enable_if<optional_use_raw_prov
 
     optional_value_provider(const value_type& copy_from)
     {
+        // DEBT: Should be using copy constructor here
         provider_type::value(copy_from);
     }
 
