@@ -72,14 +72,13 @@ public:
     /**
      * DEBT: In the spec, c++17 utilizes deduction guides here.
      * So should we
-     * DEBT: Replace this move with a forward
      **/
     template <class U, class enabled = enable_if_t<
         is_constructible<T, U&&>::value &&
         is_same<remove_cvref_t<U>, in_place_t>::value == false &&
         is_base_of<optional_tag_base, remove_cvref_t<U>>::value == false
         > >
-    optional(U&& value) : base_type(in_place_t{}, std::move(value))
+    constexpr optional(U&& value) : base_type(in_place_t{}, std::forward<U>(value))
     {
     }
 #else
@@ -174,13 +173,13 @@ public:
 #endif
     T value_or( U&& default_value ) &&
     {
-        return base_type::has_value() ? base_type::value() : std::move(default_value);
+        return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
     }
 
     template <class U>
     constexpr T value_or( U&& default_value ) const&
     {
-        return base_type::has_value() ? base_type::value() : std::move(default_value);
+        return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
     }
 #else
     // Untested
@@ -235,11 +234,8 @@ public:
     ESTD_CPP_DEFAULT_CTOR(optional)
 
 #ifdef __cpp_rvalue_references
-    // FIX: Not doing 'U' deduction for same reason that
-    // we can't properly detect presence of 'optional' coming
-    // in here
-    //template <class U>
-    optional(value_type&& v) : base_type(in_place_t{}, std::move(v))
+    // Not doing 'class U' because layer1 is expected to be trivial
+    optional(value_type&& v) : base_type(in_place_t{}, std::forward<value_type>(v))
     { }
 #else
     optional(const value_type& copy_from) : base_type(copy_from)
