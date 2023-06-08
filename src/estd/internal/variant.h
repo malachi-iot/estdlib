@@ -280,7 +280,7 @@ public:
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        typedef variadic::selector<internal::constructable_selector<T>, Types...> selector;
+        typedef typename base_type::template is_constructible_selector<T> selector;
         typedef typename selector::first selected;
         typedef typename selected::type T_j;
 

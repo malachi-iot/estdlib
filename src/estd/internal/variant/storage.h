@@ -135,6 +135,10 @@ struct variant_storage_base : variant_storage_tag
     template <size_t I>
     using const_pointer_at_index = add_pointer_t<const type_at_index<I>>;
 
+    template <class... Types2>
+    using is_constructible_selector = selector<
+        internal::constructable_selector<Types2...>>;
+
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
 
