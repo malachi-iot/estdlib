@@ -11,6 +11,7 @@ struct NonTrivial
     const int code_;
     const bool copied_ = false;
     const bool moved_ = false;
+    const bool initialized_ = false;
 
     std::function<void()> on_dtor;
 
@@ -22,11 +23,12 @@ struct NonTrivial
     {}
 
     NonTrivial(const NonTrivial& copy_from) :
-        code_{copy_from.code_}, copied_{true},
+        code_{copy_from.code_}, copied_{true}, initialized_{true},
         on_dtor(copy_from.on_dtor)
     {}
+
     NonTrivial(NonTrivial&& move_from) noexcept :
-        code_{move_from.code_}, moved_{true},
+        code_{move_from.code_}, moved_{true}, initialized_{true},
         on_dtor(std::move(move_from.on_dtor))
     {}
 

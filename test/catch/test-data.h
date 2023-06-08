@@ -15,6 +15,8 @@ struct Dummy
 {
     int val1;
     const char* value2;
+    const bool moved_ = false;
+    const bool copied_ = false;
 
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() {}
@@ -25,14 +27,16 @@ struct Dummy
 
     Dummy(Dummy&& move_from) :
         val1(std::move(move_from.val1)),
-        value2(std::move(move_from.value2))
+        value2(std::move(move_from.value2)),
+        moved_{true}
     {
 
     }
 
     explicit Dummy(const Dummy& copy_from) :
         val1(copy_from.val1),
-        value2(copy_from.value2)
+        value2(copy_from.value2),
+        copied_{true}
     {
 
     }
@@ -46,6 +50,12 @@ struct Dummy
     Dummy& operator =(const Dummy& copy_from)
     {
         new (this) Dummy(copy_from);
+        return *this;
+    }
+
+    Dummy& operator=(Dummy&& move_from)
+    {
+        new (this) Dummy(std::move(move_from));
         return *this;
     }
 };

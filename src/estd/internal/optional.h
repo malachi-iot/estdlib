@@ -149,6 +149,13 @@ protected:
     {
 
     }
+
+    template <class ...TArgs>
+    constexpr explicit optional_value_provider(in_place_conditional_t<0>, bool condition, TArgs&&...args) :
+        storage(in_place_conditional_t<0>{}, condition, std::forward<TArgs>(args)...)
+    {
+
+    }
 #else
     template <class T1>
     optional_value_provider(in_place_t, const T1& v1) :
@@ -216,11 +223,22 @@ struct optional_base : optional_value_provider<T>,
 
     ESTD_CPP_DEFAULT_CTOR(optional_base)
 
-#if __cpp_rvalue_references
-    explicit optional_base(in_place_t, T&& value) :
-        base_type(in_place_t{}, std::forward<T>(value)),
+#if __cpp_variadic_templates
+    template <class ...TArgs>
+    explicit optional_base(in_place_t, TArgs&&...args) :
+        base_type(in_place_t{}, std::forward<TArgs>(args)...),
         optional_has_value(true)
     {}
+
+    /*
+    optional_base(optional_base&& move_from) :
+        base_type(in_place_conditional_t<0>{},
+            move_from.has_value(),
+            std::move(move_from.value())),
+        optional_has_value(move_from.has_value())
+    {
+    }   */
+
 #else
     optional_base(in_place_t, const T& copy_from) :
         base_type(in_place_t(), copy_from),
@@ -228,11 +246,41 @@ struct optional_base : optional_value_provider<T>,
     {}
 #endif
 
+    /*
+    optional_base(const optional_base& copy_from) :
+        base_type(in_place_conditional_t<0>{},
+            copy_from.has_value(),
+            copy_from.value()),
+        optional_has_value(copy_from.has_value())
+    {
+    }   */
+
     template <class T2, class TBase>
+#if __cpp_constexpr
+    constexpr explicit
+#endif
     optional_base(const optional<T2, TBase>& copy_from) :
-        base_type(in_place_t(), copy_from.value()),
+        base_type(in_place_conditional_t<0>{},
+            copy_from.has_value(),
+            copy_from.value()),
         optional_has_value(copy_from.has_value())
     {}
+
+#if __cpp_rvalue_references
+    template <class T2, class TBase>
+    constexpr explicit optional_base(optional<T2, TBase>&& move_from) :
+        base_type(in_place_conditional_t<0>{},
+            move_from.has_value(),
+            std::move(move_from.value())),
+        optional_has_value(move_from.has_value())
+    {}
+#endif
+
+    ~optional_base()
+    {
+        if(optional_has_value::has_value())
+            base_type::destroy();
+    }
 
     void reset()
     {

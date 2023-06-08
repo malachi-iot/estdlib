@@ -293,5 +293,46 @@ TEST_CASE("optional")
         o.reset();
 
         REQUIRE(counter == 1);
+
+        o.emplace(77, [&]{ ++counter; });
+
+        SECTION("constructor")
+        {
+            optional<test::NonTrivial> o2(o), o_empty;
+            optional<test::NonTrivial> o_empty2(o_empty);
+
+            SECTION("move")
+            {
+                optional<test::NonTrivial> o3(std::move(o2));
+
+                REQUIRE(o3->initialized_);
+                REQUIRE(o3->copied_ == false);
+                REQUIRE(o3->moved_);
+            }
+
+            REQUIRE(counter == 2);
+        }
+        SECTION("assignment")
+        {
+            optional<test::Dummy> o2(in_place_t{}, 7, "hi2u"), o3;
+
+            // NonTrivial lacks assignment operator on purpose
+            //optional<test::NonTrivial> o2;
+
+            REQUIRE(!o2->copied_);
+            REQUIRE(!o2->moved_);
+
+            o3 = o2;
+
+            REQUIRE(o3->copied_);
+            REQUIRE(!o2->moved_);
+
+            SECTION("move")
+            {
+                o2 = std::move(o3);
+
+                REQUIRE(o2->moved_);
+            }
+        }
     }
 }

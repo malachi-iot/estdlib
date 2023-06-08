@@ -45,6 +45,7 @@ class optional :
 {
     typedef TBase base_type;
 
+    /*
     template <class U>
     void assign_value(const U& u)
     {
@@ -55,7 +56,7 @@ class optional :
             base_type::direct_initialize(u);
             base_type::has_value(true);
         }
-    }
+    }   */
 
     template <class U>
     void assign_value(U&& u)
@@ -83,7 +84,14 @@ public:
 
 #ifdef __cpp_rvalue_references
     template < class U, class TUBase >
-    constexpr optional(optional<U, TUBase>&& move_from ) :
+    constexpr optional(optional<U, TUBase>&& move_from) :
+        base_type(std::move(move_from))
+    {
+    }
+
+    // DEBT: I was hoping default of this would cascade down to the
+    // user defined one for optional_base but so far no dice
+    constexpr optional(optional&& move_from) :
         base_type(std::move(move_from))
     {
     }
@@ -104,6 +112,13 @@ public:
     optional(const value_type& copy_from) :
         base_type(in_place_t(), copy_from) {}
 #endif
+
+    // DEBT: I was hoping default of this would cascade down to the
+    // user defined one for optional_base but so far no dice
+    constexpr optional(const optional& move_from) :
+        base_type(std::move(move_from))
+    {
+    }
 
 #if __cpp_variadic_templates
     template <class ...TArgs>
@@ -149,7 +164,34 @@ public:
         return *this;
     }
 
+    optional& operator=(const optional& assign_from)
+    {
+        if(assign_from.has_value())
+            assign_value(assign_from.value());
+        else
+            base_type::reset();
+
+        return *this;
+    }
+
 #ifdef __cpp_rvalue_references
+    template <class U, class TBase2, class enabled =
+        typename enable_if<
+            is_constructible<T, optional<U>&>::value == false &&
+            is_convertible<T, optional<U>&>::value == false &&
+            is_assignable<T, optional<U>&>::value == false>::type
+        >
+    optional& operator=(optional<U, TBase2>&& move_from)
+    {
+        if(move_from.has_value())
+            assign_value(std::move(move_from.value()));
+        else
+            base_type::reset();
+
+        return *this;
+    }
+
+
     template<class U = T, class enabled = enable_if_t<
         is_assignable<T&, U>::value &&
         is_constructible<T, U>::value &&

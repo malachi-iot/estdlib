@@ -281,6 +281,17 @@ public:
     {
     }
 
+    template <size_t index, class ...TArgs>
+    constexpr explicit variant_storage_base(in_place_conditional_t<index>, bool condition, TArgs&&...args) :
+        dummy{
+            condition ?
+                construct_at<type_at_index<index>>
+                    (storage.raw, std::forward<TArgs>(args)...) :
+                monostate{}}
+    {
+    }
+
+
     template <size_t index>
     pointer_at_index<index> get()
     {

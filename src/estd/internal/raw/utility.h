@@ -8,6 +8,9 @@ namespace internal {
 
 struct in_place_tag {};
 
+template <size_t>
+struct in_place_conditional_t : in_place_tag {};
+
 }
 
 struct in_place_t : internal::in_place_tag
