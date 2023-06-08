@@ -156,30 +156,12 @@ struct optional_base : optional_value_provider<T>,
         optional_has_value(true)
     {}
 
-    /*
-    optional_base(optional_base&& move_from) :
-        base_type(in_place_conditional_t<0>{},
-            move_from.has_value(),
-            std::move(move_from.value())),
-        optional_has_value(move_from.has_value())
-    {
-    }   */
-
 #else
     optional_base(in_place_t, const T& copy_from) :
         base_type(in_place_t(), copy_from),
         optional_has_value(true)
     {}
 #endif
-
-    /*
-    optional_base(const optional_base& copy_from) :
-        base_type(in_place_conditional_t<0>{},
-            copy_from.has_value(),
-            copy_from.value()),
-        optional_has_value(copy_from.has_value())
-    {
-    }   */
 
     template <class T2, class TBase>
 #if __cpp_constexpr
@@ -202,16 +184,20 @@ struct optional_base : optional_value_provider<T>,
     {}
 #endif
 
-    ~optional_base()
+    void destroy()
     {
         if(optional_has_value::has_value())
             base_type::destroy();
     }
 
+    ~optional_base()
+    {
+        destroy();
+    }
+
     void reset()
     {
-        if(optional_has_value::has_value())
-            base_type::destroy();
+        destroy();
 
         optional_has_value::reset();
     }

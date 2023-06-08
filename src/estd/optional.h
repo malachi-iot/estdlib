@@ -45,7 +45,6 @@ class optional :
 {
     typedef TBase base_type;
 
-    /*
     template <class U>
     void assign_value(const U& u)
     {
@@ -56,8 +55,9 @@ class optional :
             base_type::direct_initialize(u);
             base_type::has_value(true);
         }
-    }   */
+    }
 
+#if __cpp_rvalue_references
     template <class U>
     void assign_value(U&& u)
     {
@@ -72,6 +72,7 @@ class optional :
             base_type::has_value(true);
         }
     }
+#endif
 
 public:
     typedef typename base_type::value_type value_type;
@@ -214,12 +215,14 @@ public:
 
 
 #ifdef __cpp_variadic_templates
-    // NOTE: This one won't work with bitwise version
-    template< class... TArgs >
-    T& emplace( TArgs&&... args )
+    // NOTE: This one won't work with bitwise version.  In theory
+    // it could work with layer1 version, but doesn't currently.
+    // In both cases, it's better to use assignment operator when
+    // possible since they are trivial
+    template<class... TArgs>
+    T& emplace(TArgs&&... args)
     {
-        if(base_type::has_value())
-            base_type::destroy();
+        base_type::destroy();
 
         T& v = base_type::emplace(std::forward<TArgs>(args)...);
 
