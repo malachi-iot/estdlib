@@ -115,8 +115,8 @@ public:
 
     // DEBT: I was hoping default of this would cascade down to the
     // user defined one for optional_base but so far no dice
-    constexpr optional(const optional& move_from) :
-        base_type(std::move(move_from))
+    ESTD_CPP_CONSTEXPR_RET optional(const optional& copy_from) :
+        base_type(copy_from)
     {
     }
 

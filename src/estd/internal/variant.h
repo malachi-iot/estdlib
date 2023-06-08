@@ -780,6 +780,18 @@ struct variant_storage
         new (storage.raw) type(v);
     }
 
+
+    template <size_t I, class T>
+    variant_storage(in_place_conditional_t<I>, bool condition, const T& v)
+    {
+        if(condition)
+        {
+            typedef typename type_at_index<I>::type type;
+            new (storage.raw) type(v);
+        }
+    }
+
+
     template <size_t I>
     variant_storage(in_place_index_t<I>)
     {

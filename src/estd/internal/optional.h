@@ -4,12 +4,6 @@
 #include "type_traits.h"
 #include "variant.h"
 
-// Old optional code worked pretty well, despite some clunkiness and debt,
-// so keeping it around in case bugs show up in new one
-#ifndef FEATURE_ESTD_OPTIONAL_LEGACY
-#define FEATURE_ESTD_OPTIONAL_LEGACY 0
-#endif
-
 namespace estd {
 
 namespace internal {
@@ -39,95 +33,23 @@ struct optional_tag_base
 
 class optional_has_value
 {
-    bool m_initialized;
+    bool initialized_;
 
 protected:
     optional_has_value(bool initialized = false) :
-        m_initialized(initialized) {}
+        initialized_(initialized) {}
 
-    void reset() { m_initialized = false; }
+    void reset() { initialized_ = false; }
 
-    void has_value(bool initialized) { m_initialized = initialized; }
-
-public:
-    bool has_value() const { return m_initialized; }
-};
-
-template <class T, class enabler = void>
-struct optional_value_provider;
-
-#if FEATURE_ESTD_OPTIONAL_LEGACY
-template <class T>
-struct optional_use_raw_provider :
-    estd::integral_constant<bool,
-        !(estd::is_integral<T>::value ||
-        estd::is_enum<T>::value ||
-        estd::is_pointer<T>::value)> {};
-
-
-// intrinsic variety, no need to go crazy with raw_instance_provider
-template <class T>
-struct optional_value_provider<T, typename estd::enable_if<!optional_use_raw_provider<T>::value>::type >
-{
-    typedef T value_type;
-
-protected:
-    T value_;
-
-    void value(const T& value)
-    {
-        value_ = value;
-    }
-
-#if __cpp_rvalue_references
-    void value(T&& value)
-    {
-        value_ = std::move(value);
-    }
-#endif
-
-    ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
-    optional_value_provider(T value) : value_(value) {}
-
-    typedef value_type& return_type;
-    typedef const value_type& const_return_type;
+    void has_value(bool initialized) { initialized_ = initialized; }
 
 public:
-    value_type& value() { return value_; }
-    ESTD_CPP_CONSTEXPR_RET const value_type& value() const { return value_; }
-
-    value_type* operator->() { return &value_; }
-    const value_type* operator->() const { return &value_; }
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return initialized_; }
 };
 
-// TODO: Consider using a flavor of variant_storage here
+
 template <class T>
-struct optional_value_provider<T, typename estd::enable_if<optional_use_raw_provider<T>::value>::type > :
-    experimental::raw_instance_provider<T>
-{
-    typedef typename experimental::raw_instance_provider<T> provider_type;
-    typedef typename provider_type::value_type value_type;
-
-    typedef value_type& return_type;
-    typedef const value_type& const_return_type;
-
-    ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
-
-    optional_value_provider(const value_type& copy_from)
-    {
-        // DEBT: Should be using copy constructor here
-        provider_type::value(copy_from);
-    }
-
-    //typename aligned_storage<sizeof(T), alignof (T)>::type storage;
-    // TODO: will need attention on the alignment front
-
-    value_type* operator->() { return &provider_type::value(); }
-    const value_type* operator->() const { return &provider_type::value(); }
-};
-#else
-template <class T>
-struct optional_value_provider<T>
+struct optional_value_provider
 {
     typedef optional_value_provider this_type;
 
@@ -157,6 +79,11 @@ protected:
 
     }
 #else
+    template <class T1>
+    optional_value_provider(in_place_conditional_t<0>, bool condition, const T1& v1) :
+        storage(in_place_conditional_t<0>(), bool condition, v1)
+    {}
+
     template <class T1>
     optional_value_provider(in_place_t, const T1& v1) :
         storage(in_place_index_t<0>(), v1)
@@ -213,7 +140,6 @@ public:
     { return get<0>(storage); }
 };
 
-#endif
 
 template <class T>
 struct optional_base : optional_value_provider<T>,
