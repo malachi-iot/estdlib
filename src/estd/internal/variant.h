@@ -162,12 +162,10 @@ public:
     template <class F, class ...TArgs>
     size_type visit(F&& f, TArgs&&...args)
     {
-        size_type selected;
-        base_type::visit_instance(
+        int selected = base_type::visit_instance(
             std::forward<F>(f),
-            &selected,
             std::forward<TArgs>(args)...);
-        return selected;
+        return selected == -1 ? variant_npos() : selected;
     }
 
     constexpr variant() :

@@ -222,7 +222,7 @@ public:
 
     void destroy(unsigned index)
     {
-        visit_instance(destroyer_functor{}, nullptr, index);
+        visit_instance(destroyer_functor{}, index);
     }
 
     template <class T, class ...TArgs>
@@ -273,17 +273,15 @@ public:
         new (storage.raw) type_at_index<I> (std::move(*move_from.get<I>()));
     }
 
-    // DEBT: visit_instance auto adds 'this', visit doesn't
     template <typename F, class ...TArgs>
-    monostate visit_instance(F&& f, size_type* index, TArgs&&...args)
+    int visit_instance(F&& f, TArgs&&...args)
     {
         int i = visitor::visit_instance(std::forward<F>(f),
             variant_storage_getter_functor{},
             *this,
             std::forward<TArgs>(args)...);
 
-        if(index != nullptr) *index = (std::size_t)i;
-        return {};
+        return i;
     }
 
     template <typename F, class ...TArgs>
