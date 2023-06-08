@@ -1,13 +1,9 @@
 #include "unit-test.h"
 #include "test-data.h"
 
-#include <estd/internal/variant.h>
+#include <estd/variant.h>
 
 using namespace estd;
-
-// NOTE: ADL doesn't seem to quite do what we expect with GCC 8.3.1 (rpi pico)
-// so we include this namespace too
-using namespace estd::internal;
 
 static void test_variant_1()
 {
@@ -16,7 +12,7 @@ static void test_variant_1()
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
 
-    v = (const char*)"hello";
+    v = "hello";
 
     TEST_ASSERT_FALSE(holds_alternative<int>(v));
     TEST_ASSERT_TRUE(holds_alternative<const char*>(v));
@@ -28,6 +24,27 @@ static void test_variant_1()
 #endif
 }
 
+
+static void test_variant_nontrivial()
+{
+#if __cplusplus >= 201103L
+    int counter = 0;
+    variant<int, estd::test::NonTrivial> v(
+        in_place_index_t<1>{}, 7, [&]{++counter;}), v2;
+
+    v2 = std::move(v);
+
+    // FIX: Does a copy, not a move, and doesn't call dtor like it should
+    // (remember there's no assignment operator for this guy)
+    //TEST_ASSERT_EQUAL(1, counter);
+    TEST_ASSERT_EQUAL(7, get<1>(v2).code_);
+    TEST_ASSERT_TRUE(get<1>(v2).initialized_);
+    //TEST_ASSERT_FALSE(get<1>(v2).copied_);
+    //TEST_ASSERT_TRUE(get<1>(v2).moved_);
+#endif
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("variant", "[variant]")
 #else
@@ -35,5 +52,6 @@ void test_variant()
 #endif
 {
     RUN_TEST(test_variant_1);
+    RUN_TEST(test_variant_nontrivial);
 }
 
