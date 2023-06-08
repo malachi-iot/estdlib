@@ -146,9 +146,24 @@ TEST_CASE("variant")
                 }
 
                 REQUIRE(counter == 3);
+
+                {
+                    variant1_type v3(in_place_index_t<1>{}, 8, dtor_fn);
+
+                    // since no assignment operator, one more dtor runs
+                    // FIX: this ends up as a copy operation, needs to be a move
+                    v = std::move(v3);
+
+                    REQUIRE(counter == 4);
+                    //REQUIRE(get<1>(v).moved_);
+
+                    // v3 dtor runs here, bumping us up to 5
+                }
+
+                // v2 dtor runs here, bumping us up to 6
             }
 
-            REQUIRE(counter == 4);
+            REQUIRE(counter == 6);
         }
         SECTION("copy")
         {
