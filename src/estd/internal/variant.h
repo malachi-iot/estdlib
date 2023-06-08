@@ -52,6 +52,46 @@ void assert_index_matches(const variant<Types...>& v)
 #endif
 }
 
+// EXPERIMENTAL
+struct variant_traits
+{
+    typedef size_t index_type;
+
+    static constexpr index_type npos = variant_npos();
+};
+
+// EXPERIMENTAL
+struct variant_optional_traits
+{
+    typedef bool index_type;
+
+    static constexpr index_type npos = false;
+};
+
+// EXPERIMENTAL
+struct variant_expected_traits
+{
+    typedef bool index_type;
+};
+
+
+// EXPERIMENTAL
+template <class Types, class Traits = variant_traits>
+class variant_base;
+
+// EXPERIMENTAL
+template <class ...Types, class Traits>
+class variant_base<variadic::types<Types...>, Traits> :
+    protected variant_storage<Types...>
+{
+    using index_type = typename Traits::index_type;
+
+    friend Traits;
+
+protected:
+    index_type index_;
+};
+
 template <class ...Types>
 class variant : protected variant_storage<Types...>
 {

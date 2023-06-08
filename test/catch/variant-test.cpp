@@ -298,6 +298,11 @@ TEST_CASE("variant")
         int value = get_exp<0>(v);
 
         //value = internal::get<0>(v);
+
+        SECTION("variant_base")
+        {
+            internal::variant_base<variadic::types<int> > var;
+        }
     }
 }
 
