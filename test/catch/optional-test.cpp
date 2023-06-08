@@ -142,13 +142,15 @@ TEST_CASE("optional")
 
             REQUIRE(sz == sizeof(int));
 
+            val = 3;
+
             val2 = val;
 
             REQUIRE(val2);
 
             int v = *val2;
 
-            REQUIRE(v == 5);
+            REQUIRE(v == 3);
         }
         SECTION("nullopt")
         {

@@ -45,12 +45,31 @@ class optional :
 {
     typedef TBase base_type;
 
-protected:
-    template < class U, class TUBase >
-    void copy(const optional<U, TUBase>& copy_from)
+    template <class U>
+    void assign_value(const U& u)
     {
-        base_type::has_value(copy_from.has_value());
-        base_type::value(copy_from.value());
+        if(base_type::has_value())
+            base_type::value(u);
+        else
+        {
+            base_type::direct_initialize(u);
+            base_type::has_value(true);
+        }
+    }
+
+    template <class U>
+    void assign_value(U&& u)
+    {
+        // DEBT: Optimize this so that when direct initialize and
+        // assignment are identical and/or trivial, we don't even
+        // do the has_value runtime check
+        if(base_type::has_value())
+            base_type::value(std::forward<U>(u));
+        else
+        {
+            base_type::direct_initialize(std::forward<U>(u));
+            base_type::has_value(true);
+        }
     }
 
 public:
@@ -113,10 +132,20 @@ public:
     }
 
 
-    template <class U, class TBase2>
+    // DEBT: Still need 'move' variety
+    template <class U, class TBase2, class enabled =
+        typename enable_if<
+            is_constructible<T, optional<U>&>::value == false &&
+            is_convertible<T, optional<U>&>::value == false &&
+            is_assignable<T, optional<U>&>::value == false>::type
+        >
     optional& operator=(const optional<U, TBase2>& assign_from)
     {
-        copy(assign_from);
+        if(assign_from.has_value())
+            assign_value(assign_from.value());
+        else
+            base_type::reset();
+
         return *this;
     }
 
@@ -127,15 +156,7 @@ public:
         is_base_of<optional_tag_base, remove_cvref_t<U>>::value == false> >
     optional& operator=(U&& v)
     {
-        // DEBT: Optimize this so that when direct initialize and
-        // assignment are identical and/or trivial, we don't even
-        // do the has_value runtime check
-        if(base_type::has_value())
-            base_type::value(std::forward<U>(v));
-        else
-            base_type::direct_initialize(std::forward<U>(v));
-
-        base_type::has_value(true);
+        assign_value(std::forward<U>(v));
 
         return *this;
     }
