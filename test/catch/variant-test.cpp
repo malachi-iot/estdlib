@@ -116,19 +116,36 @@ TEST_CASE("variant")
             v = 8;
 
             REQUIRE(get<int>(v) == 8);
+            REQUIRE(counter == 0);
 
             {
                 variant1_type v2(estd::in_place_type_t<test::NonTrivial>{}, 7, dtor_fn);
 
+                // sneakily NonTrivial has no assignment operator, so we need a direct initialize
+                // However, destruct is basically a noop since active variant is the integer
                 v = v2;
 
-                auto _v = get<test::NonTrivial>(v);
+                REQUIRE(counter == 0);
 
-                REQUIRE(_v.code_ == 7);
+                {
+                    // Makes a copy, so expect another dtor
+                    auto _v = get<test::NonTrivial>(v);
 
-                test::NonTrivial v3(7, dtor_fn);
+                    REQUIRE(_v.code_ == 7);
+                }
 
-                v = v3;
+                REQUIRE(counter == 1);
+
+                {
+                    // Brand new NonTrivial, so dtor is gonna bump up counter
+                    test::NonTrivial v3(7, dtor_fn);
+
+                    // dtor runs here, because there is no assignment operator
+                    // so full destruct/di happens
+                    v = v3;
+                }
+
+                REQUIRE(counter == 3);
             }
 
             REQUIRE(counter == 4);

@@ -277,6 +277,64 @@ public:
         new (storage.raw) type_at_index<I> (std::move(*move_from.get<I>()));
     }
 
+
+    template <size_t I, class T_j, class T,
+        class enabled = enable_if_t<
+            is_nothrow_constructible<T_j, T>::value ||
+            !is_nothrow_move_constructible<T_j>::value> >
+    void assignment_emplace_helper(T&& t, bool = true)
+    {
+        emplace<I>(std::forward<T>(t));
+    }
+
+    template <size_t I, class T_i, class T,
+        class enabled = enable_if_t<
+            !(is_nothrow_constructible<T_i, T>::value ||
+            !is_nothrow_move_constructible<T_i>::value)> >
+    void assignment_emplace_helper(T&& t)
+    {
+        emplace<I>(T_i(std::forward<T>(t)));
+    }
+
+    template <size_t I, class T_i, class T, class enabled = enable_if_t<is_assignable<T_i&, T>::value> >
+    void assignment_helper(T&& t)
+    {
+        //assign<I>(std::forward<T>(t));
+        *get<I>() = std::forward<T>(t);
+    }
+
+    template <size_t I, class T_i, class T, class enabled = enable_if_t<!is_assignable<T_i&, T>::value> >
+    void assignment_helper(T&& t, bool = true)
+    {
+        // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
+        // but we do.  Consider feature-flagging
+        destroy<I>();
+        assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
+    }
+
+    // Assign or direct initialize, depending on whether index matches
+    // and what is matched to is assignable vs constructible
+    // NOTE: This will assign the first one it finds; however, multiple
+    // constructible technically is undefined behavior so do not rely on this
+    template <class U>
+    void assign_or_init(size_type* index, U&& u)
+    {
+        typedef is_constructible_selector<U> selector;
+        typedef typename selector::first selected;
+        typedef typename selected::type T_j;
+
+        if(*index == selected::index)
+        {
+            assignment_helper<selected::index, T_j>(std::forward<U>(u));
+        }
+        else
+        {
+            destroy(*index);
+            assignment_emplace_helper<selected::index, T_j>(std::forward<U>(u));
+            *index = selected::index;
+        }
+    }
+
     template <typename F, class ...TArgs>
     int visit_instance(F&& f, TArgs&&...args)
     {

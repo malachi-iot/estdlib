@@ -242,60 +242,12 @@ public:
         move_from.index_ = variant_npos();
     }
 
-    template <size_t I, class T_j, class T,
-        class enabled = enable_if_t<
-            is_nothrow_constructible<T_j, T>::value ||
-            !is_nothrow_move_constructible<T_j>::value> >
-    void assignment_emplace_helper(T&& t, bool = true)
-    {
-        emplace<I>(std::forward<T>(t));
-    }
-
-    template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
-                !(is_nothrow_constructible<T_i, T>::value ||
-                !is_nothrow_move_constructible<T_i>::value)> >
-    void assignment_emplace_helper(T&& t)
-    {
-        emplace<I>(T_i(std::forward<T>(t)));
-    }
-
-    template <size_t I, class T_i, class T, class enabled = enable_if_t<is_assignable<T_i&, T>::value> >
-    void assignment_helper(T&& t)
-    {
-        *get_ll<I>(*this) = std::forward<T>(t);
-    }
-
-    template <size_t I, class T_i, class T, class enabled = enable_if_t<!is_assignable<T_i&, T>::value> >
-    void assignment_helper(T&& t, bool = true)
-    {
-        // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
-        // but we do.  Consider feature-flagging
-        // DEBT: Assigns index_ when it doesn't need to
-        assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
-    }
-
     template <
         class T,
         class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
     variant& operator=(T&& t)
     {
-        typedef typename base_type::template is_constructible_selector<T> selector;
-        typedef typename selector::first selected;
-        typedef typename selected::type T_j;
-
-        // DEBT: Multiple constructable T_j could be found.  Spec implies this is not
-        // allowed.  However, in our case, we choose the first one.  Find a tighter
-        // spec to indicate what we should really do here and consider a feature flag
-
-        if(selected::index == index_)
-        {
-            assignment_helper<selected::index, T_j>(std::forward<T>(t));
-        }
-        else
-        {
-            assignment_emplace_helper<selected::index, T_j>(std::forward<T>(t));
-        }
+        base_type::assign_or_init(&index_, std::forward<T>(t));
 
         return *this;
     }
