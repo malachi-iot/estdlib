@@ -301,7 +301,9 @@ TEST_CASE("variant")
 
         SECTION("variant_base")
         {
-            internal::variant_base<variadic::types<int> > var;
+            internal::variant_base<
+                variadic::types<int>,
+                internal::variant_traits> var;
         }
     }
 }
