@@ -95,10 +95,8 @@ struct variant_storage_getter_functor
 struct destroyer_functor
 {
     template <size_t I, class T>
-    bool operator()(variadic::visitor_instance<I, T> vi, unsigned index)
+    bool operator()(variadic::visitor_instance<I, T> vi)
     {
-        if(I != index) return false;
-
         vi.value.~T();
 
         return true;
@@ -113,9 +111,30 @@ struct variant_storage_base : variant_storage_tag
     using size_type = std::size_t;
     typedef variant_storage_base<trivial, Types...> this_type;
 
+    struct index_visitor
+    {
+        template <size_t I, class T, class F, class ...TArgs>
+        constexpr bool operator()(variadic::visitor_index<I, T>, size_type index,
+            this_type& this_, F&& f, TArgs&&...args) const
+        {
+            return I == index ?
+                f(variadic::visitor_instance<I, T>{*this_.get<I>()},
+                    std::forward<TArgs>(args)...) :
+                false;
+        }
+    };
+
     static constexpr bool is_trivial = trivial;
 
     using visitor = variadic::visitor<Types...>;
+
+    template <class F, class ...TArgs>
+    int visit_index(size_type index, F&& f, TArgs&&...args)
+    {
+        return visitor::visit(index_visitor{}, index, *this,
+            std::forward<F>(f),
+            std::forward<TArgs>(args)...);
+    }
 
     template <class TEval>
     using selector = variadic::selector<TEval, Types...>;
@@ -226,7 +245,7 @@ public:
 
     void destroy(unsigned index)
     {
-        visit_instance(destroyer_functor{}, index);
+        visit_index(index, destroyer_functor{});
     }
 
     template <class T, class ...TArgs>
