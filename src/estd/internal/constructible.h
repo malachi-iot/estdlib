@@ -30,6 +30,9 @@ using is_nothrow_move_assignable = std::is_nothrow_move_assignable<T>;
 template <class T>
 using is_nothrow_move_constructible = std::is_nothrow_move_constructible<T>;
 
+template <class T>
+using is_move_assignable = std::is_move_assignable<T>;
+
 template <class T, class ...TArgs>
 using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
 

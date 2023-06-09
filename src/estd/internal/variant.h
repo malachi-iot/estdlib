@@ -3,13 +3,12 @@
 #include "platform.h"
 #include "fwd/functional.h"
 #include "fwd/variant.h"
-#include "raw/utility.h"
-#include "raw/variant.h"
-#include "feature/variant.h"
 
 #include "variant/storage.h"
 
-#include "variadic.h"
+#if !FEATURE_ESTD_VARIANT_PERMISSIVE_ASSIGNMENT
+#error variant: strict assignment not supported yet
+#endif
 
 #include <cstdlib>
 
@@ -96,7 +95,7 @@ class variant : protected variant_storage<Types...>
 
 
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
+                 class enabled = enable_if_t<is_move_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, base_type& v, variant&& assign_from)
         {
             if(assign_from.index() != I) return false;
@@ -105,9 +104,6 @@ class variant : protected variant_storage<Types...>
             return true;
         }
 
-        // NOTE: This whole direct-init flavor doesn't seem to conform, so this might
-        // go away.  Convenient though for non trivial types which don't have an assignment
-        // operator.  Probably should feature flag it
         template <size_t I, class T_i,
             class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
@@ -127,7 +123,7 @@ class variant : protected variant_storage<Types...>
 
         // NOTE: See commens in above copy_from flavor
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
+                 class enabled = enable_if_t<!is_move_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
         {
             if(move_from.index() != I) return false;
