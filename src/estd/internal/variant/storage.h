@@ -136,6 +136,14 @@ struct variant_storage_base : variant_storage_tag
             std::forward<TArgs>(args)...);
     }
 
+    template <class F, class ...TArgs>
+    int visit_index(size_type index, F&& f, TArgs&&...args) const
+    {
+        return visitor::visit(index_visitor{}, index, *this,
+            std::forward<F>(f),
+            std::forward<TArgs>(args)...);
+    }
+
     template <class TEval>
     using selector = variadic::selector<TEval, Types...>;
 
