@@ -261,6 +261,12 @@ public:
         *get<I>() = *assign_from.get<I>();
     }
 
+    template <size_t I>
+    void assign(this_type&& assign_from)
+    {
+        *get<I>() = std::move(*assign_from.get<I>());
+    }
+
     // Same operation as copy constructor, but more explicit since
     // type safety is up to programmer
     template <size_t I>

@@ -12,6 +12,8 @@ struct NonTrivial
     const bool copied_ = false;
     const bool moved_ = false;
     const bool initialized_ = false;
+    bool destroyed_ = false;
+    bool moved_from_ = false;
 
     std::function<void()> on_dtor;
 
@@ -19,7 +21,7 @@ struct NonTrivial
 
     template <class F>
     explicit NonTrivial(int code, F&& f) :
-        code_{code}, on_dtor(std::forward<F>(f))
+        code_{code}, initialized_{true}, on_dtor(std::forward<F>(f))
     {}
 
     NonTrivial(const NonTrivial& copy_from) :
@@ -30,10 +32,13 @@ struct NonTrivial
     NonTrivial(NonTrivial&& move_from) noexcept :
         code_{move_from.code_}, moved_{true}, initialized_{true},
         on_dtor(std::move(move_from.on_dtor))
-    {}
+    {
+        move_from.moved_from_ = true;
+    }
 
     ~NonTrivial()
     {
+        destroyed_ = true;
         if(on_dtor) on_dtor();
     }
 };

@@ -149,21 +149,40 @@ TEST_CASE("variant")
 
                 {
                     variant1_type v3(in_place_index_t<1>{}, 8, dtor_fn);
+                    test::NonTrivial& v4 = get<1>(v3);
 
-                    // since no assignment operator, one more dtor runs
-                    // FIX: this ends up as a copy operation, needs to be a move
+                    REQUIRE(get<1>(v3).initialized_ == true);
+                    REQUIRE(get<1>(v3).moved_ == false);
+                    REQUIRE(get<1>(v3).moved_from_ == false);
+
+                    // since no assignment operator, existing 'v' dtor runs
+                    // v3 dtor also runs, but dtor_fn does NOT, because move on a std::function
+                    // clears out the target
                     v = std::move(v3);
 
-                    REQUIRE(counter == 4);
-                    //REQUIRE(get<1>(v).moved_);
+                    REQUIRE(v3.valueless_by_exception());
 
-                    // v3 dtor runs here, bumping us up to 5
+                    // NOTE: In this narrow case, looking at destructed data
+                    // is still OK (not undefined)
+                    REQUIRE(v4.initialized_ == true);
+                    REQUIRE(v4.moved_ == false);
+                    REQUIRE(v4.moved_from_);
+                    REQUIRE(v4.destroyed_);
+                    REQUIRE(v4.on_dtor == nullptr);
+
+                    REQUIRE(counter == 4);
+                    REQUIRE(get<1>(v).code_ == 8);
+                    REQUIRE(get<1>(v).moved_);
+                    REQUIRE(get<1>(v).copied_ == false);
+                    REQUIRE(get<1>(v).on_dtor != nullptr);
                 }
 
-                // v2 dtor runs here, bumping us up to 6
+                REQUIRE(counter == 4);
+
+                // v2 dtor runs here, bumping us up to 5
             }
 
-            REQUIRE(counter == 6);
+            REQUIRE(counter == 5);
         }
         SECTION("copy")
         {

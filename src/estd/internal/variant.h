@@ -94,6 +94,17 @@ class variant : protected variant_storage<Types...>
             return true;
         }
 
+
+        template <size_t I, class T_i,
+                 class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
+        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, variant&& assign_from)
+        {
+            if(assign_from.index() != I) return false;
+
+            v.template assign<I>(std::move(assign_from));
+            return true;
+        }
+
         // NOTE: This whole direct-init flavor doesn't seem to conform, so this might
         // go away.  Convenient though for non trivial types which don't have an assignment
         // operator.  Probably should feature flag it
@@ -109,6 +120,27 @@ class variant : protected variant_storage<Types...>
             v.destroy_if_valid();
 
             v.template copy<I>(copy_from);
+
+            return true;
+        }
+
+
+        // NOTE: See commens in above copy_from flavor
+        template <size_t I, class T_i,
+                 class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
+        bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
+        {
+            if(move_from.index() != I) return false;
+
+            v.destroy_if_valid();
+
+            v.template move<I>(std::move(move_from));
+
+            // remember, our variant destroys as soon as we determine transition to
+            // valueless state - once valueless, we lose ability to identify who
+            // needs destruction
+            move_from.template destroy<I>();
+            move_from.index_ = variant_npos();
 
             return true;
         }
@@ -269,6 +301,23 @@ public:
         return *this;
     }
 
+
+    variant& operator=(variant&& rhs)
+    {
+        if(rhs.valueless_by_exception())
+        {
+            destroy_if_valid();
+            index_ = variant_npos();
+        }
+        else
+        {
+            int index = visitor::visit(assignment_functor{}, *this, std::move(rhs));
+            index_ = index == -1 ? variant_npos() : (size_type)index;
+        }
+
+        return *this;
+    }
+
     constexpr size_type index() const { return index_; }
 
     template <class T, class ...TArgs,
@@ -277,10 +326,7 @@ public:
     {
         destroy_if_valid();
 
-        //typedef typename base_type::visitor::visit_struct<constructable_selector<T> > finder_type;
-        //typedef typename finder_type::selected_type T_i;
-
-        // Unset index just in case expection is thrown during construction
+        // Unset index just in case exception is thrown during construction
         index_ = variant_npos();
 
         T* const v = base_type::template emplace<T>(std::forward<TArgs>(args)...);
