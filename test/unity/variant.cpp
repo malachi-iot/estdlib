@@ -32,15 +32,27 @@ static void test_variant_nontrivial()
     variant<int, estd::test::NonTrivial> v(
         in_place_index_t<1>{}, 7, [&]{++counter;}), v2;
 
+    estd::test::NonTrivial& v3 = get<1>(v);
+
     v2 = std::move(v);
 
-    // FIX: Does a copy, not a move, and doesn't call dtor like it should
-    // (remember there's no assignment operator for this guy)
-    //TEST_ASSERT_EQUAL(1, counter);
+    // No dtor_fn call yet since v2 was unassigned and a move
+    // from nulls out dtor_fn
+    // (remember also there's no assignment operator for this guy)
+    TEST_ASSERT_EQUAL(0, counter);
     TEST_ASSERT_EQUAL(7, get<1>(v2).code_);
     TEST_ASSERT_TRUE(get<1>(v2).initialized_);
-    //TEST_ASSERT_FALSE(get<1>(v2).copied_);
-    //TEST_ASSERT_TRUE(get<1>(v2).moved_);
+    TEST_ASSERT_FALSE(get<1>(v2).copied_);
+    TEST_ASSERT_TRUE(get<1>(v2).moved_);
+    TEST_ASSERT_FALSE(get<1>(v2).moved_from_);
+
+    TEST_ASSERT_TRUE(v3.moved_from_);
+
+    v2 = 0;
+
+    // v2 assignment now destroyes non trivial and activates
+    // dtor_fn
+    TEST_ASSERT_EQUAL(1, counter);
 #endif
 }
 
