@@ -16,47 +16,56 @@ set(ESTD_DIR ${ROOT_DIR}/src)
 
 add_subdirectory(${ESTD_DIR} estd)
 
-add_executable(${PROJECT_NAME} "main.cpp"
-    algorithm-test.cpp
-    allocator-test.cpp
-    array-test.cpp
-    buffer-test.cpp
-    c++03-test.cpp
-    charconv-test.cpp
-    chrono-test.cpp
-	cstddef-test.cpp
-    experimental/memory-pool1-test.cpp
-    experimental/memory-pool2-test.cpp
-    experimental/memory-pool3-test.cpp
-    expected-test.cpp
-    experimental-test.cpp
-    functional-test.cpp
-    ios-test.cpp
-    iostream-test.cpp
-    istream-test.cpp
-    iterator-test.cpp
-    list-test.cpp
-    limits-test.cpp
-	locale-test.cpp
-    map-test.cpp
-    memory-test.cpp
-    misc-test.cpp
-    optional-test.cpp
-    ostream-test.cpp
-    priority-queue-test.cpp
-    queue-test.cpp
-    stack-test.cpp
-	streambuf-test.cpp
-    string-test.cpp
-    ratio-test.cpp
-    test-data.h
-    type-traits-test.cpp
-    tuple-test.cpp
-    vector-test.cpp
-    utility-test.cpp
-    variadic-test.cpp
-    variant-test.cpp
+add_executable(${PROJECT_NAME} "main.cpp")
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
+    # Since unit tests take a while to compile now, have an override
+    # sources.cmake (excluded from source control) for spot targeted
+    # testing
+    include(sources.cmake)
+else()
+    target_sources(${PROJECT_NAME} PRIVATE
+        algorithm-test.cpp
+        allocator-test.cpp
+        array-test.cpp
+        buffer-test.cpp
+        c++03-test.cpp
+        charconv-test.cpp
+        chrono-test.cpp
+        cstddef-test.cpp
+        experimental/memory-pool1-test.cpp
+        experimental/memory-pool2-test.cpp
+        experimental/memory-pool3-test.cpp
+        expected-test.cpp
+        experimental-test.cpp
+        functional-test.cpp
+        ios-test.cpp
+        iostream-test.cpp
+        istream-test.cpp
+        iterator-test.cpp
+        list-test.cpp
+        limits-test.cpp
+        locale-test.cpp
+        map-test.cpp
+        memory-test.cpp
+        misc-test.cpp
+        optional-test.cpp
+        ostream-test.cpp
+        priority-queue-test.cpp
+        queue-test.cpp
+        stack-test.cpp
+        streambuf-test.cpp
+        string-test.cpp
+        ratio-test.cpp
+        test-data.h
+        type-traits-test.cpp
+        tuple-test.cpp
+        vector-test.cpp
+        utility-test.cpp
+        variadic-test.cpp
+        variant-test.cpp
         internal-test.cpp)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
