@@ -122,6 +122,17 @@ struct variant_storage_base : variant_storage_tag
                     std::forward<TArgs>(args)...) :
                 false;
         }
+
+
+        template <size_t I, class T, class F, class ...TArgs>
+        constexpr bool operator()(variadic::visitor_index<I, T>, size_type index,
+            F&& f, TArgs&&...args) const
+        {
+            return I == index ?
+                f(variadic::visitor_index<I, T>{},
+                    std::forward<TArgs>(args)...) :
+                false;
+        }
     };
 
     static constexpr bool is_trivial = trivial;
