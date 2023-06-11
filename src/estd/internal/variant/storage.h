@@ -124,6 +124,7 @@ struct variant_storage_base : variant_storage_tag
         }
 
 
+        /*
         template <size_t I, class T, class F, class ...TArgs>
         constexpr bool operator()(variadic::visitor_index<I, T>, size_type index,
             F&& f, TArgs&&...args) const
@@ -132,7 +133,7 @@ struct variant_storage_base : variant_storage_tag
                 f(variadic::visitor_index<I, T>{},
                     std::forward<TArgs>(args)...) :
                 false;
-        }
+        }   */
     };
 
     static constexpr bool is_trivial = trivial;
@@ -303,6 +304,18 @@ public:
     void assign(this_type&& assign_from)
     {
         *get<I>() = std::move(*assign_from.get<I>());
+    }
+
+    template <size_t I>
+    void assign(const type_at_index<I>& assign_from)
+    {
+        *get<I>() = assign_from;
+    }
+
+    template <size_t I>
+    void assign(type_at_index<I>&& assign_from)
+    {
+        *get<I>() = std::move(assign_from);
     }
 
     // Same operation as copy constructor, but more explicit since

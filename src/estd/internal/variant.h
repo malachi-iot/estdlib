@@ -297,8 +297,9 @@ public:
     template <class F, class ...TArgs>
     int visit_index(F&& f, TArgs&&...args) const
     {
-        return base_type::visit_index(
+        return visitor::visit(typename base_type::index_visitor{},
             index_,
+            *this,
             std::forward<F>(f),
             std::forward<TArgs>(args)...);
     }
@@ -314,7 +315,7 @@ public:
         else
         {
             //base_type& _rhs = rhs;
-            //rhs.visit_index(assignment_functor{}, *this);
+            //int index = rhs.visit_index(assignment_functor{}, *this, rhs);
             int index = visitor::visit(assignment_functor{}, *this, rhs);
             index_ = index == -1 ? variant_npos() : (size_type)index;
         }
