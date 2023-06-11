@@ -85,22 +85,36 @@ class variant : protected variant_storage<Types...>
     {
         template <size_t I, class T_i,
             class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, const variant& assign_from)
+        bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& assign_from)
         {
             if(assign_from.index() != I) return false;
 
-            v.template assign<I>(assign_from);
+            if(I == v.index())
+                v.template assign<I>(assign_from);
+            else
+            {
+                v.destroy_if_valid();
+
+                v.template copy<I>(assign_from);
+            }
             return true;
         }
 
 
         template <size_t I, class T_i,
                  class enabled = enable_if_t<is_move_assignable<T_i>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, variant&& assign_from)
+        bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& assign_from)
         {
             if(assign_from.index() != I) return false;
 
-            v.template assign<I>(std::move(assign_from));
+            if(I == v.index())
+                v.template assign<I>(std::move(assign_from));
+            else
+            {
+                v.destroy_if_valid();
+
+                v.template move<I>(std::move(assign_from));
+            }
             return true;
         }
 
