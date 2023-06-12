@@ -85,10 +85,8 @@ class variant : protected variant_storage<Types...>
     {
         template <size_t I, class T_i,
             class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& assign_from)
+        bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, const variant& assign_from)
         {
-            if(assign_from.index() != I) return false;
-
             if(I == v.index())
                 v.template assign<I>(assign_from);
             else
@@ -105,8 +103,6 @@ class variant : protected variant_storage<Types...>
                  class enabled = enable_if_t<is_move_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& assign_from)
         {
-            if(assign_from.index() != I) return false;
-
             if(I == v.index())
                 v.template assign<I>(std::move(assign_from));
             else
@@ -122,8 +118,6 @@ class variant : protected variant_storage<Types...>
             class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
-            if(copy_from.index() != I) return false;
-
             // DEBT: Technically would be more efficient to run the dtor
             // directly and not abort when index is found - however, that
             // breaks our burgeoning paradigm, so holding off
@@ -140,8 +134,6 @@ class variant : protected variant_storage<Types...>
                  class enabled = enable_if_t<!is_move_assignable<T_i>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
         {
-            if(move_from.index() != I) return false;
-
             v.destroy_if_valid();
 
             v.template move<I>(std::move(move_from));
@@ -176,7 +168,8 @@ class variant : protected variant_storage<Types...>
     // speed vs size edge case
     void destroy_if_valid()
     {
-        if(valid()) base_type::destroy(index_);
+        //if(valid()) // base destoy innately checks for valid index
+        base_type::destroy(index_);
     }
 
     template <size_t I>
@@ -315,8 +308,10 @@ public:
         else
         {
             //base_type& _rhs = rhs;
-            //int index = rhs.visit_index(assignment_functor{}, *this, rhs);
-            int index = visitor::visit(assignment_functor{}, *this, rhs);
+            // DEBT: visit_index does more legwork than is needed, grabbing
+            // actual value via visit_instance.  Optimize that out
+            int index = rhs.visit_index(assignment_functor{}, *this, rhs);
+            //int index = visitor::visit(assignment_functor{}, *this, rhs);
             index_ = index == -1 ? variant_npos() : (size_type)index;
         }
 
@@ -333,7 +328,7 @@ public:
         }
         else
         {
-            int index = visitor::visit(assignment_functor{}, *this, std::move(rhs));
+            int index = rhs.visit_index(assignment_functor{}, *this, std::move(rhs));
             index_ = index == -1 ? variant_npos() : (size_type)index;
         }
 

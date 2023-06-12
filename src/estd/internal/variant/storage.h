@@ -124,6 +124,16 @@ struct variant_storage_base : variant_storage_tag
         }
 
 
+        template <size_t I, class T, class F, class ...TArgs>
+        constexpr bool operator()(variadic::visitor_index<I, T>, size_type index,
+            const this_type& this_, F&& f, TArgs&&...args) const
+        {
+            return I == index ?
+                f(variadic::visitor_instance<I, const T>{*this_.get<I>()},
+                    std::forward<TArgs>(args)...) :
+                false;
+        }
+
         /*
         template <size_t I, class T, class F, class ...TArgs>
         constexpr bool operator()(variadic::visitor_index<I, T>, size_type index,
@@ -149,7 +159,7 @@ struct variant_storage_base : variant_storage_tag
     }
 
     template <class F, class ...TArgs>
-    int visit_index(size_type index, F&& f, TArgs&&...args) const
+    constexpr int visit_index(size_type index, F&& f, TArgs&&...args) const
     {
         return visitor::visit(index_visitor{}, index, *this,
             std::forward<F>(f),
@@ -263,9 +273,9 @@ public:
         get<index>()->~t();
     }
 
-    void destroy(unsigned index)
+    constexpr bool destroy(unsigned index) const
     {
-        visit_index(index, destroyer_functor{});
+        return visit_index(index, destroyer_functor{}) != -1;
     }
 
     template <class T, class ...TArgs>
