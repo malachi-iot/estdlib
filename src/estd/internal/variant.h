@@ -166,10 +166,10 @@ class variant : protected variant_storage<Types...>
     // IDEA: Consider a feature flag to track the particular destructor of interest
     // via a function pointer instead of this visitor pattern.  Would be a pretty specific
     // speed vs size edge case
-    void destroy_if_valid()
+    bool destroy_if_valid()
     {
         //if(valid()) // base destoy innately checks for valid index
-        base_type::destroy(index_);
+        return base_type::destroy(index_);
     }
 
     template <size_t I>
@@ -288,13 +288,15 @@ public:
     }
 
     template <class F, class ...TArgs>
-    int visit_index(F&& f, TArgs&&...args) const
+    size_type visit_index(F&& f, TArgs&&...args) const
     {
-        return visitor::visit(typename base_type::index_visitor{},
+        int i = visitor::visit(typename base_type::index_visitor{},
             index_,
             *this,
             std::forward<F>(f),
             std::forward<TArgs>(args)...);
+
+        return i == -1 ? variant_npos() : i;
     }
 
     // DEBT: Needs more work, but coming along
@@ -310,9 +312,7 @@ public:
             //base_type& _rhs = rhs;
             // DEBT: visit_index does more legwork than is needed, grabbing
             // actual value via visit_instance.  Optimize that out
-            int index = rhs.visit_index(assignment_functor{}, *this, rhs);
-            //int index = visitor::visit(assignment_functor{}, *this, rhs);
-            index_ = index == -1 ? variant_npos() : (size_type)index;
+            index_ = rhs.visit_index(assignment_functor{}, *this, rhs);
         }
 
         return *this;
@@ -328,8 +328,7 @@ public:
         }
         else
         {
-            int index = rhs.visit_index(assignment_functor{}, *this, std::move(rhs));
-            index_ = index == -1 ? variant_npos() : (size_type)index;
+            index_ = rhs.visit_index(assignment_functor{}, *this, std::move(rhs));
         }
 
         return *this;
