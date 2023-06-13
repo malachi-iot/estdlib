@@ -59,7 +59,7 @@ struct optional_value_provider
     typedef const_reference const_return_type;
 
 private:
-    variant_storage<T> storage;
+    variant_storage<T, monostate> storage;
 
 protected:
     ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
@@ -130,6 +130,14 @@ protected:
     {
         get<0>(storage) = v;
     }
+
+#if __cpp_rvalue_references
+    template <class U>
+    void assign_value(bool has_value, U&& u)
+    {
+        storage.template assign_or_init<0, 1>(has_value, std::forward<U>(u));
+    }
+#endif
 
 public:
     pointer operator->() { return storage.template get<0>(); }
@@ -221,6 +229,14 @@ protected:
     {
         value_ = u;
     }
+
+#if __cpp_rvalue_references
+    template <class U>
+    void assign_value(U&& u)
+    {
+        value_ = std::forward<U>(u);
+    }
+#endif
 
     // DEBT: Make a converting constructor also
     ESTD_CPP_CONSTEXPR_RET optional_bitwise(const optional_bitwise& copy_from) :

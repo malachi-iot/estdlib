@@ -397,12 +397,13 @@ public:
     // index = index of variant tracked in 'this' - since it's a compile time constant,
     // this is most useful for when match toggles between two possibilities (such as
     // 'expected')
+    /// @param match are we currently tracking 'I'
     template <size_t I, size_t index, class U>
     void assign_or_init(bool match, U&& u)
     {
         typedef type_at_index<I> T_j;
 
-        // Are we tracking the exact type being assigned?
+        // Are we tracking 'I'?  If so, assign over it
         if(match)
         {
             assignment_helper<I, T_j>(std::forward<U>(u));
