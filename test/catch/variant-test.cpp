@@ -179,10 +179,20 @@ TEST_CASE("variant")
 
                 REQUIRE(counter == 4);
 
-                // v2 dtor runs here, bumping us up to 5
+                {
+                    variant1_type v3(5);
+
+                    // wipes out NonTrivial v alternative, resulting in yet another
+                    // dtor_fn call
+                    v = v3;
+
+                    REQUIRE(counter == 5);
+                }
+
+                // v2 dtor runs here, bumping us up to 6
             }
 
-            REQUIRE(counter == 5);
+            REQUIRE(counter == 6);
         }
         SECTION("copy")
         {

@@ -81,41 +81,31 @@ class variant : protected variant_storage<Types...>
         }
     };
 
+    // NOTE: Have to remove const since adding const to T_i is needed when pulling instance
+    // from const variant
     struct assignment_functor
     {
         template <size_t I, class T_i,
-            class enabled = enable_if_t<is_copy_assignable<T_i>::value> >
+            class enabled = enable_if_t<is_copy_assignable<remove_const_t<T_i>>::value> >
         bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, const variant& assign_from)
         {
-            if(I == v.index())
-                v.template assign<I>(assign_from);
-            else
-            {
-                v.destroy_if_valid();
-
-                v.template copy<I>(assign_from);
-            }
+            size_type index = v.index();
+            v.assign_or_init(&index, vi.value);
             return true;
         }
 
 
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<is_move_assignable<T_i>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& assign_from)
+                 class enabled = enable_if_t<is_move_assignable<remove_const_t<T_i>>::value> >
+        bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, variant&& assign_from)
         {
-            if(I == v.index())
-                v.template assign<I>(std::move(assign_from));
-            else
-            {
-                v.destroy_if_valid();
-
-                v.template move<I>(std::move(assign_from));
-            }
+            size_type index = v.index();
+            v.assign_or_init(&index, std::move(vi.value));
             return true;
         }
 
         template <size_t I, class T_i,
-            class enabled = enable_if_t<!is_copy_assignable<T_i>::value> >
+            class enabled = enable_if_t<!is_copy_assignable<remove_const_t<T_i>>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
             // DEBT: Technically would be more efficient to run the dtor
@@ -131,7 +121,7 @@ class variant : protected variant_storage<Types...>
 
         // NOTE: See commens in above copy_from flavor
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<!is_move_assignable<T_i>::value> >
+                 class enabled = enable_if_t<!is_move_assignable<remove_const_t<T_i>>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
         {
             v.destroy_if_valid();

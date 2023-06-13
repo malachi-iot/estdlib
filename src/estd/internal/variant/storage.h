@@ -395,6 +395,7 @@ public:
             // ... if not, destroy what we're tracking (if any) and
             // do a direct initialization
             destroy(*index);
+            // DEBT: May want to check if T_j is trivial and if so do assignment here
             assignment_emplace_helper<I, T_j>(std::forward<U>(u));
             *index = I;
         }
