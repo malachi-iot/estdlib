@@ -10,6 +10,10 @@
 #error variant: strict assignment not supported yet
 #endif
 
+#if !FEATURE_ESTD_VARIANT_EAGER_DESTRUCT
+#error variant: only eager destruct mode supported
+#endif
+
 #include <cstdlib>
 
 namespace estd {
@@ -75,7 +79,7 @@ class variant : protected variant_storage<Types...>
             move_from.template destroy<I>();
 
             // NOTE: Not setting index_ here becuase we need it to stay put for
-            // intiialization list to pick it up
+            // initialization list to pick it up
 
             return true;
         }
@@ -90,7 +94,7 @@ class variant : protected variant_storage<Types...>
         bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, const variant& assign_from)
         {
             size_type index = v.index();
-            v.assign_or_init(&index, vi.value);
+            v.template assign_or_init<I>(&index, vi.value);
             return true;
         }
 
@@ -100,7 +104,7 @@ class variant : protected variant_storage<Types...>
         bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, variant&& assign_from)
         {
             size_type index = v.index();
-            v.assign_or_init(&index, std::move(vi.value));
+            v.template assign_or_init<I>(&index, std::move(vi.value));
             return true;
         }
 
@@ -119,7 +123,7 @@ class variant : protected variant_storage<Types...>
         }
 
 
-        // NOTE: See commens in above copy_from flavor
+        // NOTE: See comments in above copy_from flavor
         template <size_t I, class T_i,
                  class enabled = enable_if_t<!is_move_assignable<remove_const_t<T_i>>::value> >
         bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
@@ -128,11 +132,13 @@ class variant : protected variant_storage<Types...>
 
             v.template move<I>(std::move(move_from));
 
+#if FEATURE_ESTD_VARIANT_EAGER_DESTRUCT
             // remember, our variant destroys as soon as we determine transition to
             // valueless state - once valueless, we lose ability to identify who
             // needs destruction
             move_from.template destroy<I>();
             move_from.index_ = variant_npos();
+#endif
 
             return true;
         }

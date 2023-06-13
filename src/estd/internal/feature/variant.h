@@ -9,3 +9,13 @@
 #ifndef FEATURE_ESTD_VARIANT_PERMISSIVE_ASSIGNMENT
 #define FEATURE_ESTD_VARIANT_PERMISSIVE_ASSIGNMENT 1
 #endif
+
+
+// Spec is inspecific whether operations which gracefully empty a variant of its
+// alternative immediately run the alternative destructor or whether it waits until
+// a later go-out-of-scope or reassignment.  Spec seems to imply it's the latter.
+// We default to the former (eager)
+#ifndef FEATURE_ESTD_VARIANT_EAGER_DESTRUCT
+#define FEATURE_ESTD_VARIANT_EAGER_DESTRUCT 1
+#endif
+
