@@ -4,7 +4,7 @@
 
 namespace estd {
 
-#ifdef FEATURE_CPP_VARIADIC
+#if __cpp_variadic_templates
 template<class... TArgs>
 class tuple;
 #endif

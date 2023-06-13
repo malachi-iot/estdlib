@@ -14,7 +14,7 @@ using namespace estd;
 struct identify_index_functor
 {
     template <size_t I, class T>
-    bool operator()(variadic::visitor_index<I, T>, int&& param)
+    constexpr bool operator()(variadic::visitor_index<I, T>, int&& param) const
     {
         return param == I;
     }
@@ -27,6 +27,23 @@ struct tuple_getter_functor
     T& operator()(variadic::visitor_index<I, T>, tuple<TArgs...>& t)
     {
         return get<I>(t);
+    }
+};
+
+// Handling 'instance' mechanism right within functor
+struct tuple_getter_functor2
+{
+    // DEBT: Ensure this in fact is a tuple type, or perhaps there's a clever
+    // way to guarantee that a 'get' is present and operates as expected
+    template <size_t I, class T, class TTuple, class F, class ...TArgs>
+    bool operator()(variadic::visitor_index<I, T>, TTuple& t, F&& f, TArgs&&...args)
+    {
+        // DEBT: visitor_instance erodes down to a visitor_index.  Works fine,
+        // but CLang-Tidy complains 8 bytes are wasted (which they are).  However,
+        // I expected optimizer and general compiler rules to be A-OK with that
+        return f(
+            variadic::visitor_instance<I, T>{get<I>(t)},
+            std::forward<TArgs>(args)...);
     }
 };
 
@@ -127,6 +144,13 @@ TEST_CASE("variadic")
             int result = vh_type::visit_instance(identify_type_functor<const char*>{},
                 tuple_getter_functor{}, t,
                 &output);
+
+            REQUIRE(result == 1);
+            REQUIRE(output == test::str_hello);
+
+            result = vh_type::visit(
+                tuple_getter_functor2{}, t,
+                identify_type_functor<const char*>{}, &output);
 
             REQUIRE(result == 1);
             REQUIRE(output == test::str_hello);
