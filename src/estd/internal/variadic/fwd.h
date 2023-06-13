@@ -46,6 +46,9 @@ using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::
 template <size_t I, class T>
 struct visitor_index;
 
+template <size_t I, class T>
+struct visitor_instance;
+
 template <class ...Types>
 struct types;
 

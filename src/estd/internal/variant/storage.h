@@ -87,6 +87,13 @@ struct variant_storage_getter_functor
     {
         return get<I>(vs);
     }
+
+    template <size_t I, class T, class ...Types>
+    T& operator()(variadic::visitor_index<I, T>, variant<Types...>& vs)
+    {
+        // DEBT: A bit of a cheat
+        return *get_ll<I>(vs);
+    }
 };
 
 

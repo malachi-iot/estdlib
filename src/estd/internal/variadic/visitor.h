@@ -9,6 +9,30 @@
 #if __cpp_variadic_templates
 namespace estd {
 
+namespace internal {
+
+struct legacy_visit_instance_functor
+{
+    template <size_t I, class T, class Fg, class Tg, class F, class ...TArgs>
+    //constexpr
+    bool operator()(variadic::visitor_index<I, T> vi,
+        Fg&& getter,
+        Tg&& source,
+        F&& f,
+        TArgs&&...args) const
+    {
+        auto& value = getter(vi, source);
+        variadic::visitor_instance<I, T> vi2{value};
+
+        return f(
+            //variadic::visitor_instance<I, T>{getter(vi, source)},
+            vi2,
+            std::forward<TArgs>(args)...);
+    }
+};
+
+}
+
 namespace variadic {
 
 template <size_t I, class T>
@@ -28,6 +52,8 @@ struct visitor_instance : visitor_index<I, T>
     typedef T value_type;
 
     visitor_instance(const visitor_instance&) = default;
+    //visitor_instance(visitor_instance&&) noexcept = default;
+
     constexpr explicit visitor_instance(T& value) : value{value} {}
 };
 
@@ -85,7 +111,7 @@ struct visitor
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
     }
 
-
+#if LEGACY
 #if __cpp_concepts
     template <size_t I, class... TArgs,
             concepts::InstanceVisitorFunctor<TArgs...> F, class T,
@@ -112,6 +138,17 @@ struct visitor
                 std::forward<Fg>(getter),
                 t,
                 std::forward<TArgs>(args)...);
+    }
+#endif
+
+    template <class F, class Fg, class Tg, class... TArgs>
+    static int visit_instance(F&& f, Fg&& getter, Tg&& t, TArgs&&...args)
+    {
+        return visit(internal::legacy_visit_instance_functor{},
+            std::forward<Fg>(getter),
+            std::forward<Tg>(t),
+            std::forward<F>(f),
+            std::forward<TArgs>(args)...);
     }
 
     template <class TEval>
