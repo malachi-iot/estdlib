@@ -125,31 +125,16 @@ public:
 #if __cpp_rvalue_references
     expected& operator=(nonvoid_value_type&& v)
     {
-        if(has_value_)
-            base_type::value() = std::forward<nonvoid_value_type>(v);
-        else
-        {
-            base_type::destroy_error();
-            new (&base_type::value()) nonvoid_value_type(std::forward<nonvoid_value_type>(v));
-            has_value_ = true;
-        }
-
+        base_type::assign_value(has_value_, std::forward<nonvoid_value_type>(v));
+        if(!has_value_) has_value_ = true;
         return *this;
     }
 #endif
 
     expected& operator=(const unexpected_type& copy_from)
     {
-        const error_type& e = copy_from.error();
-
-        if(!has_value_)
-            base_type::error() = e;
-        else
-        {
-            base_type::destroy_value();
-            new (&base_type::error()) error_type(e);
-            has_value_ = false;
-        }
+        base_type::assign_error(!has_value_, copy_from.error());
+        if(has_value_) has_value_ = false;
         return *this;
     }
 

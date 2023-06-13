@@ -150,6 +150,17 @@ protected:
         storage.template destroy<ERROR>();
     }
 
+    void assign_value(bool has_value, nonvoid_value_type&& v)
+    {
+        storage.template assign_or_init<0, 1>(has_value,
+            std::forward<nonvoid_value_type>(v));
+    }
+
+    void assign_error(bool has_error, const error_type& v)
+    {
+        storage.template assign_or_init<1, 0>(has_error, v);
+    }
+
 public:
     nonvoid_value_type& value() { return get<VALUE>(storage); }
     ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<VALUE>(storage); }

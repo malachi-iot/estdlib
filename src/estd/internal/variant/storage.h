@@ -379,6 +379,43 @@ public:
         assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
     }
 
+    template <size_t I, class T_i, class T,
+        class enabled = enable_if_t<estd::is_trivial<T_i>::value> >
+    void direct_init_helper(T&& t)
+    {
+        *get<I>() = std::forward<T>(t);
+    }
+
+    template <size_t I, class T_i, class T,
+        class enabled = enable_if_t<!estd::is_trivial<T_i>::value> >
+    void direct_init_helper(T&& t, bool = true)
+    {
+        assignment_emplace_helper<I, T_i>(std::forward<T>(t));
+    }
+
+
+    // index = index of variant tracked in 'this' - since it's a compile time constant,
+    // this is most useful for when match toggles between two possibilities (such as
+    // 'expected')
+    template <size_t I, size_t index, class U>
+    void assign_or_init(bool match, U&& u)
+    {
+        typedef type_at_index<I> T_j;
+
+        // Are we tracking the exact type being assigned?
+        if(match)
+        {
+            assignment_helper<I, T_j>(std::forward<U>(u));
+        }
+        else
+        {
+            // ... if not, destroy what we're tracking (if any) and
+            // do a direct initialization
+            destroy<index>();
+            direct_init_helper<I, T_j>(std::forward<U>(u));
+        }
+    }
+
     // index = index of variant tracked in 'this'
     template <size_t I, class U>
     void assign_or_init(size_type* index, U&& u)
@@ -395,8 +432,7 @@ public:
             // ... if not, destroy what we're tracking (if any) and
             // do a direct initialization
             destroy(*index);
-            // DEBT: May want to check if T_j is trivial and if so do assignment here
-            assignment_emplace_helper<I, T_j>(std::forward<U>(u));
+            direct_init_helper<I, T_j>(std::forward<U>(u));
             *index = I;
         }
     }
