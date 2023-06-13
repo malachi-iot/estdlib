@@ -146,6 +146,22 @@ struct variant_storage_base : variant_storage_tag
         }   */
     };
 
+
+    struct getter_functor2
+    {
+        template <size_t I, class T, class F, class ...TArgs>
+        constexpr bool operator()(variadic::visitor_index<I, T>, this_type& vs, F&& f, TArgs&&...args) const
+        {
+            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<TArgs>(args)...);
+        }
+
+        template <size_t I, class T, class F, class ...TArgs>
+        constexpr bool operator()(variadic::visitor_index<I, T>, const this_type& vs, F&& f, TArgs&&...args) const
+        {
+            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<TArgs>(args)...);
+        }
+    };
+
     static constexpr bool is_trivial = trivial;
 
     using visitor = variadic::visitor<Types...>;
@@ -454,9 +470,13 @@ public:
     template <typename F, class ...TArgs>
     int visit_instance(F&& f, TArgs&&...args)
     {
+        /*
         int i = visitor::visit_instance(std::forward<F>(f),
             variant_storage_getter_functor{},
             *this,
+            std::forward<TArgs>(args)...); */
+        int i = visitor::visit(getter_functor2{}, *this,
+            std::forward<F>(f),
             std::forward<TArgs>(args)...);
 
         return i;
