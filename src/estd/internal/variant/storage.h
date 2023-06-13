@@ -379,6 +379,27 @@ public:
         assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
     }
 
+    // index = index of variant tracked in 'this'
+    template <size_t I, class U>
+    void assign_or_init(size_type* index, U&& u)
+    {
+        typedef type_at_index<I> T_j;
+
+        // Are we tracking the exact type being assigned?
+        if(*index == I)
+        {
+            assignment_helper<I, T_j>(std::forward<U>(u));
+        }
+        else
+        {
+            // ... if not, destroy what we're tracking (if any) and
+            // do a direct initialization
+            destroy(*index);
+            assignment_emplace_helper<I, T_j>(std::forward<U>(u));
+            *index = I;
+        }
+    }
+
     // Assign or direct initialize, depending on whether index matches
     // and what is matched to is assignable vs constructible
     // NOTE: This will assign the first one it finds; however, multiple
@@ -388,18 +409,8 @@ public:
     {
         typedef is_constructible_selector<U> selector;
         typedef typename selector::first selected;
-        typedef typename selected::type T_j;
 
-        if(*index == selected::index)
-        {
-            assignment_helper<selected::index, T_j>(std::forward<U>(u));
-        }
-        else
-        {
-            destroy(*index);
-            assignment_emplace_helper<selected::index, T_j>(std::forward<U>(u));
-            *index = selected::index;
-        }
+        assign_or_init<selected::index>(index, std::forward<U>(u));
     }
 
     template <typename F, class ...TArgs>
