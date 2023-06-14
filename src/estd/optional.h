@@ -45,35 +45,11 @@ class optional :
 {
     typedef TBase base_type;
 
-    /*
-    template <class U>
-    void assign_value(const U& u)
-    {
-        if(base_type::has_value())
-            base_type::value(u);
-        else
-        {
-            base_type::direct_initialize(u);
-            base_type::has_value(true);
-        }
-    }
-
 #if __cpp_rvalue_references
-    template <class U>
-    void assign_value(U&& u)
-    {
-        // DEBT: Optimize this so that when direct initialize and
-        // assignment are identical and/or trivial, we don't even
-        // do the has_value runtime check
-        if(base_type::has_value())
-            base_type::value(std::forward<U>(u));
-        else
-        {
-            base_type::direct_initialize(std::forward<U>(u));
-            base_type::has_value(true);
-        }
-    }
-#endif */
+
+    /// if current value exists and is not trivial, destroy it
+    /// then do an assign or direct initialize, depending on
+    /// what T prefers
     template <class U>
     void assign_value(U&& u)
     {
@@ -82,6 +58,7 @@ class optional :
             std::forward<U>(u));
         base_type::has_value(true);
     }
+#endif
 
 
 public:
@@ -329,7 +306,7 @@ public:
 
     optional& operator=(estd::nullopt_t)
     {
-        base_type::value(null_value);
+        base_type::reset();
         return *this;
     }
 

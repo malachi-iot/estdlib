@@ -91,21 +91,10 @@ protected:
 #endif
 
 #if __cpp_rvalue_references
-    void value(value_type&& v)
-    {
-        get<0>(storage) = std::forward<value_type>(v);
-    }
-
     template <class ...TArgs>
     reference emplace(TArgs&&...args)
     {
         return * storage.template emplace<0>(std::forward<TArgs>(args)...);
-    }
-
-    template <class T2>
-    void direct_initialize(T2&& v)
-    {
-        emplace(std::forward<T2>(v));
     }
 #else
     template <class T1>
@@ -126,6 +115,8 @@ protected:
         storage.template destroy<0>();
     }
 
+    // NOTE: Direct assignment, doesn't account for dtor or
+    // existing object.  Only use this when T is trivial
     void value(const_reference v)
     {
         get<0>(storage) = v;
@@ -138,6 +129,12 @@ protected:
         storage.template assign_or_init<0, 1>(has_value, std::forward<U>(u));
     }
 #endif
+
+    template <class U>
+    void assign_value(bool has_value, const U& u)
+    {
+        storage.template assign_or_init<0, 1>(has_value, u);
+    }
 
 public:
     pointer operator->() { return storage.template get<0>(); }
@@ -211,6 +208,7 @@ struct optional_base : optional_value_provider<T>,
     }
 };
 
+// NOTE: T is necessarily trivial
 template <class T, unsigned bit_count>
 class optional_bitwise
 {
@@ -224,20 +222,19 @@ protected:
     void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
 
-    template <class U>
-    void direct_initialize(const U& u)
-    {
-        value_ = u;
-    }
-
 #if __cpp_rvalue_references
     template <class U>
     void assign_value(bool, U&& u)
     {
         value_ = std::forward<U>(u);
-        has_value_ = true;
     }
 #endif
+
+    template <class U>
+    void assign_value(bool, const U& u)
+    {
+        value_ = u;
+    }
 
     // DEBT: Make a converting constructor also
     ESTD_CPP_CONSTEXPR_RET optional_bitwise(const optional_bitwise& copy_from) :
@@ -303,7 +300,7 @@ public:
     typedef T value_type;
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value() != null_value_; }
-    void has_value(bool) {}
+    static constexpr bool has_value(bool) { return{}; }
     void reset() { base_type::value(null_value_); }
 
     static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
