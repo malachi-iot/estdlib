@@ -45,6 +45,7 @@ class optional :
 {
     typedef TBase base_type;
 
+    /*
     template <class U>
     void assign_value(const U& u)
     {
@@ -72,7 +73,16 @@ class optional :
             base_type::has_value(true);
         }
     }
-#endif
+#endif */
+    template <class U>
+    void assign_value(U&& u)
+    {
+        base_type::assign_value(
+            base_type::has_value(),
+            std::forward<U>(u));
+        base_type::has_value(true);
+    }
+
 
 public:
     typedef typename base_type::value_type value_type;
@@ -390,7 +400,7 @@ ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& v
 
 
 template <class T, class U, class TBase>
-CONSTEXPR bool operator>(const optional<T, TBase>& opt, const U& value)
+ESTD_CPP_CONSTEXPR_RET bool operator>(const optional<T, TBase>& opt, const U& value)
 {
     return opt.has_value() ? opt.value() > value : false;
 }

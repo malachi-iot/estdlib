@@ -232,9 +232,10 @@ protected:
 
 #if __cpp_rvalue_references
     template <class U>
-    void assign_value(U&& u)
+    void assign_value(bool, U&& u)
     {
         value_ = std::forward<U>(u);
+        has_value_ = true;
     }
 #endif
 
