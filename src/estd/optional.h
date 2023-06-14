@@ -46,7 +46,6 @@ class optional :
     typedef TBase base_type;
 
 #if __cpp_rvalue_references
-
     /// if current value exists and is not trivial, destroy it
     /// then do an assign or direct initialize, depending on
     /// what T prefers
@@ -58,8 +57,14 @@ class optional :
             std::forward<U>(u));
         base_type::has_value(true);
     }
+#else
+    template <class U>
+    void assign_value(const U& u)
+    {
+        base_type::assign_value(base_type::has_value(), u);
+        base_type::has_value(true);
+    }
 #endif
-
 
 public:
     typedef typename base_type::value_type value_type;
@@ -136,11 +141,13 @@ public:
 
 
     // DEBT: Still need 'move' variety
-    template <class U, class TBase2, class enabled =
-        typename enable_if<
+    template <class U, class TBase2
+#if __cplusplus >= 201103L
+        , class enabled = typename enable_if<
             is_constructible<T, optional<U>&>::value == false &&
             is_convertible<T, optional<U>&>::value == false &&
             is_assignable<T, optional<U>&>::value == false>::type
+#endif
         >
     optional& operator=(const optional<U, TBase2>& assign_from)
     {
@@ -194,8 +201,7 @@ public:
     optional& operator=(const value_type& v)
     {
         // DEBT: Do same has_value interrogation as c++11 version above
-        base_type::direct_initialize(v);
-        base_type::has_value(true);
+        assign_value(v);
         return *this;
     }
 #endif

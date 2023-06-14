@@ -150,11 +150,13 @@ protected:
         storage.template destroy<ERROR>();
     }
 
+#if __cpp_rvalue_references
     void assign_value(bool has_value, nonvoid_value_type&& v)
     {
         storage.template assign_or_init<0, 1>(has_value,
             std::forward<nonvoid_value_type>(v));
     }
+#endif
 
     void assign_error(bool has_error, const error_type& v)
     {

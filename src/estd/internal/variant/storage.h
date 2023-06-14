@@ -636,6 +636,27 @@ struct variant_storage
     {
         return (typename type_at_index<I>::type*) storage.raw;
     }
+
+
+    // DEBT: Consolidate this with variadic flavor
+    template <size_t I, size_t index, class U>
+    void assign_or_init(bool match, const U& u)
+    {
+        typedef type_at_index<I> T_j;
+
+        // Are we tracking 'I'?  If so, assign over it
+        if(match)
+        {
+            *get<I>() = u;
+        }
+        else
+        {
+            // ... if not, destroy what we're tracking (if any) and
+            // do a direct initialization
+            destroy<index>();
+            emplace<I>(u);
+        }
+    }
 };
 
 

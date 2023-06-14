@@ -4,6 +4,7 @@
 
 namespace estd { namespace test {
 
+#if __cplusplus >= 201103L
 // NOTE: Specifically excludes assignment (operator =) to more deeply
 // exercise consuming API
 struct NonTrivial
@@ -46,6 +47,7 @@ struct NonTrivial
 
 constexpr unsigned dtor_count_1() { return 3; }
 constexpr unsigned dtor_count_2() { return dtor_count_1() + 1; }
+#endif
 
 
 

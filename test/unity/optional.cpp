@@ -7,7 +7,7 @@ static void test_optional_default()
 {
     estd::optional<const char*> o;
 
-    TEST_ASSERT_EQUAL(false, o.has_value());
+    TEST_ASSERT_FALSE(o.has_value());
 }
 
 
@@ -18,6 +18,15 @@ static void test_optional_charptr()
     TEST_ASSERT(o.has_value());
 }
 
+
+static void test_optional_int()
+{
+    estd::optional<int> o;
+
+    TEST_ASSERT(!o.has_value());
+
+    o = 10;
+}
 
 static void test_optional_layer1()
 {
@@ -42,5 +51,6 @@ void test_optional()
 {
     RUN_TEST(test_optional_default);
     RUN_TEST(test_optional_charptr);
+    RUN_TEST(test_optional_int);
     RUN_TEST(test_optional_layer1);
 }

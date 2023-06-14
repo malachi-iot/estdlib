@@ -2,7 +2,7 @@
 
 #include "../new.h"
 #include "type_traits.h"
-#include "variant.h"
+#include "variant/storage.h"
 
 namespace estd {
 
@@ -59,6 +59,8 @@ struct optional_value_provider
     typedef const_reference const_return_type;
 
 private:
+    // DEBT: monostate at '1' so that we can feed that into
+    // assign_or_init as value to move away from
     variant_storage<T, monostate> storage;
 
 protected:
@@ -81,7 +83,7 @@ protected:
 #else
     template <class T1>
     optional_value_provider(in_place_conditional_t<0>, bool condition, const T1& v1) :
-        storage(in_place_conditional_t<0>(), bool condition, v1)
+        storage(in_place_conditional_t<0>(), condition, v1)
     {}
 
     template <class T1>
@@ -101,12 +103,6 @@ protected:
     reference emplace(T1& v)
     {
         return *storage.template emplace<0>(v);
-    }
-
-    template <class T1>
-    void direct_initialize(T1& v)
-    {
-        emplace(v);
     }
 #endif
 
@@ -173,7 +169,7 @@ struct optional_base : optional_value_provider<T>,
     constexpr explicit
 #endif
     optional_base(const optional<T2, TBase>& copy_from) :
-        base_type(in_place_conditional_t<0>{},
+        base_type(in_place_conditional_t<0>(),
             copy_from.has_value(),
             copy_from.value()),
         optional_has_value(copy_from.has_value())
@@ -300,7 +296,11 @@ public:
     typedef T value_type;
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value() != null_value_; }
+#if __cpp_constexpr
     static constexpr bool has_value(bool) { return{}; }
+#else
+    static inline void has_value(bool) {}
+#endif
     void reset() { base_type::value(null_value_); }
 
     static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
