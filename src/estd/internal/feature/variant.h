@@ -1,5 +1,7 @@
 #pragma once
 
+#include "exception.h"
+
 
 // Spec calls for variant assignments to demand constructible AND assignable from
 // all alternatives.  When this flag is 0, that requirement is enforced.  Default

@@ -203,15 +203,22 @@ public:
 #if __cpp_exceptions
         if(!has_value_)
             throw bad_expected_access<E>(base_type::error());
+#elif FEATURE_ESTD_EXCEPTION_ABORT
+        if(!has_value_) abort();
 #endif
         return base_type::value();
     }
 
-#if __cpp_exceptions
+#if __cpp_exceptions || FEATURE_ESTD_EXCEPTION_ABORT
     const nonvoid_value_type& value() const
     {
         if(!has_value_)
+#if __cpp_exceptions
             throw bad_expected_access<E>(base_type::error());
+#else
+            abort();
+#endif
+
         return base_type::value();
     }
 #else
