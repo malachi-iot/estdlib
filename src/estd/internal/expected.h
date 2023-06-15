@@ -5,6 +5,7 @@
 #include "utility.h"
 #include "variant.h"
 
+#include "fwd/expected.h"
 #include "raw/expected.h"
 
 // c++20 gives us conditional explicits - before that, we generally
@@ -23,6 +24,14 @@ namespace estd { namespace internal {
 
 struct expected_tag {};
 struct unexpected_tag {};
+
+// Guidance from
+// https://stackoverflow.com/questions/16337610/how-to-know-if-a-type-is-a-specialization-of-stdvector
+template <class>
+struct is_unexpected : false_type {};
+
+template <class E>
+struct is_unexpected<unexpected<E>> : true_type {};
 
 #if __cplusplus >= 201103L
 template <class T>
@@ -151,14 +160,22 @@ protected:
     }
 
 #if __cpp_rvalue_references
-    void assign_value(bool has_value, nonvoid_value_type&& v)
+    template <class U>
+    void assign_value(bool has_value, U&& v)
     {
         storage.template assign_or_init<0, 1>(has_value,
-            std::forward<nonvoid_value_type>(v));
+            std::forward<U>(v));
+    }
+#else
+    template <class U>
+    void assign_value(bool has_value, const U& v)
+    {
+        storage.template assign_or_init<0, 1>(has_value, v);
     }
 #endif
 
-    void assign_error(bool has_error, const error_type& v)
+    template <class G>
+    void assign_error(bool has_error, const G& v)
     {
         storage.template assign_or_init<1, 0>(has_error, v);
     }

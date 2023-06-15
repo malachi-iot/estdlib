@@ -16,7 +16,15 @@ struct variant_alternative<I, internal::variant_storage<Types...> > :
 
 namespace internal {
 
-
+#if FEATURE_ESTD_VARIANT_PERMISSIVE_ASSIGNMENT
+template <class T, class U>
+using is_variant_assignable = is_constructible<T, U>;
+#else
+template <class T, class U>
+using is_variant_assignable = bool_constant<
+    is_constructible<T, U>::value &
+    is_assignable<T&, U>::value>;
+#endif
 
 // Very similar to c++20 flavor, but importantly returns monostate instead
 template <class T2, class ...TArgs>

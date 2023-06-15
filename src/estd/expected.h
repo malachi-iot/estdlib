@@ -123,15 +123,34 @@ public:
 
 
 #if __cpp_rvalue_references
-    expected& operator=(nonvoid_value_type&& v)
+    template <class U, class enabled = enable_if_t<
+        is_same<expected, remove_cvref_t<U>>::value == false &&
+        internal::is_unexpected<remove_cvref_t<U>>::value == false &&
+        is_constructible<T, U>::value
+        >>
+    expected& operator=(U&& v)
     {
-        base_type::assign_value(has_value_, std::forward<nonvoid_value_type>(v));
+        base_type::assign_value(has_value_, std::forward<U>(v));
+        if(!has_value_) has_value_ = true;
+        return *this;
+    }
+#else
+    expected& operator=(const nonvoid_value_type& v)
+    {
+        base_type::assign_value(has_value_, v);
         if(!has_value_) has_value_ = true;
         return *this;
     }
 #endif
 
-    expected& operator=(const unexpected_type& copy_from)
+#if __cplusplus >= 201103L
+    template <class G, class GF = const G&, class enabled = enable_if_t<
+        internal::is_variant_assignable<E, GF>::value
+        >>
+#else
+    template <class G>
+#endif
+    expected& operator=(const unexpected<G>& copy_from)
     {
         base_type::assign_error(!has_value_, copy_from.error());
         if(has_value_) has_value_ = false;
