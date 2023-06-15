@@ -22,16 +22,20 @@
 
 namespace estd { namespace internal {
 
-struct expected_tag {};
-struct unexpected_tag {};
-
 // Guidance from
 // https://stackoverflow.com/questions/16337610/how-to-know-if-a-type-is-a-specialization-of-stdvector
 template <class>
 struct is_unexpected : false_type {};
 
 template <class E>
-struct is_unexpected<unexpected<E>> : true_type {};
+struct is_unexpected<unexpected<E> > : true_type {};
+
+template <class>
+struct is_expected : false_type {};
+
+template <class T, class E>
+struct is_expected<expected<T, E> > : true_type {};
+
 
 #if __cplusplus >= 201103L
 template <class T>
@@ -39,8 +43,8 @@ using expected_ctor_6 = bool_constant<
     is_void<T>::value == false &&
     is_same<remove_cvref_t<T>, in_place_t>::value == false &&
     // DEBT: is_constructible
-    is_base_of<expected_tag, remove_cvref_t<T>>::value == false &&
-    is_base_of<unexpected_tag, remove_cvref_t<T>>::value == false
+    is_expected<remove_cvref_t<T>>::value == false &&
+    is_unexpected<remove_cvref_t<T>>::value == false
     >;
 #endif
 
@@ -49,7 +53,7 @@ using expected_ctor_6 = bool_constant<
 // since it's always required that E is initialized somehow
 // when using this directly as 'unexpected'
 template <class E>
-class unexpected : public unexpected_tag
+class unexpected
 {
 private:
     const E error_;
@@ -87,7 +91,7 @@ public:
 // If this is an issue, we can specialize this internal::expected.  However,
 // even in that case we may need monostate if E is not default constructible
 template <class T, class E>
-class expected : public expected_tag
+class expected
 {
 public:
     typedef T value_type;
