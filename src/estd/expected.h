@@ -2,7 +2,30 @@
 
 #include "internal/expected.h"
 
+#if __cpp_exceptions
+#include <exception>
+#endif
+
 namespace estd {
+
+#if __cpp_exceptions
+template <class E>
+class bad_expected_access;
+
+template <>
+class bad_expected_access<void> : public std::exception {};
+
+template <class E>
+class bad_expected_access : public bad_expected_access<void>
+{
+    const E error_;
+
+public:
+    bad_expected_access(const E& e) : error_(e) {}
+
+    const E& error() const { return error_; }
+};
+#endif
 
 template <class E>
 class unexpected : public internal::unexpected<const E>
@@ -12,7 +35,7 @@ class unexpected : public internal::unexpected<const E>
 public:
 #if __cpp_rvalue_references
     constexpr unexpected(const unexpected&) = default;
-    constexpr unexpected(unexpected&&) NOEXCEPT = default;
+    constexpr unexpected(unexpected&&) noexcept = default;
 
     template <class Err = E>
     constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
@@ -175,16 +198,39 @@ public:
     }
 #endif
 
+    nonvoid_value_type& value()
+    {
+#if __cpp_exceptions
+        if(!has_value_)
+            throw bad_expected_access<E>(base_type::error());
+#endif
+        return base_type::value();
+    }
+
+#if __cpp_exceptions
+    const nonvoid_value_type& value() const
+    {
+        if(!has_value_)
+            throw bad_expected_access<E>(base_type::error());
+        return base_type::value();
+    }
+#else
+    ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const
+    {
+        return base_type::value();
+    }
+#endif
+
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
 
     const nonvoid_value_type& operator*() const
     {
-        return base_type::value();
+        return value();
     }
 
     const T* operator->() const
     {
-        return & base_type::value();
+        return &value();
     }
 
 #if __cpp_constexpr
