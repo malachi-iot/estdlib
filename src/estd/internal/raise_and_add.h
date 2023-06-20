@@ -8,8 +8,10 @@ namespace estd { namespace internal {
 #if FEATURE_TOOLCHAIN_OVERFLOW_BUILTIN
 // adapted from GNUC
 template<typename _Tp>
-typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
-inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
+// Looks like __builtin_mul_overflow handles signed and unsigned automatically,
+// so no longer discriminating between this and umul
+//typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type
+bool inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 {
     if (__builtin_mul_overflow(__val, __base, &__val)
         || __builtin_add_overflow(__val, __c, &__val))
@@ -18,6 +20,8 @@ inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
 }
 
 
+/*
+ * Nifty idea, but doesn't go down to unsigned short
 template<typename _Tp>
 typename estd::enable_if<!estd::is_signed<_Tp>::value, bool>::type
 inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
@@ -26,7 +30,7 @@ inline raise_and_add(_Tp& __val, const unsigned short __base, unsigned char __c)
         || __builtin_uadd_overflow(__val, __c, &__val))
         return false;
     return true;
-}
+}   */
 
 template<typename _Tp>
 typename estd::enable_if<estd::is_signed<_Tp>::value, bool>::type

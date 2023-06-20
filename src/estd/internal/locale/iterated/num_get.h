@@ -20,6 +20,7 @@
 #include "../fwd.h"
 #include "../../ios_base.h"
 #include "../../chooser.h"
+#include "../../feature/num_get.h"
 
 namespace estd { namespace iterated {
 
@@ -69,7 +70,7 @@ struct num_get
 
     // 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    inline static bool raise_and_add(int_type n, T& v, true_type)
+    ESTD_CPP_CONSTEXPR_RET static bool raise_and_add(int_type n, T& v, true_type)
     {
         return positive ?
            estd::internal::raise_and_add(v, base, n) :
@@ -87,6 +88,15 @@ struct num_get
             {
                 state_.state_ = Overflow;
                 err |= ios_base::failbit;
+
+                // DEBT: Consider consolidating this with code elsewhere
+                // which assigns v = 0, though only if it improves code
+                // efficiency
+#if FEATURE_ESTD_NUM_GET_LWG23
+                v = positive ?
+                    estd::numeric_limits<T>::max() :
+                    estd::numeric_limits<T>::min();
+#endif
             }
 
             return false;

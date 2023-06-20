@@ -32,12 +32,12 @@ TEST_CASE("istream")
     }
     SECTION("parsing")
     {
-        layer1::string<32> str = "2 xyz";
-
-        detail::basic_istream<streambuf_type> _cin(str);
-
         SECTION("integer conversion")
         {
+            layer1::string<32> str{"2 xyz"};
+
+            detail::basic_istream<streambuf_type> _cin(str);
+
             int val = - 1;
 
             _cin >> val;
@@ -47,8 +47,44 @@ TEST_CASE("istream")
 
             _cin >> val;
 
+            REQUIRE(val == 0);
             REQUIRE(_cin.good() == false);
+
             if(_cin) FAIL();
+        }
+        SECTION("integer overflow")
+        {
+            SECTION("signed")
+            {
+                layer1::string<32> str{"-70000"};
+
+                detail::basic_istream<streambuf_type> _cin(str);
+
+                int16_t v = 0;
+
+                _cin >> v;
+
+                REQUIRE(_cin.fail());
+                REQUIRE(v == estd::numeric_limits<decltype(v)>::min());
+            }
+            SECTION("unsigned")
+            {
+                layer1::string<32> str{"2 70000"};
+                detail::basic_istream<streambuf_type> _cin(str);
+
+                uint16_t v = 0;
+
+                _cin >> v;
+
+                REQUIRE(_cin.eof() == false);
+                REQUIRE(_cin.good());
+                REQUIRE(v == 2);
+
+                _cin >> v;
+
+                REQUIRE(_cin.fail());
+                REQUIRE(v == estd::numeric_limits<decltype(v)>::max());
+            }
         }
         SECTION("istringstream")
         {
