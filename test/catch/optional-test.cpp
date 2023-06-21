@@ -168,7 +168,8 @@ TEST_CASE("optional")
 
             // NOTE: according to spec, this is a semi-valid operation,
             // though leaning on the NO because we haven't set has_value to true this way
-            val2.value() = 1;
+            //val2.value() = 1;     // Doesn't work due to bad_option_exception
+            *val2 = 1;
 
             REQUIRE(!val2);
 
@@ -254,12 +255,12 @@ TEST_CASE("optional")
             estd::layer1::optional<int, -1> value = returning_optional(5);
 
             REQUIRE(value);
-            REQUIRE(*value == 5);
+            REQUIRE(value.value() == 5);
 
             value = returning_optional(10);
 
             REQUIRE(!value);
-            REQUIRE(value.value() == -1);
+            REQUIRE(*value == -1);
         }
     }
     SECTION("auto specializing based on traits/base")

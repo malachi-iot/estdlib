@@ -3,9 +3,14 @@
  */
 #pragma once
 
+#if __cpp_exceptions
+#include <exception>
+#endif
+
 #include "utility.h"
 #include "memory.h"
 
+#include "internal/feature/optional.h"
 #include "internal/optional.h"
 
 namespace estd {
@@ -35,6 +40,10 @@ static
 CONSTEXPR nullopt_t nullopt{0};
 #else
 CONSTEXPR nullopt_t nullopt(0);
+#endif
+
+#if __cpp_exceptions
+class bad_optional_access : public std::exception {};
 #endif
 
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
@@ -125,8 +134,8 @@ public:
     {}
 #endif
 
-    template < class U, class TUBase >
-    optional( const optional<U, TUBase>& copy_from ) :
+    template <class U, class TUBase>
+    optional(const optional<U, TUBase>& copy_from) :
         base_type(copy_from)
     {
     }
@@ -225,18 +234,37 @@ public:
     }
 #endif
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
-    template< class U >
+    // -- getters
+
+    T& value() &
+    {
+#if __cpp_exceptions
+        if(!base_type::has_value()) throw bad_optional_access();
+#endif
+        return base_type::value();
+    }
+
+    const T& value() const&
+    {
+#if __cpp_exceptions
+        if(!base_type::has_value()) throw bad_optional_access();
+#endif
+        return base_type::value();
+    }
+
+
+#ifdef __cpp_rvalue_references
+    template <class U>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
     constexpr
 #endif
-    T value_or( U&& default_value ) &&
+    T value_or(U&& default_value) &&
     {
         return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
     }
 
     template <class U>
-    constexpr T value_or( U&& default_value ) const&
+    constexpr T value_or(U&& default_value) const&
     {
         return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
     }
