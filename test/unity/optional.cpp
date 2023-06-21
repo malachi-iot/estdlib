@@ -33,7 +33,7 @@ static void test_optional_layer1()
     estd::layer1::optional<int, -5> o;
 
     TEST_ASSERT(!o.has_value());
-    TEST_ASSERT_EQUAL(-5, o.value());
+    TEST_ASSERT_EQUAL(-5, *o);
 
     o = 10;
 

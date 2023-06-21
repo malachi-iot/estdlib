@@ -242,9 +242,12 @@ public:
     {
 #if __cpp_exceptions
         if(!base_type::has_value()) throw bad_optional_access();
+#else
+        if(!base_type::has_value()) abort();
 #endif
     }
 
+#if __cplusplus >= 201103L
     return_type value() &
     {
         return (assert_has_value(), base_type::value());
@@ -264,6 +267,17 @@ public:
     {
         return (assert_has_value(), base_type::value());
     }
+#else
+    return_type value()
+    {
+        return (assert_has_value(), base_type::value());
+    }
+
+    const_return_type value() const
+    {
+        return (assert_has_value(), base_type::value());
+    }
+#endif
 
 #ifdef __cpp_rvalue_references
     template <class U>
@@ -302,7 +316,7 @@ public:
 namespace layer1 {
 
 // DEBT: Has some kind of MSVC compatibility
-template <class T, T null_value = T()>
+template <class T, T null_value = internal::optional_default_value<T>::value>
 class optional : public estd::optional<T, internal::layer1::optional_base<T, null_value> >
 {
     typedef estd::optional<T, internal::layer1::optional_base<T, null_value> > base_type;
@@ -404,35 +418,35 @@ public:
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator==(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? opt.value() == value : false;
+    return opt.has_value() ? *opt == value : false;
 }
 
 
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator==(const U& value, const optional<T, TBase>& opt)
 {
-    return opt.has_value() ? value == opt.value() : false;
+    return opt.has_value() ? value == *opt : false;
 }
 
 
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? opt.value() != value : true;
+    return opt.has_value() ? *opt != value : true;
 }
 
 
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator>(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? opt.value() > value : false;
+    return opt.has_value() ? *opt > value : false;
 }
 
 
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? opt.value() < value : false;
+    return opt.has_value() ? *opt < value : false;
 }
 
 

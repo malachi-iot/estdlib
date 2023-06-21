@@ -219,6 +219,17 @@ TEST_CASE("optional")
 
             // layer1 flavor means 0 == null
             REQUIRE(!val);
+
+            try
+            {
+                val.value();
+
+                FAIL();
+            }
+            catch(const bad_optional_access&)
+            {
+
+            }
         }
         SECTION("layer1: bool")
         {
