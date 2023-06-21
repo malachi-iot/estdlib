@@ -53,6 +53,8 @@ class optional :
         public TBase
 {
     typedef TBase base_type;
+    typedef typename base_type::return_type return_type;
+    typedef typename base_type::const_return_type const_return_type;
 
 #if __cpp_rvalue_references
     /// if current value exists and is not trivial, destroy it
@@ -236,22 +238,32 @@ public:
 
     // -- getters
 
-    T& value() &
+    void assert_has_value() const
     {
 #if __cpp_exceptions
         if(!base_type::has_value()) throw bad_optional_access();
 #endif
-        return base_type::value();
     }
 
-    const T& value() const&
+    return_type value() &
     {
-#if __cpp_exceptions
-        if(!base_type::has_value()) throw bad_optional_access();
-#endif
-        return base_type::value();
+        return (assert_has_value(), base_type::value());
     }
 
+    constexpr const_return_type value() const&
+    {
+        return (assert_has_value(), base_type::value());
+    }
+
+    value_type&& value() &&
+    {
+        return (assert_has_value(), base_type::value());
+    }
+
+    constexpr const value_type&& value() const &&
+    {
+        return (assert_has_value(), base_type::value());
+    }
 
 #ifdef __cpp_rvalue_references
     template <class U>
@@ -282,8 +294,8 @@ public:
 #endif
     operator bool() const { return base_type::has_value(); }
 
-    typename base_type::return_type operator*() { return base_type::value(); }
-    typename base_type::const_return_type operator*() const { return base_type::value(); }
+    return_type operator*() { return base_type::value(); }
+    const_return_type operator*() const { return base_type::value(); }
 };
 
 

@@ -171,7 +171,7 @@ struct optional_base : optional_value_provider<T>,
     optional_base(const optional<T2, TBase>& copy_from) :
         base_type(in_place_conditional_t<0>(),
             copy_from.has_value(),
-            copy_from.value()),
+            *copy_from),
         optional_has_value(copy_from.has_value())
     {}
 
@@ -180,7 +180,8 @@ struct optional_base : optional_value_provider<T>,
     constexpr explicit optional_base(optional<T2, TBase>&& move_from) :
         base_type(in_place_conditional_t<0>{},
             move_from.has_value(),
-            std::move(move_from.value())),
+            // DEBT: Don't even do rvalue/move ctor/assignment if no_value
+            std::move(*move_from)),
         optional_has_value(move_from.has_value())
     {}
 #endif
