@@ -1,5 +1,12 @@
 #pragma once
 
+// EXPERIMENTAL, not used
+// It's preferable to incur a runtime check and risk of abort than it is
+// to deviate further from std spec behavior.  All identified cases
+// provide a "safe" way to check and avoid the would-be exception/abort
+// AND have alternate API to bypass check (i.e. expected::value vs
+// expected::operator*)
+
 // Exceptions are frequently off in embedded environments.  For scenarios
 // which usually require an exception, we can either:
 // 1) fall back to a raw abort operation

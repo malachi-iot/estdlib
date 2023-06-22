@@ -60,6 +60,16 @@ class expected : public internal::expected<T, E>
             base_type::destroy_error();
     }
 
+    void assert_has_value()
+    {
+        if(!has_value_)
+#if __cpp_exceptions
+            throw bad_expected_access<E>(base_type::error());
+#else
+            abort();
+#endif
+    }
+
 public:
     typedef unexpected<E> unexpected_type;
     typedef typename base_type::nonvoid_value_type nonvoid_value_type;
@@ -198,46 +208,47 @@ public:
     }
 #endif
 
-    nonvoid_value_type& value()
+    nonvoid_value_type& value() ESTD_CPP_REFQ
     {
-#if __cpp_exceptions
-        if(!has_value_)
-            throw bad_expected_access<E>(base_type::error());
-#elif FEATURE_ESTD_EXCEPTION_ABORT
-        if(!has_value_) abort();
-#endif
-        return base_type::value();
-    }
-
-#if __cpp_exceptions || FEATURE_ESTD_EXCEPTION_ABORT
-    const nonvoid_value_type& value() const
-    {
-        if(!has_value_)
-#if __cpp_exceptions
-            throw bad_expected_access<E>(base_type::error());
-#else
-            abort();
-#endif
+        assert_has_value();
 
         return base_type::value();
     }
-#else
-    ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const
+
+    const nonvoid_value_type& value() const ESTD_CPP_REFQ
     {
+        assert_has_value();
+
         return base_type::value();
     }
-#endif
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
 
-    const nonvoid_value_type& operator*() const
+    nonvoid_value_type& operator*() ESTD_CPP_REFQ
     {
-        return value();
+        return base_type::value();
     }
+
+    const nonvoid_value_type& operator*() const ESTD_CPP_REFQ
+    {
+        return base_type::value();
+    }
+
+#if __cpp_rvalue_references
+    nonvoid_value_type&& operator*() &&
+    {
+        return base_type::value();
+    }
+
+    const nonvoid_value_type&& operator*() const&&
+    {
+        return base_type::value();
+    }
+#endif
 
     const T* operator->() const
     {
-        return &value();
+        return &base_type::value();
     }
 
 #if __cpp_constexpr

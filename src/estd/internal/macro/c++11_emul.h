@@ -31,6 +31,12 @@
 #define ESTD_CPP_CONSTEXPR_RET inline
 #endif
 
+#if __cpp_ref_qualifiers
+#define ESTD_CPP_REFQ &
+#else
+#define ESTD_CPP_REFQ
+#endif
+
 // Assistance to define typical "typedef T value_type" and friends
 #define ESTD_CPP_STD_VALUE_TYPE(T)  \
     typedef T value_type;           \
