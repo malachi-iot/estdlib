@@ -48,7 +48,8 @@ public:
 
     typedef internal::impl::streambuf_helper helper_type;
 
-    friend helper_type;
+    // DEBT: 'friend helper_type' makes CLang in c++03 mode mad
+    friend struct internal::impl::streambuf_helper;
 
     int_type sungetc()
     {
