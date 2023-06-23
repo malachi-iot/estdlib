@@ -56,6 +56,11 @@ public:
         return helper_type::sungetc(this);
     }
 
+    ESTD_CPP_CONSTEXPR_RET int_type xsgetc() const
+    {
+        return traits_type::to_int_type(base_type::xsgetc());
+    }
+
 protected:
 
     // not yet used overflow helpers
@@ -144,24 +149,21 @@ public:
         return helper_type::sbumpc_evaporated(this);
     }
 
-    int_type snextc()
-    {
-        int_type ch = this->sbumpc();
-
-        if(ch == traits_type::eof())
-            return traits_type::eof();
-        else
-            return this->sgetc();
-    }
-
     int_type sgetc()
     {
-        if(base_type::xin_avail() == 0)
-            return base_type::underflow();
+        return base_type::xin_avail() == 0 ? underflow() : xsgetc();
+    }
 
-        int_type ch = traits_type::to_int_type(base_type::xsgetc());
+    ESTD_CPP_CONSTEXPR_RET int_type sgetc() const
+    {
+        return base_type::xin_avail() == 0 ? underflow() : xsgetc();
+    }
 
-        return ch;
+    int_type snextc()
+    {
+        const int_type ch = sbumpc();
+
+        return ch == traits_type::eof() ? traits_type::eof() : sgetc();
     }
 
     // sgetc implies nonblocking, but in fact typically does block in std environments

@@ -63,7 +63,7 @@ public:
     // This method in particular is sensitive to pos_type reference.  Stack usage goes
     // sky high if we return a copy
 
-    const index_type& pos() const { return _pos; }
+    ESTD_CPP_CONSTEXPR_RET const index_type& pos() const { return _pos; }
 };
 
 template <typename TCharTraits, class TIndex = unsigned short>

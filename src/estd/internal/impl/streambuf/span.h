@@ -156,7 +156,10 @@ struct in_span_streambuf :
 protected:
     const span_type& in() const { return base_type::value(); }
 
-    const pos_type& pos() const { return base_pos_type::pos(); }
+    ESTD_CPP_CONSTEXPR_RET const pos_type& pos() const
+    {
+        return base_pos_type::pos();
+    }
 
 public:
     in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
@@ -165,28 +168,28 @@ public:
 
     }
 
-    // FIX: dropping const on returned span_type, not recommended
-    char_type* eback() const
-    { return const_cast<char_type*>(in().data()); }
-
-    char_type* gptr() const { return eback() + pos(); }
-    char_type* egptr() const { return eback() + in().size(); }
+    ESTD_CPP_CONSTEXPR_RET char_type* eback() const { return in().data(); }
+    ESTD_CPP_CONSTEXPR_RET char_type* gptr() const { return eback() + pos(); }
+    ESTD_CPP_CONSTEXPR_RET char_type* egptr() const { return eback() + in().size(); }
 
 protected:
-    streamsize xin_avail() const { return in().size() - pos(); }
+    ESTD_CPP_CONSTEXPR_RET streamsize xin_avail() const
+    {
+        return in().size() - pos();
+    }
 
     streamsize showmanyc() const { return base_pos_type::showmanyc(xin_avail()); }
 
     streamsize xsgetn(nonconst_char_type* s, streamsize count)
     {
         // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
-        streamsize c = estd::min(count, xin_avail());
+        const streamsize c = estd::min(count, xin_avail());
         estd::copy_n(gptr(), c, s);
         this->gbump(c);
         return c;
     }
 
-    const char_type& xsgetc() const { return *gptr(); }
+    ESTD_CPP_CONSTEXPR_RET const char_type& xsgetc() const { return *gptr(); }
 };
 
 
