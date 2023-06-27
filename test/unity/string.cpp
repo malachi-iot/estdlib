@@ -75,6 +75,8 @@ void test_from_chars()
 static void test_to_chars()
 {
     estd::layer1::string<32> s;
+    const uint64_t biguint = 999999999999999;
+    const int64_t bigint = 999999999999999;
 
     estd::to_chars_result result = estd::to_chars(s.data(), s.data() + s.max_size(), 771);
 
@@ -87,6 +89,20 @@ static void test_to_chars()
     TEST_ASSERT_EQUAL(result.ptr, s.data() + 30);
     TEST_ASSERT_EQUAL('f', s[30]);
     TEST_ASSERT_EQUAL('0', s[31]);
+
+    result = estd::to_chars(s.data(), s.data() + s.max_size(), bigint);
+
+    TEST_ASSERT_EQUAL('9', s[0]);
+    TEST_ASSERT_EQUAL('9', s[1]);
+    TEST_ASSERT_EQUAL('9', s[2]);
+    TEST_ASSERT_EQUAL('9', s[10]);
+
+    result = estd::to_chars(s.data(), s.data() + s.max_size(), biguint);
+
+    TEST_ASSERT_EQUAL('9', s[0]);
+    TEST_ASSERT_EQUAL('9', s[1]);
+    TEST_ASSERT_EQUAL('9', s[2]);
+    TEST_ASSERT_EQUAL('9', s[10]);
 }
 
 static void test_to_string_opt()
