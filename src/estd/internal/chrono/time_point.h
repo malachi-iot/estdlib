@@ -6,6 +6,10 @@
 
 #include "../macro/push.h"
 
+#if FEATURE_STD_CHRONO
+#include <chrono>
+#endif
+
 namespace estd { namespace chrono {
 
 #ifdef FEATURE_ESTD_CHRONO

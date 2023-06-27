@@ -15,6 +15,11 @@
 
 using namespace estd::chrono;
 
+// DEBT: Currently our own alias of steady_clock is largely inactive
+// However, the whole estd::chrono feature is for environments which
+// may not have std lib in the first place so this using breaks that
+using std::chrono::steady_clock;
+
 steady_clock::time_point start;
 uint32_t start_ms;
 

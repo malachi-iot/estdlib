@@ -8,6 +8,7 @@ namespace estd {
 
 namespace internal {
 
+// DEBT: Move to proper forward area
 template <class T>
 struct optional_base;
 
@@ -32,6 +33,7 @@ struct optional_default_value<bool> :
 
 }
 
+// DEBT: Put forward off into dedicated forward area
 template <class T, class TBase = internal::optional_base<T> >
 class optional;
 
@@ -295,19 +297,20 @@ protected:
 #endif
 
     // DEBT: #ifdef this out for scenarios only when rvalue is not available
-    optional_base(in_place_t, const T& value) : base_type(in_place_t(), value) {}
+    ESTD_CPP_CONSTEXPR_RET optional_base(in_place_t, const T& value) :
+        base_type(in_place_t(), value) {}
 
     // should always bool == true here
     //optional_base(bool) {}
 
-    optional_base() : base_type(in_place_t(), null_value_) {}
+    ESTD_CPP_CONSTEXPR_RET optional_base() : base_type(in_place_t(), null_value_) {}
 
-    optional_base(const optional_base& copy_from) :
+    ESTD_CPP_CONSTEXPR_RET optional_base(const optional_base& copy_from) :
         base_type(in_place_t(), copy_from.value())
     {}
 
     template <class T2, class TBase>
-    optional_base(const optional<T2, TBase>& copy_from) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT optional_base(const optional<T2, TBase>& copy_from) :
         base_type(in_place_t(),
             copy_from.has_value() ? copy_from.value() : null_value_)
     {}

@@ -6,6 +6,10 @@
 
 #include "../macro/push.h"
 
+#if FEATURE_STD_CHRONO
+#include <chrono>
+#endif
+
 namespace estd { namespace chrono {
 
 #ifdef FEATURE_ESTD_CHRONO
@@ -31,7 +35,7 @@ protected:
     template <class Rep2, class Period2>
     static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const duration<Rep2, Period2>& d);
 
-#if FEATURE_STD_CHRONO_CORE
+#if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
     static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
@@ -59,7 +63,7 @@ public:
 #endif
         duration(const duration<Rep2, Period2>& d);
 
-#if FEATURE_STD_CHRONO_CORE
+#if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr

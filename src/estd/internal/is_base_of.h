@@ -35,7 +35,7 @@ namespace internal {
     template<typename B, typename D>
     auto test_is_base_of(int) -> decltype(is_base_of_test_func<B>(static_cast<D*>(nullptr)));
     template<typename, typename>
-    auto test_is_base_of(...) -> std::true_type; // private or ambiguous base
+    auto test_is_base_of(...) -> estd::true_type; // private or ambiguous base
 #endif
 }
 

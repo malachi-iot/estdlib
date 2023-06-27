@@ -2,6 +2,8 @@
 
 #include "platform.h"
 #include "raw/type_traits.h"
+#include "../utility.h"
+#include "utility/declval.h"
 
 // Specifically for is_void
 #include "llvm/is_void.h"

@@ -200,6 +200,9 @@ template< bool B, class T = void>
 class enable_if_t : public enable_if<B, T>::type {};
 #endif
 
+#pragma push_macro("B1")
+#undef B1
+
 
 #if __cpp_variadic_templates
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/types/conjunction
@@ -224,5 +227,7 @@ template <class T, class U>
 inline constexpr bool is_same_v = is_same<T, U>::value;
 #endif
 #endif
+
+#pragma pop_macro("B1")
 
 }
