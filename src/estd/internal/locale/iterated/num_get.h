@@ -22,6 +22,8 @@
 #include "../../chooser.h"
 #include "../../feature/num_get.h"
 
+#include "../../macro/push.h"
+
 namespace estd { namespace iterated {
 
 template <unsigned base, typename TChar, class TLocale>
@@ -322,3 +324,5 @@ struct bool_get<TChar, TLocale, true>
 
 
 }}
+
+#include "../../macro/pop.h"

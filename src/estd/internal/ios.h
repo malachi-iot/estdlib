@@ -6,7 +6,7 @@
 #include "locale.h"
 #include <stdint.h>
 #include "../iosfwd.h"
-#include "../variant.h"
+#include "raw/variant.h"
 #if ESTD_OS_TYPE
 #include "../thread.h"
 #endif

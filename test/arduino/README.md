@@ -5,17 +5,17 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | Project  |   Date  | Vendor    | Platform      | Result   | Notes |
 | -------- | ------- | --------- | ------------- | -------- | -----
 | basic    | 27JUN23 | Microchip | ARM SAMD21 m0 | Partial  | Nearly passes see Footnote [2]
-| basic    | 27JUN23 | Microchip | AVR 32u4      | Fail     | Footnote [1]
+| basic    | 27JUN23 | Microchip | AVR 32u4      | Fail     | std::chrono::steady_time not available
 | basic    | 27JUN23 | Microchip | ARM SAM m4    | Compiles |
 | ostream  | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
-| ostream  | 04JAN23 | Microchip | AVR 32u4      | Compiles |
+| ostream  | 27JUN23 | Microchip | AVR 32u4      | Compiles |
 | ostream  | 27JUN23 | Espressif | ESP32         | Compiles |
-| ostream  | 27JUN23 | Espressif | ESP32C3       | Fail     | Firmware seems corrupted
+| ostream  | 27JUN23 | Espressif | ESP32C3       | Fail     | pio can't find compiler package
 | ostream  | 27JUN23 | STM       | STM32F303K8   | Compiles |
-| ostream  | 04JAN23 | Microchip | ATtiny        | Compiles |
+| ostream  | 27JUN23 | Microchip | ATtiny        | Compiles |
 | unity    | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | unity    | 27JUN23 | Microchip | ARM SAMD51 m4 | Compiles |
-| unity    | 27JUN23 | Microchip | AVR 32u4      | Fail     | Footnote [1]
+| unity    | 27JUN23 | Microchip | AVR 32u4      | Fail     |
 | unity    | 27JUN23 | Espressif | ESP32S        | Compiles |
 | unity    | 27JUN23 | Espressif | ESP32C3       | Fail     | pio can't find compiler package
 | unity    | 27JUN23 | STM       | STM32F303K8   | Compiles |

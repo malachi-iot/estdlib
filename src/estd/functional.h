@@ -16,7 +16,7 @@
 
 #include "internal/invoke.h"
 
-#include "variant.h"
+#include "internal/raw/variant.h"
 
 #include "exp/functional.h"
 #include "obsolete/functional.h"
