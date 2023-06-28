@@ -25,11 +25,14 @@ void setup()
 
     UNITY_BEGIN();
 
+    // DEBT: Consolidate this with the other explicit unity caller
+
     test_align();
     test_array();
     test_chrono();
     test_cpp();
     test_cstddef();
+    test_expected();
     test_functional();
     test_limits();
     test_locale();
@@ -43,6 +46,7 @@ void setup()
     test_string();
     test_thread();
     test_tuple();
+    test_variant();
 
     UNITY_END();
 

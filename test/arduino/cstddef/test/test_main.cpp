@@ -16,9 +16,15 @@ void test_byte_to_integer()
 
 void setup()
 {
+    // delay generally recommended by:
+    // https://docs.platformio.org/en/stable/plus/unit-testing.html
+    delay(5000);
+
     UNITY_BEGIN();
 
     RUN_TEST(test_byte_to_integer);
+
+    UNITY_END();
 }
 
 

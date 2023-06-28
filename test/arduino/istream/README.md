@@ -1,3 +1,6 @@
-This test is not ready for prime time
+# Unusual but intended behaviors: arduino_istream
 
-We don't yet have blocking support, therefore `cin` doesn't wait for you to type 
+Does not wait for EOL on extraction operator, making it slightly more "interactive"
+
+Does not echo back to console during extraction operator.
+This might be an interesting option for the future, but for the moment this is correct
