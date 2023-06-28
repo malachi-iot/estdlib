@@ -12,7 +12,7 @@
 ## Quality Updates & Bug Fixes
 
 * `is_base_of` no longer caught up on access modifierrs
-* General c++03 compatibility
+* General Arduino, c++03 compatibility
 * `estd::optional` and `estd::expected` much more robust
     * shares code base with `estd::variant`
     * when available, exceptions are now supported
