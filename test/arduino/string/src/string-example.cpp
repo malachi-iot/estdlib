@@ -8,6 +8,9 @@ void setup()
 }
 
 
+#define USE_IOS 0
+
+
 void loop()
 {
     static int counter = 0;
@@ -18,8 +21,16 @@ void loop()
     name += ' ';
     name += "Mouse";
 
+#if USE_IOS
+    // FIX: Use arduino_stream here, this is now broken
     Serial << "Hello: ";
     Serial << name << F(" - counter=") << counter++;
+#else
+    Serial.print(F("Hello: "));
+    Serial.print(name.data());
+    Serial.print(F(" - counter="));
+    Serial.print(counter++);
+#endif
 
     Serial.println(F("!!"));
     
