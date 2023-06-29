@@ -94,12 +94,20 @@ struct add_lvalue_reference : type_identity<T&> {};
 template <>
 struct add_lvalue_reference<void> : type_identity<void> {};
 
+#ifdef __cpp_rvalue_references
+template <class T>
+struct add_rvalue_reference : type_identity<T&&> {};;
+#endif
+
 #ifdef __cpp_alias_templates
 template <class T>
 using add_const_t = typename add_const<T>::type;
 
 template <class T>
 using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+
+template <class T>
+using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 #endif
 
 template< class T> struct add_volatile { typedef volatile T type; };
