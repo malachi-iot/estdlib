@@ -3,6 +3,8 @@
 #include "core.h"
 #include "accessors.h"
 
+#include "../../cstdlib.h"
+
 namespace estd {
 
 #if __cpp_variadic_templates
@@ -375,22 +377,22 @@ public:
         new (storage.raw) type_at_index<I> (std::move(*move_from.get<I>()));
     }
 
-    /*
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
-            !is_convertible<T, T_i>::value &&
-            (is_nothrow_constructible<T_i, T>::value ||
-            !is_nothrow_move_constructible<T_i>::value)> >
+            !is_convertible<T, T_i>::value> >
     void assignment_emplace_helper(T&&, long = 0)
     {
-    } */
+#if FEATURE_ESTD_VARIANT_STRICT_CONVERSION
+        std::abort();
+#endif
+    }
 
 
     // DEBT: We often don't get here because is_nothrow_constructible doesn't like a const T&
     // Not sure yet if that's "proper behavior" as indicated by variant docs, but seems to be
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
-            //is_convertible<T, T_i>::value &&
+            is_convertible<T, T_i>::value &&
             (is_nothrow_constructible<T_i, T>::value ||
             !is_nothrow_move_constructible<T_i>::value)> >
     void assignment_emplace_helper(T&& t, bool = true)
@@ -400,6 +402,7 @@ public:
 
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
+            is_convertible<T, T_i>::value &&
             !(is_nothrow_constructible<T_i, T>::value ||
             !is_nothrow_move_constructible<T_i>::value)> >
     void assignment_emplace_helper(T&& t)
@@ -425,25 +428,29 @@ public:
 
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
-            //is_convertible<T, T_i>::value &&
+            is_convertible<T, T_i>::value &&
             estd::is_trivial<T_i>::value> >
     void direct_init_helper(T&& t)
     {
         *get<I>() = std::forward<T>(t);
     }
 
-    /*
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
             estd::is_trivial<T_i>::value &&
             !is_convertible<T, T_i>::value> >
     void direct_init_helper(T&& t, long = 0)
     {
-        *get<I>() = std::forward<T>(t);
-    }   */
+        //*get<I>() = std::forward<T>(t);
+        //static_assert(is_convertible<T, T_i>::value, "ERR");
+#if FEATURE_ESTD_VARIANT_STRICT_CONVERSION
+        std::abort();
+#endif
+    }
 
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
+            is_convertible<T, T_i>::value &&
             !estd::is_trivial<T_i>::value> >
     void direct_init_helper(T&& t, bool = true)
     {

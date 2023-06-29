@@ -22,3 +22,14 @@
 #define FEATURE_ESTD_VARIANT_EAGER_DESTRUCT 1
 #endif
 
+
+// We trust SFINAE to choose the right assignment helpers in variant_storage.  However, bugs
+// can happen.  This flag (defaulting to on) generates extra runtime code to alert/abort if
+// we encounter a condition where a non convertible (permissive convert) is actually attempted.
+// Appears to be mainly an artifact of -fpermissive or similar, where things like const char* -> int
+// are considered during SFINAE and then complained about
+// Turn this off to optimize code more, since it ideally isn't needed
+#ifndef FEATURE_ESTD_VARIANT_STRICT_CONVERSION
+#define FEATURE_ESTD_VARIANT_STRICT_CONVERSION 1
+#endif
+
