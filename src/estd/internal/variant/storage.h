@@ -453,6 +453,9 @@ public:
     // this is most useful for when match toggles between two possibilities (such as
     // 'expected')
     /// @param match are we currently tracking 'I'
+    // DEBT: Operates with variant sensibilities, specifically in that as per
+    // https://en.cppreference.com/w/cpp/utility/variant/operator%3D will assign to a
+    // temporary copy of T_j if T_j has a noexcept move constructor or a non-noexcept copy constructor.
     template <size_t I, size_t index, class U>
     void assign_or_init(bool match, U&& u)
     {

@@ -25,7 +25,7 @@ struct Dummy
         val1(val1), value2(val2)
         {}
 
-    Dummy(Dummy&& move_from) :
+    Dummy(Dummy&& move_from) NOEXCEPT :
         val1(move_from.val1),
         value2(move_from.value2),
         moved_{true}
