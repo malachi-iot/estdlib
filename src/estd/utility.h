@@ -9,6 +9,7 @@
 #include "internal/fwd/tuple-shared.h"
 #include "internal/type_traits.h"
 #include "internal/variadic/integer_sequence.h"
+#include "internal/utility.h"
 
 #include "cstddef.h"
 
@@ -111,7 +112,7 @@ typename tuple_element<index, pair<T1, T2> >::type& get(const pair<T1, T2>& p)
 template<class T>
 typename estd::add_rvalue_reference<T>::type declval() */
 
-#ifdef FEATURE_CPP_VARIADIC
+#ifdef __cpp_variadic_templates
 // adapted from https://gist.github.com/ntessore/dc17769676fb3c6daa1f
 template<typename T, std::size_t N, T... Is>
 struct make_integer_sequence : make_integer_sequence<T, N-1, N-1, Is...> {};
@@ -128,66 +129,6 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 #endif
 
 }
-
-// DEBT: Try to move this 'std' portion to an internal or other reduced-dependency
-// area
-#if defined(FEATURE_STD_UTILITY)
-// Utilize stock-standard std version of this if it's available
-#include <utility>
-#elif defined(FEATURE_CPP_MOVESEMANTIC) && defined(FEATURE_CPP_DECLTYPE)
-#include "internal/utility/declval.h"
-#include "internal/utility/forward.h"
-
-// Normally we try to avoid direct substituting std namespace, but in circumstances
-// where std namespace is completely absent,
-// oft-used conventions need to be spliced in
-
-namespace std {
-
-// more or less copy/pasted from GNU reference
-
-/**
- *  @brief  Forward an lvalue.
- *  @return The parameter cast to the specified type.
- *
- *  This function is used to implement "perfect forwarding".
- */
-template<typename _Tp>
-constexpr _Tp&& 
-forward(typename estd::remove_reference<_Tp>::type& __t) noexcept
-{ return static_cast<_Tp&&>(__t); }
-
-
-/**
-   *  @brief  Forward an rvalue.
-   *  @return The parameter cast to the specified type.
-   *
-   *  This function is used to implement "perfect forwarding".
-   */
-template<typename _Tp>
-constexpr _Tp&&
-forward(typename estd::remove_reference<_Tp>::type&& __t) noexcept
-{
-    static_assert(!estd::is_lvalue_reference<_Tp>::value, "template argument"
-        " substituting _Tp is an lvalue reference type");
-    return static_cast<_Tp&&>(__t);
-}
-
-/**
-   *  @brief  Convert a value to an rvalue.
-   *  @param  __t  A thing of arbitrary type.
-   *  @return The parameter cast to an rvalue-reference to allow moving it.
-  */
-  template<typename _Tp>
-    constexpr typename estd::remove_reference<_Tp>::type&&
-    move(_Tp&& __t) noexcept
-    { return static_cast<typename estd::remove_reference<_Tp>::type&&>(__t); }
-
-
-
-
-}
-#endif
 
 namespace estd {
 

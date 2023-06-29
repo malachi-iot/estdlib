@@ -1,6 +1,10 @@
 #pragma once
 
+#if FEATURE_STD_FUNCTIONAL
 #include <functional>
+#else
+#include <estd/utility.h>
+#endif
 
 namespace estd { namespace test {
 
@@ -16,7 +20,11 @@ struct NonTrivial
     bool destroyed_ = false;
     bool moved_from_ = false;
 
+#if FEATURE_STD_FUNCTIONAL
     std::function<void()> on_dtor;
+#else
+    bool on_dtor = false;   // dummy, for environments without std::function
+#endif
 
     explicit NonTrivial(int code) : code_{code} {}
 
@@ -40,7 +48,9 @@ struct NonTrivial
     ~NonTrivial()
     {
         destroyed_ = true;
+#if FEATURE_STD_FUNCTIONAL
         if(on_dtor) on_dtor();
+#endif
     }
 };
 

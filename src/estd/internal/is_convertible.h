@@ -1,21 +1,11 @@
 #pragma once
 
-#include "platform.h"
-#include "raw/type_traits.h"
-#include "../utility.h"
-#include "utility/declval.h"
+#include "utility.h"
 
 // Specifically for is_void
 #include "llvm/is_void.h"
 
 #if __cplusplus >= 201103L
-
-// DEBT: Only pulling in this for declval.  Not pulling in utility.h since that itself
-// includes type_traits which is responsible for is_convertible.  Consider our own implementation
-// of std::declval as per https://en.cppreference.com/w/cpp/utility/declval
-#ifdef FEATURE_STD_UTILITY
-#include <utility>
-#endif
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/types/is_convertible
 namespace estd {

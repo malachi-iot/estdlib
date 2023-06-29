@@ -3,10 +3,14 @@
 #include "platform.h"
 #include "raw/utility.h"
 #include "legacy/utility.h"
-#include "type_traits.h"
+#include "raw/type_traits.h"
 
-#ifdef FEATURE_STD_UTILITY
+#if FEATURE_STD_UTILITY
+// Utilize stock-standard std version of this if it's available
 #include <utility>
+#else
+#include "utility/declval.h"
+#include "utility/forward.h"
 #endif
 
 namespace estd { namespace internal {

@@ -2,21 +2,17 @@
 
 #include "platform.h"
 
-#if FEATURE_STD_TYPE_TRAITS
+#include "feature/type_traits.h"
+
+#if FEATURE_ESTD_TYPE_TRAITS_ALIASED
 #include <type_traits>
 
 namespace estd {
 
 // DEBT: Copy/paste inline version of this from LLVM, GNU, etc.
 #if __cpp_alias_templates
-template <class T, class U>
-using is_assignable = std::is_assignable<T, U>;
-
 template <class T, class ...TArgs>
 using is_constructible = std::is_constructible<T, TArgs...>;
-
-template <class T>
-using is_copy_assignable = std::is_copy_assignable<T>;
 
 template <class T>
 using is_copy_constructible = std::is_copy_constructible<T>;
@@ -25,13 +21,7 @@ template <class T, class ...TArgs>
 using is_nothrow_constructible = std::is_nothrow_constructible<T, TArgs...>;
 
 template <class T>
-using is_nothrow_move_assignable = std::is_nothrow_move_assignable<T>;
-
-template <class T>
 using is_nothrow_move_constructible = std::is_nothrow_move_constructible<T>;
-
-template <class T>
-using is_move_assignable = std::is_move_assignable<T>;
 
 template <class T, class ...TArgs>
 using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
@@ -101,12 +91,5 @@ using is_nothrow_constructible = detail::is_constructible<void_t<>, T, Args...>;
 template <class T, class... Args>
 using is_nothrow_move_constructible = detail::is_move_constructible<void_t<>, T, Args...>;
 
-template<typename T, typename U, typename = void>
-struct is_assignable : false_type {};
-
-template<typename T, typename U>
-struct is_assignable<T, U, decltype(std::declval<T>() = std::declval<U>(), void())> :
-    true_type {};
 }
-
 #endif

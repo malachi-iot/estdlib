@@ -21,5 +21,8 @@ template <class T>
 using add_pointer_t = typename add_pointer<T>::type;
 #endif
 
+template <class Base, class Derived>
+struct is_base_of;
+
 
 }

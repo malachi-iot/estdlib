@@ -22,6 +22,7 @@ template<typename _Tp>
 
 template<typename _Tp>
     auto declval() noexcept -> decltype(__declval<_Tp>(0));
+
 }
 
 #endif

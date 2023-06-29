@@ -14,11 +14,7 @@
 #error variant: only eager destruct mode supported
 #endif
 
-#if FEATURE_STD_CSTDLIB
-#include <cstdlib>
-#else
-#include "stdlib.h"
-#endif
+#include "../cstdlib.h"
 
 namespace estd {
 
