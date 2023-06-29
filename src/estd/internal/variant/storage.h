@@ -375,11 +375,22 @@ public:
         new (storage.raw) type_at_index<I> (std::move(*move_from.get<I>()));
     }
 
-
-    template <size_t I, class T_j, class T,
+    /*
+    template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
-            is_nothrow_constructible<T_j, T>::value ||
-            !is_nothrow_move_constructible<T_j>::value> >
+            !is_convertible<T, T_i>::value &&
+            (is_nothrow_constructible<T_i, T>::value ||
+            !is_nothrow_move_constructible<T_i>::value)> >
+    void assignment_emplace_helper(T&&, long = 0)
+    {
+    } */
+
+
+    template <size_t I, class T_i, class T,
+        class enabled = enable_if_t<
+            //is_convertible<T, T_i>::value &&
+            (is_nothrow_constructible<T_i, T>::value ||
+            !is_nothrow_move_constructible<T_i>::value)> >
     void assignment_emplace_helper(T&& t, bool = true)
     {
         emplace<I>(std::forward<T>(t));
@@ -411,14 +422,27 @@ public:
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<estd::is_trivial<T_i>::value> >
+        class enabled = enable_if_t<
+            //is_convertible<T, T_i>::value &&
+            estd::is_trivial<T_i>::value> >
     void direct_init_helper(T&& t)
     {
         *get<I>() = std::forward<T>(t);
     }
 
+    /*
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<!estd::is_trivial<T_i>::value> >
+        class enabled = enable_if_t<
+            estd::is_trivial<T_i>::value &&
+            !is_convertible<T, T_i>::value> >
+    void direct_init_helper(T&& t, long = 0)
+    {
+        *get<I>() = std::forward<T>(t);
+    }   */
+
+    template <size_t I, class T_i, class T,
+        class enabled = enable_if_t<
+            !estd::is_trivial<T_i>::value> >
     void direct_init_helper(T&& t, bool = true)
     {
         assignment_emplace_helper<I, T_i>(std::forward<T>(t));

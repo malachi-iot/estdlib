@@ -19,21 +19,21 @@ struct Dummy
     const bool copied_ = false;
 
     // because underlying struct is an array for layer1::queue, darnit
-    Dummy() {}
+    Dummy() = default;
 
     Dummy(int val1, const char* val2) :
         val1(val1), value2(val2)
         {}
 
     Dummy(Dummy&& move_from) :
-        val1(std::move(move_from.val1)),
-        value2(std::move(move_from.value2)),
+        val1(move_from.val1),
+        value2(move_from.value2),
         moved_{true}
     {
 
     }
 
-    explicit Dummy(const Dummy& copy_from) :
+    Dummy(const Dummy& copy_from) :
         val1(copy_from.val1),
         value2(copy_from.value2),
         copied_{true}
