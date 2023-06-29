@@ -11,14 +11,15 @@
 // 1/20/2020: No longer the case:
 //            32u4 compiles 92 bytes larger :(
 //            attiny85 compiles 32 bytes larger :(
+// 29JUN23:   Back again! same size!
 #define TEST_CHRONO
 
 using namespace estd::chrono;
+using namespace estd::chrono_literals;
 
-// DEBT: Currently our own alias of steady_clock is largely inactive
-// However, the whole estd::chrono feature is for environments which
-// may not have std lib in the first place so this using breaks that
-using std::chrono::steady_clock;
+// DEBT: Make a test flavor of this that excercises std::steady_clock
+// However, arduino_clock is 100% appropriate here
+using steady_clock = estd::chrono::arduino_clock;
 
 steady_clock::time_point start;
 uint32_t start_ms;
@@ -46,7 +47,7 @@ void loop()
 
     long count = duration_cast<milliseconds>(now - start).count();
 
-    estd::this_thread::sleep_for(milliseconds(1000));
+    estd::this_thread::sleep_for(1000ms);
 #else
     uint32_t now_ms = millis();
 
