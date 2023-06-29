@@ -16,14 +16,18 @@ void infuse_unexpected(E err)
     REQUIRE(e.error() == ue.error());
 }
 
-template <class T>
-static estd::expected<T, estd::errc> err_return()
-{
-    return estd::unexpected<estd::errc>(estd::errc::invalid_argument);
-}
-
 using namespace estd;
 
+
+template <class T>
+static expected<T, errc> err_return()
+{
+#if __cpp_deduction_guides
+    return unexpected(errc::invalid_argument);
+#else
+    return unexpected<errc>(errc::invalid_argument);
+#endif
+}
 
 typedef estd::test::NonTrivial ExplicitError;
 

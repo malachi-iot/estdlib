@@ -37,12 +37,20 @@ public:
     constexpr unexpected(const unexpected&) = default;
     constexpr unexpected(unexpected&&) noexcept = default;
 
-    template <class Err = E>
+    // DEBT: needs filters to be not same as unexpected, in_place_t, etc
+    template <class Err = E, bool enabled = true>
     constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
+
+    // TODO: Need in_place_t ctor
 #else
     ESTD_CPP_CONSTEXPR_RET unexpected(const E& e) : base_type(e) {}
 #endif
 };
+
+#if __cpp_deduction_guides
+template <class E>
+unexpected(E) -> unexpected<E>;
+#endif
 
 
 template <class T, class E>
