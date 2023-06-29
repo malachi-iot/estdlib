@@ -207,6 +207,8 @@ TEST_CASE("optional")
 
             REQUIRE(val > 4);
             REQUIRE(val == 5);
+            REQUIRE(val < 10);
+            REQUIRE(val <= 10);
 
             int val2 = -1;
 

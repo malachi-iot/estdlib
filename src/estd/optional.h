@@ -315,6 +315,10 @@ public:
 
 namespace layer1 {
 
+#if __cpp_alias_templates__NOTREADY
+template <class T, T null_value = internal::optional_default_value<T>::value>
+using optional = estd::optional<T, internal::layer1::optional_base<T, null_value> >;
+#else
 // DEBT: Has some kind of MSVC compatibility
 template <class T, T null_value = internal::optional_default_value<T>::value>
 class optional : public estd::optional<T, internal::layer1::optional_base<T, null_value> >
@@ -387,18 +391,6 @@ public:
         base_type::operator=(value);
         return *this;
     }
-
-/*
-    optional& operator=(const estd::optional<value_type>& assign_from)
-    {
-        copy(assign_from);
-        return *this;
-    } */
-
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-    operator bool() const { return base_type::has_value(); }
 };
 
 
@@ -411,7 +403,7 @@ public:
 
     ESTD_CPP_FORWARDING_CTOR(optional)
 };
-
+#endif
 
 }
 
@@ -439,16 +431,27 @@ ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& v
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator>(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? *opt > value : false;
+    return opt && *opt > value;
 }
 
 
 template <class T, class U, class TBase>
 ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& value)
 {
-    return opt.has_value() ? *opt < value : false;
+    return opt && *opt < value;
 }
 
+template <class T, class U, class TBase>
+ESTD_CPP_CONSTEXPR_RET bool operator<=(const optional<T, TBase>& opt, const U& value)
+{
+    return opt && *opt <= value;
+}
+
+template <class T, class U, class TBase>
+ESTD_CPP_CONSTEXPR_RET bool operator>=(const optional<T, TBase>& opt, const U& value)
+{
+    return opt && *opt >= value;
+}
 
 
 }
