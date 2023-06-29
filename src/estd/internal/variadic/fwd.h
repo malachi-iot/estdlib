@@ -3,6 +3,8 @@
 #include "../raw/cstddef.h"
 #include "../raw/utility.h"
 
+#include "concepts.h"
+
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
 
@@ -34,6 +36,9 @@ namespace detail {
 
 template <size_t size, class TEval, class ...Types>
 struct selector;
+
+template <size_t size, class TEval, class T, T ...Types>
+struct value_selector;
 
 }
 

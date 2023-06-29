@@ -130,6 +130,19 @@ public:
     static constexpr bool all = selected::size() == sizeof...(Types) + 1;
 };
 
+template <size_t size, class TEval, class T, T t, T ...Values>
+struct value_selector<size, TEval, T, t, Values...>
+{
+private:
+    typedef value_selector<size, TEval, T, Values...> upward;
+
+public:
+    static constexpr size_t index = ((size - 1) - sizeof...(Values));
+
+    using evaluated = typename TEval::template evaluator<T, index>;
+    static constexpr bool eval = evaluated::value;
+};
+
 
 }
 
