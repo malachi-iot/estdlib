@@ -8,7 +8,7 @@ using namespace estd;
 
 estd::optional<int> returning_optional(int val)
 {
-    if(val == 10) return estd::nullopt;
+    if(val == 10) return nullopt;
 
     if(val == 20) return {};
 
@@ -52,9 +52,9 @@ enum PlainOldEnum
 namespace estd { namespace internal {
 
 template<>
-struct optional_base<SpecializedEnum> : optional_bitwise<SpecializedEnum, 4>
+struct optional_base<SpecializedEnum> : layer1::optional_base<SpecializedEnum, 4>
 {
-    typedef optional_bitwise<SpecializedEnum, 4> base_type;
+    typedef layer1::optional_base<SpecializedEnum, 4> base_type;
 
     ESTD_CPP_FORWARDING_CTOR(optional_base)
 };
@@ -278,10 +278,9 @@ TEST_CASE("optional")
     }
     SECTION("auto specializing based on traits/base")
     {
-        // This experiment works quite well, it's a matter of naming/convention/usability to work out now
-
         estd::optional<SpecializedEnum> o;
 
+        REQUIRE(o.bitsize() == 4);
         REQUIRE(o.has_value() == false);
 
         o = Value1;
@@ -289,6 +288,8 @@ TEST_CASE("optional")
         REQUIRE(o == Value1);
 
         o.reset();
+
+        REQUIRE(sizeof(o) == sizeof(SpecializedEnum));
     }
     SECTION("non trivial")
     {

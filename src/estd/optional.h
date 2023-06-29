@@ -315,15 +315,15 @@ public:
 
 namespace layer1 {
 
-#if __cpp_alias_templates__NOTREADY
+#if FEATURE_ESTD_OPTIONAL_LAYER1_ALIAS
 template <class T, T null_value = internal::optional_default_value<T>::value>
-using optional = estd::optional<T, internal::layer1::optional_base<T, null_value> >;
+using optional = estd::optional<T, internal::layer1::optional<T, null_value> >;
 #else
-// DEBT: Has some kind of MSVC compatibility
+// DEBT: Has some kind of MSVC incompatibility
 template <class T, T null_value = internal::optional_default_value<T>::value>
-class optional : public estd::optional<T, internal::layer1::optional_base<T, null_value> >
+class optional : public estd::optional<T, internal::layer1::optional<T, null_value> >
 {
-    typedef estd::optional<T, internal::layer1::optional_base<T, null_value> > base_type;
+    typedef estd::optional<T, internal::layer1::optional<T, null_value> > base_type;
     typedef typename base_type::value_type value_type;
 
 protected:
@@ -391,17 +391,6 @@ public:
         base_type::operator=(value);
         return *this;
     }
-};
-
-
-template <>
-class optional<bool> : public estd::optional<bool, estd::internal::optional_bitwise<bool, 1> >
-{
-    typedef estd::optional<bool, estd::internal::optional_bitwise<bool, 1> > base_type;
-
-public:
-
-    ESTD_CPP_FORWARDING_CTOR(optional)
 };
 #endif
 

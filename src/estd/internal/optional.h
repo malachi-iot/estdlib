@@ -2,21 +2,12 @@
 
 #include "../new.h"
 #include "type_traits.h"
+#include "fwd/optional.h"
 #include "variant/storage.h"
 
 namespace estd {
 
 namespace internal {
-
-// DEBT: Move to proper forward area
-template <class T>
-struct optional_base;
-
-// EXPERIMENTAL
-// I don't love that it's encouraged to have '0' as default null value integer, so
-// playing with this.
-template <class T, class enabled = void>
-struct optional_default_value;
 
 // TODO: Experiment with making this -1
 template <class T>
@@ -32,10 +23,6 @@ struct optional_default_value<bool> :
 
 
 }
-
-// DEBT: Put forward off into dedicated forward area
-template <class T, class TBase = internal::optional_base<T> >
-class optional;
 
 namespace internal {
 
@@ -226,64 +213,17 @@ struct optional_base : optional_value_provider<T>,
     }
 };
 
-// NOTE: T is necessarily trivial
-template <class T, unsigned bit_count>
-class optional_bitwise
-{
-    struct
-    {
-        T value_ : bit_count;
-        bool has_value_ : 1;
-    };
-
-protected:
-    void value(T v) { value_ = v; }
-    void has_value(bool initialized) { has_value_ = initialized; }
-
-#if __cpp_rvalue_references
-    template <class U>
-    void assign_value(bool, U&& u)
-    {
-        value_ = std::forward<U>(u);
-    }
-#endif
-
-    template <class U>
-    void assign_value(bool, const U& u)
-    {
-        value_ = u;
-    }
-
-    // DEBT: Make a converting constructor also
-    ESTD_CPP_CONSTEXPR_RET optional_bitwise(const optional_bitwise& copy_from) :
-        value_(copy_from.value_),
-        has_value_(copy_from.has_value_)
-    {}
-
-    ESTD_CPP_CONSTEXPR_RET optional_bitwise() :
-        has_value_(false)
-    {}
-
-    ESTD_CPP_CONSTEXPR_RET optional_bitwise(in_place_t, const T& v) :
-        value_(v), has_value_(true)
-    {}
-
-public:
-    typedef T value_type;
-    typedef value_type return_type;
-    typedef value_type const_return_type;
-
-    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
-    void reset() { has_value_ = false; }
-
-    // Deviates from spec here, since bitfield precludes returning a reference    
-    ESTD_CPP_CONSTEXPR_RET value_type value() const { return value_; }
-};
-
 namespace layer1 {
 
+// NOTE: for layer1, T is expected to be trivial
+// DEBT: Make a c++20 concept to enforce this
+
+template <class T, unsigned bitsize, T null_value_ = T()>
+class optional_base;
+
+// regular null_value flavor
 template <class T, T null_value_>
-class optional_base : public optional_value_provider<T>
+class optional_base<T, 0, null_value_> : public optional_value_provider<T>
 {
     typedef optional_value_provider<T> base_type;
 
@@ -328,6 +268,68 @@ public:
 
     static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
 };
+
+
+// bitwise flavor
+template <class T, unsigned bitsize_, T>
+class optional_base
+{
+    struct
+    {
+        T value_ : bitsize_;
+        bool has_value_ : 1;
+    };
+
+protected:
+    void value(T v) { value_ = v; }
+    void has_value(bool initialized) { has_value_ = initialized; }
+
+#if __cpp_rvalue_references
+    template <class U>
+    void assign_value(bool, U&& u)
+    {
+        value_ = std::forward<U>(u);
+    }
+#endif
+
+    template <class U>
+    void assign_value(bool, const U& u)
+    {
+        value_ = u;
+    }
+
+    // DEBT: Make a converting constructor also
+    ESTD_CPP_CONSTEXPR_RET optional_base(const optional_base& copy_from) :
+        value_(copy_from.value_),
+        has_value_(copy_from.has_value_)
+    {}
+
+    ESTD_CPP_CONSTEXPR_RET optional_base() :
+        has_value_(false)
+    {}
+
+    ESTD_CPP_CONSTEXPR_RET optional_base(in_place_t, const T& v) :
+        value_(v), has_value_(true)
+    {}
+
+public:
+    typedef T value_type;
+    typedef value_type return_type;
+    typedef value_type const_return_type;
+
+    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
+    void reset() { has_value_ = false; }
+
+    // Deviates from spec here, since bitfield precludes returning a reference
+    ESTD_CPP_CONSTEXPR_RET value_type value() const { return value_; }
+
+    static ESTD_CPP_CONSTEXPR_RET const unsigned bitsize() { return bitsize_; }
+};
+
+#if __cpp_alias_templates
+template <class T, T null_value_>
+using optional = optional_base<T, is_same<T, bool>::value ? 1 : 0, null_value_>;
+#endif
 
 }
 
