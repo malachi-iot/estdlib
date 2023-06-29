@@ -61,6 +61,7 @@ struct sparse_tuple
 
 #if __cpp_variadic_templates
 // 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
+// TODO: use new variadic support area instead of this
 
 template<int index, typename First, typename... Rest>
 struct GetImpl : GetImpl<index - 1, Rest...>
@@ -85,13 +86,15 @@ struct GetImpl<0, First, Rest...>
 {
     typedef First first_type;
     using tuple_type = tuple<First, Rest...>;
+    using valref_type = typename tuple<First>::valref_type;
+    using const_valref_type = typename tuple<First>::const_valref_type;
 
-    static typename tuple_type::const_valref_type value(const tuple<First, Rest...>& t)
+    static const_valref_type value(const tuple<First, Rest...>& t)
     {
         return t.first();
     }
 
-    static typename tuple_type::valref_type value(tuple<First, Rest...>& t)
+    static valref_type value(tuple<First, Rest...>& t)
     {
         return t.first();
     }

@@ -27,7 +27,7 @@ static void test_variant_1()
 
 static void test_variant_nontrivial()
 {
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L && FEATURE_STD_FUNCTIONAL
     int counter = 0;
     variant<int, estd::test::NonTrivial> v(
         in_place_index_t<1>{}, 7, [&]{++counter;}), v2;

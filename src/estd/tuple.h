@@ -11,6 +11,8 @@ template <std::size_t I, class T>
 using tuple_element_t = typename tuple_element<I, T>::type;
 
 
+// TODO: Feed tuple_element from new variadic support code
+
 // recursive case
 template< std::size_t I, class Head, class... Tail >
 struct tuple_element<I, estd::tuple<Head, Tail...>>
@@ -20,8 +22,8 @@ struct tuple_element<I, estd::tuple<Head, Tail...>>
 template< class Head, class... Tail >
 struct tuple_element<0, estd::tuple<Head, Tail...>>
 {
-    using valref_type = typename estd::tuple<Head, Tail...>::valref_type;
-    using const_valref_type = typename estd::tuple<Head, Tail...>::const_valref_type;
+    using valref_type = typename estd::tuple<Head>::valref_type;
+    using const_valref_type = typename estd::tuple<Head>::const_valref_type;
 
     typedef Head type;
 };

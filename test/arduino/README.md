@@ -22,7 +22,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | string      | 29JUN23 | Microchip | AVR 32u4      | Compiles |
 | unity       | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | unity       | 27JUN23 | Microchip | ARM SAMD51 m4 | Compiles |
-| unity       | 27JUN23 | Microchip | AVR 32u4      | Fail     |
+| unity       | 30JUN23 | Microchip | AVR 32u4      | Compiles |
 | unity       | 27JUN23 | Espressif | ESP32S        | Compiles |
 | unity       | 27JUN23 | Espressif | ESP32C3       | Fail     | pio can't find compiler package
 | unity       | 27JUN23 | STM       | STM32F303K8   | Compiles |
