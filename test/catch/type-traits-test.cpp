@@ -101,19 +101,19 @@ TEST_CASE("type traits tests")
         REQUIRE(is_convertible<test::ChildOfDummy*, test::Dummy*>::value == true);
         REQUIRE(is_convertible<test::Dummy*, test::ChildOfDummy*>::value == false);
 
-        bool v1 = std::is_convertible<monostate, float>::value;
+        bool v1 = is_convertible<monostate, float>::value;
 
         REQUIRE(v1 == false);
 
-        v1 = std::is_convertible<float, monostate>::value;
+        v1 = is_convertible<float, monostate>::value;
 
         REQUIRE(v1 == false);
 
-        v1 = std::is_convertible<int, const char*>::value;
+        v1 = is_convertible<int, const char*>::value;
 
         REQUIRE(v1 == false);
 
-        v1 = estd::is_constructible<const char*, int>::value;
+        v1 = is_constructible<const char*, int>::value;
 
         REQUIRE(v1 == false);
 
@@ -127,6 +127,24 @@ TEST_CASE("type traits tests")
         v1 = is_assignable<test::NonTrivial&, test::NonTrivial>::value;
 
         REQUIRE(v1 == false);
+    }
+    SECTION("is_constructible")
+    {
+        bool v1 = is_nothrow_constructible<test::Dummy, test::Dummy>::value;
+
+        REQUIRE(v1);
+
+        v1 = is_nothrow_constructible<test::Dummy, test::Dummy&&>::value;
+
+        REQUIRE(v1 == true);
+
+        v1 = is_nothrow_constructible<test::Dummy, const test::Dummy&>::value;
+
+        REQUIRE(v1 == false);
+
+        v1 = is_nothrow_move_constructible<test::Dummy>::value;
+
+        REQUIRE(v1);
     }
 }
 

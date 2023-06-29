@@ -386,6 +386,8 @@ public:
     } */
 
 
+    // DEBT: We often don't get here because is_nothrow_constructible doesn't like a const T&
+    // Not sure yet if that's "proper behavior" as indicated by variant docs, but seems to be
     template <size_t I, class T_i, class T,
         class enabled = enable_if_t<
             //is_convertible<T, T_i>::value &&
