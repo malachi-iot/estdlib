@@ -63,6 +63,12 @@ struct values;
 template <class T, bool v = true>
 struct projected_result;
 
+template <class T, T ...Values>
+struct value_visitor;
+
+template <class ...Types>
+struct type_visitor;
+
 }
 
 template <class ...Types>

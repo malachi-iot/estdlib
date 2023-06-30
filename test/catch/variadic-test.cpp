@@ -86,6 +86,21 @@ struct synthetic_projector
 
 TEST_CASE("variadic")
 {
+    SECTION("types")
+    {
+        typedef variadic::types<monostate, float, char*> types;
+
+        REQUIRE(is_same<monostate, types::get<0>>::value);
+        REQUIRE(is_same<char*, types::get<2>>::value);
+
+        SECTION("prepend")
+        {
+            using prepended = types::prepend<void>;
+
+            REQUIRE(prepended::size() == 4);
+            REQUIRE(is_same<float, prepended::get<2>>::value);
+        }
+    }
     SECTION("select_type")
     {
         SECTION("basic")
@@ -137,7 +152,7 @@ TEST_CASE("variadic")
     {
         SECTION("static")
         {
-            typedef variadic::visitor<monostate, int, float, const char*> vh_type;
+            typedef variadic::type_visitor<monostate, int, float, const char*> vh_type;
 
             int result = vh_type::visit(identify_index_functor{}, 1);
 
@@ -145,7 +160,7 @@ TEST_CASE("variadic")
         }
         SECTION("tuple instance")
         {
-            typedef variadic::visitor<float, const char*, int> vh_type;
+            typedef variadic::type_visitor<float, const char*, int> vh_type;
 
             tuple<float, const char*, int> t(1.2, &test::str_hello[0], 7);
             const char* output = nullptr;
@@ -171,7 +186,7 @@ TEST_CASE("variadic")
             // which takes variant as an input (so as to be slightly
             // more std-like)
 
-            typedef variadic::visitor<monostate, int, float, const char*> vh_type;
+            typedef variadic::type_visitor<monostate, int, float, const char*> vh_type;
 
             variant<monostate, int, float, const char*> v;
 
@@ -242,11 +257,20 @@ TEST_CASE("variadic")
     SECTION("values")
     {
         typedef variadic::values<int, 0, 7, 77, 777> values;
-        typedef internal::value_visitor<int, 0, 7, 77, 777> visitor;
 
-        int index = visitor::visit(identify_value_functor{}, 77);
+        SECTION("visit")
+        {
+            int index = values::visit(identify_value_functor{}, 77);
 
-        REQUIRE(index == 2);
+            REQUIRE(index == 2);
+
+            // Nifty trick - since integral_constant has a value_type conversion
+            // operator, we can directly specify 'int' for v
+            index = values::visit([](int v, int compare_to)
+              { return v == compare_to; }, 777);
+
+            REQUIRE(index == 3);
+        }
     }
     // TODO: Move this out to 'utility' test area
     SECTION("integer_sequence")
@@ -326,7 +350,7 @@ TEST_CASE("variadic")
         }
         SECTION("test2")
         {
-            typedef variadic::visitor<int, float, monostate, int> type;
+            typedef variadic::type_visitor<int, float, monostate, int> type;
 
             REQUIRE(type::select<internal::is_same_selector<int>>::indices::size() == 2);
             REQUIRE(type::select<internal::is_same_projector<float>>::all == true);

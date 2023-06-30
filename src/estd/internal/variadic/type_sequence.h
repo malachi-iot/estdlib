@@ -30,6 +30,8 @@ struct type_sequence_accessor
     using first = get<0>;
 
     using last = get<size() - 1>;
+
+    using visitor = variadic::type_visitor<Types...>;
 };
 
 template <>

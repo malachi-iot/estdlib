@@ -184,7 +184,7 @@ class variant : protected variant_storage<Types...>
     friend struct variant_storage_getter_functor;
 
     // DEBT: I'd like to phase this one out if we can
-    friend struct variadic::visitor<Types...>;
+    friend struct variadic::type_visitor<Types...>;
 
 public:
     template <class T>

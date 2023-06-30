@@ -31,6 +31,8 @@ struct legacy_visit_instance_functor
     }
 };
 
+// DEBT: This name and namespace location are confusing in respect to
+// the existence of value_visitor
 template <size_t I, class T, T v>
 struct visitor_value :
     in_place_index_t<I>,
@@ -39,30 +41,6 @@ struct visitor_value :
 
 };
 
-template <class T, T ...Values>
-struct value_visitor
-{
-    using values = variadic::values<T, Values...>;
-
-    template <size_t I,
-            class enabled = enable_if_t<(I == sizeof...(Values))>,
-            class... TArgs,
-            class F>
-    static constexpr short visit(F&&, TArgs&&...) { return -1; }
-
-    template <size_t I = 0, class F,
-            class enabled = enable_if_t<(I < sizeof...(Values))>,
-            class... TArgs>
-    static int visit(F&& f, TArgs&&...args)
-    {
-        visitor_value<I, T, values::template get<I>::value> v{};
-
-        if(f(v, std::forward<TArgs>(args)...))
-            return I;
-
-        return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
-    }
-};
 
 }
 
@@ -118,8 +96,34 @@ concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
 #endif
 
 
+template <class T, T ...Values>
+struct value_visitor
+{
+    template <size_t I>
+    using get = internal::get_index_finder<I, T, Values...>;
+
+    template <size_t I>
+    using indexer = internal::visitor_value<I, T, get<I>::value>;
+
+    template <size_t I,
+        class enabled = enable_if_t<(I == sizeof...(Values))>,
+        class... TArgs,
+        class F>
+    static constexpr short visit(F&&, TArgs&&...) { return -1; }
+
+    template <size_t I = 0, class F,
+        class enabled = enable_if_t<(I < sizeof...(Values))>,
+        class... TArgs>
+    constexpr static int visit(F&& f, TArgs&&...args)
+    {
+        return f(indexer<I>{}, std::forward<TArgs>(args)...) ?
+            I :
+            visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+    }
+};
+
 template <typename... Types>
-struct visitor
+struct type_visitor
 {
     //typedef layer1::optional<size_t, internal::variant_npos()> return_type;
 

@@ -44,6 +44,18 @@ struct value_sequence_single<T, I>
     static constexpr T single() { return I; }
 };
 
+template <typename T, T ...Values>
+struct value_sequence_accessor
+{
+    using visitor = variadic::value_visitor<T, Values...>;
+
+    template <class F, class ...TArgs>
+    constexpr static int visit(F&& f, TArgs&&...args)
+    {
+        return visitor::visit(std::forward<F>(f), std::forward<TArgs>(args)...);
+    }
+};
+
 
 }
 
@@ -53,7 +65,9 @@ namespace variadic {
 // Since we can track pointers and references too, I prefer the name variadic::values
 // rather than integer_sequence
 template <typename T, T ...Is>
-struct values : internal::value_sequence_single<T, Is...>
+struct values :
+    internal::value_sequence_single<T, Is...>,
+    internal::value_sequence_accessor<T, Is...>
 {
     static constexpr size_t size() { return sizeof...(Is); }
 

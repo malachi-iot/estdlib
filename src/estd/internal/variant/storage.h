@@ -127,6 +127,7 @@ struct variant_storage_base : variant_storage_tag
 {
     using size_type = std::size_t;
     typedef variant_storage_base<trivial, Types...> this_type;
+    using types = variadic::types<Types...>;
 
     struct index_visitor
     {
@@ -181,7 +182,7 @@ struct variant_storage_base : variant_storage_tag
 
     static constexpr bool is_trivial = trivial;
 
-    using visitor = variadic::visitor<Types...>;
+    using visitor = variadic::type_visitor<Types...>;
 
     template <class F, class ...TArgs>
     int visit_index(size_type index, F&& f, TArgs&&...args)
