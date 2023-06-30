@@ -31,11 +31,17 @@ struct legacy_visit_instance_functor
     }
 };
 
+template <size_t I>
+struct visitor_index : in_place_index_t<I>
+{
+    static constexpr size_t index = I;
+};
+
 // DEBT: This name and namespace location are confusing in respect to
 // the existence of value_visitor
 template <size_t I, class T, T v>
 struct visitor_value :
-    in_place_index_t<I>,
+    visitor_index<I>,
     integral_constant<T, v>
 {
 
@@ -47,12 +53,11 @@ struct visitor_value :
 namespace variadic {
 
 template <size_t I, class T>
-struct visitor_index  :
-        in_place_index_t<I>,
-        in_place_type_t<T>,
-        type_identity<T>
+struct visitor_index :
+    internal::visitor_index<I>,
+    in_place_type_t<T>,
+    type_identity<T>
 {
-    static constexpr size_t index = I;
 };
 
 template <size_t I, class T>
