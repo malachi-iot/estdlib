@@ -90,6 +90,8 @@ struct uint_strlen<8, bits> :
 template <class T, bool _is_signed>
 struct integer_limits
 {
+    static CONSTEXPR bool is_specialized = true;
+
     // non-standard, how many bits in this T
     static CONSTEXPR unsigned bits = (sizeof(T) * CHAR_BIT);
 
@@ -111,10 +113,26 @@ struct integer_limits
                 (is_signed ? 1 : 0)> {};
 };
 
+template <class T, bool is_signed_ = true>
+struct float_limits
+{
+    static CONSTEXPR bool is_specialized = true;
+
+    // non-standard, how many bits in this T
+    static CONSTEXPR unsigned bits = (sizeof(T) * CHAR_BIT);
+
+    static CONSTEXPR bool is_integer = false;
+    static CONSTEXPR bool is_signed = is_signed_;
+};
+
 // We maintain this internal one because it helps quite a bit with int -> precision
 // mapping.
 // DEBT: Just as above, strongly consider making this into 'detail' namespace
-template <class T> struct numeric_limits;
+template <class T>
+struct numeric_limits
+{
+    static CONSTEXPR bool is_specialized = false;
+};
 
 template <>
 struct numeric_limits<int8_t> : internal::integer_limits<int8_t, true>
@@ -190,6 +208,48 @@ struct numeric_limits<__int128> :  internal::integer_limits<__int128, true>
     static CONSTEXPR uint64_t min() { return 0; }
     // FIX: the following is just an approximation for now
     static CONSTEXPR uint64_t max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
+};
+#endif
+
+#ifdef __FLT_MIN__
+template <>
+struct numeric_limits<float> : internal::float_limits<float>
+{
+    static ESTD_CPP_CONSTEXPR_RET float lowest()
+    {
+        return -__FLT_MAX__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET float min()
+    {
+        return __FLT_MIN__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET float max()
+    {
+        return __FLT_MAX__;
+    }
+};
+#endif
+
+#ifdef __DBL_MIN__
+template <>
+struct numeric_limits<double> : internal::float_limits<double>
+{
+    static ESTD_CPP_CONSTEXPR_RET double lowest()
+    {
+        return -__DBL_MAX__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET double min()
+    {
+        return __DBL_MIN__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET double max()
+    {
+        return __DBL_MAX__;
+    }
 };
 #endif
 

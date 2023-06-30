@@ -153,6 +153,12 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v1);
     }
+    SECTION("is_floating_point")
+    {
+        bool v1 = is_floating_point<double>::value;
+
+        REQUIRE(v1);
+    }
 }
 
 #include "macro/pop.h"

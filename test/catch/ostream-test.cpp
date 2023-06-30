@@ -35,7 +35,7 @@ TEST_CASE("ostream")
         double v = 7;
 
         // FIX: c++ permits this narrowing conversion, but we want to prohibit it
-        out << v;
+        //out << v;
 
         // TODO: Comes out as a char, so raw 7 not '7' - see above
         //REQUIRE(out.rdbuf()->str()[0] == '7');

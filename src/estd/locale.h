@@ -11,6 +11,7 @@
 #include "internal/locale/facet.h"
 #include "internal/locale/money.h"
 #include "internal/locale/num_get.h"
+#include "internal/locale/num_put.h"
 #include "internal/locale/numpunct.h"
 
 

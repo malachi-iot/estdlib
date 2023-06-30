@@ -54,12 +54,21 @@ typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStr
     return out_int_helper(out, value);
 }
 
+template <class TStreambuf, class TBase, typename T>
+typename enable_if<is_floating_point<T>::value, basic_ostream<TStreambuf, TBase>&>::type
+operator <<(basic_ostream<TStreambuf, TBase>& out, T)
+{
+    static_assert(!is_floating_point<T>::value, "Not yet supported");
+    return out;
+}
+
+
 template <class TStreambuf, class TBase>
 inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
-                                                        typename TBase::char_type ch)
+    typename TBase::char_type ch)
 {
 #if FEATURE_ESTD_OSTREAM_SETW
-    streamsize pad = out.width();
+    const streamsize pad = out.width();
 
     out.fill_n(pad - 1);
     out.width(0);

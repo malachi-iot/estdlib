@@ -1,6 +1,7 @@
 // declarations
 #pragma once
 
+#include "platform.h"
 #include "locale/fwd.h"
 
 namespace estd { namespace internal {
