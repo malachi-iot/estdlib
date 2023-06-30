@@ -117,6 +117,13 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v1 == false);
 
+        v1 = is_convertible<double, char>::value;
+
+        REQUIRE(v1 == true);
+
+        v1 = std::is_convertible<double, char>::value;
+
+        REQUIRE(v1 == true);
     }
     SECTION("is_assignable")
     {
