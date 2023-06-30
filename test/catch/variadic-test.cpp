@@ -20,6 +20,15 @@ struct identify_index_functor
     }
 };
 
+struct identify_value_functor
+{
+    template <size_t I, class T, T v>
+    constexpr bool operator()(internal::visitor_value<I, T, v>, T&& param) const
+    {
+        return param == v;
+    }
+};
+
 // NOTE: Works well enough we might put it out into tuple area
 struct tuple_getter_functor
 {
@@ -229,6 +238,15 @@ TEST_CASE("variadic")
         bool v = is_same<float, first_type>::value;
 
         REQUIRE(v);
+    }
+    SECTION("values")
+    {
+        typedef variadic::values<int, 0, 7, 77, 777> values;
+        typedef internal::value_visitor<int, 0, 7, 77, 777> visitor;
+
+        int index = visitor::visit(identify_value_functor{}, 77);
+
+        REQUIRE(index == 2);
     }
     // TODO: Move this out to 'utility' test area
     SECTION("integer_sequence")

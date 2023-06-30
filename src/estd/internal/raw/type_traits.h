@@ -17,7 +17,7 @@ struct integral_constant {
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
 #endif
-    operator value_type() const { return value; }
+    operator value_type() const NOEXCEPT { return value; }
     //constexpr value_type operator()() const noexcept { return value; } //since c++14
 };
 
