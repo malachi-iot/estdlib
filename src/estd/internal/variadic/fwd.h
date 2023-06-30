@@ -78,6 +78,19 @@ struct types;
 template <typename T, T ...Is>
 struct values;
 
+#if __cpp_template_auto
+namespace experimental {
+
+template <auto ...Is>
+struct v;
+
+template <auto T, decltype(T) ...Is>
+using v2 = values<decltype(T), T, Is...>;
+
+
+}
+#endif
+
 template <class T, bool v = true>
 struct projected_result;
 

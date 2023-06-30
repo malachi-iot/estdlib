@@ -83,6 +83,15 @@ struct values :
     static constexpr T first() { return get<0>::value; }
 };
 
+#if __cpp_template_auto
+namespace experimental {
+
+template <auto T, decltype(T) ...Is>
+struct v<T, Is...> : values<decltype(T), T, Is...> {};
+
+}
+#endif
+
 }
 
 // NOTE: Superset of regular integer_sequence, this one has get, append

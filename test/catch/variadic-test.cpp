@@ -363,6 +363,17 @@ TEST_CASE("variadic")
             REQUIRE(is_same<projected::single::type, double>::value);
         }
     }
+    SECTION("experimental")
+    {
+#if __cpp_template_auto
+        static constexpr const char* c1 = "hello";
+        using v = variadic::experimental::v<0, *c1>;
+        using values = variadic::experimental::v2<0, 4, 7>;
+
+        REQUIRE(values::size() == 3);
+        REQUIRE(values::get<1>() == 4);
+#endif
+    }
 }
 
 #include "macro/pop.h"
