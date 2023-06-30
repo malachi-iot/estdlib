@@ -228,13 +228,13 @@ struct variant_storage_base : variant_storage_tag
     struct copying_constructor_functor
     {
         template <size_t I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
-        constexpr bool operator()(variadic::visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
+        constexpr bool operator()(variadic::type<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
         {
             return false;
         }
 
         template <size_t I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
+        bool operator()(variadic::type<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
         {
             if(index != I) return false;
 
@@ -243,7 +243,7 @@ struct variant_storage_base : variant_storage_tag
         }
 
         template <size_t I, class T_i>
-        bool operator()(variadic::visitor_instance<I, T_i> vi, const this_type& copy_from, const size_type index)
+        bool operator()(variadic::instance<I, T_i> vi, const this_type& copy_from, const size_type index)
         {
             if(index != I) return false;
 

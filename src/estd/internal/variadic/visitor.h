@@ -1,9 +1,8 @@
 #pragma once
 
 #include "fwd.h"
-//#include "../fwd/variant.h"
+#include "concepts.h"
 #include "selector.h"
-//#include "../../optional.h"
 
 
 #if __cpp_variadic_templates
@@ -15,7 +14,7 @@ struct legacy_visit_instance_functor
 {
     template <size_t I, class T, class Fg, class Tg, class F, class ...TArgs>
     //constexpr
-    bool operator()(variadic::visitor_index<I, T> vi,
+    bool operator()(variadic::v1::visitor_index<I, T> vi,
         Fg&& getter,
         Tg&& source,
         F&& f,
@@ -37,20 +36,19 @@ struct visitor_index : in_place_index_t<I>
     static constexpr size_t index = I;
 };
 
-// DEBT: This name and namespace location are confusing in respect to
-// the existence of value_visitor
+}
+
+namespace variadic {
+
+inline namespace v1 {
+// DEBT: Not a great name, seeing as it interacts with 'value_visitor'
 template <size_t I, class T, T v>
 struct visitor_value :
-    visitor_index<I>,
+    internal::visitor_index<I>,
     integral_constant<T, v>
 {
 
 };
-
-
-}
-
-namespace variadic {
 
 template <size_t I, class T>
 struct visitor_index :
@@ -73,6 +71,9 @@ struct visitor_instance : visitor_index<I, T>
     constexpr explicit visitor_instance(T& value) : value{value} {}
 };
 
+}
+
+// DEBT: Move this out, if we can.  Specialized usage of visitor_index etc makes that hard though
 #if __cpp_concepts
 #include <concepts>
 
@@ -108,7 +109,7 @@ struct value_visitor
     using get = internal::get_index_finder<I, T, Values...>;
 
     template <size_t I>
-    using indexer = internal::visitor_value<I, T, get<I>::value>;
+    using value = v1::visitor_value<I, T, get<I>::value>;
 
     template <size_t I,
         class enabled = enable_if_t<(I == sizeof...(Values))>,
@@ -121,7 +122,7 @@ struct value_visitor
         class... TArgs>
     constexpr static int visit(F&& f, TArgs&&...args)
     {
-        return f(indexer<I>{}, std::forward<TArgs>(args)...) ?
+        return f(value<I>{}, std::forward<TArgs>(args)...) ?
             I :
             visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
     }

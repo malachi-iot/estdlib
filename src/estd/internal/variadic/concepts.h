@@ -4,9 +4,11 @@
 #include <concepts>
 #endif
 
-namespace estd { namespace internal {
-
 #if __cpp_concepts
-#endif
+namespace estd {
+namespace internal {
 
-}}
+
+}
+}
+#endif

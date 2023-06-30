@@ -3,8 +3,6 @@
 #include "../raw/cstddef.h"
 #include "../raw/utility.h"
 
-#include "concepts.h"
-
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
 
@@ -48,11 +46,31 @@ using selector = typename detail::selector<sizeof...(Types), TEval, Types...>::s
 template <class TEval, class ...Types>
 using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::projected;
 
+inline namespace v1 {
+
+template <size_t I, class T, T v>
+struct visitor_value;
+
 template <size_t I, class T>
 struct visitor_index;
 
 template <size_t I, class T>
 struct visitor_instance;
+
+}
+
+inline namespace v2 {
+
+template <size_t I, class T, T v>
+using value = v1::visitor_value<I, T, v>;
+
+template <size_t I, class T>
+using type = v1::visitor_index<I, T>;
+
+template <size_t I, class T>
+using instance = v1::visitor_instance<I, T>;
+
+}
 
 template <class ...Types>
 struct types;

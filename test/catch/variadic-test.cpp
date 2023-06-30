@@ -14,7 +14,7 @@ using namespace estd;
 struct identify_index_functor
 {
     template <size_t I, class T>
-    constexpr bool operator()(variadic::visitor_index<I, T>, int&& param) const
+    constexpr bool operator()(variadic::type<I, T>, int&& param) const
     {
         return param == I;
     }
@@ -23,7 +23,7 @@ struct identify_index_functor
 struct identify_value_functor
 {
     template <size_t I, class T, T v>
-    constexpr bool operator()(internal::visitor_value<I, T, v>, T&& param) const
+    constexpr bool operator()(variadic::value<I, T, v>, T&& param) const
     {
         return param == v;
     }
@@ -33,7 +33,7 @@ struct identify_value_functor
 struct tuple_getter_functor
 {
     template <size_t I, class T, class ...TArgs>
-    T& operator()(variadic::visitor_index<I, T>, tuple<TArgs...>& t)
+    T& operator()(variadic::type<I, T>, tuple<TArgs...>& t)
     {
         return get<I>(t);
     }
@@ -45,13 +45,13 @@ struct tuple_getter_functor2
     // DEBT: Ensure this in fact is a tuple type, or perhaps there's a clever
     // way to guarantee that a 'get' is present and operates as expected
     template <size_t I, class T, class TTuple, class F, class ...TArgs>
-    bool operator()(variadic::visitor_index<I, T>, TTuple& t, F&& f, TArgs&&...args)
+    bool operator()(variadic::type<I, T>, TTuple& t, F&& f, TArgs&&...args)
     {
         // DEBT: visitor_instance erodes down to a visitor_index.  Works fine,
         // but CLang-Tidy complains 8 bytes are wasted (which they are).  However,
         // I expected optimizer and general compiler rules to be A-OK with that
         return f(
-            variadic::visitor_instance<I, T>{get<I>(t)},
+            variadic::v1::visitor_instance<I, T>{get<I>(t)},
             std::forward<TArgs>(args)...);
     }
 };
@@ -67,7 +67,7 @@ struct identify_type_functor
     constexpr bool operator()(in_place_index_t<I>, T*) const { return false; }
 
     template <size_t I>
-    bool operator()(variadic::visitor_instance<I, T> v, T* output) const
+    bool operator()(variadic::instance<I, T> v, T* output) const
     {
         // output = const char**
         if(output)  *output = v.value;

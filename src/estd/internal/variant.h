@@ -65,7 +65,7 @@ class variant : protected variant_storage<Types...>
     struct moving_constructor_functor
     {
         template <size_t I, class T_i>
-        bool operator()(variadic::visitor_index<I, T_i>, base_type& v, variant&& move_from)
+        bool operator()(variadic::v1::visitor_index<I, T_i>, base_type& v, variant&& move_from)
         {
             if(move_from.index() != I) return false;
 
@@ -110,7 +110,7 @@ class variant : protected variant_storage<Types...>
 
         template <size_t I, class T_i,
             class enabled = enable_if_t<!is_copy_assignable<remove_const_t<T_i>>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
+        bool operator()(variadic::v1::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
             // DEBT: Technically would be more efficient to run the dtor
             // directly and not abort when index is found - however, that
@@ -126,7 +126,7 @@ class variant : protected variant_storage<Types...>
         // NOTE: See comments in above copy_from flavor
         template <size_t I, class T_i,
                  class enabled = enable_if_t<!is_move_assignable<remove_const_t<T_i>>::value> >
-        bool operator()(variadic::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
+        bool operator()(variadic::v1::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
         {
             v.destroy_if_valid();
 
