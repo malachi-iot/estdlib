@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/platform.h"
+#include "internal/limits.h"
 #include "cstdint.h"
 #include "cstddef.h"
 
@@ -13,24 +14,6 @@
 // DEBT: Might be better to make a new "traits/type/integral_constant.h" and friends to
 // more clearly provide that
 #include "internal/type_traits.h"
-
-#ifdef FEATURE_STD_CLIMITS
-#include <climits>
-#else
-// NOTE: Keep an eye on this, make sure we are pulling in proper standard limits.h
-// -- and in fact, our filename probably should be climits.h
-#include <limits.h>
-
-#endif
-
-#ifndef CHAR_BIT
-#warning CHAR_BIT not set, defaulting to 8 bits
-#define CHAR_BIT 8
-#endif
-
-#if CHAR_BIT != 8
-#error "Only 8 bit-wide bytes supported"
-#endif
 
 #if FEATURE_CPP_PUSH_MACRO
 #pragma push_macro("max")
@@ -98,6 +81,7 @@ struct integer_limits
     static CONSTEXPR bool is_integer = true;
     static CONSTEXPR bool is_signed = _is_signed;
     static CONSTEXPR int digits = bits - (is_signed ? 1 : 0);
+    static CONSTEXPR bool is_iec559 = false;
 
     /// Retrieves maximum length a string of this int, accounting for
     /// base representation
@@ -123,16 +107,19 @@ struct float_limits
 
     static CONSTEXPR bool is_integer = false;
     static CONSTEXPR bool is_signed = is_signed_;
+
+#if defined(__GCC_IEC_559) || defined(__STDC_IEC_559__)
+    static CONSTEXPR bool is_iec559 = true;
+#else
+    static CONSTEXPR bool is_iec559 = false;
+#endif
+
 };
 
 // We maintain this internal one because it helps quite a bit with int -> precision
 // mapping.
 // DEBT: Just as above, strongly consider making this into 'detail' namespace
-template <class T>
-struct numeric_limits
-{
-    static CONSTEXPR bool is_specialized = false;
-};
+template <class T> struct numeric_limits;
 
 template <>
 struct numeric_limits<int8_t> : internal::integer_limits<int8_t, true>
@@ -256,7 +243,13 @@ struct numeric_limits<double> : internal::float_limits<double>
 
 }
 
-template <class T> struct numeric_limits;
+template <class T>
+struct numeric_limits
+{
+    static CONSTEXPR bool is_specialized = false;
+    static CONSTEXPR bool is_integer = false;
+    static CONSTEXPR bool is_iec559 = false;
+};
 
 
 #if SIZEOF_CHAR == 16

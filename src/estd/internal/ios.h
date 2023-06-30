@@ -4,7 +4,7 @@
 //#include "../ios.h"
 #include "../type_traits.h"
 #include "locale.h"
-#include <stdint.h>
+#include "../cstdint.h"
 #include "../iosfwd.h"
 #include "raw/variant.h"
 #if ESTD_OS_TYPE
