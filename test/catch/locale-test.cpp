@@ -339,6 +339,27 @@ TEST_CASE("locale")
             n.get(in, in + strlen(in), fmt2, state, v);
         }
     }
+    SECTION("num_put")
+    {
+        layer1::string<64> val;
+        ios_base fmt;
+        internal::num_put<char, char*> n;
+
+        SECTION("bool")
+        {
+            char* last = n.put(val.data(), fmt, ' ', true);
+            *last = 0;
+
+            REQUIRE(val == "true");
+        }
+        SECTION("int")
+        {
+            char* last = n.put(val.data(), fmt, ' ', 100);
+            *last = 0;
+
+            REQUIRE(val == "100");
+        }
+    }
     SECTION("cbase")
     {
         SECTION("base 8")
