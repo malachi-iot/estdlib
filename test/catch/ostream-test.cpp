@@ -40,6 +40,15 @@ TEST_CASE("ostream")
         // TODO: Comes out as a char, so raw 7 not '7' - see above
         //REQUIRE(out.rdbuf()->str()[0] == '7');
     }
+    SECTION("output bool")
+    {
+        const bool v = true;
+
+        // Not ready yet
+        //out << v;
+
+        //REQUIRE(out.rdbuf()->str() == "true");
+    }
     SECTION("formatting")
     {
         SECTION("fill")
