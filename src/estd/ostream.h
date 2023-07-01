@@ -100,10 +100,22 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
     return out << buffer;
 }
 
+#if __cpp_rvalue_references
+// DEBT: Would really like to filter this out by is_invocable, but we don't have that
+// in estd yet
+template <class TStreambuf, class TBase, class F,
+    enable_if_t<is_base_of<internal::ostream_functor_tag, F>::value, bool> = true>
+basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out, F&& f)
+{
+    f(out);
+    return out;
+}
+#endif
+
 
 }
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template <class TChar, class CharTraits = estd::char_traits<TChar> >
 using basic_ostream = detail::basic_ostream<
     basic_streambuf<TChar, CharTraits>,

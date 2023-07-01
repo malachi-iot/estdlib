@@ -6,9 +6,25 @@
 
 using namespace estd;
 
+#include "macro/push.h"
+
+struct exp_manipulator : internal::ostream_functor_tag
+{
+    int v;
+
+    explicit exp_manipulator(int v) : v{v*2} {}
+
+    template <class TStreambuf, class TBase>
+    void operator()(estd::detail::basic_ostream<TStreambuf, TBase>& out)
+    {
+        out << v * 2;
+    }
+};
+
 TEST_CASE("ostream")
 {
     experimental::ostringstream<64> out;
+    const auto& out_s = out.rdbuf()->str();
 
     SECTION("output character")
     {
@@ -99,6 +115,9 @@ TEST_CASE("ostream")
         }
         SECTION("clock style")
         {
+            // TODO: Consider time facet stuff, but mate it more to steady_clock and friends rather than
+            // time_t
+
             out << setfill('0');
             out << setw(2) << 1 << ':' << setw(2) << 30;
 
@@ -107,4 +126,12 @@ TEST_CASE("ostream")
             REQUIRE(s == "01:30");
         }
     }
+    SECTION("experimental")
+    {
+        out << exp_manipulator(5);
+
+        REQUIRE(out_s == "20");
+    }
 }
+
+#include "macro/pop.h"

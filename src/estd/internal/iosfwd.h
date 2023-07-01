@@ -38,6 +38,9 @@ using basic_istream = detail::basic_istream<TStreambuf, TBase>;
 
 #endif
 
+// For our non-standard << overload which takes a functor
+struct ostream_functor_tag {};
+
 }
 
 template <class TStreambuf, class TBase>
