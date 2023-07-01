@@ -12,10 +12,10 @@ struct exp_manipulator : internal::ostream_functor_tag
 {
     int v;
 
-    explicit exp_manipulator(int v) : v{v*2} {}
+    constexpr explicit exp_manipulator(int v) : v{v*2} {}
 
     template <class TStreambuf, class TBase>
-    void operator()(estd::detail::basic_ostream<TStreambuf, TBase>& out)
+    void operator()(estd::detail::basic_ostream<TStreambuf, TBase>& out) const
     {
         out << v * 2;
     }

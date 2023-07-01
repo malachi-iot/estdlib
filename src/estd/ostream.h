@@ -105,10 +105,9 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 // in estd yet
 template <class TStreambuf, class TBase, class F,
     enable_if_t<is_base_of<internal::ostream_functor_tag, F>::value, bool> = true>
-basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out, F&& f)
+constexpr basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out, F&& f)
 {
-    f(out);
-    return out;
+    return (f(out), out);
 }
 #endif
 
