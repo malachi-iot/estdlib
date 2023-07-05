@@ -8,6 +8,7 @@
     * `variadic::values` for compile-time management of `T ...Values` (overlaps with `estd::index_sequence`)
     * `variadic::selector` for compile-time evaluation of `class ...Types`
     * `variadic::visitor` for runtime visitor pattern applied to `class ...Types`
+* Added ESTD_VERSION macro for compile-time version query
 
 ## Quality Updates & Bug Fixes
 
