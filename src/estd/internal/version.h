@@ -5,6 +5,7 @@
 // this is our flavor of https://en.cppreference.com/w/cpp/header/version since
 // as of today C++20 isn't highly available in the embedded world
 #include <iso646.h>
+#include "../port/version.h"
 
 #if __GLIBCXX__             // GNU libstdc++
 #define FEATURE_STD     1

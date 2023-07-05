@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal/platform.h"
+
 #ifdef FEATURE_STD_NEW
 #include <new>
 #else

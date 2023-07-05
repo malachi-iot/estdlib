@@ -8,6 +8,7 @@ set(TOOLS_DIR ../tools/cmake)
 
 include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)
+include(${TOOLS_DIR}/version.cmake)
 
 set(SOURCE_FILES
     estd/internal/string_convert.cpp
