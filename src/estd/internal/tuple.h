@@ -1,14 +1,9 @@
 #pragma once
 
 #include "platform.h"
-#include "is_empty.h"
 #include "type_traits.h"
 #include "fwd/tuple.h"
-
-#if defined(FEATURE_STD_UTILITY)
-// rpi-pico needs an explicit include of this here for std::move
-#include <utility>
-#endif
+#include "utility.h"    // For std::move
 
 namespace estd { namespace internal {
 

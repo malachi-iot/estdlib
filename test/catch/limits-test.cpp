@@ -209,4 +209,19 @@ TEST_CASE("limits & common_type tests")
         // DEBT: Probably should be 4, but we overallocate in case of negative hex
         REQUIRE(v2 == 5);
     }
+    SECTION("sign reversal")
+    {
+        SECTION("uint64_t")
+        {
+            bool v = is_same<numeric_limits<uint64_t>::signed_type, int64_t>::value;
+
+            REQUIRE(v);
+        }
+        SECTION("short")
+        {
+            bool v = is_same<numeric_limits<short>::unsigned_type, unsigned short>::value;
+
+            REQUIRE(v);
+        }
+    }
 }

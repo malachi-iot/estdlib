@@ -1,9 +1,9 @@
 #pragma once
 
-#include "utility.h"
+#include "../utility.h"
 
 // Specifically for is_void
-#include "llvm/is_void.h"
+#include "../llvm/is_void.h"
 
 #if __cplusplus >= 201103L
 

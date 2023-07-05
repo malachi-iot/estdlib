@@ -1,11 +1,8 @@
 #pragma once
 
-#include "platform.h"
+#include "features.h"
 
-#include "feature/type_traits.h"
-#include "raw/type_traits.h"
-
-#include "utility.h"
+#include "../utility.h"
 
 #if FEATURE_ESTD_TYPE_TRAITS_ALIASED
 #include <type_traits>

@@ -220,4 +220,13 @@ struct make_signed
     typedef typename internal::__apply_cv<_Tp, typename internal::__make_signed<typename remove_cv<_Tp>::type>::type>::type type;
 };
 
+// +++ 05JUL23 MB added, not part of LLVM (that I copied)
+
+#if __cpp_alias_templates
+template <class T>
+using make_signed_t = typename estd::make_signed<T>::type;
+#endif
+
+// ---
+
 }

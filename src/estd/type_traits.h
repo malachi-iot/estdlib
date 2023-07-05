@@ -1,7 +1,6 @@
 #pragma once
 
 #include "internal/platform.h"
-#include "internal/is_empty.h"
 #include "internal/type_traits.h"
 #include "internal/is_base_of.h"
 
