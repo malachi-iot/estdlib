@@ -11,13 +11,52 @@ using namespace estd;
 
 #include "macro/push.h"
 
+static test::Dummy dummy(7, "hi2u");
+
+// EXPERIMENTAL, but looking good
+template <class T, T* v>
+struct integral_pointer
+{
+    typedef T value_type;
+    typedef T* pointer;
+    typedef T& reference;
+    typedef integral_pointer type;
+
+    static constexpr pointer value = v;
+    static constexpr T& ref = *v;
+
+    constexpr pointer operator->() const
+    {
+        return value;
+    }
+
+    constexpr reference operator*() const { return ref; }
+};
+
+
+#define ESTD_INTEGRAL_POINTER(v)    integral_pointer<decltype(v), &v>
+
 TEST_CASE("type traits tests")
 {
     SECTION("integral_constant")
     {
         using type1 = integral_constant<int, 5>;
+        using type2 = integral_constant<test::Dummy*, &dummy>;
+        using type3 = integral_pointer<test::Dummy, &dummy>;
+        using type4 = ESTD_INTEGRAL_POINTER(dummy);
 
         REQUIRE(type1() == 5);
+        REQUIRE(type2()()->val1 == 7);
+        REQUIRE(type3::ref == dummy);
+
+        type3::ref.val1++;
+
+        REQUIRE(dummy.val1 == 8);
+        REQUIRE(type3()->val1 == 8);
+
+        test::Dummy& d = *type3();
+        REQUIRE(d.val1 == 8);
+        (*type3{}).val1 = 5;
     }
     SECTION("make_signed")
     {

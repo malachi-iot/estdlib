@@ -58,6 +58,12 @@ struct Dummy
         new (this) Dummy(std::move(move_from));
         return *this;
     }
+
+    bool operator==(const Dummy& compare_to) const
+    {
+        return val1 == compare_to.val1 &&
+            value2 == compare_to.value2;
+    }
 };
 
 struct ChildOfDummy : Dummy {};
