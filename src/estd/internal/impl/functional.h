@@ -66,6 +66,7 @@ struct function_fnptr1<TResult(TArgs...)>
 
         F f;
 
+        // DEBT: Use rvalue here
         TResult exec(TArgs...args)
         {
             return f(std::forward<TArgs>(args)...);

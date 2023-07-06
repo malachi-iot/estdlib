@@ -84,6 +84,59 @@ struct ProvidedTest2<TResult(TArgs...), TDummy>
     static TResult test2(TArgs...) { return TResult(); }
 };
 
+struct TestFunctor1
+{
+    int value = 0;
+
+    int operator()(int v)
+    {
+        value += v;
+        return value;
+    }
+};
+
+
+struct TestFunctorProvider
+{
+    using this_type = TestFunctorProvider;
+    using function_type = estd::detail::function<int(int)>;
+
+    int value = 0;
+
+    struct base
+    {
+        //this_type* const this_;
+    };
+
+    struct adder //: base
+    {
+        this_type* const this_;
+        int operator()(int v) const
+        {
+            return this_->value += v;
+        }
+    };
+
+    struct subtractor //: base
+    {
+        this_type* const this_;
+        int operator()(int v) const
+        {
+            return this_->value -= v;
+        }
+    };
+
+    function_type::model<adder> adder_model;
+    function_type::model<subtractor> subtractor_model;
+
+    function_type which;
+
+    TestFunctorProvider() :
+        adder_model{adder{this}},
+        subtractor_model{subtractor{this}},
+        which{&adder_model}
+    {}
+};
 
 TEST_CASE("functional")
 {
@@ -399,6 +452,33 @@ TEST_CASE("functional")
 
             p3.test2(5);
             REQUIRE(estd::is_same<decltype(type1::value2), float>::value);
+        }
+        SECTION("functor")
+        {
+            SECTION("fundamental")
+            {
+                TestFunctor1 functor;
+                fn1_type::model<TestFunctor1> m2(std::forward<TestFunctor1>(functor));
+                //auto m2 = fn1_type::make_model(std::forward<TestFunctor1>(functor));
+                int v = m2.exec(5);
+
+                REQUIRE(v == 5);
+
+                v = m2.exec(5);
+
+                REQUIRE(v == 10);
+
+                //REQUIRE(functor.value == 10);
+            }
+            SECTION("within a class")
+            {
+                TestFunctorProvider tfp;
+
+                tfp.which(5);
+                tfp.which(2);
+
+                REQUIRE(tfp.value == 7);
+            }
         }
     }
     SECTION("function_traits")
