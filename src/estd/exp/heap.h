@@ -175,4 +175,13 @@ void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
     heap.make();
 }
 
+// UNTESTED
+template <class RandomIt, class Compare>
+void push_heap(RandomIt first, RandomIt last, Compare comp)
+{
+    internal_heap<RandomIt, Compare> heap(first, last, 2, comp);
+
+    heap.push(last - 1);
+}
+
 }}

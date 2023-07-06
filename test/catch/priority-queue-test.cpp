@@ -74,7 +74,8 @@ TEST_CASE("priority-queue-test")
     }
     SECTION("std priority queue")
     {
-        // NOTE: Unlake make_heap, this behaves identically with estd flavor
+        // NOTE: Unlake make_heap, this behaves identically with estd flavor, because
+        // currently our priority_queue uses std::make_heap/std::push_heap
         std::priority_queue<int> pq;
 
         pq.push(5);
@@ -158,6 +159,10 @@ TEST_CASE("priority-queue-test")
     SECTION("experimental")
     {
         int values[] = { 1, 5, 9, 3, 2, 0 };
+        estd::layer1::vector<int, 10> values2 = { 1, 5, 9, 3, 2, 0 };
+        // FIX: begin2/end2 don't work with out make_heap/push_heap
+        auto begin2 = values2.begin();
+        auto end2 = values2.end();
         int* begin = values;
         int* end = values + sizeof(values) / sizeof(values[0]);
 
@@ -172,6 +177,11 @@ TEST_CASE("priority-queue-test")
             REQUIRE(values[3] == 3);
             REQUIRE(values[4] == 5);
             REQUIRE(values[5] == 9);
+        }
+        SECTION("push_heap")
+        {
+            estd::experimental::make_heap(begin, end, estd::less<int>{});
+            estd::experimental::push_heap(begin, end, estd::less<int>{});
         }
         SECTION("make_heap: std parity")
         {
