@@ -13,6 +13,12 @@ using namespace estd;
 
 TEST_CASE("type traits tests")
 {
+    SECTION("integral_constant")
+    {
+        using type1 = integral_constant<int, 5>;
+
+        REQUIRE(type1() == 5);
+    }
     SECTION("make_signed")
     {
         typedef make_signed<uint16_t>::type should_be_int16_t;
@@ -20,6 +26,12 @@ TEST_CASE("type traits tests")
         REQUIRE(sizeof(should_be_int16_t) == sizeof(int16_t));
         REQUIRE(is_signed<should_be_int16_t>::value);
         REQUIRE(!is_signed<uint16_t>::value);
+    }
+    SECTION("make_unsigned")
+    {
+        using should_be_uint16_t = make_unsigned_t<int16_t>;
+
+        REQUIRE(is_same<uint16_t, should_be_uint16_t>::value);
     }
     SECTION("decay")
     {

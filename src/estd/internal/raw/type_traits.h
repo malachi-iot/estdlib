@@ -9,16 +9,31 @@
 
 namespace estd {
 
+#if __cpp_alias_templates
+template <class T>
+struct type_identity { using type = T; };
+
+template <class T>
+using type_identity_t = typename type_identity<T>::type;
+#else
+template <class T>
+struct type_identity { typedef T type; };
+#endif
+
+
 template<class T, T v>
-struct integral_constant {
+struct integral_constant
+{
     static CONSTEXPR T value = v;
     typedef T value_type;
     typedef integral_constant type; // using injected-class-name
-#ifdef FEATURE_CPP_CONSTEXPR
+#ifdef __cpp_constexpr
     constexpr
 #endif
     operator value_type() const NOEXCEPT { return value; }
-    //constexpr value_type operator()() const noexcept { return value; } //since c++14
+#ifdef __cpp_constexpr
+    constexpr value_type operator()() const noexcept { return value; } //since c++14
+#endif
 };
 
 #ifdef __cpp_alias_templates
@@ -30,17 +45,6 @@ using bool_constant = integral_constant<bool, B>;
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
 
-#if __cpp_alias_templates
-template< class T >
-struct type_identity { using type = T; };
-
-template< class T >
-using type_identity_t = typename type_identity<T>::type;
-#else
-template< class T >
-struct type_identity { typedef T type; };
-#endif
-
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };
 
@@ -50,11 +54,11 @@ template< class T > struct remove_volatile<volatile T> { typedef T type; };
 
 template< class T > struct remove_reference      { typedef T type; };
 template< class T > struct remove_reference<T&>  { typedef T type; };
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
 template< class T > struct remove_reference<T&&> { typedef T type; };
 #endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template< class T >
 using remove_reference_t = typename remove_reference<T>::type;
 #endif
