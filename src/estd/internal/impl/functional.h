@@ -34,13 +34,13 @@ struct function_fnptr1<TResult(TArgs...)>
 
         const function_type f;
 
-        model_base(function_type f) : f(f) {}
+        constexpr explicit model_base(function_type f) : f(f) {}
 
-        model_base(const model_base& copy_from) = default;
+        constexpr model_base(const model_base& copy_from) = default;
         // just like concept_fnptr2, default move constructor somehow
         // results in make_inline2 leaving f uninitialized
         //concept_fnptr1(concept_fnptr1&& move_from) = default;
-        model_base(model_base&& move_from) :
+        constexpr model_base(model_base&& move_from) noexcept:
             f(move_from.f)
         {}
 
@@ -58,7 +58,7 @@ struct function_fnptr1<TResult(TArgs...)>
         typedef model_base base_type;
 
         //template <typename U>
-        model(F&& u) :
+        constexpr explicit model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
             f(std::forward<F>(u))
         {
@@ -86,13 +86,13 @@ struct function_fnptr2<TResult(TArgs...)>
 
         const function_type _f;
 
-        model_base(function_type f) : _f(f) {}
+        constexpr explicit model_base(function_type f) : _f(f) {}
 
         model_base(const model_base& copy_from) = default;
         // DEBT: For some reason ESP32's default move constructor
         // doesn't initialize _f
         //concept_fnptr2(concept_fnptr2&& move_from) = default;
-        model_base(model_base&& move_from) :
+        constexpr model_base(model_base&& move_from) noexcept:
             _f(std::move(move_from._f))
         {}
 
@@ -107,7 +107,7 @@ struct function_fnptr2<TResult(TArgs...)>
     {
         typedef model_base base_type;
 
-        model(F&& u) :
+        constexpr explicit model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::__exec)),
             f(std::forward<F>(u))
         {
@@ -152,14 +152,14 @@ struct function_virtual<TResult(TArgs...)>
     template <class F>
     struct model : model_base
     {
-        model(F&& u) :
+        constexpr explicit model(F&& u) :
             f(std::forward<F>(u))
         {
         }
 
         F f;
 
-        virtual TResult _exec(TArgs...args) override
+        TResult _exec(TArgs...args) override
         {
             return f(std::forward<TArgs>(args)...);
         }

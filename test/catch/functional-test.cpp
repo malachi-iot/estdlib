@@ -332,7 +332,7 @@ TEST_CASE("functional")
                 {
                     int counter = 0;
 
-                    virtual void _exec(int v) override
+                    void _exec(int v) override
                     {
                         counter += v;
                     }
@@ -348,9 +348,12 @@ TEST_CASE("functional")
             SECTION("fnptr1 (default)")
             {
                 //estd::detail::impl::function_fnptr2<void(int)>::
+                typedef estd::detail::impl::function_fnptr1<void(int)> model_type;
+                typedef detail::function<void(int), model_type> _fb;
                 int value = 0;
 
-                auto m = estd::internal::make_model<void(int)>(
+                //auto m = estd::internal::make_model<void(int)>(
+                auto m = _fb::make_model(
                     [&](int v) { value += v; });
 
                 estd::detail::function<void(int)> f(&m);
