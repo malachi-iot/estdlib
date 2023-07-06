@@ -323,7 +323,7 @@ public:
     // Deviates from spec here, since bitfield precludes returning a reference
     ESTD_CPP_CONSTEXPR_RET value_type value() const { return value_; }
 
-    static ESTD_CPP_CONSTEXPR_RET const unsigned bitsize() { return bitsize_; }
+    static ESTD_CPP_CONSTEXPR_RET unsigned bitsize() { return bitsize_; }
 };
 
 #if __cpp_alias_templates
