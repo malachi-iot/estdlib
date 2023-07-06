@@ -72,6 +72,25 @@ TEST_CASE("priority-queue-test")
 
         REQUIRE(pq.top() == 7);
     }
+    SECTION("std priority queue")
+    {
+        // NOTE: Unlake make_heap, this behaves identically with estd flavor
+        std::priority_queue<int> pq;
+
+        pq.push(5);
+        pq.push(3);
+        pq.push(8);
+
+        REQUIRE(pq.top() == 8);
+
+        pq.pop();
+
+        REQUIRE(pq.top() == 5);
+
+        pq.emplace(7);
+
+        REQUIRE(pq.top() == 7);
+    }
     SECTION("priority queue, reverse sort")
     {
         estd::layer1::priority_queue<int, 10, estd::greater<int> > pq;
@@ -144,7 +163,19 @@ TEST_CASE("priority-queue-test")
 
         SECTION("make_heap")
         {
+            // FIX: our implementation is backwards from std
             estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
+
+            REQUIRE(values[0] == 0);
+            REQUIRE(values[1] == 2);
+            REQUIRE(values[2] == 1);
+            REQUIRE(values[3] == 3);
+            REQUIRE(values[4] == 5);
+            REQUIRE(values[5] == 9);
+        }
+        SECTION("make_heap: std parity")
+        {
+            std::make_heap(begin, end, [](int a, int b){ return a > b; });
 
             REQUIRE(values[0] == 0);
             REQUIRE(values[1] == 2);
