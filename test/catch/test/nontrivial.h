@@ -26,7 +26,9 @@ struct NonTrivial
     bool on_dtor = false;   // dummy, for environments without std::function
 #endif
 
-    explicit NonTrivial(int code) : code_{code} {}
+    explicit NonTrivial(int code) :
+        code_{code}, initialized_{true}
+    {}
 
     template <class F>
     explicit NonTrivial(int code, F&& f) :

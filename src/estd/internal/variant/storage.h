@@ -558,6 +558,35 @@ public:
 };
 
 
+template <class T>
+class instance_storage : protected variant_storage_base<is_trivial<T>::value, T>
+{
+    using base_type = variant_storage_base<is_trivial<T>::value, T>;
+
+    ESTD_CPP_STD_VALUE_TYPE(T)
+
+public:
+    // NOLINTBEGIN
+
+    pointer get() { return base_type::template get<0>(); }
+    const_pointer get() const { return base_type::template get<0>(); }
+
+    template <class ...TArgs>
+    pointer emplace(TArgs&&...args)
+    {
+        return base_type::template emplace<0>(std::forward<TArgs>(args)...);
+    }
+
+    void destroy() { return base_type::template destroy<0>(); }
+
+    pointer assign(const_reference copy_from)
+    {
+        return base_type::template assign<0>(copy_from);
+    }
+
+    // NOLINTEND
+};
+
 
 template <class T>
 struct converting_constructor_functor

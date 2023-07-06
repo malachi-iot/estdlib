@@ -350,6 +350,19 @@ TEST_CASE("variant")
             REQUIRE(index == 1);
             REQUIRE(get<1>(v) == 10);
         }
+        SECTION("single instance")
+        {
+            internal::instance_storage<test::NonTrivial> storage;
+
+            storage.emplace(0);
+
+            REQUIRE(storage.get()->initialized_ == true);
+            REQUIRE(storage.get()->destroyed_ == false);
+
+            storage.destroy();
+
+            REQUIRE(storage.get()->destroyed_);
+        }
     }
     SECTION("experimental")
     {
