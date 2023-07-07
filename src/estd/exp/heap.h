@@ -7,6 +7,8 @@
 #include "../internal/iterator_standalone.h"
 #include "../functional.h"
 
+#include "../internal/macro/push.h"
+
 namespace estd { namespace experimental {
 
 
@@ -205,3 +207,5 @@ void pop_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 }
 
 }}
+
+#include "../internal/macro/pop.h"

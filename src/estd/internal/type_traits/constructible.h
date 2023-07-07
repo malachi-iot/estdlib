@@ -40,8 +40,8 @@ inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<
 }
 #elif __cpp_alias_templates
 
-#include "raw/type_traits.h"
-#include "utility/declval.h"
+#include "../raw/type_traits.h"
+#include "../utility/declval.h"
 
 namespace estd {
 

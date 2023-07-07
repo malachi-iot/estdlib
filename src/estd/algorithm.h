@@ -3,17 +3,14 @@
 #include "internal/platform.h"
 #include "internal/heap.h"
 #include "internal/functional.h"
+#include "internal/feature/algorithm.h"
 #include "utility.h"
+
+#include "internal/macro/push.h"
 
 #ifdef FEATURE_STD_ALGORITHM
 #include <algorithm>
-#endif
-
-#ifndef FEATURE_ESTD_ALGORITHM_OPT
-#define FEATURE_ESTD_ALGORITHM_OPT 1
-#endif
-
-#ifndef FEATURE_STD_ALGORITHM
+#else
 #undef FEATURE_ESTD_ALGORITHM_OPT
 #endif
 
@@ -63,12 +60,6 @@ bool equal(InputIt1 first1, InputIt1 last1,
     }
     return true;
 }
-
-// Arduino lib makes its own min
-#ifdef min
-#define ESTD_MIN_SAVER min
-#undef min
-#endif
 
 // https://en.cppreference.com/w/cpp/algorithm/min
 template <class T>
@@ -234,3 +225,5 @@ void reverse(BidirIt first, BidirIt last)
 }
 
 }
+
+#include "internal/macro/pop.h"

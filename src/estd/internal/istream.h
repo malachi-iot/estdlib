@@ -2,10 +2,9 @@
 
 #include "ios_policy.h"
 #include "ios.h"
+#include "feature/ios.h"
 
-#ifndef FEATURE_ESTD_IOS_GCOUNT
-#define FEATURE_ESTD_IOS_GCOUNT 1
-#endif
+#include "macro/push.h"
 
 
 namespace estd { namespace detail {
@@ -367,3 +366,5 @@ public:
 #endif
 
 }}
+
+#include "macro/pop.h"

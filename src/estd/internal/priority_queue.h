@@ -6,9 +6,6 @@
 
 #include "platform.h"
 
-// Temporarily forcing this on while we dev
-#define FEATURE_ESTD_ALGORITHM_HEAP 1
-
 #include "../exp/heap.h"
 #include "feature/queue.h"
 

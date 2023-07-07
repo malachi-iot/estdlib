@@ -23,6 +23,8 @@
 #include <ostream>
 #endif
 
+#include "internal/macro/push.h"
+
 namespace estd {
 
 // TODO: Determine how to organize different string implementations
@@ -297,7 +299,7 @@ public:
 };
 
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#if __cpp_alias_templates
 template <size_t N, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
 #else
@@ -730,6 +732,7 @@ int stoi(
 #include "internal/to_string.h"
 
 
+#include "internal/macro/pop.h"
 
 
 

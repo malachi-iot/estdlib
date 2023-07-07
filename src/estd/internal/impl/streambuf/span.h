@@ -3,6 +3,8 @@
 #include "../streambuf.h"
 #include "pos.h"
 
+#include "../../macro/push.h"
+
 namespace estd { namespace internal { namespace impl {
 
 // just the fundamental pieces, overflow/sync device handling will have to
@@ -194,3 +196,5 @@ protected:
 
 
 }}}
+
+#include "../../macro/pop.h"
