@@ -7,9 +7,5 @@
 // If available, default to utilizing regular std heap mechanisms since we expect
 // their algorithms to be more optimized than mine.
 #if !defined(FEATURE_ESTD_ALGORITHM_HEAP)
-#if FEATURE_STD_ALGORITHM
-#define FEATURE_ESTD_ALGORITHM_HEAP 0
-#else
-#define FEATURE_ESTD_ALGORITHM_HEAP 1
-#endif
+#define FEATURE_ESTD_ALGORITHM_HEAP !FEATURE_STD_ALGORITHM
 #endif

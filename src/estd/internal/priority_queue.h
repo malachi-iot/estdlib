@@ -12,15 +12,16 @@
 #include "../exp/heap.h"
 #include "feature/queue.h"
 
-// relies on std::push_heap
-#ifdef FEATURE_STD_ALGORITHM
-
+// DEBT: Obsolete, we now always have priority queue since we have our own
+// heap implementation
 #define FEATURE_ESTD_PRIORITY_QUEUE 1
 
 #include "../vector.h"
 #include "../functional.h"
 
+#if !FEATURE_ESTD_ALGORITHM_HEAP
 #include <algorithm>
+#endif
 
 namespace estd {
 
@@ -232,5 +233,3 @@ public:
 }
 
 }
-
-#endif
