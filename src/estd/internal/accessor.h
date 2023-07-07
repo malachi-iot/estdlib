@@ -188,17 +188,18 @@ public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::value_type value_type;
 
-    accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
+    ESTD_CPP_CONSTEXPR_RET accessor(TAllocator& a, const typename base_t::handle_with_offset& h) :
         base_t(a, h) {}
 
     // NOTE: Making this non-const because get_allocator() needs to be non const
     // as this accessor can peer in and change stuff (legitimate non-const locking)
-    accessor(const accessor& copy_from) : base_t(copy_from)
+    ESTD_CPP_CONSTEXPR_RET accessor(const accessor& copy_from) : base_t(copy_from)
     {}
 
     accessor& operator=(const value_type& assign_from)
     {
-        return base_t::template assign<accessor>(assign_from);
+        base_t::template assign<accessor>(assign_from);
+        return *this;
     }
 
     accessor& operator=(const accessor& assign_from)
