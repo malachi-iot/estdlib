@@ -27,7 +27,8 @@ struct internal_heap
 
     // remember, in typical std:: fashion 'last' is node *just after*
     // last node
-    iterator_type first_, last_;
+    const iterator_type first_;
+    iterator_type last_;
     // paradigm is comp(a, b) = true means that a should be moved
     // towards root node.  If one wants a minheap, then make
     // comp(a, b) = a < b
@@ -75,7 +76,7 @@ struct internal_heap
             reference current_ref = *current;
 
             // if current actually should bubble up
-            if(comp(current_ref, parent_ref))
+            if(comp(parent_ref, current_ref))
             {
                 swap(current, parent);
                 current = parent;
@@ -109,10 +110,10 @@ struct internal_heap
             // further past the end.
             iterator_type last_child = estd::min(first_child + k, last_);
 
-            iterator_type chosen_child = estd::min_element(first_child, last_child, comp);
+            iterator_type chosen_child = estd::max_element(first_child, last_child, comp);
 
             // now, if the best candidate child also should be bumped up
-            if(comp(*chosen_child, *current))
+            if(comp(*current, *chosen_child))
             {
                 // then swap and bump it up
                 swap(chosen_child, current);
@@ -175,24 +176,32 @@ struct internal_heap
     }
 };
 
-template< class RandomIt, class Compare >
+template <class RandomIt, class Compare = less<typename iterator_traits<RandomIt>::value_type> >
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
 constexpr
 #endif
-void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
+void make_heap( RandomIt first, RandomIt last, Compare comp = Compare(), const int k = 2 )
 {
     internal_heap<RandomIt, Compare> heap(first, last, k, comp);
 
     heap.make();
 }
 
-// Lightly tested - has problems
-template <class RandomIt, class Compare>
-void push_heap(RandomIt first, RandomIt last, Compare comp)
+// Underway
+template <class RandomIt, class Compare = less<typename iterator_traits<RandomIt>::value_type> >
+void push_heap(RandomIt first, RandomIt last, Compare comp = Compare())
 {
     internal_heap<RandomIt, Compare> heap(first, last, 2, comp);
 
     heap.restore_up();
+}
+
+template <class RandomIt, class Compare = less<typename iterator_traits<RandomIt>::value_type>>
+void pop_heap(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    internal_heap<RandomIt, Compare> heap(first, last, 2, comp);
+
+    heap.pop();
 }
 
 }}

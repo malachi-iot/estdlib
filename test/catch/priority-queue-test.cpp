@@ -169,7 +169,7 @@ TEST_CASE("priority-queue-test")
         SECTION("make_heap")
         {
             // FIX: our implementation is backwards from std
-            estd::experimental::make_heap(begin, end, [](int a, int b){ return a < b; });
+            estd::experimental::make_heap(begin, end, [](int a, int b){ return a > b; });
 
             REQUIRE(values[0] == 0);
             REQUIRE(values[1] == 2);
@@ -178,9 +178,24 @@ TEST_CASE("priority-queue-test")
             REQUIRE(values[4] == 5);
             REQUIRE(values[5] == 9);
         }
+        SECTION("make_heap (max)")
+        {
+            estd::experimental::make_heap(begin, end);
+
+            REQUIRE(values[5] == 0);
+            REQUIRE(values[4] == 2);
+            REQUIRE(values[3] == 3);
+            REQUIRE(values[2] == 1);
+            REQUIRE(values[1] == 5);
+            REQUIRE(values[0] == 9);
+
+            estd::experimental::pop_heap(begin, end);
+
+            REQUIRE(values[0] == 5);
+        }
         SECTION("push_heap")
         {
-            estd::experimental::make_heap(begin2, values2.end(), estd::less<int>{});
+            estd::experimental::make_heap(begin2, values2.end(), estd::greater<int>{});
 
             REQUIRE(values2[0] == 0);
             REQUIRE(values2[1] == 20);
@@ -191,11 +206,11 @@ TEST_CASE("priority-queue-test")
 
             values2.push_back(5);
 
-            estd::experimental::push_heap(begin2, values2.end(), estd::less<int>{});
+            estd::experimental::push_heap(begin2, values2.end(), estd::greater<int>{});
 
             values2.push_back(95);
 
-            estd::experimental::push_heap(begin2, values2.end(), estd::less<int>{});
+            estd::experimental::push_heap(begin2, values2.end(), estd::greater<int>{});
 
             REQUIRE(values2[0] == 0);
             REQUIRE(values2[1] == 20);
@@ -205,7 +220,7 @@ TEST_CASE("priority-queue-test")
             REQUIRE(values2[5] == 90);
             REQUIRE(values2[6] == 10);
 
-            estd::experimental::internal_heap<decltype(begin2), estd::less<int> > h(begin2, values2.end());
+            estd::experimental::internal_heap<decltype(begin2), estd::greater<int> > h(begin2, values2.end());
 
             h.pop();
             h.pop();
@@ -228,7 +243,11 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("make_heap: std parity")
         {
-            std::make_heap(begin, end, [](int a, int b){ return a > b; });
+            std::make_heap(begin, end, std::greater<int>{});
+
+            // DEBT: It's quite conceivable the numbers won't perfectly match here
+            // what we really need is either a decomposer of heaps or at a minimum
+            // a bunch of pop operations
 
             REQUIRE(values[0] == 0);
             REQUIRE(values[1] == 2);
@@ -239,7 +258,7 @@ TEST_CASE("priority-queue-test")
         }
         SECTION("internal heap")
         {
-            estd::experimental::internal_heap<int*, estd::less<int> > heap(begin, end);
+            estd::experimental::internal_heap<int*, estd::greater<int> > heap(begin, end);
 
             heap.make();
 

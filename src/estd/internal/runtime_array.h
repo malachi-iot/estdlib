@@ -238,7 +238,7 @@ public:
             return current.h_exp() - subtrahend.current.h_exp();
         }
 
-        inline iterator operator+(ptrdiff_t offset)
+        inline iterator operator+(ptrdiff_t offset) const
         {
             iterator it(*this);
 
