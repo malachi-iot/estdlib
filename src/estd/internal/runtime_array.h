@@ -256,11 +256,20 @@ public:
             return it;
         }
 
-        bool operator>(const iterator& compare) const
+        ESTD_CPP_CONSTEXPR_RET bool operator>(const iterator& compare) const
         {
             return current.h_exp() > compare.current.h_exp();
         }
 
+        ESTD_CPP_CONSTEXPR_RET bool operator>=(const iterator& compare) const
+        {
+            return current.h_exp() >= compare.current.h_exp();
+        }
+
+        ESTD_CPP_CONSTEXPR_RET bool operator<(const iterator& compare) const
+        {
+            return current.h_exp() < compare.current.h_exp();
+        }
 
         /*
         bool operator<(const iterator& compare) const

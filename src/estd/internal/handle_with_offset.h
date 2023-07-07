@@ -51,12 +51,22 @@ public:
     // c) no handle at all (dummy handle, like fixed allocator)
     // if none of these are the case, be sure to overload these operators
     // in inherited classes
-    bool operator >(const handle_with_offset_base& compare_to) const
+    ESTD_CPP_CONSTEXPR_RET bool operator >(const handle_with_offset_base& compare_to) const
     {
         return m_offset > compare_to.m_offset;
     }
 
-    bool operator==(const handle_with_offset_base& compare_to) const
+    ESTD_CPP_CONSTEXPR_RET bool operator <(const handle_with_offset_base& compare_to) const
+    {
+        return m_offset < compare_to.m_offset;
+    }
+
+    ESTD_CPP_CONSTEXPR_RET bool operator >=(const handle_with_offset_base& compare_to) const
+    {
+        return m_offset >= compare_to.m_offset;
+    }
+
+    ESTD_CPP_CONSTEXPR_RET bool operator==(const handle_with_offset_base& compare_to) const
     {
         return m_offset == compare_to.m_offset;
     }
