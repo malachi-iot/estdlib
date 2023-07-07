@@ -193,14 +193,38 @@ TEST_CASE("priority-queue-test")
 
             estd::experimental::push_heap(begin2, values2.end(), estd::less<int>{});
 
+            values2.push_back(95);
+
+            estd::experimental::push_heap(begin2, values2.end(), estd::less<int>{});
+
             REQUIRE(values2[0] == 0);
             REQUIRE(values2[1] == 20);
             REQUIRE(values2[2] == 5);
             REQUIRE(values2[3] == 30);
             REQUIRE(values2[4] == 50);
             REQUIRE(values2[5] == 90);
-            // FIX: Well that's not right
             REQUIRE(values2[6] == 10);
+
+            estd::experimental::internal_heap<decltype(begin2), estd::less<int> > h(begin2, values2.end());
+
+            h.pop();
+            h.pop();
+
+            REQUIRE(h.front() == 10);
+
+            h.pop();
+            h.pop();
+            h.pop();
+
+            REQUIRE(h.front() == 50);
+
+            h.pop();
+
+            REQUIRE(h.front() == 90);
+
+            h.pop();
+
+            REQUIRE(h.front() == 95);
         }
         SECTION("make_heap: std parity")
         {

@@ -50,6 +50,8 @@ struct internal_heap
         estd::swap(*a, *b);
     }
 
+    ESTD_CPP_CONSTEXPR_RET bool empty() const { return last_ == first_; }
+
     ESTD_CPP_CONSTEXPR_RET size_t size() const { return last_ - first_; }
 
     // starting from last element, bubble up
