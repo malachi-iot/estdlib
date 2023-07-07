@@ -178,6 +178,18 @@ template<class T, std::size_t N>
 struct remove_extent<T[N]> { typedef T type; };
 
 
+template <class T> struct remove_pointer { typedef T type; };
+template <class T> struct remove_pointer<T*> { typedef T type; };
+template <class T> struct remove_pointer<T* const> { typedef T type; };
+template <class T> struct remove_pointer<T* volatile> { typedef T type; };
+template <class T> struct remove_pointer<T* const volatile> { typedef T type; };
+
+#if __cpp_alias_templates
+template <class T>
+using remove_pointer_t = typename remove_pointer<T>::type;
+#endif
+
+
 #ifdef FEATURE_CPP_ALIGN
 // NOTE: deprecated in C++23
 template<std::size_t Len, std::size_t Align /* default alignment not implemented */>
