@@ -18,6 +18,7 @@
     * shares code base with `estd::variant`
     * when available, exceptions are now supported
 * `estd::num_get` and by extension `istream` integer parsing now returns min/max value on overflow
+* `estd::priority_queue` works on more targets
 
 # v0.5.1 - 18MAY23
 
