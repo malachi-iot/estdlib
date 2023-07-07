@@ -6,7 +6,11 @@
 
 #include "platform.h"
 
+// Temporarily forcing this on while we dev
+#define FEATURE_ESTD_ALGORITHM_HEAP 1
+
 #include "../exp/heap.h"
+#include "feature/queue.h"
 
 // relies on std::push_heap
 #ifdef FEATURE_STD_ALGORITHM
@@ -47,6 +51,24 @@ class priority_queue : protected estd::internal::struct_evaporator<Compare>
 protected:
     Container c;
 
+    void push_heap()
+    {
+#if FEATURE_ESTD_ALGORITHM_HEAP
+        estd::experimental::push_heap(c.begin(), c.end(), compare());
+#else
+        std::push_heap(c.begin(), c.end(), compare());
+#endif
+    }
+
+    void pop_heap()
+    {
+#if FEATURE_ESTD_ALGORITHM_HEAP
+        estd::experimental::pop_heap(c.begin(), c.end(), compare());
+#else
+        std::pop_heap(c.begin(), c.end(), compare());
+#endif
+    }
+
 public:
     // 'evaporated' type which means either Compare itself if empty, or
     // a reference to Compare if not empty
@@ -64,13 +86,13 @@ public:
 
     ESTD_CPP_DEFAULT_CTOR(priority_queue)
 
-    priority_queue(const Compare& compare) :
+    EXPLICIT priority_queue(const Compare& compare) :
         compare_provider_type(compare)
     {}
 
-    bool empty() const { return c.empty(); }
+    ESTD_CPP_CONSTEXPR_RET bool empty() const { return c.empty(); }
 
-    size_type size() const { return c.size(); }
+    ESTD_CPP_CONSTEXPR_RET size_type size() const { return c.size(); }
 
     // DEBT: Consider returning a const reference here instead, since returned
     // value is expected to be used and discarded rather quickly.  So theoretically
@@ -83,14 +105,14 @@ public:
     void push(const value_type& value)
     {
         c.push_back(value);
-        std::push_heap(c.begin(), c.end(), compare());
+        push_heap();
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#ifdef __cpp_rvalue_references
     void push(value_type&& value)
     {
         c.push_back(std::move(value));
-        std::push_heap(c.begin(), c.end(), compare());
+        push_heap();
     }
 
     priority_queue& operator =(priority_queue&& move_from)
@@ -108,7 +130,7 @@ public:
 
     void pop()
     {
-        std::pop_heap(c.begin(), c.end(), compare());
+        pop_heap();
         c.pop_back();
     }
 
@@ -118,7 +140,7 @@ public:
     accessor emplace(TArgs&&...args)
     {
         c.emplace_back(std::forward<TArgs>(args)...);
-        std::push_heap(c.begin(), c.end(), compare());
+        push_heap();
         return c.back();
     }
 
@@ -135,7 +157,7 @@ public:
         auto accessor = c.emplace_back(std::forward<TArgs>(args)...);
         f(accessor.lock());
         accessor.unlock();
-        std::push_heap(c.begin(), c.end(), compare());
+        push_heap();
         return c.back();
     }
 #endif
@@ -154,7 +176,11 @@ public:
         // see https://stackoverflow.com/questions/32213377/heapify-in-c-stl
         // DEBT: Also, we want to do this from 'v' not c.begin().  However,
         // our accessor-rather-than-pointer makes that a little tricky
+#if FEATURE_ESTD_ALGORITHM_HEAP
+        estd::experimental::make_heap(c.begin(), c.end(), compare());
+#else
         std::make_heap(c.begin(), c.end(), compare());
+#endif
     }
 
 #ifdef __cpp_rvalue_references
@@ -177,14 +203,14 @@ namespace layer1 {
 
 template <class T, size_t len, class Compare = less<T> >
 class priority_queue :
-    public estd::priority_queue<T, layer1::vector<T, len>, Compare >
+    public estd::priority_queue<T, layer1::vector<T, len>, Compare>
 {
-    typedef estd::priority_queue<T, layer1::vector<T, len>, Compare > base_type;
+    typedef estd::priority_queue<T, layer1::vector<T, len>, Compare> base_type;
 
 public:
     ESTD_CPP_DEFAULT_CTOR(priority_queue)
 
-    priority_queue(const Compare& compare) : base_type(compare)
+    EXPLICIT priority_queue(const Compare& compare) : base_type(compare)
     {
 
     }
@@ -197,7 +223,7 @@ namespace layer2 {
 
 template <class T, size_t len, class Compare = less<T> >
 class priority_queue :
-        public estd::priority_queue<T, layer2::vector<T, len>, Compare >
+        public estd::priority_queue<T, layer2::vector<T, len>, Compare>
 {
 public:
 
