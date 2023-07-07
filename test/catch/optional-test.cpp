@@ -47,6 +47,20 @@ enum PlainOldEnum
     POE_2
 };
 
+struct BitField
+{
+    union
+    {
+        struct
+        {
+            int val1 : 3;
+            int val2 : 10;
+        };
+
+        int raw = 0;
+    };
+};
+
 // Any time SpecializedEnum is used in regular estd::optional, it routes to this base class
 // See below unit test
 namespace estd { namespace internal {
@@ -176,6 +190,17 @@ TEST_CASE("optional")
             val = val2;
 
             REQUIRE(!val);
+        }
+        SECTION("assign from bitfield")
+        {
+            BitField bf;
+
+            bf.val2 = 10;
+
+            val = (int)bf.val2;
+
+            REQUIRE(val.has_value());
+            REQUIRE(val == bf.val2);
         }
     }
     SECTION("comparisons")
