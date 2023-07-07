@@ -21,19 +21,24 @@ struct internal_heap
     typedef RandomIt iterator_type;
     typedef estd::iterator_traits<iterator_type> iterator_traits;
     typedef typename iterator_traits::reference reference;
+    typedef typename iterator_traits::value_type value_type;
+    //typedef typename estd::add_const<reference>::type const_reference;
+    typedef const value_type& const_reference;
 
     // remember, in typical std:: fashion 'last' is node *just after*
     // last node
-    iterator_type first, last;
+    iterator_type first_, last_;
     // paradigm is comp(a, b) = true means that a should be moved
     // towards root node.  If one wants a minheap, then make
     // comp(a, b) = a < b
     Compare comp;
+
+    // DEBT: Seems that 'k' would be better suited as a non-type template parameter
     const int k;
 
     internal_heap(RandomIt first, RandomIt last, const int k = 2, Compare comp = Compare()) :
-        first(first),
-        last(last),
+        first_(first),
+        last_(last),
         comp(comp),
         k(k)
     {}
@@ -45,7 +50,7 @@ struct internal_heap
         estd::swap(*a, *b);
     }
 
-    size_t size() const { return last - first; }
+    ESTD_CPP_CONSTEXPR_RET size_t size() const { return last_ - first_; }
 
     // starting from last element, bubble up
     // returns true when no swapping was needed
@@ -56,15 +61,19 @@ struct internal_heap
         const int last_idx = size();
         //iterator_type current = last - sizeof(value_type);
         int current_idx = last_idx - 1;
-        iterator_type current = first + current_idx;
+        iterator_type current = first_ + current_idx;
 
-        while(current != first)
+        while(current != first_)
         {
             int parent_idx = (current_idx - 1) / k;
-            iterator_type parent = first + parent_idx;
+            iterator_type parent = first_ + parent_idx;
+
+            // Just for debugging
+            reference parent_ref = *parent;
+            reference current_ref = *current;
 
             // if current actually should bubble up
-            if(comp(*current, *parent))
+            if(comp(current_ref, parent_ref))
             {
                 swap(current, parent);
                 current = parent;
@@ -87,16 +96,16 @@ struct internal_heap
     {
         for(;;)
         {
-            int current_idx = current - first;
+            int current_idx = current - first_;
             int first_child_idx = (current_idx * k) + 1;
-            iterator_type first_child = first + first_child_idx;
+            iterator_type first_child = first_ + first_child_idx;
 
             // past the end of the leaf
-            if(first_child >= last) break;
+            if(first_child >= last_) break;
 
             // theoretical iterator one past last child - it may actually be even
             // further past the end.
-            iterator_type last_child = estd::min(first_child + k, last);
+            iterator_type last_child = estd::min(first_child + k, last_);
 
             iterator_type chosen_child = estd::min_element(first_child, last_child, comp);
 
@@ -117,21 +126,21 @@ struct internal_heap
     // starting from first element, push down
     void restore_down()
     {
-        restore_down(first);
+        restore_down(first_);
     }
 
-    const reference front() const { return *first; }
+    ESTD_CPP_CONSTEXPR_RET const_reference front() const { return *first_; }
 
     void pop()
     {
-        swap(first, --last);
+        swap(first_, --last_);
         restore_down();
     }
 
     // NOTE: be careful, last++ may not produce correct results
-    void push(const typename iterator_traits::value_type& v)
+    void push(const_reference& v)
     {
-        *last++ = v;
+        *last_++ = v;
         restore_up();
     }
 
@@ -141,7 +150,7 @@ struct internal_heap
     // new last-1 position)
     void push(iterator_type last)
     {
-        this->last = last;
+        last_ = last;
         restore_up();
     }
 
@@ -154,12 +163,12 @@ struct internal_heap
         int last_nonleaf_idx = (size() - 1) / k;
         // FIX: this is not sufficient, because restore_up doesn't evaluate all children
         //while(!restore_up());
-        for(iterator_type i = first + last_nonleaf_idx;
+        for(iterator_type i = first_ + last_nonleaf_idx;
             ;)
         {
             restore_down(i);
 
-            if(i-- == first) break;
+            if(i-- == first_) break;
         }
     }
 };
@@ -175,13 +184,13 @@ void make_heap( RandomIt first, RandomIt last, Compare comp, const int k = 2 )
     heap.make();
 }
 
-// UNTESTED
+// Lightly tested - has problems
 template <class RandomIt, class Compare>
 void push_heap(RandomIt first, RandomIt last, Compare comp)
 {
     internal_heap<RandomIt, Compare> heap(first, last, 2, comp);
 
-    heap.push(last - 1);
+    heap.restore_up();
 }
 
 }}
