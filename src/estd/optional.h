@@ -260,12 +260,13 @@ public:
 
     value_type&& value() &&
     {
-        return (assert_has_value(), base_type::value());
+        return (assert_has_value(), std::forward<value_type>(base_type::value()));
     }
 
     constexpr const value_type&& value() const &&
     {
-        return (assert_has_value(), base_type::value());
+        return (assert_has_value(),
+            std::forward<const value_type>(base_type::value()));
     }
 #else
     return_type value()

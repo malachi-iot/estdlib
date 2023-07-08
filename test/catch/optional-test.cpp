@@ -202,6 +202,22 @@ TEST_CASE("optional")
             REQUIRE(val.has_value());
             REQUIRE(val == bf.val2);
         }
+        SECTION("rvalue")
+        {
+            enum Options { Register, Unregister, Unspecified = 3 };
+            typedef estd::layer1::optional<Options, Unspecified> option_value_type;
+
+            struct T1
+            {
+                Options o : 2;
+
+                option_value_type opt() const { return o; }
+            };
+            T1 t1{Unregister};
+            option_value_type v2 = t1.opt().value();
+
+            REQUIRE(v2 == Unregister);
+        }
     }
     SECTION("comparisons")
     {
@@ -377,5 +393,9 @@ TEST_CASE("optional")
                 REQUIRE(o2->moved_);
             }
         }
+    }
+    SECTION("internal")
+    {
+        //estd::internal::layer1::optional_base<int, 10, 0> v;
     }
 }
