@@ -53,8 +53,6 @@ class optional :
         public TBase
 {
     typedef TBase base_type;
-    typedef typename base_type::return_type return_type;
-    typedef typename base_type::const_return_type const_return_type;
 
 #if __cpp_rvalue_references
     /// if current value exists and is not trivial, destroy it
@@ -87,9 +85,9 @@ protected:
         // DEBT: Seemed to be working, but now it doesn't
         //is_same<add_rvalue_reference<value_type>, return_type>::value;
 
-    // DEBT: These names are not consistent with 'return_type', but not too bad overall
-    typedef typename conditional<real_reference, value_type&&, value_type>::type rvalue_type;
-    typedef typename conditional<real_reference, const value_type&&, const value_type>::type const_rvalue_type;
+    typedef internal::value_type_morph<T, real_reference ?
+        internal::value_type_morphs::none :
+        internal::value_type_morphs::no_reference> type_morph;
 
     void assert_has_value() const
     {
@@ -260,33 +258,33 @@ public:
     // -- getters
 
 #if __cpp_rvalue_references
-    return_type value() &
+    typename type_morph::reference value() &
     {
         return (assert_has_value(), base_type::value());
     }
 
-    constexpr const_return_type value() const&
+    constexpr typename type_morph::const_reference value() const&
     {
         return (assert_has_value(), base_type::value());
     }
 
-    rvalue_type value() &&
+    typename type_morph::rvalue_reference value() &&
     {
         return (assert_has_value(), std::forward<value_type>(base_type::value()));
     }
 
-    constexpr const_rvalue_type value() const &&
+    constexpr typename type_morph::const_rvalue_reference value() const &&
     {
         return (assert_has_value(),
             std::forward<const value_type>(base_type::value()));
     }
 #else
-    return_type value()
+    typename type_morph::reference value()
     {
         return (assert_has_value(), base_type::value());
     }
 
-    const_return_type value() const
+    typename type_morph::const_reference value() const
     {
         return (assert_has_value(), base_type::value());
     }
@@ -321,8 +319,8 @@ public:
 #endif
     operator bool() const { return base_type::has_value(); }
 
-    return_type operator*() { return base_type::value(); }
-    const_return_type operator*() const { return base_type::value(); }
+    typename type_morph::reference operator*() { return base_type::value(); }
+    typename type_morph::const_reference operator*() const { return base_type::value(); }
 };
 
 

@@ -26,6 +26,41 @@ struct optional_default_value<bool> :
 
 namespace internal {
 
+enum class value_type_morphs
+{
+    none,
+    no_reference
+};
+
+// Once in a while we do need to "ditch the ref", such as with evaporators or
+// bitwise optional.  This might be a convenient mechanism to help with hat
+template <class, value_type_morphs>
+struct value_type_morph;
+
+template <class T>
+struct value_type_morph<T, value_type_morphs::none>
+{
+    ESTD_CPP_STD_VALUE_TYPE(T);
+
+#if __cpp_rvalue_references
+    typedef T&& rvalue_reference;
+    typedef const T&& const_rvalue_reference;
+#endif
+};
+
+template <class T>
+struct value_type_morph<T, value_type_morphs::no_reference>
+{
+    typedef T value_type;
+    typedef T reference;
+    typedef const T const_reference;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef T rvalue_reference;
+    typedef const T const_rvalue_reference;
+};
+
+
 // TODO: Not yet used yet, used to signal that particular type T is a layer1
 // creature as well as bit size
 template <class T>
