@@ -79,12 +79,28 @@ class optional :
 
 public:
     typedef typename base_type::value_type value_type;
-    static CONSTEXPR bool real_reference =
-        is_same<add_rvalue_reference<value_type>, return_type>::value;
 
+protected:
+    // Determines if we're returning a true reference to underlying value (std optional
+    // behavior) or a value/copy (such as with bitwise flavor)
+    static CONSTEXPR bool real_reference = base_type::real_reference;
+        // DEBT: Seemed to be working, but now it doesn't
+        //is_same<add_rvalue_reference<value_type>, return_type>::value;
+
+    // DEBT: These names are not consistent with 'return_type', but not too bad overall
     typedef typename conditional<real_reference, value_type&&, value_type>::type rvalue_type;
     typedef typename conditional<real_reference, const value_type&&, const value_type>::type const_rvalue_type;
 
+    void assert_has_value() const
+    {
+#if __cpp_exceptions
+        if(!base_type::has_value()) throw bad_optional_access();
+#else
+        if(!base_type::has_value()) abort();
+#endif
+    }
+
+public:
     // --- constructors
     // We depend on base class to initialize default to has_value() == false
     ESTD_CPP_DEFAULT_CTOR(optional)
@@ -242,15 +258,6 @@ public:
 #endif
 
     // -- getters
-
-    void assert_has_value() const
-    {
-#if __cpp_exceptions
-        if(!base_type::has_value()) throw bad_optional_access();
-#else
-        if(!base_type::has_value()) abort();
-#endif
-    }
 
 #if __cpp_rvalue_references
     return_type value() &

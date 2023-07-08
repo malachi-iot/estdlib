@@ -394,11 +394,36 @@ TEST_CASE("optional")
             }
         }
     }
+    SECTION("type checks")
+    {
+        optional<bool> v1;
+        layer1::optional<bool> v2;
+        optional<int> v3;
+
+        using type1_1 = decltype(optional<bool>{}.value());
+        using type1_2 = decltype(layer1::optional<bool>{}.value());
+        using type1_3 = decltype(optional<int>{}.value());
+
+        using type2_1 = decltype(v1.value());
+        using type2_2 = decltype(v2.value());
+
+        REQUIRE(is_rvalue_reference<type1_1>::value);
+        REQUIRE(!is_rvalue_reference<type1_2>::value);
+        REQUIRE(is_rvalue_reference<type1_3>::value);
+
+        REQUIRE(is_lvalue_reference<type2_1>::value);
+        REQUIRE(!is_lvalue_reference<type2_2>::value);
+    }
     SECTION("internal")
     {
+        // Tucked away in internal namespace is a full bitwise flavor of optional.  So far this is
+        // only used to layer1 bool specialization
         SECTION("bitwise")
         {
             using bitwise = estd::optional<int, estd::internal::layer1::optional_base<int, 10, 0> >;
+            using value_type = decltype(bitwise{}.value());
+
+            REQUIRE(!is_rvalue_reference<value_type>::value);
 
             struct V
             {

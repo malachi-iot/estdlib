@@ -74,6 +74,8 @@ private:
 protected:
     ESTD_CPP_DEFAULT_CTOR(optional_value_provider)
 
+    static CONSTEXPR bool real_reference = true;
+
 #if __cpp_variadic_templates
     template <class ...TArgs>
     constexpr explicit optional_value_provider(in_place_t, TArgs&&...args) :
@@ -283,6 +285,8 @@ class optional_base
 protected:
     void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
+
+    static CONSTEXPR bool real_reference = false;
 
 #if __cpp_rvalue_references
     template <class U>
