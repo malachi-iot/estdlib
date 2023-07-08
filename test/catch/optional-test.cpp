@@ -396,6 +396,28 @@ TEST_CASE("optional")
     }
     SECTION("internal")
     {
-        //estd::internal::layer1::optional_base<int, 10, 0> v;
+        SECTION("bitwise")
+        {
+            using bitwise = estd::optional<int, estd::internal::layer1::optional_base<int, 10, 0> >;
+
+            struct V
+            {
+                int b_ : 10;
+
+                bitwise b() const { return b_; }
+            } v{5};
+            bitwise b1;
+
+            b1 = 5;
+
+            REQUIRE(v.b().has_value());
+
+            int v2 = v.b().value();
+
+            REQUIRE(v2 == 5);
+
+            // FIX: Not working
+            //REQUIRE(v.b() == b1);
+        }
     }
 }

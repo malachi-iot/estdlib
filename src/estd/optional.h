@@ -79,6 +79,11 @@ class optional :
 
 public:
     typedef typename base_type::value_type value_type;
+    static CONSTEXPR bool real_reference =
+        is_same<add_rvalue_reference<value_type>, return_type>::value;
+
+    typedef typename conditional<real_reference, value_type&&, value_type>::type rvalue_type;
+    typedef typename conditional<real_reference, const value_type&&, const value_type>::type const_rvalue_type;
 
     // --- constructors
     // We depend on base class to initialize default to has_value() == false
@@ -247,7 +252,7 @@ public:
 #endif
     }
 
-#if __cplusplus >= 201103L
+#if __cpp_rvalue_references
     return_type value() &
     {
         return (assert_has_value(), base_type::value());
@@ -258,12 +263,12 @@ public:
         return (assert_has_value(), base_type::value());
     }
 
-    value_type&& value() &&
+    rvalue_type value() &&
     {
         return (assert_has_value(), std::forward<value_type>(base_type::value()));
     }
 
-    constexpr const value_type&& value() const &&
+    constexpr const_rvalue_type value() const &&
     {
         return (assert_has_value(),
             std::forward<const value_type>(base_type::value()));
