@@ -324,14 +324,19 @@ TEST_CASE("priority-queue-test")
 
         REQUIRE(pq.container().size() == 4);
 
-        /*
-        auto f = estd::find_if(pq.container().begin(), pq.container().end(),
-            [&](Dummy& v){ return v.value2 == d7.value2; });
+        SECTION("erase")
+        {
+            auto f = estd::find_if(pq.container().begin(), pq.container().end(),
+                [&](Dummy& v){ return v.value2 == d7.value2; });
 
-        REQUIRE((*f).val1 == 7);
+            REQUIRE((*f).val1 == 7);
 
-        pq.erase(*f); */
-        pq.erase2([&](Dummy& v) { return v.value2 == d7.value2; });
+            pq.erase(*f);
+        }
+        SECTION("erase_if")
+        {
+            pq.erase_if([&](Dummy& v) { return v.value2 == d7.value2; });
+        }
 
         REQUIRE(pq.top().lock().val1 == 9);
         pq.pop();

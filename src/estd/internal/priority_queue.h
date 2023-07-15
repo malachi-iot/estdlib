@@ -133,7 +133,7 @@ public:
     }
 
 
-#if defined(FEATURE_CPP_MOVESEMANTIC) && defined(FEATURE_CPP_VARIADIC)
+#if __cpp_rvalue_references && __cpp_variadic_templates
     template <class ...TArgs>
     accessor emplace(TArgs&&...args)
     {
@@ -164,11 +164,15 @@ public:
     container_type& container() { return c; }
     const container_type& container() const { return c; }
 
-    // EXPERIMENTAL
     // https://www.geeksforgeeks.org/insertion-and-deletion-in-heaps/
+    // DEBT: Not optimized, but passes tests
     void erase(reference v)
     {
+        // Wipe out what v was pointing to with content of last
+        // node
         v = c.back();
+
+        // Now, erase last (duplicated) node and rebalance heap
         c.pop_back();
         // DEBT: Slow!  make_heap does multiple heapify and we only need one
         // see https://stackoverflow.com/questions/32213377/heapify-in-c-stl
@@ -182,9 +186,8 @@ public:
     }
 
 #ifdef __cpp_rvalue_references
-    // EXPERIMENTAL
     template <class F>
-    bool erase2(F&& f)
+    bool erase_if(F&& f)
     {
         auto i = estd::find_if(c.begin(), c.end(), f);
 
