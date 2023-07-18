@@ -2,24 +2,12 @@
 
 #include "../type_traits.h"
 #include "locale.h"
-#include <stdint.h>
+#include "../cstdint.h"
 #include "iosfwd.h"
 
+#include "feature/ios.h"
+
 namespace estd {
-
-#ifndef FEATURE_ESTD_AGGRESIVE_BITFIELD
-#define FEATURE_ESTD_AGGRESIVE_BITFIELD 1
-#endif
-
-
-// DEBT: Move ostream feature flags elsewhere
-#ifndef FEATURE_ESTD_OSTREAM_SETW
-#define FEATURE_ESTD_OSTREAM_SETW 1
-#define FEATURE_ESTD_OSTREAM_SETFILL 1
-#define FEATURE_ESTD_OSTREAM_SETIOSALIGN 1
-#endif
-
-
 
 class ios_base
 {
@@ -117,13 +105,13 @@ public:
     fmtflags unsetf(fmtflags flags)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ &= ~flags; return prior; }
 
-    fmtflags flags() const
+    ESTD_CPP_CONSTEXPR_RET fmtflags flags() const
     { return state_.fmtfl_; }
 
     fmtflags flags(fmtflags fmtfl)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ = fmtfl; return prior; }
 
-    iostate rdstate() const
+    ESTD_CPP_CONSTEXPR_RET iostate rdstate() const
     { return state_.iostate_; }
 
     void clear(iostate state = goodbit)
@@ -134,22 +122,21 @@ public:
         state_.iostate_ |= state;
     }
 
-    bool good() const
+    ESTD_CPP_CONSTEXPR_RET bool good() const
     { return rdstate() == goodbit; }
 
-    bool bad() const
+    ESTD_CPP_CONSTEXPR_RET bool bad() const
     { return rdstate() & badbit; }
 
-    bool fail() const
+    ESTD_CPP_CONSTEXPR_RET bool fail() const
     { return rdstate() & failbit || rdstate() & badbit; }
 
-    bool eof() const
+    ESTD_CPP_CONSTEXPR_RET bool eof() const
     { return rdstate() & eofbit; }
 
 protected:
     // internal call which we may make a layer0 version for optimization
-    bool is_unitbuf_set() const { return state_.fmtfl_ & unitbuf; }
-
+    ESTD_CPP_CONSTEXPR_RET bool is_unitbuf_set() const { return state_.fmtfl_ & unitbuf; }
 };
 
 // NOTE: these are not heeded quite yet

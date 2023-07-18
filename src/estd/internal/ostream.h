@@ -4,8 +4,7 @@
 
 namespace estd { namespace detail {
 
-// DEBT: it's time to put this into 'detail' namespace, since it's used much more often
-// than estd::basic_ostream - is there a way to make TBase a little less confusing for consumers?
+// DEBT: is there a way to make TBase a little less confusing for consumers?
 template <class TStreambuf, class TBase>
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
@@ -87,7 +86,9 @@ private:
 #if FEATURE_ESTD_OSTREAM_SETW
     // NOTE: Deviates from spec - std wants this in ios_base as part of setf
     // DEBT: Super clumsy, may want additional layer of wrappers for enum class
-#ifdef FEATURE_CPP_ENUM_CLASS
+    // NOTE: Due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31 below,
+    // not using scoped enum at all in this case
+#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
     enum class positioning_type
 #else
     struct positioning_type { enum values
@@ -97,7 +98,7 @@ private:
         right,
         internal
     };
-#ifdef FEATURE_CPP_ENUM_CLASS
+#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
     using positioning = positioning_type;
 #else
     };
