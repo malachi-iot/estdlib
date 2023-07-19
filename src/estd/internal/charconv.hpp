@@ -113,6 +113,27 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
 // DEBT: to_chars bounds checking here is quite weak
 
+template <int base_ = -1>
+struct base_provider
+{
+    static CONSTEXPR unsigned base = (unsigned) base_;
+
+    ESTD_CPP_CONSTEXPR_RET unsigned operator()() const { return base; }
+};
+
+template <>
+struct base_provider<-1>
+{
+    typedef unsigned type;
+
+    const type base;
+
+    ESTD_CPP_CONSTEXPR_RET base_provider(int base) : base{(type)base} {}
+
+    ESTD_CPP_CONSTEXPR_RET unsigned operator()() const { return base; }
+};
+
+
 /// Performs to_chars slightly differently than stock.  returned 'ptr' is beginning
 /// of converted integer rather than end, since the algorithm likes to do it that way
 /// \tparam TCharBaseTraits
@@ -125,10 +146,10 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 /// \remarks
 /// NOTE: Not using default template arg to maintain c++03 compatibility
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
-template <class TCbase, class TInt>
+template <class TCbase, class TInt, int base_>
 detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
         typename TCbase::char_type* first,
-        typename TCbase::char_type* last, TInt value, const int base)
+        typename TCbase::char_type* last, TInt value, base_provider<base_> base)
 {
     typedef TCbase cbase_type;
     typedef typename TCbase::char_type char_type;
@@ -139,8 +160,8 @@ detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
 
     while(first != last)
     {
-        *last = cbase_type::to_char(value % base);
-        value /= base;
+        *last = cbase_type::to_char(value % base());
+        value /= base();
 
         if(value == 0)
         {

@@ -53,13 +53,13 @@ inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, from_cha
 /// \param base
 /// \return
 template <class TInt>
-inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, to_chars_result>::type
+typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, to_chars_result>::type
     to_chars_opt(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer_opt<internal::cbase_C_36_type>(first, last, value, base);
+        return internal::to_chars_integer_opt<internal::cbase_C_36_type>(first, last, value, internal::base_provider<>(base));
     else
-        return internal::to_chars_integer_opt<internal::cbase_C_10_type>(first, last, value, base);
+        return internal::to_chars_integer_opt<internal::cbase_C_10_type>(first, last, value, internal::base_provider<>(base));
 }
 
 template <class TInt>
