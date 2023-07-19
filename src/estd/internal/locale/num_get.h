@@ -129,11 +129,14 @@ private:
             // TODO: Consider strongly using a switch statement, even though it does
             // spiritually break the spec "the first applicable choice of the following five is selected" [1]
 
+#if FEATURE_ESTD_OSTREAM_OCTAL
             if(basefield == estd::ios_base::oct)
             {
                 return get_unsigned_integer<8>(in, end, err, str, v);
             }
-            else if(basefield == estd::ios_base::hex)
+            else
+#endif
+            if(basefield == estd::ios_base::hex)
             {
                 return get_unsigned_integer<16>(in, end, err, str, v);
             }
@@ -158,11 +161,14 @@ private:
         {
             const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
 
+#if FEATURE_ESTD_OSTREAM_OCTAL
             if(basefield == estd::ios_base::oct)
             {
                 return get_signed_integer<8>(in, end, err, str, v);
             }
-            else if(basefield == estd::ios_base::hex)
+            else
+#endif
+            if(basefield == estd::ios_base::hex)
             {
                 // No real negative in hex, so presume caller knows this and passed in a
                 // signed type for their own convenience
@@ -221,8 +227,10 @@ public:
     {
         switch(basefield)
         {
+#if FEATURE_ESTD_OSTREAM_OCTAL
             case estd::ios_base::oct:
                 return get<8>(in, end, err, v);
+#endif
 
             case estd::ios_base::hex:
                 return get<16>(in, end, err, v);

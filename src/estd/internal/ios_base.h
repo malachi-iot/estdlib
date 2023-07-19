@@ -21,7 +21,9 @@ public:
     // is expected to be zero
     static CONSTEXPR fmtflags dec = 0x01;
     static CONSTEXPR fmtflags hex = 0x02;
+#if FEATURE_ESTD_OSTREAM_OCTAL
     static CONSTEXPR fmtflags oct = 0x03;
+#endif
     static CONSTEXPR fmtflags basefield = dec | hex;
 
     static CONSTEXPR fmtflags left = 0x08;

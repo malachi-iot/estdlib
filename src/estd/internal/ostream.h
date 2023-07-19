@@ -263,6 +263,23 @@ public:
 
 namespace internal {
 
+// Low level helper, hopefully gets un-inlined and saves some code space
+template <class TStreambuf, class TBase>
+void write_int_buffer(
+    detail::basic_ostream<TStreambuf, TBase>& out,
+    typename TStreambuf::char_type* buffer,
+    unsigned sz)
+{
+#if FEATURE_ESTD_OSTREAM_SETW
+    const streamsize pad = out.width();
+
+    out.fill_n(pad - sz);
+    out.width(0);
+#endif
+
+    out.write(buffer, sz);
+}
+
 // Internal call - write an integer of the specified base to the output stream
 // DEBT: No locale num_put available yet.
 // to_string_opt is less overhead so really we'd like to compile time choose
@@ -274,18 +291,14 @@ inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream
     // +1 for null terminator
     char buffer[estd::numeric_limits<T>::template length<base>::value + 2];
 
-    to_chars_result result = to_string_opt(buffer, value, base);
+    const to_chars_result result = to_string_opt(buffer, value, base);
+    const unsigned sz = &buffer[sizeof(buffer) - 1] - result.ptr;
 
-    int sz = &buffer[sizeof(buffer) - 1] - result.ptr;
+    // DEBT: Need to check to_chars_result error code
 
-#if FEATURE_ESTD_OSTREAM_SETW
-    const streamsize pad = out.width();
+    write_int_buffer(out, result.ptr, sz);
 
-    out.fill_n(pad - sz);
-    out.width(0);
-#endif
-
-    return out.write(result.ptr, sz);
+    return out;
 }
 
 template <class TStreambuf, class TBase, typename TInt>
@@ -295,8 +308,10 @@ detail::basic_ostream<TStreambuf, TBase>& out_int_helper(detail::basic_ostream<T
     // support for that really would be useful
     switch(out.flags() & ios_base::basefield)
     {
+#if FEATURE_ESTD_OSTREAM_OCTAL
         case ios_base::oct:
             return write_int<8>(out, value);
+#endif
 
         case ios_base::dec:
             return write_int<10>(out, value);
