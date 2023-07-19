@@ -146,10 +146,10 @@ struct base_provider<-1>
 /// \remarks
 /// NOTE: Not using default template arg to maintain c++03 compatibility
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
-template <class TCbase, class TInt, int base_>
-detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
-        typename TCbase::char_type* first,
-        typename TCbase::char_type* last, TInt value, base_provider<base_> base)
+template <class TCbase, class TInt, class TCharIt, int base_>
+inline detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
+        TCharIt first,
+        TCharIt last, TInt value, base_provider<base_> base)
 {
     typedef TCbase cbase_type;
     typedef typename TCbase::char_type char_type;
