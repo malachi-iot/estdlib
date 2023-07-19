@@ -146,6 +146,9 @@ struct base_provider<-1>
 /// \remarks
 /// NOTE: Not using default template arg to maintain c++03 compatibility
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
+/// DEBT: TCharIt probably won't work out unless we match up to_chars_result,
+///       which does at the moment but seems fragile.  Old TCbase::char_type*
+///       may have been better.  At a minimum, try to enforce matching the two
 template <class TCbase, class TInt, class TCharIt, int base_>
 inline detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
         TCharIt first,
