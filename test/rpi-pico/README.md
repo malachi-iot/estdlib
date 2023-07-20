@@ -12,7 +12,7 @@ Be sure to set FREERTOS_KERNEL_PATH as per https://github.com/racka98/PicoW-Free
 
 |   Date  | Board                | PICO_SDK     | FreeRTOS | Result  | Notes |
 | ------- | -------------------- | ------------ | -------- | -------- | ----- |
-| 01JUN23 | Raspberry Pi Pico W  | v1.5.0       |  10.5.1  | Pass     | FreeRTOS dynamic only
+| 20JUL23 | Raspberry Pi Pico W  | v1.5.0       |  10.5.1  | Pass     | FreeRTOS dynamic only
 | 01DEC22 | Raspberry Pi Pico W  | v1.4.0       |  10.5.1  | Pass     | FreeRTOS static + dynamic
 | 01JUN23 | Raspberry Pi Pico W  | v1.4.0       |  none    | Pass     |
 | 17MAR23 | Raspberry Pi Pico    | v1.5.0       |  none    | Compiles | Compiled on ARM64 platform, no rpi pico present
