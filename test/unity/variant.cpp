@@ -12,6 +12,7 @@ static void test_variant_1()
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
 
+    // FIX: hangs AVR
     v = "hello";
 
     TEST_ASSERT_FALSE(holds_alternative<int>(v));
@@ -27,10 +28,18 @@ static void test_variant_1()
 
 static void test_variant_nontrivial()
 {
-#if __cplusplus >= 201103L && FEATURE_STD_FUNCTIONAL
+#if __cplusplus >= 201103L
+#if FEATURE_STD_FUNCTIONAL
     int counter = 0;
+#endif
     variant<int, estd::test::NonTrivial> v(
-        in_place_index_t<1>{}, 7, [&]{++counter;}), v2;
+        in_place_index_t<1>{}, 7,
+#if FEATURE_STD_FUNCTIONAL
+        [&]{++counter;}),
+#else
+        true),
+#endif
+        v2;
 
     estd::test::NonTrivial& v3 = get<1>(v);
 
@@ -39,20 +48,26 @@ static void test_variant_nontrivial()
     // No dtor_fn call yet since v2 was unassigned and a move
     // from nulls out dtor_fn
     // (remember also there's no assignment operator for this guy)
+#if FEATURE_STD_FUNCTIONAL
     TEST_ASSERT_EQUAL(0, counter);
+#endif
     TEST_ASSERT_EQUAL(7, get<1>(v2).code_);
     TEST_ASSERT_TRUE(get<1>(v2).initialized_);
     TEST_ASSERT_FALSE(get<1>(v2).copied_);
     TEST_ASSERT_TRUE(get<1>(v2).moved_);
     TEST_ASSERT_FALSE(get<1>(v2).moved_from_);
 
+    // FIX: Fails on AVR
     TEST_ASSERT_TRUE(v3.moved_from_);
 
     v2 = 0;
 
+#if FEATURE_STD_FUNCTIONAL
     // v2 assignment now destroyes non trivial and activates
     // dtor_fn
     TEST_ASSERT_EQUAL(1, counter);
+#endif
+
 #endif
 }
 

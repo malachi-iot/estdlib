@@ -1,6 +1,6 @@
 #pragma once
 
-#include <new>
+#include <estd/new.h>
 
 #include <estd/cstdint.h>
 #include <estd/utility.h>

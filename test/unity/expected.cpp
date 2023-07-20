@@ -5,12 +5,20 @@
 
 using namespace estd;
 
+// DEBT: Sloppy way of switching to 16-bit packed mode.  AVR isn't the only possible
+// target for this.
+#if __AVR__
+static CONSTEXPR unsigned sz = sizeof(int) + sizeof(bool);
+#else
+static CONSTEXPR unsigned sz = sizeof(int) * 2;
+#endif
+
 static void test_expected_void()
 {
     expected<void, int> e;
 
     TEST_ASSERT_TRUE(e.has_value());
-    TEST_ASSERT_EQUAL(sizeof(e), sizeof(int) * 2);
+    TEST_ASSERT_EQUAL(sizeof(e), sz);
 }
 
 static void test_expected_int()
@@ -19,7 +27,7 @@ static void test_expected_int()
 
     TEST_ASSERT_TRUE(e.has_value());
     TEST_ASSERT_TRUE(e.value() == 0);
-    TEST_ASSERT_EQUAL(sizeof(e), sizeof(int) * 2);
+    TEST_ASSERT_EQUAL(sizeof(e), sz);
 
     TEST_ASSERT_EQUAL(7, *e2);
 }

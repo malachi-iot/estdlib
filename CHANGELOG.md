@@ -13,12 +13,16 @@
 ## Quality Updates & Bug Fixes
 
 * `is_base_of` no longer caught up on access modifierrs
-* General Arduino, c++03 compatibility
+* General Arduino, AVR, c++03 compatibility
 * `estd::optional` and `estd::expected` much more robust
     * shares code base with `estd::variant`
     * when available, exceptions are now supported
 * `estd::num_get` and by extension `istream` integer parsing now returns min/max value on overflow
 * `estd::priority_queue` works on more targets
+
+## Known Issues & Limitations
+
+* `estd::variant` not functional on AVR, probably bugs in https://github.com/malachi-iot/estdlib/issues/7
 
 # v0.5.1 - 18MAY23
 
