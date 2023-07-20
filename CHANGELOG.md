@@ -1,4 +1,6 @@
-# v0.5.2 - #####23
+# v0.6.0 - 20JUL23
+
+*NOTICE*: License changed from **MIT** to **APACHE 2.0**
 
 ## Added Features
 
