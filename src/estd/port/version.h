@@ -5,8 +5,8 @@
 #include <estd/port/arch/version.h>
 
 #define ESTD_VER_MAJOR     0
-#define ESTD_VER_MINOR     5
-#define ESTD_VER_PATCH     1
+#define ESTD_VER_MINOR     6
+#define ESTD_VER_PATCH     0
 
-#define ESTD_VERSION  ESTD_BUILD_SEMVER(0, 5, 1)
-#define ESTD_VERSION_STR "0.5.1"
+#define ESTD_VERSION  ESTD_BUILD_SEMVER(0, 6, 0)
+#define ESTD_VERSION_STR "0.6.0"
