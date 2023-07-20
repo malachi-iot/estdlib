@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(estd VERSION 0.5.1 LANGUAGES CXX)
 
-set(TOOLS_DIR ../tools/cmake)
+include(../tools/cmake/setvars.cmake)
 
 include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)

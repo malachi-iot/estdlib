@@ -9,10 +9,9 @@ else()
     message(STATUS "using c++${CMAKE_CXX_STANDARD}")
 endif()
 
-set(ROOT_DIR ../..)
+include(../../tools/cmake/setvars.cmake)
 
 INCLUDE_DIRECTORIES(${ROOT_DIR}/ext/Catch2/single_include/catch2)
-set(ESTD_DIR ${ROOT_DIR}/src)
 
 add_subdirectory(${ESTD_DIR} estd)
 
