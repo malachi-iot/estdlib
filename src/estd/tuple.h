@@ -77,6 +77,13 @@ class tuple<T, TArgs...> :
     typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
 
 public:
+    template <class UType,
+        enable_if_t<is_constructible<T, UType>::value, bool> = true>
+    constexpr tuple(UType&& value, TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...),
+        storage_type(std::forward<UType>(value))
+    {}
+
     constexpr tuple(T&& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
         storage_type(std::forward<T>(value))

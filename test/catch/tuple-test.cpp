@@ -273,6 +273,25 @@ TEST_CASE("tuple")
             REQUIRE(t.test() == 5);
         }
     }
+    SECTION("converting constructor")
+    {
+        int counter = 0;
+        tuple<test::NonTrivial> t(5);
+
+        REQUIRE(get<0>(t).code_ == 5);
+
+        {
+            tuple<test::NonTrivial, int> t2(
+                make_tuple(7, [&]{++counter;}),
+                77);
+
+            REQUIRE(counter == 0);
+            REQUIRE(get<0>(t2).code_ == 7);
+            REQUIRE(get<1>(t2) == 77);
+        }
+
+        REQUIRE(counter == 1);
+    }
 }
 
 #include "macro/pop.h"

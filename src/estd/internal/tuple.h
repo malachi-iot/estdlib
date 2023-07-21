@@ -42,7 +42,14 @@ struct sparse_tuple
     T& first() { return value; }
 
 #if __cpp_constexpr
-    constexpr sparse_tuple(T&& value) : value(std::move(value)) {}
+    // DEBT: A little sloppy, but should suffice.  This way we make way for converting/direct
+    // init constructors without impeding default move constructor
+    template <class UType, enable_if_t<!is_same<UType, sparse_tuple>::value, bool> = true>
+    explicit constexpr sparse_tuple(UType&& value) :    // NOLINT
+        value(std::forward<UType>(value)) {}
+
+    constexpr sparse_tuple(sparse_tuple&&) noexcept = default;
+    constexpr sparse_tuple(const sparse_tuple&) = default;
     constexpr sparse_tuple() = default;
 #else
     sparse_tuple(const T& value) : value(value) {}
