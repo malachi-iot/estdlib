@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include <estd/tuple.h>
+#include <estd/internal/variadic.h>
 
 #include "test-data.h"
 
@@ -289,6 +290,30 @@ TEST_CASE("tuple")
             REQUIRE(get<0>(t2).code_ == 7);
             REQUIRE(get<1>(t2) == 77);
         }
+
+        REQUIRE(counter == 1);
+    }
+    SECTION("visiting")
+    {
+        // Large overlap with 'apply' but using our own variadic namespace and a bit more powerful
+        tuple<test::NonTrivial> v(5);
+        int counter = 0;
+
+        // NOTE: Cheating a tiny bit, since we only have 1 item in tuple we don't
+        // have to dance around and 'auto' functor.  Only a little bit cheating because
+        // this still won't compile or pass if things aren't just right.  Therefore not debt
+        v.visit(
+            [](variadic::v3::instance<test::NonTrivial> v, int& counter)
+            {
+                ++counter;
+
+                REQUIRE(v.value.copied_ == false);
+                REQUIRE(v.value.moved_ == false);
+
+                REQUIRE(v.value.code_ == 5);
+
+                return false;
+            }, counter);
 
         REQUIRE(counter == 1);
     }

@@ -72,6 +72,14 @@ using instance = v1::visitor_instance<I, T>;
 
 }
 
+// EXPERIMENTAL at this time
+namespace v3 {
+
+template <class T, size_t I = 1000>
+using instance = v1::visitor_instance<I, T>;
+
+}
+
 template <class ...Types>
 struct types;
 

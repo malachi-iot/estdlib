@@ -2,6 +2,9 @@
 
 #include "internal/tuple.h"
 
+// EXPERIMENTAL
+#include "internal/variadic/visitor.h"
+
 #include "type_traits.h"
 
 #if __cpp_alias_templates && __cpp_variadic_templates
@@ -48,12 +51,13 @@ class tuple<T&, TArgs...> : public tuple<TArgs...>
     T& value;
 
     typedef tuple<TArgs...> base_type;
+    using types = variadic::types<T&, TArgs...>;
 
 public:
     typedef T& valref_type;
     typedef const T& const_valref_type;
 
-    constexpr tuple(T& value, TArgs&&...args) :
+    constexpr explicit tuple(T& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
         value(value)
     {}
@@ -75,6 +79,7 @@ class tuple<T, TArgs...> :
 {
     typedef tuple<TArgs...> base_type;
     typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
+    using types = variadic::types<T, TArgs...>;
 
 public:
     template <class UType,
@@ -98,6 +103,14 @@ public:
     static constexpr int index = sizeof...(TArgs);
 
     typedef T element_type;
+
+    // EXPERIMENTAL
+    template <class F, class ...TArgs2>
+    bool visit(F&& f, TArgs2&&...args)
+    {
+        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
+            std::forward<TArgs2>(args)...);
+    }
 };
 
 

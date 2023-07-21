@@ -30,10 +30,34 @@ struct legacy_visit_instance_functor
     }
 };
 
+struct visit_tuple_functor
+{
+    // DEBT: Use 'Concept' here to filter to 'tuple-like'
+    template <size_t I, class T, class Tuple, class F, class ...TArgs>
+    bool operator()(variadic::type<I, T>, Tuple& tuple, F&& f, TArgs&&...args) const
+    {
+        T& v = get<I>(tuple);
+
+        return f(variadic::instance<I, T>{v}, std::forward<TArgs>(args)...);
+    }
+};
+
 template <size_t I>
 struct visitor_index : in_place_index_t<I>
 {
     static constexpr size_t index = I;
+};
+
+template <class T>
+struct visitor_instance : in_place_type_t<T>
+{
+    T& value;
+
+    typedef T value_type;
+
+    visitor_instance(const visitor_instance&) = default;
+
+    constexpr explicit visitor_instance(T& value) : value{value} {}
 };
 
 }
@@ -59,17 +83,33 @@ struct visitor_index :
 };
 
 template <size_t I, class T>
-struct visitor_instance : visitor_index<I, T>
+struct visitor_instance : visitor_index<I, T>,
+    // NOTE: Not bothered that we have multiple inheritance for in_place_type_t since it's an empty
+    // struct anyway
+    internal::visitor_instance<T>
 {
-    T& value;
-
-    typedef T value_type;
-
     visitor_instance(const visitor_instance&) = default;
     //visitor_instance(visitor_instance&&) noexcept = default;
 
-    constexpr explicit visitor_instance(T& value) : value{value} {}
+    constexpr explicit visitor_instance(T& value) :
+        internal::visitor_instance<T>(value) {}
 };
+
+// EXPERIMENTAL - not in other namespace because it's a specialization
+template <class T>
+struct visitor_instance<1000, T> : internal::visitor_instance<T>
+{
+    visitor_instance(const visitor_instance&) = default;
+
+    constexpr explicit visitor_instance(T& value) :
+        internal::visitor_instance<T>(value) {}
+
+    template <size_t I>
+    constexpr visitor_instance(const visitor_instance<I, T>& vi) :
+        visitor_instance(vi.value)
+    {}
+};
+
 
 }
 

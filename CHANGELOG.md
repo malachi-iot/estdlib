@@ -1,3 +1,11 @@
+# v0.6.1 - XXXXX23
+
+## Added Features
+
+## Quality Updates & Bug Fixes
+
+* `estd::tuple` now has conversion constructor
+
 # v0.6.0 - 20JUL23
 
 *NOTICE*: License changed from **MIT** to **APACHE 2.0**
