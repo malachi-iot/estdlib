@@ -1,5 +1,4 @@
 #include <estd/string.h>
-#include <estd/string_view.h>
 #include <estd/vector.h>
 #include <estd/charconv.h>
 #include <cstdlib>
@@ -513,67 +512,6 @@ TEST_CASE("string tests")
 
         REQUIRE(s.starts_with("te"));
         REQUIRE(!s.starts_with("st"));
-    }
-    SECTION("string_view")
-    {
-        string_view sv("test", 4);
-        string_view sv2 = sv;
-        string_view sv3 = "test3";
-
-        int sz = sizeof(sv);
-
-        // policy makes all strings default to size type of uint16_t
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        REQUIRE(sizeof(string_view::size_type) == sizeof(uint16_t));
-#endif
-        REQUIRE(sz == sizeof(char*) + sizeof(size_t));
-
-        REQUIRE(sv3.starts_with(sv));
-        REQUIRE(sv2 == sv);
-        REQUIRE(sv2.compare(sv) == 0);
-        REQUIRE(sv2 == "test");
-
-        // NOTE: Only works in an experimental capacity right now.  Adjusted
-        // layer3::allocator to have experimental setters to adjust its pointer
-        // and size
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        sv3.remove_suffix(2);
-
-        REQUIRE(sv3 == "tes");
-
-        sv3.remove_prefix(1);
-
-        REQUIRE(sv3 == "es");
-#endif
-
-        // Does not compile, as is correct behavior - string_views are read only except
-        // for remove_suffix and remove_prefix
-        //sv3 += "T";
-
-        SECTION("from layer1::string")
-        {
-            layer1::string<32> s = "hi2u";
-
-            estd::string_view v = s;
-
-            REQUIRE(v == "hi2u");
-        }
-        SECTION("from layer2::string")
-        {
-            layer2::const_string s = "hi2u";
-
-            estd::string_view v = s;
-
-            REQUIRE(v == "hi2u");
-        }
-
-        sv3 = "test3";
-
-        estd::string_view sv4 = sv3.substr(1, 2);
-
-        const char* helper = sv4.lock();
-
-        REQUIRE(sv4 == "es");
     }
     SECTION("conversion")
     {

@@ -55,6 +55,7 @@ else()
         stack-test.cpp
         streambuf-test.cpp
         string-test.cpp
+        string-view-test.cpp
         ratio-test.cpp
         test-data.h
         type-traits-test.cpp
