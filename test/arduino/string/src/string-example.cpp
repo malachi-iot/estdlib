@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include <estd/string.h>
+#include <estd/exp/pgm_string.h>
 
 void setup()
 {
@@ -11,6 +12,9 @@ void setup()
 #define USE_IOS 0
 
 
+//static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
+static estd::pgm_string pgm_s((const PROGMEM char*)"hello");
+
 void loop()
 {
     static int counter = 0;
@@ -20,6 +24,8 @@ void loop()
     name = "Mickey";
     name += ' ';
     name += "Mouse";
+
+    //name += pgm_s;
 
 #if USE_IOS
     // FIX: Use arduino_stream here, this is now broken
