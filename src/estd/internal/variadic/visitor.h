@@ -97,7 +97,7 @@ struct visitor_instance : visitor_index<I, T>,
 
 // EXPERIMENTAL - not in other namespace because it's a specialization
 template <class T>
-struct visitor_instance<1000, T> : internal::visitor_instance<T>
+struct visitor_instance<internal::variant_npos(), T> : internal::visitor_instance<T>
 {
     visitor_instance(const visitor_instance&) = default;
 

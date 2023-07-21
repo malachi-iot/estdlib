@@ -43,9 +43,6 @@ type_at_index<index, Types...>* get_ll(variant<Types...>& vs) noexcept;
 template <int index, class ...Types>
 constexpr const type_at_index<index, Types...>* get_ll(const variant<Types...>& vs) noexcept;
 
-// DEBT: Supposed to be an inline variable, but we want c++11 compat, so we deviate from spec
-constexpr size_t variant_npos() { return (size_t)-1; }
-
 }
 
 #else

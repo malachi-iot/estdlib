@@ -2,6 +2,7 @@
 
 #include "../raw/cstddef.h"
 #include "../raw/utility.h"
+#include "../raw/variant.h"
 
 #if __cpp_variadic_templates
 namespace estd { namespace internal {
@@ -75,7 +76,11 @@ using instance = v1::visitor_instance<I, T>;
 // EXPERIMENTAL at this time
 namespace v3 {
 
-template <class T, size_t I = 1000>
+// EXPERIMENTAL Not sure we want to proclaim that 'I' is more default than 'T',
+// which is more or less what this does.  However, it does have universal advantage
+// over v1 and v2 in that neither of those currently treat anything as default anyway
+// Lastly, this can be achieved by going direct to internal::visitor_xxx stuff
+template <class T = void, size_t I = internal::variant_npos()>
 using instance = v1::visitor_instance<I, T>;
 
 }

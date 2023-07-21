@@ -104,7 +104,7 @@ public:
 
     typedef T element_type;
 
-    // EXPERIMENTAL
+    // EXPERIMENTAL, though I think I'm wanting to keep it
     template <class F, class ...TArgs2>
     bool visit(F&& f, TArgs2&&...args)
     {
