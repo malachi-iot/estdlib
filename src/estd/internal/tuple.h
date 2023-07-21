@@ -3,13 +3,10 @@
 #include "platform.h"
 #include "type_traits.h"
 #include "fwd/tuple.h"
+#include "feature/tuple.h"
 #include "utility.h"    // For std::move
 
 namespace estd { namespace internal {
-
-#ifndef FEATURE_ESTD_SPARSE_TUPLE
-#define FEATURE_ESTD_SPARSE_TUPLE 1
-#endif
 
 // DEBT: 'sparse_tuple' can probably work well in c++03 tuple flavor too
 

@@ -79,14 +79,14 @@ class tuple<T, TArgs...> :
 public:
     constexpr tuple(T&& value, TArgs&&...args) :
         base_type(std::forward<TArgs>(args)...),
-        storage_type(std::move(value))
+        storage_type(std::forward<T>(value))
     {}
 
     using storage_type::first;
     using typename storage_type::valref_type;
     using typename storage_type::const_valref_type;
 
-    explicit tuple() {}
+    explicit tuple() = default;
 
     static constexpr int index = sizeof...(TArgs);
 
