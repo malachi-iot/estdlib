@@ -52,7 +52,7 @@ template<
     friend basic_string operator +=(basic_string& lhs, TInput rhs); */
 
 public:
-    typedef typename base_t::size_type size_type;
+    typedef typename base_type::size_type size_type;
 
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
@@ -68,14 +68,13 @@ public:
     typedef Traits traits_type;
     typedef typename base_t::allocator_type allocator_type;
     typedef StringPolicy policy_type;
+    typedef typename base_type::const_pointer const_pointer;
 
     typedef typename allocator_type::handle_type handle_type;
 
     static CONSTEXPR size_type npos = (size_type) -1;
 
-    size_type length() const { return base_t::size(); }
-
-    basic_string& erase(size_type index = 0, size_type count = -1)
+    basic_string& erase(size_type index = 0, size_type count = npos)
     {
         size_type size_minus_index = base_t::size() - index;
         // NOTE: A bit tricky, if we don't use helper size_minus_index, template
@@ -88,7 +87,7 @@ public:
         return *this;
     }
 
-    basic_string& append(size_type count, value_type c)
+    basic_string& append(size_type count, value_type c) // NOLINT
     {
         while(count--) base_t::push_back(c);
 
@@ -96,66 +95,23 @@ public:
     }
 
 
-    template <class TForeignChar, class TForeignTraits, class TForeignAllocator>
-    basic_string& append(const basic_string<TForeignChar, typename TForeignTraits::char_traits, TForeignAllocator, TForeignTraits>& str)
+    template <class Allocator2, class Policy2>
+    basic_string& append(const internal::basic_string<Allocator2, Policy2>& str)
     {
         base_t::append(str);
         return *this;
     }
 
-    basic_string& append(const value_type* s, size_type count)
+    basic_string& append(const_pointer s, size_type count)  // NOLINT
     {
         base_t::append(s, count);
         return *this;
     }
 
 
-    basic_string& append(const value_type* s)
+    basic_string& append(const_pointer s)
     {
         return append(s, strlen(s));
-    }
-
-
-    int compare( const CharT* s ) const
-    {
-        size_type raw_size = base_t::size();
-        size_type s_size = strlen(s);
-
-        if(raw_size < s_size) return -1;
-        if(raw_size > s_size) return 1;
-
-        // gets here if size matches
-        const CharT* raw = base_t::clock();
-
-        int result = traits_type::compare(raw, s, raw_size);
-
-        base_t::cunlock();
-
-        return result;
-
-    }
-
-
-    template <class TForeignChar, class TForeignTraits, class TForeignAlloc>
-    int compare(const basic_string<TForeignChar, typename TForeignTraits::char_traits, TForeignAlloc, TForeignTraits>& str) const
-    {
-        size_type raw_size = base_t::size();
-        size_type s_size = str.size();
-
-        if(raw_size < s_size) return -1;
-        if(raw_size > s_size) return 1;
-
-        // gets here if size matches
-        const CharT* raw = base_t::clock();
-        const CharT* s = str.clock();
-
-        int result = traits_type::compare(raw, s, raw_size);
-
-        base_t::cunlock();
-
-        str.cunlock();
-
-        return result;
     }
 
 
@@ -183,39 +139,10 @@ public:
         return *this;
     }
 
-    basic_string& operator=(const CharT* s)
+    basic_string& operator=(const_pointer s)
     {
         base_t::assign(s, strlen(s));
         return *this;
-    }
-
-    // compare to a C-style string
-    bool starts_with(const CharT* compare_to) const
-    {
-        const value_type* s = base_t::clock();
-
-        size_type source_max = length();
-
-        while(source_max-- && *compare_to != 0)
-            if(*s++ != *compare_to++)
-            {
-                base_t::cunlock();
-                return false;
-            }
-
-        base_t::cunlock();
-        // if compare_to is longer than we are, then it's also a fail
-        return source_max != -1;
-    }
-
-
-
-    // Keeping this as I expect to eventually need a string/char traits aware
-    // version of the character-by-character comparison
-    template <class TImpl>
-    bool starts_with(const internal::allocated_array<TImpl>& compare_to) const
-    {
-        return base_t::starts_with(compare_to);
     }
 };
 

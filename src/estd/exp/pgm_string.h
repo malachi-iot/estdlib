@@ -21,6 +21,7 @@ struct pgm_allocator_traits
 {
     using value_type = char;
     using pointer = const PROGMEM char*;
+    using const_pointer = pointer;
     using handle_type = pointer;
     using handle_with_offset = pointer;
     using size_type = size_t;
@@ -29,12 +30,13 @@ struct pgm_allocator_traits
     static CONSTEXPR bool is_locking_exp = false;
 };
 
-struct PgmPolicy
+struct PgmPolicy : pgm_allocator_traits
 {
     using char_traits = estd::char_traits<char>;
 };
 
 
+// TODO: Phase this guy out
 template <class TAllocator>
 struct dynamic_array<TAllocator, PgmPolicy>
 {
@@ -64,6 +66,7 @@ struct dynamic_array<TAllocator, PgmPolicy>
 
 }
 
+// TODO: Phase this guy out
 template <>
 struct allocated_array<impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy> > :
     impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy> 
@@ -72,6 +75,15 @@ struct allocated_array<impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy>
     using impl_type = impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy>;
 
     allocated_array(const char* const s) : base_type(s) {}
+};
+
+template <>
+struct basic_string<impl::pgm_allocator, impl::PgmPolicy> : impl::PgmPolicy
+{
+    using allocator_type = impl::pgm_allocator;
+    using allocator_traits = impl::pgm_allocator_traits;
+
+    basic_string(const char* const s) {}
 };
 
 
@@ -95,11 +107,11 @@ using pgm_string = basic_string<char, char_traits<char>,
     internal::impl::pgm_allocator,
     internal::impl::PgmPolicy>; */
 
-struct pgm_string : basic_string<char, char_traits<char>,
+struct pgm_string : basic_string<char, estd::char_traits<char>,
     internal::impl::pgm_allocator,
     internal::impl::PgmPolicy>
 {
-    using base_type = basic_string<char, char_traits<char>,
+    using base_type = basic_string<char, estd::char_traits<char>,
         internal::impl::pgm_allocator,
         internal::impl::PgmPolicy>;
 
