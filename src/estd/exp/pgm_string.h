@@ -4,6 +4,8 @@
 #include <estd/internal/dynamic_array.h>
 #include "../string.h"
 
+#include "../internal/macro/push.h"
+
 namespace estd {
 
 namespace internal {
@@ -26,7 +28,7 @@ struct pgm_allocator_traits
     using const_pointer = pointer;
     using handle_type = pointer;
     using handle_with_offset = pointer;
-    using size_type = size_t;
+    using size_type = uint16_t;
 
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
@@ -171,9 +173,20 @@ struct private_array_base :
             ++p;
             return temp;
         }
+
+        constexpr iterator operator+(int adder) const
+        {
+            return { p + adder };
+        }
+
+        iterator& operator+=(int adder)
+        {
+            p += adder;
+            return *this;
+        }
     };
 
-    iterator begin() const { return { data_ }; }
+    constexpr iterator begin() const { return { data_ }; }
 
     accessor operator[](size_t index)
     {
@@ -205,17 +218,28 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
             base_type::size();
     }
 
-    iterator end() const
+    constexpr iterator end() const
     {
         return { base_type::data_ + size() };
     }
 
-    size_type copy(char* dest, size_type count, size_type pos = 0)
+    // copies without bounds checking
+    void copy_ll(char* dest, size_type count, size_type pos = 0) const
     {
-        // FIX: Doesn't pay attention to size()
+        //iterator source(base_type::data_ + pos);
+        iterator source = base_type::begin() + pos;
 
-        memcpy_P(dest, base_type::data_ + pos, count);
-        return count;
+        estd::copy_n(source, count, dest);
+    }
+
+    size_type copy(char* dest, size_type count, size_type pos = 0) const
+    {
+        const size_type _end = estd::min(count, size());
+        copy_ll(dest, _end, pos);
+
+        //memcpy_P(dest, base_type::data_ + pos, count);
+        
+        return _end;
     }
 
 
@@ -301,3 +325,4 @@ struct pgm_string : basic_string<char, estd::char_traits<char>,
 
 }
 
+#include "../internal/macro/pop.h"

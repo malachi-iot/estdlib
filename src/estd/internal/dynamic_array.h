@@ -252,10 +252,12 @@ protected:
     // internal call: grows entire size() by amount,
     // ensuring that there's enough space along the
     // way to do so (allocating more if necessary)
-    // returns size before growth
-    size_type grow(int by_amount)
+    /// @returns size before growth
+    size_type grow(int by_amount, bool* success = nullptr)
     {
-        ensure_additional_capacity(by_amount);
+        bool success_ = ensure_additional_capacity(by_amount);
+
+        if(success != nullptr) *success = success_;
 
         // Doing this before memcpy for null-terminated
         // scenarios
@@ -334,28 +336,28 @@ protected:
 public:
     // EXPERIMENTAL, untested
     template <class TImpl2>
-    dynamic_array& append(const experimental::private_array<TImpl2>& source)
+    void append(const experimental::private_array<TImpl2>& source)
     {
-        typedef typename experimental::private_array<TImpl2>::const_iterator iterator;
+        //typedef typename experimental::private_array<TImpl2>::const_iterator iterator;
         size_type len = source.size();
+        bool grow_success;
 
-        // FIX: Needs bounds checking!!
-        size_type current_size = grow(len);
+        const size_type pre_growth_size = grow(len, &grow_success);
 
-        iterator it = source.begin();
-        iterator end = source.end();
+        if(grow_success == false)   len = size() - pre_growth_size;
 
-        value_type* raw = lock(current_size);
+        pointer raw = lock(pre_growth_size);
 
-        // DEBT: Use source.copy instead
-        while(len--)
-        {
-            *raw++ = *it;
-            ++it;
-        }
+        source.copy_ll(raw, len);
+        //source.copy(raw, len);
+
+        // NOTE: Not using source.copy because we manually did source.size()
+        // already, which for expliclty sized would be a wash but for null-terminated
+        // would incur an overhead since copy would call its own strlen
+
+        //copy_n(source.begin(), len, raw);
 
         unlock();
-        return *this;
     }
 
     template <class TForeignImpl>

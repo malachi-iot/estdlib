@@ -15,9 +15,16 @@ struct pa_impl
 template <>
 struct experimental::private_array<pa_impl> : public array<int, 10>
 {
-    private_array() : array<int, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+    using base_type = array<int, 10>;
+
+    private_array() : base_type{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     {
 
+    }
+
+    void copy_ll(int* dest, int count) const
+    {
+        estd::copy_n(base_type::data(), count, dest);
     }
 };
 
