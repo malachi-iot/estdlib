@@ -13,16 +13,9 @@ namespace internal {
 namespace impl {
 
 template <size_t N>
-struct pgm_allocator2 :
-    estd::internal::single_fixedbuf_allocator<
-        char,
-        N,
-        const char*>
+struct pgm_allocator2 : estd::layer2::allocator<const char, N>
 {
-    using base_type = estd::internal::single_fixedbuf_allocator<
-        char,
-        N,
-        const char*>;
+    using base_type = estd::layer2::allocator<const char, N>;
 
     ESTD_CPP_FORWARDING_CTOR(pgm_allocator2)
 

@@ -387,11 +387,11 @@ struct allocator : estd::internal::single_fixedbuf_allocator<T, len, T*>
 {
     typedef estd::internal::single_fixedbuf_allocator<T, len, T*> base_t;
 
-    allocator(T* buf) : base_t(buf) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT allocator(T* buf) : base_t(buf) {}
 
-    // TODO: Need to do that SFINAE trick to force this to invoke
+    // DEBT: Compare len to N and make sure we don't get ourselves into trouble
     template <size_t N>
-    allocator(T (&array) [N]) : base_t(array, N)
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT allocator(T (&array) [N]) : base_t(array, N)
     {
 
     }
@@ -415,13 +415,13 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, TSiz
     typedef typename base_t::difference_type difference_type;
 
 #ifdef __cpp_initializer_lists
-    constexpr allocator(std::initializer_list<T> initlist) : base_t(initlist)
+    constexpr allocator(std::initializer_list<T> initlist) : base_type(initlist)
     {
     }
 #endif
 
     template <TSize N>
-    ESTD_CPP_CONSTEXPR_RET allocator(T (&array) [N]) : base_t(array, N)
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT allocator(T (&array) [N]) : base_type(array, N)
     {
 
     }

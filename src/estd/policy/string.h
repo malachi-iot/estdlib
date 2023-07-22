@@ -7,13 +7,5 @@
 
 namespace estd {
 
-// prototype
-template<
-    class CharT,
-    class Traits,
-    class Allocator,
-    class Policy
-> class basic_string;
-
 }
 
