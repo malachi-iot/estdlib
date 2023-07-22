@@ -24,6 +24,7 @@ namespace estd {
 
 namespace internal {
 
+/// Core of allocators which can only perform one allocation on one singular buffer
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
 // also this is a stateful allocator, by nature of TBuffer taking up some space
@@ -67,15 +68,14 @@ protected:
         return static_cast<pointer>(&buffer[offset]);
     }
 
-    const_pointer data(size_type offset = 0) const
+    ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type offset = 0) const
     {
         return static_cast<const_pointer>(&buffer[offset]);
     }
 
-    // for inline buffers, we want the option of leaving it untouched
-    single_allocator_base() {}
+    ESTD_CPP_DEFAULT_CTOR(single_allocator_base)
 
-    single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
+    ESTD_CPP_CONSTEXPR_RET single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }
@@ -153,8 +153,8 @@ public:
 };
 
 // Can only have its allocate function called ONCE
-// tracks how much of the allocator has been allocated
-// null_terminated flag mainly serves as a trait/clue to specializations
+// compile-time size()
+// Loosely corresponds to layer1/layer2 behavior
 // len can == 0 in which case we're in unbounded mode
 // FIX: Need to do this in a way where T/TBuffer isn't auto running all its
 // constructors (so like the raw_instance_provider or aligned_storage)
@@ -175,11 +175,11 @@ public:
     // experimental tag reflecting that this memory block will never move
     typedef void is_pinned_tag_exp;
 
-    single_fixedbuf_allocator() {}
+    ESTD_CPP_DEFAULT_CTOR(single_fixedbuf_allocator)
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
-    single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
+    ESTD_CPP_CONSTEXPR_RET single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
 
 
     handle_with_size allocate_ext(size_t size)
@@ -219,7 +219,6 @@ public:
 // mainly for layer3:
 // runtime (but otherwise constant) size()
 // runtime (but otherwise constant) buffer*
-// as before, null_terminated is merely a clue/trait for consumer class
 template <class T, class TSize = std::size_t>
 class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, TSize>
 {

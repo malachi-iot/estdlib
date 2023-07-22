@@ -12,6 +12,30 @@ namespace internal {
 
 namespace impl {
 
+template <size_t N>
+struct pgm_allocator2 :
+    estd::internal::single_fixedbuf_allocator<
+        char,
+        N,
+        const char*>
+{
+    using base_type = estd::internal::single_fixedbuf_allocator<
+        char,
+        N,
+        const char*>;
+
+    ESTD_CPP_FORWARDING_CTOR(pgm_allocator2)
+
+    // DEBT: Kinda sloppy, exposing this this way, but it gets the job done
+    // - Not deriving from pgn_allocator2 itself because then we get ambiguities
+    // for things like const_pointer
+    ESTD_CPP_CONSTEXPR_RET typename base_type::const_pointer data(
+        typename base_type::size_type offset = 0) const
+    {
+        return base_type::data(offset);
+    }
+};
+
 struct pgm_allocator
 {
     using value_type = char;
@@ -111,6 +135,10 @@ uint32_t pgm_read<uint32_t>(const void* address)
 // really
 #define FEATURE_ESTD_PGM_EXP_IT 0
 
+// Dogfooding in allocator.  So far it just seems to make it more complicated,
+// but a feeling tells me this will be useful
+#define FEATURE_ESTD_PGM_ALLOCATOR 1
+
 
 template <class T>
 class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
@@ -163,13 +191,36 @@ struct private_array_base :
     using base_type = estd::internal::impl::PgmPolicy<T,
         internal::impl::PgmPolicyType::String, N>;
 
-    using base_type::size_type;
+    using typename base_type::size_type;
     using typename base_type::const_pointer;
     using base_type::value_type;
 
+#if FEATURE_ESTD_PGM_ALLOCATOR
+    // data_ was working, but let's dogfood a bit
+    internal::impl::pgm_allocator2<N> alloc;
+    //using alloc_type = internal::impl::pgm_allocator2<N>;
+
+    ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type pos = 0) const
+    {
+        return alloc.data(pos);
+    }
+
+    constexpr private_array_base(const_pointer data) :
+        alloc(data)
+    {}
+#else
     const_pointer data_;
 
-    constexpr private_array_base(const_pointer data) : data_{data} {}
+    ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type pos = 0) const
+    {
+        return data_ + pos;
+    }
+
+    constexpr private_array_base(const_pointer data) :
+        data_{data}
+    {}
+
+#endif
 
     using accessor = pgm_accessor<char>;
 
@@ -204,11 +255,11 @@ struct private_array_base :
         }
     };
 
-    constexpr iterator begin() const { return { data_ }; }
+    constexpr iterator begin() const { return { data() }; }
 
     accessor operator[](size_t index)
     {
-        return accessor { data_ + index };
+        return accessor { data(index) };
     }
 };
 
@@ -232,20 +283,20 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
     size_type size() const
     {
         return base_type::null_terminated ?
-            strnlen_P(base_type::data_, 256) :
+            strnlen_P(base_type::data(), 256) :
             base_type::size();
     }
 
     constexpr iterator end() const
     {
-        return { base_type::data_ + size() };
+        return { base_type::data(size()) };
     }
 
     // copies without bounds checking
     void copy_ll(char* dest, size_type count, size_type pos = 0) const
     {
         //iterator source(base_type::data_ + pos);
-        iterator source = base_type::begin() + pos;
+        iterator source(base_type::data(pos));
 
         estd::copy_n(source, count, dest);
     }
@@ -275,7 +326,7 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
         {
             // FIX: Not fully checked to see if int result aligns with
             // dynamic_array flavor outside of 0/not 0
-            return strcmp_P(s, base_type::data_);
+            return strcmp_P(s, base_type::data());
         }
         else
         {
@@ -286,7 +337,7 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
 
     private_array& operator=(const private_array& copy_from)
     {
-        base_type::data_ = copy_from.data_;
+        base_type::data() = copy_from.data();
         return *this;
     }
 };
