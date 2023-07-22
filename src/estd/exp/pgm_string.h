@@ -328,6 +328,17 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
         }
     }
 
+    // Expects regular (non pgm) space string here
+    // both compare_to and pgm_string must be null terminated
+    bool starts_with(const char* compare_to) const
+    {
+        //internal::starts_with_n(begin(), compare_to, size());
+        return internal::starts_with(base_type::begin(), compare_to);
+    }
+
+
+    // Effectively a shallow copy, since pgm_string largely represents a pointer
+    // wrapper
     private_array& operator=(const private_array& copy_from)
     {
         base_type::data() = copy_from.data();
@@ -354,6 +365,7 @@ struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
 
     size_type length() const { return base_type::size(); }
 
+    // Expects PGM space string here
     constexpr basic_string(const char* const s) : base_type(s) {}
 
 #ifdef ARDUINO
