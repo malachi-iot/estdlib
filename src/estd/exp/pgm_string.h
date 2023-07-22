@@ -3,6 +3,7 @@
 #include <estd/internal/fwd/variant.h>
 #include <estd/internal/dynamic_array.h>
 #include "../string.h"
+#include <estd/ostream.h>
 
 #include "../internal/macro/push.h"
 
@@ -410,6 +411,15 @@ struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
 };
 
 using pgm_string = basic_pgm_string<>;
+
+// Special case insertion operator for arduino streams who can handle
+// PGM space directly
+template <size_t N>
+constexpr arduino_ostream& operator <<(arduino_ostream& out,
+    const basic_pgm_string<N>& s)
+{
+    return out << reinterpret_cast<const __FlashStringHelper*>(s.data());
+}
 
 }
 
