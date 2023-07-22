@@ -86,12 +86,22 @@ struct private_array<estd::internal::impl::PgmPolicy<>> :
     {
         pointer p;
 
-        operator value_type() const
+        value_type operator*() const
         {
             return pgm_read_byte_near(p);
         }
 
         constexpr accessor(const_pointer p) : p{p} {}
+
+        constexpr bool operator==(const accessor& compare_to) const
+        {
+            return p == compare_to.p;
+        }
+
+        constexpr bool operator!=(const accessor& compare_to) const
+        {
+            return p != compare_to.p;
+        }
     };
 
     struct iterator : accessor
@@ -105,8 +115,8 @@ struct private_array<estd::internal::impl::PgmPolicy<>> :
         }
     };
 
-    iterator begin() { return { data_ }; }
-    iterator end() { return { data_ + size() }; }
+    iterator begin() const { return { data_ }; }
+    iterator end() const { return { data_ + size() }; }
 
     accessor operator[](size_t index)
     {
