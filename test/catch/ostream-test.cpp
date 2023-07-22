@@ -132,6 +132,17 @@ TEST_CASE("ostream")
 
         REQUIRE(out_s == "20");
     }
+    SECTION("arrays/strings")
+    {
+        SECTION("layer1 string")
+        {
+            layer1::string<64> s{"hello"};
+
+            out << s;
+
+            REQUIRE(out_s == "hello");
+        }
+    }
 }
 
 #include "macro/pop.h"

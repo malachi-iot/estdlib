@@ -107,6 +107,10 @@ uint32_t pgm_read<uint32_t>(const void* address)
     return pgm_read_dword_near(address);
 }
 
+// Experimenting with strlen-less end() code, but it seems to gain nothing
+// really
+#define FEATURE_ESTD_PGM_EXP_IT 0
+
 
 template <class T>
 class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
@@ -118,21 +122,35 @@ protected:
 
     const_pointer p;
 
+    value_type value() const { return pgm_read<T>(p); }
+
+#if FEATURE_ESTD_PGM_EXP_IT
+    const bool is_null() const
+    {
+        return p == nullptr || value() == 0;
+    }
+#endif
+
 public:
     constexpr pgm_accessor(const_pointer p) : p{p} {}
 
-    value_type operator*() const
-    {
-        return pgm_read<T>(p);
-    }
+    value_type operator*() const { return value(); }
 
-    constexpr bool operator==(const pgm_accessor& compare_to) const
+    //constexpr
+    bool operator==(const pgm_accessor& compare_to) const
     {
+#if FEATURE_ESTD_PGM_EXP_IT
+        if(is_null() && compare_to.is_null()) return true;
+#endif
         return p == compare_to.p;
     }
 
-    constexpr bool operator!=(const pgm_accessor& compare_to) const
+    //constexpr
+    bool operator!=(const pgm_accessor& compare_to) const
     {
+#if FEATURE_ESTD_PGM_EXP_IT
+        if(!(is_null() && compare_to.is_null())) return true;
+#endif
         return p != compare_to.p;
     }
 };
@@ -289,6 +307,13 @@ struct basic_string<impl::pgm_allocator, impl::PgmPolicy<char>> :
     size_type length() const { return base_type::size(); }
 
     constexpr basic_string(const char* const s) : base_type(s) {}
+
+#ifdef ARDUINO
+    // UNTESTED
+    constexpr basic_string(const __FlashStringHelper* s) :
+        base_type(reinterpret_cast<const char*>(s))
+    {}
+#endif
 };
 
 

@@ -60,11 +60,7 @@ inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
     iterator it = pa.begin();
     iterator end = pa.end();
 
-    while(it != end)
-    {
-        out.put(*it);
-        ++it;
-    }
+    while(it != end)    out.put(*it++);
 
     return out;
 }
