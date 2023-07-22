@@ -12,6 +12,7 @@ const char test1[] PROGMEM = "Hello AVR: ";
 //constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
 //constexpr static estd::pgm_string pgm_s(F("Hello AVR: "));
 constexpr static estd::pgm_string pgm_s(test1);
+constexpr static estd::basic_pgm_string<sizeof(test1) - 1> pgm_s3(test1);
 
 struct Returner
 {
@@ -62,7 +63,7 @@ void loop()
 
 #if USE_IOS
 #if __AVR__
-    cout << pgm_s;
+    cout << pgm;
 #else
     cout << F("Hello: ");
 #endif

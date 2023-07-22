@@ -346,11 +346,15 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
 
 namespace internal {
 
-template <>
-struct basic_string<impl::pgm_allocator, impl::PgmPolicy<char>> :
-    experimental::private_array<impl::PgmPolicy<char>>
+template <size_t N>
+using PgmStringPolicy = impl::PgmPolicy<char, impl::PgmPolicyType::String, N>;
+
+
+template <size_t N>
+struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
+    experimental::private_array<PgmStringPolicy<N>>
 {
-    using base_type = experimental::private_array<impl::PgmPolicy<char>>;
+    using base_type = experimental::private_array<PgmStringPolicy<N>>;
     using allocator_type = impl::pgm_allocator;
     using allocator_traits = impl::pgm_allocator_traits<char>;
     using typename base_type::size_type;
@@ -388,16 +392,19 @@ using pgm_string = basic_string<char, char_traits<char>,
     internal::impl::pgm_allocator,
     internal::impl::PgmPolicy>; */
 
-struct pgm_string : basic_string<char, estd::char_traits<char>,
+template <size_t N = internal::variant_npos()>
+struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
     internal::impl::pgm_allocator,
-    internal::impl::PgmPolicy<char>>
+    internal::PgmStringPolicy<N>>
 {
     using base_type = basic_string<char, estd::char_traits<char>,
         internal::impl::pgm_allocator,
-        internal::impl::PgmPolicy<char>>;
+        internal::PgmStringPolicy<N>>;
 
-    constexpr pgm_string(const char* const s) : base_type(s) {}
+    constexpr basic_pgm_string(const char* const s) : base_type(s) {}
 };
+
+using pgm_string = basic_pgm_string<>;
 
 }
 
