@@ -19,7 +19,7 @@ struct pgm_allocator
 
 
 template <class T>
-struct _pgm_allocator_traits
+struct pgm_allocator_traits
 {
     using value_type = T;
     using pointer = const PROGMEM value_type*;
@@ -31,8 +31,6 @@ struct _pgm_allocator_traits
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
 };
-
-using pgm_allocator_traits = _pgm_allocator_traits<char>;
 
 enum class PgmPolicyType
 {
@@ -49,7 +47,7 @@ template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
 struct PgmPolicy;
 
 template <size_t N>
-struct PgmPolicy<char, PgmPolicyType::String, N> : pgm_allocator_traits
+struct PgmPolicy<char, PgmPolicyType::String, N> : pgm_allocator_traits<char>
 {
     using char_traits = estd::char_traits<char>;
 
@@ -109,9 +107,9 @@ uint32_t pgm_read<uint32_t>(const void* address)
 
 
 template <class T>
-class pgm_accessor<T> : protected internal::impl::_pgm_allocator_traits<T>
+class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
 {
-    using base_type = internal::impl::_pgm_allocator_traits<T>;
+    using base_type = internal::impl::pgm_allocator_traits<T>;
 protected:
     using typename base_type::const_pointer;
     using typename base_type::value_type;
@@ -150,6 +148,8 @@ struct private_array_base :
     using base_type::value_type;
 
     const_pointer data_;
+
+    constexpr private_array_base(const_pointer data) : data_{data} {}
 
     using accessor = pgm_accessor<char>;
 
@@ -190,11 +190,13 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
     using base_type = private_array_base<char, N>;
 
     using typename base_type::size_type;
-    using base_type::const_pointer;
-    using base_type::value_type;
+    using typename base_type::const_pointer;
+    using typename base_type::value_type;
     using typename base_type::iterator;
 
     using const_iterator = iterator;
+
+    constexpr private_array(const_pointer data) : base_type(data) {}
 
     size_type size() const
     {
@@ -215,6 +217,36 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
         memcpy_P(dest, base_type::data_ + pos, count);
         return count;
     }
+
+
+    /* TODO
+    template <class TImpl2>
+    int compare(const internal::allocated_array<TImpl2>& s) const
+    {
+        return -1;
+    }   */
+
+
+    int compare(const char* s) const
+    {
+        if(base_type::null_terminated)
+        {
+            // FIX: Not fully checked to see if int result aligns with
+            // dynamic_array flavor outside of 0/not 0
+            return strcmp_P(s, base_type::data_);
+        }
+        else
+        {
+            // DEBT: do more of a memcmp here
+            return -1;
+        }
+    }
+
+    private_array& operator=(const private_array& copy_from)
+    {
+        base_type::data_ = copy_from.data_;
+        return *this;
+    }
 };
 
 }
@@ -225,10 +257,14 @@ template <>
 struct basic_string<impl::pgm_allocator, impl::PgmPolicy<char>> :
     experimental::private_array<impl::PgmPolicy<char>>
 {
+    using base_type = experimental::private_array<impl::PgmPolicy<char>>;
     using allocator_type = impl::pgm_allocator;
-    using allocator_traits = impl::pgm_allocator_traits;
+    using allocator_traits = impl::pgm_allocator_traits<char>;
+    using typename base_type::size_type;
 
-    basic_string(const char* const s) {}
+    size_type length() const { return base_type::size(); }
+
+    constexpr basic_string(const char* const s) : base_type(s) {}
 };
 
 
@@ -236,7 +272,7 @@ struct basic_string<impl::pgm_allocator, impl::PgmPolicy<char>> :
 
 template <>
 struct allocator_traits<internal::impl::pgm_allocator> :
-    internal::impl::pgm_allocator_traits
+    internal::impl::pgm_allocator_traits<char>
 {
 
 };
@@ -260,7 +296,7 @@ struct pgm_string : basic_string<char, estd::char_traits<char>,
         internal::impl::pgm_allocator,
         internal::impl::PgmPolicy<char>>;
 
-    pgm_string(const char* const s) : base_type(s) {}
+    constexpr pgm_string(const char* const s) : base_type(s) {}
 };
 
 }

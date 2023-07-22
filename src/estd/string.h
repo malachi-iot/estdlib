@@ -132,7 +132,16 @@ public:
 
 
     template <class TForeignImpl>
-    basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)
+    basic_string& operator=(const experimental::private_array<TForeignImpl>& copy_from)   // NOLINT
+    {
+        // DEBT: Sloppy
+        base_t::base_type::operator =(copy_from);
+        return *this;
+    }
+
+
+    template <class TForeignImpl>
+    basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)   // NOLINT
     {
         // DEBT: Sloppy
         base_t::base_type::operator =(copy_from);

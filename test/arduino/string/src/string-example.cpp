@@ -7,12 +7,17 @@
 #include <estd/exp/pgm_string.h>
 
 //static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
-static estd::pgm_string pgm_s((const PROGMEM char*)"hello");
+constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
 #endif
 
 void setup()
 {
     Serial.begin(115200);
+
+#if __AVR__
+    // Compiles, not run tested yet
+    //bool v = pgm_s == "Hello";
+#endif
 }
 
 
@@ -35,7 +40,11 @@ void loop()
     //name += pgm_s;
 
 #if USE_IOS
+#if __AVR__
+    cout << pgm_s;
+#else
     cout << F("Hello: ");
+#endif
     cout << name << F(" - counter=") << counter++;
 #else
     Serial.print(F("Hello: "));
