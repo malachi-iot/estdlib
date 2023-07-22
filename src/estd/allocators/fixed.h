@@ -409,25 +409,25 @@ template <class T, class TSize = std::size_t, bool malleable = false>
 struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize>
 {
     typedef estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
+    typedef base_t base_type;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
     typedef typename base_t::size_type size_type;
     typedef typename base_t::difference_type difference_type;
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-    allocator(std::initializer_list<T> initlist) : base_t(initlist)
+#ifdef __cpp_initializer_lists
+    constexpr allocator(std::initializer_list<T> initlist) : base_t(initlist)
     {
     }
 #endif
 
     template <TSize N>
-    allocator(T (&array) [N]) : base_t(array, N)
+    ESTD_CPP_CONSTEXPR_RET allocator(T (&array) [N]) : base_t(array, N)
     {
 
     }
 
-    template <class TAllocatorParam>
-    allocator(const TAllocatorParam& p) : base_t(p) {}
+    ESTD_CPP_FORWARDING_CTOR(allocator)
 
     // Experimental - malleable allocator.  Used primarily for basic_string_view
     // remove_prefix and remove_suffix

@@ -15,11 +15,5 @@ template<
     class Policy
 > class basic_string;
 
-template <class CharT,
-          class Traits,
-          class Policy = experimental::sized_string_policy<Traits, int16_t, true> >
-class basic_string_view;
-
-
 }
 

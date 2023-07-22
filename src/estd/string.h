@@ -10,6 +10,7 @@
 #include "traits/char_traits.h"
 #include "traits/string.h"
 #include "internal/string.h"
+#include "internal/fwd/string_view.h"
 #include "policy/string.h"
 #include "port/string.h"
 #include "algorithm.h"

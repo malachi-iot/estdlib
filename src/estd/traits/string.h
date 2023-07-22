@@ -54,6 +54,7 @@ struct string_policy : buffer_policy<TSize, constant>
 };
 
 
+// Denotes a string whose size is tracked via traditional C null termination
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
 struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, constant>
 {
@@ -66,6 +67,7 @@ struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, 
 };
 
 
+// Denotes a string whose buffer size is tracked at runtime via an integer
 template <class TCharTraits, class TSize = int16_t, bool constant = false>
 struct sized_string_policy  : public string_policy<TCharTraits, TSize, constant>
 {
