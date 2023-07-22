@@ -6,8 +6,22 @@
 #if __AVR__
 #include <estd/exp/pgm_string.h>
 
+const char test1[] PROGMEM = "Hello AVR: ";
+
 //static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
-constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
+//constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
+//constexpr static estd::pgm_string pgm_s(F("Hello AVR: "));
+constexpr static estd::pgm_string pgm_s(test1);
+
+struct Returner
+{
+    //static const char test2[] PROGMEM = "Hello AVR2";
+    static estd::pgm_string value()
+    {
+        return { PSTR("(value)") };
+    }
+};
+
 #endif
 
 void setup()
@@ -37,7 +51,14 @@ void loop()
     name += ' ';
     name += "Mouse";
 
-    //name += pgm_s;
+#if __AVR__
+    //estd::pgm_string pgm_s2(PSTR("(value)"));
+    estd::pgm_string pgm_s2 = Returner::value();
+
+    name += pgm_s2;
+    //name += Returner::value();
+    //name += F("(value)");
+#endif
 
 #if USE_IOS
 #if __AVR__
