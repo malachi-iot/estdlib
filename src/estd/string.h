@@ -9,15 +9,12 @@
 #include "internal/dynamic_array.h"
 #include "traits/char_traits.h"
 #include "traits/string.h"
+#include "internal/string.h"
 #include "policy/string.h"
 #include "port/string.h"
 #include "algorithm.h"
 #include "span.h"
-#if FEATURE_STD_CSTDLIB
-#include <cstdlib>
-#else
-#include <stdlib.h>
-#endif
+#include "cstdlib.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
 #include <ostream>
@@ -43,10 +40,10 @@ template<
 #else
     class Allocator, class StringPolicy
 #endif
-> class basic_string :
-        public internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> >
+> class basic_string : public internal::basic_string<Allocator, StringPolicy>
 {
-    typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, StringPolicy> > base_t;
+    typedef internal::basic_string<Allocator, StringPolicy> base_t;
+    typedef base_t base_type;
 
     /*
      * Was using this for Arduino port += but actually it's not necessary and causes linker
@@ -58,11 +55,10 @@ public:
     typedef typename base_t::size_type size_type;
 
 protected:
-    template <class THelperParam>
-    basic_string(const THelperParam& p) : base_t(p) {}
+    ESTD_CPP_FORWARDING_CTOR(basic_string)
 
 public:
-    basic_string() {}
+    ESTD_CPP_DEFAULT_CTOR(basic_string)
 
     template <class TImpl>
     basic_string(const internal::allocated_array<TImpl>& copy_from) :
@@ -182,7 +178,8 @@ public:
     template <class TForeignImpl>
     basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)
     {
-        base_t::operator =(copy_from);
+        // DEBT: Sloppy
+        base_t::base_type::operator =(copy_from);
         return *this;
     }
 
