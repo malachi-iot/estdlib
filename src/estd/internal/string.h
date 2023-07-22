@@ -36,8 +36,8 @@ public:
 
     size_type length() const { return base_type::size(); }
 
-    template <class TForeignAlloc, class TForeignPolicy>
-    int compare(const basic_string<TForeignAlloc, TForeignPolicy>& str) const
+    template <class TImpl>
+    int compare(const internal::dynamic_array<TImpl>& str) const
     {
         size_type raw_size = base_type::size();
         size_type s_size = str.size();

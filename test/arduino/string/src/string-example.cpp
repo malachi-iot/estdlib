@@ -2,10 +2,13 @@
 
 #include <estd/ostream.h>
 #include <estd/string.h>
+
+#if __AVR__
 #include <estd/exp/pgm_string.h>
 
 //static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
 static estd::pgm_string pgm_s((const PROGMEM char*)"hello");
+#endif
 
 void setup()
 {

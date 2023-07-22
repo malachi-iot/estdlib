@@ -3,13 +3,10 @@
 #include "allocated_array.h"
 #include "../../allocators/fixed.h"
 #include "../../allocators/handle_desc.h"
+#include "../fwd/dynamic_array.h"
 
 namespace estd { namespace internal { namespace impl {
 
-
-// See reference implementation near the bottom
-template <class TAllocator, class TPolicy>
-struct dynamic_array;
 
 // TODO: Fixup name.  Specializer to reveal size of either
 // an explicitly-sized or null-terminated entity

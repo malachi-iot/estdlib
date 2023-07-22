@@ -332,6 +332,31 @@ protected:
 
 
 public:
+    // EXPERIMENTAL, untested
+    template <class TImpl2>
+    dynamic_array& append(const experimental::private_array<TImpl2>& source)
+    {
+        typedef typename experimental::private_array<TImpl2>::iterator iterator;
+        size_type len = source.size();
+
+        // FIX: Needs bounds checking!!
+        size_type current_size = grow(len);
+
+        iterator it = source.begin();
+        iterator end = source.end();
+
+        value_type* raw = lock(current_size);
+
+        // DEBT: Use source.copy instead
+        while(len--)
+        {
+            *raw++ = *it;
+            ++it;
+        }
+
+        unlock();
+    }
+
     template <class TForeignImpl>
     dynamic_array& append(const allocated_array<TForeignImpl>& source)
     {
