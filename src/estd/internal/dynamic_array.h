@@ -336,7 +336,7 @@ public:
     template <class TImpl2>
     dynamic_array& append(const experimental::private_array<TImpl2>& source)
     {
-        typedef typename experimental::private_array<TImpl2>::iterator iterator;
+        typedef typename experimental::private_array<TImpl2>::const_iterator iterator;
         size_type len = source.size();
 
         // FIX: Needs bounds checking!!
@@ -355,6 +355,7 @@ public:
         }
 
         unlock();
+        return *this;
     }
 
     template <class TForeignImpl>

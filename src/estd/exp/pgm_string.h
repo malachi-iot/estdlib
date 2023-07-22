@@ -71,7 +71,10 @@ struct private_array<estd::internal::impl::PgmPolicy<>> :
     estd::internal::impl::PgmPolicy<>
 {
     using base_type = estd::internal::impl::PgmPolicy<>;
+
     using base_type::size_type;
+    using base_type::const_pointer;
+    using base_type::value_type;
 
     const_pointer data_;
 
@@ -82,10 +85,12 @@ struct private_array<estd::internal::impl::PgmPolicy<>> :
             base_type::size();
     }
 
-    struct accessor
+    class accessor
     {
+    protected:
         pointer p;
 
+    public:
         value_type operator*() const
         {
             return pgm_read_byte_near(p);
@@ -113,7 +118,16 @@ struct private_array<estd::internal::impl::PgmPolicy<>> :
             ++p;
             return *this;
         }
+
+        accessor operator++(int)
+        {
+            accessor temp{p};
+            ++p;
+            return temp;
+        }
     };
+
+    using const_iterator = iterator;
 
     iterator begin() const { return { data_ }; }
     iterator end() const { return { data_ + size() }; }
