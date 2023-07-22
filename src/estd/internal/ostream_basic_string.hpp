@@ -22,6 +22,17 @@ inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
     return out;
 }
 
+// EXPERIMENTAL
+template <class TStreambuf, class TBase, class TImpl>
+inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
+    detail::basic_ostream<TStreambuf, TBase>& out,
+    const estd::experimental::private_array<TImpl>& pa
+)
+{
+    return out;
+}
+
+
 // catch-all case, mainly useful for const_string varieties
 // since const char and char don't align between ostream
 // and string.  However, useful for other dynamic_array

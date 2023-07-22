@@ -1,5 +1,6 @@
 #include <avr/pgmspace.h>
 
+#include <estd/internal/fwd/variant.h>
 #include <estd/internal/dynamic_array.h>
 #include "../string.h"
 
@@ -30,55 +31,104 @@ struct pgm_allocator_traits
     static CONSTEXPR bool is_locking_exp = false;
 };
 
+template <size_t N = estd::internal::variant_npos()>
 struct PgmPolicy : pgm_allocator_traits
 {
     using char_traits = estd::char_traits<char>;
+
+    static constexpr size_t size() { return N; }
+
+    // DEBT: Align this nomenclature with how 'span' does it,
+    // since we're kind of making a fancy span here
+    // DEBT: Along those lines, consider making a private_span alongside
+    // private_array
+    static constexpr bool null_terminated = N == estd::internal::variant_npos();
 };
 
-
-// TODO: Phase this guy out
-template <class TAllocator>
-struct dynamic_array<TAllocator, PgmPolicy>
+/*
+ * TODO: Forgot to consider null term vs fixed size vs runtime size
+ * Thinking runtime size just shouldn't be supported for pgm_string,
+ * but low level private_array will likely want it eventually
+template <>
+struct PgmPolicy<estd::internal::variant_npos()> : pgm_allocator_traits
 {
-    using size_type = size_t;
+    using char_traits = estd::char_traits<char>;
+    size_t size_;
 
-    using allocator_type = pgm_allocator;
-    using allocator_traits = pgm_allocator_traits;
+    constexpr size_t size() const { return size_; }
+    static constexpr bool has_extent = false;
+};*/
 
-    using value_type = allocator_type::value_type;
 
-    // FIX: This is incorrect, we'll need a full iterator to do pgm_read_byte
-    using iterator = char*;
-    using accessor = iterator;
+}
 
-    static CONSTEXPR bool uses_termination() { return false; }
+}
 
-    dynamic_array(const char* const) {}
+namespace experimental {
 
-    // DEBT: Feed this via allocator
-    static constexpr size_type size() { return 10; }
+template<>
+struct private_array<estd::internal::impl::PgmPolicy<>> :
+    estd::internal::impl::PgmPolicy<>
+{
+    using base_type = estd::internal::impl::PgmPolicy<>;
+    using base_type::size_type;
 
-    template <class TAllocator2, class TPolicy>
-    void append_to_other(dynamic_array<TAllocator2, TPolicy>& other)
+    const_pointer data_;
+
+    size_type size() const
     {
+        return base_type::null_terminated ?
+            strnlen_P(data_, 256) :
+            base_type::size();
+    }
+
+    struct accessor
+    {
+        pointer p;
+
+        operator value_type() const
+        {
+            return pgm_read_byte_near(p);
+        }
+
+        constexpr accessor(const_pointer p) : p{p} {}
+    };
+
+    struct iterator : accessor
+    {
+        constexpr iterator(const_pointer p) : accessor(p) {}
+
+        iterator& operator++()
+        {
+            ++p;
+            return *this;
+        }
+    };
+
+    iterator begin() { return { data_ }; }
+    iterator end() { return { data_ + size() }; }
+
+    accessor operator[](size_t index)
+    {
+        return accessor { data_ + index };
+    }
+
+    size_type copy(char* dest, size_type count, size_type pos = 0)
+    {
+        // FIX: Doesn't pay attention to size()
+
+        memcpy_P(dest, data_ + pos, count);
+        return count;
     }
 };
 
 }
 
-// TODO: Phase this guy out
-template <>
-struct allocated_array<impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy> > :
-    impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy> 
-{
-    using base_type = impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy>;
-    using impl_type = impl::dynamic_array<impl::pgm_allocator, impl::PgmPolicy>;
-
-    allocated_array(const char* const s) : base_type(s) {}
-};
+namespace internal {
 
 template <>
-struct basic_string<impl::pgm_allocator, impl::PgmPolicy> : impl::PgmPolicy
+struct basic_string<impl::pgm_allocator, impl::PgmPolicy<>> :
+    experimental::private_array<impl::PgmPolicy<>>
 {
     using allocator_type = impl::pgm_allocator;
     using allocator_traits = impl::pgm_allocator_traits;
@@ -109,11 +159,11 @@ using pgm_string = basic_string<char, char_traits<char>,
 
 struct pgm_string : basic_string<char, estd::char_traits<char>,
     internal::impl::pgm_allocator,
-    internal::impl::PgmPolicy>
+    internal::impl::PgmPolicy<>>
 {
     using base_type = basic_string<char, estd::char_traits<char>,
         internal::impl::pgm_allocator,
-        internal::impl::PgmPolicy>;
+        internal::impl::PgmPolicy<>>;
 
     pgm_string(const char* const s) : base_type(s) {}
 };
