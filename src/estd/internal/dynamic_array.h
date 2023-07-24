@@ -137,6 +137,9 @@ protected:
             // DEBT: Really need to do this by some kind of policy
             const size_type requested_size = cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type));
 
+            success = reserve(requested_size);
+
+            /*
             // NOTE: fixed allocator aborts on reallocate call, and now we filter that out with
             // this max_size.  The idea is that dynamic_array avoids aborts/exceptions - but consuming
             // things like vector/string will actually be responsible for that.
@@ -145,6 +148,7 @@ protected:
             else
                 // DEBT: Doing this because fixed allocators currently just call 'abort' on reallocate
                 success = false;
+            */
 
 #ifdef DEBUG
             // TODO: Do a debug log print here to notify of allocation failure
