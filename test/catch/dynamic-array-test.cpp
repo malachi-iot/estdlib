@@ -51,6 +51,7 @@ TEST_CASE("dynamic array")
     }
     SECTION("overflow")
     {
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         // DEBT: Consider adding assignment operator to append_result
         auto r = da1.append(pa1);
         REQUIRE(r.has_value());
@@ -59,5 +60,6 @@ TEST_CASE("dynamic array")
         //auto r3 = da1.append(pa1);
         //REQUIRE(r3.has_value() == false);
         //REQUIRE(r3.error() == 0);
+#endif
     }
 }

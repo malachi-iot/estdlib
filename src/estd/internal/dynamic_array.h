@@ -332,10 +332,10 @@ protected:
     // version
     append_result append(const value_type* buf, size_type len)
     {
-#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         grow_result r = grow(len);
-        const bool grow_success = r.increased_by.has_value();
         const size_type current_size = r.starting_size;
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+        const bool grow_success = r.increased_by.has_value();
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_APPEND_TRUNC
         // DEBT: Overflow not actually tested yet
@@ -346,13 +346,11 @@ protected:
         if(grow_success == false)   return append_result(unexpect_t(), 0);
 #endif
 
-#else
-        size_type current_size = grow(len);
 #endif
 
         value_type* raw = lock(current_size);
 
-        while(len--) *raw++ = *buf++;
+        estd::copy_n(buf, len, raw);
 
         unlock();
 
@@ -361,6 +359,8 @@ protected:
             return append_result(len);
         else
             return append_result(unexpect_t(), len);
+#else
+        return len;
 #endif
     }
 
@@ -422,12 +422,14 @@ public:
 
         grow_result r = grow(len);
         const size_type pre_growth_size = r.starting_size;
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         const bool grow_success = r.increased_by.has_value();
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_APPEND_TRUNC
         if(grow_success == false)   len = r.increased_by.error();
 #else
         if(grow_success == false)   return append_result(unexpect_t(), 0);
+#endif
 #endif
 
         pointer raw = lock(pre_growth_size);
@@ -447,6 +449,8 @@ public:
         return grow_success ?
             append_result(len) :
             append_result(estd::unexpect_t(), len);
+#else
+        return len;
 #endif
     }
 
@@ -495,7 +499,9 @@ public:
         // TODO: combine this with _append since it's mostly overlapping code
         grow_result r = grow(1);
 
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(r.increased_by.has_value() == false) return append_result(unexpect_t(), 0);
+#endif
 
         const size_type current_size = r.starting_size;
 

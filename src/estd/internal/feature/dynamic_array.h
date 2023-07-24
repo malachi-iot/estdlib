@@ -5,8 +5,10 @@
 // For extremely constrained environments, one can save a few bytes by disabling the baked in
 // bounds checking to things like 'append'.  As always, if you elect to skip bounds checking,
 // take extra care!
+// NOTE: Disabled since feature is not 100% working.  Specifically, an ambiguity exists in internal::dynamic_array
+// as to whether abort/except should happen there or not
 #ifndef FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
-#define FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK 1
+#define FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK 0
 #endif
 
 // By default, append will add everything it can and truncate anything that goes over the

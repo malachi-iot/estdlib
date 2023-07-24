@@ -65,6 +65,7 @@ protected:
     // DEBT: Does not conform to 'strong exception safety guarantee'
     static void assert_append(typename base_type::append_result r)
     {
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(r.has_value() == false)
         {
 #if __cpp_exceptions
@@ -73,6 +74,7 @@ protected:
             std::abort();
 #endif
         }
+#endif
     }
 
 public:
