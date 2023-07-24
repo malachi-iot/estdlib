@@ -9,7 +9,7 @@ namespace estd { namespace internal { namespace impl {
 template <class TString>
 struct stringbuf_base : streambuf_base<typename TString::traits_type>
 {
-    stringbuf_base() {}
+    ESTD_CPP_DEFAULT_CTOR(stringbuf_base)
 };
 
 template <class TString>
@@ -22,21 +22,21 @@ struct out_stringbuf : stringbuf_base<TString>
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
 
-    TString _str;
+    TString str_;
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+#if __cpp_variadic_templates && __cpp_rvalue_references
     template <class ...TArgs>
 #ifdef FEATURE_CPP_CONSTEXPR
     constexpr
 #endif
     out_stringbuf(TArgs&&...args) :
-        _str(std::forward<TArgs>(args)...)
+        str_(std::forward<TArgs>(args)...)
     {}
 #else
     out_stringbuf() {}
 
     template <class TParam1>
-    out_stringbuf(TParam1& p) : _str(p) {}
+    out_stringbuf(TParam1& p) : str_(p) {}
 #endif
 
     streamsize xsputn(const char_type* s, streamsize count)
@@ -44,24 +44,35 @@ struct out_stringbuf : stringbuf_base<TString>
         // FIX: normal strings throw an exception if we exceed internal
         // buffer size, but here we should instead have an optional error
         // facility
-        _str.append(s, count);
+        str_.append(s, count);
         return count;
     }
 
     int_type sputc(char_type ch)
     {
-        _str += ch;
+        str_ += ch;
         return traits_type::to_int_type(ch);
     }
 
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
-    const string_type& str() const { return _str; }
+    ESTD_CPP_CONSTEXPR_RET const string_type& str() const { return str_; }
 
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {
         // TODO: check to make sure which contains ios_base::out
-        return _str.size();
+        return str_.size();
+    }
+
+    ESTD_CPP_CONSTEXPR_RET typename string_type::view_type view() const
+    {
+        return str_;
+    }
+
+    // non-standard, won't work with all varieties of estd::string
+    void clear()
+    {
+        str_.clear();
     }
 };
 
@@ -114,7 +125,7 @@ struct basic_stringbuf :
 
     size_type xin_avail() const
     {
-        return this->_str.length() - pos();
+        return this->str_.length() - pos();
     }
 
     streamsize showmanyc() const { return in_base_type::showmanyc(xin_avail()); }
@@ -124,8 +135,8 @@ struct basic_stringbuf :
     {
         // DEBT: May be better off using standard string indexer here.  Its fancy iterator probably
         // will optimize out
-        char_type ch = *base_type::_str.clock(pos(), 1);
-        base_type::_str.cunlock();
+        char_type ch = *base_type::str_.clock(pos(), 1);
+        base_type::str_.cunlock();
         return ch;
     }
 
@@ -152,7 +163,7 @@ struct basic_stringbuf :
 
             case ios_base::end:
                 if(which & ios_base::in)
-                    return in_base_type::seekpos(this->_str.length() + off);
+                    return in_base_type::seekpos(this->str().length() + off);
                 break;
         }
 

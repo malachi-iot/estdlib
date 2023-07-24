@@ -224,12 +224,15 @@ public:
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
 
-    bool empty(const handle_descriptor& hd) const
+    // EXPERIMENTAL, if we're always at capacity, technically we're full
+    ESTD_CPP_CONSTEXPR_RET bool full() const { return true; }
+
+    ESTD_CPP_CONSTEXPR_RET bool empty(const handle_descriptor& hd) const
     {
         return hd.size() > 0;
     }
 
-    size_type size(const handle_descriptor& hd) const
+    ESTD_CPP_CONSTEXPR_RET size_type size(const handle_descriptor& hd) const
     {
         return hd.size();
     }

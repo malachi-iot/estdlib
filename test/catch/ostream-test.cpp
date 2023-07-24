@@ -143,6 +143,19 @@ TEST_CASE("ostream")
             REQUIRE(out_s == "hello");
         }
     }
+    SECTION("non standard")
+    {
+        SECTION("underlying clear")
+        {
+            out << 20;
+
+            REQUIRE(out_s == "20");
+
+            out.rdbuf()->clear();
+
+            REQUIRE(out_s.empty());
+        }
+    }
 }
 
 #include "macro/pop.h"

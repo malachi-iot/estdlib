@@ -8,6 +8,8 @@
 #include "../utility.h"
 #include "../new.h"
 
+#include "../expected.h"
+
 namespace estd {
 
 namespace experimental {
@@ -211,7 +213,7 @@ public:
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}
 
-    size_type size() const { return base_t::size(); }
+    ESTD_CPP_CONSTEXPR_RET size_type size() const { return base_t::size(); }   // NOLINT
 
     size_type capacity() const { return impl().capacity(); }
 
@@ -334,9 +336,11 @@ protected:
 
 
 public:
-    // EXPERIMENTAL, untested
+    typedef estd::expected<dynamic_array*, unsigned> append_result;
+
+    // EXPERIMENTAL, lightly tested
     template <class TImpl2>
-    void append(const experimental::private_array<TImpl2>& source)
+    append_result append(const experimental::private_array<TImpl2>& source)
     {
         //typedef typename experimental::private_array<TImpl2>::const_iterator iterator;
         size_type len = source.size();
@@ -358,6 +362,14 @@ public:
         //copy_n(source.begin(), len, raw);
 
         unlock();
+
+        return {};
+
+        // FIX: Looks like we have a bug here
+        /*
+        return grow_success ?
+            append_result(this) :
+            append_result(estd::unexpect_t(), (unsigned)len ); */
     }
 
     template <class TForeignImpl>

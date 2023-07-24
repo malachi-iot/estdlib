@@ -383,14 +383,20 @@ public:
         return accessor(get_allocator(), offset(size() - 1));
     }
 
-    size_type max_size() const
+    ESTD_CPP_CONSTEXPR_RET size_type max_size() const
     {
         return m_impl.max_size();
     }
 
-    bool empty() const
+    ESTD_CPP_CONSTEXPR_RET bool empty() const
     {
         return m_impl.empty();
+    }
+
+    // Non standard and not yet functional
+    ESTD_CPP_CONSTEXPR_RET bool full() const
+    {
+        return m_impl.full();
     }
 
     // copy (into dest)

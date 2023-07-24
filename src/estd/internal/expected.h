@@ -11,6 +11,7 @@
 // c++20 gives us conditional explicits - before that, we generally
 // have to leave explicit out.  However, one may force explicit ctors
 // by enabling this flag.
+// DEBT: Move this out to feature area
 #ifndef FEATURE_ESTD_STRICT_EXPECTED
 #define FEATURE_ESTD_STRICT_EXPECTED 0
 #endif

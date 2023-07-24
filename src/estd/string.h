@@ -55,6 +55,10 @@ template<
 public:
     typedef typename base_type::size_type size_type;
 
+    // DEBT: At the moment more a compiler helper so that stringbuf can compile, even if
+    // its view() isn't called
+    typedef basic_string_view<CharT, Traits> view_type;
+
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
 
@@ -226,9 +230,13 @@ public:
 
     const CharT* data() const { return base_t::clock(); }
 
-    operator basic_string_view<CharT, Traits>() const
+    // A little clumsy since basic_string_view treats everything as const already,
+    // so if we are converting from a const_string we have to remove const from CharT
+    typedef basic_string_view<CharT, Traits> view_type;
+
+    ESTD_CPP_CONSTEXPR_RET operator view_type() const
     {
-        return basic_string_view<CharT, Traits>(data(), base_t::size());
+        return view_type(data(), base_t::size());
     }
 };
 
@@ -376,9 +384,11 @@ public:
 
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT
-    operator basic_string_view<typename estd::remove_const<CharT>::type, Traits>() const
+    typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
+
+    ESTD_CPP_CONSTEXPR_RET operator view_type() const
     {
-        return basic_string_view<typename estd::remove_const<CharT>::type, Traits>(data(), base_t::size());
+        return view_type(data(), base_t::size());
     }
 };
 
