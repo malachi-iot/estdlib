@@ -1,8 +1,8 @@
 set(ESTDLIB_DIR ../../../..)
 #set(ESTDLIB_DIR "dummy")
 
-# DEBT: This line is not touching ESTDLIB_DIR at all
-get_filename_component(ESTDLIB_DIR,
+# DEBT: 23JUL23 Fixed this line but haven't tested yet
+get_filename_component(ESTDLIB_DIR
     "${CMAKE_CURRENT_LIST_DIR}/${ESTDLIB_DIR}"
     ABSOLUTE)
 
