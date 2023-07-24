@@ -9,6 +9,7 @@
 #include "../new.h"
 
 #include "../expected.h"
+#include "feature/dynamic_array.h"
 
 namespace estd {
 
@@ -251,6 +252,9 @@ public:
     }
 
 protected:
+    // Use this instead of 'success' ptr
+    //typedef estd::expected<size_type, size_type> grow_result;
+
     // internal call: grows entire size() by amount,
     // ensuring that there's enough space along the
     // way to do so (allocating more if necessary)
@@ -270,13 +274,29 @@ protected:
         return current_size;
     }
 
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+    typedef estd::expected<dynamic_array*, unsigned> append_result;
+#else
+    typedef void append_result;
+#endif
+
 
     // somewhat non standard, but considered a real API in estd
     // in theory this might go a little faster than the iterator
     // version
-    dynamic_array& append(const value_type* buf, size_type len)
+    append_result append(const value_type* buf, size_type len)
     {
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+        bool grow_success;
+        size_type current_size = grow(len, &grow_success);
+
+        // DEBT: Overflow not actually tested yet
+        // DEBT: We'd prefer a version of grow which actually output new len, since size()
+        // can be a little expensive
+        if(grow_success == false)   len = size() - current_size;
+#else
         size_type current_size = grow(len);
+#endif
 
         value_type* raw = lock(current_size);
 
@@ -284,7 +304,12 @@ protected:
 
         unlock();
 
-        return *this;
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+        if(grow_success)
+            return { this };
+        else
+            return append_result(unexpect_t(), len);
+#endif
     }
 
     // basically raw_erase and maps almost directly to string::erase with numeric index
@@ -336,8 +361,6 @@ protected:
 
 
 public:
-    typedef estd::expected<dynamic_array*, unsigned> append_result;
-
     // EXPERIMENTAL, lightly tested
     template <class TImpl2>
     append_result append(const experimental::private_array<TImpl2>& source)
@@ -363,27 +386,25 @@ public:
 
         unlock();
 
-        return {};
-
-        // FIX: Looks like we have a bug here
-        /*
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         return grow_success ?
             append_result(this) :
-            append_result(estd::unexpect_t(), (unsigned)len ); */
+            append_result(estd::unexpect_t(), (unsigned)len );
+#endif
     }
 
     template <class TForeignImpl>
-    dynamic_array& append(const allocated_array<TForeignImpl>& source)
+    append_result append(const allocated_array<TForeignImpl>& source)
     {
         size_type len = source.size();
 
         const typename TForeignImpl::value_type* append_from = source.clock();
 
-        append(append_from, len);
+        append_result ar = append(append_from, len);
 
         source.cunlock();
 
-        return *this;
+        return ar;
     }
 
 

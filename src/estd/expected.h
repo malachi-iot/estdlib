@@ -98,11 +98,13 @@ public:
                 (is_constructible_v<T, add_lvalue_reference_t<const U> >)) &&
                 is_constructible_v<E, const G&>
         )
-
-#else
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT expected(const expected& copy_from)
-#endif
         : base_type(copy_from, copy_from.has_value()),
+        has_value_(copy_from.has_value())
+    {}
+#endif
+
+    ESTD_CPP_CONSTEXPR_RET expected(const expected& copy_from) :
+        base_type(copy_from, copy_from.has_value()),
         has_value_(copy_from.has_value())
     {
 
@@ -124,6 +126,12 @@ public:
     constexpr expected(U&& v) :
         base_type(in_place_t{}, std::forward<U>(v)),
         has_value_{true}
+    {}
+
+    // DEBT: Not tested
+    ESTD_CPP_CONSTEXPR_RET expected(expected&& move_from) NOEXCEPT :
+        base_type(std::move(move_from), move_from.has_value()),
+        has_value_(move_from.has_value())
     {}
 #endif
 

@@ -193,6 +193,14 @@ TEST_CASE("expected")
         infuse_unexpected<void>(estd::errc::invalid_argument);
         infuse_unexpected<estd::test::Dummy>(estd::errc::invalid_argument);
     }
+    SECTION("pointer type")
+    {
+        test::NonTrivial nt(10);
+        using type = expected<test::NonTrivial*, unsigned>;
+        type e(&nt);
+
+        REQUIRE(e.has_value());
+    }
     // DEBT: Put this elsewhere
     SECTION("variant")
     {
