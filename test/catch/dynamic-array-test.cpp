@@ -37,13 +37,24 @@ TEST_CASE("dynamic array")
     da1_type da1;
     pa1_type pa1;
 
-    da1.push_back(5);
+    SECTION("basics")
+    {
+        da1.push_back(5);
 
-    REQUIRE(da1.size() == 1);
+        REQUIRE(da1.size() == 1);
 
-    da1.append(pa1);
+        da1.append(pa1);
 
-    REQUIRE(da1.size() == 11);
+        REQUIRE(da1.size() == 11);
 
-    REQUIRE(da1[2] == 1);
+        REQUIRE(da1[2] == 1);
+    }
+    SECTION("overflow")
+    {
+        // DEBT: Consider adding assignment operator to append_result
+        auto r = da1.append(pa1);
+        //REQUIRE(r.has_value());
+        auto r2 = da1.append(pa1);
+        //auto r3 = da1.append(pa1);
+    }
 }

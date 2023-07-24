@@ -62,6 +62,19 @@ public:
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
 
+    // DEBT: Does not conform to 'strong exception safety guarantee'
+    static void assert_append(typename base_type::append_result r)
+    {
+        if(r.has_value() == false)
+        {
+#if __cpp_exceptions
+            throw std::length_error("Could not allocate enough memory");
+#else
+            std::abort();
+#endif
+        }
+    }
+
 public:
     ESTD_CPP_DEFAULT_CTOR(basic_string)
 
@@ -94,7 +107,7 @@ public:
 
     basic_string& append(size_type count, value_type c) // NOLINT
     {
-        while(count--) base_t::push_back(c);
+        while(count--) *this += c;
 
         return *this;
     }
@@ -103,13 +116,13 @@ public:
     template <class Allocator2, class Policy2>
     basic_string& append(const internal::basic_string<Allocator2, Policy2>& str)
     {
-        base_t::append(str);
+        assert_append(base_type::append(str));
         return *this;
     }
 
     basic_string& append(const_pointer s, size_type count)  // NOLINT
     {
-        base_t::append(s, count);
+        assert_append(base_type::append(s, count));
         return *this;
     }
 
@@ -129,9 +142,9 @@ public:
     } */
 
 
-    basic_string& operator += (value_type c)
+    basic_string& operator+=(value_type c)
     {
-        base_t::push_back(c);
+        assert_append(base_type::push_back(c));
         return *this;
     }
 

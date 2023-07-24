@@ -55,12 +55,13 @@ class dynamic_array : public allocated_array<TImpl>
 {
     typedef dynamic_array this_t;
     typedef allocated_array<TImpl> base_t;
+    typedef allocated_array<TImpl> base_type;
 
 public:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::allocator_traits allocator_traits;
-    typedef typename base_t::impl_type impl_type;
-    typedef typename base_t::value_type value_type;
+    typedef typename base_type::allocator_type allocator_type;
+    typedef typename base_type::allocator_traits allocator_traits;
+    typedef typename base_type::impl_type impl_type;
+    typedef typename base_type::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
@@ -94,30 +95,68 @@ public:
     void unlock() { return base_t::unlock(); }
 
 protected:
-    // internal method for auto increasing capacity based on pre-set amount
-    bool ensure_additional_capacity(size_type increase_by)
+    // Use this instead of 'success' ptr
+    // If success, grew by requested value - returns the size we started with
+    // If in error, returns how much was actually grown
+    //typedef estd::expected<size_type, size_type> grow_result;
+
+    struct grow_result
     {
-        size_type cap = capacity();
+        const size_type starting_size;
+        /// "increased by" in either case, but if in error state it's a reduced count than
+        /// what was expected
+        const estd::expected<size_type, size_type> increased_by;
+
+        ESTD_CPP_CONSTEXPR_RET grow_result(size_type starting_size, size_type increased_by) :
+            starting_size(starting_size),
+            increased_by(increased_by)
+        {}
+
+        ESTD_CPP_CONSTEXPR_RET grow_result(unexpect_t, size_type starting_size, size_type increased_by) :
+            starting_size(starting_size),
+            increased_by(unexpect_t(), increased_by)
+        {}
+    };
+
+    // internal method for auto increasing capacity based on pre-set amount
+    grow_result ensure_additional_capacity(size_type increase_by)
+    {
+        const size_type starting_size = size();
+        const size_type cap = capacity();
         bool success = true;
 
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
 
-        if(size() + increase_by > cap)
+        if(starting_size + increase_by > cap)
         {
             // increase by as near to 32 bytes as is practical
-            success = reserve(cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type)));
+            // DEBT: Really need to do this by some kind of policy
+            const size_type requested_size = cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type));
+
+            success = reserve(requested_size);
+
+            /* DEBT: Not all the underlying allocators/impls reflect a max_size
+            if(requested_size <= impl().max_size())
+                success = reserve(requested_size);
+            else
+                // DEBT: Doing this because fixed allocators currently just call 'abort' on reallocate
+                success = false; */
 
 #ifdef DEBUG
             // TODO: Do a debug log print here to notify of allocation failure
 #endif
         }
 
-        return success;
+        if(success)
+            return grow_result(starting_size, increase_by);
+        else
+            return grow_result(unexpect_t(), starting_size, size() - starting_size);
     }
 
 
     // internal method for reassigning size, ensuring capacity is available
+    // DEBT: Probably need to use grow_result here too
     bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
     {
         size_type cap = capacity();
@@ -252,30 +291,26 @@ public:
     }
 
 protected:
-    // Use this instead of 'success' ptr
-    //typedef estd::expected<size_type, size_type> grow_result;
-
     // internal call: grows entire size() by amount,
     // ensuring that there's enough space along the
     // way to do so (allocating more if necessary)
     /// @returns size before growth
-    size_type grow(int by_amount, bool* success = nullptr)
+    grow_result grow(int by_amount)
     {
-        bool success_ = ensure_additional_capacity(by_amount);
+        grow_result r = ensure_additional_capacity(by_amount);
 
-        if(success != nullptr) *success = success_;
+        if(r.increased_by.has_value())
+            impl().size(r.starting_size + by_amount);
+        else
+            impl().size(r.starting_size + r.increased_by.error());
 
-        // Doing this before memcpy for null-terminated
-        // scenarios
-        size_type current_size = size();
-
-        impl().size(current_size + by_amount);
-
-        return current_size;
+        return r;
     }
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
-    typedef estd::expected<dynamic_array*, unsigned> append_result;
+    // If success, is a void return
+    // If error, returns number of bytes actually appended
+    typedef estd::expected<void, size_type> append_result;
 #else
     typedef void append_result;
 #endif
@@ -287,13 +322,19 @@ protected:
     append_result append(const value_type* buf, size_type len)
     {
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
-        bool grow_success;
-        size_type current_size = grow(len, &grow_success);
+        grow_result r = grow(len);
+        const bool grow_success = r.increased_by.has_value();
+        const size_type current_size = r.starting_size;
 
+#if FEATURE_ESTD_DYNAMIC_ARRAY_APPEND_TRUNC
         // DEBT: Overflow not actually tested yet
         // DEBT: We'd prefer a version of grow which actually output new len, since size()
         // can be a little expensive
-        if(grow_success == false)   len = size() - current_size;
+        if(grow_success == false)   len = r.error();
+#else
+        if(grow_success == false)   return append_result(unexpect_t(), 0);
+#endif
+
 #else
         size_type current_size = grow(len);
 #endif
@@ -306,7 +347,7 @@ protected:
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(grow_success)
-            return { this };
+            return append_result();
         else
             return append_result(unexpect_t(), len);
 #endif
@@ -367,11 +408,16 @@ public:
     {
         //typedef typename experimental::private_array<TImpl2>::const_iterator iterator;
         size_type len = source.size();
-        bool grow_success;
 
-        const size_type pre_growth_size = grow(len, &grow_success);
+        grow_result r = grow(len);
+        const size_type pre_growth_size = r.starting_size;
+        const bool grow_success = r.increased_by.has_value();
 
-        if(grow_success == false)   len = size() - pre_growth_size;
+#if FEATURE_ESTD_DYNAMIC_ARRAY_APPEND_TRUNC
+        if(grow_success == false)   len = r.increased_by.error();
+#else
+        if(grow_success == false)   return append_result(unexpect_t(), 0);
+#endif
 
         pointer raw = lock(pre_growth_size);
 
@@ -388,7 +434,7 @@ public:
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         return grow_success ?
-            append_result(this) :
+            append_result() :
             append_result(estd::unexpect_t(), (unsigned)len );
 #endif
     }
@@ -427,22 +473,28 @@ public:
         impl().size(end);
     }
 
-    void push_back(const value_type& value)
+    append_result push_back(const value_type& value)
     {
-        append(&value, 1);
+        return append(&value, 1);
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
-    void push_back(value_type&& value)
+#ifdef __cpp_rvalue_references
+    append_result push_back(value_type&& value)
     {
         // TODO: combine this with _append since it's mostly overlapping code
-        size_type current_size = grow(1);
+        grow_result r = grow(1);
+
+        if(r.increased_by.has_value() == false) return append_result(unexpect_t(), 0);
+
+        const size_type current_size = r.starting_size;
 
         value_type* raw = lock(current_size);
 
         new (raw) value_type(std::move(value));
 
         unlock();
+
+        return append_result();
     }
 #endif
 
@@ -472,12 +524,15 @@ public:
 
 
 
-#ifdef FEATURE_CPP_VARIADIC
+#if __cpp_variadic_templates
     template <class ...TArgs>
     accessor emplace_back(TArgs&&...args)
     {
         // TODO: combine this with _append since it's mostly overlapping code
-        size_type current_size = grow(1);
+        grow_result r = grow(1);
+
+        // FIX: Do bounds checking
+        size_type current_size = r.starting_size;
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         impl().construct(current_size, std::forward<TArgs>(args)...);
