@@ -53,8 +53,11 @@ TEST_CASE("dynamic array")
     {
         // DEBT: Consider adding assignment operator to append_result
         auto r = da1.append(pa1);
-        //REQUIRE(r.has_value());
+        REQUIRE(r.has_value());
         auto r2 = da1.append(pa1);
-        //auto r3 = da1.append(pa1);
+        REQUIRE(r2.has_value());
+        auto r3 = da1.append(pa1);
+        REQUIRE(r3.has_value() == false);
+        //REQUIRE(r3.error() == 0);
     }
 }

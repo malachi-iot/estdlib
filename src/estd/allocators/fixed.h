@@ -209,8 +209,10 @@ public:
     }
 
     // FIX: returns actual maximum size of unsigned,not ideal
-    size_t max_size() const { return len == 0 ? 
-        estd::numeric_limits<size_t>::max() : len; }
+    static ESTD_CPP_CONSTEXPR_RET size_t max_size()
+    {
+        return len == 0 ? estd::numeric_limits<size_t>::max() : len;
+    }
 
     size_t size(handle_with_size) const { return max_size(); }
 };

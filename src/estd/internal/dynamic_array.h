@@ -121,6 +121,9 @@ protected:
     // internal method for auto increasing capacity based on pre-set amount
     grow_result ensure_additional_capacity(size_type increase_by)
     {
+        // DEBT: fixed allocators IIRC have matching capacity() and max_size()
+        // possibly resulting in big and crusty code here
+
         const size_type starting_size = size();
         const size_type cap = capacity();
         bool success = true;
@@ -134,14 +137,14 @@ protected:
             // DEBT: Really need to do this by some kind of policy
             const size_type requested_size = cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type));
 
-            success = reserve(requested_size);
-
-            /* DEBT: Not all the underlying allocators/impls reflect a max_size
+            // NOTE: fixed allocator aborts on reallocate call, and now we filter that out with
+            // this max_size.  The idea is that dynamic_array avoids aborts/exceptions - but consuming
+            // things like vector/string will actually be responsible for that.
             if(requested_size <= impl().max_size())
                 success = reserve(requested_size);
             else
                 // DEBT: Doing this because fixed allocators currently just call 'abort' on reallocate
-                success = false; */
+                success = false;
 
 #ifdef DEBUG
             // TODO: Do a debug log print here to notify of allocation failure
@@ -308,11 +311,15 @@ protected:
     }
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
-    // If success, is a void return
-    // If error, returns number of bytes actually appended
-    typedef estd::expected<void, size_type> append_result;
+    // If success, returns number of bytes appended which matches initial request
+    // If error, returns number of bytes actually appended, which may be 0
+    // TODO: Try to make this a layer1 kind of thing, to avoid extra bool
+    typedef estd::expected<size_type, size_type> append_result;
+
+    // Not wanting this because I'd like to gravitate towards always returning byte count written
+    //typedef estd::layer1::optional<size_type, (size_type)-1> append_result;
 #else
-    typedef void append_result;
+    typedef size_type append_result;
 #endif
 
 
@@ -347,7 +354,7 @@ protected:
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(grow_success)
-            return append_result();
+            return append_result(len);
         else
             return append_result(unexpect_t(), len);
 #endif
@@ -434,8 +441,8 @@ public:
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         return grow_success ?
-            append_result() :
-            append_result(estd::unexpect_t(), (unsigned)len );
+            append_result(len) :
+            append_result(estd::unexpect_t(), len);
 #endif
     }
 

@@ -73,6 +73,8 @@ public:
             // will autolock and unlock if necessary, returning only a const copy
             return *loc;
         }
+
+        static size_type max_size() { return 999999; }
     };
 
     static handle_type invalid() { return NULLPTR; }
@@ -177,5 +179,7 @@ public:
 
     static CONSTEXPR bool has_size() { return false; }
 #endif
+
+    static unsigned max_size() { return 99999; }
 };
 

@@ -10,17 +10,16 @@
 #include "macro/push.h"
 
 using namespace estd;
-using namespace estd::internal;
 
 template <class TAllocator>
 struct test_specialization;
 
 template <class T, size_t N>
 struct test_specialization<layer1::allocator<T, N> > :
-        handle_descriptor_base<layer1::allocator<T, N>,
+        internal::handle_descriptor_base<layer1::allocator<T, N>,
         true, true, true, true>
 {
-    typedef handle_descriptor_base<layer1::allocator<T, N>,
+    typedef internal::handle_descriptor_base<layer1::allocator<T, N>,
     true, true, true, true> base;
 
     test_specialization() :
@@ -186,7 +185,7 @@ TEST_CASE("allocator tests")
         int& val = a.lock(0);
 
         // FIX: something is wrong here, this should work
-        REQUIRE(has_is_pinned_tag_exp_typedef<allocator_type>::value);
+        REQUIRE(internal::has_is_pinned_tag_exp_typedef<allocator_type>::value);
     }
     SECTION("experimental")
     {
