@@ -34,7 +34,7 @@ class handle_descriptor_base;
 
 
 
-// With explicit size knowledge
+// With explicit runtime size knowledge, since (constexpr) has_size = false
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular, true> :
         public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>

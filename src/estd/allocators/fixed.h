@@ -49,8 +49,7 @@ struct single_allocator_base
 
 protected:
     // NOTE: Would make private but 'adjust_offset_exp' (which basic_string_view uses)
-    // needs it.  Haven't quite yet moved this to 'aligned_storage' yet, but it's on its
-    // way
+    // needs it.
     TBuffer buffer;
 
 protected:
@@ -150,20 +149,20 @@ public:
 // compile-time size()
 // Loosely corresponds to layer1/layer2 behavior
 // len can == 0 in which case we're in unbounded mode
-// FIX: Need to do this in a way where T/TBuffer isn't auto running all its
-// constructors (so like the raw_instance_provider or aligned_storage)
+// NOTE: uninitialized_array is handy to use for TBuffer to avoid value-init of all the elements
 template <
         class T, size_t len, class TBuffer = T[len],
         class TSize = typename internal::deduce_fixed_size_t<len>::size_type>
 struct single_fixedbuf_allocator : public
         single_allocator_base<T, TBuffer, TSize>
 {
-    typedef single_allocator_base<T, TBuffer, TSize> base_t;
+    typedef single_allocator_base<T, TBuffer, TSize> base_type;
+    typedef base_type base_t;
 
-    typedef T value_type;
-    typedef bool handle_type; // really I want it an empty struct
+    typedef typename base_type::value_type value_type;
+    typedef bool handle_type; // really I want it an empty struct, though now code expects a bool
     typedef handle_type handle_with_size;
-    typedef typename base_t::size_type size_type;
+    typedef typename base_type::size_type size_type;
 
 public:
     // experimental tag reflecting that this memory block will never move
@@ -176,7 +175,7 @@ public:
     ESTD_CPP_CONSTEXPR_RET single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
 
 
-    handle_with_size allocate_ext(size_t size)
+    handle_with_size allocate_ext(size_t size) const
     {
         // we can't be sure if alloc fails or succeeds with unspecified length (when TBuffer = *)
         // but since we are embedded-oriented, permit it to succeed and trust the programmer
@@ -367,6 +366,7 @@ public:
 
 namespace layer1 {
 
+// Fixed in place singular buffer
 template <class T, size_t len>
 struct allocator : estd::internal::single_fixedbuf_allocator<T, len,
         estd::internal::uninitialized_array<T, len> >
