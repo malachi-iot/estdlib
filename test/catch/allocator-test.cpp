@@ -47,7 +47,7 @@ TEST_CASE("allocator tests")
         {
             handle_descriptor<allocator_t> d;
 
-            int szof = sizeof(d);
+            unsigned szof = sizeof(d);
 
             int size = d.size();
 

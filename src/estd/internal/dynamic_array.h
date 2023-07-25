@@ -118,6 +118,35 @@ protected:
         {}
     };
 
+    // The following 3 ensure_xxx functions only pertain to:
+    // - traditional dynamic memory scenarios (i.e. classic malloc/realloc/free behaviors)
+    // - advanced and not yet implemented fragmented locking dynamic memory
+
+    bool ensure_total_capacity(size_type new_size, size_type pad = 0)
+    {
+        if(new_size > capacity())
+        {
+            // TODO: Do an assert here, or return true/false to indicate success
+            if(!reserve(new_size + pad)) return false;
+        }
+
+        return true;
+    }
+
+    // internal method for reassigning size, ensuring capacity is available
+    // DEBT: Probably need to use grow_result here too
+    bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
+    {
+        if(ensure_total_capacity(new_size, pad) == false)
+            return false;
+
+        impl().size(new_size);
+
+        if(shrink) shrink_to_fit();
+
+        return true;
+    }
+
     // internal method for auto increasing capacity based on pre-set amount
     grow_result ensure_additional_capacity(size_type increase_by)
     {
@@ -125,17 +154,20 @@ protected:
         // possibly resulting in big and crusty code here
 
         const size_type starting_size = size();
-        const size_type cap = capacity();
-        bool success = true;
+        //const size_type cap = capacity();
+        //bool success = true;
+        static constexpr size_type pad = ((32 + sizeof(value_type)) / sizeof(value_type));
 
+        const bool success = ensure_total_capacity(starting_size + increase_by, pad);
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
 
+#if UNUSED
         if(starting_size + increase_by > cap)
         {
             // increase by as near to 32 bytes as is practical
             // DEBT: Really need to do this by some kind of policy
-            const size_type requested_size = cap + increase_by + ((32 + sizeof(value_type)) / sizeof(value_type));
+            const size_type requested_size = cap + increase_by + ;
 
             success = reserve(requested_size);
 
@@ -154,31 +186,12 @@ protected:
             // TODO: Do a debug log print here to notify of allocation failure
 #endif
         }
+#endif
 
         if(success)
             return grow_result(starting_size, increase_by);
         else
             return grow_result(unexpect_t(), starting_size, size() - starting_size);
-    }
-
-
-    // internal method for reassigning size, ensuring capacity is available
-    // DEBT: Probably need to use grow_result here too
-    bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
-    {
-        size_type cap = capacity();
-
-        if(new_size > cap)
-        {
-            // TODO: Do an assert here, or return true/false to indicate success
-            if(!reserve(new_size + pad)) return false;
-        }
-
-        impl().size(new_size);
-
-        if(shrink) shrink_to_fit();
-
-        return true;
     }
 
 
@@ -305,8 +318,11 @@ protected:
     // internal call: grows entire size() by amount,
     // ensuring that there's enough space along the
     // way to do so (allocating more if necessary)
+    // only is relevant for true dynamic allocation scenarios, such as:
+    // - classic malloc/realloc/free
+    // - not-yet-implemented fragment-adapting locking memory
     /// @returns size before growth
-    grow_result grow(int by_amount)
+    grow_result grow(size_type by_amount)
     {
         grow_result r = ensure_additional_capacity(by_amount);
 
