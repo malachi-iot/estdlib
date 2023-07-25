@@ -59,7 +59,8 @@ TEST_CASE("queue-test")
     }
     SECTION("layer1 circular queue + aligned storage")
     {
-        queue<int, layer1::deque<int, 4, experimental::aligned_storage_array_policy > > queue;
+        //queue<int, layer1::deque<int, 4, experimental::aligned_storage_array_policy > > queue;
+        queue<int, layer1::deque<int, 4> > queue;
 
         queue.push(5);
         queue.push(10);

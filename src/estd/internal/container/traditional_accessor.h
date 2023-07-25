@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../platform.h"
+#include "locking_accessor.h"
 #include "handle_with_offset.h"
 
 namespace estd { namespace internal {

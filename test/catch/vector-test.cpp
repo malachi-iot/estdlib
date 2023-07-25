@@ -203,6 +203,8 @@ TEST_CASE("vector tests")
         estd::vector<int> v;
 
         //v.push_back(3);
+
+        REQUIRE(v.is_locking == false);
     }
     SECTION("vector front/back")
     {

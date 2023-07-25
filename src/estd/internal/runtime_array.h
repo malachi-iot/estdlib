@@ -49,16 +49,28 @@ public:
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef typename allocator_type::value_type value_type;
-    typedef typename allocator_type::iterator it_test;
 
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
     // allocated array pointed to a static const(expr) * of some kind
     TImpl m_impl;
 
+public:
     static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
 
-public:
+    /*
+    typedef typename estd::conditional<
+        is_locking,
+        //allocator_traits::is_locking_exp,
+        typename allocator_type::iterator,
+        typename estd::internal::handle_iterator<
+            allocator_type,
+            traditional_accessor<value_type> > >::type it_test; */
+
+    typedef typename internal::handle_iterator<allocator_type, traditional_accessor<value_type> > it_test;
+
+    //typedef typename allocator_type::iterator it_test;
+
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
     value_type* lock(size_type pos = 0, size_type count = 0)
