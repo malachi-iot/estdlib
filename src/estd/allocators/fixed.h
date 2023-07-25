@@ -18,7 +18,35 @@ namespace estd {
 
 namespace internal {
 
-/// Core of allocators which can only perform one allocation on one singular buffer
+
+// This and specializations are experimental at the moment
+template <class Buffer>
+struct allocator_buffer_traits
+{
+    typedef bool handle_type;
+};
+
+
+template <class T>
+struct allocator_buffer_traits<T*>
+{
+    typedef T* handle_type;
+};
+
+template <class T>
+struct allocator_buffer_traits<T[]>
+{
+    typedef T* handle_type;
+};
+
+template <class T, size_t N, class Base>
+struct allocator_buffer_traits<uninitialized_array<T, N, Base> >
+{
+    typedef T* handle_type;
+};
+
+
+/// Core of allocators which can only perform one allocation on one singular, contiguous buffer
 // Can only have its allocate function called ONCE
 // maps to one and only one regular non-locking buffer
 // also this is a stateful allocator, by nature of TBuffer taking up some space
@@ -38,6 +66,7 @@ struct single_allocator_base
 #endif
     typedef TSize size_type;
     typedef TDiff difference_type;
+    typedef allocator_buffer_traits<TBuffer> buffer_traits;
     //typedef handle_type handle_with_size;
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
     typedef T value_type;
@@ -157,7 +186,6 @@ struct single_fixedbuf_allocator : public
         single_allocator_base<T, TBuffer, TSize>
 {
     typedef single_allocator_base<T, TBuffer, TSize> base_type;
-    typedef base_type base_t;
 
     typedef typename base_type::value_type value_type;
     typedef bool handle_type; // really I want it an empty struct, though now code expects a bool
@@ -172,7 +200,8 @@ public:
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
-    ESTD_CPP_CONSTEXPR_RET single_fixedbuf_allocator(const TBuffer& buffer) : base_t(buffer) {}
+    ESTD_CPP_CONSTEXPR_RET single_fixedbuf_allocator(const TBuffer& buffer) :
+        base_type(buffer) {}
 
 
     handle_with_size allocate_ext(size_t size) const
