@@ -116,10 +116,17 @@ TEST_CASE("priority-queue-test")
         Dummy d7(7, "val7");
         pq.push(d7);
 
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        REQUIRE(pq.top().val1 == 9);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 7);
+        pq.pop();
+#else
         REQUIRE(pq.top().lock().val1 == 9);
         pq.pop();
         REQUIRE(pq.top().lock().val1 == 7);
         pq.pop();
+#endif
     }
     SECTION("priority queue, emplacement")
     {
@@ -143,6 +150,20 @@ TEST_CASE("priority-queue-test")
         // I expect a std::move should be involved
         //pq.emplace(d7); // remember this effectively is an efficient 'push'
 
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        REQUIRE(pq.top().val1 == 9);
+        pq.pop();;
+        REQUIRE(pq.top().val1 == 8);
+        pq.pop();;
+        REQUIRE(pq.top().val1 == 7);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 6);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 5);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 4);
+        pq.pop();
+#else
         REQUIRE(pq.top().lock().val1 == 9);
         pq.pop();;
         REQUIRE(pq.top().lock().val1 == 8);
@@ -155,6 +176,7 @@ TEST_CASE("priority-queue-test")
         pq.pop();
         REQUIRE(pq.top().lock().val1 == 4);
         pq.pop();
+#endif
     }
     SECTION("experimental")
     {
@@ -338,12 +360,21 @@ TEST_CASE("priority-queue-test")
             pq.erase_if([&](Dummy& v) { return v.value2 == d7.value2; });
         }
 
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        REQUIRE(pq.top().val1 == 9);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 5);
+        pq.pop();
+        REQUIRE(pq.top().val1 == 3);
+        pq.pop();
+#else
         REQUIRE(pq.top().lock().val1 == 9);
         pq.pop();
         REQUIRE(pq.top().lock().val1 == 5);
         pq.pop();
         REQUIRE(pq.top().lock().val1 == 3);
         pq.pop();
+#endif
 
         REQUIRE(pq.container().size() == 0);
     }

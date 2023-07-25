@@ -47,7 +47,9 @@ TEST_CASE("stack")
         //REQUIRE(!estd::internal::has_locking_tag<container_type::allocator_type>::value);
         //REQUIRE(!container_type::accessor::is_locking);
 
+#if !FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
         REQUIRE(container_type::accessor::is_pinned);
+#endif
 
         SECTION("aggressive push of accessor")
         {
@@ -62,7 +64,9 @@ TEST_CASE("stack")
             decltype(s)::accessor a = s.top();
 
             REQUIRE(val->val1 == 7);
+#if !FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
             REQUIRE(s.top().lock()->val1 == 7);
+#endif
             REQUIRE(a->val1 == 7);
         }
     }

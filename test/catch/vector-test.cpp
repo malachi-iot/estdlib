@@ -22,11 +22,15 @@ TEST_CASE("vector tests")
         REQUIRE(v.empty());
 
         auto test = v[3];
+
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+#else
         auto& test2 = test.lock();
 
         test2 = 5;
 
         REQUIRE(v[3].lock() == 5);
+#endif
     }
     SECTION("basic vector 2")
     {
@@ -36,7 +40,11 @@ TEST_CASE("vector tests")
 
         REQUIRE(v.size() == 1);
         REQUIRE(v.capacity() > 5);
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        REQUIRE(v[0] == 5);
+#else
         REQUIRE(v[0].lock() == 5);
+#endif
         REQUIRE(!v.empty());
     }
     SECTION("Vector iterator")
@@ -51,10 +59,13 @@ TEST_CASE("vector tests")
 
         i++;
 
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        REQUIRE(*i == 2);
+#else
         REQUIRE(i.lock() == 2);
 
         i.unlock();
-
+#endif
         i++;
         i++;
 

@@ -51,7 +51,11 @@ TEST_CASE("dynamic array")
     }
     SECTION("iterate")
     {
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        //da1_type::accessor a
+#else
         da1_type::accessor a(da1.get_allocator(), 0);
+#endif
         da1.append(pa1);
 
         auto it = da1.begin();

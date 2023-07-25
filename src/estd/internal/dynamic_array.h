@@ -544,7 +544,8 @@ public:
         _erase(index, 1);
         // chances are iterator is a copy of incoming pos,
         // but we'll do this anyway
-        return iterator(base_t::get_allocator(), base_t::offset(index));
+        return base_type::create_iterator(index);
+        //return iterator(base_t::get_allocator(), base_t::offset(index));
     }
 
 
@@ -592,17 +593,23 @@ public:
         return pos;
     }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#if __cpp_rvalue_references
     iterator insert(iterator pos, value_type&& value)
     {
         pointer a = lock();
 
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+        reference pos_item = *pos;
+#else
         reference pos_item = pos.lock();
+#endif
 
         // all very raw array dependent
         raw_insert(a, &pos_item, std::move(value));
 
+#if !FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
         pos.unlock();
+#endif
 
         unlock();
 

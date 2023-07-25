@@ -11,6 +11,11 @@
 
 #include <string.h>     // for access to memcpy NOLINT
 
+// Intermediate flag which more or less disables all the handle/locking mechanisms
+// in favor of traditional pointer-style iterator.  Development flag only, once it
+// works, the compile time flag will be deduced by querying the allocator itself
+#define FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL 0
+
 namespace estd { namespace internal {
 
 // experimental and not good
@@ -163,14 +168,22 @@ public:
     // is 99%+ of the time, as of this writing)
     // DEBT: Surely this mechanism is already present elsewhere
     //typedef traditional_accessor<value_type> accessor;
-    typedef handle_accessor accessor;
-    //typedef value_type& accessor;
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+    typedef value_type& accessor;
 
-    // EXPERIMENTAL, not yet used
-    static accessor create_accessor(allocator_type& a, const handle_with_offset& h)
+    accessor create_accessor(unsigned o = 0) const
     {
-        return accessor(a, h);
+        value_type& v = get_allocator().lock(offset(o));
+        return v;
     }
+#else
+    typedef handle_accessor accessor;
+
+    ESTD_CPP_CONSTEXPR_RET accessor create_accessor(unsigned o = 0) const
+    {
+        return accessor(get_allocator(), offset(o));
+    }
+#endif
 
     typedef pointer traditional_iterator;
 
@@ -316,14 +329,10 @@ public:
         this_type& operator=(const this_type& copy_from)
         {
             //current = copy_from.current;
-            new (&current) accessor(copy_from.current);
+            new (&current) handle_accessor(copy_from.current);
             return *this;
         }
     };
-
-    typedef handle_iterator iterator;
-    //typedef traditional_iterator iterator;
-    typedef const iterator const_iterator;
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
 
@@ -336,17 +345,24 @@ public:
         return const_cast<impl_type&>(m_impl).get_allocator();
     }
 
-    /*
-    traditional_iterator create_iterator()
+#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
+    typedef traditional_iterator iterator;
+
+    traditional_iterator create_iterator(unsigned o = 0) const
     {
-        auto& v = get_allocator().lock(offset(0));
+        auto& v = get_allocator().lock(offset(o));
         return traditional_iterator{&v};
-    } */
+    }
+#else
+    typedef handle_iterator iterator;
 
     handle_iterator create_iterator(unsigned o = 0) const
     {
         return handle_iterator(get_allocator(), offset(o));
     }
+#endif
+
+    typedef const iterator const_iterator;
 
     iterator begin()
     {
@@ -396,23 +412,27 @@ public:
         // accessor itself.  perhaps wrap it all up in a FEATURE_ESTD_BOUNDSCHECK
         // to compensate for lack of exceptions requiring additional
         // data in accessor itself
-        return accessor(get_allocator(), offset(pos));
+        //return accessor(get_allocator(), offset(pos));
+        return create_accessor(pos);
     }
 
 
     accessor operator[](size_type pos) const
     {
-        return accessor(get_allocator(), offset(pos));
+        //return accessor(get_allocator(), offset(pos));
+        return create_accessor(pos);
     }
 
     accessor front() const
     {
-        return accessor(get_allocator(), offset(0));
+        //return accessor(get_allocator(), offset(0));
+        return create_accessor(0);
     }
 
     accessor back() const
     {
-        return accessor(get_allocator(), offset(size() - 1));
+        //return accessor(get_allocator(), offset(size() - 1));
+        return create_accessor(size() - 1);
     }
 
     ESTD_CPP_CONSTEXPR_RET size_type max_size() const
