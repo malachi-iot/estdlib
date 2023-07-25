@@ -20,9 +20,9 @@ struct dynamic_array_length<TAllocator, true, false>
 
     bool empty(const allocator_type& a, const handle_type& h) const
     {
-        const value_type* v = &a.clock(h, 0, 1);
+        const value_type& v = a.clock(h, 0, 1);
 
-        bool is_terminator = *v == 0;
+        bool is_terminator = v == 0;
 
         a.cunlock(h);
 

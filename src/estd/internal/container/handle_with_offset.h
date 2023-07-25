@@ -1,8 +1,7 @@
 #pragma once
 
-#include "platform.h"
-#include "../cstddef.h" // for size_t
-#include "impl/handle_desc.h"
+#include "../../cstddef.h" // for size_t
+#include "../impl/handle_desc.h"
 
 namespace estd { namespace internal {
 

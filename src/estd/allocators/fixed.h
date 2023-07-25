@@ -2,7 +2,7 @@
 
 #include "generic.h"
 #include "../traits/allocator_traits.h"
-#include "../internal/accessor.h"
+#include "../internal/container/accessor.h"
 #include "../internal/array.h"
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
@@ -12,13 +12,7 @@
 #include <assert.h>
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
-#pragma push_macro("max")
-#pragma push_macro("min")
-#undef max
-#undef min
-#endif
-
+#include "../internal/macro/push.h"
 
 namespace estd {
 
@@ -556,7 +550,4 @@ struct handle_descriptor<layer3::allocator<T, TSize>, TTraits >
 
 }
 
-#if defined(__GNUC__) || defined(_MSC_VER)
-#pragma pop_macro("min")
-#pragma pop_macro("max")
-#endif
+#include "../internal/macro/pop.h"

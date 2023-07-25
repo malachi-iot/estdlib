@@ -2,13 +2,13 @@
 
 #include "platform.h"
 #include "../traits/allocator_traits.h"
-#include "../internal/accessor.h"
+#include "container/accessor.h"
 #include "../algorithm.h"
 #include "../initializer_list.h"
 #include "iterator_standalone.h"
 #include "container/starts_with.h"
 
-#include <string.h>     // for access to memcpy
+#include <string.h>     // for access to memcpy NOLINT
 
 namespace estd { namespace internal {
 

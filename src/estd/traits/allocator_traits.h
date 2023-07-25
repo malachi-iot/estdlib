@@ -9,9 +9,9 @@
 #ifdef FEATURE_STD_MEMORY
 #include <memory>
 #endif
-#include <stdint.h> // for uint8_t and friends
+#include "../cstdint.h"
 #include "../internal/deduce_fixed_size.h"
-#include "../internal/handle_with_offset.h"
+#include "../internal/container/handle_with_offset.h"
 
 namespace estd {
 
