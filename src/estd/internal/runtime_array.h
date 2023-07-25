@@ -49,6 +49,7 @@ public:
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::iterator it_test;
 
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
@@ -178,6 +179,7 @@ public:
         return v;
     }
 #else
+    //typedef typename it_test::accessor accessor;
     typedef handle_accessor accessor;
     //typedef traditional_accessor<value_type> accessor;
 

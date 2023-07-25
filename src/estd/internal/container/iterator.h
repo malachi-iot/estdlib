@@ -16,6 +16,8 @@ template <class Allocator, class Accessor>
 class handle_iterator
 {
     typedef handle_iterator this_type;
+
+public:
     typedef Allocator allocator_type;
     typedef Accessor accessor;
 

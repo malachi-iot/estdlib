@@ -2,6 +2,7 @@
 
 #include "estd/memory.h"
 #include <estd/internal/container/traditional_accessor.h>
+#include <estd/internal/container/iterator.h>
 #include <cstddef> // for ptrdiff_t
 
 // reference allocator for inbuild mechanisms.  basically a crummy test-only
@@ -26,6 +27,10 @@ public:
 
     typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
     typedef T& accessor;
+    typedef estd::internal::handle_iterator<
+    	_allocator,
+    	estd::internal::traditional_accessor<value_type>
+    	> iterator;
 
     // primarily for subscript/array operations
     class handle_with_offset_old

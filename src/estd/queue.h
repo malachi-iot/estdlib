@@ -57,7 +57,7 @@ struct normal_array_policy
     };
 };
 
-#ifdef FEATURE_CPP_ALIGN
+#ifdef FEATURE_CPP_ALIGN_DISABLED
 struct aligned_storage_array_policy
 {
     template <class T, size_t N>
