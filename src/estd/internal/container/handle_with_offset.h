@@ -21,11 +21,6 @@ public:
     typedef size_t size_type;
 
     // TODO: Make allocator version which does bounds checking
-    // TODO: phase out increment if we can in favor of += operator
-    void increment(size_type count = 1)
-    {
-        m_offset += count;
-    }
 
     inline handle_with_offset_base& operator+=(size_type summand)
     {
@@ -176,10 +171,6 @@ public:
     }
 
     // TODO: Make allocator version which does bounds checking
-    void increment(size_t count = 1)
-    {
-        m_pointer += count;
-    }
 
     inline handle_with_offset_raw& operator +=(size_t summand)
     {

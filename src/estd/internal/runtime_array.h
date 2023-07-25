@@ -173,11 +173,12 @@ public:
 
     accessor create_accessor(unsigned o = 0) const
     {
-        value_type& v = get_allocator().lock(offset(o));
+        accessor v(get_allocator().lock(offset(o)));
         return v;
     }
 #else
     typedef handle_accessor accessor;
+    //typedef traditional_accessor<value_type> accessor;
 
     ESTD_CPP_CONSTEXPR_RET accessor create_accessor(unsigned o = 0) const
     {
@@ -209,8 +210,8 @@ public:
         void unlock() { current.unlock(); }
 
 
-        handle_iterator(allocator_type& allocator, const handle_with_offset& h ) :
-            current(allocator, h)
+        ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_iterator(const accessor& a) :
+            current(a)
         {
 
         }
@@ -230,14 +231,14 @@ public:
         // prefix version
         this_type& operator++()
         {
-            current.h_exp().increment();
+            current.h_exp() += 1;
             return *this;
         }
 
 
         this_type& operator--()
         {
-            current.h_exp().increment(-1);
+            current.h_exp() += -1;
             return *this;
         }
 
@@ -363,7 +364,7 @@ public:
 
     handle_iterator create_iterator(unsigned o = 0) const
     {
-        return handle_iterator(get_allocator(), offset(o));
+        return handle_iterator(create_accessor(o));
     }
 #endif
 

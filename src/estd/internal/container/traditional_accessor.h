@@ -41,17 +41,22 @@ struct traditional_accessor
         }
     };  */
 
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(reference v) : p(&v) {}
+
     template <class TAllocator>
     traditional_accessor(TAllocator& a, const typename estd::allocator_traits<TAllocator>::handle_with_offset& h)
     {
         p = &a.lock(h);
     }
 
-    void increment(int v = 1) { p += v; }
+    //void increment(int v = 1) { p += v; }
 
+    /*
     traditional_accessor& h_exp() { return *this; }
-    const traditional_accessor& h_exp() const { return *this; }
+    const traditional_accessor& h_exp() const { return *this; }*/
+    const_pointer h_exp() const { return p; }
 
+    operator value_type&() { return *p; }
     explicit operator value_type&() const { return *p; }
 
     value_type& lock() { return *p; }
@@ -68,7 +73,7 @@ struct traditional_accessor
         return *this;
     }
 
-    this_type& operator+=(int v)
+    this_type& operator+=(long v)
     {
         p += v;
         return *this;
