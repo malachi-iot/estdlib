@@ -3,7 +3,7 @@
 #pragma once
 
 #include "platform.h"
-#include "../type_traits.h"
+#include "type_traits.h"
 
 #ifdef FEATURE_STD_ITERATOR
 #include <iterator>
