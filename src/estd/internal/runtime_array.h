@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "../traits/allocator_traits.h"
 #include "container/accessor.h"
+#include "container/traditional_accessor.h"
 #include "../algorithm.h"
 #include "../initializer_list.h"
 #include "iterator_standalone.h"
@@ -152,15 +153,31 @@ public:
 #endif
                 estd::internal::accessor<allocator_type>,
                 estd::internal::accessor_stateless<allocator_type> >::type
-                accessor;
+                handle_accessor;
 #else
     // pre C++11 tricky to optimize this way
     typedef estd::internal::accessor<allocator_type> accessor;
 #endif
 
+    // Use this only when we're certain no locking/handle tracking is required (which
+    // is 99%+ of the time, as of this writing)
+    // DEBT: Surely this mechanism is already present elsewhere
+    //typedef traditional_accessor<value_type> accessor;
+    typedef handle_accessor accessor;
+    //typedef value_type& accessor;
 
-    class iterator
+    // EXPERIMENTAL, not yet used
+    static accessor create_accessor(allocator_type& a, const handle_with_offset& h)
     {
+        return accessor(a, h);
+    }
+
+    typedef pointer traditional_iterator;
+
+    class handle_iterator
+    {
+        typedef handle_iterator this_type;
+
     private:
         accessor current;
 
@@ -179,15 +196,15 @@ public:
         void unlock() { current.unlock(); }
 
 
-        iterator(allocator_type& allocator, const handle_with_offset& h ) :
+        handle_iterator(allocator_type& allocator, const handle_with_offset& h ) :
             current(allocator, h)
         {
 
         }
 
-        iterator(const iterator& copy_from) : current(copy_from.current) {}
+        handle_iterator(const this_type& copy_from) : current(copy_from.current) {}
 
-        ~iterator()
+        ~handle_iterator()
         {
             // FIX: not so great.  It might be passable, though not recommended,
             // to unlock an alread unlocked value.  But it's less certain what
@@ -198,69 +215,69 @@ public:
         }
 
         // prefix version
-        iterator& operator++()
+        this_type& operator++()
         {
             current.h_exp().increment();
             return *this;
         }
 
 
-        iterator& operator--()
+        this_type& operator--()
         {
             current.h_exp().increment(-1);
             return *this;
         }
 
         // postfix version
-        iterator operator++(int)
+        this_type operator++(int)
         {
-            iterator temp(*this);
+            this_type temp(*this);
             operator++();
             return temp;
         }
 
         // postfix version
-        iterator operator--(int)
+        this_type operator--(int)
         {
-            iterator temp(*this);
+            this_type temp(*this);
             operator--();
             return temp;
         }
 
-        ptrdiff_t operator-(const iterator& subtrahend) const
+        ptrdiff_t operator-(const this_type& subtrahend) const
         {
             return current.h_exp() - subtrahend.current.h_exp();
         }
 
-        inline iterator operator+(ptrdiff_t offset) const
+        inline this_type operator+(ptrdiff_t offset) const
         {
-            iterator it(*this);
+            this_type it(*this);
 
             it.current.h_exp() += offset;
 
             return it;
         }
 
-        inline iterator operator-(ptrdiff_t offset)
+        inline this_type operator-(ptrdiff_t offset)
         {
-            iterator it(*this);
+            this_type it(*this);
 
             it.current.h_exp() -= offset;
 
             return it;
         }
 
-        ESTD_CPP_CONSTEXPR_RET bool operator>(const iterator& compare) const
+        ESTD_CPP_CONSTEXPR_RET bool operator>(const this_type& compare) const
         {
             return current.h_exp() > compare.current.h_exp();
         }
 
-        ESTD_CPP_CONSTEXPR_RET bool operator>=(const iterator& compare) const
+        ESTD_CPP_CONSTEXPR_RET bool operator>=(const this_type& compare) const
         {
             return current.h_exp() >= compare.current.h_exp();
         }
 
-        ESTD_CPP_CONSTEXPR_RET bool operator<(const iterator& compare) const
+        ESTD_CPP_CONSTEXPR_RET bool operator<(const this_type& compare) const
         {
             return current.h_exp() < compare.current.h_exp();
         }
@@ -273,12 +290,12 @@ public:
 
 
         // NOTE: Descrepency between doing a pointer-ish compare and a value compare
-        ESTD_CPP_CONSTEXPR_RET bool operator==(const iterator& compare_to) const
+        ESTD_CPP_CONSTEXPR_RET bool operator==(const this_type& compare_to) const
         {
             return current.h_exp() == compare_to.current.h_exp();
         }
 
-        ESTD_CPP_CONSTEXPR_RET bool operator!=(const iterator& compare_to) const
+        ESTD_CPP_CONSTEXPR_RET bool operator!=(const this_type& compare_to) const
         {
             return !(operator ==)(compare_to);
             //return current != compare_to.current;
@@ -296,7 +313,7 @@ public:
         }
 
 
-        iterator& operator=(const iterator& copy_from)
+        this_type& operator=(const this_type& copy_from)
         {
             //current = copy_from.current;
             new (&current) accessor(copy_from.current);
@@ -304,6 +321,8 @@ public:
         }
     };
 
+    typedef handle_iterator iterator;
+    //typedef traditional_iterator iterator;
     typedef const iterator const_iterator;
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
@@ -317,14 +336,28 @@ public:
         return const_cast<impl_type&>(m_impl).get_allocator();
     }
 
+    /*
+    traditional_iterator create_iterator()
+    {
+        auto& v = get_allocator().lock(offset(0));
+        return traditional_iterator{&v};
+    } */
+
+    handle_iterator create_iterator(unsigned o = 0) const
+    {
+        return handle_iterator(get_allocator(), offset(o));
+    }
+
     iterator begin()
     {
-        return iterator(get_allocator(), offset(0));
+        //return iterator(get_allocator(), offset(0));
+        return create_iterator();
     }
 
     const_iterator cbegin() const
     {
-        return iterator(get_allocator(), offset(0));
+        //return iterator(get_allocator(), offset(0));
+        return create_iterator();
     }
 
     const_iterator begin() const
@@ -334,17 +367,21 @@ public:
 
     iterator end()
     {
+        return create_iterator(size());
+        /*
         handle_with_offset o = offset(size());
 
-        return iterator(get_allocator(), o);
+        return iterator(get_allocator(), o); */
     }
 
 
     const_iterator cend() const
     {
+        return create_iterator(size());
+        /*
         handle_with_offset o = offset(size());
 
-        return iterator(get_allocator(), o);
+        return iterator(get_allocator(), o); */
     }
 
     const_iterator end() const
@@ -354,6 +391,7 @@ public:
 
     accessor at(size_type pos) const
     {
+        // DEBT: Consider routing this *through* iterator just to dogfood and DRY a bit
         // TODO: place in error/bounds checking runtime ability within
         // accessor itself.  perhaps wrap it all up in a FEATURE_ESTD_BOUNDSCHECK
         // to compensate for lack of exceptions requiring additional

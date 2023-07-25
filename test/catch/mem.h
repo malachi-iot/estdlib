@@ -1,6 +1,7 @@
 #pragma once
 
 #include "estd/memory.h"
+#include <estd/internal/container/traditional_accessor.h>
 #include <cstddef> // for ptrdiff_t
 
 // reference allocator for inbuild mechanisms.  basically a crummy test-only
@@ -170,6 +171,13 @@ public:
     handle_with_offset offset(handle_type h, ptrdiff_t size) const
     {
         return handle_with_offset(h + size);
+    }
+
+    // DEBT: Pretty sloppy, just brute forcing the one that doesn't need locking anyway
+    //pointer lock(estd::internal::traditional_accessor<T>& a)
+    value_type& lock(const estd::internal::handle_with_offset_raw<pointer, size_t>& a)
+    {
+        return *a.handle();
     }
 
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY

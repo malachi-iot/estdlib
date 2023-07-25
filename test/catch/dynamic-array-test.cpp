@@ -49,6 +49,17 @@ TEST_CASE("dynamic array")
 
         REQUIRE(da1[2] == 1);
     }
+    SECTION("iterate")
+    {
+        da1_type::accessor a(da1.get_allocator(), 0);
+        da1.append(pa1);
+
+        auto it = da1.begin();
+
+        const auto& v = *it;
+
+        REQUIRE(v == 0);
+    }
     SECTION("overflow")
     {
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK

@@ -104,9 +104,11 @@ TEST_CASE("vector tests")
         REQUIRE(sizeof(vector_type) == (sizeof(int) * 10) + 4);
         //REQUIRE(sizeof(vector_type) == (sizeof(int) * 10) + (sizeof(size_type)));
 
-        int size_type_size = sizeof(accessor_type::handle_with_offset::size_type);
+        // +++ Experimenting with using "traditional_accessor" here
+        //int size_type_size = sizeof(accessor_type::handle_with_offset::size_type);
 
-        REQUIRE(size_type_size == 1); // not actually used much in this context (but maybe could be?)
+        //REQUIRE(size_type_size == 1); // not actually used much in this context (but maybe could be?)
+        // ---
 
         unsigned accessor_size = sizeof(accessor_type);
 
