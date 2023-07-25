@@ -145,7 +145,7 @@ public:
     allocated_array(const THelperParam& p) :
             m_impl(p) {}
 
-
+#if UNUSED
     // TODO: make accessor do this comparison in a self contained way
     // allocator itself only needs to be stateful if it needs to do handle locking
     // if not, then we assume it's pointer based and thusly can access the item
@@ -166,6 +166,7 @@ public:
     // pre C++11 tricky to optimize this way
     typedef estd::internal::accessor<allocator_type> accessor;
 #endif
+#endif
 
     // Use this only when we're certain no locking/handle tracking is required (which
     // is 99%+ of the time, as of this writing)
@@ -180,8 +181,8 @@ public:
         return v;
     }
 #else
-    //typedef typename it_test::accessor accessor;
-    typedef handle_accessor accessor;
+    typedef typename it_test::accessor accessor;
+    //typedef handle_accessor accessor;
     //typedef traditional_accessor<value_type> accessor;
 
     ESTD_CPP_CONSTEXPR_RET accessor create_accessor(unsigned o = 0) const
@@ -214,7 +215,7 @@ public:
         return traditional_iterator{&v};
     }
 #else
-    typedef handle_iterator<allocator_type, accessor> iterator;
+    typedef it_test iterator;
 
     iterator create_iterator(unsigned o = 0) const
     {

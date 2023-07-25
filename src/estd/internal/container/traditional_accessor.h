@@ -17,7 +17,8 @@ struct traditional_accessor
     ESTD_CPP_STD_VALUE_TYPE(T);
 
     // DEBT: This needs to be a trait somewhere
-    static CONSTEXPR bool is_pinned = false;
+    // experimental flag reflecting that this memory block will never move
+    static CONSTEXPR bool is_pinned = true;
 
     pointer p;
 
@@ -45,17 +46,18 @@ struct traditional_accessor
     ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(reference v) : p(&v) {}
 
     template <class TAllocator>
-    traditional_accessor(TAllocator& a, const typename estd::allocator_traits<TAllocator>::handle_with_offset& h)
+    ESTD_CPP_CONSTEXPR_RET traditional_accessor(TAllocator& a,
+        const typename estd::allocator_traits<TAllocator>::handle_with_offset& h) :
+        p(&a.lock(h))
     {
-        p = &a.lock(h);
     }
-
-    //void increment(int v = 1) { p += v; }
 
     /*
     traditional_accessor& h_exp() { return *this; }
     const traditional_accessor& h_exp() const { return *this; }*/
     pointer& h_exp() { return p; }
+
+    const pointer& h_exp() const { return p; }
 
     operator value_type&() { return *p; }
     explicit operator value_type&() const { return *p; }
@@ -73,13 +75,6 @@ struct traditional_accessor
         *p = copy_from;
         return *this;
     }
-
-    /*
-    this_type& operator+=(long v)
-    {
-        p += v;
-        return *this;
-    }   */
 
     bool operator==(const_reference& compare_to) const
     {
@@ -102,15 +97,16 @@ struct traditional_accessor
     }
 };
 
-
+/*
 template <class T>
 ptrdiff_t operator-(const traditional_accessor<T>& lhs, const traditional_accessor<T>& rhs)
 {
     return lhs.p - rhs.p;
 }
+*/
 
 template <class T>
-traditional_accessor<T> operator-(const traditional_accessor<T>& lhs, const int rhs)
+traditional_accessor<T> operator-(const traditional_accessor<T>& lhs, const T& rhs)
 {
     return lhs.p - rhs;
 }
