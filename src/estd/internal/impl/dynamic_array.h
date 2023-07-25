@@ -8,11 +8,6 @@
 namespace estd { namespace internal { namespace impl {
 
 
-// TODO: Fixup name.  Specializer to reveal size of either
-// an explicitly-sized or null-terminated entity
-template <class TAllocator, bool null_terminated, bool size_equals_capacity>
-struct dynamic_array_length;
-
 // null terminated
 template <class TAllocator>
 struct dynamic_array_length<TAllocator, true, false>
@@ -402,7 +397,6 @@ struct is_consttag_present : estd::false_type {};
 template<typename T>
 struct is_consttag_present<T, typename has_typedef<typename T::is_constant_tag_exp>::type> : estd::true_type {};
 
-// FIX: Hard wired to null terminated !
 template <class TAllocator, class TPolicy>
 struct dynamic_array : public
         dynamic_array_base<
@@ -416,12 +410,12 @@ struct dynamic_array : public
         is_consttag_present<TPolicy>::value> base_t;
     typedef typename base_t::allocator_type allocator_type;
 
-    dynamic_array(allocator_type& alloc) : base_t(alloc) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(allocator_type& alloc) : base_t(alloc) {}
 
     template <class TAllocatorParam>
     dynamic_array(const TAllocatorParam& p) : base_t(p) {}
 
-    dynamic_array() {}
+    ESTD_CPP_DEFAULT_CTOR(dynamic_array)
 };
 #else
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback

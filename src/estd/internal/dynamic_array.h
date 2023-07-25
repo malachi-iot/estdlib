@@ -46,16 +46,17 @@ public:
 namespace internal {
 
 
-// non standard base class for managing expanding/contracting arrays
-// accounts for lock/unlock behaviors. Used for vector and string
-// More or less 1:1 with vector
-// and may get rolled back completely into vector at some point -
+//
+//  -
+/// Base class for managing expanding/contracting arrays
+/// Accounts for lock/unlock behaviors. Used for vector and string
+/// @tparam TImpl typically estd::internal::impl::dynamic_array.  Abstracts away allocator-specific behaviors
+/// @remarks Kind of a superset of vector
 template <class TImpl>
 class dynamic_array : public allocated_array<TImpl>
 {
-    typedef dynamic_array this_t;
-    typedef allocated_array<TImpl> base_t;
     typedef allocated_array<TImpl> base_type;
+    typedef base_type base_t;
 
 public:
     typedef typename base_type::allocator_type allocator_type;
@@ -67,29 +68,29 @@ public:
     //typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
-    typedef typename base_t::size_type size_type;
+    typedef typename base_type::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef typename base_t::iterator iterator;
-    typedef typename base_t::accessor accessor;
+    typedef typename base_type::iterator iterator;
+    typedef typename base_type::accessor accessor;
 
     // TODO: utilize SFINAE if we can
     // ala https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
-    impl_type& impl() { return base_t::m_impl; }
+    impl_type& impl() { return base_type::m_impl; }
 
-    const impl_type& impl() const { return base_t::m_impl; }
+    const impl_type& impl() const { return base_type::m_impl; }
 
 public:
     // redeclared just for conveineince
     value_type* lock(size_type pos = 0, size_type count = 0)
     {
-        return base_t::lock(pos, count);
+        return base_type::lock(pos, count);
     }
 
     void unlock() { return base_t::unlock(); }
@@ -103,6 +104,7 @@ protected:
     struct grow_result
     {
         const size_type starting_size;
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         /// "increased by" in either case, but if in error state it's a reduced count than
         /// what was expected
         const estd::expected<size_type, size_type> increased_by;
@@ -116,6 +118,9 @@ protected:
             starting_size(starting_size),
             increased_by(unexpect_t(), increased_by)
         {}
+#else
+        ESTD_CPP_CONSTEXPR_RET grow_result(size_type v) : starting_size(v) {}
+#endif
     };
 
     // The following 3 ensure_xxx functions only pertain to:
@@ -134,7 +139,6 @@ protected:
     }
 
     // internal method for reassigning size, ensuring capacity is available
-    // DEBT: Probably need to use grow_result here too
     bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
     {
         if(ensure_total_capacity(new_size, pad) == false)
@@ -154,44 +158,22 @@ protected:
         // possibly resulting in big and crusty code here
 
         const size_type starting_size = size();
-        //const size_type cap = capacity();
-        //bool success = true;
         static constexpr size_type pad = ((32 + sizeof(value_type)) / sizeof(value_type));
 
-        const bool success = ensure_total_capacity(starting_size + increase_by, pad);
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
 
-#if UNUSED
-        if(starting_size + increase_by > cap)
-        {
-            // increase by as near to 32 bytes as is practical
-            // DEBT: Really need to do this by some kind of policy
-            const size_type requested_size = cap + increase_by + ;
-
-            success = reserve(requested_size);
-
-            /*
-            // NOTE: fixed allocator aborts on reallocate call, and now we filter that out with
-            // this max_size.  The idea is that dynamic_array avoids aborts/exceptions - but consuming
-            // things like vector/string will actually be responsible for that.
-            if(requested_size <= impl().max_size())
-                success = reserve(requested_size);
-            else
-                // DEBT: Doing this because fixed allocators currently just call 'abort' on reallocate
-                success = false;
-            */
-
-#ifdef DEBUG
-            // TODO: Do a debug log print here to notify of allocation failure
-#endif
-        }
-#endif
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+        const bool success = ensure_total_capacity(starting_size + increase_by, pad);
 
         if(success)
             return grow_result(starting_size, increase_by);
         else
             return grow_result(unexpect_t(), starting_size, size() - starting_size);
+#else
+        ensure_total_capacity(starting_size + increase_by, pad);
+        return starting_size;
+#endif
     }
 
 
@@ -199,7 +181,7 @@ protected:
     // (standard version also inserts or removes characters if requested,
     //  this one ONLY replaces the entire buffer)
     // TODO: change to assign
-    void assign(const value_type* buf, size_type len)
+    void assign(const value_type* buf, size_type len)   // NOLINT
     {
         ensure_total_size(len);
 
@@ -229,13 +211,12 @@ protected:
     {
         // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
         // so later consider doing the insert operation at that level)
-        ensure_additional_capacity(1);
-
-        impl().size(impl().size() + 1);
+        const size_type sz = impl().size();
+        ensure_total_size(sz + 1);
 
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
         size_type raw_typed_pos = to_insert_pos - a;
-        size_type remaining = size() - raw_typed_pos;
+        size_type remaining = sz - raw_typed_pos;
 
         // FIX: This is causing a memory allocation issue, probably a buffer overrun
         // but not sure why
@@ -293,7 +274,8 @@ public:
 
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
-    bool reserve( size_type new_cap )
+    // NOTE: This is kind of a lie, because reallocate will call abort() for fixed allocators
+    bool reserve(size_type new_cap)
     {
         if(!impl().is_allocated())
             return impl().allocate(new_cap);
@@ -329,10 +311,14 @@ protected:
         // No additional bounds checking, we rely on ensure_additional_capacity
         // for all that.  Would be nicer to do it in one fell swoop though, ACID-style
 
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(r.increased_by.has_value())
             impl().size(r.starting_size + by_amount);
         else
             impl().size(r.starting_size + r.increased_by.error());
+#else
+        impl().size(r.starting_size + by_amount);
+#endif
 
         return r;
     }
@@ -571,8 +557,8 @@ public:
         // TODO: combine this with _append since it's mostly overlapping code
         grow_result r = grow(1);
 
-        // FIX: Do bounds checking
-        size_type current_size = r.starting_size;
+        // DEBT: Do bounds checking, though inherently we must do some within grow/ensure calls
+        const size_type current_size = r.starting_size;
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         impl().construct(current_size, std::forward<TArgs>(args)...);

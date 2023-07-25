@@ -20,7 +20,7 @@ namespace estd { namespace internal {
 // auto allocate/construct/free/destroy anything
 //
 // is_stateful = is this a stateful (instance) allocator or a global (singleton-style) allocator
-// has_size = does this allocator track size of the allocated item
+// has_size = does this allocator track size of the allocated item (false = we manually track it in this object)
 // is_singular = standard allocator behavior is to be able to allocate multiple items.  a singular allocator can only allocate one item
 // is_contiguous = true = normal behavior, false = alternative allocator behavior where locks
 //                 don't always provide entire range
@@ -39,13 +39,13 @@ template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular, true> :
         public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
-    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
+    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_type;
 
 public:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::allocator_traits allocator_traits;
-    typedef typename base_t::handle_type handle_type;
+    typedef typename base_type::allocator_type allocator_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::allocator_traits allocator_traits;
+    typedef typename base_type::handle_type handle_type;
 
 private:
     size_type m_size;
@@ -53,18 +53,18 @@ private:
 protected:
     void size(size_type n) { m_size = n; }
 
-    handle_descriptor_base(const handle_type& h) :
-            base_t(h),
-            m_size(0) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor_base(const handle_type& h) :
+        base_type(h),
+        m_size(0) {}
 
     template <class TAllocatorParameter>
     handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
-        base_t(p, h),
+        base_type(p, h),
         m_size(0)
     {}
 
     handle_descriptor_base(allocator_type& allocator, const handle_type& h, size_type initial_size = 0) :
-        base_t(allocator, h),
+        base_type(allocator, h),
         m_size(initial_size)
     {}
 
@@ -72,16 +72,16 @@ protected:
 public:
     size_type size() const { return m_size; }
 
-    bool allocate(size_type size)
+    bool allocate(size_type size)   // NOLINT
     {
         m_size = size;
-        return base_t::allocate(size);
+        return base_type::allocate(size);
     }
 
-    bool reallocate(size_type size)
+    bool reallocate(size_type size) // NOLINT
     {
         m_size = size;
-        return base_t::reallocate(size);
+        return base_type::reallocate(size);
     }
 };
 
@@ -105,7 +105,10 @@ public:
     handle_descriptor_base(TAllocatorParameter& a, const handle_type& h)
             : base_t(a, h) {}
 
-    size_type size() const { return base_t::get_allocator().size(base_t::handle()); }
+    ESTD_CPP_CONSTEXPR_RET size_type size() const
+    {
+        return base_t::get_allocator().size(base_t::handle());
+    }
 };
 
 

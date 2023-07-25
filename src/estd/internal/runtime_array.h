@@ -6,6 +6,7 @@
 #include "../algorithm.h"
 #include "../initializer_list.h"
 #include "iterator_standalone.h"
+#include "container/starts_with.h"
 
 #include <string.h>     // for access to memcpy
 
@@ -18,7 +19,10 @@ struct no_max_string_length_tag {};
 
 // base class for any 'allocated' array, even ones using a fixed allocator
 // which pushes the boundaries of what allocated even really means
-// importantly, this allocated_array doesn't provide for growing/shrinking the array
+// importantly, this allocated_array doesn't provide for growing/shrinking the array,
+// which means things like insert, append, erase are also not present.  Look to
+// dynamic array for that
+// TImpl is usually some flavor of estd::internal::impl::dynamic_array
 template <class TImpl>
 class allocated_array : 
 #ifdef ARDUINO
@@ -47,7 +51,6 @@ protected:
     static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
 
 public:
-
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
     value_type* lock(size_type pos = 0, size_type count = 0)
@@ -118,25 +121,16 @@ protected:
         const value_type* s = clock();
         const value_type* t = compare_to.clock();
 
-        size_type source_max = size();
-        size_type target_max = compare_to.size();
-
-        while(source_max-- && target_max--)
-            if(*s++ != *t++)
-            {
-                cunlock();
-                compare_to.cunlock();
-                return false;
-            }
+        bool r = starts_with_n(s, t, size(), compare_to.size());
 
         cunlock();
         compare_to.cunlock();
-        // if compare_to is longer than we are, then it's also a fail
-        return source_max != -1;
+
+        return r;
     }
 
 public:
-    allocated_array() {}
+    ESTD_CPP_DEFAULT_CTOR(allocated_array)
 
     template <class THelperParam>
     allocated_array(const THelperParam& p) :
@@ -279,12 +273,12 @@ public:
 
 
         // NOTE: Descrepency between doing a pointer-ish compare and a value compare
-        bool operator==(const iterator& compare_to) const
+        ESTD_CPP_CONSTEXPR_RET bool operator==(const iterator& compare_to) const
         {
             return current.h_exp() == compare_to.current.h_exp();
         }
 
-        bool operator!=(const iterator& compare_to) const
+        ESTD_CPP_CONSTEXPR_RET bool operator!=(const iterator& compare_to) const
         {
             return !(operator ==)(compare_to);
             //return current != compare_to.current;
@@ -312,7 +306,7 @@ public:
 
     typedef const iterator const_iterator;
 
-    size_type size() const { return m_impl.size(); }
+    ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
 
     allocator_type& get_allocator() const
     {

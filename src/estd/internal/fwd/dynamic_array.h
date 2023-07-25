@@ -19,6 +19,11 @@ namespace impl {
 template <class TAllocator, class TPolicy>
 struct dynamic_array;
 
+// TODO: Fixup name.  Specializer to reveal size of either
+// an explicitly-sized or null-terminated entity
+template <class TAllocator, bool null_terminated, bool size_equals_capacity>
+struct dynamic_array_length;
+
 
 }
 
