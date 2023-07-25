@@ -58,18 +58,7 @@ protected:
 public:
     static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
 
-    /*
-    typedef typename estd::conditional<
-        is_locking,
-        //allocator_traits::is_locking_exp,
-        typename allocator_type::iterator,
-        typename estd::internal::handle_iterator<
-            allocator_type,
-            traditional_accessor<value_type> > >::type it_test; */
-
-    typedef typename internal::handle_iterator<allocator_type, traditional_accessor<value_type> > it_test;
-
-    //typedef typename allocator_type::iterator it_test;
+    typedef typename allocator_traits::iterator it_test;
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public

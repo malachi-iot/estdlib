@@ -204,7 +204,9 @@ TEST_CASE("vector tests")
 
         //v.push_back(3);
 
-        REQUIRE(v.is_locking == false);
+        constexpr bool v1 = v.is_locking;
+
+        REQUIRE(v1 == false);
     }
     SECTION("vector front/back")
     {

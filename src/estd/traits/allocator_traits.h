@@ -11,6 +11,9 @@
 #include "../internal/container/handle_with_offset.h"
 #include "../allocators/tags.h"
 
+#include "../internal/container/traditional_accessor.h"
+#include "../internal/container/iterator.h"
+
 #include "fwd.h"
 
 namespace estd {
@@ -151,6 +154,11 @@ struct locking_allocator_traits<TAllocator, true>
     }
 
     static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
+
+    // Non standard, for scenarios in which a consumer specifically wants to treat
+    // a handle region as a container of T.  For locking types, they MUST provide
+    // an iterator type
+    typedef typename allocator_type::iterator iterator;
 };
 
 
@@ -202,6 +210,12 @@ struct locking_allocator_traits<TAllocator, false>
     }
 
     static CONSTEXPR handle_type invalid() { return NULLPTR; }
+
+    // Non standard, for scenarios in which a consumer specifically wants to treat
+    // a handle region as a container of T
+    typedef typename internal::handle_iterator<
+        allocator_type,
+        traditional_accessor<value_type> > iterator;
 };
 
 

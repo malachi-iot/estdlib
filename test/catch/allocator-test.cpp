@@ -187,6 +187,23 @@ TEST_CASE("allocator tests")
         // FIX: something is wrong here, this should work
         REQUIRE(internal::has_is_pinned_tag_exp_typedef<allocator_type>::value);
     }
+    SECTION("traits")
+    {
+        using traits = estd::allocator_traits<std::allocator<int> >;
+
+        REQUIRE(traits::is_contiguous_exp);
+
+        int v[] = { 0, 1, 2, 3 };
+
+        // DEBT: A tiny bit concerning since we lightly frown on turning a reference
+        // to a pointer to then do pointer math on.  Not terrible, but would like to avoid that
+        traits::iterator::accessor a(v[0]);
+        traits::iterator it(a);
+
+        ++it;
+
+        REQUIRE(*it == 1);
+    }
     SECTION("experimental")
     {
     }

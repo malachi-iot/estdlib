@@ -2,6 +2,7 @@
 
 #include <stdlib.h> // for size_t
 #include "../traits/allocator_traits.h"
+#include "../traits/fwd.h"
 #include "../internal/container/handle_with_offset.h"
 #ifdef FEATURE_STD_MEMORY
 #include <memory> // for std::allocator_traits and friends
@@ -114,22 +115,23 @@ struct experimental_std_allocator : public ::std::allocator<T>
 // semi-kludgey, a way to shoehorn in existing std::allocator using our extended
 // locking mechanism.  Eventually use type_traits + SFINAE to auto deduce non-
 // existing handle_type, etc.
-template<class T>
-struct allocator_traits< ::std::allocator<T> >
-        : public ::std::allocator_traits< ::std::allocator<T > >
+template <class T>
+struct allocator_traits<::std::allocator<T> > :
+    ::std::allocator_traits<::std::allocator<T> >,
+    estd::internal::locking_allocator_traits<::std::allocator<T>, false>
 {
     typedef ::std::allocator_traits< ::std::allocator<T > > base_t;
 
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::pointer pointer;
-    typedef typename base_t::pointer handle_type;
+    //typedef typename base_t::pointer handle_type;
     typedef typename base_t::value_type value_type;
     typedef typename base_t::size_type size_type;
     //typedef handle_type handle_with_offset;
-    typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
-    typedef handle_type handle_with_size;
+    //typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
+    //typedef handle_type handle_with_size;
 
-    static CONSTEXPR handle_type invalid() { return NULLPTR; }
+    //static CONSTEXPR handle_type invalid() { return NULLPTR; }
 
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     static CONSTEXPR bool is_stateful() { return false; }
@@ -142,6 +144,7 @@ struct allocator_traits< ::std::allocator<T> >
 #endif
 
     // SFINAE = eventually we can phase out this entire specialization for std::allocator
+    // NOTE: 25JUL23 SFINAE is pretty fiddly, so I think we might wanna keep these
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool has_size_exp = false;
     static CONSTEXPR bool is_singular_exp = false;
