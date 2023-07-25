@@ -190,7 +190,7 @@ protected:
     {
         ensure_total_size(len);
 
-        base_t::assign(buf, len);
+        base_type::assign(buf, len);
     }
 
 
@@ -232,8 +232,9 @@ protected:
     }
 
     template <class TForeignImpl>
-    dynamic_array(const allocated_array<TForeignImpl>& copy_from) :
-            base_t(copy_from) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(
+        const allocated_array<TForeignImpl>& copy_from) :
+        base_t(copy_from) {}
 
     /*
     dynamic_array(const dynamic_array& copy_from) :
@@ -244,17 +245,20 @@ protected:
     } */
 
 public:
-    dynamic_array() {}
+    ESTD_CPP_DEFAULT_CTOR(dynamic_array)
 
-    explicit dynamic_array(allocator_type& t) : base_t(t) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(allocator_type& t) :
+        base_type(t) {}
 
-    template <class THelperParam>
-    dynamic_array(const THelperParam& p) :
-            base_t(p) {}
+    // DEBT: a handle related compilation glitch occurs if we try to do perfect forwarding here
+    //ESTD_CPP_FORWARDING_CTOR(dynamic_array)
+    template <class Param1>
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(const Param1 p1) :
+        base_type(p1) {}
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-    dynamic_array(std::initializer_list<value_type> initlist)
-        : base_t(initlist) {}
+#if __cpp_initializer_lists
+    constexpr dynamic_array(std::initializer_list<value_type> initlist)
+        : base_type(initlist) {}
 #endif
 
     // TODO: iterate through and destruct elements
@@ -305,6 +309,9 @@ protected:
     grow_result grow(int by_amount)
     {
         grow_result r = ensure_additional_capacity(by_amount);
+
+        // No additional bounds checking, we rely on ensure_additional_capacity
+        // for all that.  Would be nicer to do it in one fell swoop though, ACID-style
 
         if(r.increased_by.has_value())
             impl().size(r.starting_size + by_amount);

@@ -116,29 +116,28 @@ public:
 protected:
     size_type m_size;
 
-    dynamic_array_length() :
-            m_size(0)
+    ESTD_CPP_CONSTEXPR_RET dynamic_array_length() : m_size(0)
     {}
 
 
 public:
 
-    bool empty(const handle_descriptor& hd) const
+    ESTD_CPP_CONSTEXPR_RET bool empty(const handle_descriptor& hd) const
     {
         return m_size == 0;
     }
 
-    bool empty(const allocator_type& a, const handle_type& h) const
+    ESTD_CPP_CONSTEXPR_RET bool empty(const allocator_type& a, const handle_type& h) const
     {
         return m_size == 0;
     }
 
-    size_type size(const TAllocator& a, const handle_type& h) const
+    ESTD_CPP_CONSTEXPR_RET size_type size(const TAllocator& a, const handle_type& h) const
     {
         return m_size;
     }
 
-    size_type size(const handle_descriptor& hd) const
+    ESTD_CPP_CONSTEXPR_RET size_type size(const handle_descriptor& hd) const
     {
         return m_size;
     }
