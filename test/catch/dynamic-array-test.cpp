@@ -63,6 +63,15 @@ TEST_CASE("dynamic array")
         const auto& v = *it;
 
         REQUIRE(v == 0);
+
+        int v2[] = { 10, 20, 30 };
+
+        da1_type::it_test::accessor a2(v2[0]);
+        da1_type::it_test it2(a2);
+
+        a2.h_exp() += 1;
+
+        REQUIRE(a2 == 20);
     }
     SECTION("overflow")
     {

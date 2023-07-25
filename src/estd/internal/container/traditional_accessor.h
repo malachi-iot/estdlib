@@ -54,7 +54,7 @@ struct traditional_accessor
     /*
     traditional_accessor& h_exp() { return *this; }
     const traditional_accessor& h_exp() const { return *this; }*/
-    const_pointer h_exp() const { return p; }
+    pointer& h_exp() { return p; }
 
     operator value_type&() { return *p; }
     explicit operator value_type&() const { return *p; }
@@ -73,11 +73,12 @@ struct traditional_accessor
         return *this;
     }
 
+    /*
     this_type& operator+=(long v)
     {
         p += v;
         return *this;
-    }
+    }   */
 
     bool operator==(const_reference& compare_to) const
     {
