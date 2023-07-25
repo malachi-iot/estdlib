@@ -184,7 +184,7 @@ TEST_CASE("priority-queue-test")
         estd::layer1::vector<int, 10> values2 = { 10, 50, 90, 30, 20, 0 };
         // FIX: begin2/end2 don't work with out make_heap/push_heap
         auto begin2 = values2.begin();
-        auto end2 = values2.end();
+        //auto end2 = values2.end();
         int* begin = values;
         int* end = values + sizeof(values) / sizeof(values[0]);
 
@@ -351,7 +351,7 @@ TEST_CASE("priority-queue-test")
             auto f = estd::find_if(pq.container().begin(), pq.container().end(),
                 [&](Dummy& v){ return v.value2 == d7.value2; });
 
-            REQUIRE((*f).val1 == 7);
+            REQUIRE(f->val1 == 7);
 
             pq.erase(*f);
         }

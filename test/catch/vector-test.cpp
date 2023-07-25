@@ -192,8 +192,10 @@ TEST_CASE("vector tests")
 
         auto it = std::find_if(v.begin(), v.end(), [](const complex& value) { return value.value == 3; });
 
-        REQUIRE((*it).value == 3);
-        REQUIRE((*it).s == test::str_hello);
+        const complex& v2 = *it;
+
+        REQUIRE(v2.value == 3);
+        REQUIRE(v2.s == test::str_hello);
     }
     SECTION("vector with actual default std::allocator")
     {
@@ -296,8 +298,8 @@ TEST_CASE("vector tests")
 
         auto it = v.begin();
 
-        REQUIRE((*it++).val == 0);
-        REQUIRE((*it++).val == 5);
+        REQUIRE((it++)->val == 0);
+        REQUIRE((it++)->val == 5);
         REQUIRE(it == v.end());
 
         SECTION("empty() call testing")
@@ -326,7 +328,10 @@ TEST_CASE("vector tests")
             v.emplace_back(f);
 
             for(auto _f : v)
+            {
                 _f(5);
+                //_f.lock()(5);
+            }
 
             REQUIRE(value == 10);
         }

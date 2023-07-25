@@ -314,17 +314,22 @@ public:
             //return current != compare_to.current;
         }
 
-        value_type& operator*()
+        /*
+        handle_accessor operator*()
         {
             // TODO: consolidate with InputIterator behavior from iterators/list.h
-            return lock();
+            return current;
         }
 
-        const value_type& operator*() const
+        const handle_accessor operator*() const
         {
-            return lock();
-        }
+            return current;
+        }   */
 
+        value_type& operator*() { return current.lock(); }
+        const value_type& operator*() const { return current.clock(); }
+
+        const value_type* operator->() const { return &current.clock(); }
 
         this_type& operator=(const this_type& copy_from)
         {
@@ -505,4 +510,37 @@ class runtime_array
 public:
 };
 
-}}
+}
+
+/*
+template <class Impl>
+void swap(typename internal::allocated_array<Impl>::handle_accessor lhs,
+    typename internal::allocated_array<Impl>::handle_accessor rhs)
+{
+    typedef typename internal::allocated_array<Impl>::value_type& reference;
+
+    reference l = lhs.lock();
+    reference r = rhs.lock();
+
+    swap(l, r);
+
+    rhs.unlock();
+    lhs.unlock();
+}   */
+
+template <class Allocator>
+void swap(typename internal::accessor<Allocator> lhs,
+    typename internal::accessor<Allocator> rhs)
+{
+    typedef typename Allocator::value_type& reference;
+
+    reference l = lhs.lock();
+    reference r = rhs.lock();
+
+    swap(l, r);
+
+    lhs.unlock();
+    rhs.unlock();
+}
+
+}

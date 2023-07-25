@@ -257,8 +257,8 @@ TEST_CASE("experimental: memory pool v1 tests")
         // Skip these size checks if not in ideal scenario, and all these
         // tests are phasing out anyhow
 #if ESTD_ARCH_BITNESS == 64
-        int sz = sizeof(pool_type::item);
-        int expected_sz = sizeof(int) + sizeof(void*) + 4; // extra 4 because of padding on 64-bit gnu
+        unsigned sz = sizeof(pool_type::item);
+        unsigned expected_sz = sizeof(int) + sizeof(void*) + 4; // extra 4 because of padding on 64-bit gnu
 
         REQUIRE(sz == expected_sz);
 

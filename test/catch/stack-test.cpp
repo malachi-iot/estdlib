@@ -27,7 +27,7 @@ TEST_CASE("stack")
 
         int counter = 0;
 
-        for(auto& i : s)
+        for(const auto& i : s)
         {
             REQUIRE(++counter == i);
         }
