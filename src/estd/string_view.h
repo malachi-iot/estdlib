@@ -5,6 +5,8 @@
 
 namespace estd {
 
+#define FEATURE_ESTD_STRING_VIEW_UPGRADED 1
+
 template <class CharT,
           class Traits,
           // NOTE: Because this is marked as a 'const' string policy, resize-ish operations
@@ -13,6 +15,13 @@ template <class CharT,
           class Policy
           >
 class basic_string_view :
+#if FEATURE_ESTD_STRING_VIEW_UPGRADED
+    public internal::basic_string<
+        layer3::allocator<const CharT, typename Policy::size_type>, Policy>
+{
+    typedef internal::basic_string<
+        layer3::allocator<const CharT, typename Policy::size_type>, Policy> base_t;
+#else
         public basic_string<
             const CharT,
             Traits,
@@ -29,27 +38,30 @@ class basic_string_view :
 #else
         internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
 #endif
-        Policy> base_t;
 
-    typedef typename base_t::allocator_type allocator_type;
+        Policy> base_t;
+#endif
+
+    typedef base_t base_type;
+    typedef typename base_type::allocator_type allocator_type;
     typedef typename allocator_type::InitParam init_param_t;
 
 public:
-    typedef typename base_t::size_type size_type;
+    typedef typename base_type::size_type size_type;
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
-    basic_string_view() : base_t(init_param_t(NULLPTR, 0)) {}
+    basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
 
     basic_string_view(const CharT* s, size_type count) :
-        base_t(init_param_t(s, count))
+        base_type(init_param_t(s, count))
     {
 
     }
 
     // C-style null terminated string
     basic_string_view(const CharT* s) :
-        base_t(init_param_t(s, strlen(s)))
+        base_type(init_param_t(s, strlen(s)))
     {
 
     }

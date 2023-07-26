@@ -26,6 +26,8 @@ public:
     //typedef typename allocator_type::const_pointer const_pointer;
     typedef const value_type* const_pointer;
 
+    static CONSTEXPR size_type npos = (size_type) -1;
+
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string2)
 

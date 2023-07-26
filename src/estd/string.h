@@ -92,7 +92,7 @@ public:
 
     typedef typename allocator_type::handle_type handle_type;
 
-    static CONSTEXPR size_type npos = (size_type) -1;
+    static CONSTEXPR size_type npos = base_type::npos;
 
     basic_string& erase(size_type index = 0, size_type count = npos)
     {
@@ -602,9 +602,10 @@ bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft,
     return lhs.compare(rhs) == 0;
 } */
 
-template <class CharT, class StringTraits, class Alloc>
-bool operator ==( const basic_string<CharT, typename StringTraits::char_traits, Alloc, StringTraits>& lhs,
-                  typename estd::add_const<CharT>::type* rhs)
+template <class Impl>
+ESTD_CPP_CONSTEXPR_RET bool operator ==(
+    const internal::basic_string2<Impl>& lhs,
+    typename internal::basic_string2<Impl>::const_pointer rhs)
 {
     return lhs.compare(rhs) == 0;
 }
