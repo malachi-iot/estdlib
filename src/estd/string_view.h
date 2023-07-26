@@ -16,11 +16,16 @@ template <class CharT,
           >
 class basic_string_view :
 #if FEATURE_ESTD_STRING_VIEW_UPGRADED
-    public internal::basic_string<
-        layer3::allocator<const CharT, typename Policy::size_type>, Policy>
+    //public internal::basic_string<
+        //layer3::allocator<const CharT, typename Policy::size_type>, Policy>
+    public internal::basic_string2<internal::impl::allocated_array<
+            layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
 {
-    typedef internal::basic_string<
-        layer3::allocator<const CharT, typename Policy::size_type>, Policy> base_t;
+    //typedef internal::basic_string<
+        //layer3::allocator<const CharT, typename Policy::size_type>, Policy>
+    typedef internal::basic_string2<internal::impl::allocated_array<
+        layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
+        base_t;
 #else
         public basic_string<
             const CharT,
@@ -71,7 +76,7 @@ public:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         = default;
 #else
-        : base_t((base_t&)other)
+        : base_type((base_t&)other)
     {
     }
 #endif
@@ -85,7 +90,7 @@ public:
         // of fixed allocator
         //base_t::helper.reallocate(base_t::capacity() - n);
         //base_t::helper.size(base_t::helper.size() - n);
-        allocator_type& a = base_t::get_allocator();
+        allocator_type& a = base_type::get_allocator();
 
         a.set_size_exp(true, a.max_size() - n);
     }
@@ -93,7 +98,7 @@ public:
 
     void remove_prefix(size_type n)
     {
-        allocator_type& a = base_t::get_allocator();
+        allocator_type& a = base_type::get_allocator();
 
         a.adjust_offset_exp(true, n);
     }

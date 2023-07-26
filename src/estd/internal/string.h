@@ -41,7 +41,7 @@ protected:
         // gets here if size matches
         const_pointer raw = base_type::clock();
 
-        int result = traits_type::compare(raw, s, raw_size);
+        const int result = traits_type::compare(raw, s, raw_size);
 
         base_type::cunlock();
 
@@ -69,6 +69,7 @@ public:
         return result;
     }
 
+    // compare to a C-style string
     int compare(const_pointer s) const
     {
         return compare(s, strlen(s));

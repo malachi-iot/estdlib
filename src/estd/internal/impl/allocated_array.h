@@ -4,16 +4,17 @@
 
 namespace estd { namespace internal { namespace impl {
 
-template <class TAllocator>
+template <class TAllocator, class Policy = monostate>
 struct allocator_array;
 
-template <class TAllocator>
+template <class TAllocator, class Policy = monostate>
 struct allocated_array : estd::handle_descriptor<TAllocator>
 {
     typedef estd::handle_descriptor<TAllocator> base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::allocator_traits allocator_traits;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
+    typedef Policy policy_type;
 
     typedef typename base_t::size_type size_type;
 
