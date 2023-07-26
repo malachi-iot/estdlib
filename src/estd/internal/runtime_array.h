@@ -67,14 +67,14 @@ public:
         return &m_impl.lock(pos, count);
     }
 
-    void unlock()
-    {
-        m_impl.unlock();
-    }
-
     const value_type* clock(size_type pos = 0, size_type count = 0) const
     {
         return &m_impl.clock(pos, count);
+    }
+
+    void unlock()
+    {
+        m_impl.unlock();
     }
 
     void cunlock() const

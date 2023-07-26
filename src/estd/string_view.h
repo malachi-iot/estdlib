@@ -110,6 +110,10 @@ public:
             size_type pos = 0,
             size_type count = base_t::npos) const
     {
+        // DEBT: Use underlying data()/clock(), although it's noteworthy that
+        // this seemingly clumsy approach *might* work for private/moveable basic_string_view
+        // with some minor adjustments
+
         basic_string_view copy(*this);
 
         copy.remove_prefix(pos);
