@@ -304,7 +304,15 @@ struct private_array_base :
     };
 #endif
 
-    constexpr iterator begin() const { return { data() }; }
+    constexpr iterator create_iterator(size_t pos) const
+    {
+        return iterator(accessor(data(pos)));
+    }
+
+    constexpr iterator begin() const
+    {
+        return create_iterator(0);
+    }
 
     accessor operator[](size_t index)
     {
@@ -313,14 +321,14 @@ struct private_array_base :
 };
 
 
-template<size_t N>
-struct private_array<estd::internal::impl::PgmPolicy<char,
-    internal::impl::PgmPolicyType::String, N>> :
-    private_array_base<char, N>
+// Null terminated PGM space string core
+template <class T, size_t N>
+struct pgm_array_string : private_array_base<T, N>
 {
-    using base_type = private_array_base<char, N>;
+    using base_type = private_array_base<T, N>;
 
     using typename base_type::size_type;
+    using typename base_type::pointer;
     using typename base_type::const_pointer;
     using typename base_type::value_type;
     using typename base_type::accessor;
@@ -328,7 +336,7 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
 
     using const_iterator = iterator;
 
-    constexpr private_array(const_pointer data) : base_type(data) {}
+    constexpr pgm_array_string(const_pointer data) : base_type(data) {}
 
     size_type size() const
     {
@@ -339,15 +347,14 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
 
     constexpr iterator end() const
     {
-        return { base_type::data(size()) };
+        return base_type::create_iterator(size());
     }
 
     // copies without bounds checking
-    void copy_ll(char* dest, size_type count, size_type pos = 0) const
+    void copy_ll(value_type* dest, size_type count, size_type pos = 0) const
     {
 #if FEATURE_ESTD_PGM_ALLOCATOR
-        accessor a(base_type::data(pos));
-        iterator source(a);
+        iterator source = base_type::create_iterator(pos);
 #else
         //iterator source(base_type::data_ + pos);
         iterator source(base_type::data(pos));
@@ -356,7 +363,7 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
         estd::copy_n(source, count, dest);
     }
 
-    size_type copy(char* dest, size_type count, size_type pos = 0) const
+    size_type copy(value_type* dest, size_type count, size_type pos = 0) const
     {
         const size_type _end = estd::min(count, size());
         copy_ll(dest, _end, pos);
@@ -398,15 +405,26 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
         return internal::starts_with(base_type::begin(), compare_to);
     }
 
-
     // Effectively a shallow copy, since pgm_string largely represents a pointer
     // wrapper
-    private_array& operator=(const private_array& copy_from)
+    pgm_array_string& operator=(const pgm_array_string& copy_from)
     {
         base_type::data() = copy_from.data();
         return *this;
     }
 };
+
+template<size_t N>
+struct private_array<estd::internal::impl::PgmPolicy<char,
+    internal::impl::PgmPolicyType::String, N>> :
+    pgm_array_string<char, N>
+{
+    using base_type = pgm_array_string<char, N>;
+
+    constexpr private_array(typename base_type::const_pointer p) :
+        base_type(p) {}
+};
+
 
 }
 
@@ -436,6 +454,12 @@ struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
         base_type(reinterpret_cast<const char*>(s))
     {}
 #endif
+};
+
+template <size_t N>
+struct basic_string2<experimental::pgm_array_string<char, N> >
+{
+
 };
 
 
@@ -477,7 +501,7 @@ using pgm_string = basic_pgm_string<>;
 // PGM space directly
 template <size_t N>
 constexpr arduino_ostream& operator <<(arduino_ostream& out,
-    const basic_pgm_string<N>& s)
+    const experimental::pgm_array_string<char, N>& s)
 {
     return out << reinterpret_cast<const __FlashStringHelper*>(s.data());
 }

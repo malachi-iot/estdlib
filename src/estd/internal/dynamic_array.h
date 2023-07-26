@@ -94,7 +94,7 @@ public:
         return base_type::lock(pos, count);
     }
 
-    void unlock() { return base_t::unlock(); }
+    void unlock() { return base_type::unlock(); }
 
 protected:
     // Use this instead of 'success' ptr
@@ -229,7 +229,7 @@ protected:
     template <class TForeignImpl>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(
         const allocated_array<TForeignImpl>& copy_from) :
-        base_t(copy_from) {}
+        base_type(copy_from) {}
 
     /*
     dynamic_array(const dynamic_array& copy_from) :
