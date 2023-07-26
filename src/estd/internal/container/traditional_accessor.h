@@ -23,6 +23,8 @@ private:
 public:
     typedef pointer& offset_type;
     typedef const pointer& const_offset_type;
+    typedef reference locked_type;
+    typedef const_reference const_locked_type;
 
     template <class TAllocator>
     ESTD_CPP_CONSTEXPR_RET traditional_accessor(TAllocator& a,

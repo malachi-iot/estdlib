@@ -2,6 +2,8 @@
 
 #include <estd/internal/fwd/variant.h>
 #include <estd/internal/dynamic_array.h>
+#include <estd/internal/container/locking_accessor.h>
+#include <estd/internal/container/iterator.h>
 #include "../string.h"
 #include <estd/ostream.h>
 
@@ -13,10 +15,13 @@ namespace internal {
 
 namespace impl {
 
-template <size_t N>
-struct pgm_allocator2 : estd::layer2::allocator<const char, N>
+// NOTE: None of the underlying lock mechanisms are gonna work here, so
+// we might be better off with a pure manual allocator like we started
+// with with pgm_allocator
+template <class T, size_t N>
+struct pgm_allocator2 : estd::layer2::allocator<const T, N>
 {
-    using base_type = estd::layer2::allocator<const char, N>;
+    using base_type = estd::layer2::allocator<const T, N>;
 
     ESTD_CPP_FORWARDING_CTOR(pgm_allocator2)
 
@@ -134,6 +139,33 @@ uint32_t pgm_read<uint32_t>(const void* address)
 #define FEATURE_ESTD_PGM_ALLOCATOR 1
 
 
+template <class T, bool near = true>
+class pgm_accessor_impl
+{
+    ESTD_CPP_STD_VALUE_TYPE(T);
+
+private:
+    const_pointer p;
+
+public:
+    constexpr explicit pgm_accessor_impl(const_pointer p) : p{p}   {}
+
+    typedef const_pointer& offset_type;
+    typedef const const_pointer& const_offset_type;
+    typedef value_type locked_type;
+    typedef value_type const_locked_type;
+
+    offset_type offset() { return p; }
+    const_offset_type offset() const { return p; }
+
+    locked_type lock() { return pgm_read<T, near>(p); }
+    const_locked_type lock() const { return pgm_read<T, near>(p); }
+    static void unlock() {}
+};
+
+template <class T, bool near = true>
+using pgm_accessor2 = estd::internal::locking_accessor<pgm_accessor_impl<T, near> >;
+
 template <class T>
 class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
 {
@@ -189,10 +221,14 @@ struct private_array_base :
     using typename base_type::const_pointer;
     using base_type::value_type;
 
+    // DEBT: Dummy value so that regular estd::basic_string gets its
+    // dependency satisfied
+    using append_result = bool;
+
 #if FEATURE_ESTD_PGM_ALLOCATOR
+    typedef internal::impl::pgm_allocator2<T, N> allocator_type;
     // data_ was working, but let's dogfood a bit
-    internal::impl::pgm_allocator2<N> alloc;
-    //using alloc_type = internal::impl::pgm_allocator2<N>;
+    allocator_type alloc;
 
     ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type pos = 0) const
     {
@@ -248,6 +284,11 @@ struct private_array_base :
             return *this;
         }
     };
+
+#if FEATURE_ESTD_PGM_ALLOCATOR
+    using iterator2 = estd::internal::handle_iterator<
+        allocator_type, pgm_accessor2<T> >;
+#endif
 
     constexpr iterator begin() const { return { data() }; }
 

@@ -12,15 +12,23 @@ struct locking_accessor
     typedef Impl impl_type;
     typedef locking_accessor this_type;
 
-    // This is type for moving pointer/handle around (for iterator use)
-    typedef typename impl_type::offset_type offset_type;
-    typedef typename impl_type::const_offset_type const_offset_type;
     typedef typename impl_type::value_type value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
+    // This is type for moving pointer/handle around (for iterator use)
+    typedef typename impl_type::offset_type offset_type;
+    typedef typename impl_type::const_offset_type const_offset_type;
+
+    // Usually this is 'reference' and 'const_reference' respectively, but certain scenarios
+    // (such as AVR PGM) these will be 'value_type'
+    typedef typename impl_type::locked_type locked_type;
+    typedef typename impl_type::const_locked_type const_locked_type;
+
+private:
     impl_type impl_;
 
+public:
     // DEBT: Should be something like 'handle_type', not 'reference'
     //ESTD_CPP_CONSTEXPR_RET EXPLICIT locking_accessor(reference r) : impl_(r) {}
     template <class ...Args>
@@ -30,8 +38,8 @@ struct locking_accessor
     offset_type h_exp() { return impl_.offset(); }
     const_offset_type h_exp() const { return impl_.offset(); }
 
-    reference lock() { return impl_.lock(); }
-    const_reference clock() const { return impl_.lock(); }
+    locked_type lock() { return impl_.lock(); }
+    const_locked_type clock() const { return impl_.lock(); }
     void unlock() { return impl_.unlock(); }
     void cunlock() const { return impl_.unlock(); }
 
@@ -41,8 +49,8 @@ struct locking_accessor
     const_reference operator->() const { return clock(); }
 
     // DEBT: Leaves unlocked!
-    operator reference() { return lock(); }
-    explicit operator reference() const { return lock(); }
+    operator locked_type() { return lock(); }
+    explicit operator const_locked_type() const { return lock(); }
 
     this_type& operator=(const value_type& copy_from)
     {

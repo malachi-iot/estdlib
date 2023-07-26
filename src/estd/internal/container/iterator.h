@@ -33,9 +33,11 @@ public:
     typedef value_type& reference;
     // DEBT: estd-ize this tag, aliasing ::std ones when possible
     typedef ::std::bidirectional_iterator_tag iterator_category;
+    typedef typename accessor::locked_type locked_type;
+    typedef typename accessor::const_locked_type const_locked_type;
 
-    value_type& lock() { return current.lock(); }
-    const value_type& lock() const { return current.clock(); }
+    locked_type lock() { return current.lock(); }
+    const_locked_type lock() const { return current.clock(); }
     void unlock() { current.unlock(); }
 
 
@@ -132,7 +134,7 @@ public:
     } */
 
 
-    // NOTE: Descrepency between doing a pointer-ish compare and a value compare
+    // NOTE: Discrepancy between doing a pointer-ish compare and a value compare
     ESTD_CPP_CONSTEXPR_RET bool operator==(const this_type& compare_to) const
     {
         return current.h_exp() == compare_to.current.h_exp();
@@ -156,15 +158,18 @@ public:
         return current;
     }   */
 
-    value_type& operator*() { return current.lock(); }
-    const value_type& operator*() const { return current.clock(); }
+    // TODO: In the future, we may want to return accessor here directly to further defer
+    // lock/unlock operation.  For now, we have no true locking data stores.
+
+    locked_type operator*() { return current.lock(); }
+    const_locked_type operator*() const { return current.clock(); }
 
     const value_type* operator->() const { return &current.clock(); }
 
     this_type& operator=(const this_type& copy_from)
     {
-        //current = copy_from.current;
-        new (&current) accessor(copy_from.current);
+        current = copy_from.current;
+        //new (&current) accessor(copy_from.current);
         return *this;
     }
 };
