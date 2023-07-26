@@ -33,6 +33,12 @@ struct pgm_allocator2 : estd::layer2::allocator<const T, N>
     {
         return base_type::data(offset);
     }
+
+    /* Basically ready, just need to move pgm_accessor2 upwards
+     * so this can get access
+    using iterator = estd::internal::locking_iterator<
+        pgm_allocator2, pgm_accessor2<T>,
+        estd::internal::locking_iterator_modes::ro >;   */
 };
 
 struct pgm_allocator
@@ -113,9 +119,15 @@ template <typename T, bool near = true>
 T pgm_read(const void* address);
 
 template <>
-char pgm_read<char>(const void* address)
+char pgm_read<char, true>(const void* address)
 {
     return pgm_read_byte_near(address);
+}
+
+template <>
+char pgm_read<char, false>(const void* address)
+{
+    return pgm_read_byte_far(address);
 }
 
 template <>
@@ -140,7 +152,7 @@ uint32_t pgm_read<uint32_t>(const void* address)
 
 
 template <class T, bool near = true>
-class pgm_accessor_impl
+struct pgm_accessor_impl
 {
     ESTD_CPP_STD_VALUE_TYPE(T);
 
@@ -252,7 +264,13 @@ struct private_array_base :
 
 #endif
 
-    using accessor = pgm_accessor<char>;
+#if FEATURE_ESTD_PGM_ALLOCATOR
+    using accessor = pgm_accessor2<T>;
+    using iterator = estd::internal::locking_iterator<
+        allocator_type, pgm_accessor2<T>,
+        estd::internal::locking_iterator_modes::ro >;
+#else
+    using accessor = pgm_accessor<T>;
 
     struct iterator : accessor
     {
@@ -262,33 +280,28 @@ struct private_array_base :
 
         iterator& operator++()
         {
-            ++p;
+            ++accessor::p;
             return *this;
         }
 
         accessor operator++(int)
         {
-            accessor temp{p};
-            ++p;
+            accessor temp{accessor::p};
+            ++accessor::p;
             return temp;
         }
 
         constexpr iterator operator+(int adder) const
         {
-            return { p + adder };
+            return { accessor::p + adder };
         }
 
         iterator& operator+=(int adder)
         {
-            p += adder;
+            accessor::p += adder;
             return *this;
         }
     };
-
-#if FEATURE_ESTD_PGM_ALLOCATOR
-    using iterator2 = estd::internal::locking_iterator<
-        allocator_type, pgm_accessor2<T>,
-        estd::internal::locking_iterator_modes::ro >;
 #endif
 
     constexpr iterator begin() const { return { data() }; }
@@ -310,6 +323,7 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
     using typename base_type::size_type;
     using typename base_type::const_pointer;
     using typename base_type::value_type;
+    using typename base_type::accessor;
     using typename base_type::iterator;
 
     using const_iterator = iterator;
@@ -331,8 +345,13 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
     // copies without bounds checking
     void copy_ll(char* dest, size_type count, size_type pos = 0) const
     {
+#if FEATURE_ESTD_PGM_ALLOCATOR
+        accessor a(base_type::data(pos));
+        iterator source(a);
+#else
         //iterator source(base_type::data_ + pos);
         iterator source(base_type::data(pos));
+#endif
 
         estd::copy_n(source, count, dest);
     }
