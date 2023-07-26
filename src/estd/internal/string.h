@@ -6,75 +6,70 @@
 
 namespace estd { namespace internal {
 
-// DEBT: Get some c++20 concept going for Policy, and also document it
-// DEBT: Pretty sure I'd like Allocator wrapped up into policy too
-template <class Allocator, class Policy>
-class basic_string : public internal::dynamic_array<internal::impl::dynamic_array<Allocator, Policy> >
+// DEBT: Get some c++20 concept going for Policy & Impl, and also document it
+// DEBT: Clean up name - artifact of splitting this out from legacy non-impl flavor.
+// if all works out, internal::basic_string2 will become detail::basic_string
+template <class Impl>
+class basic_string2 : public internal::dynamic_array<Impl>
 {
 protected:
-    typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, Policy> > base_type;
+    typedef internal::dynamic_array<Impl> base_type;
 
 public:
-    typedef Allocator allocator_type;
+    typedef typename base_type::allocator_type  allocator_type;
     typedef typename base_type::size_type size_type;
+    typedef typename base_type::impl_type::policy_type policy_type;
     typedef typename allocator_type::value_type value_type;
-    typedef typename Policy::char_traits traits_type;
+    typedef typename policy_type::char_traits traits_type;
     typedef typename allocator_type::pointer pointer;
     // DEBT: Get this from someone's traits
     //typedef typename allocator_type::const_pointer const_pointer;
     typedef const value_type* const_pointer;
 
 protected:
-    ESTD_CPP_FORWARDING_CTOR(basic_string)
+    ESTD_CPP_FORWARDING_CTOR(basic_string2)
 
-public:
-    ESTD_CPP_DEFAULT_CTOR(basic_string)
-
-    template <class TImpl>
-    EXPLICIT basic_string(const internal::allocated_array<TImpl>& copy_from) :
-        base_type(copy_from) {}
-
-    size_type length() const { return base_type::size(); }
-
-    template <class TImpl>
-    int compare(const internal::dynamic_array<TImpl>& str) const
+    int compare(const_pointer s, size_type s_size) const
     {
         size_type raw_size = base_type::size();
-        size_type s_size = str.size();
 
         if(raw_size < s_size) return -1;
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
         const_pointer raw = base_type::clock();
-        const_pointer s = str.clock();
 
         int result = traits_type::compare(raw, s, raw_size);
 
         base_type::cunlock();
 
-        str.cunlock();
+        return result;
+    }
+
+public:
+    ESTD_CPP_DEFAULT_CTOR(basic_string2)
+
+    template <class TImpl>
+    EXPLICIT basic_string2(const internal::allocated_array<TImpl>& copy_from) :
+        base_type(copy_from) {}
+
+    size_type length() const { return base_type::size(); }
+
+    template <class TImpl>
+    int compare(const internal::allocated_array<TImpl>& a) const
+    {
+        // NOTE: Underlying compare never pays attention to null termination,
+        // so we are safe comparing against a non-string here
+        
+        int result = compare(a.clock(), a.size());
+        a.cunlock();
 
         return result;
     }
 
     int compare(const_pointer s) const
     {
-        size_type raw_size = base_type::size();
-        size_type s_size = strlen(s);
-
-        if(raw_size < s_size) return -1;
-        if(raw_size > s_size) return 1;
-
-        // gets here if size matches
-        const_pointer raw = base_type::clock();
-
-        int result = traits_type::compare(raw, s, raw_size);
-
-        base_type::cunlock();
-
-        return result;
-
+        return compare(s, strlen(s));
     }
 
 
@@ -99,5 +94,16 @@ public:
         return base_type::starts_with(compare_to);
     }
 };
+
+template <class Allocator, class Policy>
+class basic_string : public basic_string2<internal::impl::dynamic_array<Allocator, Policy> >
+{
+protected:
+    typedef basic_string2<internal::impl::dynamic_array<Allocator, Policy> > base_type;
+
+public:
+    ESTD_CPP_FORWARDING_CTOR(basic_string)
+};
+
 
 }}

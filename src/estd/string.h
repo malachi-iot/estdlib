@@ -163,14 +163,13 @@ public:
     template <class TForeignImpl>
     basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)   // NOLINT
     {
-        // DEBT: Sloppy
-        base_t::base_type::operator =(copy_from);
+        base_type::assign(copy_from);
         return *this;
     }
 
     basic_string& operator=(const_pointer s)
     {
-        base_t::assign(s, strlen(s));
+        base_type::assign(s, strlen(s));
         return *this;
     }
 };

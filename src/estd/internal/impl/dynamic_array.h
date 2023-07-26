@@ -416,6 +416,8 @@ struct dynamic_array : public
     dynamic_array(const TAllocatorParam& p) : base_t(p) {}
 
     ESTD_CPP_DEFAULT_CTOR(dynamic_array)
+
+    typedef TPolicy policy_type;
 };
 #else
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback

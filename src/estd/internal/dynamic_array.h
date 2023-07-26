@@ -51,7 +51,8 @@ namespace internal {
 /// Base class for managing expanding/contracting arrays
 /// Accounts for lock/unlock behaviors. Used for vector and string
 /// @tparam TImpl typically estd::internal::impl::dynamic_array.  Abstracts away allocator-specific behaviors
-/// @remarks Kind of a superset of vector
+/// @remarks Kind of a superset of vector.
+/// EXPERIMENTAL: specializations via impl MIGHT be read/only i.e. not sizeable
 template <class TImpl>
 class dynamic_array : public allocated_array<TImpl>
 {
@@ -524,13 +525,12 @@ public:
     }
 #endif
 
-    template <class TForeignImpl>
-    dynamic_array& operator=(const allocated_array<TForeignImpl>& copy_from)
+    template <class Impl2>
+    void assign(const allocated_array<Impl2>& copy_from)
     {
         ensure_total_size(copy_from.size());
         copy_from.copy(lock(), capacity());
         unlock();
-        return *this;
     }
 
 
