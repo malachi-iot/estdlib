@@ -213,9 +213,10 @@ struct locking_allocator_traits<TAllocator, false>
 
     // Non standard, for scenarios in which a consumer specifically wants to treat
     // a handle region as a container of T
-    typedef typename internal::handle_iterator<
+    typedef typename internal::locking_iterator<
         allocator_type,
-        traditional_accessor<value_type> > iterator;
+        traditional_accessor<value_type>,
+        internal::locking_iterator_modes::shim> iterator;
 };
 
 

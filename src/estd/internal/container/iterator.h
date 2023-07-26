@@ -5,6 +5,29 @@
 
 namespace estd { namespace internal {
 
+struct locking_iterator_modes
+{
+    enum _
+    {
+        /// read-only: lock is required (& automatically performed), but unlock isn't.  data is implicitly always pinned
+        ro,
+        /// locking is just a formmality and resolves to a pointer dereference.
+        /// unlock is a noop and is treated as such
+        shim,
+        /// implicit casting to reference is disabled.  Only explicit lock() call reveals reference
+        _explicit,
+        /// iterator locks and unlocks as it comes and goes from scope
+        auto_instance,
+        /// iterator locks and unlocks per element it iterates over
+        auto_increment
+    };
+};
+
+
+template <class Allocator, locking_iterator_modes::_>
+struct locking_iterator_base {};
+
+
 // Iterator for handle accessor types:
 // - traditional_iterator
 // - accessor_shared
@@ -12,10 +35,11 @@ namespace estd { namespace internal {
 // - lock() / unlock() method
 // - h_exp() access to pointer-like (for address manipulation only)
 // Handle accessors attempt to delegate control of locking/pinning to itself
-template <class Allocator, class Accessor>
-class handle_iterator
+template <class Allocator, class Accessor,
+          locking_iterator_modes::_ mode = locking_iterator_modes::shim>
+class locking_iterator : public locking_iterator_base<Allocator, mode>
 {
-    typedef handle_iterator this_type;
+    typedef locking_iterator this_type;
 
 public:
     typedef Allocator allocator_type;
@@ -41,15 +65,15 @@ public:
     void unlock() { current.unlock(); }
 
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_iterator(const accessor& a) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT locking_iterator(const accessor& a) :
         current(a)
     {
 
     }
 
-    handle_iterator(const this_type& copy_from) : current(copy_from.current) {}
+    locking_iterator(const this_type& copy_from) : current(copy_from.current) {}
 
-    ~handle_iterator()
+    ~locking_iterator()
     {
         // FIX: not so great.  It might be passable, though not recommended,
         // to unlock an alread unlocked value.  But it's less certain what

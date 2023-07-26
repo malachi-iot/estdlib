@@ -286,8 +286,9 @@ struct private_array_base :
     };
 
 #if FEATURE_ESTD_PGM_ALLOCATOR
-    using iterator2 = estd::internal::handle_iterator<
-        allocator_type, pgm_accessor2<T> >;
+    using iterator2 = estd::internal::locking_iterator<
+        allocator_type, pgm_accessor2<T>,
+        estd::internal::locking_iterator_modes::ro >;
 #endif
 
     constexpr iterator begin() const { return { data() }; }

@@ -80,7 +80,7 @@ struct single_allocator_base
 
     // For scenarios where someone wishes to specifically treat this allocated
     // item as a container of T
-    typedef handle_iterator<
+    typedef locking_iterator<
         single_allocator_base,
         traditional_accessor<value_type> > iterator;
 

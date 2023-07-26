@@ -27,10 +27,10 @@ public:
 
     typedef estd::internal::handle_with_offset_raw<pointer> handle_with_offset;
     typedef T& accessor;
-    typedef estd::internal::handle_iterator<
+    typedef estd::internal::locking_iterator<
     	_allocator,
-    	estd::internal::traditional_accessor<value_type>
-    	> iterator;
+        estd::internal::traditional_accessor<value_type> >
+        iterator;
 
     // primarily for subscript/array operations
     class handle_with_offset_old
