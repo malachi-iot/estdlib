@@ -124,11 +124,13 @@ char pgm_read<char, true>(const void* address)
     return pgm_read_byte_near(address);
 }
 
+#ifdef __AVR_HAVE_ELPM__
 template <>
 char pgm_read<char, false>(const void* address)
 {
     return pgm_read_byte_far(address);
 }
+#endif
 
 template <>
 uint16_t pgm_read<uint16_t>(const void* address)
@@ -149,6 +151,8 @@ uint32_t pgm_read<uint32_t>(const void* address)
 // Dogfooding in allocator.  So far it just seems to make it more complicated,
 // but a feeling tells me this will be useful
 #define FEATURE_ESTD_PGM_ALLOCATOR 1
+
+// TODO: Use __WITH_AVRLIBC__ in features area
 
 
 template <class T, bool near = true>
