@@ -2,6 +2,8 @@
 
 Document v0.1
 
+NOT referring to c++20 concepts feature
+
 # Allocators
 
 `estd` builds on regular std allocators concept and adds a few notions:
