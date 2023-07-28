@@ -115,8 +115,8 @@ public:
     }
 
 
-    template <class Allocator2, class Policy2>
-    basic_string& append(const internal::basic_string<Allocator2, Policy2>& str)
+    template <class Impl2>
+    basic_string& append(const internal::basic_string2<Impl2>& str)
     {
         assert_append(base_type::append(str));
         return *this;
@@ -571,6 +571,15 @@ template< class CharT, class Traits, class Alloc, class Policy, class TString >
     estd::basic_string<CharT,Traits,Alloc,Policy>&
         operator+=(estd::basic_string<CharT,Traits,Alloc,Policy>& lhs,
                    TString rhs )
+{
+    lhs.append(rhs);
+    return lhs;
+}
+
+
+template <class Impl, class T>
+estd::internal::basic_string2<Impl>& operator+=(
+    estd::internal::basic_string2<Impl>& lhs, T rhs)
 {
     lhs.append(rhs);
     return lhs;
