@@ -245,7 +245,8 @@ class dynamic_array_base :
         public estd::internal::impl::allocated_array<TAllocator>,
         dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
 {
-    typedef estd::internal::impl::allocated_array<TAllocator> base_t;
+    typedef estd::internal::impl::allocated_array<TAllocator> base_type;
+    typedef base_type base_t;
     typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
 
 public:
@@ -264,16 +265,17 @@ public:
     //typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     // account for null-termination during a max_size request
-    size_type max_size() const
+    ESTD_CPP_CONSTEXPR_RET size_type max_size() const
     {
-        return base_t::max_size() - (null_terminated ? 1 : 0);
+        return base_type::max_size() - (null_terminated ? 1 : 0);
         //return base_t::get_allocator().max_size() - (null_terminated ? 1 : 0);
     }
 
 
     // repurposing/renaming of what size meant before (ALLOCATED) vs now
     // (USED within ALLOCATED)
-    size_type capacity() const { return base_t::size(); }
+    ESTD_CPP_CONSTEXPR_RET size_type capacity() const
+    { return base_type::size(); }
 
     /*
     // Helper for old dynamic_array code.  New one I'm thinking caller
@@ -284,7 +286,7 @@ public:
     } */
 
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
-    // 'used' size within that allocation.  For this variety, we are null terminated
+    // 'used' size within that allocation.  For this variety, we could be null terminated
     size_type size() const
     {
         if(!base_t::is_allocated()) return 0;
@@ -293,6 +295,7 @@ public:
         //return length_helper_t::size(base_t::get_allocator(), base_t::handle());
     }
 
+    // adjust 'used' (not ALLOCATED) size
     void size(size_type n)
     {
         length_helper_t::size(*this, n);

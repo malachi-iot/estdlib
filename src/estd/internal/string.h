@@ -57,8 +57,8 @@ public:
 
     size_type length() const { return base_type::size(); }
 
-    template <class TImpl>
-    int compare(const internal::allocated_array<TImpl>& a) const
+    template <class Impl2>
+    int compare(const internal::allocated_array<Impl2>& a) const
     {
         // NOTE: Underlying compare never pays attention to null termination,
         // so we are safe comparing against a non-string here
@@ -91,8 +91,8 @@ public:
 
     // Keeping this as I expect to eventually need a string/char traits aware
     // version of the character-by-character comparison
-    template <class TImpl>
-    bool starts_with(const internal::allocated_array<TImpl>& compare_to) const
+    template <class Impl2>
+    bool starts_with(const internal::allocated_array<Impl2>& compare_to) const  // NOLINT
     {
         return base_type::starts_with(compare_to);
     }

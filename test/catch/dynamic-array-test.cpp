@@ -5,6 +5,8 @@
 using namespace estd;
 using namespace estd::internal;
 
+#include "macro/push.h"
+
 struct pa_impl
 {
     //ESTD_CPP_STD_VALUE_TYPE(int)
@@ -52,7 +54,8 @@ TEST_CASE("dynamic array")
     SECTION("iterate")
     {
 #if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
-        //da1_type::accessor a
+        int _v0 = 0;
+        da1_type::accessor a = _v0;
 #else
         da1_type::accessor a(da1.get_allocator(), 0);
 #endif
@@ -66,8 +69,8 @@ TEST_CASE("dynamic array")
 
         int v2[] = { 10, 20, 30 };
 
-        da1_type::it_test::accessor a2(v2[0]);
-        da1_type::it_test it2(a2);
+        da1_type::a_it::accessor a2(v2[0]);
+        da1_type::a_it it2(a2);
 
         a2.h_exp() += 1;
 
@@ -87,3 +90,5 @@ TEST_CASE("dynamic array")
 #endif
     }
 }
+
+#include "macro/pop.h"

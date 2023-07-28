@@ -19,16 +19,17 @@ struct allocated_array : estd::handle_descriptor<TAllocator>
 
     typedef typename base_t::size_type size_type;
 
-    size_type max_size() const { return base_t::get_allocator().max_size(); }
+    ESTD_CPP_CONSTEXPR_RET size_type max_size() const
+    { return base_type::get_allocator().max_size(); }
 
     ESTD_CPP_DEFAULT_CTOR(allocated_array)
 
     template <class TAllocatorParam>
-    allocated_array(TAllocatorParam& p) : base_t(p) {}
+    allocated_array(TAllocatorParam& p) : base_type(p) {}
 
     handle_with_offset offset(size_type pos) const
     {
-        return base_t::get_allocator().offset(base_t::handle(), pos);
+        return base_type::get_allocator().offset(base_t::handle(), pos);
     }
 };
 
