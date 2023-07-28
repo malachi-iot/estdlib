@@ -15,40 +15,17 @@ template <class CharT,
           class Policy
           >
 class basic_string_view :
-#if FEATURE_ESTD_STRING_VIEW_UPGRADED
-    //public internal::basic_string<
-        //layer3::allocator<const CharT, typename Policy::size_type>, Policy>
     public internal::basic_string2<internal::impl::allocated_array<
             layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
 {
-    //typedef internal::basic_string<
-        //layer3::allocator<const CharT, typename Policy::size_type>, Policy>
     typedef internal::basic_string2<internal::impl::allocated_array<
         layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
-        base_t;
-#else
-        public basic_string<
-            const CharT,
-            Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-            layer3::allocator<const CharT, typename Policy::size_type>,
-#else
-            internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
-#endif
-            Policy>
-{
-    typedef basic_string<const CharT, Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        layer3::allocator<const CharT, typename Policy::size_type>,
-#else
-        internal::single_fixedbuf_runtimesize_allocator<const CharT, size_t>,
-#endif
+        base_type;
 
-        Policy> base_t;
-#endif
-
-    typedef base_t base_type;
     typedef typename base_type::allocator_type allocator_type;
+
+    // DEBT: InitParam works, but are probably better served by something like
+    // in_place_t.  InitParam was done to get around lack of variadic forwarding
     typedef typename allocator_type::InitParam init_param_t;
 
 public:
@@ -65,7 +42,7 @@ public:
     }
 
     // C-style null terminated string
-    basic_string_view(const CharT* s) :
+    ESTD_CPP_CONSTEXPR_RET basic_string_view(const CharT* s) :
         base_type(init_param_t(s, strlen(s)))
     {
 
@@ -76,7 +53,7 @@ public:
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
         = default;
 #else
-        : base_type((base_t&)other)
+        : base_type(other)
     {
     }
 #endif
@@ -108,7 +85,7 @@ public:
 #endif
     basic_string_view substr(
             size_type pos = 0,
-            size_type count = base_t::npos) const
+            size_type count = base_type::npos) const
     {
         // DEBT: Use underlying data()/clock(), although it's noteworthy that
         // this seemingly clumsy approach *might* work for private/moveable basic_string_view
@@ -117,7 +94,7 @@ public:
         basic_string_view copy(*this);
 
         copy.remove_prefix(pos);
-        if(count != base_t::npos)
+        if(count != base_type::npos)
         {
             allocator_type& a = copy.get_allocator();
 

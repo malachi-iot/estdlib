@@ -105,6 +105,18 @@ struct has_typedef
 }; */
 
 
+struct allocator_locking_preference
+{
+    enum _
+    {
+        /// Allocator does not real locking at all.  Any lock API is using a pointer shim
+        none,
+        /// Allocator does traditional explicit lock/unlock calls at allocator_traits level
+        standard,
+        /// Allocator prefers iterator-level locking, which has its own set of moves
+        iterator
+    };
+};
 
 /// interact with actual underlying locking allocator
 template <class TAllocator>
@@ -165,6 +177,9 @@ struct locking_allocator_traits<TAllocator, true>
     // a handle region as a container of T.  For locking types, they MUST provide
     // an iterator type
     typedef typename allocator_type::iterator iterator;
+
+    static CONSTEXPR allocator_locking_preference::_ locking_preference =
+        allocator_locking_preference::standard;
 };
 
 
@@ -230,6 +245,9 @@ struct locking_allocator_traits<TAllocator, false>
         allocator_type,
         traditional_accessor<value_type>,
         internal::locking_iterator_modes::shim> iterator;
+
+    static CONSTEXPR allocator_locking_preference::_ locking_preference =
+        allocator_locking_preference::none;
 };
 
 
