@@ -48,8 +48,14 @@ struct pgm_allocator
     using handle_type = pointer;
 };
 
+template <class T, bool near = true>
+struct pgm_accessor_impl;
 
-template <class T>
+template <class T, bool near = true>
+using pgm_accessor2 = estd::internal::locking_accessor<pgm_accessor_impl<T, near> >;
+
+
+template <class T, size_t N = internal::variant_npos()>
 struct pgm_allocator_traits
 {
     using value_type = T;
@@ -58,9 +64,16 @@ struct pgm_allocator_traits
     using handle_type = pointer;
     using handle_with_offset = pointer;
     using size_type = uint16_t;
+    using allocator_type = pgm_allocator2<T, N>;
 
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
+
+    using allocator_valref = allocator_type;;
+    using iterator = estd::internal::locking_iterator<
+        allocator_type,
+        pgm_accessor2<T>,
+        estd::internal::locking_iterator_modes::ro>;
 };
 
 enum class PgmPolicyType
@@ -106,14 +119,6 @@ struct PgmPolicy<estd::internal::variant_npos()> : pgm_allocator_traits
 };*/
 
 
-}
-
-}
-
-namespace experimental {
-
-template <class T, bool near = true>
-class pgm_accessor;
 
 template <typename T, bool near = true>
 T pgm_read(const void* address);
@@ -144,18 +149,8 @@ uint32_t pgm_read<uint32_t>(const void* address)
     return pgm_read_dword_near(address);
 }
 
-// Experimenting with strlen-less end() code, but it seems to gain nothing
-// really
-#define FEATURE_ESTD_PGM_EXP_IT 0
 
-// Dogfooding in allocator.  So far it just seems to make it more complicated,
-// but a feeling tells me this will be useful
-#define FEATURE_ESTD_PGM_ALLOCATOR 1
-
-// TODO: Use __WITH_AVRLIBC__ in features area
-
-
-template <class T, bool near = true>
+template <class T, bool near>
 struct pgm_accessor_impl
 {
     ESTD_CPP_STD_VALUE_TYPE(T);
@@ -179,8 +174,33 @@ public:
     static void unlock() {}
 };
 
+
+
+
+}
+
+
+template <size_t N>
+using PgmStringPolicy = impl::PgmPolicy<char, impl::PgmPolicyType::String, N>;
+
+
+}
+
+namespace experimental {
+
 template <class T, bool near = true>
-using pgm_accessor2 = estd::internal::locking_accessor<pgm_accessor_impl<T, near> >;
+class pgm_accessor;
+
+// Experimenting with strlen-less end() code, but it seems to gain nothing
+// really
+#define FEATURE_ESTD_PGM_EXP_IT 0
+
+// Dogfooding in allocator.  So far it just seems to make it more complicated,
+// but a feeling tells me this will be useful
+#define FEATURE_ESTD_PGM_ALLOCATOR 1
+
+// TODO: Use __WITH_AVRLIBC__ in features area
+
 
 template <class T>
 class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
@@ -192,7 +212,7 @@ protected:
 
     const_pointer p;
 
-    value_type value() const { return pgm_read<T>(p); }
+    value_type value() const { return internal::impl::pgm_read<T>(p); }
 
 #if FEATURE_ESTD_PGM_EXP_IT
     const bool is_null() const
@@ -269,9 +289,10 @@ struct private_array_base :
 #endif
 
 #if FEATURE_ESTD_PGM_ALLOCATOR
-    using accessor = pgm_accessor2<T>;
+    using accessor = internal::impl::pgm_accessor2<T>;
     using iterator = estd::internal::locking_iterator<
-        allocator_type, pgm_accessor2<T>,
+        allocator_type,
+        accessor,
         estd::internal::locking_iterator_modes::ro >;
 #else
     using accessor = pgm_accessor<T>;
@@ -337,6 +358,9 @@ struct pgm_array_string : private_array_base<T, N>
     using typename base_type::value_type;
     using typename base_type::accessor;
     using typename base_type::iterator;
+    using policy_type = internal::PgmStringPolicy<N>;
+
+    using allocator_traits = internal::impl::pgm_allocator_traits<T>;
 
     using const_iterator = iterator;
 
@@ -435,10 +459,6 @@ struct private_array<estd::internal::impl::PgmPolicy<char,
 namespace internal {
 
 template <size_t N>
-using PgmStringPolicy = impl::PgmPolicy<char, impl::PgmPolicyType::String, N>;
-
-
-template <size_t N>
 struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
     experimental::private_array<PgmStringPolicy<N>>
 {
@@ -460,11 +480,12 @@ struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
 #endif
 };
 
+/*
 template <size_t N>
 struct basic_string2<experimental::pgm_array_string<char, N> >
 {
 
-};
+};  */
 
 
 }
@@ -498,6 +519,20 @@ struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
 
     constexpr basic_pgm_string(const char* const s) : base_type(s) {}
 };
+
+
+template <size_t N = internal::variant_npos()>
+struct basic_pgm_string2 :
+    internal::basic_string2<experimental::pgm_array_string<char, N> >
+{
+    using base_type = internal::basic_string2<
+        experimental::pgm_array_string<char, N> >;
+
+    constexpr basic_pgm_string2(const char* const s) :
+        base_type(s)
+    {}
+};
+
 
 using pgm_string = basic_pgm_string<>;
 
