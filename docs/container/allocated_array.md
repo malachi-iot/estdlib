@@ -10,15 +10,9 @@ like `dynamic_array` can extend and change that
 
 ## estd::internal::impl::allocated_array<Allocator>
 
-More or less the core glue to hold together and allocated array.  By way of
-`estd::handle_descriptor`, it holds on to:
+More or less a shim around [estd::handle_descriptor](handle.md#estdhandle_descriptor)
 
-- allocator itself
-- size allocated to the array
-
-Also `estd::handle_descriptor` provides a lot of wrapped functionality for
-lock/unlock and things like `construct`, `free` etc all mated to one particular
-memory chunk.
+Only exists to typedef `policy_type` for usage down the line by dynamic_array
 
 ## estd::internal::allocated_array<Impl>
 

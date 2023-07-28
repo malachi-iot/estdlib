@@ -37,7 +37,7 @@ class handle_descriptor_base;
 // With explicit runtime size knowledge, since (constexpr) has_size = false
 template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, false, is_singular, true> :
-        public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
+    public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
     typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_type;
 
@@ -92,22 +92,18 @@ template <class TAllocator, bool is_stateful, bool is_singular>
 class handle_descriptor_base<TAllocator, is_stateful, true, is_singular, true> :
         public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
 {
-    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_t;
+    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_type;
 
 public:
-    typedef typename base_t::allocator_type allocator_type;
+    typedef typename base_type::allocator_type allocator_type;
     typedef typename allocator_type::size_type size_type;
-    typedef typename base_t::handle_type handle_type;
+    typedef typename base_type::handle_type handle_type;
 
-    handle_descriptor_base(const handle_type& h) : base_t(h) {}
-
-    template <class TAllocatorParameter>
-    handle_descriptor_base(TAllocatorParameter& a, const handle_type& h)
-            : base_t(a, h) {}
+    ESTD_CPP_FORWARDING_CTOR(handle_descriptor_base)
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const
     {
-        return base_t::get_allocator().size(base_t::handle());
+        return base_type::get_allocator().size(base_type::handle());
     }
 };
 

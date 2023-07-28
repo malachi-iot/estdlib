@@ -94,7 +94,7 @@ public:
         return base_type::lock(pos, count);
     }
 
-    void unlock() { return base_type::unlock(); }
+    void unlock() { return base_type::unlock(); }   // NOLINT
 
 protected:
     // Use this instead of 'success' ptr
