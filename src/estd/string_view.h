@@ -5,8 +5,6 @@
 
 namespace estd {
 
-#define FEATURE_ESTD_STRING_VIEW_UPGRADED 1
-
 template <class CharT,
           class Traits,
           // NOTE: Because this is marked as a 'const' string policy, resize-ish operations

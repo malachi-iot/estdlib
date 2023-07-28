@@ -4,6 +4,7 @@
 #include "../traits/allocator_traits.h"
 #include "container/accessor.h"
 #include "container/iterator.h"
+#include "container/specializer.h"
 #include "container/traditional_accessor.h"
 #include "../algorithm.h"
 #include "../initializer_list.h"
@@ -31,7 +32,7 @@ struct no_max_string_length_tag {};
 // dynamic array for that
 // TImpl is usually some flavor of estd::internal::impl::dynamic_array
 template <class TImpl>
-class allocated_array : 
+class allocated_array :
 #ifdef ARDUINO
     public print_handler_tag,
 #endif
@@ -49,8 +50,11 @@ public:
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef typename allocator_type::value_type value_type;
+    typedef const value_type* const_pointer;
 
     typedef typename allocator_traits::allocator_valref allocator_valref;
+
+    typedef dynamic_array_helper<impl_type> helper;
 
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
@@ -129,17 +133,9 @@ protected:
 
 
     template <class TForeignImpl>
-    bool starts_with(const allocated_array<TForeignImpl>& compare_to) const
+    ESTD_CPP_CONSTEXPR_RET bool starts_with(const allocated_array<TForeignImpl>& compare_to) const
     {
-        const value_type* s = clock();
-        const value_type* t = compare_to.clock();
-
-        bool r = starts_with_n(s, t, size(), compare_to.size());
-
-        cunlock();
-        compare_to.cunlock();
-
-        return r;
+        return helper::starts_with(*this, compare_to);
     }
 
 public:
@@ -201,8 +197,6 @@ public:
 
     typedef pointer traditional_iterator;
 
-
-
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
 
     allocator_valref get_allocator() const
@@ -235,13 +229,11 @@ public:
 
     iterator begin()
     {
-        //return iterator(get_allocator(), offset(0));
         return create_iterator();
     }
 
     const_iterator cbegin() const
     {
-        //return iterator(get_allocator(), offset(0));
         return create_iterator();
     }
 
@@ -294,13 +286,11 @@ public:
 
     accessor front() const
     {
-        //return accessor(get_allocator(), offset(0));
         return create_accessor(0);
     }
 
     accessor back() const
     {
-        //return accessor(get_allocator(), offset(size() - 1));
         return create_accessor(size() - 1);
     }
 
@@ -325,21 +315,7 @@ public:
     size_type copy(typename estd::remove_const<value_type>::type* dest,
                    size_type count, size_type pos = 0) const
     {
-        const value_type* src = clock(pos, count);
-
-        // TODO: since we aren't gonna throw an exception, determine what to do if
-        // pos > size()
-
-        if(pos + count > size())
-            count = size() - pos;
-
-        // TODO: Do the m_impl.copy_from here
-
-        memcpy(dest, src, count * sizeof(value_type));
-
-        cunlock();
-
-        return count;
+        return helper::copy_to(*this, dest, count, pos);
     }
 
     template <class TForeignImpl>
@@ -351,16 +327,7 @@ public:
         if(raw_size < s_size) return -1;
         if(raw_size > s_size) return 1;
 
-        // gets here if size matches
-        const value_type* raw = clock();
-        const value_type* s = compare_to.clock();
-
-        bool result = estd::equal(raw, raw + raw_size, s);
-
-        cunlock();
-        compare_to.cunlock();
-
-        return result;
+        return helper::compare(*this, compare_to, raw_size);
     }
 };
 

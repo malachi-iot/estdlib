@@ -45,64 +45,6 @@ public:
 
 namespace internal {
 
-template <class TImpl>
-class dynamic_array;
-
-template <class Impl, class Enabled = void>
-struct dynamic_array_helper;
-
-
-template <class Impl>
-struct dynamic_array_helper<Impl, enable_if_t<
-    Impl::allocator_traits::locking_preference == allocator_locking_preference::iterator> >
-{
-};
-
-template <class Impl>
-struct dynamic_array_helper<Impl, enable_if_t<
-    Impl::allocator_traits::locking_preference == allocator_locking_preference::standard ||
-    Impl::allocator_traits::locking_preference == allocator_locking_preference::none> >
-{
-    typedef internal::dynamic_array<Impl> dynamic_array;
-    typedef typename dynamic_array::value_type value_type;
-    typedef typename dynamic_array::pointer pointer;
-    typedef typename dynamic_array::const_pointer const_pointer;
-
-    // copies into da at specified pos
-    static void copy(dynamic_array& da, const_pointer from, unsigned pos, unsigned len)
-    {
-        pointer raw = da.lock(pos);
-
-        estd::copy_n(from, len, raw);
-
-        da.unlock();
-    }
-
-    // copies into da a specified allocated array
-    template <class Impl2>
-    static void copy(dynamic_array& da, unsigned pos, const allocated_array<Impl2>& from, unsigned len)
-    {
-        pointer raw = da.lock(pos);
-
-        from.copy(raw, len);
-
-        da.unlock();
-    }
-
-    // copies into da from first to last
-    template <class InputIt>
-    void copy(dynamic_array& da, unsigned pos, InputIt first, InputIt last)
-    {
-        pointer raw = da.lock(pos);
-
-        estd::copy(first, last, raw);
-
-        da.unlock();
-    }
-
-};
-
-
 //
 //  -
 /// Base class for managing expanding/contracting arrays
@@ -417,7 +359,7 @@ protected:
 
 #endif
 
-        helper::copy(*this, buf, current_size, len);
+        helper::copy_from(*this, current_size, buf, len);
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(grow_success)
@@ -588,7 +530,7 @@ public:
         const unsigned len = copy_from.size();
 
         ensure_total_size(len);
-        helper::copy(*this, 0, copy_from, len);
+        helper::copy_from(*this, 0, copy_from, len);
     }
 
 

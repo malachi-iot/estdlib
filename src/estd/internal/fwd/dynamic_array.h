@@ -13,6 +13,9 @@ struct private_array;
 
 namespace internal {
 
+template <class TImpl>
+class allocated_array;;
+
 namespace impl {
 
 // See reference implementation near bottom of internal/impl/dynamic_array.h
@@ -26,6 +29,9 @@ struct dynamic_array_length;
 
 
 }
+
+template <class TImpl>
+class dynamic_array;
 
 }
 }
