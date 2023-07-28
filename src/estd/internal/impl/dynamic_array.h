@@ -242,10 +242,12 @@ public:
 // allocated size or not (underlying size() call)
 template <class TAllocator, bool null_terminated, bool size_equals_capacity>
 class dynamic_array_base :
-        public estd::internal::impl::allocated_array<TAllocator>,
+        //public estd::internal::impl::allocated_array<TAllocator>,
+        public estd::handle_descriptor<TAllocator>,
         dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
 {
-    typedef estd::internal::impl::allocated_array<TAllocator> base_type;
+    typedef estd::handle_descriptor<TAllocator> base_type;
+    //typedef estd::internal::impl::allocated_array<TAllocator> base_type;
     typedef base_type base_t;
     typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
 

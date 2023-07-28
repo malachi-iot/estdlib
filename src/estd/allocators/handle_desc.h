@@ -134,13 +134,25 @@ class handle_descriptor :
              TTraits::is_contiguous_exp> base_type;
 
 public:
-     ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(
-         typename TTraits::handle_type h = TTraits::invalid()) :
-         base_type(h) {}
 
-     template <class TAllocatorParameter>
-     ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(TAllocatorParameter& p) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(
+        typename TTraits::handle_type h = TTraits::invalid()) :
+        base_type(h) {}
+
+    template <class TAllocatorParameter>
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(TAllocatorParameter& p) :
         base_type(p, TTraits::invalid()) {}
+
+    typedef typename base_type::size_type size_type;
+
+    ESTD_CPP_CONSTEXPR_RET size_type max_size() const
+    { return base_type::get_allocator().max_size(); }
+
+    typename TTraits::handle_with_offset offset(size_type pos) const
+    {
+        return base_type::get_allocator().offset(
+            base_type::handle(), pos);
+    }
 };
 #else
 #ifdef FEATURE_CPP_CONSTEXPR
