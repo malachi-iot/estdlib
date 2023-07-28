@@ -45,6 +45,63 @@ public:
 
 namespace internal {
 
+template <class TImpl>
+class dynamic_array;
+
+template <class Impl, class Enabled = void>
+struct dynamic_array_helper;
+
+
+template <class Impl>
+struct dynamic_array_helper<Impl, enable_if_t<
+    Impl::allocator_traits::locking_preference == allocator_locking_preference::iterator> >
+{
+};
+
+template <class Impl>
+struct dynamic_array_helper<Impl, enable_if_t<
+    Impl::allocator_traits::locking_preference == allocator_locking_preference::standard ||
+    Impl::allocator_traits::locking_preference == allocator_locking_preference::none> >
+{
+    typedef internal::dynamic_array<Impl> dynamic_array;
+    typedef typename dynamic_array::value_type value_type;
+    typedef typename dynamic_array::pointer pointer;
+    typedef typename dynamic_array::const_pointer const_pointer;
+
+    // copies into da at specified pos
+    static void copy(dynamic_array& da, const_pointer from, unsigned pos, unsigned len)
+    {
+        pointer raw = da.lock(pos);
+
+        estd::copy_n(from, len, raw);
+
+        da.unlock();
+    }
+
+    // copies into da a specified allocated array
+    template <class Impl2>
+    static void copy(dynamic_array& da, unsigned pos, const allocated_array<Impl2>& from, unsigned len)
+    {
+        pointer raw = da.lock(pos);
+
+        from.copy(raw, len);
+
+        da.unlock();
+    }
+
+    // copies into da from first to last
+    template <class InputIt>
+    void copy(dynamic_array& da, unsigned pos, InputIt first, InputIt last)
+    {
+        pointer raw = da.lock(pos);
+
+        estd::copy(first, last, raw);
+
+        da.unlock();
+    }
+
+};
+
 
 //
 //  -
@@ -57,7 +114,7 @@ template <class TImpl>
 class dynamic_array : public allocated_array<TImpl>
 {
     typedef allocated_array<TImpl> base_type;
-    typedef base_type base_t;
+    typedef dynamic_array_helper<TImpl> helper;
 
 public:
     typedef typename base_type::allocator_type allocator_type;
@@ -68,6 +125,10 @@ public:
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;
+
+    // DEBT: Getting errors due to ambiguity of source allocator_traits
+    typedef const value_type* const_pointer;
+    //typedef typename allocator_traits::const_pointer const_pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
     typedef typename base_type::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
@@ -259,7 +320,10 @@ public:
     // TODO: iterate through and destruct elements
     ~dynamic_array() {}
 
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return base_t::size(); }   // NOLINT
+    ESTD_CPP_CONSTEXPR_RET size_type size() const   // NOLINT
+    {
+        return base_type::size();
+    }
 
     size_type capacity() const { return impl().capacity(); }
 
@@ -287,14 +351,9 @@ public:
     template <class InputIt>
     void assign(InputIt first, InputIt last)
     {
-        value_type* d = lock();
-
         ensure_total_size(last - first, 0, true);
 
-        while(first != last)
-            *d++ = *first++;
-
-        unlock();
+        helper::copy(*this, 0, first, last);
     }
 
 protected:
@@ -358,11 +417,7 @@ protected:
 
 #endif
 
-        value_type* raw = lock(current_size);
-
-        estd::copy_n(buf, len, raw);
-
-        unlock();
+        helper::copy(*this, buf, current_size, len);
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(grow_success)
@@ -423,7 +478,9 @@ protected:
 
 
 public:
-    // EXPERIMENTAL, lightly tested
+    // EXPERIMENTAL, lightly tested - experimental::private array was a good try,
+    // and inspired some ideas, and now is on the way out in favor of
+    // allocator_locking_preference approach
     template <class TImpl2>
     append_result append(const experimental::private_array<TImpl2>& source)
     {
@@ -528,9 +585,10 @@ public:
     template <class Impl2>
     void assign(const allocated_array<Impl2>& copy_from)
     {
-        ensure_total_size(copy_from.size());
-        copy_from.copy(lock(), capacity());
-        unlock();
+        const unsigned len = copy_from.size();
+
+        ensure_total_size(len);
+        helper::copy(*this, 0, copy_from, len);
     }
 
 
@@ -540,7 +598,7 @@ public:
     // untested and unoptimized
     iterator erase(const_iterator pos)
     {
-        size_type index = pos - base_t::begin();
+        size_type index = pos - base_type::begin();
         _erase(index, 1);
         // chances are iterator is a copy of incoming pos,
         // but we'll do this anyway
@@ -571,7 +629,7 @@ public:
         unlock();
 #endif
 
-        return base_t::back();
+        return base_type::back();
     }
 #endif
 

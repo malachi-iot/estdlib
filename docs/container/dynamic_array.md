@@ -13,3 +13,5 @@ Generally represents a resizeable array.
 
 Accounts for locking/unlocking behavior and therefore need not be contiguous, but in reality today it always is.
 
+Implements `copy`, `assign`
+

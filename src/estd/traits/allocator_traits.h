@@ -125,6 +125,7 @@ struct locking_allocator_traits<TAllocator, true>
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
     typedef value_type*                         pointer;
+    typedef const value_type*                   const_pointer;
     typedef typename TAllocator::size_type      size_type;
     typedef typename TAllocator::handle_type    handle_type;
 
@@ -190,6 +191,7 @@ struct locking_allocator_traits<TAllocator, false>
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
     typedef value_type*                         pointer;
+    typedef const value_type*                   const_pointer;
     typedef typename TAllocator::size_type      size_type;
     typedef pointer                             handle_type;
 
