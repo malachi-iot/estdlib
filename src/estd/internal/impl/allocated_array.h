@@ -10,7 +10,8 @@ struct allocator_array;
 template <class TAllocator, class Policy = monostate>
 struct allocated_array : estd::handle_descriptor<TAllocator>
 {
-    typedef estd::handle_descriptor<TAllocator> base_t;
+    typedef estd::handle_descriptor<TAllocator> base_type;
+    typedef base_type base_t;
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::allocator_traits allocator_traits;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
@@ -20,7 +21,7 @@ struct allocated_array : estd::handle_descriptor<TAllocator>
 
     size_type max_size() const { return base_t::get_allocator().max_size(); }
 
-    allocated_array() {}
+    ESTD_CPP_DEFAULT_CTOR(allocated_array)
 
     template <class TAllocatorParam>
     allocated_array(TAllocatorParam& p) : base_t(p) {}

@@ -103,9 +103,12 @@ public:
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference.  We have to pull this stunt since
     // consumers of get_allocator() won't take an rvalue
-    allocator_type& get_allocator() const
+    static allocator_type& get_allocator()
     {
-        allocator_type* _fake = NULLPTR;
+#if __cpp_static_assert
+        static_assert(is_empty<allocator_type>::value, "stateful allocators not permitted");
+#endif
+        CONSTEXPR allocator_type* _fake = NULLPTR;
         return *_fake;
         //return allocator_type();
     }
