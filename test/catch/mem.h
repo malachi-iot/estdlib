@@ -180,7 +180,7 @@ public:
 
     // DEBT: Pretty sloppy, just brute forcing the one that doesn't need locking anyway
     //pointer lock(estd::internal::traditional_accessor<T>& a)
-    value_type& lock(const estd::internal::handle_with_offset_raw<pointer, size_t>& a)
+    value_type& lock(const estd::internal::handle_with_offset_raw<pointer, size_t>& a) const
     {
         return *a.handle();
     }

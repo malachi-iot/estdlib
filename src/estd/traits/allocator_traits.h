@@ -106,15 +106,21 @@ struct has_typedef
 
 
 
-// interact with actual underlying locking allocator
+/// interact with actual underlying locking allocator
 template <class TAllocator>
 struct locking_allocator_traits<TAllocator, true>
 {
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
-    typedef typename TAllocator::pointer        pointer;
+    typedef value_type*                         pointer;
     typedef typename TAllocator::size_type      size_type;
-    typedef typename TAllocator::handle_type            handle_type;
+    typedef typename TAllocator::handle_type    handle_type;
+
+    // EXPERIMENTAL
+    // Some kind of global memory pool Allocator type might be empty/stateless
+    typedef typename conditional<is_empty<allocator_type>::value,
+        allocator_type,
+        allocator_type&>::type allocator_valref;
 
     // handle_with_size is phased out with advent of has_size_tag coupled with
     // outside-of-allocator specializations
@@ -123,12 +129,12 @@ struct locking_allocator_traits<TAllocator, true>
 
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
-    static reference lock(allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
+    static reference lock(allocator_valref a, handle_type h, size_type pos = 0, size_type count = 0)
     {
         return a.lock(h, pos, count);
     }
 
-    static reference lock(allocator_type &a, handle_with_offset h, size_type pos = 0, size_type count = 0)
+    static reference lock(allocator_valref a, handle_with_offset h, size_type pos = 0, size_type count = 0)
     {
         return a.lock(h, pos, count);
     }
@@ -162,15 +168,22 @@ struct locking_allocator_traits<TAllocator, true>
 };
 
 
-// shim for non locking activities
+/// shim for non locking activities
 template <class TAllocator>
 struct locking_allocator_traits<TAllocator, false>
 {
     typedef TAllocator                          allocator_type;
     typedef typename TAllocator::value_type     value_type;
-    typedef typename TAllocator::pointer        pointer;
+    typedef value_type*                         pointer;
     typedef typename TAllocator::size_type      size_type;
-    typedef typename TAllocator::pointer        handle_type;
+    typedef pointer                             handle_type;
+
+    // EXPERIMENTAL
+    // Probably always nonlocking allocators are empty...
+    typedef typename conditional<is_empty<allocator_type>::value,
+        //const allocator_type&,
+        allocator_type,
+        allocator_type&>::type allocator_valref;
 
     // handle_with_size is phased out with advent of has_size_tag coupled with
     // outside-of-allocator specializations
@@ -180,12 +193,12 @@ struct locking_allocator_traits<TAllocator, false>
 
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
-    static reference lock(allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
+    static reference lock(const allocator_type&, handle_type h, size_type pos = 0, size_type count = 0)
     {
         return *(h + pos);
     }
 
-    static reference lock(allocator_type &a, handle_with_offset h, size_type pos = 0, size_type count = 0)
+    static reference lock(const allocator_type&, handle_with_offset h, size_type pos = 0, size_type count = 0)
     {
         return *(h.handle() + pos);
         //return a.lock(h, pos, count);
@@ -201,7 +214,7 @@ struct locking_allocator_traits<TAllocator, false>
         return *(h.handle() + pos);
     }
 
-    static void unlock(allocator_type& a, handle_type h)
+    static void unlock(const allocator_type& a, handle_type h)
     {
     }
 

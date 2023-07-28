@@ -50,6 +50,8 @@ public:
 
     typedef typename allocator_type::value_type value_type;
 
+    typedef typename allocator_traits::allocator_valref allocator_valref;
+
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
     // allocated array pointed to a static const(expr) * of some kind
@@ -187,9 +189,13 @@ public:
     //typedef handle_accessor accessor;
     //typedef traditional_accessor<value_type> accessor;
 
-    ESTD_CPP_CONSTEXPR_RET accessor create_accessor(unsigned o = 0) const
+    //ESTD_CPP_CONSTEXPR_RET
+    accessor create_accessor(unsigned o = 0) const
     {
-        return accessor(get_allocator(), offset(o));
+        // DEBT: using temp variable here because accessor ctor signature REQUIRES a reference,
+        // even for stateless allocators
+        allocator_valref allocator = get_allocator();
+        return accessor(allocator, offset(o));
     }
 #endif
 
@@ -199,7 +205,7 @@ public:
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
 
-    allocator_type& get_allocator() const
+    allocator_valref get_allocator() const
     {
         // FIX: Hate this, but since we have stateful allocators flying around everywhere, even
         // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator

@@ -27,8 +27,8 @@ public:
     typedef const_reference const_locked_type;
 
     template <class TAllocator>
-    ESTD_CPP_CONSTEXPR_RET traditional_accessor(TAllocator& a,
-        const typename estd::allocator_traits<TAllocator>::handle_with_offset& h) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(TAllocator& a,
+        const typename allocator_traits<TAllocator>::handle_with_offset& h) :
         p(&a.lock(h))
     {
     }

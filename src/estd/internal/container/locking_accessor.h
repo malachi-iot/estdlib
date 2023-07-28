@@ -31,9 +31,7 @@ private:
 public:
     // DEBT: Should be something like 'handle_type', not 'reference'
     //ESTD_CPP_CONSTEXPR_RET EXPLICIT locking_accessor(reference r) : impl_(r) {}
-    template <class ...Args>
-    constexpr explicit locking_accessor(Args&&...args) :
-        impl_(std::forward<Args>(args)...) {}
+    ESTD_CPP_FORWARDING_CTOR_MEMBER(locking_accessor, impl_)
 
     offset_type h_exp() { return impl_.offset(); }
     const_offset_type h_exp() const { return impl_.offset(); }

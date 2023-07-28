@@ -100,14 +100,12 @@ public:
     // NOTE: odd, but OK.  Since we're stateless, we can return what otherwise
     // would be an invalid reference.  We have to pull this stunt since
     // consumers of get_allocator() won't take an rvalue
-    static allocator_type& get_allocator()
+    static allocator_type get_allocator()
     {
 #if __cpp_static_assert
         static_assert(is_empty<allocator_type>::value, "stateful allocators not permitted");
 #endif
-        CONSTEXPR allocator_type* _fake = NULLPTR;
-        return *_fake;
-        //return allocator_type();
+        return allocator_type();
     }
 
 protected:
@@ -128,6 +126,10 @@ protected:
     typedef typename allocator_traits::handle_type handle_type;
     typedef typename allocator_traits::allocator_type allocator_type;
 
+    typedef typename conditional<is_empty<allocator_type>::value,
+        const allocator_type&,
+        allocator_type&>::type allocator_ref;
+
     typedef value_evaporator<handle_type, !is_singular, bool, true> base_t;
 
 public:
@@ -138,7 +140,7 @@ protected:
 
     handle_descriptor(const handle_type& h) : base_t(h) {}
 
-    value_type& lock(allocator_type& a, size_type pos = 0, size_type len = 0)
+    value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
     {
         return allocator_traits::lock(a, handle(), pos, len);
     }
@@ -148,7 +150,7 @@ protected:
         return allocator_traits::clock(a, handle(), pos, len);
     }
 
-    void unlock(allocator_type& a)
+    void unlock(allocator_ref a)
     {
         allocator_traits::unlock(a, handle());
     }
