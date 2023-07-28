@@ -52,7 +52,7 @@ struct contiguous_descriptor<TAllocator, true>
 
 // https://en.cppreference.com/w/cpp/language/ebo we can have specialized base classes which are empty
 // and don't hurt our sizing
-template <class TAllocator, bool is_stateful>
+template <class TAllocator, bool is_stateful = estd::is_empty<TAllocator>::value>
 class allocator_descriptor;
 
 
@@ -63,14 +63,11 @@ class allocator_descriptor<TAllocator, true>
     TAllocator allocator;
 
 protected:
-    // NOTE: variadic would be nice, but obviously not always available
-    template <class TAllocatorParameter>
-    allocator_descriptor(TAllocatorParameter& p) :
-        allocator(p) {}
+    ESTD_CPP_FORWARDING_CTOR_MEMBER(allocator_descriptor, allocator)
 
     // Not unusual for a stateful allocator to default construct itself just
     // how we want it
-    allocator_descriptor() {}
+    ESTD_CPP_DEFAULT_CTOR(allocator_descriptor)
 
 public:
     typedef typename remove_reference<TAllocator>::type allocator_type;

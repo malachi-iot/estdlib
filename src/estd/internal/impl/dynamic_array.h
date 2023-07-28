@@ -410,13 +410,10 @@ struct dynamic_array : public
     typedef dynamic_array_base<
         typename estd::remove_reference<TAllocator>::type,
         is_nulltag_present<TPolicy>::value,
-        is_consttag_present<TPolicy>::value> base_t;
-    typedef typename base_t::allocator_type allocator_type;
+        is_consttag_present<TPolicy>::value> base_type;
+    typedef typename base_type::allocator_type allocator_type;
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(allocator_type& alloc) : base_t(alloc) {}
-
-    template <class TAllocatorParam>
-    dynamic_array(const TAllocatorParam& p) : base_t(p) {}
+    ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
     ESTD_CPP_DEFAULT_CTOR(dynamic_array)
 
