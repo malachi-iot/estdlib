@@ -11,8 +11,6 @@
 #include "iterator_standalone.h"
 #include "container/starts_with.h"
 
-#include <string.h>     // for access to memcpy NOLINT
-
 // Intermediate flag which more or less disables all the handle/locking mechanisms
 // in favor of traditional pointer-style iterator.  Development flag only, once it
 // works, the compile time flag will be deduced by querying the allocator itself

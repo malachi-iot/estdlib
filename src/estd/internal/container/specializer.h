@@ -6,6 +6,8 @@
 
 #include "starts_with.h"
 
+#include <string.h>     // for access to memcpy NOLINT
+
 namespace estd { namespace internal {
 
 /// Handles special cases of how allocated_array impls
@@ -25,13 +27,21 @@ struct dynamic_array_helper<Impl, enable_if_t<
     Impl::allocator_traits::locking_preference == allocator_locking_preference::standard ||
     Impl::allocator_traits::locking_preference == allocator_locking_preference::none> >
 {
-    typedef internal::dynamic_array<Impl> dynamic_array;
     typedef internal::allocated_array<Impl> array;
 
-    typedef typename dynamic_array::value_type value_type;
-    typedef typename dynamic_array::pointer pointer;
-    typedef typename dynamic_array::const_pointer const_pointer;
+    array& a;
+
+    typedef typename array::value_type value_type;
+    typedef typename array::pointer pointer;
+    typedef typename array::const_pointer const_pointer;
     typedef typename array::size_type size_type;
+
+    //pointer raw_;
+
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array_helper(array& a) :
+        a(a)
+    {
+    }
 
     // from = other -> this
     // to = this -> other
@@ -59,7 +69,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // copies into da from first to last
     template <class InputIt>
-    void copy(dynamic_array& da, unsigned pos, InputIt first, InputIt last)
+    void copy(array& da, unsigned pos, InputIt first, InputIt last)
     {
         pointer raw = da.lock(pos);
 
