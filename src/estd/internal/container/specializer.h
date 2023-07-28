@@ -33,8 +33,26 @@ struct dynamic_array_helper<Impl, enable_if_t<
         typename estd::remove_const<value_type>::type* dest,
         size_type count, size_type pos = 0)
     {
-        // FIX: TBD
-        return 0;
+        auto src = a.create_iterator();
+
+        // FIX: Add += for our special iterators
+        //src += count;
+
+        // TODO: get_allocator must be present in pgm flavor
+
+        // TODO: since we aren't gonna throw an exception, determine what to do if
+        // pos > size()
+
+        if(pos + count > a.size())
+            count = a.size() - pos;
+
+        // TODO: Do the m_impl.copy_from here
+
+        estd::copy_n(src, count, dest);
+
+        a.cunlock();
+
+        return count;
     }
 };
 
