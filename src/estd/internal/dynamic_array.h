@@ -298,7 +298,9 @@ public:
         helper::copy(*this, 0, first, last);
     }
 
-protected:
+//protected:
+// DEBT: Temporarily making this public as we bring specializer online
+public:
     // internal call: grows entire size() by amount,
     // ensuring that there's enough space along the
     // way to do so (allocating more if necessary)
@@ -466,6 +468,7 @@ public:
     template <class TForeignImpl>
     append_result append(const allocated_array<TForeignImpl>& source)
     {
+        /*
         size_type len = source.size();
 
         const typename TForeignImpl::value_type* append_from = source.clock();
@@ -475,6 +478,9 @@ public:
         source.cunlock();
 
         return ar;
+
+        */
+        return helper::append(*this, source);
     }
 
 

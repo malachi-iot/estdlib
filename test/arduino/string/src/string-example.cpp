@@ -57,7 +57,7 @@ void loop()
     //estd::pgm_string pgm_s2(PSTR("(value)"));
     estd::pgm_string pgm_s2 = Returner::value();
 
-    name += pgm_s2;
+    name += pgm_s4; // FIX: Almost works, just need to implement copy_to
     //name += Returner::value();
     //name += F("(value)");
 #endif

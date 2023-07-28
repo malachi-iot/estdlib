@@ -20,6 +20,22 @@ template <class Impl>
 struct dynamic_array_helper<Impl, enable_if_t<
     Impl::allocator_traits::locking_preference == allocator_locking_preference::iterator> >
 {
+    typedef internal::dynamic_array<Impl> dynamic_array;
+    typedef internal::allocated_array<Impl> array;
+
+    typedef typename array::value_type value_type;
+    typedef typename array::pointer pointer;
+    typedef typename array::const_pointer const_pointer;
+    typedef typename array::size_type size_type;
+
+    // copy from us to outside dest/other
+    static size_type copy_to(const array& a,
+        typename estd::remove_const<value_type>::type* dest,
+        size_type count, size_type pos = 0)
+    {
+        // FIX: TBD
+        return 0;
+    }
 };
 
 template <class Impl>
@@ -27,6 +43,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
     Impl::allocator_traits::locking_preference == allocator_locking_preference::standard ||
     Impl::allocator_traits::locking_preference == allocator_locking_preference::none> >
 {
+    typedef internal::dynamic_array<Impl> dynamic_array;
     typedef internal::allocated_array<Impl> array;
 
     array& a;
@@ -69,13 +86,33 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // copies into da from first to last
     template <class InputIt>
-    void copy(array& da, unsigned pos, InputIt first, InputIt last)
+    void copy_from(array& da, unsigned pos, InputIt first, InputIt last)
     {
         pointer raw = da.lock(pos);
 
         estd::copy(first, last, raw);
 
         da.unlock();
+    }
+
+    // DEBT: Temporary, move the bulk of this back out to dynamic_array and turn
+    // this into a regular 'array' flavor
+    template <class Impl2>
+    //static typename dynamic_array::append_result
+    // DEBT: This return type won't always match, depending on feature flags
+    static size_type
+        append(dynamic_array& a, const allocated_array<Impl2>& copy_from)
+    {
+        size_type len = copy_from.size();
+        auto r = a.grow(len);
+        const size_type current_size = r.starting_size;
+        pointer raw = a.lock(current_size);
+
+        copy_from.copy(raw, len);
+
+        a.unlock();
+
+        return {};
     }
 
     template <class Impl2>

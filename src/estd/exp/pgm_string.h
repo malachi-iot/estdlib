@@ -74,6 +74,9 @@ struct pgm_allocator_traits
         allocator_type,
         pgm_accessor2<T>,
         estd::internal::locking_iterator_modes::ro>;
+
+    static constexpr estd::internal::allocator_locking_preference::_
+        locking_preference = internal::allocator_locking_preference::iterator;
 };
 
 enum class PgmPolicyType
