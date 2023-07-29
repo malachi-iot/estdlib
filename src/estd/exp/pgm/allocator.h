@@ -51,7 +51,7 @@ struct pgm_allocator
     using handle_type = pointer;
 };
 
-template <class T, size_t N = internal::variant_npos()>
+template <class T, size_t N>
 struct pgm_allocator_traits
 {
     using value_type = T;
@@ -81,6 +81,13 @@ struct pgm_allocator_traits
 }   // estd::internal::impl
 
 }   // estd::internal
+
+template <>
+struct allocator_traits<internal::impl::pgm_allocator> :
+    internal::impl::pgm_allocator_traits<char>
+{
+
+};
 
 }
 

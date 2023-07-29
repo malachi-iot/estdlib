@@ -1,5 +1,7 @@
 #pragma once
 
+#include <estd/internal/fwd/variant.h>
+
 namespace estd {
 
 namespace internal {
@@ -8,6 +10,9 @@ namespace impl {
 
 template <class T, bool near = true>
 struct pgm_accessor_impl;
+
+template <class T, size_t N = internal::variant_npos()>
+struct pgm_allocator_traits;
 
 }
 

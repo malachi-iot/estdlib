@@ -9,9 +9,9 @@ namespace estd {
 namespace internal {
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<experimental::pgm_array_string<T, N> >
+struct dynamic_array_helper<experimental::private_array_base<T, N> >
 {
-    typedef experimental::pgm_array_string<T, N> impl_type;
+    typedef experimental::private_array_base<T, N> impl_type;
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
 
@@ -26,7 +26,13 @@ struct dynamic_array_helper<experimental::pgm_array_string<T, N> >
         size_type count, size_type pos = 0)
     {
         const size_type _end = estd::min(count, a.size());
-        memcpy_P(dest, a.offset(pos), _end * sizeof(T));
+        // DEBT: Not 100% convinced that resolves
+        // back to a pointer smoothly or at all, even though compiles OK
+        //const_pointer src = a.ofset(pos);
+        
+        // DEBT: A tad TOO knowledgable about allocated_array internals
+        const_pointer src = a.m_impl.data(pos);
+        memcpy_P(dest, src, _end * sizeof(T));
         return _end;
     }
 };
@@ -34,7 +40,7 @@ struct dynamic_array_helper<experimental::pgm_array_string<T, N> >
 // DEBT: We have to manually specialize this guy too because we DON'T
 // expose locking_preference at allocator_traits level
 template <class O, unsigned N>
-struct out_string_helper<O, experimental::pgm_array_string<char, N> >
+struct out_string_helper<O, experimental::private_array_base<char, N> >
 {
     template <class A>
     static void out(O& out, const A& str)
@@ -49,16 +55,25 @@ struct out_string_helper<O, experimental::pgm_array_string<char, N> >
 
 template <size_t N = internal::variant_npos()>
 struct basic_pgm_string2 :
-    internal::basic_string2<experimental::pgm_array_string<char, N> >
+    internal::basic_string2<experimental::private_array_base<char, N> >
 {
     using base_type = internal::basic_string2<
-        experimental::pgm_array_string<char, N> >;
+        experimental::private_array_base<char, N> >;
 
     constexpr basic_pgm_string2(const char* const s) :
         base_type(s)
     {}
 };
 
+/*
+ * Just needs access to .data()
+ * Consider doing this via out_string_helper specialization instead
+template <size_t N>
+constexpr arduino_ostream& operator <<(arduino_ostream& out,
+    const internal::basic_string2<experimental::private_array_base<char, N> >& s)
+{
+    return out << reinterpret_cast<const __FlashStringHelper*>(s.data());
+}   */
 
 }
 

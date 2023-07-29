@@ -32,6 +32,12 @@ namespace estd {
 // We can start switching 'layer' version of string to derive from basic_string itself by using
 // fixed allocators
 // TODO: Document why it's necessary to remove_const for char_traits CharT
+///
+/// @tparam CharT
+/// @tparam Traits
+/// @tparam Allocator
+/// @tparam StringPolicy
+/// @remarks Largely a wrapper around internal::basic_string, which is much less clumsy
 template<
     class CharT,
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
@@ -82,7 +88,7 @@ public:
 
     template <class TImpl>
     basic_string(const internal::allocated_array<TImpl>& copy_from) :
-        base_t(copy_from) {}
+        base_type(copy_from) {}
 
     typedef CharT value_type;
     typedef Traits traits_type;
@@ -96,13 +102,13 @@ public:
 
     basic_string& erase(size_type index = 0, size_type count = npos)
     {
-        size_type size_minus_index = base_t::size() - index;
+        size_type size_minus_index = base_type::size() - index;
         // NOTE: A bit tricky, if we don't use helper size_minus_index, template
         // resolution fails, presumably because the math operation implicitly
         // creates an int
         size_type to_remove_count = estd::min(count, size_minus_index);
 
-        base_t::_erase(index, to_remove_count);
+        base_type::_erase(index, to_remove_count);
 
         return *this;
     }
