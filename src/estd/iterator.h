@@ -14,6 +14,7 @@
 #include "internal/ios_base.h"
 #include "internal/istream_iterator.h"
 #include "internal/istreambuf_iterator.h"
+#include "internal/ostream_iterator.h"
 
 // TODO: Might need a specialization for our accessor-related things. we'll see
 namespace estd {

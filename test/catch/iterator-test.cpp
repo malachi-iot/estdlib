@@ -100,4 +100,14 @@ TEST_CASE("iterator")
 
         //estd::experimental::filter_iterator
     }
+    SECTION("ostream_iterator")
+    {
+        estd::experimental::ostringstream<128> out;
+        estd::experimental::ostream_iterator<char, decltype(out)> it{out};
+
+        *it++ = 'H';
+        *it++ = 'i';
+
+        REQUIRE(out.rdbuf()->str() == "Hi");
+    }
 }

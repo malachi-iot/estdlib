@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iosfwd.h"
+#include "ostream_iterator.h"
 #include "../string.h"
 
 namespace estd {
@@ -14,12 +15,9 @@ template <class Ostream, class Impl>
 void out_string_helper_iterated(Ostream& out, const allocated_array<Impl>& str)
 {
     typedef allocated_array<Impl> container_type;
-    typedef typename container_type::iterator iterator;
+    experimental::ostream_iterator<typename container_type::value_type, Ostream> o{out};
 
-    iterator it = str.begin();
-    iterator end = str.end();
-
-    while(it != end)    out.put(*it++);
+    estd::copy(str.begin(), str.end(), o);
 }
 
 template <class O, class Impl>
