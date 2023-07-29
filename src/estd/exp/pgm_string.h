@@ -1,4 +1,9 @@
+#pragma once
+
 #include <avr/pgmspace.h>
+
+#include "pgm/allocator.h"
+#include "pgm/read.h"
 
 #include <estd/internal/fwd/variant.h>
 #include <estd/internal/dynamic_array.h>
@@ -14,73 +19,6 @@ namespace estd {
 namespace internal {
 
 namespace impl {
-
-// NOTE: None of the underlying lock mechanisms are gonna work here, so
-// we might be better off with a pure manual allocator like we started
-// with with pgm_allocator
-template <class T, size_t N>
-struct pgm_allocator2 : estd::layer2::allocator<const T, N>
-{
-    using base_type = estd::layer2::allocator<const T, N>;
-
-    ESTD_CPP_FORWARDING_CTOR(pgm_allocator2)
-
-    // DEBT: Kinda sloppy, exposing this this way, but it gets the job done
-    // - Not deriving from pgn_allocator2 itself because then we get ambiguities
-    // for things like const_pointer
-    ESTD_CPP_CONSTEXPR_RET typename base_type::const_pointer data(
-        typename base_type::size_type offset = 0) const
-    {
-        return base_type::data(offset);
-    }
-
-    /* Basically ready, just need to move pgm_accessor2 upwards
-     * so this can get access
-    using iterator = estd::internal::locking_iterator<
-        pgm_allocator2, pgm_accessor2<T>,
-        estd::internal::locking_iterator_modes::ro >;   */
-};
-
-struct pgm_allocator
-{
-    using value_type = char;
-    using pointer = const PROGMEM char*;
-    using handle_type = pointer;
-};
-
-template <class T, bool near = true>
-struct pgm_accessor_impl;
-
-template <class T, bool near = true>
-using pgm_accessor2 = estd::internal::locking_accessor<pgm_accessor_impl<T, near> >;
-
-
-template <class T, size_t N = internal::variant_npos()>
-struct pgm_allocator_traits
-{
-    using value_type = T;
-    using pointer = const PROGMEM value_type*;
-    using const_pointer = pointer;
-    using handle_type = pointer;
-    using handle_with_offset = pointer;
-    using size_type = uint16_t;
-    using allocator_type = pgm_allocator2<T, N>;
-
-    static CONSTEXPR bool is_stateful_exp = false;
-    static CONSTEXPR bool is_locking_exp = false;
-
-    using allocator_valref = allocator_type;;
-    using iterator = estd::internal::locking_iterator<
-        allocator_type,
-        pgm_accessor2<T>,
-        estd::internal::locking_iterator_modes::ro>;
-
-    // NOTE: Tricky behavior - by NOT exposing this, dynamic_array_helper 
-    // specialization can't specialize ON it, opening doorway to specializing
-    // on Impl instead
-    //static constexpr estd::internal::allocator_locking_preference::_
-    //    locking_preference = internal::allocator_locking_preference::iterator;
-};
 
 enum class PgmPolicyType
 {
@@ -126,66 +64,6 @@ struct PgmPolicy<estd::internal::variant_npos()> : pgm_allocator_traits
 
 
 
-template <typename T, bool near = true>
-T pgm_read(const void* address);
-
-template <>
-char pgm_read<char, true>(const void* address)
-{
-    return pgm_read_byte_near(address);
-}
-
-#ifdef __AVR_HAVE_ELPM__
-template <>
-char pgm_read<char, false>(const void* address)
-{
-    return pgm_read_byte_far(address);
-}
-#endif
-
-template <>
-uint16_t pgm_read<uint16_t>(const void* address)
-{
-    return pgm_read_word_near(address);
-}
-
-template <>
-uint32_t pgm_read<uint32_t>(const void* address)
-{
-    return pgm_read_dword_near(address);
-}
-
-
-template <class T, bool near>
-struct pgm_accessor_impl
-{
-    ESTD_CPP_STD_VALUE_TYPE(T);
-
-private:
-    const_pointer p;
-
-public:
-    constexpr explicit pgm_accessor_impl(const_pointer p) : p{p}   {}
-
-    template <class Alloc>
-    constexpr explicit pgm_accessor_impl(Alloc, const_pointer p) : p{p}       {}
-
-    typedef const_pointer& offset_type;
-    typedef const const_pointer& const_offset_type;
-    typedef value_type locked_type;
-    typedef value_type const_locked_type;
-
-    offset_type offset() { return p; }
-    const_offset_type offset() const { return p; }
-
-    locked_type lock() { return pgm_read<T, near>(p); }
-    const_locked_type lock() const { return pgm_read<T, near>(p); }
-    static void unlock() {}
-};
-
-
-
-
 }
 
 
@@ -200,17 +78,7 @@ namespace experimental {
 template <class T, bool near = true>
 class pgm_accessor;
 
-// Experimenting with strlen-less end() code, but it seems to gain nothing
-// really
-#define FEATURE_ESTD_PGM_EXP_IT 0
-
-// Dogfooding in allocator.  So far it just seems to make it more complicated,
-// but a feeling tells me this will be useful
-#define FEATURE_ESTD_PGM_ALLOCATOR 1
-
-// TODO: Use __WITH_AVRLIBC__ in features area
-
-
+// "legacy" flavor, phasing out
 template <class T>
 class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
 {
@@ -221,7 +89,7 @@ protected:
 
     const_pointer p;
 
-    value_type value() const { return internal::impl::pgm_read<T>(p); }
+    value_type value() const { return internal::pgm_read<T>(p); }
 
 #if FEATURE_ESTD_PGM_EXP_IT
     const bool is_null() const
@@ -503,42 +371,6 @@ struct basic_string2<experimental::pgm_array_string<char, N> >
 
 
 
-template <typename T, unsigned N>
-struct dynamic_array_helper<experimental::pgm_array_string<T, N> >
-{
-    typedef experimental::pgm_array_string<T, N> impl_type;
-    typedef internal::dynamic_array<impl_type> dynamic_array;
-    typedef internal::allocated_array<impl_type> array;
-
-    typedef typename array::value_type value_type;
-    typedef typename array::pointer pointer;
-    typedef typename array::const_pointer const_pointer;
-    typedef typename array::size_type size_type;
-
-    // copy from us to outside dest/other
-    static size_type copy_to(const array& a,
-        typename estd::remove_const<value_type>::type* dest,
-        size_type count, size_type pos = 0)
-    {
-        const size_type _end = estd::min(count, a.size());
-        memcpy_P(dest, a.offset(pos), _end * sizeof(T));
-        return _end;
-    }
-};
-
-// DEBT: We have to manually specialize this guy too because we DON'T
-// expose locking_preference at allocator_traits level
-template <class O, unsigned N>
-struct out_string_helper<O, experimental::pgm_array_string<char, N> >
-{
-    template <class A>
-    static void out(O& out, const A& str)
-    {
-        out_string_helper_iterated(out, str);
-    }
-};
-
-
 }   // estd::internal
 
 template <>
@@ -572,19 +404,6 @@ struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
 };
 
 
-template <size_t N = internal::variant_npos()>
-struct basic_pgm_string2 :
-    internal::basic_string2<experimental::pgm_array_string<char, N> >
-{
-    using base_type = internal::basic_string2<
-        experimental::pgm_array_string<char, N> >;
-
-    constexpr basic_pgm_string2(const char* const s) :
-        base_type(s)
-    {}
-};
-
-
 using pgm_string = basic_pgm_string<>;
 
 // Special case insertion operator for arduino streams who can handle
@@ -598,4 +417,3 @@ constexpr arduino_ostream& operator <<(arduino_ostream& out,
 
 }
 
-#include "../internal/macro/pop.h"

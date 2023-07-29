@@ -4,7 +4,7 @@
 #include <estd/string.h>
 
 #if __AVR__
-#include <estd/exp/pgm_string.h>
+#include <estd/exp/pgm/string2.h>
 
 const char test1[] PROGMEM = "Hello AVR: ";
 
