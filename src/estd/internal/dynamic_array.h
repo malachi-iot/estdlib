@@ -468,18 +468,6 @@ public:
     template <class TForeignImpl>
     append_result append(const allocated_array<TForeignImpl>& source)
     {
-        /*
-        size_type len = source.size();
-
-        const typename TForeignImpl::value_type* append_from = source.clock();
-
-        append_result ar = append(append_from, len);
-
-        source.cunlock();
-
-        return ar;
-
-        */
         return helper::append(*this, source);
     }
 

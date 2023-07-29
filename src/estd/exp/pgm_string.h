@@ -75,8 +75,11 @@ struct pgm_allocator_traits
         pgm_accessor2<T>,
         estd::internal::locking_iterator_modes::ro>;
 
-    static constexpr estd::internal::allocator_locking_preference::_
-        locking_preference = internal::allocator_locking_preference::iterator;
+    // NOTE: Tricky behavior - by NOT exposing this, dynamic_array_helper 
+    // specialization can't specialize ON it, opening doorway to specializing
+    // on Impl instead
+    //static constexpr estd::internal::allocator_locking_preference::_
+    //    locking_preference = internal::allocator_locking_preference::iterator;
 };
 
 enum class PgmPolicyType
@@ -163,6 +166,9 @@ private:
 
 public:
     constexpr explicit pgm_accessor_impl(const_pointer p) : p{p}   {}
+
+    template <class Alloc>
+    constexpr explicit pgm_accessor_impl(Alloc, const_pointer p) : p{p}       {}
 
     typedef const_pointer& offset_type;
     typedef const const_pointer& const_offset_type;
@@ -259,6 +265,7 @@ struct private_array_base :
     using typename base_type::size_type;
     using typename base_type::const_pointer;
     using base_type::value_type;
+    using allocator_traits = internal::impl::pgm_allocator_traits<T>;
 
     // DEBT: Dummy value so that regular estd::basic_string gets its
     // dependency satisfied
@@ -277,6 +284,12 @@ struct private_array_base :
     constexpr private_array_base(const_pointer data) :
         alloc(data)
     {}
+
+    allocator_type& get_allocator() { return alloc; }
+    const_pointer offset(unsigned pos) const 
+    {
+        return alloc.data(pos);
+    }
 #else
     const_pointer data_;
 
@@ -362,8 +375,6 @@ struct pgm_array_string : private_array_base<T, N>
     using typename base_type::accessor;
     using typename base_type::iterator;
     using policy_type = internal::PgmStringPolicy<N>;
-
-    using allocator_traits = internal::impl::pgm_allocator_traits<T>;
 
     using const_iterator = iterator;
 
@@ -491,7 +502,32 @@ struct basic_string2<experimental::pgm_array_string<char, N> >
 };  */
 
 
-}
+
+template <unsigned N>
+struct dynamic_array_helper<experimental::pgm_array_string<char, N> >
+{
+    typedef experimental::pgm_array_string<char, N> impl_type;
+    typedef internal::dynamic_array<impl_type> dynamic_array;
+    typedef internal::allocated_array<impl_type> array;
+
+    typedef typename array::value_type value_type;
+    typedef typename array::pointer pointer;
+    typedef typename array::const_pointer const_pointer;
+    typedef typename array::size_type size_type;
+
+    // copy from us to outside dest/other
+    static size_type copy_to(const array& a,
+        typename estd::remove_const<value_type>::type* dest,
+        size_type count, size_type pos = 0)
+    {
+        const size_type _end = estd::min(count, a.size());
+        memcpy_P(dest, a.offset(pos), _end);
+        return _end;
+    }
+};
+
+
+}   // estd::internal
 
 template <>
 struct allocator_traits<internal::impl::pgm_allocator> :

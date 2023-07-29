@@ -18,5 +18,10 @@ Only exists to typedef `policy_type` for usage down the line by dynamic_array
 
 Implements familiar core array operations: `at`, `operator[]`, `begin`, etc.
 
+Requires from Impl:
+
+- offset
+- get_accessor
+
 Noteworthy is that `accessor` is employed here rather than direct references, though
 `accessor` can potentially be configured to be a reference.  [See documentation on Accessors](concepts.md#accessors)

@@ -1,9 +1,11 @@
-#include <estd/internal/dynamic_array.h>
-
 #include <catch.hpp>
+
+#include <estd/internal/dynamic_array.h>
 
 using namespace estd;
 using namespace estd::internal;
+
+#include "mem.h"
 
 #include "macro/push.h"
 
@@ -28,6 +30,26 @@ struct experimental::private_array<pa_impl> : public array<int, 10>
     {
         estd::copy_n(base_type::data(), count, dest);
     }
+};
+
+static constexpr const int data_[] = {0, 1, 2, 3};
+
+struct synthetic_impl
+{
+    using size_type = unsigned;
+
+    using allocator_type = _allocator<const int>;
+    struct allocator_traits : estd::allocator_traits<allocator_type>
+    {
+        using allocator_type = _allocator<const int>;
+        static constexpr const internal::allocator_locking_preference::_ locking_preference =
+            internal::allocator_locking_preference::iterator;
+    };
+
+    static allocator_type get_allocator() { return {}; }
+
+    static unsigned size() { return 4; }
+    static const int* offset(unsigned v) { return data_ + v; }
 };
 
 TEST_CASE("dynamic array")
@@ -88,6 +110,16 @@ TEST_CASE("dynamic array")
         //REQUIRE(r3.has_value() == false);
         //REQUIRE(r3.error() == 0);
 #endif
+    }
+    SECTION("helper")
+    {
+        int dest[10];
+        estd::internal::allocated_array<synthetic_impl> a;
+        estd::internal::dynamic_array_helper<synthetic_impl> helper;
+
+        helper.copy_to(a, dest, 2);
+
+        REQUIRE(dest[1] == 1);
     }
 }
 

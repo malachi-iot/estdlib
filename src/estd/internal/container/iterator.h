@@ -118,11 +118,23 @@ public:
         return current.h_exp() - subtrahend.current.h_exp();
     }
 
+    this_type& operator += (ptrdiff_t offset)
+    {
+        current.h_exp() += offset;
+        return *this;
+    }
+
+    this_type& operator -= (ptrdiff_t offset)
+    {
+        current.h_exp() -= offset;
+        return *this;
+    }
+
     inline this_type operator+(ptrdiff_t offset) const
     {
         this_type it(*this);
 
-        it.current.h_exp() += offset;
+        it += offset;
 
         return it;
     }

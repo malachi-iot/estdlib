@@ -5,7 +5,7 @@
 #include <estd/internal/container/iterator.h>
 #include <cstddef> // for ptrdiff_t
 
-// reference allocator for inbuild mechanisms.  basically a crummy test-only
+// reference allocator for inbuilt mechanisms.  basically a crummy test-only
 // version of std new_allocator
 template <class T>
 class _allocator

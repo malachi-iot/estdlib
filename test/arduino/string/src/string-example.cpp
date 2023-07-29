@@ -33,6 +33,7 @@ void setup()
 #if __AVR__
     // Compiles, not run tested yet
     //bool v = pgm_s == "Hello";
+    char c = pgm_s4[0];
 #endif
 }
 

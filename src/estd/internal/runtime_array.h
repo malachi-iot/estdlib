@@ -54,6 +54,8 @@ public:
 
     typedef dynamic_array_helper<impl_type> helper;
 
+    friend class dynamic_array_helper<impl_type>;
+
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
     // allocated array pointed to a static const(expr) * of some kind
