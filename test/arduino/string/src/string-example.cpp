@@ -65,7 +65,7 @@ void loop()
 
 #if USE_IOS
 #if __AVR__
-    cout << pgm_s;
+    cout << pgm_s << pgm_s4;
 #else
     cout << F("Hello: ");
 #endif

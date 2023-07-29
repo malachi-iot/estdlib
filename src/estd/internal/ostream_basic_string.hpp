@@ -5,6 +5,47 @@
 
 namespace estd {
 
+namespace internal {
+
+template <class Ostram, class Impl, class = void>
+struct out_string_helper;
+
+template <class Ostream, class Impl>
+void out_string_helper_iterated(Ostream& out, const allocated_array<Impl>& str)
+{
+    typedef allocated_array<Impl> container_type;
+    typedef typename container_type::iterator iterator;
+
+    iterator it = str.begin();
+    iterator end = str.end();
+
+    while(it != end)    out.put(*it++);
+}
+
+template <class O, class Impl>
+struct out_string_helper<O, Impl, typename estd::enable_if<
+    Impl::allocator_traits::locking_preference == allocator_locking_preference::iterator>::type>
+{
+    static void out(O& out, const allocated_array<Impl>& str)
+    {
+        out_string_helper_iterated(out, str);
+    }
+};
+
+template <class O, class Impl>
+struct out_string_helper<O, Impl, typename estd::enable_if<
+    !(Impl::allocator_traits::locking_preference == allocator_locking_preference::iterator)>::type>
+{
+    static void out(O& out, const allocated_array<Impl>& str)
+    {
+        out.write(str.clock(), str.size());
+        str.cunlock();
+    }
+};
+
+
+}
+
 /*
 template <class TStreambuf, class TBase, class TStringAllocator, class TStringPolicy>
 inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
@@ -41,13 +82,18 @@ inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
     static_assert (estd::is_same<l_char_type, r_char_type>::value, "character types must match");
 #endif
 
-    out.write(str.clock(), str.size());
-    str.cunlock();
+    typedef internal::out_string_helper<detail::basic_ostream<TStreambuf, TBase>, TStringImpl> helper;
+
+    helper::out(out, str);
+
+    //out.write(str.clock(), str.size());
+    //str.cunlock();
     return out;
 }
 
 
 // EXPERIMENTAL
+/*
 template <class TStreambuf, class TBase, class TImpl>
 inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
     detail::basic_ostream<TStreambuf, TBase>& out,
@@ -63,6 +109,6 @@ inline detail::basic_ostream<TStreambuf, TBase>& operator <<(
     while(it != end)    out.put(*it++);
 
     return out;
-}
+}   */
 
 }

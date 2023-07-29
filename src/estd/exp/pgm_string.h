@@ -343,7 +343,6 @@ struct private_array_base :
             return *this;
         }
     };
-#endif
 
     constexpr iterator create_iterator(size_t pos) const
     {
@@ -359,6 +358,7 @@ struct private_array_base :
     {
         return accessor { data(index) };
     }
+#endif
 };
 
 
@@ -503,10 +503,10 @@ struct basic_string2<experimental::pgm_array_string<char, N> >
 
 
 
-template <unsigned N>
-struct dynamic_array_helper<experimental::pgm_array_string<char, N> >
+template <typename T, unsigned N>
+struct dynamic_array_helper<experimental::pgm_array_string<T, N> >
 {
-    typedef experimental::pgm_array_string<char, N> impl_type;
+    typedef experimental::pgm_array_string<T, N> impl_type;
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
 
@@ -521,8 +521,20 @@ struct dynamic_array_helper<experimental::pgm_array_string<char, N> >
         size_type count, size_type pos = 0)
     {
         const size_type _end = estd::min(count, a.size());
-        memcpy_P(dest, a.offset(pos), _end);
+        memcpy_P(dest, a.offset(pos), _end * sizeof(T));
         return _end;
+    }
+};
+
+// DEBT: We have to manually specialize this guy too because we DON'T
+// expose locking_preference at allocator_traits level
+template <class O, unsigned N>
+struct out_string_helper<O, experimental::pgm_array_string<char, N> >
+{
+    template <class A>
+    static void out(O& out, const A& str)
+    {
+        out_string_helper_iterated(out, str);
     }
 };
 
