@@ -6,7 +6,7 @@
 #if __AVR__
 #include <estd/exp/pgm/string2.h>
 
-const char test1[] PROGMEM = "Hello AVR: ";
+const char test1[] PROGMEM = "Hello AVR:";
 
 //static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
 //constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
@@ -58,14 +58,16 @@ void loop()
     //estd::pgm_string pgm_s2(PSTR("(value)"));
     estd::pgm_string pgm_s2 = Returner::value();
 
-    name += pgm_s4; // FIX: Almost works, just need to implement copy_to
+    //name += pgm_s;
+    name += pgm_s4;
     //name += Returner::value();
     //name += F("(value)");
 #endif
 
 #if USE_IOS
 #if __AVR__
-    cout << pgm_s << pgm_s4;
+    cout << pgm_s;
+    cout << pgm_s4; // NOTE: Uses a lot more memory than pgm_s
 #else
     cout << F("Hello: ");
 #endif

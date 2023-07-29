@@ -42,10 +42,18 @@ struct dynamic_array_helper<experimental::private_array_base<T, N> >
 template <class O, unsigned N>
 struct out_string_helper<O, experimental::private_array_base<char, N> >
 {
+
+    // DEBT: Use 'arduino_ostream' not random O
     template <class A>
     static void out(O& out, const A& str)
     {
+#ifdef ARDUINO
+        const auto& allocator = str.get_allocator();
+        const char* data = allocator.data();
+        out << reinterpret_cast<const __FlashStringHelper*>(data);
+#else
         out_string_helper_iterated(out, str);
+#endif
     }
 };
 
@@ -65,15 +73,6 @@ struct basic_pgm_string2 :
     {}
 };
 
-/*
- * Just needs access to .data()
- * Consider doing this via out_string_helper specialization instead
-template <size_t N>
-constexpr arduino_ostream& operator <<(arduino_ostream& out,
-    const internal::basic_string2<experimental::private_array_base<char, N> >& s)
-{
-    return out << reinterpret_cast<const __FlashStringHelper*>(s.data());
-}   */
 
 }
 

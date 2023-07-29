@@ -40,6 +40,8 @@ struct private_array_base : Policy
     {}
 
     allocator_type& get_allocator() { return alloc; }
+    const allocator_type& get_allocator() const { return alloc; }
+
     const_pointer offset(unsigned pos) const 
     {
         return alloc.data(pos);
