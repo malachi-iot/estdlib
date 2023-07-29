@@ -47,15 +47,26 @@ struct out_string_helper<O, experimental::private_array_base<char, N> >
     template <class A>
     static void out(O& out, const A& str)
     {
+        out_string_helper_iterated(out, str);
+    }
+};
+
+
 #ifdef ARDUINO
+template <unsigned N>
+struct out_string_helper<arduino_ostream, experimental::private_array_base<char, N> >
+{
+
+    // DEBT: Use 'arduino_ostream' not random O
+    template <class A>
+    static void out(arduino_ostream& out, const A& str)
+    {
         const auto& allocator = str.get_allocator();
         const char* data = allocator.data();
         out << reinterpret_cast<const __FlashStringHelper*>(data);
-#else
-        out_string_helper_iterated(out, str);
-#endif
     }
 };
+#endif
 
 
 }   // estd::internal
