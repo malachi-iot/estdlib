@@ -214,7 +214,10 @@ class basic_string
                 estd::internal::single_fixedbuf_allocator <CharT, N>,
 #endif
                 StringPolicy>
-                base_t;
+                base_type;
+
+    typedef base_type base_t;
+
 public:
     basic_string() {}
 
@@ -223,25 +226,16 @@ public:
         base_t::operator =(s);
     }
 
-    template <class TForeignAllocator, class TForeignTraits>
-    basic_string(const estd::basic_string<
-            CharT,
-            typename TForeignTraits::char_traits,
-            TForeignAllocator,
-            TForeignTraits>& copy_from)
+    template <class Impl>
+    basic_string(const estd::internal::allocated_array<Impl>& copy_from)
     {
-        base_t::operator=(copy_from);
+        base_type::operator=(copy_from);
     }
 
-    // using ForeignCharT and ForeignTraits because incoming string might use const char
-    template <class ForeignCharT, class ForeignTraits, class ForeignAllocator>
-    basic_string& operator=(const estd::basic_string<
-                            ForeignCharT,
-                            typename ForeignTraits::char_traits,
-                            ForeignAllocator,
-                            ForeignTraits>& copy_from)
+    template <class Impl>
+    basic_string& operator=(const estd::internal::allocated_array<Impl>& copy_from)   // NOLINT
     {
-        base_t::operator =(copy_from);
+        base_type::operator=(copy_from);
         return *this;
     }
 
@@ -309,7 +303,8 @@ class basic_string
             estd::internal::single_fixedbuf_allocator < CharT, N, CharT* >,
 #endif
             StringPolicy >
-            base_t;
+            base_type;
+    typedef base_type base_t;
     typedef typename base_t::impl_type helper_type;
 
 public:
@@ -374,19 +369,19 @@ public:
         if(n >= 0) base_t::impl().size(n);
     }
 
-    template <class ForeignAllocator, class ForeignTraits>
-    basic_string(const estd::basic_string<CharT, typename ForeignTraits::char_traits, ForeignAllocator, ForeignTraits> & copy_from)
+    template <class Impl>
+    basic_string(const estd::internal::allocated_array<Impl>& copy_from)
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
-        : base_t(copy_from.clock())
+        : base_type(copy_from.clock())
     {
     }
 
-    template <class ForeignAllocator, class ForeignTraits>
-    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits>& copy_from)
+    template <class Impl>
+    basic_string& operator=(const estd::internal::allocated_array<Impl>& copy_from) // NOLINT
     {
-        base_t::operator =(copy_from);
+        base_type::operator =(copy_from);
         return *this;
     }
 

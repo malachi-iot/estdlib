@@ -121,6 +121,17 @@ TEST_CASE("dynamic array")
 
         REQUIRE(dest[1] == 1);
     }
+    SECTION("assign/copy")
+    {
+        estd::internal::allocated_array<synthetic_impl> a;
+        da1_type da1_1;
+
+        da1.push_back(1);
+
+        da1_1 = da1;
+
+        REQUIRE(da1_1.size() == 1);
+    }
 }
 
 #include "macro/pop.h"
