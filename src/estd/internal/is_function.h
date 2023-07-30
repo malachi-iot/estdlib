@@ -79,7 +79,7 @@ struct is_function<Ret(Args......) const volatile &&> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) noexcept> : true_type {};
+struct is_function<Ret(Args...,...) noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) const noexcept> : true_type {};
 template<class Ret, class... Args>
@@ -87,11 +87,11 @@ struct is_function<Ret(Args...) volatile noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) const volatile noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) volatile noexcept> : true_type {};
+struct is_function<Ret(Args...,...) volatile noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const volatile noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const volatile noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) & noexcept> : true_type {};
 template<class Ret, class... Args>
@@ -101,13 +101,13 @@ struct is_function<Ret(Args...) volatile & noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) const volatile & noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) & noexcept> : true_type {};
+struct is_function<Ret(Args...,...) & noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const & noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const & noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) volatile & noexcept> : true_type {};
+struct is_function<Ret(Args...,...) volatile & noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const volatile & noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const volatile & noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) && noexcept> : true_type {};
 template<class Ret, class... Args>
@@ -117,12 +117,12 @@ struct is_function<Ret(Args...) volatile && noexcept> : true_type {};
 template<class Ret, class... Args>
 struct is_function<Ret(Args...) const volatile && noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) && noexcept> : true_type {};
+struct is_function<Ret(Args...,...) && noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const && noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const && noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) volatile && noexcept> : true_type {};
+struct is_function<Ret(Args...,...) volatile && noexcept> : true_type {};
 template<class Ret, class... Args>
-struct is_function<Ret(Args......) const volatile && noexcept> : true_type {};
+struct is_function<Ret(Args...,...) const volatile && noexcept> : true_type {};
 #endif
 #endif // __cpp_variadic_templates
