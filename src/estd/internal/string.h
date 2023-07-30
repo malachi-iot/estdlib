@@ -33,7 +33,8 @@ public:
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string2)
 
-    int compare(const_pointer s, size_type s_size) const
+    template <typename InputIt>
+    int compare(InputIt s, size_type s_size) const
     {
         size_type raw_size = base_type::size();
 

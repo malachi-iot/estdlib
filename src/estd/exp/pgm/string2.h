@@ -47,6 +47,18 @@ struct dynamic_array_helper<experimental::private_array_base<T, N> >
         // lhs - so we have to flip the result here
         return -strncmp_P(rhs, src, sz);
     }
+
+    // rhs = null terminated C string
+    // UNTESTED
+    template <class InputIt>
+    static bool starts_with(const array& lhs, InputIt rhs)
+    {
+        const_pointer s = lhs.begin();
+
+        // Couldn't find any pgmspace API that really handled this, so doing
+        // it manually
+        return starts_with(lhs, rhs);
+    }
 };
 
 // DEBT: We have to manually specialize this guy too because we DON'T
@@ -55,7 +67,6 @@ template <class O, unsigned N>
 struct out_string_helper<O, experimental::private_array_base<char, N> >
 {
 
-    // DEBT: Use 'arduino_ostream' not random O
     template <class A>
     static void out(O& out, const A& str)
     {
@@ -68,8 +79,6 @@ struct out_string_helper<O, experimental::private_array_base<char, N> >
 template <unsigned N>
 struct out_string_helper<arduino_ostream, experimental::private_array_base<char, N> >
 {
-
-    // DEBT: Use 'arduino_ostream' not random O
     template <class A>
     static void out(arduino_ostream& out, const A& str)
     {
