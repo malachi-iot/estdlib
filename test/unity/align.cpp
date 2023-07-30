@@ -14,11 +14,6 @@ static void test_align_1()
     TEST_ASSERT_EQUAL_INT(sizeof(int), sizeof(data_type));
 }
 
-static void test_align_2()
-{
-    experimental::aligned_storage_array<TestStruct, 10> a;
-}
-
 #ifdef ESP_IDF_TESTING
 TEST_CASE("alignment tests", "[align]")
 #else
