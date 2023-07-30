@@ -56,6 +56,8 @@ template <class TImpl>
 class dynamic_array : public allocated_array<TImpl>
 {
     typedef allocated_array<TImpl> base_type;
+
+protected:
     typedef dynamic_array_helper<TImpl> helper;
 
 public:

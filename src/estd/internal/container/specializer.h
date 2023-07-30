@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../fwd/dynamic_array.h"
+#include "../fwd/string.h"
 #include "../../traits/allocator_traits.h"
 #include "../../algorithm.h"
 
@@ -130,6 +131,8 @@ struct dynamic_array_helper<Impl, enable_if_t<
     static bool starts_with(const array& a, const allocated_array<Impl2>& compare_to)
     {
         const value_type* s = a.clock();
+
+        // DEBT: Try not to presume rhs/compare_to is lockable
         const value_type* t = compare_to.clock();
 
         bool r = starts_with_n(s, t, a.size(), compare_to.size());
@@ -169,6 +172,8 @@ struct dynamic_array_helper<Impl, enable_if_t<
     {
         // gets here if size matches
         const value_type* raw = lhs.clock();
+
+        // DEBT: we don't want to presume rhs can lock
         const value_type* s = rhs.clock();
 
         // DEBT: Need to do a proper -1, 0, 1 compare here
@@ -178,6 +183,32 @@ struct dynamic_array_helper<Impl, enable_if_t<
         rhs.cunlock();
 
         return result;
+    }
+
+
+    /// Low-level compare - does NOT check for matching size!
+    static int compare(const basic_string2<Impl>& lhs, const_pointer s, size_type s_size)
+    {
+        typedef typename basic_string2<Impl>::traits_type traits_type;
+        const_pointer raw = lhs.clock();
+
+        const int result = traits_type::compare(raw, s, s_size);
+
+        lhs.cunlock();
+
+        return result;
+    }
+
+    // rhs = null terminated C string
+    static bool starts_with(const array& lhs, const_pointer rhs)
+    {
+        const_pointer s = lhs.clock();
+
+        bool r = starts_with_n(s, rhs, lhs.size());
+
+        lhs.cunlock();
+
+        return r;
     }
 };
 

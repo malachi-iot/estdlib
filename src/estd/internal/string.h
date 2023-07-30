@@ -15,6 +15,8 @@ class basic_string2 : public internal::dynamic_array<Impl>
 protected:
     typedef internal::dynamic_array<Impl> base_type;
 
+    typedef typename base_type::helper helper;
+
 public:
     typedef typename base_type::allocator_type  allocator_type;
     typedef typename base_type::size_type size_type;
@@ -39,21 +41,11 @@ protected:
         if(raw_size > s_size) return 1;
 
         // gets here if size matches
-        const_pointer raw = base_type::clock();
-
-        const int result = traits_type::compare(raw, s, raw_size);
-
-        base_type::cunlock();
-
-        return result;
+        return helper::compare(*this, s, s_size);
     }
 
 public:
     ESTD_CPP_DEFAULT_CTOR(basic_string2)
-
-    template <class TImpl>
-    EXPLICIT basic_string2(const internal::allocated_array<TImpl>& copy_from) :
-        base_type(copy_from) {}
 
     size_type length() const { return base_type::size(); }
 
@@ -79,12 +71,7 @@ public:
     // compare to a C-style string
     bool starts_with(const_pointer compare_to) const
     {
-        const_pointer s = base_type::clock();
-
-        bool r = starts_with_n(s, compare_to, length());
-
-        base_type::cunlock();
-        return r;
+        return helper::starts_with(*this, compare_to);
     }
 
 
