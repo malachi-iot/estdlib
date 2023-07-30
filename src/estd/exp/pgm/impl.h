@@ -125,7 +125,14 @@ struct private_array_base : Policy
 #endif
 };
 
-
-
 }
+
+namespace avr { namespace impl {
+
+template <class T, size_t N, class Policy = estd::internal::impl::PgmPolicy<
+        T, internal::impl::PgmPolicyType::String, N> >
+using pgm_array = experimental::private_array_base<T, N, Policy>;
+
+}}
+
 }

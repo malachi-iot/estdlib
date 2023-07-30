@@ -1,6 +1,12 @@
 #pragma once
 
-#include "../pgm_string.h"
+#include "allocator.h"
+#include "impl.h"
+#include "read.h"
+#include "policy.h"
+
+#include "../../internal/string.h"
+#include "../../ostream.h"
 
 #include "../../internal/macro/push.h"
 
@@ -9,9 +15,9 @@ namespace estd {
 namespace internal {
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<experimental::private_array_base<T, N> >
+struct dynamic_array_helper<avr::impl::pgm_array<T, N> >
 {
-    typedef experimental::private_array_base<T, N> impl_type;
+    typedef avr::impl::pgm_array<T, N> impl_type;
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
 
@@ -64,7 +70,7 @@ struct dynamic_array_helper<experimental::private_array_base<T, N> >
 // DEBT: We have to manually specialize this guy too because we DON'T
 // expose locking_preference at allocator_traits level
 template <class O, unsigned N>
-struct out_string_helper<O, experimental::private_array_base<char, N> >
+struct out_string_helper<O, avr::impl::pgm_array<char, N> >
 {
 
     template <class A>
@@ -77,7 +83,7 @@ struct out_string_helper<O, experimental::private_array_base<char, N> >
 
 #ifdef ARDUINO
 template <unsigned N>
-struct out_string_helper<arduino_ostream, experimental::private_array_base<char, N> >
+struct out_string_helper<arduino_ostream, avr::impl::pgm_array<char, N> >
 {
     template <class A>
     static void out(arduino_ostream& out, const A& str)
@@ -95,15 +101,16 @@ struct out_string_helper<arduino_ostream, experimental::private_array_base<char,
 
 template <size_t N = internal::variant_npos()>
 struct basic_pgm_string2 :
-    internal::basic_string2<experimental::private_array_base<char, N> >
+    internal::basic_string2<avr::impl::pgm_array<char, N> >
 {
-    using base_type = internal::basic_string2<
-        experimental::private_array_base<char, N> >;
+    using base_type = internal::basic_string2<avr::impl::pgm_array<char, N> >;
 
     constexpr basic_pgm_string2(const char* const s) :
         base_type(s)
     {}
 };
+
+using pgm_string2 = basic_pgm_string2<>;
 
 
 }
