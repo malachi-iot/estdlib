@@ -357,7 +357,10 @@ TEST_CASE("locale")
             char* last = n.put(val.data(), fmt, ' ', 100);
             *last = 0;
 
-            REQUIRE(val == "100");
+            // FIX: gcc 10.2.1 this glitches, clang works OK
+            const bool r = val == "100";
+
+            REQUIRE(r);
         }
     }
     SECTION("cbase")
