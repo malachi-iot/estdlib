@@ -43,7 +43,7 @@ struct dynamic_array_helper<avr::impl::pgm_array<T, N> >
     }
 
 
-    static int compare(const basic_string2<impl_type>& lhs, const_pointer rhs, size_type sz)
+    static int compare(const detail::basic_string<impl_type>& lhs, const_pointer rhs, size_type sz)
     {
         const auto& allocator = lhs.get_allocator();
         const_pointer src = allocator.data();
@@ -99,18 +99,18 @@ struct out_string_helper<arduino_ostream, avr::impl::pgm_array<char, N> >
 }   // estd::internal
 
 
-template <size_t N = internal::variant_npos()>
+template <class CharT, size_t N = internal::variant_npos()>
 struct basic_pgm_string2 :
-    internal::basic_string2<avr::impl::pgm_array<char, N> >
+    detail::basic_string<avr::impl::pgm_array<CharT, N> >
 {
-    using base_type = internal::basic_string2<avr::impl::pgm_array<char, N> >;
+    using base_type = detail::basic_string<avr::impl::pgm_array<CharT, N> >;
 
     constexpr basic_pgm_string2(const char* const s) :
         base_type(s)
     {}
 };
 
-using pgm_string2 = basic_pgm_string2<>;
+using pgm_string2 = basic_pgm_string2<char>;
 
 
 }

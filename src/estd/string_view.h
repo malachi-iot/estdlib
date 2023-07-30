@@ -13,10 +13,10 @@ template <class CharT,
           class Policy
           >
 class basic_string_view :
-    public internal::basic_string2<internal::impl::allocated_array<
+    public detail::basic_string<internal::impl::allocated_array<
             layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
 {
-    typedef internal::basic_string2<internal::impl::allocated_array<
+    typedef detail::basic_string<internal::impl::allocated_array<
         layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
         base_type;
 

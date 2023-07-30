@@ -10,6 +10,7 @@
 #include "traits/char_traits.h"
 #include "traits/string.h"
 #include "internal/string.h"
+#include "internal/fwd/string.h"
 #include "internal/fwd/string_view.h"
 #include "policy/string.h"
 #include "port/string.h"
@@ -122,7 +123,7 @@ public:
 
 
     template <class Impl2>
-    basic_string& append(const internal::basic_string2<Impl2>& str)
+    basic_string& append(const internal::allocated_array<Impl2>& str)
     {
         assert_append(base_type::append(str));
         return *this;
@@ -191,11 +192,7 @@ typedef basic_string<char> string;
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = estd::char_traits<CharT >,
-        class StringPolicy = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type
-                >
+template<class CharT, size_t N, bool null_terminated, class Traits, class StringPolicy>
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,
@@ -255,23 +252,6 @@ public:
 };
 
 
-#if __cpp_alias_templates
-template <size_t N, bool null_terminated = true>
-using string = basic_string<char, N, null_terminated>;
-#else
-template <size_t N, bool null_terminated = true>
-class string : public basic_string<char, N, null_terminated>
-{
-    typedef basic_string<char, N, null_terminated> base_t;
-
-public:
-    string() {}
-
-    string(const char* s) : base_t(s)
-    {
-    }
-};
-#endif
 
 }
 
@@ -408,7 +388,7 @@ public:
 };
 
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template <size_t N = 0, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
 #endif
@@ -579,8 +559,7 @@ template< class CharT, class Traits, class Alloc, class Policy, class TString >
 
 
 template <class Impl, class T>
-estd::internal::basic_string2<Impl>& operator+=(
-    estd::internal::basic_string2<Impl>& lhs, T rhs)
+detail::basic_string<Impl>& operator+=(detail::basic_string<Impl>& lhs, T rhs)
 {
     lhs.append(rhs);
     return lhs;
@@ -614,8 +593,8 @@ bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft,
 
 template <class Impl>
 ESTD_CPP_CONSTEXPR_RET bool operator ==(
-    const internal::basic_string2<Impl>& lhs,
-    typename internal::basic_string2<Impl>::const_pointer rhs)
+    const detail::basic_string<Impl>& lhs,
+    typename detail::basic_string<Impl>::const_pointer rhs)
 {
     return lhs.compare(rhs) == 0;
 }
@@ -642,6 +621,7 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 // NOTE: Retains TChar rather than deducing from Traits because Traits always
 // removes const, while TChar can be const.  Will create complexities if and when
 // wchar needs to be supported
+// DEBT: Rework to use num_get/from_string
 template <class TChar, class Traits, class Alloc, class TStringTraits>
 long stol(
         const basic_string<TChar, Traits, Alloc, TStringTraits>& str,

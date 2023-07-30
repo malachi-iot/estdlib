@@ -198,9 +198,9 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
 
     /// Low-level compare - does NOT check for matching size!
-    static int compare(const basic_string2<Impl>& lhs, const_pointer s, size_type s_size)
+    static int compare(const detail::basic_string<Impl>& lhs, const_pointer s, size_type s_size)
     {
-        typedef typename basic_string2<Impl>::traits_type traits_type;
+        typedef typename detail::basic_string<Impl>::traits_type traits_type;
         const_pointer raw = lhs.clock();
 
         const int result = traits_type::compare(raw, s, s_size);

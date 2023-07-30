@@ -4,13 +4,13 @@
 
 #include "dynamic_array.h"
 
-namespace estd { namespace internal {
+namespace estd { namespace detail {
 
 // DEBT: Get some c++20 concept going for Policy & Impl, and also document it
 // DEBT: Clean up name - artifact of splitting this out from legacy non-impl flavor.
 // if all works out, internal::basic_string2 will become detail::basic_string
 template <class Impl>
-class basic_string2 : public internal::dynamic_array<Impl>
+class basic_string : public internal::dynamic_array<Impl>
 {
 protected:
     typedef internal::dynamic_array<Impl> base_type;
@@ -31,7 +31,7 @@ public:
     static CONSTEXPR size_type npos = (size_type) -1;
 
 protected:
-    ESTD_CPP_FORWARDING_CTOR(basic_string2)
+    ESTD_CPP_FORWARDING_CTOR(basic_string)
 
     template <typename InputIt>
     int compare(InputIt s, size_type s_size) const
@@ -46,7 +46,7 @@ protected:
     }
 
 public:
-    ESTD_CPP_DEFAULT_CTOR(basic_string2)
+    ESTD_CPP_DEFAULT_CTOR(basic_string)
 
     size_type length() const { return base_type::size(); }
 
@@ -86,11 +86,18 @@ public:
     }
 };
 
+}
+
+namespace internal {
+
+// Phase this out in favor of always using detail::basic_string
+// Keeping for the edge cases where Allocator/Policy is more convenient
 template <class Allocator, class Policy>
-class basic_string : public basic_string2<internal::impl::dynamic_array<Allocator, Policy> >
+class basic_string : public detail::basic_string<
+    internal::impl::dynamic_array<Allocator, Policy> >
 {
 protected:
-    typedef basic_string2<internal::impl::dynamic_array<Allocator, Policy> > base_type;
+    typedef detail::basic_string<internal::impl::dynamic_array<Allocator, Policy> > base_type;
 
 public:
     ESTD_CPP_FORWARDING_CTOR(basic_string)

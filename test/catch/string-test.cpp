@@ -11,9 +11,7 @@ using namespace estd;
 
 #include <catch.hpp>
 
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+#include "macro/push.h"
 
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";
@@ -590,4 +588,4 @@ TEST_CASE("string tests")
     }
 }
 
-#pragma GCC diagnostic pop
+#include "macro/pop.h"
