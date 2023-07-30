@@ -28,6 +28,8 @@ struct dynamic_array_helper<Impl, enable_if_t<
     typedef typename array::pointer pointer;
     typedef typename array::const_pointer const_pointer;
     typedef typename array::size_type size_type;
+    typedef typename array::iterator iterator;
+    typedef typename array::const_iterator const_iterator;
 
     // copy from us to outside dest/other
     static size_type copy_to(const array& a,
@@ -47,6 +49,16 @@ struct dynamic_array_helper<Impl, enable_if_t<
         estd::copy_n(src, count, dest);
 
         return count;
+    }
+
+
+    /// Low-level compare - does NOT check for matching size!
+    template <class Impl2>
+    static bool equal(const array& lhs, const allocated_array<Impl2>& rhs,
+        size_type len)
+    {
+        const_iterator it = lhs.begin();
+        return estd::equal(it, it + len, rhs.begin());
     }
 };
 

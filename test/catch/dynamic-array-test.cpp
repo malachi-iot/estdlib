@@ -114,16 +114,16 @@ TEST_CASE("dynamic array")
     SECTION("helper")
     {
         int dest[10];
-        estd::internal::allocated_array<synthetic_impl> a;
-        estd::internal::dynamic_array_helper<synthetic_impl> helper;
+        estd::internal::allocated_array<synthetic_impl> a{};
+        using helper = estd::internal::dynamic_array_helper<synthetic_impl>;
 
-        helper.copy_to(a, dest, 2);
+        helper::copy_to(a, dest, 2);
 
         REQUIRE(dest[1] == 1);
     }
     SECTION("assign/copy")
     {
-        estd::internal::allocated_array<synthetic_impl> a;
+        estd::internal::allocated_array<synthetic_impl> a{};
         da1_type da1_1;
 
         da1.push_back(1);
@@ -131,6 +131,12 @@ TEST_CASE("dynamic array")
         da1_1 = da1;
 
         REQUIRE(da1_1.size() == 1);
+    }
+    SECTION("equality")
+    {
+        estd::internal::allocated_array<synthetic_impl> a{};
+
+        da1.append(a);
     }
 }
 
