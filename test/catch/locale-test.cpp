@@ -358,9 +358,6 @@ TEST_CASE("locale")
             char* last = n.put(data, fmt, ' ', 100);
             *last = 0;
 
-            // FIX: gcc 10.2.1 this glitches, clang works OK
-            // Looks like bug in put() itself, returns one too far
-            // for 'last'
             const bool r = val == "100";
 
             REQUIRE(r);

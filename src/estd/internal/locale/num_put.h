@@ -44,7 +44,7 @@ public:
         // No extra space for null terminator, not needed for iter_type/stream out
         char buffer[N + 1];
 
-        to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
+        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
 
         return copy(result.ptr, &buffer[N + 1], out);
     }
