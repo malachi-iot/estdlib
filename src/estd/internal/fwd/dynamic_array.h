@@ -1,5 +1,11 @@
 #pragma once
 
+#include "../platform.h"
+
+#if __cpp_lib_concepts
+#include <concepts>
+#endif
+
 namespace estd {
 
 namespace experimental {
@@ -13,7 +19,34 @@ struct private_array;
 
 namespace internal {
 
-template <class TImpl>
+#if __cpp_concepts
+template <class T>
+concept AllocatedArrayImpl = requires(T a)
+{
+    typename T::size_type;
+    typename T::allocator_type;
+    //typename T::policy_type;
+
+    a.get_allocator();
+    a.size();
+};
+
+template <class T>
+concept BufferPolicy = requires
+{
+    typename T::size_type;
+    T::is_constant();
+};
+
+
+template <class T>
+concept AllocatedArrayOperations = requires
+{
+    T::copy_into();
+};
+#endif
+
+template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) TImpl>
 class allocated_array;;
 
 namespace impl {

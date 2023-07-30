@@ -44,9 +44,9 @@ template<
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
 #ifdef FEATURE_STD_MEMORY
     class Allocator = std::allocator<CharT>,
-    class StringPolicy = experimental::sized_string_policy<Traits>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = experimental::sized_string_policy<Traits>
 #else
-    class Allocator, class StringPolicy
+    class Allocator, ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy
 #endif
 > class basic_string : public internal::basic_string<Allocator, StringPolicy>
 {
@@ -192,7 +192,8 @@ typedef basic_string<char> string;
 namespace layer1 {
 
 
-template<class CharT, size_t N, bool null_terminated, class Traits, class StringPolicy>
+template<class CharT, size_t N, bool null_terminated, class Traits,
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,

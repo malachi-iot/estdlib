@@ -45,3 +45,10 @@
     typedef const value_type& const_reference;  \
     typedef value_type* pointer;                \
     typedef const value_type* const_pointer;
+
+/// Wrapper for c++20 concepts for use in template lists
+#if __cpp_concepts
+#define ESTD_CPP_CONCEPT(T)     T
+#else
+#define ESTD_CPP_CONCEPT(T)     class
+#endif

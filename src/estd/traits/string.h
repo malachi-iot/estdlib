@@ -37,14 +37,15 @@ template <>
 struct is_const_tag_exp_base<true> { typedef void is_constant_tag_exp; };
 
 
-// explicit constant specified here because char_traits by convention doesn't
-// specify const
-template <class TSize, bool constant>
-struct buffer_policy : is_const_tag_exp_base<constant>
+// explicit constant specified here because:
+// - char_traits by convention doesn't specify const
+// - even if it did, this policy applies to non string allocated arrays too
+template <class TSize, bool constant_>
+struct buffer_policy : is_const_tag_exp_base<constant_>
 {
     typedef TSize size_type;
 
-    static CONSTEXPR bool is_constant() { return constant; }
+    static CONSTEXPR bool is_constant() { return constant_; }
 };
 
 template <class TCharTraits, class TSize = int16_t, bool constant = false >
@@ -85,6 +86,7 @@ struct sized_string_policy  : public string_policy<TCharTraits, TSize, constant>
 // TODO: Consider moving this out into an impl/string.h
 namespace internal { namespace impl {
 
+// DEBT: 30JUL23 Pretty sure this crusty old code won't compile now
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 
 // applies generally to T[N], RW buffer but also to non-const T*

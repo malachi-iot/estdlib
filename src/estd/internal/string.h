@@ -6,10 +6,9 @@
 
 namespace estd { namespace detail {
 
-// DEBT: Get some c++20 concept going for Policy & Impl, and also document it
 // DEBT: Clean up name - artifact of splitting this out from legacy non-impl flavor.
 // if all works out, internal::basic_string2 will become detail::basic_string
-template <class Impl>
+template <ESTD_CPP_CONCEPT(internal::StringImpl) Impl>
 class basic_string : public internal::dynamic_array<Impl>
 {
 protected:

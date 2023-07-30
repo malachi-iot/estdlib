@@ -2,6 +2,8 @@
 
 #include "platform.h"
 #include "../traits/allocator_traits.h"
+#include "fwd/dynamic_array.h"
+#include "container/fwd.h"
 #include "container/accessor.h"
 #include "container/iterator.h"
 #include "container/specializer.h"
@@ -29,7 +31,7 @@ struct no_max_string_length_tag {};
 // which means things like insert, append, erase are also not present.  Look to
 // dynamic array for that
 // TImpl is usually some flavor of estd::internal::impl::dynamic_array
-template <class TImpl>
+template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) TImpl>
 class allocated_array :
 #ifdef ARDUINO
     public print_handler_tag,
