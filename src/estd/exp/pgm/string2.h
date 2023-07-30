@@ -35,6 +35,18 @@ struct dynamic_array_helper<experimental::private_array_base<T, N> >
         memcpy_P(dest, src, _end * sizeof(T));
         return _end;
     }
+
+
+    static int compare(const basic_string2<impl_type>& lhs, const_pointer rhs, size_type sz)
+    {
+        const auto& allocator = lhs.get_allocator();
+        const_pointer src = allocator.data();
+
+        // NOTE: strcmp_P expects *second* parameter as pgm space,
+        // while basic_string operations overall expect basic_string to be
+        // lhs - so we have to flip the result here
+        return -strncmp_P(rhs, src, sz);
+    }
 };
 
 // DEBT: We have to manually specialize this guy too because we DON'T

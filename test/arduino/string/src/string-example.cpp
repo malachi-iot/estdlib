@@ -26,27 +26,30 @@ struct Returner
 
 #endif
 
-void setup()
-{
-    Serial.begin(115200);
-
-#if __AVR__
-    // Compiles, not run tested yet
-    //bool v = pgm_s == "Hello";
-    char c = pgm_s4[0];
-#endif
-}
-
-
 #define USE_IOS 1
 
 #if USE_IOS
 static estd::arduino_ostream cout(Serial);
 #endif
 
+
+void setup()
+{
+    Serial.begin(115200);
+}
+
+
 void loop()
 {
     static int counter = 0;
+
+#if __AVR__
+    int v = pgm_s4 == "Hello AVR:";
+    char c = pgm_s4[0];
+
+    // FIX: 'v' as a bool is not getting expanded to true/false
+    cout << F("loop: v=") << v << ", c=" << c << estd::endl;
+#endif
 
     estd::layer1::string<64> name;
 

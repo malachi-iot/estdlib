@@ -200,7 +200,8 @@ struct dynamic_array_helper<Impl, enable_if_t<
     }
 
     // rhs = null terminated C string
-    static bool starts_with(const array& lhs, const_pointer rhs)
+    template <class InputIt>
+    static bool starts_with(const array& lhs, InputIt rhs)
     {
         const_pointer s = lhs.clock();
 
