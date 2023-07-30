@@ -3,6 +3,8 @@
 #include "../platform.h"
 #include "../iterator_standalone.h"
 
+#include "fwd.h"
+
 namespace estd { namespace internal {
 
 struct locking_iterator_modes

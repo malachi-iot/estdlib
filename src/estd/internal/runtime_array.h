@@ -324,10 +324,9 @@ public:
         size_type raw_size = size();
         size_type s_size = compare_to.size();
 
-        if(raw_size < s_size) return -1;
-        if(raw_size > s_size) return 1;
+        if(raw_size != s_size) return false;
 
-        return helper::compare(*this, compare_to, raw_size);
+        return helper::equal(*this, compare_to, raw_size);
     }
 };
 

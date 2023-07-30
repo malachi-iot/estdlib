@@ -167,7 +167,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     /// Low-level compare - does NOT check for matching size!
     template <class Impl2>
-    static bool compare(const array& lhs, const allocated_array<Impl2>& rhs,
+    static bool equal(const array& lhs, const allocated_array<Impl2>& rhs,
         size_type len)
     {
         // gets here if size matches
@@ -176,7 +176,6 @@ struct dynamic_array_helper<Impl, enable_if_t<
         // DEBT: we don't want to presume rhs can lock
         const value_type* s = rhs.clock();
 
-        // DEBT: Need to do a proper -1, 0, 1 compare here
         bool result = estd::equal(raw, raw + len, s);
 
         lhs.cunlock();
