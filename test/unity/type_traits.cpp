@@ -45,6 +45,9 @@ static void test_is_convertible()
 
 static void test_is_assignable()
 {
+    bool v = is_copy_assignable<const char*>::value;
+
+    TEST_ASSERT_TRUE(v);
 }
 
 

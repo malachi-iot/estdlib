@@ -11,10 +11,31 @@ static void test_variant_storage_1()
 	
 	vs_type::size_type index = 0;
 	vs_type vs;
-	int val = 7;
+	const int val = 7;
+    const char* val2 = ::test::span_buf;
 	
 	vs.assign_or_init(&index, val); 
+
+    TEST_ASSERT_EQUAL(val, *vs.get<int>());
 }
+
+
+static void test_variant_storage_2()
+{
+	typedef internal::variant_storage<int, const char*> vs_type;
+	
+	vs_type::size_type index = 0;
+    using selector = vs_type::is_constructible_selector<const char*>;
+	vs_type vs;
+    const char* val = ::test::span_buf;
+
+    TEST_ASSERT_EQUAL(1, selector::first::index);
+	
+	vs.assign_or_init(&index, val); 
+
+    TEST_ASSERT_EQUAL(val, *vs.get<1>());
+}
+
 
 static void test_variant_1()
 {
@@ -91,6 +112,7 @@ void test_variant()
 #endif
 {
     RUN_TEST(test_variant_storage_1);
+    RUN_TEST(test_variant_storage_2);
     RUN_TEST(test_variant_1);
     RUN_TEST(test_variant_nontrivial);
 }
