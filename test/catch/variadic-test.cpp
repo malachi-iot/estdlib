@@ -113,6 +113,15 @@ TEST_CASE("variadic")
             REQUIRE(idx == 1);
             REQUIRE(multiple == false);
         }
+        SECTION("constructible")
+        {
+            using _selector = internal::constructible_selector<const char*>;
+            using selector = variadic::selector<_selector, int, const char*>;
+
+            constexpr int idx = selector::first::index;
+
+            REQUIRE(idx == 1);
+        }
         SECTION("not found")
         {
             typedef estd::internal::select_type<int, estd::monostate, float> iot;

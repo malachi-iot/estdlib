@@ -169,6 +169,10 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v1 == false);
 
+        v1 = is_constructible<int, const char*>::value;
+
+        REQUIRE(v1 == false);
+
         v1 = is_convertible<double, char>::value;
 
         REQUIRE(v1 == true);

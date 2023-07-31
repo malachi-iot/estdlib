@@ -33,6 +33,13 @@ static void test_type_traits_1()
 
 static void test_is_constructible()
 {
+    bool v = is_constructible<int, const char*>::value;
+
+    TEST_ASSERT_FALSE(v);
+
+    v = is_constructible<const char*, int>::value;
+
+    TEST_ASSERT_FALSE(v);
 }
 
 
