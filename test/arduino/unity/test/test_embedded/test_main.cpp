@@ -47,6 +47,7 @@ void setup()
     test_thread();
     test_tuple();
     test_type_traits();
+    test_variadic();
     test_variant();
 
     UNITY_END();

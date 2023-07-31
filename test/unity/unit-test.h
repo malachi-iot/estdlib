@@ -22,6 +22,7 @@ void test_expected();
 void test_functional();
 void test_limits();
 void test_locale();
+void test_map();
 void test_optional();
 void test_ostream();
 void test_queue();
@@ -32,7 +33,7 @@ void test_string();
 void test_thread();
 void test_tuple();
 void test_type_traits();
-void test_map();
+void test_variadic();
 void test_variant();
 
 struct TestStruct

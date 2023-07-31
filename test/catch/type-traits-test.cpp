@@ -147,6 +147,7 @@ TEST_CASE("type traits tests")
     }
     SECTION("is_convertible")
     {
+        REQUIRE(is_convertible<int, long>::value == true);
         REQUIRE(is_convertible<test::ChildOfDummy, test::Dummy>::value == true);
         REQUIRE(is_convertible<test::Dummy, test::ChildOfDummy>::value == false);
         REQUIRE(is_convertible<test::ChildOfDummy*, test::Dummy*>::value == true);

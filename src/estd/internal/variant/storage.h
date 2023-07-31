@@ -295,7 +295,7 @@ public:
     }
 
     template <size_t index>
-    const_pointer_at_index<index> get() const
+    constexpr const_pointer_at_index<index> get() const
     {
         return (const_pointer_at_index<index>) storage.raw;
     }
@@ -490,6 +490,11 @@ public:
     void assign_or_init(size_type* index, U&& u)
     {
         typedef type_at_index<I> T_j;
+
+        // DEBT: A static assert to determine whether U is convertible/
+        // assignable to T_j would be useful here
+#if __cpp_static_assert
+#endif
 
         // Are we tracking the exact type being assigned?
         if(*index == I)

@@ -5,6 +5,17 @@
 
 using namespace estd;
 
+static void test_variant_storage_1()
+{
+	typedef internal::variant_storage<estd::monostate, int> vs_type;
+	
+	vs_type::size_type index = 0;
+	vs_type vs;
+	int val = 7;
+	
+	vs.assign_or_init(&index, val); 
+}
+
 static void test_variant_1()
 {
 #if __cplusplus >= 201103L
@@ -12,7 +23,8 @@ static void test_variant_1()
 
     TEST_ASSERT_TRUE(holds_alternative<int>(v));
 
-    // FIX: hangs AVR
+    // FIX: hangs AVR - we suspect our is_convertible and friends of having a bug
+    // which selects the wrong index
     v = "hello";
 
     TEST_ASSERT_FALSE(holds_alternative<int>(v));
@@ -78,6 +90,7 @@ TEST_CASE("variant", "[variant]")
 void test_variant()
 #endif
 {
+    RUN_TEST(test_variant_storage_1);
     RUN_TEST(test_variant_1);
     RUN_TEST(test_variant_nontrivial);
 }

@@ -194,6 +194,17 @@ TEST_CASE("variant")
 
             REQUIRE(counter == 6);
         }
+        SECTION("assign (trivial cases)")
+        {
+            variant<int, const char*> v;
+
+            REQUIRE(holds_alternative<int>(v));
+
+            v = "hello";
+
+            REQUIRE(!holds_alternative<int>(v));
+            REQUIRE(holds_alternative<const char*>(v));
+        }
         SECTION("copy")
         {
             int counter = 0;
@@ -362,6 +373,20 @@ TEST_CASE("variant")
             storage.destroy();
 
             REQUIRE(storage.get()->destroyed_);
+        }
+        SECTION("assign into")
+        {
+            vs_type vs;
+            vs_type::size_type index = 0;
+            const int v = 7;
+
+            // NOTE: If you get index of matching U wrong here, it segfaults
+            //vs.assign_or_init<1>(&index, v);
+
+            // This one auto-deduces type index of 'v'
+            vs.assign_or_init(&index, v);
+
+            REQUIRE(*vs.get<1>() == v);
         }
     }
     SECTION("experimental")

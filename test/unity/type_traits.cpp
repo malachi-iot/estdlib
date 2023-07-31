@@ -30,6 +30,23 @@ static void test_type_traits_1()
     TEST_ASSERT_TRUE(v);
 }
 
+
+static void test_is_constructible()
+{
+}
+
+
+static void test_is_convertible()
+{
+	TEST_ASSERT_TRUE(is_convertible<int, long>::value);
+}
+
+
+static void test_is_assignable()
+{
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("compile time type_traits", "[type_traits]")
 #else
@@ -37,4 +54,7 @@ void test_type_traits()
 #endif
 {
     RUN_TEST(test_type_traits_1);
+    RUN_TEST(test_is_constructible);
+    RUN_TEST(test_is_convertible);
+    RUN_TEST(test_is_assignable);
 }
