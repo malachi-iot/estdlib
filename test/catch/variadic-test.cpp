@@ -235,7 +235,7 @@ TEST_CASE("variadic")
         REQUIRE(selected == 1);
 
         //typedef internal::visitor_helper_struct<internal::converting_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
-        typedef variadic::selector<internal::constructable_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        typedef variadic::selector<internal::constructible_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
         selected = vhs_type3::first::index;
 
         REQUIRE(selected == 0);

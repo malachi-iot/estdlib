@@ -220,7 +220,7 @@ struct variant_storage_base : variant_storage_tag
 
     template <class... Types2>
     using is_constructible_selector = selector<
-        internal::constructable_selector<Types2...>>;
+        internal::constructible_selector<Types2...>>;
 
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
