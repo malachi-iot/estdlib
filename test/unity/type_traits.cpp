@@ -31,8 +31,21 @@ static void test_type_traits_1()
 }
 
 
+static void test_is_same()
+{
+    bool v = is_same<int, const char*>::value;
+
+    TEST_ASSERT_FALSE(v);
+}
+
+
 static void test_is_constructible()
 {
+    // FIX: On AVR promicro, this fails - it considers
+    // one constructible from another.  Furthermore, this MIGHT
+    // be an artifact of the '-fpermissive' flag applied to Arduino
+    // on AVR.
+
     bool v = is_constructible<int, const char*>::value;
 
     TEST_ASSERT_FALSE(v);
@@ -65,6 +78,7 @@ void test_type_traits()
 #endif
 {
     RUN_TEST(test_type_traits_1);
+    RUN_TEST(test_is_same);
     RUN_TEST(test_is_constructible);
     RUN_TEST(test_is_convertible);
     RUN_TEST(test_is_assignable);
