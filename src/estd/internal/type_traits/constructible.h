@@ -38,7 +38,11 @@ inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<
 #endif
 
 }
-#elif __cpp_alias_templates
+#endif
+
+// Partially enabling our own flavor even when aliasing is requested just for unit test
+// scenarios
+#if __cpp_alias_templates && (UNIT_TESTING || FEATURE_ESTD_TYPE_TRAITS_ALIASED == false)
 
 #include "../raw/type_traits.h"
 #include "../utility/declval.h"
@@ -75,6 +79,7 @@ struct is_move_constructible<
     void_t<decltype(T(std::declval<T&&>()))>, T> : true_type {};
 }
 
+#if FEATURE_ESTD_TYPE_TRAITS_ALIASED == false
 template <class T, class... Args>
 using is_constructible = detail::is_constructible<void_t<>, T, Args...>;
 
@@ -88,6 +93,7 @@ using is_nothrow_constructible = detail::is_constructible<void_t<>, T, Args...>;
 
 template <class T, class... Args>
 using is_nothrow_move_constructible = detail::is_move_constructible<void_t<>, T, Args...>;
+#endif
 
 }
 #endif

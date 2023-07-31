@@ -215,6 +215,22 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v1);
     }
+    SECTION("non-aliased")
+    {
+        // Using non-aliased flavors here, just to ensure proper implementation (rather than ONLY
+        // test ON AVRs)
+
+        SECTION("is_constructible")
+        {
+            bool v = detail::is_constructible<int, const char*>::value;
+
+            REQUIRE(v == false);
+
+            v = detail::is_constructible<const char*, int>::value;
+
+            REQUIRE(v == false);
+        }
+    }
 }
 
 #include "macro/pop.h"
