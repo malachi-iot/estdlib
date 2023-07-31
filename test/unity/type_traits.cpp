@@ -38,7 +38,8 @@ static void test_is_constructible()
 
 static void test_is_convertible()
 {
-	TEST_ASSERT_TRUE(is_convertible<int, long>::value);
+    constexpr bool v = is_convertible<int, long>::value; 
+	TEST_ASSERT_TRUE(v);
 }
 
 

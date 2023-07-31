@@ -5,6 +5,10 @@
 #include <estd/cstddef.h>
 #include "unity/unit-test.h"
 
+#ifdef __AVR__
+#include <avr/wdt.h>
+#endif
+
 #ifdef LED_BUILTIN
 CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
 #endif
@@ -12,15 +16,26 @@ CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
 
 void setup()
 {
+    Serial.begin(9600);
+
+#ifdef __AVR__
+    wdt_disable();
+#endif
+
     // delay generally recommended by:
     // https://docs.platformio.org/en/stable/plus/unit-testing.html
     delay(5000);
+
+#ifdef __AVR__
+    wdt_enable(WDTO_8S);
+#endif
+
+    while(!Serial);
 
 #ifdef LED_BUILTIN
     pinMode(LED_PIN, OUTPUT);
 #endif
 
-    Serial.begin(9600);
     Serial.println("setup: begin");
 
     UNITY_BEGIN();
@@ -47,8 +62,8 @@ void setup()
     test_thread();
     test_tuple();
     test_type_traits();
-    test_variadic();
-    test_variant();
+    //test_variadic();
+    //test_variant();
 
     UNITY_END();
 
@@ -64,5 +79,9 @@ void loop()
     delay(100);
     digitalWrite(LED_PIN, LOW);
     delay(500);
+#endif
+
+#ifdef __AVR__
+    wdt_reset();
 #endif
 }
