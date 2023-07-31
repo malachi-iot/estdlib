@@ -22,12 +22,14 @@ void setup()
     wdt_disable();
 #endif
 
-    // delay generally recommended by:
+    // delay was generally recommended by:
     // https://docs.platformio.org/en/stable/plus/unit-testing.html
-    delay(5000);
+    // but no longer.  Keeping a minimal one here just for boot/reprogram
+    // assist (that was original recommendation)
+    delay(2000);
 
 #ifdef __AVR__
-    wdt_enable(WDTO_8S);
+    wdt_enable(WDTO_4S);
 #endif
 
     while(!Serial);
@@ -62,7 +64,7 @@ void setup()
     test_thread();
     test_tuple();
     test_type_traits();
-    //test_variadic();
+    test_variadic();
     //test_variant();
 
     UNITY_END();
