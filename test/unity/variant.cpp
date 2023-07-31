@@ -25,7 +25,7 @@ static void test_variant_storage_2()
 	typedef internal::variant_storage<int, const char*> vs_type;
 	
 	vs_type::size_type index = 0;
-    using selector = vs_type::is_constructible_selector<const char*>;
+    using selector = vs_type::assign_or_init_selector<const char*>;
 	vs_type vs;
     const char* val = ::test::span_buf;
 
@@ -90,6 +90,7 @@ static void test_variant_nontrivial()
     TEST_ASSERT_TRUE(get<1>(v2).moved_);
     TEST_ASSERT_FALSE(get<1>(v2).moved_from_);
 
+    TEST_ASSERT_EQUAL(7, v3.code_);
     // FIX: Fails on AVR
     TEST_ASSERT_TRUE(v3.moved_from_);
 

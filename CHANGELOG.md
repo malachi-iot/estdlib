@@ -2,9 +2,22 @@
 
 ## Added Features
 
+* `estd::detail::string` is a more manageable way to pass strings around
+
 ## Quality Updates & Bug Fixes
 
 * `estd::tuple` now has conversion constructor
+* `estd::variant` on AVR now usable, with caveats (see next session)
+* String support code got a major scrub, though still a lot of crust in there
+
+## Known Issues & Limitations
+
+* `estd::is_constructible` is broken on AVR.  Possibly this is due to `-fpermissive` default flag
+* `estd::variant` on AVR caveats:
+    * Using `is_convertible` rather than `is_constructible`, for assignment
+      operator, so your mileage may vary when using more exotic types and constructors
+    * `is_constructible` being how it is may negatively affect other areas.  So far unit tests are OK though.
+    * move semantic seems glitchy, destructs don't seem to get called
 
 # v0.6.0 - 20JUL23
 

@@ -222,6 +222,10 @@ struct variant_storage_base : variant_storage_tag
     using is_constructible_selector = selector<
         internal::constructible_selector<Types2...>>;
 
+    template <class... Types2>
+    using is_convertible_selector = selector<
+        internal::converting_selector<Types2...>>;
+
     using is_copy_constructible_selector =
         selector<internal::is_copy_constructible_selector>;
 
@@ -511,6 +515,16 @@ public:
         }
     }
 
+    // DEBT: Workaround for AVR 'is_constructible' reporting true
+    // way too often (theory is -fpermissive is responsible)
+#ifdef __AVR__
+    template <class U>
+    using assign_or_init_selector = is_convertible_selector<U>;
+#else
+    template <class U>
+    using assign_or_init_selector = is_constructible_selector<U>;
+#endif
+
     // Assign or direct initialize, depending on whether index matches
     // and what is matched to is assignable vs constructible
     // NOTE: This will assign the first one it finds; however, multiple
@@ -518,8 +532,7 @@ public:
     template <class U>
     void assign_or_init(size_type* index, U&& u)
     {
-        typedef is_constructible_selector<U> selector;
-        typedef typename selector::first selected;
+        typedef typename assign_or_init_selector<U>::first selected;
 
         assign_or_init<selected::index>(index, std::forward<U>(u));
     }
