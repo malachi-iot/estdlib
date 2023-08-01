@@ -10,6 +10,12 @@ Normally estd aliases out some of the <algorithm> functions in hopes that
 your particular platform has a nice optimized version.  This can be disabled
 by setting FEATURE_ESTD_ALGORITHM_OPT to 0
 
+## FEATURE_ESTD_CHRONO
+
+If off, estd::chrono largely aliases to std::chrono
+
+> DEBT: Confusing
+
 ## FEATURE_ESTD_FREERTOS_THREAD
 
 Enable or disable estd::mutex and similar wrappers for freertos.
@@ -56,3 +62,7 @@ a compiler def (since it's more descriptive and available than just FREERTOS).  
 converted to `1` in `freertos/version.h`
 
 > DEBT: Special value `2` is confusing and is planned to be phased out
+
+## FEATURE_POSIX_CHRONO
+
+## FEATURE_STD_CHRONO_CORE

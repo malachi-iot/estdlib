@@ -5,10 +5,13 @@
 namespace estd {
 namespace chrono {
 
-// compiles, untested
+// compiles, lightly tested
 struct arduino_clock
 {
-    typedef estd::chrono::internal::milli_rep rep;
+    // https://www.arduino.cc/reference/en/language/functions/time/millis/
+    // "Data type: unsigned long."
+    typedef unsigned long rep;
+
     // Arduino leans on millis() call for general case timing, so we report that
     // as system_period
     // "a tick period, where the tick period is a compile-time rational

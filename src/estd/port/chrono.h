@@ -6,29 +6,13 @@
 #include "../internal/chrono/literals.h"
 #include "../ratio.h"
 #include "../limits.h"
+#include "std/chrono.h"
 
 // DEBT: Move this, does not belong in 'port'
 
 #ifdef FEATURE_ESTD_CHRONO
 
-namespace estd { namespace chrono {
-
-
-#ifdef FEATURE_STD_CHRONO
-template <class ToDuration, class Rep, class Period>
-inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
-{
-    typedef ratio<Period::num, Period::den> period_type;
-
-    duration<Rep, period_type> our_d(d);
-
-    return duration_cast<ToDuration>(our_d);
-}
-#endif
-
-
-}
-
+namespace estd {
 
 #ifdef FEATURE_CPP_INLINE_NAMESPACE
 inline
