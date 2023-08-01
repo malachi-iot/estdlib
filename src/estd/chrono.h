@@ -24,12 +24,13 @@
 #include "port/freertos/chrono.h"
 #elif defined(ESTD_ARDUINO)
 #include "port/arduino/chrono.h"
-#elif defined(FEATURE_POSIX_CHRONO) || defined(WIN32)
-#include "port/posix/chrono.h"
-#elif LIB_PICO_TIME
-#include "port/rpi/pico/chrono.h"
-#elif FEATURE_STD_CHRONO
-#include "port/std/chrono.h"
+
+// Gone, but not yet forgotten.  Keeping around in case of regressions
+//#elif defined(FEATURE_POSIX_CHRONO) || defined(WIN32)
+//#include "port/posix/chrono.h"
+
+#elif LIB_PICO_TIME || FEATURE_STD_CHRONO
+// Handled below in parallel to things being arduino or freertos
 #else
 #warning Unsupported platform
 #endif
@@ -39,12 +40,16 @@
 #include "port/rpi/pico/chrono.h"
 #endif
 
+#if FEATURE_STD_CHRONO
+#include "port/std/chrono.h"
+#endif
+
 // if we don't already have a std::chrono::steady_clock aliased...
 #ifndef FEATURE_STD_CHRONO
 
 // alias out steady_clock depending on system settings
 namespace estd { namespace chrono {
-#ifdef FEATURE_ESTD_FREERTOS_CHRONO
+#if FEATURE_ESTD_FREERTOS_CHRONO
 typedef freertos_clock steady_clock;
 #else
 #ifdef ATMEL_ASF

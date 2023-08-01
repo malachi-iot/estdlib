@@ -1,6 +1,6 @@
 #pragma once
 
-#include <estd/internal/fwd/tuple.h>
+#include <estd/tuple.h>
 
 #if FEATURE_STD_FUNCTIONAL
 #include <functional>
@@ -39,7 +39,7 @@ struct NonTrivial
 
     template <class F>
     explicit NonTrivial(tuple<int, F> i) :
-        NonTrivial(get<0>(i), get<1>(i))
+        NonTrivial(estd::get<0>(i), estd::get<1>(i))
     {}
 
     NonTrivial(const NonTrivial& copy_from) :

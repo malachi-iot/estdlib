@@ -1,3 +1,5 @@
+#pragma once
+
 #include "duration.h"
 
 namespace estd { namespace chrono {
@@ -12,7 +14,7 @@ template<
     >
 ESTD_CPP_CONSTEXPR_RET Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
 {
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
     typedef ratio_divide<Period2, Period> rd;
 #else
     typedef detail::ratio_divide<Period2, Period> rd;

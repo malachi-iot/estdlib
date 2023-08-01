@@ -74,11 +74,9 @@ public:
 
     typedef std::ratio<Period::num, Period::den> std_period_type;
 
-    operator std::chrono::duration<Rep, std_period_type>() const
+    ESTD_CPP_CONSTEXPR_RET operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
     {
-        std::chrono::duration<Rep, std_period_type> converted(count());
-
-        return converted;
+        return std::chrono::duration<Rep, std_period_type>(count());
     }
 #endif
 

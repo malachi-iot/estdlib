@@ -16,6 +16,10 @@ If off, estd::chrono largely aliases to std::chrono
 
 > DEBT: Confusing
 
+## FEATURE_ESTD_FREERTOS_CHRONO
+
+When true (default when ESTD_OS_FREERTOS is set) maps `estd::freertos_clock` to `estd::steady_clock` 
+
 ## FEATURE_ESTD_FREERTOS_THREAD
 
 Enable or disable estd::mutex and similar wrappers for freertos.
@@ -31,6 +35,10 @@ on that criteria
 ## FEATURE_ESTD_IOS_GCOUNT
 
 Enable or disable 'gcount' feature in istream
+
+## FEATURE_ESTD_NATIVE_CHRONO
+
+If true (defaults to false) disables `FEATURE_STD_CHRONO_CORE` and `FEATURE_STD_CHRONO_CLOCK`
 
 ## FEATURE_ESTD_SPARSE_TUPLE
 
