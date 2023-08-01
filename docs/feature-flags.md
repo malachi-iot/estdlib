@@ -16,6 +16,16 @@ If off, estd::chrono largely aliases to std::chrono
 
 > DEBT: Confusing
 
+## FEATURE_ESTD_CHRONO_LITERALS
+
+~~Compilers frequently get mad when we try to make our own flavor of user literals
+`s`, `ms`, etc. so this flag enables or disables this feature~~
+
+> Above is maybe what it should be, but isn't right now
+
+Set to true when GCC (not Clang) is used, indicating estd versions of `s`, `ms`
+chrono literals are present.
+
 ## FEATURE_ESTD_FREERTOS_CHRONO
 
 When true (default when ESTD_OS_FREERTOS is set) maps `estd::freertos_clock` to `estd::steady_clock` 

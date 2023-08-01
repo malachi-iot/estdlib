@@ -27,7 +27,7 @@ namespace chrono_literals {
 // CLang allows this during the compile phase, but ignores the definitions and generates
 // a bunch of warnings.  Until we can repair that, CLang is disabled.  In the short term,
 // we only enable these literals for GCC
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) && __cpp_user_defined_literals
 #define FEATURE_ESTD_CHRONO_LITERALS 1
 
 // Compiler complains that these are in the reserved suffix category, which is in a sense
@@ -36,7 +36,6 @@ namespace chrono_literals {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wliteral-suffix"
 
-#ifdef FEATURE_CPP_USER_LITERAL
 constexpr chrono::seconds operator "" s(unsigned long long s)
 {
     return chrono::seconds(s);
@@ -56,8 +55,6 @@ constexpr chrono::nanoseconds operator "" ns(unsigned long long rep)
 {
     return chrono::nanoseconds(rep);
 }
-
-#endif
 
 #pragma GCC diagnostic pop
 #else

@@ -103,7 +103,6 @@ set(INCLUDE_FILES
         estd/port/asf/thread.h
 
         estd/port/chrono.h
-        estd/port/chrono.hpp
         estd/port/identify_platform.h
         estd/port/arduino/chrono.h
         estd/port/arduino/string.h

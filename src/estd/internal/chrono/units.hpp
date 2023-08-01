@@ -1,21 +1,13 @@
 /**
  * C++20 units helpers and friends
  * e.g. https://en.cppreference.com/w/cpp/chrono/year
+ * TODO: Bring in embr/j1939 unit base code and merge it here/nearby
  */
-// DEBT: A lot of chrono code is in port/chrono.h/hpp, would be better if it was instead here
 #pragma once
 
 #include "../fwd/chrono.h"
-#include "../../port/chrono.hpp"
 
-#ifdef FEATURE_PRAGMA_PUSH_MACRO
-#pragma push_macro("abs")
-#pragma push_macro("max")
-#pragma push_macro("min")
-#undef abs
-#undef max
-#undef min
-#endif
+#include "../macro/push.h"
 
 namespace estd { namespace chrono {
 
@@ -166,8 +158,4 @@ struct clock_traits<std::chrono::system_clock> : unix_epoch_clock_traits
 
 }}
 
-#ifdef FEATURE_PRAGMA_PUSH_MACRO
-#pragma pop_macro("min")
-#pragma pop_macro("max")
-#pragma pop_macro("abs")
-#endif
+#include "../macro/pop.h"
