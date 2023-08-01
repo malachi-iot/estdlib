@@ -66,3 +66,8 @@ converted to `1` in `freertos/version.h`
 ## FEATURE_POSIX_CHRONO
 
 ## FEATURE_STD_CHRONO_CORE
+
+## FEATURE_STD_CHRONO_CLOCK
+
+Even if FEATURE_STD_CHRONO is present and true, we may only elect to alias out
+estd::steady_clock = std::steady_clock if this is true (default 1)

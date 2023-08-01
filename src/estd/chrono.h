@@ -28,6 +28,8 @@
 #include "port/posix/chrono.h"
 #elif LIB_PICO_TIME
 #include "port/rpi/pico/chrono.h"
+#elif FEATURE_STD_CHRONO
+#include "port/std/chrono.h"
 #else
 #warning Unsupported platform
 #endif

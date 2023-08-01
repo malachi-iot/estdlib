@@ -16,8 +16,8 @@ void loop()
 {
     auto now = chrono::steady_clock::now();
 
-    now += estd::chrono::milliseconds(1000);
-    now + estd::chrono::milliseconds(1000);
+    //now += estd::chrono::milliseconds(1000);
+    //now + estd::chrono::milliseconds(1000);
 
     estd::this_thread::sleep_for(estd::chrono::milliseconds(1000));
 }
