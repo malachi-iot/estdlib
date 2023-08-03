@@ -82,24 +82,42 @@ struct synthetic_projector
     using evaluator = variadic::projected_result<double, is_same<T, float>::value>;
 };
 
-template <class T, class Tag, class enabled = void>
+template <class T, class Tag, class Args, class enabled = void>
 struct has_method_group : bool_constant<false> {};
+
+template <class T, class Tag, class ...Args>
+struct method_invoke_assist;
 
 //decltype(std::declval<TObserver>().on_notify(e)
 
 struct hello_tag {};
 
 template <class T>
-struct has_method_group<T, hello_tag, decltype(T().hello())> : bool_constant<true> {};
+struct method_invoke_assist<T, hello_tag>
+{
+    void operator()(T& t) const
+    {
+        t.hello();
+    }
+};
+
+template <class... Args> struct fake : bool_constant<true> {};
 
 template <class T>
-struct has_method_group<T, hello_tag, decltype(T().hello2())> : bool_constant<true> {};
+struct has_method_group<T, hello_tag, fake<>, decltype(T().hello())> : bool_constant<true> {};
+
+template <class T, class Arg1>
+struct has_method_group<T, hello_tag, fake<Arg1>, decltype(T().hello(std::declval<Arg1>()))> : bool_constant<true> {};
+
+template <class T>
+struct has_method_group<T, hello_tag, fake<>, decltype(T().hello2())> : bool_constant<true> {};
 
 struct Invoker1 {};
 
 struct Invoker2
 {
     void hello() {}
+    void hello(int param) {}
 };
 
 struct Invoker3
@@ -113,11 +131,11 @@ class Invoker4
 };
 
 
-template <class Tag>
+template <class Tag, class ...Args>
 struct has_method_selector
 {
     template <class T, size_t>
-    using evaluator = has_method_group<T, Tag>;
+    using evaluator = has_method_group<T, Tag, fake<Args...>>;
 };
 
 
@@ -423,11 +441,12 @@ TEST_CASE("variadic")
 
         SECTION("invoker")
         {
-            using types = variadic::types<Invoker1, Invoker2>;
-            using selected = variadic::selector<has_method_selector<hello_tag>,
-                Invoker1, Invoker2, Invoker3, Invoker4>;
+            using types = variadic::types<Invoker1, Invoker2, Invoker3, Invoker4>;
+            using selected = types::selector<has_method_selector<hello_tag> >;
+            using selected2 = types::selector<has_method_selector<hello_tag, int> >;
 
             REQUIRE(selected::size() == 2);
+            REQUIRE(selected2::size() == 1);
         }
     }
 }

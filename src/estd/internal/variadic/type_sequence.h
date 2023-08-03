@@ -32,6 +32,14 @@ struct type_sequence_accessor
     using last = get<size() - 1>;
 
     using visitor = variadic::type_visitor<Types...>;
+
+    // +++ EXPERIMENTAL, not sure I want to put *this much* into type sequence
+    template <class Eval>
+    using selector = variadic::selector<Eval, Types...>;
+
+    template <class Eval>
+    using projector = variadic::projector<Eval, Types...>;
+    // ---
 };
 
 template <>
