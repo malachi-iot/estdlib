@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 # From https://stackoverflow.com/questions/38823537/execute-git-describe-in-custom-target
 
