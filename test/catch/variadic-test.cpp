@@ -82,6 +82,44 @@ struct synthetic_projector
     using evaluator = variadic::projected_result<double, is_same<T, float>::value>;
 };
 
+template <class T, class Tag, class enabled = void>
+struct has_method_group : bool_constant<false> {};
+
+//decltype(std::declval<TObserver>().on_notify(e)
+
+struct hello_tag {};
+
+template <class T>
+struct has_method_group<T, hello_tag, decltype(T().hello())> : bool_constant<true> {};
+
+template <class T>
+struct has_method_group<T, hello_tag, decltype(T().hello2())> : bool_constant<true> {};
+
+struct Invoker1 {};
+
+struct Invoker2
+{
+    void hello() {}
+};
+
+struct Invoker3
+{
+    static void hello() {}
+};
+
+class Invoker4
+{
+    void hello() {}
+};
+
+
+template <class Tag>
+struct has_method_selector
+{
+    template <class T, size_t>
+    using evaluator = has_method_group<T, Tag>;
+};
+
 
 
 TEST_CASE("variadic")
@@ -382,6 +420,15 @@ TEST_CASE("variadic")
         REQUIRE(values::size() == 3);
         REQUIRE(values::get<1>() == 4);
 #endif
+
+        SECTION("invoker")
+        {
+            using types = variadic::types<Invoker1, Invoker2>;
+            using selected = variadic::selector<has_method_selector<hello_tag>,
+                Invoker1, Invoker2, Invoker3, Invoker4>;
+
+            REQUIRE(selected::size() == 2);
+        }
     }
 }
 
