@@ -8,7 +8,7 @@
 
 namespace estd { namespace freertos {
 
-namespace internal {
+namespace detail {
 
 template <class T>
 struct queue
@@ -65,9 +65,9 @@ public:
 
 
 template <class T>
-class queue<T, false> : public internal::queue<T>
+class queue<T, false> : public detail::queue<T>
 {
-    typedef internal::queue<T> base_type;
+    typedef detail::queue<T> base_type;
     typedef typename base_type::value_type value_type;
 
 public:
@@ -81,11 +81,11 @@ public:
 
 #if configSUPPORT_STATIC_ALLOCATION
 template <class T>
-class queue<T, true> : public internal::queue<T>
+class queue<T, true> : public detail::queue<T>
 {
     StaticQueue_t static_queue;
 
-    typedef internal::queue<T> base_type;
+    typedef detail::queue<T> base_type;
     typedef typename base_type::value_type value_type;
     typedef typename base_type::pointer pointer;
 
@@ -98,6 +98,14 @@ public:
             &static_queue))
     {
 
+    }
+
+    // UNTESTED
+    BaseType_t static_buffers(
+        uint8_t** ppucQueueStorage,
+        StaticQueue_t** ppxStaticQueue) const
+    {
+        return xQueueGetStaticBuffers(base_type::q, ppucQueueStorage, ppxStaticQueue);
     }
 };
 #endif

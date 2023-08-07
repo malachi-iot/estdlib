@@ -47,8 +47,6 @@ public:
     const char* get_name() const { return pcQueueGetName(h); }
 #endif
 
-    void reset() { xQueueReset(h); }
-
     void free() { vQueueDelete(h); }
 
     UBaseType_t messages_waiting() const
@@ -56,9 +54,25 @@ public:
         return uxQueueMessagesWaiting(h);
     }
 
+    BaseType_t overwrite(void* pvBuffer)
+    {
+        return xQueueOverwrite(h, pvBuffer);
+    }
+
+    BaseType_t overwrite_from_isr(void* pvBuffer,
+        BaseType_t* pxHigherPriorityTaskWoken = nullptr)
+    {
+        return xQueueOverwriteFromISR(h, pvBuffer, pxHigherPriorityTaskWoken);
+    }
+
     BaseType_t peek(void* pvBuffer, TickType_t xTicksToWait) const
     {
         return xQueuePeek(h, pvBuffer, xTicksToWait);
+    }
+
+    BaseType_t peek_from_isr(void* pvBuffer) const
+    {
+        return xQueuePeekFromISR(h, pvBuffer);
     }
 
     BaseType_t send(const void* pvItemToQueue, TickType_t xTicksToWait)
@@ -71,9 +85,19 @@ public:
         return xQueueSendFromISR(h, pvItemToQueue, pxHigherPriorityTaskWoken);
     }
 
+    BaseType_t send_to_back(const void* pvItemToQueue, TickType_t xTicksToWait)
+    {
+        return xQueueSendToBack(h, pvItemToQueue, xTicksToWait);
+    }
+
     BaseType_t receive(void* pvBuffer, TickType_t xTicksToWait)
     {
         return xQueueReceive(h, pvBuffer, xTicksToWait);
+    }
+
+    BaseType_t reset()
+    {
+        return xQueueReset(h);
     }
 
     UBaseType_t spaces_available() const
