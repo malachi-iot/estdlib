@@ -59,7 +59,7 @@ struct visitor_instance : in_place_type_t<T>
 
     constexpr explicit visitor_instance(T& value) : value{value} {}
     
-    ESTD_CPP_CONSTEXPR_RET pointer operator->() { return &value; }
+    pointer operator->() { return &value; }
     ESTD_CPP_CONSTEXPR_RET const_pointer operator->() const { return &value; }
 };
 
