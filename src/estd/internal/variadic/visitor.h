@@ -51,13 +51,16 @@ struct visitor_index : in_place_index_t<I>
 template <class T>
 struct visitor_instance : in_place_type_t<T>
 {
-    T& value;
+    ESTD_CPP_STD_VALUE_TYPE(T)
 
-    typedef T value_type;
+    reference value;
 
     visitor_instance(const visitor_instance&) = default;
 
     constexpr explicit visitor_instance(T& value) : value{value} {}
+    
+    ESTD_CPP_CONSTEXPR_RET pointer operator->() { return &value; }
+    ESTD_CPP_CONSTEXPR_RET const_pointer operator->() const { return &value; }
 };
 
 }
