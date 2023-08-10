@@ -105,11 +105,18 @@ public:
     typedef T element_type;
 
     // EXPERIMENTAL, though I think I'm wanting to keep it
-    template <class F, class ...TArgs2>
-    bool visit(F&& f, TArgs2&&...args)
+    template <class F, class ...Args2>
+    bool visit(F&& f, Args2&&...args)
     {
         return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
-            std::forward<TArgs2>(args)...);
+            std::forward<Args2>(args)...);
+    }
+
+    template <class F, class ...Args2>
+    constexpr bool visit(F&& f, Args2&&...args) const
+    {
+        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
+            std::forward<Args2>(args)...);
     }
 };
 

@@ -214,7 +214,7 @@ TEST_CASE("tuple")
         }
         SECTION("complex empty type")
         {
-            tuple<EmptyClass, EmptyClass, EmptyClass> t;
+            const tuple<EmptyClass, EmptyClass, EmptyClass> t;
 
             int sz = sizeof(t);
 
