@@ -93,6 +93,15 @@ struct DefaultConstructor
     DefaultConstructor() : val(default_value()) {}
 };
 
+template <unsigned N>
+class Templated
+{
+public:
+    int val1;
+
+    static constexpr unsigned index = N;
+};
+
 
 struct EmptyClass {};
 

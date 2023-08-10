@@ -1,7 +1,6 @@
 #include <estd/type_traits.h>
 
 #include "unit-test.h"
-#include "../catch/test-data.h"
 
 using namespace estd;
 

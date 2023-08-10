@@ -22,8 +22,8 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | string      | 29JUN23 | Microchip | AVR 32u4      | Compiles |
 | unity       | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | unity       | 20JUL23 | Microchip | ARM SAMD51 m4 | Pass     | regular and CAN both
-| unity       | 20JUL23 | Microchip | AVR 32u4      | Fail     | variant not working, I suspect Footnote [1]
-| unity       | 27JUN23 | Espressif | ESP32S        | Compiles |
+| unity       | 20JUL23 | Microchip | AVR 32u4      | Fail     | variant not working, I suspect Footnote [1].  Also, tuple glitches out with multiple identical types
+| unity       | 09AUG23 | Espressif | ESP32S        | Fail     | FreeRTOS related compile errors
 | unity       | 27JUN23 | Espressif | ESP32C3       | Fail     | pio can't find compiler package
 | unity       | 27JUN23 | STM       | STM32F303K8   | Compiles |
 | unity       | 27JUN23 | Microchip | ATtiny        | Fail     | Not enough space on chip + Footnote [1]

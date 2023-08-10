@@ -175,6 +175,17 @@ TEST_CASE("tuple")
 
             REQUIRE(int_value == 5);
         }
+        SECTION("multiple identical")
+        {
+            estd::tuple<
+                Templated<0>,
+                Templated<0>,
+                Templated<0> > tuple3;
+
+            get<0>(tuple3).val1 = 1;
+            get<1>(tuple3).val1 = 2;
+            get<2>(tuple3).val1 = 2;
+        }
     }
     SECTION("value initialization")
     {

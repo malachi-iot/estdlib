@@ -6,6 +6,8 @@
 
 #include <estd/internal/platform.h>
 
+#include "../catch/test-data.h"
+
 // TODO: Make ESP_IDF_TESTING something specified/deduced from
 // native esp-idf testing rather than guessed based on it being arduino
 // (doing this temporarily to bring up pio unity testing)
