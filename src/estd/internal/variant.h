@@ -90,7 +90,7 @@ class variant : protected variant_storage<Types...>
     struct assignment_functor
     {
         template <size_t I, class T_i,
-            class enabled = enable_if_t<is_copy_assignable<remove_const_t<T_i>>::value> >
+            enable_if_t<is_copy_assignable<remove_const_t<T_i>>::value, bool> = true>
         bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, const variant& assign_from)
         {
             size_type index = v.index();
@@ -100,7 +100,7 @@ class variant : protected variant_storage<Types...>
 
 
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<is_move_assignable<remove_const_t<T_i>>::value> >
+            enable_if_t<is_move_assignable<remove_const_t<T_i>>::value, bool> = true>
         bool operator()(variadic::visitor_instance<I, T_i> vi, variant& v, variant&& assign_from)
         {
             size_type index = v.index();
@@ -109,7 +109,7 @@ class variant : protected variant_storage<Types...>
         }
 
         template <size_t I, class T_i,
-            class enabled = enable_if_t<!is_copy_assignable<remove_const_t<T_i>>::value> >
+            enable_if_t<!is_copy_assignable<remove_const_t<T_i>>::value, bool> = true>
         bool operator()(variadic::v1::visitor_index<I, T_i>, variant& v, const variant& copy_from, bool = true)
         {
             // DEBT: Technically would be more efficient to run the dtor
@@ -125,7 +125,7 @@ class variant : protected variant_storage<Types...>
 
         // NOTE: See comments in above copy_from flavor
         template <size_t I, class T_i,
-                 class enabled = enable_if_t<!is_move_assignable<remove_const_t<T_i>>::value> >
+                 enable_if_t<!is_move_assignable<remove_const_t<T_i>>::value, bool> = true>
         bool operator()(variadic::v1::visitor_index<I, T_i>, variant& v, variant&& move_from, bool = true)
         {
             v.destroy_if_valid();
@@ -275,7 +275,7 @@ public:
 
     template <
         class T,
-        class enabled = enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value> >
+        enable_if_t<!is_base_of<variant_storage_tag, remove_cvref_t<T> >::value, bool> = true>
     variant& operator=(T&& t)
     {
         base_type::assign_or_init(&index_, std::forward<T>(t));
@@ -333,7 +333,7 @@ public:
     constexpr size_type index() const { return index_; }
 
     template <class T, class ...TArgs,
-        class enabled = enable_if_t<is_constructible<T, TArgs...>::value> >
+        enable_if_t<is_constructible<T, TArgs...>::value, bool> = true>
     T& emplace(TArgs&&...args)
     {
         destroy_if_valid();

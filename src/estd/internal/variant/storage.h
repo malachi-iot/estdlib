@@ -231,13 +231,15 @@ struct variant_storage_base : variant_storage_tag
 
     struct copying_constructor_functor
     {
-        template <size_t I, class T_i, class enabled = enable_if_t<!is_copy_constructible<T_i>::value> >
+        template <size_t I, class T_i,
+            enable_if_t<!is_copy_constructible<T_i>::value, bool> = true>
         constexpr bool operator()(variadic::type<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index) const
         {
             return false;
         }
 
-        template <size_t I, class T_i, class enabled = enable_if_t<is_copy_constructible<T_i>::value> >
+        template <size_t I, class T_i,
+            enable_if_t<is_copy_constructible<T_i>::value, bool> = true>
         bool operator()(variadic::type<I, T_i>, this_type& v, const this_type& copy_from, const unsigned index)
         {
             if(index != I) return false;
@@ -383,8 +385,8 @@ public:
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
-            !is_convertible<T, T_i>::value> >
+        enable_if_t<
+            !is_convertible<T, T_i>::value, bool> = true>
     void assignment_emplace_helper(T&&, long = 0)
     {
 #if FEATURE_ESTD_VARIANT_STRICT_CONVERSION
@@ -396,33 +398,35 @@ public:
     // DEBT: We often don't get here because is_nothrow_constructible doesn't like a const T&
     // Not sure yet if that's "proper behavior" as indicated by variant docs, but seems to be
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
+        enable_if_t<
             is_convertible<T, T_i>::value &&
             (is_nothrow_constructible<T_i, T>::value ||
-            !is_nothrow_move_constructible<T_i>::value)> >
+            !is_nothrow_move_constructible<T_i>::value), bool> = true>
     void assignment_emplace_helper(T&& t, bool = true)
     {
         emplace<I>(std::forward<T>(t));
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
+        enable_if_t<
             is_convertible<T, T_i>::value &&
             !(is_nothrow_constructible<T_i, T>::value ||
-            !is_nothrow_move_constructible<T_i>::value)> >
+            !is_nothrow_move_constructible<T_i>::value), bool> = true>
     void assignment_emplace_helper(T&& t)
     {
         emplace<I>(T_i(std::forward<T>(t)));
     }
 
-    template <size_t I, class T_i, class T, class enabled = enable_if_t<is_assignable<T_i&, T>::value> >
+    template <size_t I, class T_i, class T,
+        enable_if_t<is_assignable<T_i&, T>::value, bool> = true>
     void assignment_helper(T&& t)
     {
         //assign<I>(std::forward<T>(t));
         *get<I>() = std::forward<T>(t);
     }
 
-    template <size_t I, class T_i, class T, class enabled = enable_if_t<!is_assignable<T_i&, T>::value> >
+    template <size_t I, class T_i, class T,
+        enable_if_t<!is_assignable<T_i&, T>::value, bool> = true>
     void assignment_helper(T&& t, bool = true)
     {
         // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
@@ -432,18 +436,18 @@ public:
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
+        enable_if_t<
             is_convertible<T, T_i>::value &&
-            estd::is_trivial<T_i>::value> >
+            estd::is_trivial<T_i>::value, bool> = true>
     void direct_init_helper(T&& t)
     {
         *get<I>() = std::forward<T>(t);
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
+        enable_if_t<
             estd::is_trivial<T_i>::value &&
-            !is_convertible<T, T_i>::value> >
+            !is_convertible<T, T_i>::value, bool> = true>
     void direct_init_helper(T&& t, long = 0)
     {
         //*get<I>() = std::forward<T>(t);
@@ -454,9 +458,9 @@ public:
     }
 
     template <size_t I, class T_i, class T,
-        class enabled = enable_if_t<
+        enable_if_t<
             is_convertible<T, T_i>::value &&
-            !estd::is_trivial<T_i>::value> >
+            !estd::is_trivial<T_i>::value, bool> = true>
     void direct_init_helper(T&& t, bool = true)
     {
         assignment_emplace_helper<I, T_i>(std::forward<T>(t));
@@ -614,7 +618,8 @@ struct converting_constructor_functor
     template <class T_i>
     constexpr bool operator()(T_i*) const { return false; }
 
-    template <class T_i, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
+    template <class T_i,
+        enable_if_t<estd::is_constructible<T_i, T>::value, bool> = true>
     bool operator()(T_i* t_i)
     {
         new (t_i) T_i(std::forward<T>(t));
@@ -628,7 +633,8 @@ struct converting_constructor_functor2
     template <size_t I, class TVariant, class T>
     constexpr bool operator()(in_place_index_t<I>, TVariant, T&&) const { return false; }
 
-    template <size_t I, class T_i, class TVariant, class T, class enabled = enable_if_t<estd::is_constructible<T_i, T>::value> >
+    template <size_t I, class T_i, class TVariant, class T,
+        enable_if_t<estd::is_constructible<T_i, T>::value, bool> = true>
     bool operator()(variadic::visitor_index<I, T_i>, TVariant& v, T&& t)
     {
         new (v.template get<I>()) T_i(std::forward<T>(t));
