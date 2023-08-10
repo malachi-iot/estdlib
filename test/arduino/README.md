@@ -30,6 +30,6 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 
 ## Footnotes
 
-[^1] `variant` and friends rely on std::is_constructible and similar, which is now reimplemented in AVR environment but may have issues - though some progress is underway.  See https://github.com/malachi-iot/estdlib/issues/7
-[^2]  Unexpected behavior with steady_clock::now() see https://github.com/malachi-iot/estdlib/issues/6.  Tests now use arduino_clock, however
-[^3]  Behavior may not be 100% as expected.  See specific README associated with project
+[^1]: `variant` and friends rely on std::is_constructible and similar, which is now reimplemented in AVR environment but may have issues - though some progress is underway.  See https://github.com/malachi-iot/estdlib/issues/7
+[^2]:  Unexpected behavior with steady_clock::now() see https://github.com/malachi-iot/estdlib/issues/6.  Tests now use arduino_clock, however
+[^3]:  Behavior may not be 100% as expected.  See specific README associated with project
