@@ -30,13 +30,21 @@ struct legacy_visit_instance_functor
     }
 };
 
+// DEBT: Use 'Concept' here to filter to 'tuple-like'
 struct visit_tuple_functor
 {
-    // DEBT: Use 'Concept' here to filter to 'tuple-like'
     template <size_t I, class T, class Tuple, class F, class ...TArgs>
     bool operator()(variadic::type<I, T>, Tuple& tuple, F&& f, TArgs&&...args) const
     {
-        T& v = get<I>(tuple);
+        typename tuple_element<I, Tuple>::valref_type v = get<I>(tuple);
+
+        return f(variadic::instance<I, T>{v}, std::forward<TArgs>(args)...);
+    }
+
+    template <size_t I, class T, class Tuple, class F, class ...TArgs>
+    bool operator()(variadic::type<I, T>, const Tuple& tuple, F&& f, TArgs&&...args) const
+    {
+        typename tuple_element<I, Tuple>::const_valref_type v = get<I>(tuple);
 
         return f(variadic::instance<I, T>{v}, std::forward<TArgs>(args)...);
     }

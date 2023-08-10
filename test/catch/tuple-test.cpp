@@ -224,6 +224,11 @@ TEST_CASE("tuple")
 
             // FIX: As it should be, this can't convert a temporary to a reference
             EmptyClass v1 = estd::get<0>(t);
+
+            t.visit([](internal::visitor_instance<EmptyClass> vi)
+            {
+                return false;
+            });
         }
         SECTION("intermixed types")
         {
