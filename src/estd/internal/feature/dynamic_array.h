@@ -22,3 +22,11 @@
 #define FEATURE_ESTD_DYNAMIC_ARRAY_APPEND_TRUNC 1
 #endif
 #endif
+
+// std::vector demands a proper assignment operator be present to satisfy
+// 'CopyAssignable' and 'MoveAssignable' during an insert.  We are more
+// relaxed and can fall back to a copy or move constructor, respectively.
+// Set this flag to '1' if the more strict std behavior is desired.
+#ifndef FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
+#define FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT 0
+#endif

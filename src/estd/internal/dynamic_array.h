@@ -199,25 +199,64 @@ protected:
 #ifdef __cpp_rvalue_references
     template <class T2 = value_type>
     typename enable_if<is_move_assignable<T2>::value>::type
-    move_assist()
+    move_assist(pointer first, pointer last, pointer d_last)
     {
-
+        move_backward(first, last, d_last);
     }
 
+#if !FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
     template <class T2 = value_type>
-    typename enable_if<is_nothrow_move_constructible<T2>::value>::type
-    move_assist()
+    typename enable_if<
+        is_move_constructible<T2>::value &&
+        !is_move_assignable<T2>::value>::type
+    move_assist(pointer first, pointer last, pointer d_last)
     {
-
+        while (first != last)
+            new (--d_last) T2(std::move(*--last));
     }
+#endif
 #endif
 
     template <class T2 = value_type>
     typename enable_if<is_copy_assignable<T2>::value>::type
-    move_assist()
+    copy_assist(pointer first, const_pointer last, pointer d_last)
     {
-
+        copy_backward(first, last, d_last);
     }
+
+#if !FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
+    template <class T2 = value_type>
+    typename enable_if<
+        is_copy_constructible<T2>::value &&
+        !is_copy_assignable<T2>::value>::type
+    copy_assist(pointer first, const_pointer last, pointer d_last)
+    {
+        while (first != last)
+            new (--d_last) T2(*--last);
+    }
+#endif
+
+
+    // NOTE: I think I get the std thinking now.  By hanging
+    // a move vs copy off the input parameter, the decision
+    // to use move vs copy on the entire underlying array
+    // is available to the caller.  This is relevant because
+    // the expense of a copy vs a move is application specific
+    /*
+    // NOTE: It seems std vector will do a copy_backward based
+    // on whether incoming was a const T& or T&&, rather than
+    // whether T itself is capable of a move.  I prefer move_backward
+    // whenever possible, but that deviates from spec.  This feels
+    // like I am not understanding their implementation, thinking, or both
+    template <class T2 = value_type>
+    typename enable_if<
+        is_copy_assignable<T2>::value &&
+        !is_move_assignable<T2>::value &&
+        !is_move_constructible<T2>::value>::type
+    move_assist(pointer first, pointer last, pointer d_last)
+    {
+        copy_backward(first, last, d_last);
+    } */
 
 
 
@@ -226,42 +265,39 @@ protected:
     {
         grow(1);
 
-        // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
         const size_type sz = size();
-        size_type raw_typed_pos = to_insert_pos - a;
-        size_type remaining = size() - raw_typed_pos;
 
-        //*(to_insert_pos + 1) = std::move(*to_insert_pos);
-        //new (to_insert_pos + 1) value_type(std::move(*to_insert_pos));
-
-        estd::move_backward(to_insert_pos, (a + sz - 1), (a + sz));
-
-        // FIX: This is causing a memory allocation issue, probably a buffer overrun
-        // but not sure why
+        // NOTE: Keeping around to use for optimization of trivial cases
+        //size_type raw_typed_pos = to_insert_pos - a;
+        //size_type remaining = size() - raw_typed_pos;
         //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
+        move_assist(to_insert_pos, (a + sz - 1), (a + sz));
+
+        // Placement new makes sense here since to_insert_pos is now considered
+        // uninitialized/undefined
         new (to_insert_pos) value_type(std::move(to_insert_value));
     }
 #endif
 
 
-    void raw_insert(value_type* a, value_type* to_insert_pos, const value_type* to_insert_value)
+    void raw_insert(value_type* a, pointer to_insert_pos, const_pointer to_insert_value)
     {
         // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
         // so later consider doing the insert operation at that level)
         const size_type sz = impl().size();
         ensure_total_size(sz + 1);
 
-        // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
-        size_type raw_typed_pos = to_insert_pos - a;
-        size_type remaining = sz - raw_typed_pos;
-
-        // FIX: This is causing a memory allocation issue, probably a buffer overrun
-        // but not sure why
+        // NOTE: Keeping around to use for optimization of trivial cases
+        //size_type raw_typed_pos = to_insert_pos - a;
+        //size_type remaining = sz - raw_typed_pos;
         //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
-        estd::copy_backward(to_insert_pos, (a + sz), (a + sz + 1));
 
-        *to_insert_pos = *to_insert_value;
+        copy_assist(to_insert_pos, (a + sz), (a + sz + 1));
+
+        // DEBT: Might want to consider placement new here, or delegate that
+        // copy responsibility off to copy_assist
+        new (to_insert_pos) value_type(to_insert_value);
     }
 
     template <class TForeignImpl>

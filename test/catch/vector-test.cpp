@@ -289,12 +289,14 @@ TEST_CASE("vector tests")
                 move_from.val = -1;
             }
 
+#if FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
             Item& operator=(Item&& move_from)
             {
                 val = move_from.val;
                 move_from.val = -1;
                 return *this;
             }
+#endif
         };
 
         layer1::vector<Item, 10> v;

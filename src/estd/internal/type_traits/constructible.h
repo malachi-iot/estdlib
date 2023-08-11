@@ -15,6 +15,9 @@ using is_constructible = std::is_constructible<T, TArgs...>;
 template <class T>
 using is_copy_constructible = std::is_copy_constructible<T>;
 
+template <class T>
+using is_move_constructible = std::is_move_constructible<T>;
+
 template <class T, class ...TArgs>
 using is_nothrow_constructible = std::is_nothrow_constructible<T, TArgs...>;
 
