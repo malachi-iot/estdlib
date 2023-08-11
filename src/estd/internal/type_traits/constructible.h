@@ -89,6 +89,9 @@ using is_constructible = detail::is_constructible<void_t<>, T, Args...>;
 template <class T>
 using is_copy_constructible = detail::is_copy_constructible<void_t<>, T>;
 
+template <class T>
+using is_move_constructible = detail::is_move_constructible<void_t<>, T>;
+
 // DEBT: Since exceptions are usually off, we cheat and reuse regular
 // is_constructible.  Certainly not the right way to do things
 template <class T, class... Args>

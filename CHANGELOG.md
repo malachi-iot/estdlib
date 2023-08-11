@@ -9,6 +9,7 @@
 * `estd::tuple` now has conversion constructor
 * `estd::variant` on AVR now usable, with caveats (see next session)
 * String support code got a major scrub, though still a lot of crust in there
+* `estd::vector` no longer does naughty `memmove` with non-trivial types
 
 ## Known Issues & Limitations
 

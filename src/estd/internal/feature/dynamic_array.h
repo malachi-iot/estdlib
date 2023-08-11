@@ -30,3 +30,10 @@
 #ifndef FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
 #define FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT 0
 #endif
+
+// WHen doing inserts or deletes, if trivial type is detected,
+// use memmove or memcpy instead of regular estd::copy and friends
+// this is EXPERIMENTAL and not fully functional at this time
+#ifndef FEATURE_ESTD_DYNAMIC_ARRAY_MEMMOVE
+#define FEATURE_ESTD_DYNAMIC_ARRAY_MEMMOVE 0
+#endif

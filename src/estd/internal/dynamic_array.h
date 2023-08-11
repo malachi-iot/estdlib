@@ -218,11 +218,27 @@ protected:
 #endif
 
     template <class T2 = value_type>
-    typename enable_if<is_copy_assignable<T2>::value>::type
+    typename enable_if<
+        is_copy_assignable<T2>::value
+#if FEATURE_ESTD_DYNAMIC_ARRAY_MEMMOVE
+        && !is_trivial<T2>::value
+#endif
+        >::type
     copy_assist(pointer first, const_pointer last, pointer d_last)
     {
         copy_backward(first, last, d_last);
     }
+
+#if FEATURE_ESTD_DYNAMIC_ARRAY_MEMMOVE
+    template <class T2 = value_type>
+    typename enable_if<is_trivial<T2>::value>::type
+    inline copy_assist(pointer first, const_pointer last, pointer d_last)
+    {
+        const size_t sz = last - first;
+
+        memmove(d_last - sz, first, sz);
+    }
+#endif
 
 #if !FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
     template <class T2 = value_type>
