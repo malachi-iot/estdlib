@@ -194,19 +194,51 @@ protected:
         base_type::assign(buf, len);
     }
 
+    // DEBT: Use a strictness feature flag to disallow falling back
+    // to constructors
+#ifdef __cpp_rvalue_references
+    template <class T2 = value_type>
+    typename enable_if<is_move_assignable<T2>::value>::type
+    move_assist()
+    {
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+    }
+
+    template <class T2 = value_type>
+    typename enable_if<is_nothrow_move_constructible<T2>::value>::type
+    move_assist()
+    {
+
+    }
+#endif
+
+    template <class T2 = value_type>
+    typename enable_if<is_copy_assignable<T2>::value>::type
+    move_assist()
+    {
+
+    }
+
+
+
+#ifdef __cpp_rvalue_references
     void raw_insert(value_type* a, value_type* to_insert_pos, value_type&& to_insert_value)
     {
         grow(1);
 
         // NOTE: this shall be all very explicit raw array operations.  Not resilient to other data structure
+        const size_type sz = size();
         size_type raw_typed_pos = to_insert_pos - a;
         size_type remaining = size() - raw_typed_pos;
 
+        //*(to_insert_pos + 1) = std::move(*to_insert_pos);
+        //new (to_insert_pos + 1) value_type(std::move(*to_insert_pos));
+
+        estd::move_backward(to_insert_pos, (a + sz - 1), (a + sz));
+
         // FIX: This is causing a memory allocation issue, probably a buffer overrun
         // but not sure why
-        memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+        //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
         new (to_insert_pos) value_type(std::move(to_insert_value));
     }
@@ -226,7 +258,8 @@ protected:
 
         // FIX: This is causing a memory allocation issue, probably a buffer overrun
         // but not sure why
-        memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+        //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+        estd::copy_backward(to_insert_pos, (a + sz), (a + sz + 1));
 
         *to_insert_pos = *to_insert_value;
     }

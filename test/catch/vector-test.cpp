@@ -288,6 +288,13 @@ TEST_CASE("vector tests")
             {
                 move_from.val = -1;
             }
+
+            Item& operator=(Item&& move_from)
+            {
+                val = move_from.val;
+                move_from.val = -1;
+                return *this;
+            }
         };
 
         layer1::vector<Item, 10> v;

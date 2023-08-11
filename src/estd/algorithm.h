@@ -128,6 +128,7 @@ ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp)
     return largest;
 }
 
+// DEBT: use overall macro push/pop here
 #ifdef ESTD_MIN_SAVER
 #define min ESTD_MIN_SAVER
 #endif
@@ -157,6 +158,36 @@ inline OutputIt copy_n(InputIt first, Size count, OutputIt result)
 
     return result;
 }
+
+
+template<class InputIt, class OutputIt>
+inline OutputIt copy_backward(InputIt first, InputIt last,
+              OutputIt d_last)
+{
+#if FEATURE_ESTD_ALGORITHM_OPT
+    return std::copy_backward(first, last, d_last);
+#else
+    while (first != last)
+        *--d_last = *--last;
+
+    return d_last;
+#endif
+}
+
+template<class InputIt, class OutputIt>
+inline OutputIt move_backward(InputIt first, InputIt last,
+              OutputIt d_last)
+{
+#if FEATURE_ESTD_ALGORITHM_OPT
+    return std::move_backward(first, last, d_last);
+#else
+    while (first != last)
+        *--d_last = std::move(*--last);
+
+    return d_last;
+#endif
+}
+
 
 template<class InputIt, class UnaryPredicate>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD

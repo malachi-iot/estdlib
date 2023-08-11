@@ -16,6 +16,7 @@ struct test_class_1
     }
 };
 
+using namespace estd;
 
 TEST_CASE("algorithm tests")
 {
@@ -53,5 +54,16 @@ TEST_CASE("algorithm tests")
 
         REQUIRE(buf[5] == 7);
         REQUIRE(buf[9] == 7);
+    }
+    SECTION("copy_backward")
+    {
+        array<unsigned, 10> a{ 0, 1, 2, 3, 4, 5 };
+
+        copy_backward(a.begin() + 1, a.end() - 1, a.end());
+
+        REQUIRE(a[0] == 0);
+        REQUIRE(a[1] == 1);
+        REQUIRE(a[2] == 1);
+        REQUIRE(a[3] == 2);
     }
 }

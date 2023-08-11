@@ -138,6 +138,21 @@ TEST_CASE("dynamic array")
 
         da1.append(a);
     }
+    SECTION("insert")
+    {
+        da1.push_back(1);
+        da1.push_back(2);
+        da1.push_back(3);
+
+        da1.insert(da1.begin() + 1, 4);
+
+        REQUIRE(da1[0] == 1);
+        REQUIRE(da1[1] == 4);
+        REQUIRE(da1[2] == 2);
+        REQUIRE(da1[3] == 3);
+
+        REQUIRE(da1.size() == 4);
+    }
 }
 
 #include "macro/pop.h"
