@@ -46,6 +46,9 @@ void setup()
 
     test_align();
     test_array();
+#ifdef __AVR__
+    test_avr_pgm();
+#endif
     test_chrono();
     test_cpp();
     test_cstddef();

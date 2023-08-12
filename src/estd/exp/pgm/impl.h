@@ -5,13 +5,14 @@
 #include "policy.h"
 
 namespace estd {
-namespace experimental {
+namespace avr { namespace impl {
 
 // For "legacy" mode, this is not impl but instead entire implementation
 // For newer mode, this Impl feeds estd::internal::allocated_array
+// NOTE: was experimental::private_array_base
 template <class T, size_t N, class Policy = estd::internal::impl::PgmPolicy<
         T, internal::impl::PgmPolicyType::String, N> >
-struct private_array_base : Policy
+struct pgm_array : Policy
 {
     using base_type = Policy;
 
@@ -30,12 +31,12 @@ struct private_array_base : Policy
     // data_ was working, but let's dogfood a bit
     allocator_type alloc;
 
-    ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type pos = 0) const
+    constexpr const_pointer data(size_type pos = 0) const
     {
         return alloc.data(pos);
     }
 
-    constexpr private_array_base(const_pointer data) :
+    constexpr pgm_array(const_pointer data) :
         alloc(data)
     {}
 
@@ -124,14 +125,6 @@ struct private_array_base : Policy
     }
 #endif
 };
-
-}
-
-namespace avr { namespace impl {
-
-template <class T, size_t N, class Policy = estd::internal::impl::PgmPolicy<
-        T, internal::impl::PgmPolicyType::String, N> >
-using pgm_array = experimental::private_array_base<T, N, Policy>;
 
 }}
 
