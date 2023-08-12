@@ -4,17 +4,23 @@
 #include <estd/string.h>
 
 #if __AVR__
-#include <estd/exp/pgm_string.h>
+//#include <estd/exp/pgm_string.h>
 #include <estd/exp/pgm/string.h>
 
 const char test1[] PROGMEM = "Hello AVR:";
 
+// https://forum.arduino.cc/t/what-does-the-f-do-exactly/89384
+// https://github.com/vancegroup-mirrors/avr-libc/blob/master/avr-libc/include/avr/pgmspace.h
+// Looks like documented PSTR is a bit of a lie
+
 //static estd::pgm_string s(PSTR("hello")); // FIX: Why don't you work??
 //constexpr static estd::pgm_string pgm_s((const PROGMEM char*)"Hello AVR: ");
 //constexpr static estd::pgm_string pgm_s(F("Hello AVR: "));
-constexpr static estd::pgm_string pgm_s(test1);
-constexpr static estd::basic_pgm_string<sizeof(test1) - 1> pgm_s3(test1);
-static estd::pgm_string2 pgm_s4(test1);
+//static estd::pgm_string2 pgm_s5(PSTR("hello"));
+// "statement-expressions are not allowed outside functions nor in template-argument lists"
+
+static estd::basic_pgm_string<char, sizeof(test1) - 1> pgm_s3(test1);
+static estd::pgm_string pgm_s4(test1);
 
 struct Returner
 {
@@ -22,6 +28,11 @@ struct Returner
     static estd::pgm_string value()
     {
         return { PSTR("(value)") };
+    }
+
+    static estd::layer2::string<> value2()
+    {
+        return "(value-2)";
     }
 };
 
@@ -37,6 +48,8 @@ static estd::arduino_ostream cout(Serial);
 void setup()
 {
     Serial.begin(115200);
+
+    while(!Serial);
 }
 
 
@@ -59,19 +72,23 @@ void loop()
     name += "Mouse";
 
 #if __AVR__
-    //estd::pgm_string pgm_s2(PSTR("(value)"));
+    estd::pgm_string pgm_s(PSTR("(value-inline)"));
     estd::pgm_string pgm_s2 = Returner::value();
 
-    //name += pgm_s;
     name += pgm_s4;
-    //name += Returner::value();
+    name += Returner::value();
+    //name += Returner::value2();
+
     //name += F("(value)");
 #endif
 
 #if USE_IOS
 #if __AVR__
     cout << pgm_s;
-    cout << pgm_s4; // NOTE: Uses a lot more memory than pgm_s
+    cout << pgm_s3;
+    cout << Returner::value();
+    cout << estd::endl;
+    //cout << Returner::value2();
 #else
     cout << F("Hello: ");
 #endif

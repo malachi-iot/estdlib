@@ -18,7 +18,7 @@ struct private_array_base : Policy
     using typename base_type::size_type;
     using typename base_type::const_pointer;
     using base_type::value_type;
-    using allocator_traits = internal::impl::pgm_allocator_traits<T>;
+    using allocator_traits = internal::impl::pgm_allocator_traits<T, N>;
     using policy_type = Policy;
 
     // DEBT: Dummy value so that regular estd::basic_string gets its

@@ -84,7 +84,7 @@ struct pgm_allocator_traits
 
 template <>
 struct allocator_traits<internal::impl::pgm_allocator> :
-    internal::impl::pgm_allocator_traits<char>
+    internal::impl::pgm_allocator_traits<char, internal::variant_npos()>
 {
 
 };

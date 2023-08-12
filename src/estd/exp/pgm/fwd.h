@@ -11,7 +11,7 @@ namespace impl {
 template <class T, bool near = true>
 struct pgm_accessor_impl;
 
-template <class T, size_t N = internal::variant_npos()>
+template <class T, size_t N>
 struct pgm_allocator_traits;
 
 }

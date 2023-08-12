@@ -129,7 +129,7 @@ struct basic_string<impl::pgm_allocator, PgmStringPolicy<N>> :
 {
     using base_type = experimental::private_array<PgmStringPolicy<N>>;
     using allocator_type = impl::pgm_allocator;
-    using allocator_traits = impl::pgm_allocator_traits<char>;
+    using allocator_traits = impl::pgm_allocator_traits<char, N>;
     using typename base_type::size_type;
 
     size_type length() const { return base_type::size(); }
@@ -166,7 +166,7 @@ using pgm_string = basic_string<char, char_traits<char>,
     internal::impl::PgmPolicy>; */
 
 template <size_t N = internal::variant_npos()>
-struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
+struct basic_pgm_string_old : basic_string<char, estd::char_traits<char>,
     internal::impl::pgm_allocator,
     internal::PgmStringPolicy<N>>
 {
@@ -178,7 +178,7 @@ struct basic_pgm_string : basic_string<char, estd::char_traits<char>,
 };
 
 
-using pgm_string = basic_pgm_string<>;
+using pgm_string_old = basic_pgm_string<>;
 
 // Special case insertion operator for arduino streams who can handle
 // PGM space directly.  Considered "legacy" mode now

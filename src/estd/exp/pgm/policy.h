@@ -23,7 +23,8 @@ template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
 struct PgmPolicy;
 
 template <size_t N>
-struct PgmPolicy<char, PgmPolicyType::String, N> : pgm_allocator_traits<char>
+struct PgmPolicy<char, PgmPolicyType::String, N> :
+    pgm_allocator_traits<char, N>
 {
     using char_traits = estd::char_traits<char>;
 

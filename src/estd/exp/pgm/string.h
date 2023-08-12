@@ -100,17 +100,17 @@ struct out_string_helper<arduino_ostream, avr::impl::pgm_array<char, N> >
 
 
 template <class CharT, size_t N = internal::variant_npos()>
-struct basic_pgm_string2 :
+struct basic_pgm_string :
     detail::basic_string<avr::impl::pgm_array<CharT, N> >
 {
     using base_type = detail::basic_string<avr::impl::pgm_array<CharT, N> >;
 
-    constexpr basic_pgm_string2(const char* const s) :
+    constexpr basic_pgm_string(const char* const s) :
         base_type(s)
     {}
 };
 
-using pgm_string2 = basic_pgm_string2<char>;
+using pgm_string = basic_pgm_string<char>;
 
 
 }

@@ -12,9 +12,9 @@ class pgm_accessor;
 
 // "legacy" flavor, phasing out
 template <class T>
-class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T>
+class pgm_accessor<T> : protected internal::impl::pgm_allocator_traits<T, internal::variant_npos()>
 {
-    using base_type = internal::impl::pgm_allocator_traits<T>;
+    using base_type = internal::impl::pgm_allocator_traits<T, internal::variant_npos()>;
 protected:
     using typename base_type::const_pointer;
     using typename base_type::value_type;
