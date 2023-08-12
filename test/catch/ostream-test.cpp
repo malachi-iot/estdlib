@@ -156,6 +156,18 @@ TEST_CASE("ostream")
             REQUIRE(out_s.empty());
         }
     }
+    SECTION("streambuf reference")
+    {
+        using streambuf_type = layer1::basic_out_stringbuf<char, 256, true>;
+        streambuf_type streambuf;
+        detail::basic_ostream<streambuf_type&> out_ref(streambuf);
+
+        out_ref << 2;
+        out_ref << "Hello";
+        out_ref << exp_manipulator(5);
+
+        REQUIRE(streambuf.str() == "2Hello20");
+    }
 }
 
 #include "macro/pop.h"

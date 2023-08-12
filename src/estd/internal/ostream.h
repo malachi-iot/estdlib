@@ -267,7 +267,7 @@ namespace internal {
 template <class TStreambuf, class TBase>
 void write_int_buffer(
     detail::basic_ostream<TStreambuf, TBase>& out,
-    typename TStreambuf::char_type* buffer,
+    typename remove_cvref<TStreambuf>::type::char_type* buffer,
     unsigned sz)
 {
 #if FEATURE_ESTD_OSTREAM_SETW
