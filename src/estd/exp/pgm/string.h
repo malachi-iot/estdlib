@@ -98,6 +98,7 @@ struct out_string_helper<arduino_ostream, avr::impl::pgm_array<char, N> >
 
 }   // estd::internal
 
+inline namespace v0 { inline namespace avr {
 
 template <class CharT, size_t N = internal::variant_npos()>
 struct basic_pgm_string :
@@ -112,6 +113,7 @@ struct basic_pgm_string :
 
 using pgm_string = basic_pgm_string<char>;
 
+}}
 
 }
 

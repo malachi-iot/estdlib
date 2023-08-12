@@ -5,7 +5,8 @@
 #include "policy.h"
 
 namespace estd {
-namespace avr { namespace impl {
+
+inline namespace v0 { inline namespace avr { namespace impl {
 
 // For "legacy" mode, this is not impl but instead entire implementation
 // For newer mode, this Impl feeds estd::internal::allocated_array
@@ -126,6 +127,6 @@ struct pgm_array : Policy
 #endif
 };
 
-}}
+}}}
 
 }

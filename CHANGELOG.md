@@ -3,6 +3,7 @@
 ## Added Features
 
 * `estd::detail::string` is a more manageable way to pass strings around
+* Experimental/partial support for AVR PGM strings: `estd::v0::avr::pgm_string`
 
 ## Quality Updates & Bug Fixes
 

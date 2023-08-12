@@ -20,7 +20,7 @@ namespace impl {
 
 // NOTE: None of the underlying lock mechanisms are gonna work here, so
 // we might be better off with a pure manual allocator like we started
-// with with pgm_allocator
+// with with pgm_allocator (now in obsolete area)
 template <class T, size_t N>
 struct pgm_allocator2 : estd::layer2::allocator<const T, N>
 {
@@ -42,13 +42,6 @@ struct pgm_allocator2 : estd::layer2::allocator<const T, N>
     using iterator = estd::internal::locking_iterator<
         pgm_allocator2, pgm_accessor2<T>,
         estd::internal::locking_iterator_modes::ro >;   */
-};
-
-struct pgm_allocator
-{
-    using value_type = char;
-    using pointer = const PROGMEM char*;
-    using handle_type = pointer;
 };
 
 template <class T, size_t N>
@@ -81,13 +74,6 @@ struct pgm_allocator_traits
 }   // estd::internal::impl
 
 }   // estd::internal
-
-template <>
-struct allocator_traits<internal::impl::pgm_allocator> :
-    internal::impl::pgm_allocator_traits<char, internal::variant_npos()>
-{
-
-};
 
 }
 
