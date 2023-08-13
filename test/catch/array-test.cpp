@@ -235,11 +235,9 @@ TEST_CASE("array/vector tests")
 
             auto h = traits::allocate(alloc, 10);
             int& p = traits::lock(alloc, h);
+            const int* const _p = &p;
 
-            //auto h = alloc.allocate(1);
-            //int* p = &alloc.lock(h);
-
-            REQUIRE(&p != nullptr);
+            REQUIRE(_p != nullptr);
 
             // NOTE: noop
             traits::unlock(alloc, h);

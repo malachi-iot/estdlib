@@ -141,6 +141,8 @@ public:
 
     typedef typename base_type::size_type size_type;
 
+    // DEBT: Underlying allocator sometimes has higher precision on its max_size,
+    // causing potential issues here - especially when limits::max() is used
     ESTD_CPP_CONSTEXPR_RET size_type max_size() const
     { return base_type::get_allocator().max_size(); }
 
