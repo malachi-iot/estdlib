@@ -6,12 +6,11 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-// TODO: Make all these toStrings return actual number of bytes used
-// TODO: Make all these toStrings take a maximum length parameter
-
-
+// DEBT: Move validation mechanism out of estd completely
 
 namespace estd { namespace internal {
+
+#if FEATURE_ESTD_STRING_LEGACY_VALIDATION
 
 const char VALIDATE_NULLSTR_ERROR[] PROGMEM = "Null String";
 const char VALIDATE_STRTOOLONG_ERROR[] PROGMEM = "String too long";
@@ -77,7 +76,22 @@ template <> PGM_P validateString<unsigned short>(const char* input)
     return input == str_end ? VALIDATE_FORMAT_ERROR : NULLPTR;
 }
 
+template<> PGM_P getTypeName<const char*>()
+{
+  return TYPENAME_CHARPTR;
+}
 
+template<> PGM_P getTypeName<int>()
+{
+  return TYPENAME_INT;
+}
+
+
+#endif
+
+// Phasing this out, just keeping around in case some random code needs it
+// to_chars / num_put is vastly superior
+#if FEATURE_ESTD_STRING_LEGACY_TOSTRING
 
 template<> char* toString(char* output, char input)
 {
@@ -141,19 +155,11 @@ template<> char* toString(char* output, float input)
 }
 #endif
 
-
-
-template<> PGM_P getTypeName<const char*>()
-{
-  return TYPENAME_CHARPTR;
-}
-
-template<> PGM_P getTypeName<int>()
-{
-  return TYPENAME_INT;
-}
+#endif
 
 }}
+
+#if FEATURE_ESTD_STRING_LEGACY_FROM_CHARS
 
 namespace estd {
 namespace legacy {
@@ -183,3 +189,5 @@ from_chars_result from_chars(const char* first, const char* last,
 }
 
 }}
+
+#endif

@@ -25,17 +25,8 @@ namespace estd {
 // non standard but non intrusive overloads in case you've already got the string
 // you'd like to populate
 template <class T, class TStrImpl>
-typename estd::enable_if<!estd::numeric_limits<T>::is_integer, void>::type
-to_string(estd::internal::allocated_array<TStrImpl>& s, const T& value)
-{
-    internal::toString(s.lock(), value, s.max_size());
-    s.unlock();
-}
-
-
-template <class T, class TStrImpl>
 typename estd::enable_if<estd::numeric_limits<T>::is_integer, void>::type
-to_string(estd::internal::allocated_array<TStrImpl>& s, const T value)
+to_string(estd::internal::allocated_array<TStrImpl>& s, const T& value)
 {
     typedef typename TStrImpl::allocator_type::value_type char_type;
 
