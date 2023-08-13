@@ -2,6 +2,7 @@
 
 #include <estd/tuple.h>
 
+// TODO: Dogfood in some estd::functional here
 #if FEATURE_STD_FUNCTIONAL
 #include <functional>
 #else
@@ -52,6 +53,10 @@ struct NonTrivial
         on_dtor(std::move(move_from.on_dtor))
     {
         move_from.moved_from_ = true;
+
+        // move_from.on_dtor "is in a valid but unspecified state after the call."
+        // therefore we really want to be sure to clear it
+        move_from.on_dtor = nullptr_t {};
     }
 
     ~NonTrivial()

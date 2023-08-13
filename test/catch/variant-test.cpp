@@ -145,12 +145,11 @@ TEST_CASE("variant")
                     v = v3;
                 }
 
-                // FIX: macOS/Clang this fails
                 REQUIRE(counter == 3);
 
                 {
                     variant1_type v3(in_place_index_t<1>{}, 8, dtor_fn);
-                    test::NonTrivial& v4 = get<1>(v3);
+                    const test::NonTrivial& v4 = get<1>(v3);
 
                     REQUIRE(get<1>(v3).initialized_ == true);
                     REQUIRE(get<1>(v3).moved_ == false);
@@ -244,7 +243,6 @@ TEST_CASE("variant")
                 variant1_type v2(std::move(v));
             }
 
-            // FIX: macOS/Clang this fails
             REQUIRE(counter == 1);
         }
         SECTION("converting constructor")
