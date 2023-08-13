@@ -145,6 +145,7 @@ TEST_CASE("variant")
                     v = v3;
                 }
 
+                // FIX: macOS/Clang this fails
                 REQUIRE(counter == 3);
 
                 {
@@ -243,6 +244,7 @@ TEST_CASE("variant")
                 variant1_type v2(std::move(v));
             }
 
+            // FIX: macOS/Clang this fails
             REQUIRE(counter == 1);
         }
         SECTION("converting constructor")
