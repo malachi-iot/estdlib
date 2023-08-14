@@ -33,7 +33,7 @@ public:
     // scenario
     basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
 
-    basic_string_view(const CharT* s, size_type count) :
+    ESTD_CPP_CONSTEXPR_RET basic_string_view(const CharT* s, size_type count) :
         base_type(init_param_t(s, count))
     {
 

@@ -31,8 +31,8 @@ public:
 
     static CONSTEXPR bool is_evaporated = true;
 
-    value_evaporator(TEvaporated) {}
-    value_evaporator() {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT value_evaporator(TEvaporated) {}
+    ESTD_CPP_DEFAULT_CTOR(value_evaporator)
 };
 
 template <class TValue, class TEvaporated, TEvaporated default_value>
@@ -51,8 +51,8 @@ public:
 
     static CONSTEXPR bool is_evaporated = false;
 
-    value_evaporator(const TValue& v) : m_value(v) {}
-    value_evaporator() {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT value_evaporator(const TValue& v) : m_value(v) {}
+    ESTD_CPP_DEFAULT_CTOR(value_evaporator)
 };
 
 

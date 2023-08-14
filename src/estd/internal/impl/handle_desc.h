@@ -138,7 +138,7 @@ public:
 protected:
     void handle(const handle_type& h) { base_t::value(h); }
 
-    handle_descriptor(const handle_type& h) : base_t(h) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(const handle_type& h) : base_t(h) {}
 
     value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
     {
@@ -192,12 +192,12 @@ public:
 public:
     // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
     template <class TAllocatorParameter>
-    allocator_and_handle_descriptor(TAllocatorParameter& p, const handle_type& h) :
+    ESTD_CPP_CONSTEXPR_RET allocator_and_handle_descriptor(TAllocatorParameter& p, const handle_type& h) :
             base_t(p),
             handle_base_t(h)
     {}
 
-    allocator_and_handle_descriptor(const handle_type& h) :
+    ESTD_CPP_CONSTEXPR_RET allocator_and_handle_descriptor(const handle_type& h) :
         handle_base_t(h) {}
 
 

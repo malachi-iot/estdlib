@@ -105,7 +105,7 @@ protected:
 
     ESTD_CPP_DEFAULT_CTOR(single_allocator_base)
 
-    ESTD_CPP_CONSTEXPR_RET single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }
@@ -208,7 +208,7 @@ public:
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
-    ESTD_CPP_CONSTEXPR_RET single_fixedbuf_allocator(const TBuffer& buffer) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_allocator(const TBuffer& buffer) :
         base_type(buffer) {}
 
 
@@ -272,7 +272,7 @@ protected:
         m_buffer_size = size;
     }
 
-    explicit single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
         base_t(buffer),
         m_buffer_size(size)
     {
@@ -285,10 +285,10 @@ public:
         T* buffer;      // incoming layer3 buffer
         size_type size; // size of layer3 buffer (remember this represents allocated size)
 
-        InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
+        ESTD_CPP_CONSTEXPR_RET InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
     };
 
-    single_fixedbuf_runtimesize_allocator(const InitParam& p)
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_runtimesize_allocator(const InitParam& p)
         : base_t(p.buffer), m_buffer_size(p.size)
     {}
 

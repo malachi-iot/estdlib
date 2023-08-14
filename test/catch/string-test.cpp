@@ -16,7 +16,6 @@ using namespace estd;
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";
 
-
 TEST_CASE("string tests")
 {
     SECTION("string tests")

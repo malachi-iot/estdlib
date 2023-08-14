@@ -144,7 +144,7 @@ public:
     ESTD_CPP_DEFAULT_CTOR(allocated_array)
 
     template <class THelperParam>
-    allocated_array(const THelperParam& p) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT allocated_array(const THelperParam& p) :
             m_impl(p) {}
 
 #if UNUSED

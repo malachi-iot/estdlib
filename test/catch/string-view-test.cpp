@@ -73,6 +73,10 @@ TEST_CASE("string_view")
 
         REQUIRE(sv4 == "es");
     }
+    SECTION("constexpr")
+    {
+        constexpr string_view sv("test", 4);
+    }
 }
 
 
