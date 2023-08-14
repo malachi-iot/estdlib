@@ -52,7 +52,7 @@ public:
     // layer1 strings can safely issue a lock like this, since unlock is a no-op
     CharT* data() { return base_t::lock(); }
 
-    const CharT* data() const { return base_t::clock(); }
+    ESTD_CPP_CONSTEXPR_RET const CharT* data() const { return base_t::clock(); }
 
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT

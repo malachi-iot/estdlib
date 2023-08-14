@@ -6,6 +6,9 @@
 // TODO: refactor layer2 & layer3 to utilize a handle and not a CharT*
 namespace estd { namespace layer2 {
 
+// DEBT: Rework to only handle null terminated, because otherwise we're looking
+// at a fixed-size string which would be better served by a
+// layer1::basic_string_view
 template<class CharT, size_t N, bool null_terminated = true,
          class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class StringPolicy = typename estd::conditional<null_terminated,
@@ -97,7 +100,7 @@ public:
     }
 
     template <class Impl>
-    basic_string(estd::internal::allocated_array<Impl>& copy_from)
+    ESTD_CPP_CONSTEXPR_RET basic_string(estd::internal::allocated_array<Impl>& copy_from)
         // FIX: very bad -- don't leave things locked!  Also, we really want
         // to only permit this operation when copy_from is a null term string,
         // otherwise copy_from won't know if we've changed the str len.
@@ -107,8 +110,7 @@ public:
     {
     }
 
-    // DEBT: Similar to above constructor, we probably want to filter this
-    // by compatible resizing scenarios
+    // Assigns incoming copy_from to whatever pointer we are tracking.
     template <class Impl>
     basic_string& operator=(const estd::internal::allocated_array<Impl>& copy_from) // NOLINT
     {
@@ -126,7 +128,7 @@ public:
     // layer2 strings can safely issue a lock like this, since unlock is a no-op
     CharT* data() { return base_t::lock(); }
 
-    const CharT* data() const { return base_t::clock(); }
+    ESTD_CPP_CONSTEXPR_RET const CharT* data() const { return base_t::clock(); }
 
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT

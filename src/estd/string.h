@@ -291,21 +291,21 @@ bool operator ==( const basic_string<TCharLeft, typename StringTraitsLeft::char_
 
 // FIX: This doesn't account for conversion errors, but should.  std version
 // throws exceptions
-// NOTE: Retains TChar rather than deducing from Traits because Traits always
-// removes const, while TChar can be const.  Will create complexities if and when
-// wchar needs to be supported
-// DEBT: Rework to use num_get/from_string
-template <class TChar, class Traits, class Alloc, class TStringTraits>
+// DEBT: Rework to use num_get/from_string - doing so will make it easier
+// to handle non-null terminated strings
+template <class Impl>
 long stol(
-        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        const detail::basic_string<Impl>& str,
         size_t* pos = 0, int base = 10)
 {
     // FIX: very clunky way to ensure we're looking at a null terminated string
-    // somehow I never expose null_termination indicators on the string itself
-    TStringTraits::is_null_termination(0);
+    // policy won't have this method otherwise
+    Impl::policy_type::is_null_termination(0);
 
-    const TChar* data = str.clock();
-    typename estd::remove_const<TChar>::type* end;
+    typedef typename Impl::policy_type::char_traits::char_type char_type;
+
+    const char_type* data = str.clock();
+    char_type* end;
     long result = strtol(data, &end, base);
     str.cunlock();
     if(pos != NULLPTR)

@@ -4,7 +4,7 @@
 
 namespace avr {
 
-void loop1(estd::layer1::string<64>& name);
+void loop1(estd::layer2::string<> name);
 void loop2();
 
 
