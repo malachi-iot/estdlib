@@ -1,6 +1,9 @@
 #pragma once
 
 #include "fwd/string.h"
+#include "layer1/string.h"
+#include "layer2/string.h"
+#include "layer3/string.h"
 
 #include "dynamic_array.h"
 
