@@ -351,14 +351,18 @@ public:
     }
 
     template <class Impl>
-    basic_string(const estd::internal::allocated_array<Impl>& copy_from)
-        // FIX: very bad -- don't leave things locked!
-        // only doing this because we often pass around layer1, layer2, layer3 strings who
+    basic_string(estd::internal::allocated_array<Impl>& copy_from)
+        // FIX: very bad -- don't leave things locked!  Also, we really want
+        // to only permit this operation when copy_from is a null term string,
+        // otherwise copy_from won't know if we've changed the str len.
+        // Only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
-        : base_type(copy_from.clock())
+        : base_type(copy_from.lock())
     {
     }
 
+    // DEBT: Similar to above constructor, we probably want to filter this
+    // by compatible resizing scenarios
     template <class Impl>
     basic_string& operator=(const estd::internal::allocated_array<Impl>& copy_from) // NOLINT
     {

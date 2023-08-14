@@ -140,6 +140,15 @@ TEST_CASE("string tests")
                 // NOTE: Doesn't work by design - loses const-qualifiers
                 //layer2::string<> str3 = "hi2u";
             }
+            SECTION("initialize from lyaer1")
+            {
+                layer1::string<64> l1s{"hello"};
+                layer2::string<> l2s(l1s);
+
+                l2s += " 2u";
+
+                REQUIRE(l1s == "hello 2u");
+            }
         }
         SECTION("assignment to literal")
         {
@@ -183,6 +192,11 @@ TEST_CASE("string tests")
             REQUIRE(str.size() == 4);
             REQUIRE(strcmp(buf, "hi2u") == 0);
             REQUIRE(str.data() == buf);
+        }
+        SECTION("fundamentals")
+        {
+            REQUIRE(sizeof(layer2::string<>) == sizeof(char*));
+            REQUIRE(sizeof(layer2::string<128>) == sizeof(char*));
         }
     }
     SECTION("layer 3 null terminated")
