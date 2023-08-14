@@ -319,7 +319,7 @@ public:
     }
 
     template <class TAllocatorParameter>
-    dynamic_array_base(TAllocatorParameter& p) : base_t(p)
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array_base(TAllocatorParameter& p) : base_t(p)
     {
         // FIX: More sloppy, it's possible TAllocatorParameter has the sizing data in it
         // so we do NOT do size here

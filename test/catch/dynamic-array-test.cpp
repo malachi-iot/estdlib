@@ -153,6 +153,19 @@ TEST_CASE("dynamic array")
 
         REQUIRE(da1.size() == 4);
     }
+    SECTION("constexpr")
+    {
+        // This test primarily verifies that dynamic array in general can be used as a constexpr,
+        // even though that's an edge case.  Currently pgm_string and basic_string_view share
+        // code with this, even though they aren't really dynamic
+
+        using da2_type = internal::dynamic_array<internal::impl::dynamic_array<
+            estd::internal::single_fixedbuf_allocator<int, 20, const int*>, void> >;
+
+        constexpr da2_type da2(data_);
+
+        REQUIRE(da2.empty());
+    }
 }
 
 #include "macro/pop.h"

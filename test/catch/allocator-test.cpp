@@ -204,6 +204,11 @@ TEST_CASE("allocator tests")
 
         REQUIRE(*it == 1);
     }
+    SECTION("constexpr")
+    {
+        constexpr const char* backing = "Hello";
+        layer2::allocator<const char, 128> a(backing);
+    }
     SECTION("experimental")
     {
     }

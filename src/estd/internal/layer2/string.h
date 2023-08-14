@@ -46,7 +46,7 @@ public:
     // - a size=capacity variant, in which str_buffer isn't (necessarily) null terminated
     //   but size() still reflects the right size of the string
     // This particular constructor is good for string literals, assuming CharT is const char
-    basic_string(CharT* str_buffer) : base_t(str_buffer)
+    ESTD_CPP_CONSTEXPR_RET basic_string(CharT* str_buffer) : base_type(str_buffer)
     {
     }
 

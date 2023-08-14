@@ -47,7 +47,7 @@ struct pgm_allocator2 : estd::layer2::allocator<const T, N>
 template <class T, size_t N>
 struct pgm_allocator_traits
 {
-    using value_type = T;
+    using value_type = add_const_t<T>;
     using pointer = const PROGMEM value_type*;
     using const_pointer = pointer;
     using handle_type = pointer;

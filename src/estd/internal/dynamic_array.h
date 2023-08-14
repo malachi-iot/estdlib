@@ -347,7 +347,7 @@ public:
 #endif
 
     // TODO: iterate through and destruct elements
-    ~dynamic_array() {}
+    //~dynamic_array() {}
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const   // NOLINT
     {

@@ -139,7 +139,7 @@ TEST_CASE("string tests")
                 // NOTE: Doesn't work by design - loses const-qualifiers
                 //layer2::string<> str3 = "hi2u";
             }
-            SECTION("initialize from lyaer1")
+            SECTION("initialize from layer 1")
             {
                 layer1::string<64> l1s{"hello"};
                 layer2::string<> l2s(l1s);
@@ -147,6 +147,15 @@ TEST_CASE("string tests")
                 l2s += " 2u";
 
                 REQUIRE(l1s == "hello 2u");
+            }
+            SECTION("constexpr")
+            {
+                // DEBT: Works -- however, we prefer to make a layer1::basic_string_view for this case
+                constexpr layer2::basic_string<const char, 0> str("hello");
+                constexpr layer2::basic_string<const char, 5> str2("hello");
+
+                // As desired, this won't compile since str is const
+                //str += " 2u";
             }
         }
         SECTION("assignment to literal")

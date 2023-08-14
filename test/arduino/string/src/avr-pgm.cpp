@@ -19,8 +19,8 @@ const char test1[] PROGMEM = "Hello PGM:";
 //static estd::pgm_string2 pgm_s5(PSTR("hello"));
 // "statement-expressions are not allowed outside functions nor in template-argument lists"
 
-static estd::basic_pgm_string<char, sizeof(test1) - 1> hello_explicit_len(test1);
-static estd::pgm_string hello(test1);
+static constexpr estd::basic_pgm_string<char, sizeof(test1) - 1> hello_explicit_len(test1);
+static constexpr estd::pgm_string hello(test1);
 
 struct Returner
 {
