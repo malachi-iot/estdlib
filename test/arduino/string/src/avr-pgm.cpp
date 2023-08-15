@@ -7,7 +7,7 @@
 #include <estd/exp/pgm/string.h>
 
 
-const char test1[] PROGMEM = "Hello PGM:";
+static const char test1[] PROGMEM = "Hello PGM:";
 
 // https://forum.arduino.cc/t/what-does-the-f-do-exactly/89384
 // https://github.com/vancegroup-mirrors/avr-libc/blob/master/avr-libc/include/avr/pgmspace.h
@@ -19,12 +19,14 @@ const char test1[] PROGMEM = "Hello PGM:";
 //static estd::pgm_string2 pgm_s5(PSTR("hello"));
 // "statement-expressions are not allowed outside functions nor in template-argument lists"
 
+// Wishing for __flash keyword:
+// https://community.platformio.org/t/avr-flash-flash-not-recognized-in-c/5454/9
+
 static constexpr estd::basic_pgm_string<char, sizeof(test1) - 1> hello_explicit_len(test1);
 static constexpr estd::pgm_string hello(test1);
 
 struct Returner
 {
-    //static const char test2[] PROGMEM = "Hello AVR2";
     static estd::pgm_string value()
     {
         return { PSTR("(value)") };
@@ -34,6 +36,16 @@ struct Returner
     {
         return "(value-2)";
     }
+
+#if __cpp_inline_variables
+    //static const char value3_[] PROGMEM = "(value3)";
+    constexpr static const char value3_[] PROGMEM = "(value3)"; 
+
+    static constexpr estd::pgm_string value3()
+    {
+        return { value3_ };
+    }
+#endif
 };
 
 namespace avr {
@@ -65,6 +77,10 @@ void loop2()
     cout << pgm_s;
     cout << hello_explicit_len;
     cout << Returner::value();
+#if __cpp_inline_variables
+    cout << F(", ");
+    cout << Returner::value3();
+#endif
     cout << estd::endl;
     //cout << Returner::value2();
 }

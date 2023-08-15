@@ -3,7 +3,7 @@
 #include "fwd.h"
 #include "type_sequence.h"
 #include "integer_sequence.h"
-#include "../is_base_of.h"
+#include "../type_traits/is_base_of.h"
 
 #if __cpp_variadic_templates
 namespace estd {

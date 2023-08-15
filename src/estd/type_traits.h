@@ -2,14 +2,11 @@
 
 #include "internal/platform.h"
 #include "internal/type_traits.h"
-#include "internal/is_base_of.h"
 
 #include "internal/raw/cstddef.h"
 
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
-
-#include "internal/is_function.h"
 
 namespace internal {
 

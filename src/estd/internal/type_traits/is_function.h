@@ -1,3 +1,9 @@
+#pragma once
+
+#include "../raw/type_traits.h"
+
+namespace estd {
+
 // normally we avoid these non-freestanding internal .h files, but in this case
 // it's cleaner to do so
 
@@ -126,3 +132,5 @@ template<class Ret, class... Args>
 struct is_function<Ret(Args...,...) const volatile && noexcept> : true_type {};
 #endif
 #endif // __cpp_variadic_templates
+
+}

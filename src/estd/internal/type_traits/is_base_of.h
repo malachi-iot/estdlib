@@ -1,9 +1,9 @@
 #pragma once
 
-#include "type_traits.h"
+#include "../raw/type_traits.h"
 // DEBT: Piecemeal out dependencies to reduce overall dependency footprint.
 // required: void_t, true_type, is_class, remove_cv, integral_constant
-#include "../utility.h"
+#include "../../utility.h"
 
 namespace estd {
 

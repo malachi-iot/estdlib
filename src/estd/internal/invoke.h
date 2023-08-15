@@ -5,7 +5,9 @@
 #include "invoke_result.h"
 
 // TODO: Adjust so that earlier versions can use
-#if __cplusplus >= 201703L
+// TODO: Document where the heck we got this from
+
+#if __cplusplus >= 201703L && defined(FEATURE_STD_TYPE_TRAITS)
 
 namespace estd {
 
