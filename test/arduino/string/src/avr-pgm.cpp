@@ -23,7 +23,7 @@ static const char test1[] PROGMEM = "Hello PGM:";
 // https://community.platformio.org/t/avr-flash-flash-not-recognized-in-c/5454/9
 
 static constexpr estd::basic_pgm_string<char, sizeof(test1) - 1> hello_explicit_len(test1);
-static constexpr estd::pgm_string hello(test1);
+static constexpr estd::pgm_string hello = test1;
 
 struct Returner
 {
@@ -32,13 +32,12 @@ struct Returner
         return { PSTR("(value)") };
     }
 
-    static estd::layer2::string<> value2()
+    static estd::layer2::basic_string<const char, 0> value2()
     {
         return "(value-2)";
     }
 
 #if __cpp_inline_variables
-    //static const char value3_[] PROGMEM = "(value3)";
     constexpr static const char value3_[] PROGMEM = "(value3)"; 
 
     static constexpr estd::pgm_string value3()
@@ -58,7 +57,6 @@ void loop1(estd::layer2::string<> name)
     // FIX: 'v' as a bool is not getting expanded to true/false
     cout << F("loop: v=") << v << ", c=" << c << estd::endl;
 
-
     estd::pgm_string returner_value = Returner::value();
 
     name += hello;
@@ -72,14 +70,15 @@ void loop1(estd::layer2::string<> name)
 
 void loop2()
 {
-    estd::pgm_string pgm_s(PSTR("(value-inline)"));
+    const estd::pgm_string pgm_s(PSTR("(value-inline)"));
 
     cout << pgm_s;
     cout << hello_explicit_len;
     cout << Returner::value();
 #if __cpp_inline_variables
     cout << F(", ");
-    cout << Returner::value3();
+    constexpr estd::pgm_string pgm_value3 = Returner::value3();
+    cout << pgm_value3;
 #endif
     cout << estd::endl;
     //cout << Returner::value2();
