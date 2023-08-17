@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(estd VERSION 0.6.0 LANGUAGES CXX)
+project(estd VERSION 0.6.1 LANGUAGES CXX)
 
 include(../tools/cmake/setvars.cmake)
 

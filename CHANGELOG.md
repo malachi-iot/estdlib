@@ -1,4 +1,4 @@
-# v0.6.1 - XXXXX23
+# v0.6.1 - 16AUG23
 
 ## Added Features
 
