@@ -58,7 +58,7 @@ static void test_priority_queue()
 #ifdef ESTD_OS_FREERTOS
 
 template <class T>
-static void test_freertos_queue(freertos::internal::queue<T>& queue)
+static void test_freertos_queue(freertos::detail::queue<T>& queue)
 {
     const unsigned val = 7;
     unsigned val2 = 0;
