@@ -31,8 +31,6 @@ struct type_sequence_accessor
 
     using last = get<size() - 1>;
 
-    using visitor = variadic::type_visitor<Types...>;
-
     // +++ EXPERIMENTAL, not sure I want to put *this much* into type sequence
     template <class Eval>
     using selector = variadic::selector<Eval, Types...>;
@@ -80,6 +78,8 @@ struct types :
 
     template <class T>
     using append = types<Types..., T>;
+
+    using visitor = variadic::type_visitor<Types...>;
 
     static constexpr bool empty() { return sizeof...(Types) == 0; }
 };

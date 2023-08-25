@@ -184,7 +184,7 @@ struct type_visitor
 {
     //typedef layer1::optional<size_t, internal::variant_npos()> return_type;
 
-    template <size_t I,
+    template <size_t I = 0,
             class enabled = enable_if_t<(I == sizeof...(Types))>,
             class... TArgs,
 #if __cpp_concepts
