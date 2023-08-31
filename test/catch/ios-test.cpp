@@ -278,13 +278,9 @@ TEST_CASE("ios")
         {
             layer1::stringbuf<32> sb;
         }
-        // NOTE: current layer1 ostringstream and istringstream is interesting
-        // but I don't think representative of real use cases - i.e.
-        // fusing the data and the format metadata together.  Smells like a solution
-        // looking for a problem.  So, marking it as experimental
         SECTION("ostringstream")
         {
-            experimental::ostringstream<32> out;
+            layer1::ostringstream<32> out;
 
             int sz = sizeof(out);
 
@@ -296,13 +292,13 @@ TEST_CASE("ios")
         }
         SECTION("istringstream")
         {
-            experimental::istringstream<32> in = "hi2u";
+            layer1::istringstream<32> in = "hi2u";
 
             REQUIRE(in.rdbuf()->str() == "hi2u");
         }
         SECTION("numeric test")
         {
-            experimental::ostringstream<32> out;
+            layer1::ostringstream<32> out;
 
             SECTION("base 10")
             {
@@ -333,7 +329,7 @@ TEST_CASE("ios")
         }
         SECTION("tellp")
         {
-            experimental::ostringstream<32> out;
+            layer1::ostringstream<32> out;
             int value = 2;
 
             out << "hi" << value++ << 'u';
@@ -352,7 +348,7 @@ TEST_CASE("ios")
     }
     SECTION("spitting out various strings")
     {
-        experimental::ostringstream<256> out;
+        layer1::ostringstream<256> out;
 
         SECTION("layer2")
         {

@@ -34,10 +34,33 @@ struct basic_stringbuf : estd::internal::streambuf<
 #endif
 }
 
+
+#if __cpp_alias_templates
+namespace layer1 {
+template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
+using basic_ostringstream = estd::detail::basic_ostream<layer1::basic_out_stringbuf<TChar, N, null_terminated, Traits> >;
+
+template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
+using basic_istringstream = estd::detail::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >;
+
+template<size_t N, bool null_terminated = true>
+using ostringstream = basic_ostringstream<char, N, null_terminated>;
+
+template<size_t N, bool null_terminated = true>
+using istringstream = basic_istringstream<char, N, null_terminated>;
+}
+#endif
+
 namespace experimental {
-// all these were (are) layer1, but not sure we want this kind of fused
-// data + formatting functionality
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+// 31AUG23 Historically we were unsure if we wanted
+// to commit layer1 basic_stringstream to
+// only the two major string use cases of null term.  Now, we do - if someone
+// has something more exotic in mind, one can always swap in a different variety
+// of stringbuf.  Keeping experimental namespace here to not break existing
+// code.
+// DEBT: phase out stringstream's participation in 'experimental' completely by
+// 01OCT23
+#ifdef __cpp_alias_templates
 template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
 using basic_ostringstream = estd::detail::basic_ostream<layer1::basic_out_stringbuf<TChar, N, null_terminated, Traits> >;
 
@@ -74,9 +97,10 @@ struct ostringstream : estd::detail::basic_ostream<layer1::basic_stringbuf<char,
 
 }
 
+
 namespace layer2 {
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
+#ifdef __cpp_alias_templates
 template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
 using basic_stringbuf = internal::streambuf <
     internal::impl::basic_stringbuf<

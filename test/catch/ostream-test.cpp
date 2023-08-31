@@ -23,7 +23,7 @@ struct exp_manipulator : internal::ostream_functor_tag
 
 TEST_CASE("ostream")
 {
-    experimental::ostringstream<64> out;
+    layer1::ostringstream<64> out;
     const auto& out_s = out.rdbuf()->str();
 
     SECTION("output character")
@@ -154,6 +154,10 @@ TEST_CASE("ostream")
             out.rdbuf()->clear();
 
             REQUIRE(out_s.empty());
+
+            out << 321;
+
+            REQUIRE(out_s == "321");
         }
     }
     SECTION("streambuf reference")
