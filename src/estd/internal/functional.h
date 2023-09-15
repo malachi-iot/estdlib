@@ -167,6 +167,9 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
 
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
 
+// TODO: Put this into actual features.h file
+#define FEATURE_ESTD_FUNCTION_TRIVIAL 1
+
 namespace detail {
 
 /// Lower-level version of function which is hands-off for memory management
@@ -191,8 +194,10 @@ protected:
     model_base* m;
 
 public:
+    // DEBT: We need operator = for these two as well, so that we can
+    // make them explicit - unless we can prove having just these constructors
+    // is a good practice (and document here)
     function(nullptr_t = nullptr_t{}) : m(NULLPTR) {}
-
     function(model_base* m) : m(m) {}
 
     function(const function& copy_from) = default;

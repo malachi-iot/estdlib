@@ -591,6 +591,12 @@ TEST_CASE("functional")
 
         REQUIRE(value == 5);
     }
+    // DEBT: Revise nomenclature and move to organized location alongside
+    // similar unit tests
+    SECTION("trivial (movable)")
+    {
+
+    }
 }
 
 #endif
