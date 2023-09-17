@@ -123,8 +123,11 @@ public:
         typename upward::indices::template prepend<index>,
         typename upward::indices>;
 
+    /// Raw list of types in this sequence
     using types = prepend<typename upward::types, T>;
+    /// Converted (via Eval) list of types in this sequence
     using projected = prepend<typename upward::projected, projected_type>;
+    /// List of visitor_index specifying Type and explicit index per variadic item
     using selected = prepend<typename upward::selected, visitor_index>;
 
     static constexpr bool all = selected::size() == sizeof...(Types) + 1;

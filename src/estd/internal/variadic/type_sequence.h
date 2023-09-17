@@ -30,28 +30,12 @@ struct type_sequence_accessor
     using first = get<0>;
 
     using last = get<size() - 1>;
-
-    // +++ EXPERIMENTAL, not sure I want to put *this much* into type sequence
-    template <class Eval>
-    using selector = variadic::v2::selector<Eval, Types...>;
-
-    template <class Eval>
-    using select = typename selector<Eval>::selected;
-
-    template <class Eval>
-    using projector = variadic::v1::projector<Eval, Types...>;
-    // ---
 };
 
 template <>
 struct type_sequence_accessor<>
 {
     static constexpr size_t size() { return 0; }
-
-    // ++ EXPERIMENTAL
-    template <class Eval>
-    using select = variadic::types<>;
-    // --
 };
 
 template <class ...Types>
@@ -90,6 +74,14 @@ struct types :
     using visitor = variadic::type_visitor<Types...>;
 
     static constexpr bool empty() { return sizeof...(Types) == 0; }
+
+    // +++ EXPERIMENTAL, not sure I want to put *this much* into type sequence
+    template <class Eval>
+    using selector = variadic::v2::selector<Eval, Types...>;
+
+    template <class Eval>
+    using where = typename selector<Eval>::types;
+    // ---
 };
 
 }

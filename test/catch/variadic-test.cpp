@@ -171,7 +171,7 @@ TEST_CASE("variadic")
 
             REQUIRE(empty_types::size() == 0);
 
-            using empty_selected = empty_types::select<internal::is_same_selector<int> >;
+            using empty_selected = empty_types::where<internal::is_same_selector<int> >;
 
             REQUIRE(empty_selected::size() == 0);
         }
@@ -468,8 +468,8 @@ TEST_CASE("variadic")
         SECTION("invoker")
         {
             using types = variadic::types<Invoker1, Invoker2, Invoker3, Invoker4>;
-            using selected = types::select<has_method_selector<hello_tag> >;
-            using selected2 = types::select<has_method_selector<hello_tag, int> >;
+            using selected = types::where<has_method_selector<hello_tag> >;
+            using selected2 = types::where<has_method_selector<hello_tag, int> >;
 
             REQUIRE(selected::size() == 2);
             REQUIRE(selected2::size() == 1);
@@ -490,7 +490,7 @@ TEST_CASE("variadic")
             REQUIRE(b);
 
             // Unwrap the type within the selection result via projection
-            using projected = selected::projector<retrieve_type_projector>;
+            using projected = selected::selector<retrieve_type_projector>::projected;
             //using projected = types::projector<retrieve_type_projector>;
             using first2 = projected::first;
 
@@ -499,7 +499,7 @@ TEST_CASE("variadic")
             b = estd::is_same<first2, float>::value;
             REQUIRE(b);
 
-            using selected2 = types::selector<internal::is_same_selector<float> >::types;
+            using selected2 = types::where<internal::is_same_selector<float> >;
             using first3 = selected2::first;
 
             REQUIRE(selected2::size() == 1);
