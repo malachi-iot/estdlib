@@ -149,6 +149,16 @@ TEST_CASE("variadic")
         REQUIRE(is_same<monostate, types::get<0>>::value);
         REQUIRE(is_same<char*, types::get<2>>::value);
 
+        SECTION("empty")
+        {
+            using empty_types = variadic::types<>;
+
+            REQUIRE(empty_types::size() == 0);
+
+            using empty_selected = empty_types::select<internal::is_same_selector<int> >;
+
+            REQUIRE(empty_selected::size() == 0);
+        }
         SECTION("prepend")
         {
             using prepended = types::prepend<void>;

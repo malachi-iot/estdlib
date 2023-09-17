@@ -36,6 +36,9 @@ struct type_sequence_accessor
     using selector = variadic::selector<Eval, Types...>;
 
     template <class Eval>
+    using select = variadic::selector<Eval, Types...>;
+
+    template <class Eval>
     using projector = variadic::projector<Eval, Types...>;
     // ---
 };
@@ -44,6 +47,11 @@ template <>
 struct type_sequence_accessor<>
 {
     static constexpr size_t size() { return 0; }
+
+    // ++ EXPERIMENTAL
+    template <class Eval>
+    using select = variadic::types<>;
+    // --
 };
 
 template <class ...Types>
