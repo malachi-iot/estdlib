@@ -82,6 +82,22 @@ struct synthetic_projector
     using evaluator = variadic::projected_result<double, is_same<T, float>::value>;
 };
 
+// Sort of a pseudo passthrough, translates more complex projected_result style to
+// pure type
+struct retrieve_type_projector
+{
+    template <class T>
+    struct helper :
+        estd::type_identity<T>
+    {
+        static constexpr bool value = true;
+    };
+
+    template <class T, size_t>
+    //using evaluator = helper<T>;
+    using evaluator = variadic::projected_result<typename T::type, true>;
+};
+
 template <class T, class Tag, class Args, class enabled = void>
 struct has_method_group : bool_constant<false> {};
 
@@ -182,7 +198,7 @@ TEST_CASE("variadic")
         SECTION("constructible")
         {
             using _selector = internal::constructible_selector<const char*>;
-            using selector = variadic::selector<_selector, int, const char*>;
+            using selector = variadic::v1::selector<_selector, int, const char*>;
 
             constexpr int idx = selector::first::index;
 
@@ -299,23 +315,23 @@ TEST_CASE("variadic")
     }
     SECTION("visitor struct")
     {
-        typedef variadic::selector<internal::converting_selector<int>, int, float, monostate> vhs_type;
+        typedef variadic::v1::selector<internal::converting_selector<int>, int, float, monostate> vhs_type;
         int selected = vhs_type::first::index;
 
         REQUIRE(selected == 0);
 
-        typedef variadic::selector<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
+        typedef variadic::v1::selector<internal::converting_selector<char[128]>, int, const char*, monostate> vhs_type2;
         selected = vhs_type2::first::index;
 
         REQUIRE(selected == 1);
 
         //typedef internal::visitor_helper_struct<internal::converting_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
-        typedef variadic::selector<internal::constructible_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
+        typedef variadic::v1::selector<internal::constructible_selector<int>, test::NonTrivial, const char*, monostate> vhs_type3;
         selected = vhs_type3::first::index;
 
         REQUIRE(selected == 0);
 
-        typedef variadic::selector<internal::index_selector<1>, int, float, monostate> vhs_type4;
+        typedef variadic::v1::selector<internal::index_selector<1>, int, float, monostate> vhs_type4;
         selected = vhs_type4::first::index;
         bool v = is_same<vhs_type4::first::type, float>::value;
 
@@ -452,11 +468,43 @@ TEST_CASE("variadic")
         SECTION("invoker")
         {
             using types = variadic::types<Invoker1, Invoker2, Invoker3, Invoker4>;
-            using selected = types::selector<has_method_selector<hello_tag> >;
-            using selected2 = types::selector<has_method_selector<hello_tag, int> >;
+            using selected = types::select<has_method_selector<hello_tag> >;
+            using selected2 = types::select<has_method_selector<hello_tag, int> >;
 
             REQUIRE(selected::size() == 2);
             REQUIRE(selected2::size() == 1);
+        }
+        SECTION("types::select")
+        {
+            using types = variadic::types<monostate, float, char*>;
+
+            using selected = types::selector<internal::is_same_selector<float> >::selected;
+            using first = selected::first;
+
+            constexpr int index = first::index;
+            bool b;
+
+            REQUIRE(selected::size() == 1);
+            b = estd::is_same<selected::first::type, float>::value;
+            REQUIRE(index == 1);
+            REQUIRE(b);
+
+            // Unwrap the type within the selection result via projection
+            using projected = selected::projector<retrieve_type_projector>;
+            //using projected = types::projector<retrieve_type_projector>;
+            using first2 = projected::first;
+
+            first2 f2;
+            REQUIRE(projected::size() == 1);
+            b = estd::is_same<first2, float>::value;
+            REQUIRE(b);
+
+            using selected2 = types::selector<internal::is_same_selector<float> >::types;
+            using first3 = selected2::first;
+
+            REQUIRE(selected2::size() == 1);
+            b = estd::is_same<first3, float>::value;
+            REQUIRE(b);
         }
     }
 }

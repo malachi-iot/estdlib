@@ -33,13 +33,13 @@ struct type_sequence_accessor
 
     // +++ EXPERIMENTAL, not sure I want to put *this much* into type sequence
     template <class Eval>
-    using selector = variadic::selector<Eval, Types...>;
+    using selector = variadic::v2::selector<Eval, Types...>;
 
     template <class Eval>
-    using select = variadic::selector<Eval, Types...>;
+    using select = typename selector<Eval>::selected;
 
     template <class Eval>
-    using projector = variadic::projector<Eval, Types...>;
+    using projector = variadic::v1::projector<Eval, Types...>;
     // ---
 };
 

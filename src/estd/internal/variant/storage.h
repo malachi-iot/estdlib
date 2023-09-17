@@ -201,7 +201,7 @@ struct variant_storage_base : variant_storage_tag
     }
 
     template <class TEval>
-    using selector = variadic::selector<TEval, Types...>;
+    using selector = variadic::v1::selector<TEval, Types...>;
 
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;

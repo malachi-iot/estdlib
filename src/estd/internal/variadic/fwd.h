@@ -41,13 +41,13 @@ struct value_selector;
 
 }
 
+inline namespace v1 {
+
 template <class TEval, class ...Types>
 using selector = typename detail::selector<sizeof...(Types), TEval, Types...>::selected;
 
 template <class TEval, class ...Types>
 using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::projected;
-
-inline namespace v1 {
 
 template <size_t I, class T, T v>
 struct visitor_value;
@@ -61,6 +61,11 @@ struct visitor_instance;
 }
 
 inline namespace v2 {
+
+// v1 got a little too fancy - pare it down to only selector alias, and let
+// consumer choose whether they wanna do ::types, ::selected, ::projected
+template <class Eval, class ...Types>
+using selector = typename detail::selector<sizeof...(Types), Eval, Types...>;
 
 template <size_t I, class T, T v>
 using value = v1::visitor_value<I, T, v>;

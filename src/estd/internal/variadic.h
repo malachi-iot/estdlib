@@ -91,7 +91,7 @@ using are_same = conjunction<variadic::projector<is_same_projector<T>, TArgs...>
 
 
 template <class T, class ...TArgs>
-using select_type = variadic::selector<is_same_selector<T>, TArgs...>;
+using select_type = variadic::v1::selector<is_same_selector<T>, TArgs...>;
 
 // Evaluate true or false whether a variadic contains a particular type
 template <class T, class ...Types>
