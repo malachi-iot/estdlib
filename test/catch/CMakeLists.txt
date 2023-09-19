@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project("estd-unit-tests")
+project("estd-unit-tests" VERSION 1.0)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     message(DEBUG "defaulting to c++11")
@@ -11,7 +11,22 @@ endif()
 
 include(../../tools/cmake/setvars.cmake)
 
-INCLUDE_DIRECTORIES(${ROOT_DIR}/ext/Catch2/single_include/catch2)
+Set(FETCHCONTENT_QUIET FALSE)
+
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
+    GIT_TAG         v2.13.10
+    GIT_PROGRESS    TRUE
+    GIT_SHALLOW     TRUE
+)
+
+FetchContent_MakeAvailable(Catch2)
+
+message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
+
+# DEBT: Include <catch2/catch.hpp> directly and don't rely on this
+INCLUDE_DIRECTORIES(${Catch2_SOURCE_DIR}/include)
 
 add_subdirectory(${ESTD_DIR} estd)
 
@@ -88,4 +103,4 @@ endif()
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
 
-target_link_libraries(${PROJECT_NAME} estd)
+target_link_libraries(${PROJECT_NAME} estd Catch2)
