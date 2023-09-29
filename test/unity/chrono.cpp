@@ -36,22 +36,22 @@ static void test_chrono_subtract()
     TEST_ASSERT_EQUAL_INT(110000 - 100,ms.count());
 }
 
-template <class TClock>
+template <class Clock>
 void test_clock()
 {
-    typedef TClock clock_type;
+    typedef Clock clock_type;
     typedef typename clock_type::time_point time_point;
     //typedef typename time_point::duration duration;
 
     clock_type c;
 
-    //time_point min = time_point::min();
-    time_point min;
-    time_point n = c.now();
+    //const time_point min = time_point::min();
+    CONSTEXPR time_point min;
+    const time_point now = c.now();
 
     TEST_ASSERT_GREATER_THAN(
         min.time_since_epoch().count(),
-        n.time_since_epoch().count());
+        now.time_since_epoch().count());
     //TEST_ASSERT(n > min);
 }
 

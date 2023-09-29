@@ -16,9 +16,10 @@ static void test_constructible_selector()
 {
     //using types = variadic::types<int, const char*>;
     using _selector = internal::constructible_selector<const char*>;
-    using selector = variadic::selector<_selector, int, const char*>;
+    using selected = variadic::v2::selector<_selector, int, const char*>::selected;
     
-    TEST_ASSERT_EQUAL(1, selector::first::index);
+    TEST_ASSERT_EQUAL(1, selected::first::index);
+    TEST_ASSERT_EQUAL(1, selected::single::index);
 }
 
 
