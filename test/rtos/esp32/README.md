@@ -21,6 +21,7 @@ These tests are all for variants of Espressif ESP32
 | 07DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 03JAN23 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.0     | Pass   |
 | 15JUN23 | unity    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0.2   | Pass   |
+| 29SEP23 | unity    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.1.1   | Pass   |
 | 17AUG23 | unity    | ESP32C3 Xiao         | ESP32C3        | v5.1     | Pass   |
 | 20JUL23 | unity    | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
 | 29SEP23 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1.1   | Pass   |
