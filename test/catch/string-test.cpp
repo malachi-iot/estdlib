@@ -600,6 +600,16 @@ TEST_CASE("string tests")
 
         REQUIRE(error == EINVAL);
     }
+    SECTION("from_chars")
+    {
+        // Internal from_chars is not phased by locking iterator
+        estd::layer3::const_string s = "1234";
+        int v = 0;
+
+        internal::from_chars_integer<10>(s.begin(), s.end(), v);
+
+        REQUIRE(v == 1234);
+    }
     SECTION("internal")
     {
         using namespace estd::internal::legacy;

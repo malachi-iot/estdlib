@@ -17,8 +17,8 @@ namespace internal {
 typedef cbase<char, 10, internal::classic_locale_type> cbase_C_10_type;
 typedef cbase<char, 36, internal::classic_locale_type> cbase_C_36_type;
 
-template<unsigned b, class T>
-inline estd::from_chars_result from_chars_integer(const char* first, const char* last,
+template<unsigned b, class T, class CharIt>
+inline estd::detail::from_chars_result<CharIt> from_chars_integer(CharIt first, CharIt last,
     T& value,
     const unsigned short base = b)
 {

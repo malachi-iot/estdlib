@@ -19,20 +19,22 @@
 namespace estd { namespace internal {
 
 
-template<class TCbase, class T>
-estd::from_chars_result from_chars_integer(const char* first, const char* last,
+template<class Cbase, class T, class CharIt>
+detail::from_chars_result<CharIt> from_chars_integer(CharIt first, CharIt last,
                                            T& value,
-                                           const unsigned short base = TCbase::base())
+                                           const unsigned short base = Cbase::base())
 {
-    typedef TCbase cbase_type;
+    typedef Cbase cbase_type;
     typedef typename cbase_type::optional_type optional_type;
+    typedef detail::from_chars_result<CharIt> result_type;
+
 #ifdef __cpp_static_assert
     // DEBT: Expand this to allow any numeric type, we'll have to make specialized
     // versions of raise_and_add to account for that
     static_assert(estd::is_integral<T>::value, "T must be integral type");
 #endif
 
-    const char* current = first;
+    CharIt current = first;
     bool negate;
     // "If no characters match the pattern or if the value obtained by parsing
     // the matched characters is not representable in the type of value, value is unmodified," [1]
@@ -72,15 +74,15 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
                 while (++current != last && cbase_type::is_in_base(*current)) {}
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-                return from_chars_result{current, estd::errc::result_out_of_range};
+                return result_type{current, estd::errc::result_out_of_range};
 #else
-                return from_chars_result(current, estd::errc::result_out_of_range);
+                return result_type(current, estd::errc::result_out_of_range);
 #endif
             }
         }
         else if(current == first)
         {
-            return from_chars_result
+            return result_type
 #ifdef FEATURE_CPP_INITIALIZER_LIST
                 {current, estd::errc::invalid_argument};
 #else
@@ -91,9 +93,9 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
         {
             value = local_value;
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-            return from_chars_result{current, estd::errc(0)};
+            return result_type{current, estd::errc(0)};
 #else
-            return from_chars_result(current, estd::errc(0));
+            return result_type(current, estd::errc(0));
 #endif
         }
         ++current;
@@ -105,9 +107,9 @@ estd::from_chars_result from_chars_integer(const char* first, const char* last,
 
     value = local_value;
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-    return from_chars_result{last,estd::errc(0)};
+    return result_type{last,estd::errc(0)};
 #else
-    return from_chars_result(last,estd::errc(0));
+    return result_type(last,estd::errc(0));
 #endif
 }
 

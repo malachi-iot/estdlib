@@ -8,18 +8,19 @@
 
 namespace estd {
 
+namespace detail {
+
+template <typename CharIt>
 struct from_chars_result
 {
-    const char* ptr;
+    CharIt ptr;
     estd::errc ec;
 
 #ifndef __cpp_initializer_lists
-    from_chars_result(const char* ptr, estd::errc ec) :
+    from_chars_result(CharIt ptr, estd::errc ec) :
         ptr(ptr), ec(ec) {}
 #endif
 };
-
-namespace detail {
 
 template <class TChar>
 struct to_chars_result
@@ -49,7 +50,7 @@ struct to_chars_result
  */
 
 typedef detail::to_chars_result<char> to_chars_result;
-
+typedef detail::from_chars_result<const char*> from_chars_result;
 
 
 }
