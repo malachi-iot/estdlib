@@ -530,7 +530,7 @@ TEST_CASE("string tests")
     {
         layer3::const_string s("test");
 
-        // TODO
+        REQUIRE(s.find('s') == 2);
     }
     SECTION("starts_with")
     {

@@ -73,6 +73,19 @@ TEST_CASE("string_view")
 
         REQUIRE(sv4 == "es");
     }
+    SECTION("find")
+    {
+        string_view sv("key=value");
+        unsigned pos = sv.find('=');
+
+        REQUIRE(pos == 3);
+
+        string_view sv_key = sv.substr(0, pos);
+        string_view sv_value = sv.substr(pos + 1);
+
+        REQUIRE(sv_key == "key");
+        REQUIRE(sv_value == "value");
+    }
     SECTION("constexpr")
     {
         constexpr string_view sv("test", 4);

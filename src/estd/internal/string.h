@@ -86,6 +86,31 @@ public:
     {
         return base_type::starts_with(compare_to);
     }
+
+    size_type find(value_type ch, size_type pos = 0) const
+    {
+        // DEBT: Use helper to optimize this for the particular kind of
+        // string we're inspecting, or possibly use iterators if they'll
+        // do things efficiently here
+
+        const_pointer data = base_type::clock() + pos;
+        const size_type size = base_type::size();
+
+        while(pos < size)
+        {
+            if(*data++ == ch)
+            {
+                base_type::cunlock();
+                return pos;
+            }
+
+            ++pos;
+        }
+
+        base_type::cunlock();
+
+        return npos;
+    }
 };
 
 }
