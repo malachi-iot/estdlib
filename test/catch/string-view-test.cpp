@@ -77,9 +77,17 @@ TEST_CASE("string_view")
 
         estd::string_view sv4 = sv3.substr(1, 2);
 
-        const char* helper = sv4.lock();
+        const char* locked = sv4.lock();
 
         REQUIRE(sv4 == "es");
+    }
+    SECTION("data")
+    {
+        const string_view sv("test", 4);
+
+        const char* data = sv.data();
+
+        REQUIRE(*data == 't');
     }
     SECTION("find")
     {

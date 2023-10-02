@@ -28,6 +28,8 @@ class basic_string_view :
 
 public:
     typedef typename base_type::size_type size_type;
+    typedef typename base_type::pointer pointer;
+    typedef typename base_type::const_pointer const_pointer;
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
@@ -77,6 +79,11 @@ public:
 
         a.adjust_offset_exp(true, n);
     }
+
+    // DEBT: Stop sprinkling all these 'data' methods around and instead inspect the
+    // allocator to see if it's locking or not and disable or enable 'data' methods accordingly
+    pointer data() { return base_type::lock(); }
+    const_pointer data() const { return base_type::clock(); }
 
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
     CONSTEXPR
