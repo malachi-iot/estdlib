@@ -64,6 +64,14 @@ TEST_CASE("string_view")
 
             REQUIRE(v == "hi2u");
         }
+        SECTION("from layer3::string")
+        {
+            layer3::const_string s = "hi2u";
+
+            estd::string_view v = s;
+
+            REQUIRE(v == "hi2u");
+        }
 
         sv3 = "test3";
 
