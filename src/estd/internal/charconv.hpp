@@ -153,10 +153,12 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
         CharIt first,
         CharIt last, Int value, base_provider<base_> base)
 {
+    // DEBT: Put in a sanity check here to ensure cbase::char_type is compatible
+    // with CharIt
+
     typedef Cbase cbase_type;
-    typedef typename Cbase::char_type char_type;
     typedef detail::to_chars_result<CharIt> result_type;
-    typedef estd::numeric_limits<Int> numeric_limits;
+    typedef numeric_limits<Int> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
     if(negative) value *= -1;
