@@ -22,14 +22,14 @@ struct from_chars_result
 #endif
 };
 
-template <class TChar>
+template <class CharIt>
 struct to_chars_result
 {
-    TChar* ptr;
+    CharIt ptr;
     estd::errc ec;
 
 #ifndef __cpp_initializer_lists
-    to_chars_result(char* ptr, estd::errc ec) :
+    to_chars_result(CharIt ptr, estd::errc ec) :
         ptr(ptr), ec(ec) {}
 #endif
 };
@@ -49,7 +49,7 @@ struct to_chars_result
 };
  */
 
-typedef detail::to_chars_result<char> to_chars_result;
+typedef detail::to_chars_result<char*> to_chars_result;
 typedef detail::from_chars_result<const char*> from_chars_result;
 
 

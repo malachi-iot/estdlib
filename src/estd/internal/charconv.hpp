@@ -148,17 +148,15 @@ struct base_provider<-1>
 /// \remarks
 /// NOTE: Not using default template arg to maintain c++03 compatibility
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
-/// DEBT: TCharIt probably won't work out unless we match up to_chars_result,
-///       which does at the moment but seems fragile.  Old TCbase::char_type*
-///       may have been better.  At a minimum, try to enforce matching the two
-template <class TCbase, class TInt, class TCharIt, int base_>
-inline detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
-        TCharIt first,
-        TCharIt last, TInt value, base_provider<base_> base)
+template <class Cbase, class Int, class CharIt, int base_>
+inline detail::to_chars_result<CharIt> to_chars_integer_opt(
+        CharIt first,
+        CharIt last, Int value, base_provider<base_> base)
 {
-    typedef TCbase cbase_type;
-    typedef typename TCbase::char_type char_type;
-    typedef estd::numeric_limits<TInt> numeric_limits;
+    typedef Cbase cbase_type;
+    typedef typename Cbase::char_type char_type;
+    typedef detail::to_chars_result<CharIt> result_type;
+    typedef estd::numeric_limits<Int> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
 
     if(negative) value *= -1;
@@ -174,9 +172,9 @@ inline detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
                 *--last = '-';
 
 #ifdef __cpp_initializer_lists
-            return detail::to_chars_result<char_type>{last, estd::errc(0)};
+            return result_type{last, estd::errc(0)};
 #else
-            return detail::to_chars_result<char_type>(last, estd::errc(0));
+            return result_type(last, estd::errc(0));
 #endif
         }
 
@@ -184,9 +182,9 @@ inline detail::to_chars_result<typename TCbase::char_type> to_chars_integer_opt(
     }
 
 #ifdef __cpp_initializer_lists
-    return detail::to_chars_result<char_type>{last, estd::errc::value_too_large};
+    return result_type{last, estd::errc::value_too_large};
 #else
-    return detail::to_chars_result<char_type>(last, estd::errc::value_too_large);
+    return result_type(last, estd::errc::value_too_large);
 #endif
 }
 
