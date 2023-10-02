@@ -526,6 +526,12 @@ TEST_CASE("string tests")
             REQUIRE(s == "The value is 999999999999999");
         }*/
     }
+    SECTION("find")
+    {
+        layer3::const_string s("test");
+
+        // TODO
+    }
     SECTION("starts_with")
     {
         layer3::const_string s("test");
