@@ -89,9 +89,21 @@ TEST_CASE("string_view")
 
         REQUIRE(*data == 't');
     }
+    SECTION("iterators")
+    {
+        string_view sv("key=1234");
+
+        sv.remove_prefix(4);
+
+        int v;
+
+        estd::from_chars(sv.begin(), sv.end(), v);
+
+        REQUIRE(v == 1234);
+    }
     SECTION("find")
     {
-        string_view sv("key=value");
+        const string_view sv("key=value");
         unsigned pos = sv.find('=');
 
         REQUIRE(pos == 3);

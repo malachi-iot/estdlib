@@ -83,7 +83,17 @@ public:
     // DEBT: Stop sprinkling all these 'data' methods around and instead inspect the
     // allocator to see if it's locking or not and disable or enable 'data' methods accordingly
     pointer data() { return base_type::lock(); }
-    const_pointer data() const { return base_type::clock(); }
+    ESTD_CPP_CONSTEXPR_RET const_pointer data() const { return base_type::clock(); }
+
+    // DEBT: Similar to above, for scenarios which are never gonna be locking (like layer strings)
+    // we don't need the fancy locking iterator.  So continue to plumb the depths of locking_accessor,
+    // base allocators and friends to smooth this out
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
+
+    ESTD_CPP_CONSTEXPR_RET const_iterator begin() const { return data(); }
+    ESTD_CPP_CONSTEXPR_RET const_iterator end() const { return data() + base_type::size(); }
+
 
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
     CONSTEXPR
