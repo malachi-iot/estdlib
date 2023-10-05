@@ -52,6 +52,24 @@ struct access_experiment : protected internal::variant_storage<Types...>
 };
 
 
+struct dummy_visitor
+{
+    template <size_t I, class T>
+    constexpr bool operator()(variadic::v2::instance<I, T> i) const
+    {
+        return false;
+    }
+
+    template <size_t I>
+    bool operator()(variadic::v2::instance<I, test::Dummy> i) const
+    {
+        i->val1 *= 10;
+        return true;
+    }
+};
+
+
+
 TEST_CASE("variant")
 {
     SECTION("main")
@@ -388,6 +406,22 @@ TEST_CASE("variant")
 
             REQUIRE(*vs.get<1>() == v);
         }
+    }
+    SECTION("visit_index")
+    {
+        using Dummy = test::Dummy;
+
+        variant<Dummy, test::NonTrivial> v(in_place_index_t<1>{}, 7);
+
+        REQUIRE(v.index() == 1);
+
+        v.emplace<0>();
+
+        get<0>(v).val1 = 100;
+
+        v.visit_index(dummy_visitor{});
+
+        REQUIRE(get<0>(v).val1 == 1000);
     }
     SECTION("experimental")
     {

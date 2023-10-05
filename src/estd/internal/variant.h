@@ -295,6 +295,18 @@ public:
         return i == -1 ? variant_npos() : i;
     }
 
+    template <class F, class ...TArgs>
+    size_type visit_index(F&& f, TArgs&&...args)
+    {
+        int i = visitor::visit(typename base_type::index_visitor{},
+            index_,
+            *this,
+            std::forward<F>(f),
+            std::forward<TArgs>(args)...);
+
+        return i == -1 ? variant_npos() : i;
+    }
+
     // DEBT: Needs more work, but coming along
     variant& operator=(const variant& rhs)
     {
