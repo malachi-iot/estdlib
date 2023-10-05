@@ -23,5 +23,9 @@ constexpr size_t variant_npos() { return (size_t)-1; }
 
 }
 
+#if __cpp_constexpr >= 201603L
+constexpr size_t variant_npos = internal::variant_npos();
+#endif
+
 
 }

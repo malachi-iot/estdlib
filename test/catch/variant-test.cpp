@@ -415,11 +415,16 @@ TEST_CASE("variant")
 
         REQUIRE(v.index() == 1);
 
+        // https://bugreports.qt.io/browse/QTCREATORBUG-7918 seems
+        // to affect us
+
         v.emplace<0>();
 
         get<0>(v).val1 = 100;
 
-        v.visit_index(dummy_visitor{});
+        const size_t visited = v.visit_index(dummy_visitor{});
+
+        REQUIRE(visited == 0);
 
         REQUIRE(get<0>(v).val1 == 1000);
     }
