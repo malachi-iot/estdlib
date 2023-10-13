@@ -31,6 +31,7 @@ template<class T>
 struct is_member_pointer :
     internal::is_member_pointer<typename remove_cv<T>::type> {};
 
+#if __cpp_alias_templates
 template <class T>
 using is_member_function_pointer = 
     internal::is_member_function_pointer<typename remove_cv<T>::type>;
@@ -40,6 +41,7 @@ struct is_member_object_pointer : integral_constant<
     bool,
     is_member_pointer<T>::value &&
     !is_member_function_pointer<T>::value> {};
+#endif
 
 #if __cpp_inline_variables
 template< class T >

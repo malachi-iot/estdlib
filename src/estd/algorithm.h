@@ -174,6 +174,7 @@ inline OutputIt copy_backward(InputIt first, InputIt last,
 #endif
 }
 
+#if __cpp_rvalue_references
 template<class InputIt, class OutputIt>
 inline OutputIt move_backward(InputIt first, InputIt last,
               OutputIt d_last)
@@ -187,6 +188,7 @@ inline OutputIt move_backward(InputIt first, InputIt last,
     return d_last;
 #endif
 }
+#endif
 
 
 template<class InputIt, class UnaryPredicate>

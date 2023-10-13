@@ -55,10 +55,12 @@ struct traditional_accessor : locking_accessor<impl::traditional_accessor<T> >
     //ESTD_CPP_FORWARDING_CTOR(traditional_accessor)
     //ESTD_CPP_CONSTEXPR_RET traditional_accessor(T& v) : base_type(v) {}
 
+#if __cpp_variadic_templates
     template <class ...Args>
     explicit constexpr traditional_accessor(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
+#endif
 
     traditional_accessor& operator=(const typename base_type::value_type& copy_from)    // NOLINT
     {
