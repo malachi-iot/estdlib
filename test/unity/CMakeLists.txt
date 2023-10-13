@@ -2,10 +2,21 @@ cmake_minimum_required(VERSION 3.13)
 
 project(unit-tests LANGUAGES C CXX)
 
-set(ROOT_DIR ../..)
+include(../../tools/cmake/setvars.cmake)
+
+Set(FETCHCONTENT_QUIET FALSE)
+
+FetchContent_Declare(
+    Unity
+    GIT_REPOSITORY  https://github.com/ThrowTheSwitch/Unity
+    GIT_TAG         v2.5.2
+    GIT_PROGRESS    TRUE
+    GIT_SHALLOW     TRUE
+)
+
+FetchContent_MakeAvailable(Unity)
 
 add_subdirectory(${ROOT_DIR}/src estd)
-add_subdirectory(${ROOT_DIR}/ext/Unity unity)
 
 set(SOURCES
     align.cpp
