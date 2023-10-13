@@ -33,6 +33,7 @@
 #define ESTD_OS_TYPE ESTD_RTOS_TYPE_FREERTOS
 #elif (defined(__APPLE__) && defined(__MACH__))
 #define ESTD_OS_MACOS
+#define ESTD_OS_UNIX
 #define ESTD_OS_TYPE ESTD_OS_TYPE_FULL
 #elif (defined(__unix__) || defined(__linux__))
 #define ESTD_OS_UNIX

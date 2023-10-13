@@ -9,6 +9,8 @@
 
 // some platforms have c++98 onward but don't have STL headers.  Explicitly state when we *do*
 // have them
+// DEBT: May be better to only exclude this for platforms we tag as NOT having it, since those seem to (fortunately)
+// be in the minority (i.e. AVR)
 #if !defined(ARDUINO) || \
     FEATURE_STD
 
@@ -30,6 +32,7 @@
 #define FEATURE_STD_CHRONO 1
 #define FEATURE_STD_FUNCTIONAL 1
 #define FEATURE_STD_INITIALIZER_LIST 1
+#define FEATURE_STD_MUTEX 1
 #define FEATURE_STD_RATIO 1
 #define FEATURE_STD_THREAD 1
 #define FEATURE_STD_TYPE_TRAITS 1

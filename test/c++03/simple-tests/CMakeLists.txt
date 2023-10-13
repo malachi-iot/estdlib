@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(CMAKE_CXX_STANDARD 98)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 98)
+else()
+    message(STATUS "using c++${CMAKE_CXX_STANDARD}")
+endif()
 
 # DEBT: This is not always true for C++98 scenarios, but implicitly true for ADSPBFIN (inttypes.h isn't
 # available, but it seems to have those defs)

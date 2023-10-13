@@ -7,6 +7,8 @@
 
 namespace estd {
 
+typedef std::thread thread;
+
 namespace this_thread {
 
 template <class Rep, class Period>
@@ -22,6 +24,11 @@ void sleep_for(const estd::chrono::duration<Rep, Period>& sleep_duration)
 // estd::chrono::time_point 'Clock' into a std::chrono::time_point
 
 inline void yield() NOEXCEPT { std::this_thread::yield(); }
+
+inline thread::id get_id() NOEXCEPT
+{
+    return std::this_thread::get_id();
+}
 
 }
 

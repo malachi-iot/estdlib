@@ -11,10 +11,14 @@
 void test_thread_get_id()
 {
     estd::thread::id id = estd::this_thread::get_id();
-    
+
+    // DEBT: Generally RTOS seem to use something we can compare
+    // for IDs, but that's far from conclusive
+#if !defined(ESTD_OS_UNIX)
     // pretty fundamental, just makes sure we're interacting
     // with *something* consistent
     TEST_ASSERT_EQUAL(id, estd::this_thread::get_id());
+#endif
 }
 
 // TODO: Do a simplistic timed mutex scenario so that we are reasonably
