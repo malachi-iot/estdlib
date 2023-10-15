@@ -50,17 +50,22 @@ struct num_get
 
     struct _state
     {
+        // NOTE: Not yet used
+        // DEBT: Once we do use it, consider optimizing out when not an integer
+        unsigned decimal_place_ : 8;
+
         state state_ : 4;
         //bool is_signed : 1;
 
-        _state() : state_(Start) //, is_signed(false)
+        _state() : decimal_place_(0), state_(Start) //, is_signed(false)
         {}
 
     } state_;
 
+    // 'true_type' means this is an integer
     // 'false_type' means this is the unsigned flavor
     template <bool positive, typename T>
-    inline static bool raise_and_add(int_type n, T& v, false_type)
+    inline static bool raise_and_add(int_type n, T& v, true_type, false_type)
     {
         // Undefined/bad state.  Same as 'default' case switch
         // DEBT: Logging this and other internal failures would be nice.  In this case,
@@ -70,13 +75,23 @@ struct num_get
         return estd::internal::raise_and_add(v, base, n);
     }
 
-    // 'true_type' means this is the signed flavor
+    // #1 'true_type' means this is an integer
+    // #2 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    ESTD_CPP_CONSTEXPR_RET static bool raise_and_add(int_type n, T& v, true_type)
+    ESTD_CPP_CONSTEXPR_RET static bool raise_and_add(int_type n, T& v, true_type, true_type)
     {
         return positive ?
            estd::internal::raise_and_add(v, base, n) :
            estd::internal::raise_and_sub(v, base, n);
+    }
+
+    // 'false_type' means this is a float or double
+    // 'true_type' means this is the signed flavor
+    template <bool positive, typename T>
+    static bool raise_and_add(int_type n, T& v, false_type, true_type)
+    {
+        v *= base;  // NOTE: Is always base 10 here
+        return {};
     }
 
     template <bool positive, typename T>
@@ -86,7 +101,8 @@ struct num_get
 
         if(n.has_value())
         {
-            if (!raise_and_add<positive>(n.value(), v, is_signed<T>()))
+            if (!raise_and_add<positive>(n.value(), v,
+                estd::bool_constant<numeric_limits<T>::is_integer>(), is_signed<T>()))
             {
                 state_.state_ = Overflow;
                 err |= ios_base::failbit;

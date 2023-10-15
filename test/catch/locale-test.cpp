@@ -165,6 +165,11 @@ TEST_CASE("locale")
                 {
                     num_get_simple_test("123", (unsigned)123, fmt);
                 }
+                SECTION("float")
+                {
+                    // Code underway, but not ready yet
+                    //num_get_simple_test("123.45", (float)123.45, fmt);
+                }
             }
             SECTION("hex")
             {

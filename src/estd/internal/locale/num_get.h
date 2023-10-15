@@ -85,6 +85,15 @@ private:
                 i, end, str, err, str.getloc(), v);
         }
 
+        // For float and double
+        template <class T>
+        inline static iter_type get_float(iter_type i, iter_type end,
+            ios_base::iostate& err, istream_type& str, T& v)
+        {
+            return _helper::template get_signed_integer<10>(
+                i, end, str, err, str.getloc(), v);
+        }
+
         template <bool boolalpha>
         static iter_type get_bool(iter_type in, iter_type end,
             ios_base::iostate& err, istream_type& str, bool& v)
@@ -115,6 +124,7 @@ private:
         // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
         // for the hybrid overload/SFINAE approach below
 
+        // unsigned int variety
         // types after 'v':
         // 'true_type' = is integer
         // 'false_type' = unsigned
@@ -150,6 +160,7 @@ private:
             }
         }
 
+        // signed int variety
         // types after 'v':
         // 'true_type' = is integer
         // 'true_type' = signed
@@ -184,6 +195,20 @@ private:
             }
         }
 
+        // Floating point variety
+        // types after 'v':
+        // 'false_type' = is integer
+        // 'true_type' = signed
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            istream_type& str, ios_base::iostate& err,
+            T& v,
+            estd::false_type, estd::true_type)
+        {
+            return get_float(in, end, err, str, v);
+        }
+
+        // bool variety
         // types after 'v':
         // 'true_type' = is integer
         // 'false_type' = unsigned

@@ -17,10 +17,7 @@
 #include "internal/type_traits.h"
 
 #if FEATURE_CPP_PUSH_MACRO
-#pragma push_macro("max")
-#pragma push_macro("min")
-#undef max
-#undef min
+#include "internal/macro/push.h"
 #endif
 
 namespace estd {
@@ -232,49 +229,6 @@ struct numeric_limits<__int128> :  internal::integer_limits<__int128, true>
 };
 #endif
 
-#ifdef __FLT_MIN__
-template <>
-struct numeric_limits<float> : internal::float_limits<float>
-{
-    static ESTD_CPP_CONSTEXPR_RET float lowest()
-    {
-        return -__FLT_MAX__;
-    }
-
-    static ESTD_CPP_CONSTEXPR_RET float min()
-    {
-        return __FLT_MIN__;
-    }
-
-    static ESTD_CPP_CONSTEXPR_RET float max()
-    {
-        return __FLT_MAX__;
-    }
-};
-#endif
-
-#ifdef __DBL_MIN__
-template <>
-struct numeric_limits<double> : internal::float_limits<double>
-{
-    static ESTD_CPP_CONSTEXPR_RET double lowest()
-    {
-        return -__DBL_MAX__;
-    }
-
-    static ESTD_CPP_CONSTEXPR_RET double min()
-    {
-        return __DBL_MIN__;
-    }
-
-    static ESTD_CPP_CONSTEXPR_RET double max()
-    {
-        return __DBL_MAX__;
-    }
-};
-#endif
-
-
 }
 
 #if SIZEOF_CHAR == 16
@@ -331,9 +285,50 @@ template <> struct numeric_limits<bool>
     static CONSTEXPR int digits10 = 0;
 };
 
+#ifdef __FLT_MIN__
+template <>
+struct numeric_limits<float> : internal::float_limits<float>
+{
+    static ESTD_CPP_CONSTEXPR_RET float lowest()
+    {
+        return -__FLT_MAX__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET float min()
+    {
+        return __FLT_MIN__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET float max()
+    {
+        return __FLT_MAX__;
+    }
+};
+#endif
+
+#ifdef __DBL_MIN__
+template <>
+struct numeric_limits<double> : internal::float_limits<double>
+{
+    static ESTD_CPP_CONSTEXPR_RET double lowest()
+    {
+        return -__DBL_MAX__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET double min()
+    {
+        return __DBL_MIN__;
+    }
+
+    static ESTD_CPP_CONSTEXPR_RET double max()
+    {
+        return __DBL_MAX__;
+    }
+};
+#endif
+
 }
 
 #if FEATURE_CPP_PUSH_MACRO
-#pragma pop_macro("min")
-#pragma pop_macro("max")
+#include "internal/macro/pop.h"
 #endif
