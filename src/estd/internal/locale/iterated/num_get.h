@@ -35,6 +35,7 @@ struct num_get
     //typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
+    //typedef estd::numpunct<char_type, locale_type> numpunct_type;
 
     enum state
     {
@@ -88,12 +89,41 @@ struct num_get
     // 'false_type' means this is a float or double
     // 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    static bool raise_and_add(int_type n, T& v, false_type, true_type)
+    bool raise_and_add(int_type n, T& v, false_type, true_type)
     {
-        v *= base;  // NOTE: Is always base 10 here
-        return {};
+        if(state_.decimal_place_ == 0)
+        {
+            v *= base;  // NOTE: Is always base 10 here
+            v += n;
+        }
+        else
+        {
+            // TODO: Instead of dividing here, wait until we are fully done gathering
+            // numbers then divide by exp10(decimal_place)
+
+            T fractional = n;
+
+            for(int i = state_.decimal_place_; i--;)
+            {
+                fractional /= base;
+            }
+
+            // DEBT: Side effects
+            ++state_.decimal_place_;
+
+            v += fractional;
+        }
+
+        return true;
     }
 
+    ///
+    /// @tparam positive
+    /// @tparam T
+    /// @param c
+    /// @param err
+    /// @param v
+    /// @return false if 'c' is generally parseable as part of a number, true otherwise
     template <bool positive, typename T>
     bool nominal(char_type c, ios_base::iostate& err, T& v)
     {
@@ -119,6 +149,15 @@ struct num_get
 
             return false;
         }
+        else
+        {
+            //if(c == numpunct_type::decimal_point())
+            if(c == '.')
+            {
+                state_.decimal_place_ = 1;
+                return false;
+            }
+        }
 
         return true;
     }
@@ -128,6 +167,13 @@ struct num_get
     // v, causing "maybe-uninitialized" warning.  To handle this, external parties may elect to
     // init to zero instead of us.
     // DEBT: Guard against availability of autoinit with something more cohesive than just __cplusplus
+    ///
+    /// @tparam autoinit
+    /// @tparam T
+    /// @param c
+    /// @param err
+    /// @param v
+    /// @return true indicates processing is complete
     template <
 #if __cplusplus >= 201103L
         bool autoinit = true,

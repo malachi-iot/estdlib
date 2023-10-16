@@ -21,8 +21,9 @@ struct numpunct_base<char>
 {
     typedef char char_type;
 
-    static char_type thousands_sep() { return ','; }
+    static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
     static estd::layer2::const_string grouping() { return ""; }
+    static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
 };
 
 //template <locale_code::values lc, internal::encodings::values encoding>
