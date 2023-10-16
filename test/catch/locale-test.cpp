@@ -368,12 +368,26 @@ TEST_CASE("locale")
         SECTION("int")
         {
             char* data = val.data();
-            char* last = n.put(data, fmt, ' ', 100);
-            *last = 0;
 
-            const bool r = val == "100";
+            SECTION("dec")
+            {
+                char* last = n.put(data, fmt, ' ', 100);
+                *last = 0;
 
-            REQUIRE(r);
+                const bool r = val == "100";
+
+                REQUIRE(r);
+            }
+            SECTION("hex")
+            {
+                // TODO: num_put can't quite do hex just yet
+
+                fmt.setf(ios_base::hex);
+                char* last = n.put(data, fmt, ' ', 161);
+                *last = 0;
+
+                //REQUIRE(val == "A1");
+            }
         }
     }
     SECTION("cbase")
