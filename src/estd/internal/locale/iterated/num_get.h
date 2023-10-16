@@ -35,7 +35,7 @@ struct num_get
     //typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
-    //typedef estd::numpunct<char_type, locale_type> numpunct_type;
+    typedef estd::numpunct<char_type, locale_type> numpunct_type;
 
     enum state
     {
@@ -91,27 +91,13 @@ struct num_get
     template <bool positive, typename T>
     bool raise_and_add(int_type n, T& v, false_type, true_type)
     {
-        if(state_.decimal_place_ == 0)
+        v *= base;  // NOTE: Is always base 10 here
+        v += n;
+
+        if(state_.decimal_place_ != 0)
         {
-            v *= base;  // NOTE: Is always base 10 here
-            v += n;
-        }
-        else
-        {
-            // TODO: Instead of dividing here, wait until we are fully done gathering
-            // numbers then divide by exp10(decimal_place)
-
-            T fractional = n;
-
-            for(int i = state_.decimal_place_; i--;)
-            {
-                fractional /= base;
-            }
-
             // DEBT: Side effects
             ++state_.decimal_place_;
-
-            v += fractional;
         }
 
         return true;
@@ -151,7 +137,11 @@ struct num_get
         }
         else
         {
+            // DEBT: Activate numpunct
+            // TODO: Account for thousands separators
             //if(c == numpunct_type::decimal_point())
+            // FIX: Only do this when a real floating point number is on hand
+            // (would be DEBT but this makes '.' silently accepted for ints)
             if(c == '.')
             {
                 state_.decimal_place_ = 1;
@@ -160,6 +150,31 @@ struct num_get
         }
 
         return true;
+    }
+
+    // integer variety (noop)
+    template <typename T>
+    static ESTD_CPP_CONSTEXPR_RET bool finalize(T& v, true_type)
+    {
+        return {};
+    }
+
+    // floating point variety
+    template <typename T>
+    void finalize(T& v, false_type)
+    {
+        if(state_.decimal_place_ != 0)
+        {
+            T divider = 1;
+
+            // DEBT: Optimize ala
+            // https://stackoverflow.com/questions/18581560/any-way-faster-than-pow-to-compute-an-integer-power-of-10-in-c
+
+            for(int i = state_.decimal_place_; --i;)
+                divider *= base;
+
+            v /= divider;
+        }
     }
 
     // NOTE: This method never sets eof bit

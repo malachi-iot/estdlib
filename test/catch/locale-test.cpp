@@ -167,8 +167,16 @@ TEST_CASE("locale")
                 }
                 SECTION("float")
                 {
-                    // Code underway, but not ready yet
-                    //num_get_simple_test("123.45", (float)123.45, fmt);
+                    num_get_simple_test("123.45", (float)123.45, fmt);
+                }
+                SECTION("double")
+                {
+                    num_get_simple_test("123.45", (double)123.45, fmt);
+                }
+                SECTION("long double")
+                {
+                    // numeric_limits not quite ready for this one yet
+                    //num_get_simple_test("123.45", (long double)123.45, fmt);
                 }
             }
             SECTION("hex")
