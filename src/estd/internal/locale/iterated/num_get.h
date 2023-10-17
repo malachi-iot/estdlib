@@ -305,6 +305,8 @@ struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
                 v = false;
                 break;
 
+            // Yes, it is the case that '1' is expected to appear on parse failure for bool
+            // As per https://en.cppreference.com/w/cpp/locale/num_get/get 'Stage 3'
             default:
                 err |= ios_base::failbit;
 #if __has_cpp_attribute(fallthrough)

@@ -73,8 +73,10 @@ struct numpunct<wchar_t, Locale,
     ::type> :
     internal::numpunct_base<wchar_t>
 {
-    static ESTD_CPP_CONSTEXPR_RET const wchar_t* truename() { return L"true"; }
-    static ESTD_CPP_CONSTEXPR_RET const wchar_t* falsename() { return L"false"; }
+    typedef layer2::basic_string<const wchar_t, 0> const_wstring;
+
+    static ESTD_CPP_CONSTEXPR_RET const_wstring truename() { return L"true"; }
+    static ESTD_CPP_CONSTEXPR_RET const_wstring falsename() { return L"false"; }
 };
 
 

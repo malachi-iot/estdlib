@@ -470,23 +470,50 @@ TEST_CASE("locale")
                     REQUIRE(err == goodbit);
                     REQUIRE(val == 456);
                 }
+                // DEBT: Attempt to consolidate this with 'num_get_simple_test'
                 SECTION("wchar")
                 {
                     auto f = use_facet<num_get<wchar_t, const wchar_t*>>(l);
-
-                    const wchar_t* number = L"1234";
-                    int value;
                     ios_base::iostate state = ios_base::goodbit;
 
                     // DEBT: Only used for format and locale specification
                     estd::detail::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
 
-                    f.get(number, number + 4, fmt, state, value);
+                    SECTION("integer")
+                    {
+                        const wchar_t* number = L"1234";
+                        int value;
 
-                    REQUIRE(state == eofbit);
-                    // TODO: Works, but only because unicode comfortably narrows back down to regular
-                    // char during char_base_traits usage
-                    REQUIRE(value == 1234);
+                        f.get(number, number + 4, fmt, state, value);
+
+                        REQUIRE(state == eofbit);
+                        // TODO: Works, but only because unicode comfortably narrows back down to regular
+                        // char during char_base_traits usage
+                        REQUIRE(value == 1234);
+                    }
+                    SECTION("boolean")
+                    {
+                        bool value = false;
+
+                        const wchar_t* truename = L"true";
+
+                        fmt.flags(ios_base::boolalpha);
+
+                        f.get(truename, truename + 4, fmt, state, value);
+
+                        REQUIRE(state == 0);
+                        REQUIRE(value == true);
+                    }
+                    SECTION("double")
+                    {
+                        const wchar_t* number = L"1234.567";
+                        double value;
+
+                        f.get(number, number + 8, fmt, state, value);
+
+                        REQUIRE(state == eofbit);
+                        REQUIRE(value == 1234.567);
+                    }
                 }
             }
             SECTION("numpunct")
