@@ -19,6 +19,22 @@ public:
     typedef TChar char_type;
     typedef OutputIt iter_type;
 
+private:
+    template <unsigned base, class T>
+    static iter_type put_integer(iter_type out, const ios_base& str, char_type fill, T value)
+    {
+        constexpr unsigned N = estd::numeric_limits<T>::template length<base>::value;
+
+        // +1 for potential - sign
+        // No extra space for null terminator, not needed for iter_type/stream out
+        char buffer[N + 1];
+
+        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
+
+        return copy(result.ptr, &buffer[N + 1], out);
+    }
+
+public:
     static iter_type put(iter_type out, const ios_base& str, char_type fill,
         bool value)
     {
@@ -37,16 +53,9 @@ public:
     //static iter_type
     put(iter_type out, const ios_base& str, char_type fill, T value)
     {
+        //const ios_base::fmtflags basefield = str.flags() & ios_base::basefield;
         constexpr unsigned base = 10;
-        constexpr unsigned N = estd::numeric_limits<T>::template length<base>::value;
-
-        // +1 for potential - sign
-        // No extra space for null terminator, not needed for iter_type/stream out
-        char buffer[N + 1];
-
-        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
-
-        return copy(result.ptr, &buffer[N + 1], out);
+        return put_integer<base>(out, str, fill, value);
     }
 
     template <class T>

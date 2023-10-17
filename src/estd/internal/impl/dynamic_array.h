@@ -4,6 +4,7 @@
 #include "../../allocators/fixed.h"
 #include "../../allocators/handle_desc.h"
 #include "../fwd/dynamic_array.h"
+#include "../../traits/char_traits.h"
 
 namespace estd { namespace internal { namespace impl {
 
@@ -187,8 +188,9 @@ public:
     {
         const value_type* s = &hd.clock();
         const size_type max_size = hd.size();
+        typedef estd::char_traits<value_type> char_traits;
 
-        size_type sz = strlen(s);
+        size_type sz = char_traits::length(s);
 
         hd.cunlock();
 

@@ -165,6 +165,20 @@ TEST_CASE("locale")
                 {
                     num_get_simple_test("123", (unsigned)123, fmt);
                 }
+                SECTION("float")
+                {
+                    num_get_simple_test("123.45", (float)123.45, fmt);
+                }
+                SECTION("double")
+                {
+                    num_get_simple_test("123.45", (double)123.45, fmt);
+                    num_get_simple_test("-123.45678", (double)-123.45678, fmt);
+                }
+                SECTION("long double")
+                {
+                    // numeric_limits not quite ready for this one yet
+                    //num_get_simple_test("123.45", (long double)123.45, fmt);
+                }
             }
             SECTION("hex")
             {
@@ -355,12 +369,26 @@ TEST_CASE("locale")
         SECTION("int")
         {
             char* data = val.data();
-            char* last = n.put(data, fmt, ' ', 100);
-            *last = 0;
 
-            const bool r = val == "100";
+            SECTION("dec")
+            {
+                char* last = n.put(data, fmt, ' ', 100);
+                *last = 0;
 
-            REQUIRE(r);
+                const bool r = val == "100";
+
+                REQUIRE(r);
+            }
+            SECTION("hex")
+            {
+                // TODO: num_put can't quite do hex just yet
+
+                fmt.setf(ios_base::hex);
+                char* last = n.put(data, fmt, ' ', 161);
+                *last = 0;
+
+                //REQUIRE(val == "A1");
+            }
         }
     }
     SECTION("cbase")
@@ -442,23 +470,50 @@ TEST_CASE("locale")
                     REQUIRE(err == goodbit);
                     REQUIRE(val == 456);
                 }
+                // DEBT: Attempt to consolidate this with 'num_get_simple_test'
                 SECTION("wchar")
                 {
                     auto f = use_facet<num_get<wchar_t, const wchar_t*>>(l);
-
-                    const wchar_t* number = L"1234";
-                    int value;
                     ios_base::iostate state = ios_base::goodbit;
 
                     // DEBT: Only used for format and locale specification
                     estd::detail::basic_istream<layer1::basic_stringbuf<wchar_t, 32>> fmt;
 
-                    f.get(number, number + 4, fmt, state, value);
+                    SECTION("integer")
+                    {
+                        const wchar_t* number = L"1234";
+                        int value;
 
-                    REQUIRE(state == eofbit);
-                    // TODO: Works, but only because unicode comfortably narrows back down to regular
-                    // char during char_base_traits usage
-                    REQUIRE(value == 1234);
+                        f.get(number, number + 4, fmt, state, value);
+
+                        REQUIRE(state == eofbit);
+                        // TODO: Works, but only because unicode comfortably narrows back down to regular
+                        // char during char_base_traits usage
+                        REQUIRE(value == 1234);
+                    }
+                    SECTION("boolean")
+                    {
+                        bool value = false;
+
+                        const wchar_t* truename = L"true";
+
+                        fmt.flags(ios_base::boolalpha);
+
+                        f.get(truename, truename + 4, fmt, state, value);
+
+                        REQUIRE(state == 0);
+                        REQUIRE(value == true);
+                    }
+                    SECTION("double")
+                    {
+                        const wchar_t* number = L"1234.567";
+                        double value;
+
+                        f.get(number, number + 8, fmt, state, value);
+
+                        REQUIRE(state == eofbit);
+                        REQUIRE(value == 1234.567);
+                    }
                 }
             }
             SECTION("numpunct")

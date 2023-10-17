@@ -34,32 +34,39 @@ private:
         // incoming by way of str.
         // Documentation [1] indicates to favor the latter
         template <unsigned base, class TIncomingLocale, class T>
-        static iter_type get_signed_integer(iter_type i, iter_type end,
+        static iter_type get_signed_number(iter_type i, iter_type end,
             ios_base::iostate& err, TIncomingLocale l, T& v)
         {
             iterated::num_get<base, char_type, TIncomingLocale> n(l);
+            typedef bool_constant<numeric_limits<T>::is_integer> is_integer;
 
+            // DEBT: iterated::num_get sometimes does this too
             v = 0;
 
             for(; i != end; ++i)
             {
 #if __cplusplus >= 201103L
-                if(n.template get<false>(*i, err, v)) return i;
+                if(n.template get<false>(*i, err, v))
 #else
-                if(n.get(*i, err, v)) return i;
+                if(n.get(*i, err, v))
 #endif
+                {
+                    n.finalize(v, is_integer());
+                    return i;
+                }
             }
 
             err |= ios_base::eofbit;
+            n.finalize(v, is_integer());
             return i;
         }
 
 
         template <unsigned base, class TIncomingLocale, class T>
-        inline static iter_type get_signed_integer(iter_type i, iter_type end,
+        inline static iter_type get_signed_number(iter_type i, iter_type end,
             ios_base&, ios_base::iostate& err, TIncomingLocale l, T& v)
         {
-            return get_signed_integer<base>(i, end, err,l, v);
+            return get_signed_number<base>(i, end, err,l, v);
         }
     };
 
@@ -73,7 +80,7 @@ private:
         inline static iter_type get_signed_integer(iter_type i, iter_type end,
             ios_base::iostate& err, istream_type& str, T& v)
         {
-            return _helper::template get_signed_integer<base>(
+            return _helper::template get_signed_number<base>(
                 i, end, str, err, str.getloc(),v);
         }
 
@@ -81,7 +88,16 @@ private:
         inline static iter_type get_unsigned_integer(iter_type i, iter_type end,
                                             ios_base::iostate& err, istream_type& str, T& v)
         {
-            return _helper::template get_signed_integer<base>(
+            return _helper::template get_signed_number<base>(
+                i, end, str, err, str.getloc(), v);
+        }
+
+        // For float and double
+        template <class T>
+        inline static iter_type get_float(iter_type i, iter_type end,
+            ios_base::iostate& err, istream_type& str, T& v)
+        {
+            return _helper::template get_signed_number<10>(
                 i, end, str, err, str.getloc(), v);
         }
 
@@ -115,6 +131,7 @@ private:
         // https://stackoverflow.com/questions/9285657/sfinae-differentiation-between-signed-and-unsigned
         // for the hybrid overload/SFINAE approach below
 
+        // unsigned int variety
         // types after 'v':
         // 'true_type' = is integer
         // 'false_type' = unsigned
@@ -150,6 +167,7 @@ private:
             }
         }
 
+        // signed int variety
         // types after 'v':
         // 'true_type' = is integer
         // 'true_type' = signed
@@ -184,6 +202,20 @@ private:
             }
         }
 
+        // Floating point variety
+        // types after 'v':
+        // 'false_type' = is integer
+        // 'true_type' = signed
+        template <class T>
+        static iter_type get(iter_type in, iter_type end,
+            istream_type& str, ios_base::iostate& err,
+            T& v,
+            estd::false_type, estd::true_type)
+        {
+            return get_float(in, end, err, str, v);
+        }
+
+        // bool variety
         // types after 'v':
         // 'true_type' = is integer
         // 'false_type' = unsigned
@@ -208,7 +240,7 @@ private:
     template <unsigned base, typename T>
     inline iter_type get(iter_type in, iter_type end, ios_base::iostate& err, T& v) const
     {
-        return _helper::template get_signed_integer<base>(in, end, err, locale_type(), v);
+        return _helper::template get_signed_number<base>(in, end, err, locale_type(), v);
     }
 
 

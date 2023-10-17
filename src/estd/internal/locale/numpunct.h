@@ -21,9 +21,22 @@ struct numpunct_base<char>
 {
     typedef char char_type;
 
-    static char_type thousands_sep() { return ','; }
+    static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
     static estd::layer2::const_string grouping() { return ""; }
+    static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
 };
+
+// DEBT: Can probably consolidate this in a non-specialized way with regular char version
+template <>
+struct numpunct_base<wchar_t>
+{
+    typedef wchar_t char_type;
+
+    static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
+    static estd::layer2::const_string grouping() { return ""; }
+    static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
+};
+
 
 //template <locale_code::values lc, internal::encodings::values encoding>
 template <class TLocale>
@@ -50,6 +63,20 @@ struct numpunct<char,
 {
     static estd::layer2::const_string truename() { return "true"; }
     static estd::layer2::const_string falsename() { return "false"; }
+};
+
+
+template <class Locale>
+struct numpunct<wchar_t, Locale,
+    typename estd::enable_if<
+        internal::is_compatible_with_classic_locale<Locale>::value>
+    ::type> :
+    internal::numpunct_base<wchar_t>
+{
+    typedef layer2::basic_string<const wchar_t, 0> const_wstring;
+
+    static ESTD_CPP_CONSTEXPR_RET const_wstring truename() { return L"true"; }
+    static ESTD_CPP_CONSTEXPR_RET const_wstring falsename() { return L"false"; }
 };
 
 
