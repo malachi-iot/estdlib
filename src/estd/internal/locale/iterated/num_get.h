@@ -118,12 +118,12 @@ struct num_get
     template <bool positive, typename T>
     bool nominal(char_type c, ios_base::iostate& err, T& v)
     {
+        typedef estd::bool_constant<numeric_limits<T>::is_integer> is_integer;
         optional_type n = cbase_type::from_char(c);
 
         if(n.has_value())
         {
-            if (!raise_and_add<positive>(n.value(), v,
-                estd::bool_constant<numeric_limits<T>::is_integer>(), is_signed<T>()))
+            if (!raise_and_add<positive>(n.value(), v, is_integer(), is_signed<T>()))
             {
                 state_.state_ = Overflow;
                 err |= ios_base::failbit;
@@ -145,9 +145,7 @@ struct num_get
             // DEBT: Activate numpunct
             // TODO: Account for thousands separators
             //if(c == numpunct_type::decimal_point())
-            // FIX: Only do this when a real floating point number is on hand
-            // (would be DEBT but this makes '.' silently accepted for ints)
-            if(c == '.')
+            if(is_integer() == false && c == '.')
             {
                 state_.decimal_place_ = 1;
                 return false;
