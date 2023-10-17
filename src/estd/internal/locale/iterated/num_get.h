@@ -27,16 +27,16 @@
 
 namespace estd { namespace iterated {
 
-template <unsigned base, typename TChar, class TLocale>
+template <unsigned base, typename Char, class Locale>
 struct num_get
 {
-    typedef TLocale locale_type;
-    typedef TChar char_type;
+    typedef Locale locale_type;
+    typedef Char char_type;
     typedef cbase<char_type, base, locale_type> cbase_type;
     //typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
-    typedef estd::numpunct<char_type, locale_type> numpunct_type;
+    typedef numpunct<char_type, locale_type> numpunct_type;
 
     enum state
     {
@@ -270,20 +270,20 @@ struct num_get
     }
 
     // Just a bit of future proofing
-    num_get(TLocale) {}
-    num_get() {}
+    ESTD_CPP_CONSTEXPR_RET num_get(locale_type) {}
+    ESTD_CPP_DEFAULT_CTOR(num_get)
 };
 
 
 
-template <typename TChar, class TLocale>
-struct num_get<0, TChar, TLocale>
+template <typename Char, class Locale>
+struct num_get<0, Char, Locale>
 {
     union
     {
-        num_get<8, TChar, TLocale> base8;
-        num_get<10, TChar, TLocale> base10;
-        num_get<16, TChar, TLocale> base16;
+        num_get<8, Char, Locale> base8;
+        num_get<10, Char, Locale> base10;
+        num_get<16, Char, Locale> base16;
     };
 };
 
@@ -340,11 +340,11 @@ struct bool_get<TChar, TLocale, false> : num_get<2, TChar, TLocale>
 };
 
 // alpha version
-template <typename TChar, class TLocale>
-struct bool_get<TChar, TLocale, true>
+template <typename Char, class Locale>
+struct bool_get<Char, Locale, true>
 {
-    typedef TChar char_type;
-    typedef TLocale locale_type;
+    typedef Char char_type;
+    typedef Locale locale_type;
     typedef estd::numpunct<char_type, locale_type> numpunct_type;
 
     enum state
@@ -393,9 +393,9 @@ struct bool_get<TChar, TLocale, true>
 
 #if __cplusplus >= 201103L
     // DEBT: Not instance-locale compat
-    bool_get(locale_type l) : names { numpunct_type::truename(), numpunct_type::falsename() }
+    constexpr explicit bool_get(locale_type l) : names { numpunct_type::truename(), numpunct_type::falsename() }
     {}
-    bool_get() : names { numpunct_type::truename(), numpunct_type::falsename() }
+    constexpr bool_get() : names { numpunct_type::truename(), numpunct_type::falsename() }
     {}
 #else
     bool_get() { set_names(locale_type()); }

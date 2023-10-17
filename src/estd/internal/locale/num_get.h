@@ -51,13 +51,13 @@ private:
                 if(n.get(*i, err, v))
 #endif
                 {
-                    n.finalize(v, is_integer{});
+                    n.finalize(v, is_integer());
                     return i;
                 }
             }
 
             err |= ios_base::eofbit;
-            n.finalize(v, is_integer{});
+            n.finalize(v, is_integer());
             return i;
         }
 
