@@ -13,7 +13,7 @@ namespace estd {
 namespace internal {
 
 
-template <typename TChar>
+template <typename Char>
 struct numpunct_base;
 
 template <>
@@ -33,7 +33,7 @@ struct numpunct_base<wchar_t>
     typedef wchar_t char_type;
 
     static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
-    static estd::layer2::const_string grouping() { return ""; }
+    //static estd::layer2::const_string grouping() { return ""; }
     static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
 };
 
@@ -61,8 +61,10 @@ struct numpunct<char,
         ::type> :
     internal::numpunct_base<char>
 {
-    static estd::layer2::const_string truename() { return "true"; }
-    static estd::layer2::const_string falsename() { return "false"; }
+    typedef estd::layer2::const_string string_type;
+
+    static string_type truename() { return "true"; }
+    static string_type falsename() { return "false"; }
 };
 
 
@@ -73,10 +75,10 @@ struct numpunct<wchar_t, Locale,
     ::type> :
     internal::numpunct_base<wchar_t>
 {
-    typedef layer2::basic_string<const wchar_t, 0> const_wstring;
+    typedef layer2::basic_string<const wchar_t, 0> string_type;
 
-    static ESTD_CPP_CONSTEXPR_RET const_wstring truename() { return L"true"; }
-    static ESTD_CPP_CONSTEXPR_RET const_wstring falsename() { return L"false"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return L"true"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return L"false"; }
 };
 
 
@@ -86,8 +88,10 @@ struct numpunct<char,
     typename internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
     numpunct_base<char>
 {
-    static estd::layer2::const_string truename() { return "vrai"; }
-    static estd::layer2::const_string falsename() { return "faux"; }
+    typedef estd::layer2::const_string string_type;
+
+    static string_type truename() { return "vrai"; }
+    static string_type falsename() { return "faux"; }
 };
 
 }
@@ -96,8 +100,8 @@ struct numpunct<char,
 // All this wrapping is done to hide the 'TEnabled' template portion.
 // This comes in handy when doing custom specializations, one can avoid specifying
 // that extra 3rd template parameter.
-template <typename TChar, class TLocale>
-struct numpunct : internal::numpunct<TChar, TLocale> {};
+template <typename Char, class Locale>
+struct numpunct : internal::numpunct<Char, Locale> {};
 
 
 namespace internal {
