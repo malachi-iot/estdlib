@@ -172,6 +172,7 @@ TEST_CASE("locale")
                 SECTION("double")
                 {
                     num_get_simple_test("123.45", (double)123.45, fmt);
+                    num_get_simple_test("-123.45678", (double)-123.45678, fmt);
                 }
                 SECTION("long double")
                 {

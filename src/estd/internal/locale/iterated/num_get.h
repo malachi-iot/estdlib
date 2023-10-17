@@ -91,8 +91,13 @@ struct num_get
     template <bool positive, typename T>
     bool raise_and_add(int_type n, T& v, false_type, true_type)
     {
+        // TODO: Assert that base is 10
+
         v *= base;  // NOTE: Is always base 10 here
-        v += n;
+        if(positive)
+            v += n;
+        else
+            v -= n;
 
         if(state_.decimal_place_ != 0)
         {
