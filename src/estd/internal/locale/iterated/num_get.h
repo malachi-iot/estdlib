@@ -17,6 +17,7 @@
 #pragma once
 
 #include "../cbase.h"
+#include "../numpunct.h"
 #include "../fwd.h"
 #include "../../ios_base.h"
 #include "../../chooser.h"
@@ -142,10 +143,10 @@ struct num_get
         }
         else
         {
-            // DEBT: Activate numpunct
             // TODO: Account for thousands separators
-            //if(c == numpunct_type::decimal_point())
-            if(is_integer() == false && c == '.')
+            // NOTE: Probably should use is_floating_point here instead, though so far
+            // is_integer is in no danger of causing us grief
+            if(is_integer() == false && c == numpunct_type::decimal_point())
             {
                 state_.decimal_place_ = 1;
                 return false;
