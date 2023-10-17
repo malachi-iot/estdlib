@@ -80,7 +80,7 @@ public:
 
     //static locale::id id;
 
-    char widen(char c) const { return c; }
+    static ESTD_CPP_CONSTEXPR_RET char widen(char c) { return c; }
 
     // "returns whether c belongs to any of the categories specified in bitmask m" [1]
     static bool is(mask m, char ch)
@@ -114,16 +114,16 @@ public:
 }
 
 
-template <class TLocale>
-class ctype<wchar_t, TLocale> : public ctype_base
+template <class Locale>
+class ctype<wchar_t, Locale> : public ctype_base
 {
 public:
-    static wchar_t widen(char ch) { return ch; }
+    static ESTD_CPP_CONSTEXPR_RET wchar_t widen(char ch) { return ch; }
 };
 
 
-template <class TLocale>
-class ctype<char, TLocale> : public internal::ctype<char, TLocale> {};
+template <class Char, class Locale>
+class ctype : public internal::ctype<Char, Locale> {};
 
 namespace internal {
 

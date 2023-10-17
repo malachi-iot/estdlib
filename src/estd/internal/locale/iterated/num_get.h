@@ -33,7 +33,7 @@ struct num_get
     typedef Locale locale_type;
     typedef Char char_type;
     typedef cbase<char_type, base, locale_type> cbase_type;
-    //typedef ctype<char_type, locale_type> ctype_type;
+    typedef ctype<char_type, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
     typedef numpunct<char_type, locale_type> numpunct_type;
@@ -52,8 +52,7 @@ struct num_get
 
     struct _state
     {
-        // NOTE: Not yet used
-        // DEBT: Once we do use it, consider optimizing out when not an integer
+        // DEBT: Consider optimizing out somehow when not an integer
         unsigned decimal_place_ : 8;
 
         state state_ : 4;
@@ -70,8 +69,8 @@ struct num_get
     inline static bool raise_and_add(int_type n, T& v, true_type, false_type)
     {
         // Undefined/bad state.  Same as 'default' case switch
-        // DEBT: Logging this and other internal failures would be nice.  In this case,
-        // maybe we can do a static assert?
+        // DEBT: Logging this and other internal failures would be nice.  Can't do a static assert
+        // since technically state machine might reach here
         if(!positive) return true;
 
         return estd::internal::raise_and_add(v, base, n);
@@ -92,9 +91,11 @@ struct num_get
     template <bool positive, typename T>
     bool raise_and_add(int_type n, T& v, false_type, true_type)
     {
-        // TODO: Assert that base is 10
+#if __cpp_static_assert
+        static_assert(base == 10, "Only base 10 supported for floating point");
+#endif
 
-        v *= base;  // NOTE: Is always base 10 here
+        v *= base;
         if(positive)
             v += n;
         else
@@ -109,7 +110,7 @@ struct num_get
         return true;
     }
 
-    ///
+    /// Parse one character and apply it to 'v'
     /// @tparam positive
     /// @tparam T
     /// @param c
@@ -208,15 +209,15 @@ struct num_get
 #else
                 v = 0;
 #endif
-                state_.state_ = NominalPositive;
-
                 // DEBT: Revisit if we need to play with widening/narrowing/conversion
                 // to ensure this hyphen compare is proper
-                if (estd::is_signed<T>::value && c == '-')
+                if (is_signed<T>() && c == ctype_type::widen('-'))
                 {
                     state_.state_ = NominalNegative;
                     return false;
                 }
+                else
+                    state_.state_ = NominalPositive;
 
 #if __has_cpp_attribute(fallthrough)
                 [[fallthrough]];
