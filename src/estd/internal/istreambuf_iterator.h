@@ -20,18 +20,22 @@ public:
     typedef TStreambuf streambuf_type;
 
     typedef istreambuf_iterator iterator;
-    typedef char_type value_type;
     typedef typename traits_type::int_type int_type;
+    /// Deviates from spec in that we return int_type and not char_type so as to reflect
+    /// underlying stream eof condition (remember that only means no more data AT THE MOMENT)
+    typedef int_type value_type;
 
     class proxy;
 
 private:
     friend class proxy;
 
-    streambuf_type* rdbuf;
+    // Can be null if representing an 'end' iterator
+    streambuf_type* rdbuf_;
 
     //bool end() const { return ch == traits_type::eof(); }
-    bool end() const { return rdbuf == NULLPTR; }
+    //bool end() const { return rdbuf_->in_avail() == -1; }
+    ESTD_CPP_CONSTEXPR_RET bool end() const { return rdbuf_ == NULLPTR; }
 
 
     // https://en.cppreference.com/w/cpp/iterator/istreambuf_iterator/equal
@@ -52,22 +56,22 @@ public:
     constexpr
 #endif
     istreambuf_iterator() :
-        rdbuf(NULLPTR)
+        rdbuf_(NULLPTR)
     {
     }
 
-    istreambuf_iterator(streambuf_type& s) : rdbuf(&s)
+    istreambuf_iterator(streambuf_type& s) : rdbuf_(&s)
     {
     }
 
     template <class TIstreamBase>
     istreambuf_iterator(estd::detail::basic_istream<TStreambuf, TIstreamBase>& is) :
-        rdbuf(is.rdbuf())
+        rdbuf_(is.rdbuf())
     {
     }
 
     istreambuf_iterator(streambuf_type* s) :
-        rdbuf(s)
+        rdbuf_(s)
     {
     }
 
@@ -82,10 +86,10 @@ public:
         {
             // Prefix operator, we want to semi-peek into the next character to get a line
             // in on whether we're EOF
-            int_type _ch = rdbuf->snextc();
+            int_type _ch = rdbuf_->snextc();
 
-            if (_ch == traits_type::eof())
-                rdbuf = NULLPTR;
+            if (_ch == traits_type::eof() && rdbuf_->in_avail() == -1)
+                rdbuf_ = NULLPTR;
         }
 
         return *this;
@@ -122,7 +126,7 @@ public:
     {
         if(!end())
         {
-            proxy p(rdbuf->sgetc(), *this);
+            proxy p(rdbuf_->sgetc(), *this);
 
             operator++();
 
@@ -138,7 +142,7 @@ public:
 
     value_type operator*() const
     {
-        return rdbuf->sgetc();
+        return rdbuf_->sgetc();
     }
 
     bool equal(const iterator& it) const
