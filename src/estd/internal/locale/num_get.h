@@ -39,16 +39,26 @@ private:
         {
             iterated::num_get<base, char_type, TIncomingLocale> n(l);
             typedef bool_constant<numeric_limits<T>::is_integer> is_integer;
+            // DEBT: We really ought to push these traits in from somewhere else
+            typedef estd::iterator_traits<iter_type> iter_traits_type;
+            typedef estd::char_traits<char_type> traits_type;
 
             // DEBT: iterated::num_get sometimes does this too
             v = 0;
 
             for(; i != end; ++i)
             {
+                const typename iter_traits_type::value_type c = *i;
+
+                if(traits_type::not_eof(c) == false)
+                {
+                    // TODO: Do some kind of poll/block here
+                }
+
 #if __cplusplus >= 201103L
-                if(n.template get<false>(*i, err, v))
+                if(n.template get<false>(c, err, v))
 #else
-                if(n.get(*i, err, v))
+                if(n.get(c, err, v))
 #endif
                 {
                     n.finalize(v, is_integer());

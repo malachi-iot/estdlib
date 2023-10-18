@@ -20,10 +20,15 @@ public:
     typedef TStreambuf streambuf_type;
 
     typedef istreambuf_iterator iterator;
+    typedef typename traits_type::off_type difference_type;
     typedef typename traits_type::int_type int_type;
     /// Deviates from spec in that we return int_type and not char_type so as to reflect
     /// underlying stream eof condition (remember that only means no more data AT THE MOMENT)
     typedef int_type value_type;
+
+    typedef void pointer;   // DEBT: this is to satisfy iterator_traits
+    typedef char_type reference;
+    typedef std::input_iterator_tag iterator_category;
 
     class proxy;
 
