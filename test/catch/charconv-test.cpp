@@ -214,5 +214,11 @@ TEST_CASE("charconv")
             //REQUIRE(result.ec == estd::errc(0));
             REQUIRE(result.ec == 0);
         }
+        SECTION("base 16")
+        {
+            estd::to_chars_result result = estd::to_chars_opt(buffer, buffer + sizeof(buffer) - 1, 10, 16);
+
+            REQUIRE(*result.ptr == 'a');
+        }
     }
 }

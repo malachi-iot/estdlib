@@ -141,9 +141,9 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
             return c - 'a' + 10;
     }
 
-    static inline CONSTEXPR char_type to_char(int_type v)
+    static ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v)
     {
-        return v <= 10 ?
+        return v < 10 ?
                ('0' + v) :
                'a' + (v - 10);
     }

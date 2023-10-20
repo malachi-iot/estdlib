@@ -130,7 +130,7 @@ struct base_provider<-1>
 
     const type base;
 
-    ESTD_CPP_CONSTEXPR_RET base_provider(int base) : base{(type)base} {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT base_provider(int base) : base{(type)base} {}
 
     ESTD_CPP_CONSTEXPR_RET unsigned operator()() const { return base; }
 };
@@ -153,13 +153,15 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
         CharIt first,
         CharIt last, Int value, base_provider<base_> base)
 {
-    // DEBT: Put in a sanity check here to ensure cbase::char_type is compatible
-    // with CharIt
-
     typedef Cbase cbase_type;
     typedef detail::to_chars_result<CharIt> result_type;
     typedef estd::numeric_limits<Int> numeric_limits;
     const bool negative = numeric_limits::is_signed && value < 0;
+
+#if __cpp_static_assert
+    typedef typename iterator_traits<CharIt>::value_type char_type;
+    static_assert(is_same<typename cbase_type::char_type, char_type>::value, "CharIt must align with cbase");
+#endif
 
     if(negative) value *= -1;
 
