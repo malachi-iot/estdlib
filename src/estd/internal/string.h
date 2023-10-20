@@ -9,8 +9,6 @@
 
 namespace estd { namespace detail {
 
-// DEBT: Clean up name - artifact of splitting this out from legacy non-impl flavor.
-// if all works out, internal::basic_string2 will become detail::basic_string
 template <ESTD_CPP_CONCEPT(internal::StringImpl) Impl>
 class basic_string : public internal::dynamic_array<Impl>
 {

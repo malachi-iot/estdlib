@@ -39,10 +39,10 @@ struct numpunct_base<wchar_t>
 
 
 //template <locale_code::values lc, internal::encodings::values encoding>
-template <class TLocale>
+template <class Locale>
 struct numpunct<char, 
     //locale<lc, encoding>,
-    TLocale,
+    Locale,
     // TODO: Almost works, but not quite yet.  Figure out why.  Would be much nicer
     // than having to explicitly involve enable_if
     //typename is_compatible_with_classic_locale<TLocale>::type> :
@@ -56,15 +56,15 @@ struct numpunct<char,
         //is_compatible_locale_code<locale_code::en_US, lc>::value>
 
         //is_compatible_with_classic_locale<locale<lc, encoding> >::value>
-        internal::is_compatible_with_classic_locale<TLocale>::value>
+        internal::is_compatible_with_classic_locale<Locale>::value>
 
         ::type> :
     internal::numpunct_base<char>
 {
     typedef estd::layer2::const_string string_type;
 
-    static string_type truename() { return "true"; }
-    static string_type falsename() { return "false"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return "true"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return "false"; }
 };
 
 
@@ -90,8 +90,8 @@ struct numpunct<char,
 {
     typedef estd::layer2::const_string string_type;
 
-    static string_type truename() { return "vrai"; }
-    static string_type falsename() { return "faux"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return "vrai"; }
+    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return "faux"; }
 };
 
 }
