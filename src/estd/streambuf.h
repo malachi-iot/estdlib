@@ -12,6 +12,7 @@
 #include "internal/impl/streambuf/helpers.h"
 
 #include "internal/streambuf.h"
+#include "internal/impl/streambuf/concepts.h"
 
 
 //#include "features.h"
