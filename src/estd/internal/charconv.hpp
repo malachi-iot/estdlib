@@ -130,6 +130,7 @@ struct base_provider<-1>
 
     const type base;
 
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT base_provider(type base) : base{base} {}
     ESTD_CPP_CONSTEXPR_RET EXPLICIT base_provider(int base) : base{(type)base} {}
 
     ESTD_CPP_CONSTEXPR_RET unsigned operator()() const { return base; }
@@ -193,10 +194,10 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
 }
 
 // This one operates exactly according to spec, but slightly slower than above
-template <class TCbase, class TInt>
+template <unsigned b, class TInt>
 to_chars_result to_chars_integer(char* first, char* last, TInt value, const int base)
 {
-    typedef TCbase cbase_type;
+    typedef cbase<char, b, classic_locale_type> cbase_type;
     typedef typename cbase_type::char_type char_type;
 
     if(estd::numeric_limits<TInt>::is_signed && value < 0)

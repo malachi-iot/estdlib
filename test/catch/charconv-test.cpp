@@ -216,7 +216,7 @@ TEST_CASE("charconv")
         }
         SECTION("base 16")
         {
-            estd::to_chars_result result = estd::to_chars_opt(buffer, buffer + sizeof(buffer) - 1, 10, 16);
+            estd::to_chars_result result = estd::detail::to_chars<16>(buffer, buffer + sizeof(buffer) - 1, 10);
 
             REQUIRE(*result.ptr == 'a');
         }
