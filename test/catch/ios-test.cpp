@@ -132,7 +132,7 @@ TEST_CASE("ios")
         }
         SECTION("sungetc")
         {
-            streambuf_type sb = raw_str;
+            streambuf_type sb(raw_str);
 
             sb.sbumpc();
             sb.sbumpc();

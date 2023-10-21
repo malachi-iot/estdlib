@@ -195,7 +195,7 @@ TEST_CASE("experimental tests")
             estd::span<char> span = buf;
             typedef char char_type;
             typedef estd::internal::streambuf<
-                    estd::internal::impl::in_span_streambuf<char_type >> streambuf_type;
+                    estd::internal::impl::in_span_streambuf<char_type> > streambuf_type;
             typedef estd::experimental::streambuf_traits<streambuf_type> streambuf_traits;
 
             streambuf_type sb(span);

@@ -12,10 +12,10 @@ namespace estd { namespace internal { namespace impl {
 /// - xsgetn
 /// - xsputn
 /// - gbump
-template <class TTraits>
+template <class Traits>
 struct streambuf_base
 {
-    typedef TTraits traits_type;
+    typedef Traits traits_type;
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;

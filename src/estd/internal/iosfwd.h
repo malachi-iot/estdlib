@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stream_flags.h"
+#include "impl/streambuf/concepts.h"
 
 namespace estd {
 

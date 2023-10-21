@@ -28,20 +28,20 @@ namespace internal {
 // 3. blocking
 // Note that consuming istream/ostream may independently implement its own timeout code
 // in which case 'never blocking' mode may be utilized for streambuf
-template<class TImpl, class TPolicy = void>
+template<ESTD_CPP_CONCEPT(impl::Streambuf) Impl, class TPolicy = void>
 class streambuf :
         public streambuf_baseline,
-        public TImpl
+        public Impl
 {
-    typedef TImpl base_type;
-    typedef streambuf<TImpl, TPolicy> this_type;
+    typedef Impl base_type;
+    typedef streambuf<Impl, TPolicy> this_type;
 
 public:
-    typedef TImpl impl_type;
+    typedef Impl impl_type;
     typedef TPolicy policy_type;
 
-    typedef typename TImpl::char_type char_type;
-    typedef typename TImpl::traits_type traits_type;
+    typedef typename Impl::char_type char_type;
+    typedef typename Impl::traits_type traits_type;
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
@@ -91,12 +91,9 @@ protected:
 
 public:
 #if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
-    template <class ...TArgs>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    streambuf(TArgs&&...args) : 
-        base_type(std::forward<TArgs>(args)...)
+    template <class ...Args>
+    constexpr explicit streambuf(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
     {}
 #else
     // some streambufs don't need any initialization at the base level
