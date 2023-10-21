@@ -15,6 +15,20 @@ using namespace estd;
 
 using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
 
+#if __cpp_concepts
+template <internal::Streambuf Streambuf>
+void test_concept1(Streambuf& s)
+{
+    //int val = s.sgetc();
+}
+
+template <internal::OutputStreambuf Streambuf>
+void test_concept2(Streambuf& s)
+{
+    //int val = s.sgetc();
+}
+#endif
+
 TEST_CASE("streambuf")
 {
     const char raw_str[] = "raw 'traditional' output\n";
@@ -221,6 +235,35 @@ TEST_CASE("streambuf")
 
         REQUIRE(sb.in_avail() == 0);
     }
+#if __cpp_concepts
+    SECTION("concepts")
+    {
+        char buf[128];
+
+        SECTION("in span")
+        {
+            typedef estd::internal::impl::in_span_streambuf<const char> sb_impl_type;
+            typedef estd::internal::streambuf<sb_impl_type> sb_type;
+            typedef typename sb_type::traits_type traits_type;
+
+            sb_type sb(raw_str);
+
+            test_concept1(sb);
+        }
+        SECTION("out span")
+        {
+            typedef estd::internal::impl::out_span_streambuf<const char> sb_impl_type;
+            typedef estd::internal::streambuf<sb_impl_type> sb_type;
+
+            sb_type sb(raw_str);
+
+            // doesn't have sxgetc but does (sort of) have sgetc, so concept is satisfied
+
+            test_concept1(sb);
+            test_concept2(sb);
+        }
+    }
+#endif
 }
 
 #include "macro/pop.h"

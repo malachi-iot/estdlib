@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../raw/iosfwd.h"
+
 #if __cpp_concepts
 
 namespace estd { namespace internal {
@@ -18,13 +20,28 @@ concept Streambuf = requires(T s)
 
 }
 
+// TODO: Break out into InputStreambuf, and somehow combine those together
+// for consuming scenarios (maybe retain this pseudo-combined flavor since
+// our streambuf feeder which everyone is gonna use implements 99% of the API,
+// even if impl is lacking)
 template <class T>
 concept Streambuf = impl::Streambuf<T> && requires(T s)
 {
-    //s.sputn((typename T::char_type*){}, streamsize{});
-    //s.sgetn(nullptr, streamsize{});
-    //{ s.sgetc() } -> std::convertible_to<typename T::int_type>;
-    s.sgetc();
+    typename T::int_type;
+    typename T::pos_type;
+
+    s.sputn((typename T::char_type*){}, estd::streamsize{});
+    s.sgetn(nullptr, estd::streamsize{});
+    { s.sgetc() } -> std::convertible_to<typename T::int_type>;
+    s.in_avail();
+
+    // sputc is very implementation dependent and a lot of ostreambufs just don't have it
+};
+
+template <class T>
+concept OutputStreambuf = Streambuf<T> && requires(T s)
+{
+    { s.sputc(typename T::char_type{}) };
 };
 
 }}
