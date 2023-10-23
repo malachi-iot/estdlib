@@ -1,0 +1,5 @@
+if(ESP_PLATFORM)
+    include(${CMAKE_CURRENT_LIST_DIR}/tools/esp-idf/component.cmake)
+else()
+    include(${CMAKE_CURRENT_LIST_DIR}/src/CMakeLists.txt)
+endif()

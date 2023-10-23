@@ -1,3 +1,5 @@
 dependencies:
   estdlib:
     path: ../../../../tools/esp-idf/components/estdlib
+    # Won't always work since component name follows folder name
+    #path: ../../../..
