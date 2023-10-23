@@ -5,7 +5,7 @@
     "repository":
     {
         "type": "git",
-        "url": "https://github.com/malachi-iot/estdlib"
+        "url": "${PROJECT_HOMEPAGE_URL}"
     },
     "authors":
     [
@@ -32,7 +32,7 @@
     "examples": [
         "examples/pio/*/src/*.cpp"
     ],
-    "version": "0.6.1",
+    "version": "${PROJECT_VERSION}",
     "frameworks": [
         "arduino",
         "espidf",

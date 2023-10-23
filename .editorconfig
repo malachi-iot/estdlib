@@ -1,8 +1,13 @@
-[*.{c,C,cpp,CPP,h,H}]
+[*.{c,C,cpp,CPP,h,H,cmake}]
 indent_style = space
 indent_size = 4
 
 [CMakeLists.txt]
 indent_style = space
 indent_size = 4
+
+[*.yml]
+indent_style = space
+indent_size = 2
+
 
