@@ -1,0 +1,3 @@
+dependencies:
+  estdlib:
+    path: ../../../../tools/esp-idf/components/estdlib

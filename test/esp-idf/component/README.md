@@ -1,0 +1,1 @@
+This test merely tests that `estd`'s idf_component.yml behaves as expected

@@ -1,0 +1,1 @@
+This is the new location of `rtos/esp32`
