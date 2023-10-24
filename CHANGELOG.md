@@ -1,3 +1,21 @@
+# v0.6.2 - #####23
+
+## Added Features
+
+* Formally an esp-idf component now (TBD)
+* Adding floating point support to `num_get`
+* Formalizing `estd::detail::to_chars`, an even lower-level interpretation of `to_chars`
+
+## Quality Updates & Bug Fixes
+
+* Using CMake's `FetchContent` now to acquire unit test frameworks rather than submodules
+* Breaking change: selector naming (TBD)
+* Fixed bug where hex 'a' was encoded incorrectly during `to_chars`
+
+## Known Issues & Limitations
+
+* `from_chars` doesn't yet get floating point, even though `num_get` does
+
 # v0.6.1 - 16AUG23
 
 ## Added Features
