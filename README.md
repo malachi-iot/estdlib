@@ -9,8 +9,8 @@ Influence by, but different than, the great work done here: https://github.com/E
 ### Design
 
 Embedded environments have distinctly different memory management needs
-than their desktop/server counterparts.  Oore explicit and organized memory
-management schemes are desirable.  A general methodology is followed:
+than their desktop/server counterparts.  Explicit and organized memory
+management schemes are desirable.  The methodology is followed:
 
 | Layer   |   Description   | Dynamic Allocation
 | -----   |   ------------- | -
@@ -36,14 +36,19 @@ No virtual functions or dynamic allocation for any of these!
 ### Chrono
 
 Many primitives for basic time handling and comparison are brought in mirroring `std::chrono` namespace.
-For bonus fun there's a minimal `steady_clock` implementation for FreeRTOS.
+For bonus fun there's a `freertos_clock` implementation for FreeRTOS.
+
+### Functional
+
+A low level reinterpretation exists at `estd::detail::function`.  Initializion and memory management is very different
+than `std` - but otherwise usage is the same.
 
 ### Locale
 
 Bits and peieces of locale are reinterpreted.  Multiple languages and character sets are supported.  This is
-done via templates and not runtime configuration yielding high performance at the cost of broad multiple simultaneous locale support.
+done via templates and not runtime configuration, yielding high performance at the cost of broad multiple simultaneous locale support.
 
-Noteworthy is `num_get` whose underlying implementation is adapted to non-blocking scenarios.
+Noteworthy is `num_get` whose underlying implementation `iterated::num_get` is adapted to non-blocking scenarios.
 
 ### Optional
 
@@ -51,17 +56,17 @@ The `optional` class is present for your convenience.  A few specialized `layer1
 
 ### IO Streams
 
-`ostream`/`istream` support is now present.  It is cut down in robustness from the `std` implementation but still very useful.  The upside to reduced features is it's *much* lighter weight than `std`.
+`ostream`/`istream` support is now present.  It is cut down in robustness from the `std` implementation but still very useful.  The upside to this is a *much* lighter weight than `std`.
 
 Above `ios` mechanism relies on the available and familiar `streambuf` class.
 
-Finally, the implementation has been gently reinterpreted to favor non-blocking behavior.  A deeper discussion on this is in the documentation.
+Finally, importanly, the implementation is gently reinterpreted to favor non-blocking behavior.  A deeper discussion on this is in the documentation.
 
 Because the entire `ios` chain is lighter than `std` flavor, it becomes much more viable in all kinds of scenarios.
 
 ### Queues
 
-Circular queues are particularly useful in embedded environments, and as such layer1::deque provides exactly that.
+Circular queues are particularly useful in embedded environments, and as such `layer1::deque` provides exactly that.
 
 A brute force reimplementation of priority_queue is also present, since I needed that for AVRs
 
@@ -71,12 +76,14 @@ Following the layer1-layer3 paradigm, vectors are available for allocation anywh
 
 ### Span
 
-Buffer helpers, and also bringing some extra boost-inspired const_buffer and
+Buffer views, and also bringing some extra boost-inspired const_buffer and
 mutable_buffer code
 
 ### Tuples
 
-Much of the same functionality as you would expect from `std::tuples`.
+The same functionality as you would expect from `std::tuples`, with an added inherent "sparse" behavior utilizing https://en.cppreference.com/w/cpp/language/ebo to further reduce size.
+
+This sparse feature may be disabled via a feature flag.
 
 ### Strings
 
@@ -119,7 +126,11 @@ Similar to layer3::basic_string but based on a const char* for that extra
 safety.  Remember, stock std::string doesn't do this because it never points
 at memory other than its own malleable set
 
-NOTE: This so far seems to be 1:1 with `string_view`
+NOTE: `layer3 modes are approximately 1:1 with `string_view`
+
+#### estd::string_view
+
+Available for your convenience.  No notable differences from `std`
 
 ## Special Thanks
 
