@@ -56,7 +56,7 @@ The `optional` class is present for your convenience.  A few specialized `layer1
 
 ### IO Streams
 
-`ostream`/`istream` support is now present.  It is cut down in robustness from the `std` implementation but still very useful.  The upside to this is a *much* lighter weight than `std`.
+`ostream`/`istream` support is available.  It is reduced in robustness from the `std` implementation but still very powerful.  The upside to this (and its layer1-layer3 conformance) is a *much* lighter weight than `std`.
 
 Above `ios` mechanism relies on the available and familiar `streambuf` class.
 
