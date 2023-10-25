@@ -1,8 +1,16 @@
-# Platform Observations
+# Platforms
+
+## Overview
+
+There is minimal platform abstraction.  It isn't this library's function but
+sometimes (like during chrono) it's convenient to do it and have it in estdlib
+
+Also since I use Espressif chips a lot, there's some version-query helpers for
+them
 
 ## ESP32 / esp-idf
 
-03MAY22 esp-idf v4.4.1
+### Observations: 03MAY22 esp-idf v4.4.1
 
 It appears that the inbuilt `std::char_traits<char>::pos_type` resolves to fpos, which is
 pretty standard stuff.  What is mysterious and does not seem right is that this fpos
