@@ -22,8 +22,8 @@ The notion is elimination of virtual functions in favor of impl-type metaprogram
 
 ### Compiler Support
 
-We try to enable std-like features sooner than the actual spec, when possible.
-For example a fair number of type_traits are available even if you're in c++98 mode
+We try to enable std-like features sooner than the actual spec, when possible.  All features are available
+in c++11 and a some are available in c++98
 
 ## Feature Highlights
 
@@ -131,6 +131,15 @@ NOTE: `layer3 modes are approximately 1:1 with `string_view`
 #### estd::string_view
 
 Available for your convenience.  No notable differences from `std`
+
+### Variadic (non standard)
+
+A whole suite of variadic tools exist in `estd::variadic` namespace.  These have no corollary to `std`.
+Loosely inspired by C# LINQ namespace, they are particularly useful when folding expressions aren't available.
+
+### Variant
+
+Full reimplmentation of `variant` available down to c++11
 
 ## Special Thanks
 
