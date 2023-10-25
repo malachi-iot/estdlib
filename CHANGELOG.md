@@ -2,14 +2,16 @@
 
 ## Added Features
 
-* Formally an esp-idf component now (TBD)
+* Formally an esp-idf component now
 * Adding floating point support to `num_get`
 * Formalizing `estd::detail::to_chars`, an even lower-level interpretation of `to_chars`
 
 ## Quality Updates & Bug Fixes
 
 * Using CMake's `FetchContent` now to acquire unit test frameworks rather than submodules
-* Breaking change: selector naming (TBD)
+* Minor breaking change: selector disambiguation
+    * v1 namespace - "selector" might mean API to select or result of selecting
+    * v2 namespace - "selector" only means API to select
 * Fixed bug where hex 'a' was encoded incorrectly during `to_chars`
 
 ## Known Issues & Limitations
