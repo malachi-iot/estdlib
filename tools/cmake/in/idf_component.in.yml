@@ -2,6 +2,9 @@
 version: "${PROJECT_VERSION}"
 description: "${PROJECT_DESCRIPTION}"
 url: "${PROJECT_HOMEPAGE_URL}"
+repository: "${PROJECT_HOMEPAGE_URL}"
+license: "Apache-2.0"
 files:
   exclude:
     - "test/**/*"
+    - "CHANGELOG.md"
