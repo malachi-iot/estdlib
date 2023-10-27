@@ -4,4 +4,4 @@ description: "${PROJECT_DESCRIPTION}"
 url: "${PROJECT_HOMEPAGE_URL}"
 files:
   exclude:
-    - "test/**"
+    - "test/**/*"
