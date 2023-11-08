@@ -38,7 +38,9 @@ struct errc
 {
     enum values
     {
+        argument_out_of_domain = EDOM,
 #if     FEATURE_STD_FULL_ERRNO
+        argument_list_too_long = E2BIG,
         address_family_not_supported = EAFNOSUPPORT,
         bad_address = EFAULT,
         device_or_resource_busy = EBUSY,
