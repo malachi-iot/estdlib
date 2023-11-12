@@ -2,17 +2,10 @@
 
 #include "internal/tuple.h"
 
-// EXPERIMENTAL
-#include "internal/variadic/visitor.h"
-
 #include "type_traits.h"
 
 #if __cpp_alias_templates && __cpp_variadic_templates
 namespace estd {
-
-template <std::size_t I, class T>
-using tuple_element_t = typename tuple_element<I, T>::type;
-
 
 // TODO: Feed tuple_element from new variadic support code
 
@@ -38,87 +31,6 @@ struct tuple_element< I, const T >
 };
 
 
-template <>
-class tuple<>
-{
-public:
-    //static CONSTEXPR int index = 0;
-};
-
-template <class T, class ...TArgs>
-class tuple<T&, TArgs...> : public tuple<TArgs...>
-{
-    T& value;
-
-    typedef tuple<TArgs...> base_type;
-    using types = variadic::types<T&, TArgs...>;
-
-public:
-    typedef T& valref_type;
-    typedef const T& const_valref_type;
-
-    constexpr explicit tuple(T& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
-        value(value)
-    {}
-
-    static constexpr int index = sizeof...(TArgs);
-
-    const T& first() const { return value; }
-
-    T& first() { return value; }
-};
-
-
-
-
-template <class T, class ...TArgs>
-class tuple<T, TArgs...> :
-    public tuple<TArgs...>,
-    public internal::sparse_tuple<T, sizeof...(TArgs)>
-{
-    typedef tuple<TArgs...> base_type;
-    typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
-    using types = variadic::types<T, TArgs...>;
-
-public:
-    template <class UType,
-        enable_if_t<is_constructible<T, UType>::value, bool> = true>
-    constexpr tuple(UType&& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
-        storage_type(std::forward<UType>(value))
-    {}
-
-    constexpr tuple(T&& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
-        storage_type(std::forward<T>(value))
-    {}
-
-    using storage_type::first;
-    using typename storage_type::valref_type;
-    using typename storage_type::const_valref_type;
-
-    explicit tuple() = default;
-
-    static constexpr int index = sizeof...(TArgs);
-
-    typedef T element_type;
-
-    // EXPERIMENTAL, though I think I'm wanting to keep it
-    template <class F, class ...Args2>
-    bool visit(F&& f, Args2&&...args)
-    {
-        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
-            std::forward<Args2>(args)...);
-    }
-
-    template <class F, class ...Args2>
-    constexpr bool visit(F&& f, Args2&&...args) const
-    {
-        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
-            std::forward<Args2>(args)...);
-    }
-};
 
 
 /*
@@ -135,30 +47,6 @@ typename tuple_element<I, tuple<Types...> >::type&
         return get<I - 1, tuple<Types...>::base_type>(t);
 } */
 
-
-template<int index, typename... Types>
-typename tuple_element<index, tuple<Types...> >::const_valref_type get(const tuple<Types...>& t)
-{
-    return internal::GetImpl<index, Types...>::value(t);
-}
-
-template<int index, typename... Types>
-typename tuple_element<index, tuple<Types...> >::valref_type get(tuple<Types...>& t)
-{
-    return internal::GetImpl<index, Types...>::value(t);
-}
-
-template<int index, typename... Types>
-tuple_element_t<index, tuple<Types...> >&& get(tuple<Types...>&& t)
-{
-    return internal::GetImpl<index, Types...>::value(std::move(t));
-}
-
-template<int index, typename... Types>
-const tuple_element_t<index, tuple<Types...> >&& get(const tuple<Types...>&& t)
-{
-    return internal::GetImpl<index, Types...>::value(t);
-}
 
 #if OLD_VERSION
 // I think this was used with hopes of c++03 friendliness.  Since none of the rest of

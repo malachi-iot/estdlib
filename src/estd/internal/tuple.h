@@ -5,6 +5,13 @@
 #include "fwd/tuple.h"
 #include "feature/tuple.h"
 #include "utility.h"    // For std::move
+#include "tuple/get.h"  // DEBT: Must precede 'visitor.h' likely due to probable lack of 'get' forward declaration
+#include "tuple/sparse.h"
+
+// EXPERIMENTAL
+#include "variadic/visitor.h"
+
+
 
 namespace estd { namespace internal {
 
@@ -59,51 +66,90 @@ struct sparse_tuple
 
 
 #if __cpp_variadic_templates
-// 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
-// TODO: use new variadic support area instead of this
 
-template<unsigned index, typename First, typename... Rest>
-struct GetImpl : GetImpl<index - 1, Rest...>
+template <>
+class tuple<>
 {
-    /*
-    typedef GetImpl<index - 1, Rest...> base_type;
-
-    static typename base_type::const_valref_type value(const tuple<First, Rest...>& t)
-    {
-        return base_type::value(t);
-    }
-
-    static typename base_type::valref_type value(tuple<First, Rest...>& t)
-    {
-        return base_type::value(t);
-    }   */
+public:
+    //static CONSTEXPR int index = 0;
 };
 
-// cascades down eventually to this particular specialization
-// to retrieve the 'first' item
-template<typename First, typename... Rest>
-struct GetImpl<0, First, Rest...>
+template <class T, class ...TArgs>
+class tuple<T&, TArgs...> : public tuple<TArgs...>
 {
-    //typedef First first_type;
-    //using tuple_type = tuple<First, Rest...>;
-    using valref_type = typename tuple<First>::valref_type;
-    using const_valref_type = typename tuple<First>::const_valref_type;
+    T& value;
 
-    static const_valref_type value(const tuple<First, Rest...>& t)
+    typedef tuple<TArgs...> base_type;
+    using types = variadic::types<T&, TArgs...>;
+
+public:
+    typedef T& valref_type;
+    typedef const T& const_valref_type;
+
+    constexpr explicit tuple(T& value, TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...),
+        value(value)
+    {}
+
+    static constexpr int index = sizeof...(TArgs);
+
+    const T& first() const { return value; }
+
+    T& first() { return value; }
+};
+
+
+
+
+template <class T, class ...TArgs>
+class tuple<T, TArgs...> :
+    public tuple<TArgs...>,
+    public internal::sparse_tuple<T, sizeof...(TArgs)>
+{
+    typedef tuple<TArgs...> base_type;
+    typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
+    using types = variadic::types<T, TArgs...>;
+
+public:
+    template <class UType,
+        enable_if_t<is_constructible<T, UType>::value, bool> = true>
+    constexpr tuple(UType&& value, TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...),
+        storage_type(std::forward<UType>(value))
+    {}
+
+    constexpr tuple(T&& value, TArgs&&...args) :
+        base_type(std::forward<TArgs>(args)...),
+        storage_type(std::forward<T>(value))
+    {}
+
+    using storage_type::first;
+    using typename storage_type::valref_type;
+    using typename storage_type::const_valref_type;
+
+    explicit tuple() = default;
+
+    static constexpr int index = sizeof...(TArgs);
+
+    typedef T element_type;
+
+    // EXPERIMENTAL, though I think I'm wanting to keep it
+    template <class F, class ...Args2>
+    bool visit(F&& f, Args2&&...args)
     {
-        return t.first();
+        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
+            std::forward<Args2>(args)...);
     }
 
-    static valref_type value(tuple<First, Rest...>& t)
+    template <class F, class ...Args2>
+    constexpr bool visit(F&& f, Args2&&...args) const
     {
-        return t.first();
-    }
-
-    static First&& value(tuple<First, Rest...>&& t)
-    {
-        return t.first();
+        return types::visitor::visit(internal::visit_tuple_functor{}, *this, f,
+            std::forward<Args2>(args)...);
     }
 };
+
+
 #endif
 
 }}
