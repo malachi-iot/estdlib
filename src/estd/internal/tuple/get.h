@@ -5,14 +5,12 @@
 namespace estd {
 
 namespace internal {
-template<unsigned index, typename First, typename... Rest>
-struct GetImpl;
 
 // 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
 // TODO: use new variadic support area instead of this
 
-template<unsigned index, typename First, typename... Rest>
-struct GetImpl : GetImpl<index - 1, Rest...>
+template<bool sparse, unsigned index, typename First, typename... Rest>
+struct GetImpl : GetImpl<sparse, index - 1, Rest...>
 {
     /*
     typedef GetImpl<index - 1, Rest...> base_type;
@@ -30,25 +28,25 @@ struct GetImpl : GetImpl<index - 1, Rest...>
 
 // cascades down eventually to this particular specialization
 // to retrieve the 'first' item
-template<typename First, typename... Rest>
-struct GetImpl<0, First, Rest...>
+template<bool sparse, typename First, typename... Rest>
+struct GetImpl<sparse, 0, First, Rest...>
 {
     //typedef First first_type;
     //using tuple_type = tuple<First, Rest...>;
-    using valref_type = typename tuple<First>::valref_type;
-    using const_valref_type = typename tuple<First>::const_valref_type;
+    using valref_type = typename tuple<sparse, First>::valref_type;
+    using const_valref_type = typename tuple<sparse, First>::const_valref_type;
 
-    static const_valref_type value(const tuple<First, Rest...>& t)
+    static const_valref_type value(const tuple<sparse, First, Rest...>& t)
     {
         return t.first();
     }
 
-    static valref_type value(tuple<First, Rest...>& t)
+    static valref_type value(tuple<sparse, First, Rest...>& t)
     {
         return t.first();
     }
 
-    static First&& value(tuple<First, Rest...>&& t)
+    static First&& value(tuple<sparse, First, Rest...>&& t)
     {
         return t.first();
     }
@@ -57,28 +55,28 @@ struct GetImpl<0, First, Rest...>
 
 }
 
-template<int index, typename... Types>
-typename tuple_element<index, tuple<Types...> >::const_valref_type get(const tuple<Types...>& t)
+template<int index, bool sparse, typename... Types>
+typename tuple_element<index, tuple<Types...> >::const_valref_type get(const internal::tuple<sparse, Types...>& t)
 {
-    return internal::GetImpl<index, Types...>::value(t);
+    return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
-template<int index, typename... Types>
-typename tuple_element<index, tuple<Types...> >::valref_type get(tuple<Types...>& t)
+template<int index, bool sparse, typename... Types>
+typename tuple_element<index, tuple<Types...> >::valref_type get(internal::tuple<sparse, Types...>& t)
 {
-    return internal::GetImpl<index, Types...>::value(t);
+    return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
-template<int index, typename... Types>
-tuple_element_t<index, tuple<Types...> >&& get(tuple<Types...>&& t)
+template<int index, bool sparse, typename... Types>
+tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
 {
-    return internal::GetImpl<index, Types...>::value(std::move(t));
+    return internal::GetImpl<sparse, index, Types...>::value(std::move(t));
 }
 
-template<int index, typename... Types>
-const tuple_element_t<index, tuple<Types...> >&& get(const tuple<Types...>&& t)
+template<int index, bool sparse, typename... Types>
+const tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<sparse, Types...>&& t)
 {
-    return internal::GetImpl<index, Types...>::value(t);
+    return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
 }

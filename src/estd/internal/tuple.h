@@ -67,46 +67,29 @@ struct sparse_tuple
 
 #if __cpp_variadic_templates
 
-template <>
-class tuple<>
+template <bool sparse>
+class tuple<sparse>
 {
 public:
     //static CONSTEXPR int index = 0;
 };
 
-template <class T, class ...TArgs>
-class tuple<T&, TArgs...> : public tuple<TArgs...>
+
+template <class T, class ...Args>
+class tuple<false, T, Args...> :
+    public tuple<false, Args...>
 {
-    T& value;
-
-    typedef tuple<TArgs...> base_type;
-    using types = variadic::types<T&, TArgs...>;
-
-public:
-    typedef T& valref_type;
-    typedef const T& const_valref_type;
-
-    constexpr explicit tuple(T& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
-        value(value)
-    {}
-
-    static constexpr int index = sizeof...(TArgs);
-
-    const T& first() const { return value; }
-
-    T& first() { return value; }
+    using base_type = tuple<false, Args...>;
 };
 
 
 
-
 template <class T, class ...TArgs>
-class tuple<T, TArgs...> :
-    public tuple<TArgs...>,
+class tuple<true, T, TArgs...> :
+    public tuple<true, TArgs...>,
     public internal::sparse_tuple<T, sizeof...(TArgs)>
 {
-    typedef tuple<TArgs...> base_type;
+    typedef tuple<true, TArgs...> base_type;
     typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
     using types = variadic::types<T, TArgs...>;
 

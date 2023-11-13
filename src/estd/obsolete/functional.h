@@ -51,7 +51,7 @@ struct bind_type : function<F>
 {
     typedef function<F> base_type;
 
-    tuple<TArgs...> args;
+    estd::tuple<TArgs...> args;
 
     bind_type(F&& f, TArgs&&...args) :
         base_type(std::move(f)),
