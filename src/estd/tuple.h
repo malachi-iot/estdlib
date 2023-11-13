@@ -69,18 +69,16 @@ struct tuple_size<estd::tuple<TArgs...> >
 
 
 
-template <class...Types>
-CONSTEXPR tuple<Types...> make_tuple( Types&&... args )
+template <class... Types>
+CONSTEXPR tuple<Types...> make_tuple(Types&&... args )
 {
     return tuple<Types...>(std::forward<Types>(args)...);
 }
 
 namespace internal {
 
-// FIX: important deviation from spec in that we aren't returning
-// a value.  That is a little tricky
 template <class F2, class Tuple, size_t... Is>
-inline auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
+constexpr auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
     decltype (f(get<Is>(t)...))
 {
     return f(get<Is>(t)...);
@@ -92,12 +90,12 @@ template <class F2, class Tuple, class TSeq = make_index_sequence<
               tuple_size<
                   remove_reference_t<Tuple>
               >::value> >
-inline auto apply(F2&& f, Tuple&& t) ->
-    decltype (internal::apply_impl(std::move(f),
+constexpr auto apply(F2&& f, Tuple&& t) ->
+    decltype (internal::apply_impl(std::forward<F2>(f),
                                    std::forward<Tuple>(t),
                                    TSeq {}))
 {
-    return internal::apply_impl(std::move(f),
+    return internal::apply_impl(std::forward<F2>(f),
                std::forward<Tuple>(t),
                TSeq {});
 }

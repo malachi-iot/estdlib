@@ -11,59 +11,9 @@
 // EXPERIMENTAL
 #include "variadic/visitor.h"
 
-
-
 namespace estd { namespace internal {
 
 // DEBT: 'sparse_tuple' can probably work well in c++03 tuple flavor too
-
-// Needs 'index' to disambiguate from multiple base classes
-#if FEATURE_ESTD_IS_EMPTY && FEATURE_ESTD_SPARSE_TUPLE
-template <class T, std::size_t index, class enabled = void>
-struct sparse_tuple;
-
-template <class T, std::size_t index>
-struct sparse_tuple<T, index, typename enable_if<is_empty<T>::value>::type>
-{
-    static T first() { return T(); }
-
-    typedef T valref_type;
-    typedef T const_valref_type;
-};
-
-
-template <class T, std::size_t index>
-struct sparse_tuple<T, index, typename enable_if<!is_empty<T>::value>::type>
-#else
-template <class T, std::size_t index>
-struct sparse_tuple
-#endif
-{
-    T value;
-
-    typedef T& valref_type;
-    typedef const T& const_valref_type;
-
-    const T& first() const { return value; }
-
-    T& first() { return value; }
-
-#if __cpp_constexpr
-    // DEBT: A little sloppy, but should suffice.  This way we make way for converting/direct
-    // init constructors without impeding default move constructor
-    template <class UType, enable_if_t<!is_same<UType, sparse_tuple>::value, bool> = true>
-    explicit constexpr sparse_tuple(UType&& value) :    // NOLINT
-        value(std::forward<UType>(value)) {}
-
-    constexpr sparse_tuple(sparse_tuple&&) noexcept = default;
-    constexpr sparse_tuple(const sparse_tuple&) = default;
-    constexpr sparse_tuple() = default;
-#else
-    sparse_tuple(const T& value) : value(value) {}
-    sparse_tuple() {};
-#endif
-};
-
 
 #if __cpp_variadic_templates
 
@@ -75,34 +25,25 @@ public:
 };
 
 
-template <class T, class ...Args>
-class tuple<false, T, Args...> :
-    public tuple<false, Args...>
+template <bool sparse, class T, class ...Args>
+class tuple<sparse, T, Args...> :
+    public tuple<sparse, Args...>,
+    public internal::sparse_tuple<sparse, T, sizeof...(Args)>
 {
-    using base_type = tuple<false, Args...>;
-};
-
-
-
-template <class T, class ...TArgs>
-class tuple<true, T, TArgs...> :
-    public tuple<true, TArgs...>,
-    public internal::sparse_tuple<T, sizeof...(TArgs)>
-{
-    typedef tuple<true, TArgs...> base_type;
-    typedef internal::sparse_tuple<T, sizeof...(TArgs)> storage_type;
-    using types = variadic::types<T, TArgs...>;
+    typedef tuple<sparse, Args...> base_type;
+    typedef internal::sparse_tuple<sparse, T, sizeof...(Args)> storage_type;
+    using types = variadic::types<T, Args...>;
 
 public:
     template <class UType,
         enable_if_t<is_constructible<T, UType>::value, bool> = true>
-    constexpr tuple(UType&& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
+    constexpr explicit tuple(UType&& value, Args&&...args) :
+        base_type(std::forward<Args>(args)...),
         storage_type(std::forward<UType>(value))
     {}
 
-    constexpr tuple(T&& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
+    constexpr explicit tuple(T&& value, Args&&...args) :
+        base_type(std::forward<Args>(args)...),
         storage_type(std::forward<T>(value))
     {}
 
@@ -112,7 +53,7 @@ public:
 
     explicit tuple() = default;
 
-    static constexpr int index = sizeof...(TArgs);
+    //static constexpr int index = sizeof...(Args);
 
     typedef T element_type;
 

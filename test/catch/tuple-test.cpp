@@ -333,6 +333,23 @@ TEST_CASE("tuple")
 
         REQUIRE(counter == 1);
     }
+    SECTION("sparse vs non-sparse")
+    {
+        SECTION("sparse")
+        {
+            internal::tuple<true, monostate, int> t;
+            v1::sparse_tuple<monostate, int> t2;
+
+            REQUIRE(sizeof(t) == sizeof(t2));
+            REQUIRE(sizeof(t) == sizeof(int));
+        }
+        SECTION("full (non-sparse)")
+        {
+            internal::tuple<false, monostate, int> t;
+
+            REQUIRE(sizeof(t) > sizeof(int));
+        }
+    }
 }
 
 #include "macro/pop.h"

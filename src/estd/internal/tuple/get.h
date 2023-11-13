@@ -9,6 +9,8 @@ namespace internal {
 // 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
 // TODO: use new variadic support area instead of this
 
+// Needs 'index' to disambiguate from multiple base classes
+
 template<bool sparse, unsigned index, typename First, typename... Rest>
 struct GetImpl : GetImpl<sparse, index - 1, Rest...>
 {
