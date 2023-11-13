@@ -9,8 +9,6 @@ namespace internal {
 // 'GetImpl' lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
 // TODO: use new variadic support area instead of this
 
-// Needs 'index' to disambiguate from multiple base classes
-
 template<bool sparse, unsigned index, typename First, typename... Rest>
 struct GetImpl : GetImpl<sparse, index - 1, Rest...>
 {
@@ -35,10 +33,11 @@ struct GetImpl<sparse, 0, First, Rest...>
 {
     //typedef First first_type;
     //using tuple_type = tuple<First, Rest...>;
-    using valref_type = typename tuple<sparse, First>::valref_type;
-    using const_valref_type = typename tuple<sparse, First>::const_valref_type;
+    using target = tuple_storage<sparse, First>;
+    using valref_type = typename target::valref_type;
+    using const_valref_type = typename target::const_valref_type;
 
-    static const_valref_type value(const tuple<sparse, First, Rest...>& t)
+    static constexpr const_valref_type value(const tuple<sparse, First, Rest...>& t)
     {
         return t.first();
     }
@@ -58,25 +57,27 @@ struct GetImpl<sparse, 0, First, Rest...>
 }
 
 template<int index, bool sparse, typename... Types>
-typename tuple_element<index, tuple<Types...> >::const_valref_type get(const internal::tuple<sparse, Types...>& t)
+constexpr typename tuple_element<index, tuple<Types...> >::const_valref_type get(
+    const internal::tuple<sparse, Types...>& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
 template<int index, bool sparse, typename... Types>
-typename tuple_element<index, tuple<Types...> >::valref_type get(internal::tuple<sparse, Types...>& t)
+inline typename tuple_element<index, tuple<Types...> >::valref_type get(
+    internal::tuple<sparse, Types...>& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
 template<int index, bool sparse, typename... Types>
-tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
+inline tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(std::move(t));
 }
 
 template<int index, bool sparse, typename... Types>
-const tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<sparse, Types...>&& t)
+constexpr tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<sparse, Types...>&& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(t);
 }

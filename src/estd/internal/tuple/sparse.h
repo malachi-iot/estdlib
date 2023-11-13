@@ -6,12 +6,13 @@
 namespace estd { namespace internal {
 
 // DEBT: Consolidate with evaporators
-template <bool sparse, class T, std::size_t index, class enabled = void>
-struct sparse_tuple;
+
+// Needs 'index' to disambiguate from multiple base classes
 
 template <class T, std::size_t index>
-struct sparse_tuple<true, T, index, typename enable_if<is_empty<T>::value>::type>
+class tuple_storage<true, T, index, typename enable_if<is_empty<T>::value>::type>
 {
+public:
     ESTD_CPP_CONSTEXPR_RET static T first() { return T(); }
 
     typedef T valref_type;
@@ -20,31 +21,32 @@ struct sparse_tuple<true, T, index, typename enable_if<is_empty<T>::value>::type
 
 
 template <bool sparse, class T, std::size_t index>
-struct sparse_tuple<sparse, T, index,
+class tuple_storage<sparse, T, index,
     typename enable_if<!is_empty<T>::value || sparse == false>::type>
 {
     T value;
 
+public:
     typedef T& valref_type;
     typedef const T& const_valref_type;
 
-    const T& first() const { return value; }
+    constexpr const T& first() const { return value; }
 
     T& first() { return value; }
 
 #if __cpp_constexpr
     // DEBT: A little sloppy, but should suffice.  This way we make way for converting/direct
     // init constructors without impeding default move constructor
-    template <class UType, enable_if_t<!is_same<UType, sparse_tuple>::value, bool> = true>
-    explicit constexpr sparse_tuple(UType&& value) :    // NOLINT
+    template <class UType, enable_if_t<!is_same<UType, tuple_storage>::value, bool> = true>
+    explicit constexpr tuple_storage(UType&& value) :    // NOLINT
         value(std::forward<UType>(value)) {}
 
-    constexpr sparse_tuple(sparse_tuple&&) noexcept = default;
-    constexpr sparse_tuple(const sparse_tuple&) = default;
-    constexpr sparse_tuple() = default;
+    constexpr tuple_storage(tuple_storage&&) noexcept = default;
+    constexpr tuple_storage(const tuple_storage&) = default;
+    constexpr tuple_storage() = default;
 #else
-    sparse_tuple(const T& value) : value(value) {}
-    sparse_tuple() {};
+    tuple_storage(const T& value) : value(value) {}
+    tuple_storage() {};
 #endif
 };
 

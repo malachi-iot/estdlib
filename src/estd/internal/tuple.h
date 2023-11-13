@@ -28,10 +28,12 @@ public:
 template <bool sparse, class T, class ...Args>
 class tuple<sparse, T, Args...> :
     public tuple<sparse, Args...>,
-    public internal::sparse_tuple<sparse, T, sizeof...(Args)>
+    // NOTE: Interestingly, in GCC12 we can make tuple_storage private and GetImpl
+    // still works, but making above 'tuple' protected causes issues
+    public tuple_storage<sparse, T, sizeof...(Args)>
 {
     typedef tuple<sparse, Args...> base_type;
-    typedef internal::sparse_tuple<sparse, T, sizeof...(Args)> storage_type;
+    typedef tuple_storage<sparse, T, sizeof...(Args)> storage_type;
     using types = variadic::types<T, Args...>;
 
 public:
