@@ -9,7 +9,7 @@ namespace estd { namespace internal {
 
 // Needs 'index' to disambiguate from multiple base classes
 
-template <class T, std::size_t index>
+template <class T, size_t index>
 class tuple_storage<true, T, index, typename enable_if<is_empty<T>::value>::type>
 {
 public:
@@ -20,7 +20,7 @@ public:
 };
 
 
-template <bool sparse, class T, std::size_t index>
+template <bool sparse, class T, size_t index>
 class tuple_storage<sparse, T, index,
     typename enable_if<!is_empty<T>::value || sparse == false>::type>
 {

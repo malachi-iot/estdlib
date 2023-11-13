@@ -5,6 +5,13 @@
 
 namespace estd {
 
+namespace internal {
+
+template <bool sparse, class T, size_t index = 0, class enabled = void>
+class tuple_storage;
+
+}
+
 template <class T>
 struct tuple_size;
 
