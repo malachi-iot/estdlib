@@ -73,6 +73,57 @@ struct visitor_instance : in_place_type_t<T>
 
 }
 
+namespace experimental {
+
+template <class ...>
+struct functor_mover;
+
+template <>
+struct functor_mover<>
+{
+    static constexpr size_t size = 0;
+
+    template <class ...Args2>
+    constexpr bool operator()(Args2&&...) const { return {}; }
+};
+
+template <class T, class ...Args>
+struct functor_mover<T, Args...>
+{
+    using upward = functor_mover<Args...>;
+    static constexpr size_t size = sizeof...(Args) + 1;
+
+    // emits position in reverse
+    template <class F, class ...Args2>
+    void operator()(F&& f, Args2&&...args2)
+    {
+        f(variadic::type<size - 1, T>{}, std::forward<Args2>(args2)...);
+        upward{}(std::forward<F>(f), std::forward<Args2>(args2)...);
+    }
+};
+
+template <class ...Args>
+struct forward_invoker
+{
+    static constexpr size_t size = sizeof...(Args);
+
+    template <class F, int I, class T, class ...Args2>
+    void operator()(variadic::type<I, T>, F&& f, Args2&&...args) const
+    {
+        f(variadic::type<size - (I + 1), T>{}, std::forward<Args2>(args)...);
+    }
+
+    template <class F>
+    void invoke(F&& f)
+    {
+        functor_mover<Args...>{}(std::forward<F>(f));
+    }
+};
+
+
+
+}
+
 namespace variadic {
 
 inline namespace v1 {
@@ -184,8 +235,10 @@ struct type_visitor
 {
     //typedef layer1::optional<size_t, internal::variant_npos()> return_type;
 
+    static constexpr const size_t size = sizeof...(Types);
+
     template <size_t I = 0,
-            class enabled = enable_if_t<(I == sizeof...(Types))>,
+            class enabled = enable_if_t<(I == size)>,
             class... TArgs,
 #if __cpp_concepts
             concepts::ClassVisitorFunctor<TArgs...> F>
@@ -195,7 +248,7 @@ struct type_visitor
     static constexpr short visit(F&&, TArgs&&...) { return -1; }
 
     template <size_t I = 0, class F,
-            class enabled = enable_if_t<(I < sizeof...(Types))>,
+            class enabled = enable_if_t<(I < size)>,
             class... TArgs>
     static int visit(F&& f, TArgs&&...args)
     {
@@ -203,6 +256,22 @@ struct type_visitor
             return I;
 
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+    }
+
+    template <int I = size - 1,
+        class enabled = enable_if_t<(I == -1)>,
+        class... Args>
+    constexpr static short visit_reverse(Args&&...) { return -1; }
+
+    template <int I = size - 1, class F,
+        class enabled = enable_if_t<(I >= 0)>,
+        class... Args>
+    static int visit_reverse(F&& f, Args&&...args)
+    {
+        if(f(type<I, internal::type_at_index<I, Types...>>{}, std::forward<Args>(args)...))
+            return I;
+
+        return visit_reverse<I - 1>(std::forward<F>(f), std::forward<Args>(args)...);
     }
 
 #if LEGACY
@@ -245,8 +314,8 @@ struct type_visitor
             std::forward<TArgs>(args)...);
     }
 
-    template <class TEval>
-    using select = detail::selector<sizeof...(Types), TEval, Types...>;
+    template <class Eval>
+    using select = detail::selector<size, Eval, Types...>;
 };
 
 

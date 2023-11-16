@@ -20,6 +20,15 @@ struct identify_index_functor
     }
 };
 
+struct identify_numeric_functor
+{
+    template <size_t I, class T>
+    constexpr bool operator()(variadic::type<I, T>) const
+    {
+        return estd::is_arithmetic<T>::value;
+    }
+};
+
 struct identify_value_functor
 {
     template <size_t I, class T, T v>
@@ -245,9 +254,26 @@ TEST_CASE("variadic")
         {
             typedef variadic::type_visitor<monostate, int, float, const char*> vh_type;
 
-            int result = vh_type::visit(identify_index_functor{}, 1);
+            SECTION("index")
+            {
+                int result = vh_type::visit(identify_index_functor{}, 1);
 
-            REQUIRE(result == 1);
+                REQUIRE(result == 1);
+
+                result = vh_type::visit_reverse(identify_index_functor{}, 1);
+
+                REQUIRE(result == 1);
+            }
+            SECTION("arithmetic")
+            {
+                int result = vh_type::visit(identify_numeric_functor{});
+
+                REQUIRE(result == 1);
+
+                result = vh_type::visit_reverse(identify_numeric_functor{});
+
+                REQUIRE(result == 2);
+            }
         }
         SECTION("tuple instance")
         {
