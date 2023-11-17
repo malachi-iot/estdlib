@@ -78,45 +78,63 @@ namespace experimental {
 template <class ...>
 struct functor_mover;
 
+template <class ...>
+struct functor_mover2;
+
+template <class T, class ...Types>
+struct functor_mover2<variadic::types<T, Types...>, T>
+{
+    using types_ = variadic::types<T, Types...>;
+    using upward = functor_mover2<variadic::types<Types...>, typename types_::first>;
+};
+
 template <>
 struct functor_mover<>
 {
-    static constexpr size_t size = 0;
-
-    template <class ...Args2>
-    constexpr bool operator()(Args2&&...) const { return {}; }
+    template <class ...Args>
+    constexpr static bool invoke(Args&&...) { return false; }
 };
 
-template <class T, class ...Args>
-struct functor_mover<T, Args...>
+template <class T, class ...Types>
+struct functor_mover<T, Types...>
 {
-    using upward = functor_mover<Args...>;
-    static constexpr size_t size = sizeof...(Args) + 1;
+    using upward = functor_mover<Types...>;
 
     // emits position in reverse
-    template <class F, class ...Args2>
-    void operator()(F&& f, Args2&&...args2)
+    template <class F, class ...Args>
+    constexpr static bool invoke(F&& f, Args&&...args)
     {
-        f(variadic::type<size - 1, T>{}, std::forward<Args2>(args2)...);
-        upward{}(std::forward<F>(f), std::forward<Args2>(args2)...);
+        return f(variadic::type<sizeof...(Types), T>{}, std::forward<Args>(args)...) ?
+            true :
+            upward::invoke(std::forward<F>(f), std::forward<Args>(args)...);
     }
 };
 
-template <class ...Args>
+template <class ...Types>
 struct forward_invoker
 {
-    static constexpr size_t size = sizeof...(Args);
+    static constexpr size_t size = sizeof...(Types);
 
-    template <class F, int I, class T, class ...Args2>
-    void operator()(variadic::type<I, T>, F&& f, Args2&&...args) const
+    template <class F, size_t I, class T, class ...Args>
+    bool operator()(variadic::type<I, T>, F&& f, int* selected, Args&&...args) const
     {
-        f(variadic::type<size - (I + 1), T>{}, std::forward<Args2>(args)...);
+        constexpr size_t index = size - (I + 1);
+
+        if(!f(variadic::type<index, T>{}, std::forward<Args>(args)...)) return false;
+
+        *selected = index;
+        return true;
     }
 
-    template <class F>
-    void invoke(F&& f)
+    template <class F, class ...Args>
+    int invoke(F&& f, Args&&...args) const
     {
-        functor_mover<Args...>{}(std::forward<F>(f));
+        int selected = -1;
+        functor_mover<Types...>::invoke(*this,
+            std::forward<F>(f),
+            &selected,
+            std::forward<Args>(args)...);
+        return selected;
     }
 };
 
@@ -258,18 +276,18 @@ struct type_visitor
         return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
     }
 
-    template <int I = size - 1,
-        class enabled = enable_if_t<(I == -1)>,
+    template <size_t I = size,
+        class enabled = enable_if_t<(I == 0)>,
         class... Args>
     constexpr static short visit_reverse(Args&&...) { return -1; }
 
-    template <int I = size - 1, class F,
-        class enabled = enable_if_t<(I >= 0)>,
+    template <size_t I = size, class F,
+        class enabled = enable_if_t<(I > 0)>,
         class... Args>
     static int visit_reverse(F&& f, Args&&...args)
     {
-        if(f(type<I, internal::type_at_index<I, Types...>>{}, std::forward<Args>(args)...))
-            return I;
+        if(f(type<I-1, internal::type_at_index<I-1, Types...>>{}, std::forward<Args>(args)...))
+            return I - 1;
 
         return visit_reverse<I - 1>(std::forward<F>(f), std::forward<Args>(args)...);
     }

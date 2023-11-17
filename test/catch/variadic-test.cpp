@@ -250,6 +250,15 @@ TEST_CASE("variadic")
     }
     SECTION("visitor")
     {
+        SECTION("empty")
+        {
+            int result;
+
+            result = variadic::type_visitor<>::visit(identify_numeric_functor{});
+            REQUIRE(result == -1);
+            result = variadic::type_visitor<>::visit_reverse(identify_numeric_functor{});
+            REQUIRE(result == -1);
+        }
         SECTION("static")
         {
             typedef variadic::type_visitor<monostate, int, float, const char*> vh_type;
@@ -531,6 +540,13 @@ TEST_CASE("variadic")
             REQUIRE(selected2::size() == 1);
             b = estd::is_same<first3, float>::value;
             REQUIRE(b);
+        }
+        SECTION("moving through types, old-school style")
+        {
+            int result = experimental::forward_invoker<monostate, monostate, int, float>{}.
+                invoke(identify_numeric_functor{});
+
+            REQUIRE(result == 2);
         }
     }
 }
