@@ -6,6 +6,10 @@
 
 #include <estd/chrono.h>
 
+#if ESP_PLATFORM
+#include <esp_log.h>
+#endif
+
 #undef min
 #undef max
 
@@ -39,15 +43,26 @@ static void test_chrono_subtract()
 template <class Clock>
 void test_clock()
 {
+#if ESP_PLATFORM
+    static constexpr const char* TAG = "test_clock";
+#endif
+
     typedef Clock clock_type;
     typedef typename clock_type::time_point time_point;
     //typedef typename time_point::duration duration;
 
     clock_type c;
 
-    //const time_point min = time_point::min();
+    //CONSTEXPR time_point min = time_point::min();
+    // Implicit zero ought to be enough
     CONSTEXPR time_point min;
     const time_point now = c.now();
+
+#if ESP_PLATFORM
+    ESP_LOGV(TAG, "min.count()=%ld, now.count()=%ld",
+        (long)min.time_since_epoch().count(),
+        (long)now.time_since_epoch().count());
+#endif
 
     TEST_ASSERT_GREATER_THAN(
         min.time_since_epoch().count(),
@@ -112,6 +127,15 @@ static void test_literals()
 }
 #endif
 
+#if FEATURE_STD_CHRONO_CLOCK && ESP_PLATFORM
+void setUp_chrono()
+{
+    ESP_LOGD("setUp_chrono", "entry");
+
+    struct timeval tv = {0, 0};
+    TEST_ASSERT_NOT_EQUAL(-1, settimeofday(&tv, 0));
+}
+#endif
 
 #ifdef ESP_IDF_TESTING
 TEST_CASE("chrono tests", "[chrono]")
