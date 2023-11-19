@@ -13,7 +13,7 @@
 CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
 #endif
 
-#define DIAGNOSTIC 1
+//#define DIAGNOSTIC 1
 
 
 void setup()

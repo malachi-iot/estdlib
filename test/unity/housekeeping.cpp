@@ -1,3 +1,4 @@
+
 void __attribute__((weak)) setUp_chrono();
 
 //#error GOT HERE
@@ -13,7 +14,11 @@ static void setUp_static()
 
     initialized = true;
 
+    // DEBT: For some unknown reason, AVR weak linkage flips out.  For
+    // the time being, disabling the whole thing
+#ifndef __AVR__
     setUp_chrono();
+#endif
 }
 
 //void tearDown_static() {}
