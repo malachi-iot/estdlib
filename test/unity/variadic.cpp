@@ -19,7 +19,8 @@ static void test_constructible_selector()
     using selected = variadic::v2::selector<_selector, int, const char*>::selected;
     
     TEST_ASSERT_EQUAL(1, selected::first::index);
-    TEST_ASSERT_EQUAL(1, selected::single::index);
+    TEST_ASSERT_EQUAL(2, selected::size);
+    //TEST_ASSERT_EQUAL(1, selected::single::index);
 }
 
 

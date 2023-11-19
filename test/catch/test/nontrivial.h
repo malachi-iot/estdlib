@@ -54,9 +54,11 @@ struct NonTrivial
     {
         move_from.moved_from_ = true;
 
+#if FEATURE_STD_FUNCTIONAL
         // move_from.on_dtor "is in a valid but unspecified state after the call."
         // therefore we really want to be sure to clear it
         move_from.on_dtor = nullptr_t {};
+#endif
     }
 
     ~NonTrivial()

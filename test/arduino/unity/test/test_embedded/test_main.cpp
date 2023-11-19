@@ -13,6 +13,8 @@
 CONSTEXPR static unsigned LED_PIN = LED_BUILTIN;
 #endif
 
+#define DIAGNOSTIC 1
+
 
 void setup()
 {
@@ -44,7 +46,13 @@ void setup()
 
     // DEBT: Consolidate this with the other explicit unity caller
 
+#if DIAGNOSTIC
+    Serial.println("setup: phase 1");
+#endif
     test_align();
+#if DIAGNOSTIC
+    Serial.println("setup: phase 2");
+#endif
     test_array();
 #ifdef __AVR__
     test_avr_pgm();

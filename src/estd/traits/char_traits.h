@@ -31,10 +31,12 @@ struct char_traits<char>
 #endif
     typedef int off_type;
 
-    static CONSTEXPR char_type to_char_type(int_type ch) { return ch; }
-    static CONSTEXPR int_type to_int_type(const char ch) { return ch; }
-    static CONSTEXPR int_type eof() { return -1; }
-    static CONSTEXPR bool eq(char c1, char c2) { return c1 == c2; }
+    static ESTD_CPP_CONSTEXPR_RET char_type to_char_type(int_type ch) { return ch; }
+    static ESTD_CPP_CONSTEXPR_RET int_type to_int_type(const char ch) { return ch; }
+    static ESTD_CPP_CONSTEXPR_RET int_type eof() { return -1; }
+    static ESTD_CPP_CONSTEXPR_RET bool eq(char c1, char c2) { return c1 == c2; }
+    static ESTD_CPP_CONSTEXPR_RET bool not_eof(int_type v) { return v != -1; }
+
     static const char_type* find(const char_type* p, size_t count, const char_type& ch)
     {
         while(count--)
@@ -83,6 +85,12 @@ struct char_traits<char>
     static CONSTEXPR int_type nodata() { return -2; }
 #endif
 };
+
+// DEBT: std spec doesn't indicate we can do this - may have to "deconst" all
+// our char_traits usages
+template<>
+struct char_traits<const char> : char_traits<char> {};
+
 
 }
 #else

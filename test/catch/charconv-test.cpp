@@ -221,4 +221,8 @@ TEST_CASE("charconv")
             REQUIRE(*result.ptr == 'a');
         }
     }
+    SECTION("char_traits")
+    {
+        std::char_traits<const char>::length("hi2u");
+    }
 }
