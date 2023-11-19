@@ -16,13 +16,13 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | ostream     | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | ostream     | 16NOV23 | Microchip | AVR 32u4      | Pass     |
 | ostream     | 27JUN23 | Espressif | ESP32         | Compiles |
-| ostream     | 27JUN23 | Espressif | ESP32C3       | Fail     | pio can't find compiler package
+| ostream     | 18NOV23 | Espressif | ESP32C3       | Pass     |
 | ostream     | 27JUN23 | STM       | STM32F303K8   | Compiles |
 | ostream     | 27JUN23 | Microchip | ATtiny        | Compiles |
 | string      | 16NOV23 | Microchip | AVR 32u4      | Pass     |
 | unity       | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | unity       | 20JUL23 | Microchip | ARM SAMD51 m4 | Pass     | regular and CAN both
-| unity       | 18NOV23 | Microchip | AVR 32u4      | Fail     | Compiles, but run test crashes almost immediately
+| unity       | 18NOV23 | Microchip | AVR 32u4      | Partial  | Passes except for `variant` subtleties[^1]
 | unity       | 09AUG23 | Espressif | ESP32S        | Fail     | FreeRTOS related compile errors
 | unity       | 16NOV23 | Espressif | ESP32C3       | Compiles |
 | unity       | 27JUN23 | STM       | STM32F303K8   | Compiles |

@@ -19,8 +19,12 @@ static void test_constructible_selector()
     using selected = variadic::v2::selector<_selector, int, const char*>::selected;
     
     TEST_ASSERT_EQUAL(1, selected::first::index);
+#if __AVR__
+    // DEBT: https://github.com/malachi-iot/estdlib/issues/7
     TEST_ASSERT_EQUAL(2, selected::size);
-    //TEST_ASSERT_EQUAL(1, selected::single::index);
+#else
+    TEST_ASSERT_EQUAL(1, selected::single::index);
+#endif
 }
 
 
