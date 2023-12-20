@@ -1,6 +1,7 @@
 #include "unity.h"
 
-TEST_CASE("stub to get compilation onlie", "[stub]")
+// Dormant
+TEST_CASE("stub to get compilation online", "[stub]")
 {
     TEST_ASSERT(true);
 }

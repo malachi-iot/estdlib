@@ -1,3 +1,8 @@
+#ifdef ESP_PLATFORM
+#include <esp_log.h>
+
+static const char* TAG = "unity::housekeeping";
+#endif
 
 void __attribute__((weak)) setUp_chrono();
 
@@ -27,3 +32,16 @@ extern "C" void setUp()
 {
     setUp_static();
 }
+
+
+#ifdef ESP_PLATFORM
+extern "C" void tearDown()
+{
+    static bool deinitialized = false;
+
+    if(deinitialized)    return;
+
+    ESP_LOGV(TAG, "tearDown");
+    deinitialized = true;
+}
+#endif

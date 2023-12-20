@@ -15,7 +15,8 @@ set(UNITY_SRCDIR "../../../../../../unity")
 message("TESTABLE: UNIT_SRCDIR=${UNITY_SRCDIR} / ${ESTDLIB_DIR} / ${TESTESTD}")
 
 #set(COMPONENT_SRCDIRS "." ${UNITY_SRCDIR})
-set(COMPONENT_SRCDIRS "." ${ESTDLIB_DIR}/test/unity)
+#set(COMPONENT_SRCDIRS "." ${ESTDLIB_DIR}/test/unity)
+set(COMPONENT_SRCDIRS ${ESTDLIB_DIR}/test/unity)
 set(COMPONENT_ADD_INCLUDEDIRS ".")
 
 set(COMPONENT_REQUIRES estdlib esp_timer unity testable)
