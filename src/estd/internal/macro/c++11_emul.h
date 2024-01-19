@@ -39,6 +39,7 @@
 #endif
 
 // Assistance to define typical "typedef T value_type" and friends
+// DEBT: Move elsehwere, doesn't belong in c++11 emul land
 #define ESTD_CPP_STD_VALUE_TYPE(T)  \
     typedef T value_type;           \
     typedef value_type& reference;  \

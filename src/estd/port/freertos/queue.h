@@ -13,11 +13,7 @@ namespace detail {
 template <class T>
 struct queue
 {
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    ESTD_CPP_STD_VALUE_TYPE(T)
     typedef estd::chrono::freertos_clock::duration duration;
 
 protected:
@@ -68,9 +64,10 @@ template <class T>
 class queue<T, false> : public detail::queue<T>
 {
     typedef detail::queue<T> base_type;
-    typedef typename base_type::value_type value_type;
 
 public:
+    typedef typename base_type::value_type value_type;
+
     queue(unsigned queue_length) :
         base_type(
             wrapper::queue::create(queue_length, sizeof(value_type)))
@@ -86,10 +83,11 @@ class queue<T, true> : public detail::queue<T>
     StaticQueue_t static_queue;
 
     typedef detail::queue<T> base_type;
-    typedef typename base_type::value_type value_type;
-    typedef typename base_type::pointer pointer;
 
 public:
+    typedef typename base_type::value_type value_type;
+    typedef typename base_type::pointer pointer;
+    
     queue(pointer storage, unsigned queue_length) : 
         base_type(wrapper::queue::create(
             queue_length,
