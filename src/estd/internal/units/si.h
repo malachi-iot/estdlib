@@ -9,6 +9,18 @@
 
 namespace estd { namespace internal { namespace units { namespace si {
 
+enum quantities
+{
+    time,
+    length,
+    mass,
+    electric_current,
+    temperature,
+    amount_of_substance,
+    luminous_intensity
+};
+
+
 template <>
 struct traits<estd::kilo>
 {

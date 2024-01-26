@@ -1,6 +1,7 @@
 #pragma once
 
 #include "concepts.h"
+#include "../macros.h"
 
 // Copying the playbook from chrono
 
