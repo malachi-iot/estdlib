@@ -76,10 +76,11 @@ else()
         test-data.h
         type-traits-test.cpp
         tuple-test.cpp
-        vector-test.cpp
+        units-test.cpp
         utility-test.cpp
         variadic-test.cpp
         variant-test.cpp
+        vector-test.cpp
         internal-test.cpp)
 endif()
 
