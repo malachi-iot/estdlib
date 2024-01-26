@@ -19,6 +19,7 @@
 #include "charconv.h"
 #include "limits.h"
 #include "internal/string_convert.h"
+#include "internal/iomanip.h"
 #include "traits/char_traits.h"
 #include "internal/ostream.h"
 #ifdef FEATURE_ESTD_OSTREAM_TIMEOUT
@@ -174,31 +175,7 @@ convert(estd::detail::basic_ostream<TStreambuf, TBase>& os)
 }
 
 
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& endl(
-    detail::basic_ostream<TStreambuf, TBase>& os)
-{
-    // uses specialized call to bypass sentry so that we don't needlessly check
-    // unitbuf and potentially double-flush
-    os.put(os.widen('\n'), true);
-    os.flush();
-    return os;
-}
 
-// We have this out here rather than ios_base because of our deviation from virtual methods
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& dec(detail::basic_ostream<TStreambuf, TBase>& __os)
-{
-    __os.setf(ios_base::dec, ios_base::basefield);
-    return __os;
-}
-
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& hex(detail::basic_ostream<TStreambuf, TBase>& __os)
-{
-    __os.setf(ios_base::hex, ios_base::basefield);
-    return __os;
-}
 
 
 // TODO: Put this in layer1/layer2 since it isn't the traditional/fully virtual-capable version

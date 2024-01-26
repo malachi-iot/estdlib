@@ -2,6 +2,7 @@
 
 #include <estd/iosfwd.h>
 #include <estd/locale.h>
+#include "../iomanip.h"
 
 #include "fwd.h"
 
@@ -40,7 +41,7 @@ template <class Tag, class Period, class TStreambuf, class TBase,
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix(estd::detail::basic_ostream<TStreambuf, TBase>& out)
 {
-    out << si::traits<Period>::name() << traits<Tag>::name();
+    out << si::traits<Period, Tag>::name() << traits<Tag>::name();
 }
 
 template <class Tag, class Period, class TStreambuf, class TBase,
@@ -56,12 +57,12 @@ template <class Tag, class Period, class TStreambuf, class TBase,
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out)
 {
-    out << si::traits<Period>::abbrev() << traits<Tag>::abbrev();
+    out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
 }
 
 template <class Rep, class Period, class F, class Tag, class TStreambuf, class TBase>
 void write(estd::detail::basic_ostream<TStreambuf, TBase>& out,
-    const internal::unit_base<Rep, Period, Tag, F>& unit)
+    const unit_base<Rep, Period, Tag, F>& unit)
 {
     out << unit.count() << ' ';
     write_suffix<Tag, Period>(out);
@@ -69,7 +70,7 @@ void write(estd::detail::basic_ostream<TStreambuf, TBase>& out,
 
 template <class Rep, class Period, class F, class Tag, class TStreambuf, class TBase>
 void write_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out,
-    const internal::unit_base<Rep, Period, Tag, F>& unit, bool include_space = false)
+    const unit_base<Rep, Period, Tag, F>& unit, bool include_space = false)
 {
     out << unit.count();
     if(include_space) out << ' ';
@@ -121,7 +122,7 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
 }}
 
 template <class Rep, class Period, class Tag, class F>
-constexpr units::detail::unit_put<
+constexpr internal::units::detail::unit_put<
     internal::units::unit_base<Rep, Period, Tag, F> > put_unit(
     const internal::units::unit_base<Rep, Period, Tag, F>& unit, bool abbrev = true)
 {

@@ -16,6 +16,7 @@ struct traits<estd::kilo>
     static constexpr const char* abbrev() { return "k"; }
 };
 
+
 template <>
 struct traits<estd::mega>
 {
@@ -28,6 +29,14 @@ struct traits<estd::giga>
 {
     static constexpr const char* name() { return "giga"; }
     static constexpr const char* abbrev() { return "G"; }
+};
+
+// DEBT: Double check if this is actually an SI unit (I think it is)
+template <>
+struct traits<estd::tera>
+{
+    static constexpr const char* name() { return "tera"; }
+    static constexpr const char* abbrev() { return "T"; }
 };
 
 
@@ -52,6 +61,15 @@ struct traits<estd::milli>
 {
     static constexpr const char* name() { return "milli"; }
     static constexpr const char* abbrev() { return "m"; }
+};
+
+
+template <>
+struct traits<estd::micro>
+{
+    static constexpr const char* name() { return "micro"; }
+    // TODO: When character set supports it, use the proper micro symbol here
+    static constexpr const char* abbrev() { return "u"; }
 };
 
 

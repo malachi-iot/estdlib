@@ -49,7 +49,7 @@ struct cast_helper;
 namespace si {
 
 // DEBT: Do a concept here to filter by ratio
-template <class Period>
+template <class Period, class Tag = void>
 struct traits;
 
 }
