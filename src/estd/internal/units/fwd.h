@@ -47,6 +47,9 @@ class unit_base;
 template <class Rep, class Period>
 struct cast_helper;
 
+template <class, class>
+struct compound_tag;
+
 namespace si {
 
 // DEBT: Do a concept here to filter by ratio

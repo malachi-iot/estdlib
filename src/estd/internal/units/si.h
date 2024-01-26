@@ -21,16 +21,16 @@ enum quantities
 };
 
 
-template <>
-struct traits<estd::kilo>
+template <class Tag>
+struct traits<estd::kilo, Tag>
 {
     static constexpr const char* name() { return "kilo"; }
     static constexpr const char* abbrev() { return "k"; }
 };
 
 
-template <>
-struct traits<estd::mega>
+template <class Tag>
+struct traits<estd::mega, Tag>
 {
     static constexpr const char* name() { return "mega"; }
     static constexpr const char* abbrev() { return "M"; }
@@ -44,32 +44,32 @@ struct traits<estd::giga>
 };
 
 // DEBT: Double check if this is actually an SI unit (I think it is)
-template <>
-struct traits<estd::tera>
+template <class Tag>
+struct traits<estd::tera, Tag>
 {
     static constexpr const char* name() { return "tera"; }
     static constexpr const char* abbrev() { return "T"; }
 };
 
 
-template <>
-struct traits<estd::deci>
+template <class Tag>
+struct traits<estd::deci, Tag>
 {
     static constexpr const char* name() { return "deci"; }
     static constexpr const char* abbrev() { return "d"; }
 };
 
 
-template <>
-struct traits<estd::deca>
+template <class Tag>
+struct traits<estd::deca, Tag>
 {
     static constexpr const char* name() { return "deca"; }
     static constexpr const char* abbrev() { return "da"; }
 };
 
 
-template <>
-struct traits<estd::milli>
+template <class Tag>
+struct traits<estd::milli, Tag>
 {
     static constexpr const char* name() { return "milli"; }
     static constexpr const char* abbrev() { return "m"; }
