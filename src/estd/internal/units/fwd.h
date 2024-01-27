@@ -58,5 +58,7 @@ struct traits;
 
 }
 
+inline namespace literals {}
+
 
 }}}
