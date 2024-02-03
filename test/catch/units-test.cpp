@@ -13,7 +13,7 @@ template <class Rep, class Period = estd::ratio<1>, typename F = estd::internal:
 using hz = estd::internal::units::unit_base<Rep, Period, frequency_tag, F>;
 
 
-namespace estd::internal::units {
+namespace estd { namespace internal { namespace units {
 
 template <>
 struct traits<frequency_tag>
@@ -22,7 +22,7 @@ struct traits<frequency_tag>
     static constexpr const char* abbrev() { return "Hz"; }
 };
 
-}
+}}}
 
 using namespace estd::internal::units;
 
