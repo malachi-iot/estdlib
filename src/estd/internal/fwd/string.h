@@ -16,14 +16,17 @@ template <class Allocator, class Policy>
 class basic_string;
 
 #if __cpp_concepts
-template <class T>
-concept StringImpl = AllocatedArrayImpl<T>;// &&
-/*
-requires(T s, const char* rhs)
+template <class T> //, class Traits = estd::char_traits<char> >
+concept StringImpl = AllocatedArrayImpl<T> &&
+requires(T s, const T::value_type* rhs)
 {
-    { s.compare(rhs) };
-    s.starts_with(rhs);
-};  */
+    typename T::value_type;
+
+    // DEBT: Get these online
+    //typename T::traits_type;
+    //{ s.compare(rhs) };
+    //s.starts_with(rhs);
+};
 
 template <class T>
 concept StringPolicy = BufferPolicy<T> &&
