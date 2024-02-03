@@ -32,6 +32,11 @@ struct intrusive_traits
     {
         return *node;
     }
+
+    static const Data& data(const Node* node)
+    {
+        return *node;
+    }
 };
 
 // without tail
@@ -52,6 +57,8 @@ public:
     {}
 
     using iterator = intrusive_iterator<T, Traits>;
+    // DEBT: Still needs love, a pointer isn't gonna quite const up right here I think
+    using const_iterator = intrusive_iterator<const T, Traits>;
 
     ESTD_CPP_CONSTEXPR_RET bool empty() const
     {
@@ -64,8 +71,6 @@ public:
     {
         head_ = nullptr;
     }
-
-    using const_iterator = const iterator;
 
     iterator begin()
     {
@@ -88,14 +93,16 @@ public:
 
     iterator insert_after(const_iterator pos, reference value)
     {
-        iterator i(pos);
+        const_reference i = *pos;
 
-        for(; i != cend(); ++i)
-        {
+        node_type n = Traits::next(&i);
+        // DEBT: Casting away constness to conform with insert_after const_iterator signature.
+        // intrusive is just that.  May dump const_iterator from signature completely since it's
+        // kind of a lie.  Ponder the whole 'mutable' use case too.
+        Traits::next(const_cast<pointer>(&i), &value);
+        Traits::next(&value, n);
 
-        }
-
-        return i;
+        return iterator(&value);
     }
 
     void push_front(reference value)

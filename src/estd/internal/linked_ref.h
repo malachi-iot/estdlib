@@ -27,7 +27,7 @@ class linked_ref
     using iterator = typename list_type::iterator;
     //using const_iterator = typename list_type::const_iterator;
     // FIX: const_iterator needs const on value itself, not whole iterator
-    using const_iterator = typename list_type::iterator;
+    using const_iterator = typename list_type::const_iterator;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 

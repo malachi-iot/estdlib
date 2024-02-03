@@ -64,6 +64,7 @@ public:
     }
 
     reference operator*() { return Traits::data(current_); }
+    const_reference operator*() const { return Traits::data(current_); }
 };
 
 
