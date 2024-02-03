@@ -4,6 +4,7 @@
 #include "estd/memory.h"
 #include "estd/exp/tmr.h"
 #include <estd/forward_list.h>
+#include <estd/internal/linked_ref.h>
 
 #include "mem.h"
 #include "test-data.h"
@@ -229,6 +230,12 @@ TEST_CASE("memory.h tests")
                 REQUIRE(counter == 1);
             }
         }
+    }
+    SECTION("linked_ref")
+    {
+        estd::internal::linked_ref<int> r(7);
+
+        //r.count_shared();
     }
 }
 
