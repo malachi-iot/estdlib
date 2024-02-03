@@ -25,8 +25,6 @@ class linked_ref
 {
     using list_type = list::intrusive_forward<linked_ref>;
     using iterator = typename list_type::iterator;
-    //using const_iterator = typename list_type::const_iterator;
-    // FIX: const_iterator needs const on value itself, not whole iterator
     using const_iterator = typename list_type::const_iterator;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
@@ -36,16 +34,18 @@ class linked_ref
     linked_ref* next_;
 
 public:
-    linked_ref(value_type value) :
+    constexpr explicit linked_ref(value_type value) :
         value_(value),
         next_(this)
     {
     }
 
-    linked_ref(linked_ref* attach_to) :
+    explicit linked_ref(linked_ref* attach_to) :
         value_(attach_to->value_)
     {
-        list_type l(attach_to->next());
+        list_type l(attach_to);
+
+        l.insert_after(const_iterator(attach_to), *this);
 
         /*
         iterator i(attach_to);
@@ -60,10 +60,22 @@ public:
             }
         }   */
     }
+
+    ~linked_ref()
+    {
+        list_type l(this);
+
+        l.pop_front();
+
+        if(count_shared() == 1)
+        {
+            Traits::destruct(value_);
+        }
+    }
     
     linked_ref* next() const { return next_; }
     void next(linked_ref* v) { next_ = v; }
-    linked_ref& data() const { return *this; }
+    //linked_ref& data() const { return *this; }
 
     int count_shared()
     {
@@ -71,16 +83,16 @@ public:
 
         list_type l(this);
 
-        const_iterator i = l.begin();
+        const_iterator i = l.cbegin();
 
         // FIX: Yeah, we don't expect to ever see a null iterator here.
         // linked_ref goes in a circle
         while(++i != list::null_iterator{})
         {
             // TODO: filter by null/non-weak
-            linked_ref& current = *i;
+            const linked_ref& current = *i;
 
-            if(current == *this) return count;
+            if(&current == this) return count;
 
             //if(!Traits::null(&current))
             ++count;

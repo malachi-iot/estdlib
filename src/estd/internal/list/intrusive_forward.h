@@ -77,6 +77,16 @@ public:
         return iterator(head_);
     }
 
+    const_iterator begin() const
+    {
+        return const_iterator(head_);
+    }
+
+    const_iterator cbegin() const
+    {
+        return const_iterator(head_);
+    }
+
     // range operator wants it this way.  Could do a fancy conversion from
     // null_iterator back to regular iterator too...
     ESTD_CPP_CONSTEXPR_RET iterator end() const

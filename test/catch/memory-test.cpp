@@ -233,9 +233,34 @@ TEST_CASE("memory.h tests")
     }
     SECTION("linked_ref")
     {
-        estd::internal::linked_ref<int> r(7), r2(&r);
+        struct traits
+        {
+            static bool null(int v) { return v == -1; }
 
-        //r.count_shared();
+            static void destruct(int v)
+            {
+                printf("GOT HERE");
+            }
+        };
+
+        using type = estd::internal::linked_ref<int, traits>;
+
+        type r(7);
+        int count;
+
+        {
+            type r2(&r), r3(&r);
+
+            count = r.count_shared();
+
+            REQUIRE(count == 3);
+        }
+
+        count = r.count_shared();
+        //REQUIRE(count == 1);
+
+        //INFO("test")
+        //printf("GOT HERE");
     }
 }
 
