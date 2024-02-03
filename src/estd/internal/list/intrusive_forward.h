@@ -43,6 +43,7 @@ struct intrusive_traits
 template <class T, class Traits = intrusive_traits<T> >
 class intrusive_forward
 {
+protected:
     ESTD_CPP_STD_VALUE_TYPE(T)
 
     using node_type = pointer;
@@ -52,7 +53,7 @@ class intrusive_forward
 public:
     // Intrusive lists have a very different character for initialization
     // than their regular std counterparts
-    ESTD_CPP_CONSTEXPR_RET intrusive_forward(pointer head = NULLPTR) :
+    EXPLICIT ESTD_CPP_CONSTEXPR_RET intrusive_forward(pointer head = NULLPTR) :
         head_(head)
     {}
 
@@ -101,7 +102,7 @@ public:
         return *head_;
     }
 
-    iterator insert_after(const_iterator pos, reference value)
+    static iterator insert_after(const_iterator pos, reference value)
     {
         const_reference i = *pos;
 
@@ -116,7 +117,7 @@ public:
     }
 
     // Removes the element following pos.
-    iterator erase_after(const_iterator pos)
+    static iterator erase_after(const_iterator pos)
     {
         const_reference i = *pos;
 
@@ -125,6 +126,15 @@ public:
         Traits::next(const_cast<pointer>(&i), node_after_node_to_remove);
 
         return iterator(node_after_node_to_remove);
+    }
+
+    // Non standard operation to combine erase/insert into one
+    static iterator replace_after(const_iterator pos, reference value)
+    {
+        // DEBT: Combine algo to speed it up
+
+        erase_after(pos);
+        return insert_after(pos, value);
     }
 
     void push_front(reference value)
@@ -138,5 +148,35 @@ public:
         head_ = Traits::next(head_);
     }
 };
+
+template <class T, class Traits = intrusive_traits<T> >
+class circular_intrusive_forward : public intrusive_forward<T, Traits>
+{
+    using base_type = intrusive_forward<T, Traits>;
+    using typename base_type::node_type;
+
+public:
+    using typename base_type::iterator;
+    using typename base_type::pointer;
+
+    // Intrusive lists have a very different character for initialization
+    // than their regular std counterparts
+    EXPLICIT ESTD_CPP_CONSTEXPR_RET circular_intrusive_forward(pointer head = NULLPTR) :
+        base_type(head)
+    {}
+
+    // TODO: Do before_begin here - which doesn't make sense for a regular intrusive list
+    // but does here
+    iterator before_begin()
+    {
+        node_type current = base_type::head_;
+
+        while(Traits::next(current) != base_type::head_)
+            current = Traits::next(current);
+
+        return iterator(current);
+    }
+};
+
 
 }}}

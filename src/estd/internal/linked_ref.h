@@ -12,6 +12,7 @@ namespace estd { namespace internal {
 template <class T>
 struct linked_ref_traits
 {
+    static T* null() { return nullptr; }
     static bool null(T* v)
     {
         return v == nullptr;
@@ -23,7 +24,7 @@ struct linked_ref_traits
 template <class T, class Traits = linked_ref_traits<T> >
 class linked_ref
 {
-    using list_type = list::intrusive_forward<linked_ref>;
+    using list_type = list::circular_intrusive_forward<linked_ref>;
     using iterator = typename list_type::iterator;
     using const_iterator = typename list_type::const_iterator;
 
@@ -43,6 +44,13 @@ class linked_ref
         return Traits::null(value_) == true;
     }
 
+    // for weak one only
+    linked_ref() :
+        value_(Traits::null())
+    {
+
+    }
+
 public:
     constexpr explicit linked_ref(value_type value) :
         value_(value),
@@ -50,12 +58,14 @@ public:
     {
     }
 
-    explicit linked_ref(linked_ref* attach_to) :
-        value_(attach_to->value_)
+    explicit linked_ref(const linked_ref& attach_to) :
+        value_(attach_to.value_)
     {
-        list_type l(attach_to);
+        // DEBT: Do a const_cast here, maybe mutable?
+        // we are forced to do this so as to conform to regular copy constructor signature
+        list_type l((linked_ref*)&attach_to);
 
-        l.insert_after(const_iterator(attach_to), *this);
+        l.insert_after(const_iterator(&attach_to), *this);
 
         /*
         iterator i(attach_to);
@@ -71,11 +81,26 @@ public:
         }   */
     }
 
+    linked_ref(linked_ref&& attach_to) noexcept :
+        value_(attach_to.value_)
+    {
+        // NOTE: Sad truth is move operation is pretty slow, since we have to remove ourselves
+        // from a forward list necessitating a full loop through.  Naturally doubly linked list
+        // is superior here, but that's
+        // 1. not implemented yet
+        // 2. increases our footprint by ~33%
+        list_type l(&attach_to);
+        const_iterator pos(l.before_begin().current_);
+
+        // Not quite ready yet
+        l.replace_after(pos, *this);
+    }
+
     ~linked_ref()
     {
-        // DEBT: Really need to do a count_shared because weak refs may be present
-
-        if(this == next_ && is_shared())
+        //  only shared flavor link to themselves.  weak flavor almost do but they get unlinked
+        // before they get the chance
+        if(this == next_) //&& is_shared())
         {
             Traits::destruct(value_);
         }
@@ -84,11 +109,16 @@ public:
             // go in a complete circle and find starting point just before us
             linked_ref* n = this;
             int shared_counter = 0;
+            int weak_counter = 0;
 
             while(n->next() != this)
             {
                 n = n->next();
-                ++shared_counter;
+
+                if(n->is_shared())
+                    ++shared_counter;
+                else
+                    ++weak_counter;
             }
 
             // found it, just before us
@@ -100,8 +130,19 @@ public:
 
             if(shared_counter == 0)
             {
-                // we're last one
+                // we're the last shared
                 Traits::destruct(value_);
+
+                // now unlink all the weak ones
+                if(weak_counter > 0)
+                {
+                    while(n != nullptr)
+                    {
+                        linked_ref* next2 = n->next();
+                        n->next_ = nullptr;
+                        n = next2;
+                    }
+                }
             }
         }
     }
@@ -109,6 +150,17 @@ public:
     linked_ref* next() const { return next_; }
     void next(linked_ref* v) { next_ = v; }
     //linked_ref& data() const { return *this; }
+
+    linked_ref make_weak() const
+    {
+        linked_ref lr;
+
+        list_type l(&lr);
+
+        l.insert_after(const_iterator(this), *this);
+
+        return lr;
+    }
 
     int count_shared()
     {

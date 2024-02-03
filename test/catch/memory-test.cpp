@@ -249,11 +249,14 @@ TEST_CASE("memory.h tests")
         int count;
 
         {
-            type r2(&r), r3(&r);
+            type r2(r), r3(r);
 
             count = r.count_shared();
 
             REQUIRE(count == 3);
+        }
+        {
+            //type r2(r), r3(std::move(r2));
         }
 
         count = r.count_shared();
