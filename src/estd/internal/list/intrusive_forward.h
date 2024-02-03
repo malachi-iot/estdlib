@@ -13,7 +13,7 @@ template <class T>
 struct intrusive_traits
 {
     // Get next ptr
-    static T* next(T* node)
+    static T* next(const T* node)
     {
         return node->next();
     }
@@ -42,6 +42,10 @@ class intrusive_forward
     pointer head_;
 
 public:
+    ESTD_CPP_CONSTEXPR_RET intrusive_forward() :
+        head_(NULLPTR)
+    {}
+
     class iterator
     {
         pointer current_;
@@ -59,6 +63,13 @@ public:
         {
             current_ = Traits::next(current_);
             return *this;
+        }
+
+        iterator operator++(int) const
+        {
+            iterator temp(current_);
+            ++*this;
+            return temp;
         }
 
         iterator& operator--()
@@ -85,7 +96,14 @@ public:
 
     ESTD_CPP_CONSTEXPR_RET bool empty() const
     {
-        return head_ != nullptr;
+        return head_ == nullptr;
+    }
+
+    // TODO: clear() for intrusive takes on a different nature,
+    // since we don't own the values per se.  Needs more attention
+    void clear()
+    {
+        head_ = nullptr;
     }
 
     using const_iterator = const iterator;

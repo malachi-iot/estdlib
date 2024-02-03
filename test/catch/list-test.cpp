@@ -25,6 +25,19 @@ struct test_node :
 {
 };
 
+struct test_node2;
+
+// FIX: Clean this up
+struct test_node2 :
+    estd::experimental::forward_node_base_base<test_node2*>
+{
+    int val;
+
+    test_node2() :
+        estd::experimental::forward_node_base_base<test_node2*>(nullptr)
+    {}
+};
+
 
 struct test_node_handle_base
 {
@@ -570,10 +583,29 @@ TEST_CASE("linkedlist")
     }
     SECTION("github issue#11")
     {
-        estd::internal::list::intrusive_forward<test_node> list;
-        test_node a;
+        estd::internal::list::intrusive_forward<test_node2> list;
+        test_node2 a, b;
+
+        a.val = 10;
+        b.val = 5;
+
+        REQUIRE(list.empty() == true);
 
         list.push_front(a);
+
+        REQUIRE(list.empty() == false);
+
+        list.push_front(b);
+
+        REQUIRE(list.front().val == 5);
+
+        list.pop_front();
+
+        REQUIRE(list.front().val == 10);
+
+        list.pop_front();
+
+        REQUIRE(list.empty());
     }
 }
 
