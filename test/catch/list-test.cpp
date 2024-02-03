@@ -584,6 +584,7 @@ TEST_CASE("linkedlist")
     SECTION("github issue#11")
     {
         estd::internal::list::intrusive_forward<test_node2> list;
+        using iterator = decltype(list)::iterator;
         test_node2 a, b;
 
         a.val = 10;
@@ -593,9 +594,20 @@ TEST_CASE("linkedlist")
 
         list.push_front(a);
 
+        int counter = 0;
+
         REQUIRE(list.empty() == false);
 
         list.push_front(b);
+
+        for(auto& i : list)
+        {
+            counter += i.val;
+        }
+
+        REQUIRE(counter == 15);
+
+        //--list.begin();
 
         REQUIRE(list.front().val == 5);
 

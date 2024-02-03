@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iterator.h"
+
 // In response to https://github.com/malachi-iot/estdlib/issues/11
 // Undecided if we want to explicitly state forward_list here or
 // if we hang it off traits.  I'd prefer to hang it off traits,
@@ -9,29 +11,28 @@ namespace estd { namespace internal { namespace list {
 
 // If we want an allocator (non intrusive), it will come along as part of traits
 // though we might need an Impl for stateful allocators
-template <class T>
+template <class Node, class Data>
 struct intrusive_traits
 {
     // Get next ptr
-    static T* next(const T* node)
+    static Node* next(const Node* node)
     {
         return node->next();
     }
 
     // Re-assign next ptr
-    static void next(T* node, T* v)
+    static void next(Node* node, Node* v)
     {
         node->next(v);
     }
+
+    // Experimental - seeing if we want to somehow grab data from
+    // elsewhere.  Probably not.
+    static Data& data(Node* node)
+    {
+        return *node;
+    }
 };
-
-template <class T, class Traits = intrusive_traits<T> >
-struct intrusive_iterator
-{
-
-};
-
-struct null_iterator {};
 
 // without tail
 template <class T, class Traits = intrusive_traits<T> >
@@ -39,60 +40,18 @@ class intrusive_forward
 {
     ESTD_CPP_STD_VALUE_TYPE(T)
 
-    pointer head_;
+    using node_type = pointer;
+
+    node_type head_;
 
 public:
-    ESTD_CPP_CONSTEXPR_RET intrusive_forward() :
-        head_(NULLPTR)
+    // Intrusive lists have a very different character for initialization
+    // than their regular std counterparts
+    ESTD_CPP_CONSTEXPR_RET intrusive_forward(pointer head = NULLPTR) :
+        head_(head)
     {}
 
-    class iterator
-    {
-        pointer current_;
-
-    public:
-        ESTD_CPP_CONSTEXPR_RET iterator(pointer start) :
-            current_(start)
-        {}
-
-        ESTD_CPP_CONSTEXPR_RET iterator(null_iterator) :
-            current_(nullptr)
-        {}
-
-        iterator& operator++()
-        {
-            current_ = Traits::next(current_);
-            return *this;
-        }
-
-        iterator operator++(int) const
-        {
-            iterator temp(current_);
-            ++*this;
-            return temp;
-        }
-
-        iterator& operator--()
-        {
-            current_ = Traits::next(current_);
-            return *this;
-        }
-
-        bool operator==(null_iterator) const
-        {
-            return current_ == nullptr;
-        }
-
-        bool operator!=(null_iterator) const
-        {
-            return current_ != nullptr;
-        }
-
-        bool operator==(const iterator& compare_to) const
-        {
-            return current_ == compare_to.current_;
-        }
-    };
+    using iterator = intrusive_iterator<T, Traits>;
 
     ESTD_CPP_CONSTEXPR_RET bool empty() const
     {
@@ -113,18 +72,25 @@ public:
         return iterator(head_);
     }
 
+    // range operator wants it this way.  Could do a fancy conversion from
+    // null_iterator back to regular iterator too...
+    ESTD_CPP_CONSTEXPR_RET iterator end() const
+    {
+        return iterator(nullptr);
+    }
+
+    ESTD_CPP_CONSTEXPR_RET null_iterator cend() const { return null_iterator(); }
+
     reference front()
     {
         return *head_;
     }
 
-    ESTD_CPP_CONSTEXPR_RET null_iterator end() const { return null_iterator(); }
-
     iterator insert_after(const_iterator pos, reference value)
     {
         iterator i(pos);
 
-        for(; i != end(); ++i)
+        for(; i != cend(); ++i)
         {
 
         }
