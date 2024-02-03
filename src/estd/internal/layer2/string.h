@@ -130,6 +130,22 @@ public:
 
     ESTD_CPP_CONSTEXPR_RET const CharT* data() const { return base_t::clock(); }
 
+    CharT* c_str()
+    {
+#if __cpp_static_assert
+        static_assert(null_terminated, "Only works for null terminated strings");
+#endif
+        return data();
+    }
+
+    const CharT* c_str() const
+    {
+#if __cpp_static_assert
+        static_assert(null_terminated, "Only works for null terminated strings");
+#endif
+        return data();
+    }
+
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT
     typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;

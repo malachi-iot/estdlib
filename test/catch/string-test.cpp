@@ -65,6 +65,7 @@ TEST_CASE("string tests")
 
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
+        REQUIRE(s.c_str() == s);
     }
     SECTION("layer 1 size-tracked")
     {
@@ -78,6 +79,8 @@ TEST_CASE("string tests")
 
         REQUIRE(s.length() == 5);
         REQUIRE(s == test_str);
+        // Rightfully fails, c_str must be null terminated
+        //REQUIRE(s.c_str() != nullptr);
     }
     SECTION("layer 2")
     {
