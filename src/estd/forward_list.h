@@ -10,6 +10,8 @@
 #include "iterators/list.h"
 #include "utility.h"
 
+#include "internal/list/intrusive_forward.h"
+
 namespace estd {
 
 

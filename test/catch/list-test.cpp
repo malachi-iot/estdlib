@@ -568,6 +568,13 @@ TEST_CASE("linkedlist")
             REQUIRE(list.empty());
         }
     }
+    SECTION("github issue#11")
+    {
+        estd::internal::list::intrusive_forward<test_node> list;
+        test_node a;
+
+        list.push_front(a);
+    }
 }
 
 #pragma GCC diagnostic pop
