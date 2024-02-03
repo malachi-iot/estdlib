@@ -43,6 +43,13 @@ public:
         return *this;
     }
 
+    iterator operator--(int) const
+    {
+        iterator temp(current_);
+        --*this;
+        return temp;
+    }
+
     bool operator==(null_iterator) const
     {
         return current_ == nullptr;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "iterator.h"
+#include "traits.h"
+#include "base.h"
 
 // In response to https://github.com/malachi-iot/estdlib/issues/11
 // Undecided if we want to explicitly state forward_list here or
@@ -9,97 +10,32 @@
 
 namespace estd { namespace internal { namespace list {
 
-// If we want an allocator (non intrusive), it will come along as part of traits
-// though we might need an Impl for stateful allocators
-template <class Node, class Data>
-struct intrusive_traits
-{
-    // Get next ptr
-    static Node* next(const Node* node)
-    {
-        return node->next();
-    }
-
-    // Re-assign next ptr
-    static void next(Node* node, Node* v)
-    {
-        node->next(v);
-    }
-
-    // Experimental - seeing if we want to somehow grab data from
-    // elsewhere.  Probably not.
-    static Data& data(Node* node)
-    {
-        return *node;
-    }
-
-    static const Data& data(const Node* node)
-    {
-        return *node;
-    }
-};
-
 // without tail
 template <class T, class Traits = intrusive_traits<T> >
-class intrusive_forward
+class intrusive_forward : public head_base<T, Traits>
 {
+    using base_type = head_base<T, Traits>;
+
 protected:
     ESTD_CPP_STD_VALUE_TYPE(T)
 
     using node_type = pointer;
 
-    node_type head_;
-
 public:
     // Intrusive lists have a very different character for initialization
     // than their regular std counterparts
     EXPLICIT ESTD_CPP_CONSTEXPR_RET intrusive_forward(pointer head = NULLPTR) :
-        head_(head)
+        base_type(head)
     {}
 
-    using iterator = intrusive_iterator<T, Traits>;
-    // DEBT: Still needs love, a pointer isn't gonna quite const up right here I think
-    using const_iterator = intrusive_iterator<const T, Traits>;
-
-    ESTD_CPP_CONSTEXPR_RET bool empty() const
-    {
-        return head_ == nullptr;
-    }
+    using typename base_type::iterator;
+    using typename base_type::const_iterator;
 
     // TODO: clear() for intrusive takes on a different nature,
     // since we don't own the values per se.  Needs more attention
     void clear()
     {
-        head_ = nullptr;
-    }
-
-    iterator begin()
-    {
-        return iterator(head_);
-    }
-
-    const_iterator begin() const
-    {
-        return const_iterator(head_);
-    }
-
-    const_iterator cbegin() const
-    {
-        return const_iterator(head_);
-    }
-
-    // range operator wants it this way.  Could do a fancy conversion from
-    // null_iterator back to regular iterator too...
-    ESTD_CPP_CONSTEXPR_RET iterator end() const
-    {
-        return iterator(nullptr);
-    }
-
-    ESTD_CPP_CONSTEXPR_RET null_iterator cend() const { return null_iterator(); }
-
-    reference front()
-    {
-        return *head_;
+        base_type::head_ = nullptr;
     }
 
     static iterator insert_after(const_iterator pos, reference value)
@@ -139,13 +75,13 @@ public:
 
     void push_front(reference value)
     {
-        Traits::next(&value, head_);
-        head_ = &value;
+        Traits::next(&value, base_type::head_);
+        base_type::head_ = &value;
     }
 
     void pop_front()
     {
-        head_ = Traits::next(head_);
+        base_type::head_ = Traits::next(base_type::head_);
     }
 };
 

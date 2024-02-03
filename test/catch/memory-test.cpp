@@ -256,7 +256,14 @@ TEST_CASE("memory.h tests")
             REQUIRE(count == 3);
         }
         {
-            //type r2(r), r3(std::move(r2));
+            type r2(r), r3(std::move(r2));
+
+            // Unlinked - remember, circular linked list nodes never have 'nullptr' for next()
+            REQUIRE(r2.next() == nullptr);
+
+            count = r.count_shared();
+
+            REQUIRE(count == 2);
         }
 
         count = r.count_shared();

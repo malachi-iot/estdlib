@@ -1,6 +1,6 @@
 #pragma once
 
-#include "list/intrusive_forward.h"
+#include "list/intrusive.h"
 
 // Relative of shared_ptr.  Uses a few tricks to maintain a circular list/queue
 // of available shared/weak references.  Slightly computationally expensive, but
@@ -81,23 +81,27 @@ public:
         }   */
     }
 
-    linked_ref(linked_ref&& attach_to) noexcept :
-        value_(attach_to.value_)
+    linked_ref(linked_ref&& move_from) noexcept :
+        value_(move_from.value_)
     {
         // NOTE: Sad truth is move operation is pretty slow, since we have to remove ourselves
         // from a forward list necessitating a full loop through.  Naturally doubly linked list
         // is superior here, but that's
         // 1. not implemented yet
         // 2. increases our footprint by ~33%
-        list_type l(&attach_to);
+        list_type l(&move_from);
         const_iterator pos(l.before_begin().current_);
 
         // Not quite ready yet
         l.replace_after(pos, *this);
+        move_from.next_ = nullptr;
     }
 
     ~linked_ref()
     {
+        // Unlinked means we've already gone through delete process
+        if(next_ == nullptr) return;
+
         //  only shared flavor link to themselves.  weak flavor almost do but they get unlinked
         // before they get the chance
         if(this == next_) //&& is_shared())
