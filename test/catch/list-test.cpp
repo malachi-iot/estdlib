@@ -585,6 +585,7 @@ TEST_CASE("linkedlist")
     {
         estd::internal::list::intrusive_forward<test_node2> list;
         using iterator = decltype(list)::iterator;
+        using const_iterator = decltype(list)::const_iterator;
         test_node2 a, b, c;
 
         a.val = 10;
@@ -597,47 +598,71 @@ TEST_CASE("linkedlist")
 
         REQUIRE(a.next() == nullptr);
 
-        int counter = 0;
-
-        REQUIRE(list.empty() == false);
-
-        list.push_front(b);
-
-        REQUIRE(b.next() != nullptr);
-
-        for(auto& i : list)
+        SECTION("regular housekeeping")
         {
-            counter += i.val;
+            int counter = 0;
+
+            REQUIRE(list.empty() == false);
+
+            list.push_front(b);
+
+            REQUIRE(b.next() != nullptr);
+
+            for(auto& i : list)
+            {
+                counter += i.val;
+            }
+
+            REQUIRE(counter == 15);
+
+            //--list.begin();
+
+            // list has b, a - so this results in b, c, a
+            list.insert_after(&b, c);
+
+            counter = 0;
+
+            for(auto& i : list) ++counter;
+
+            REQUIRE(counter == 3);
+
+            //counter = estd::count(list.begin(), list.cend());
+
+            REQUIRE(list.front().val == 5);
+
+            list.pop_front();
+
+            REQUIRE(list.front().val == 3);
+
+            list.pop_front();
+
+            REQUIRE(list.front().val == 10);
+
+            list.pop_front();
+
+            REQUIRE(list.empty());
         }
+        SECTION("erasing")
+        {
+            list.push_front(b);
+            list.push_front(c);
 
-        REQUIRE(counter == 15);
+            // list is: c, b, a
 
-        //--list.begin();
+            list.erase_after(const_iterator(&b));
 
-        // list has b, a - so this results in b, c, a
-        list.insert_after(&b, c);
+            // list is: c, b
 
-        counter = 0;
+            REQUIRE(list.front().val == 3);
 
-        for(auto& i : list) ++counter;
+            list.pop_front();
 
-        REQUIRE(counter == 3);
+            REQUIRE(list.front().val == 5);
 
-        //counter = estd::count(list.begin(), list.cend());
+            list.pop_front();
 
-        REQUIRE(list.front().val == 5);
-
-        list.pop_front();
-
-        REQUIRE(list.front().val == 3);
-
-        list.pop_front();
-
-        REQUIRE(list.front().val == 10);
-
-        list.pop_front();
-
-        REQUIRE(list.empty());
+            REQUIRE(list.empty());
+        }
     }
 }
 

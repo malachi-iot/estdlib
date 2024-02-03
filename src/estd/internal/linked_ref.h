@@ -33,6 +33,16 @@ class linked_ref
     // Use forward_node_base_base once all this settles down
     linked_ref* next_;
 
+    constexpr bool is_shared() const
+    {
+        return Traits::null(value_) == false;
+    }
+
+    constexpr bool is_weak() const
+    {
+        return Traits::null(value_) == true;
+    }
+
 public:
     constexpr explicit linked_ref(value_type value) :
         value_(value),
@@ -63,13 +73,36 @@ public:
 
     ~linked_ref()
     {
-        list_type l(this);
+        // DEBT: Really need to do a count_shared because weak refs may be present
 
-        l.pop_front();
-
-        if(count_shared() == 1)
+        if(this == next_ && is_shared())
         {
             Traits::destruct(value_);
+        }
+        else
+        {
+            // go in a complete circle and find starting point just before us
+            linked_ref* n = this;
+            int shared_counter = 0;
+
+            while(n->next() != this)
+            {
+                n = n->next();
+                ++shared_counter;
+            }
+
+            // found it, just before us
+            list_type l(n);
+
+            // delete next element after element just before us...
+            // which is ... us!
+            l.erase_after(n);
+
+            if(shared_counter == 0)
+            {
+                // we're last one
+                Traits::destruct(value_);
+            }
         }
     }
     

@@ -239,7 +239,7 @@ TEST_CASE("memory.h tests")
 
             static void destruct(int v)
             {
-                printf("GOT HERE");
+                printf("GOT HERE: %d\n", v);
             }
         };
 
@@ -257,7 +257,7 @@ TEST_CASE("memory.h tests")
         }
 
         count = r.count_shared();
-        //REQUIRE(count == 1);
+        REQUIRE(count == 1);
 
         //INFO("test")
         //printf("GOT HERE");

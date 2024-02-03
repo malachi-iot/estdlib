@@ -115,6 +115,18 @@ public:
         return iterator(&value);
     }
 
+    // Removes the element following pos.
+    iterator erase_after(const_iterator pos)
+    {
+        const_reference i = *pos;
+
+        node_type node_to_remove = Traits::next(&i);
+        node_type node_after_node_to_remove = Traits::next(node_to_remove);
+        Traits::next(const_cast<pointer>(&i), node_after_node_to_remove);
+
+        return iterator(node_after_node_to_remove);
+    }
+
     void push_front(reference value)
     {
         Traits::next(&value, head_);
