@@ -24,6 +24,7 @@ template <class T, class Traits = linked_ref_traits<T> >
 class linked_ref
 {
     using list_type = list::intrusive_forward<linked_ref>;
+    using iterator = typename list_type::iterator;
     //using const_iterator = typename list_type::const_iterator;
     // FIX: const_iterator needs const on value itself, not whole iterator
     using const_iterator = typename list_type::iterator;
@@ -35,10 +36,29 @@ class linked_ref
     linked_ref* next_;
 
 public:
-    linked_ref(value_type value, linked_ref* attach_to = nullptr) :
-        value_(value)
+    linked_ref(value_type value) :
+        value_(value),
+        next_(this)
     {
-        list_type l(attach_to);
+    }
+
+    linked_ref(linked_ref* attach_to) :
+        value_(attach_to->value_)
+    {
+        list_type l(attach_to->next());
+
+        /*
+        iterator i(attach_to);
+
+        //for(;;)
+        {
+            linked_ref& current = *i;
+
+            if(current.next() == attach_to)
+            {
+
+            }
+        }   */
     }
     
     linked_ref* next() const { return next_; }

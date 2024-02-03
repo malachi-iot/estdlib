@@ -233,7 +233,7 @@ TEST_CASE("memory.h tests")
     }
     SECTION("linked_ref")
     {
-        estd::internal::linked_ref<int> r(7);
+        estd::internal::linked_ref<int> r(7), r2(&r);
 
         //r.count_shared();
     }
