@@ -1,3 +1,17 @@
+# v0.X.X - XXXXX24
+
+## Added Features
+
+* Added `out_buffered_stringbuf` wrapper for "true" streambuf operations (TBD, and write supporting doc, also marked internal due to naming indecision)
+* Core units capability (TBD, don't include as feature unless we liberate it
+   from internal namespace)
+* `estd::tuple` now can operate in sparse mode, meaning it can (term TBD) auto resolve down to 0 size if all its members are also 0 size.
+
+## Quality Updates & Bug Fixes
+
+* Bringing back `c_str()` to layer1 and layer2 strings
+* Various AVR and `estd::variadic` cleanup
+
 # v0.6.2 - 26OCT23
 
 ## Added Features
