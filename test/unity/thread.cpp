@@ -31,6 +31,7 @@ void test_lock_guard()
     estd::lock_guard<estd::mutex> _m(m);
 }
 
+// DEBT: Move most (all?) of this to freertos.cpp proper
 #ifdef ESTD_OS_FREERTOS
 
 #include <estd/port/freertos/timer.h>

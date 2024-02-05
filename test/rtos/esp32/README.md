@@ -28,7 +28,7 @@ These tests are all for variants of Espressif ESP32
 | 20JUL23 | unity    | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
 | 29SEP23 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1.1   | Pass   |
 | 29SEP23 | unity    | Lilygo QT Pro        | ESP32S3        | v5.1.1   | Pass*  | Intermittent failures[^1]
-| 15JAN24 | unity    | Seeed Xiao           | ESP32S3        | v5.1.2   | Pass   |
+| 04FEB24 | unity    | Seeed Xiao           | ESP32S3        | v5.1.2   | Pass   |
 
 [^1]: Fails on `test_std_system_clock`.  Likely 18NOV23 commit repairs this
 

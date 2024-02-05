@@ -24,6 +24,8 @@ public:
     task() = default;
     task(TaskHandle_t t) : t(t) {}
 
+#if configUSE_TASK_NOTIFICATIONS
+
     // DEBT: Might be better to eliminate these and use  eAction=pdPASS
     BaseType_t notify_give() const
     {
@@ -61,6 +63,7 @@ public:
     {
         return xTaskNotifyStateClear(t);
     }
+#endif
 
     const char* name() const
     {
@@ -79,10 +82,12 @@ public:
     }
 #endif
 
+#if configUSE_TRACE_FACILITY 
     void info(TaskStatus_t* taskStatus, BaseType_t getFreeStackSpace, eTaskState eState) const
     {
         vTaskGetInfo(t, taskStatus, getFreeStackSpace, eState);
     }
+#endif
 
     eTaskState state() const
     {
@@ -93,6 +98,39 @@ public:
     {
         return task(xTaskGetCurrentTaskHandle());
     }
+
+    // Being that we're a wrapper, non RAII is OK
+
+#if configSUPPORT_DYNAMIC_ALLOCATION
+    BaseType_t create(TaskFunction_t pvTaskCode,
+        const char * const pcName,
+        const configSTACK_DEPTH_TYPE uxStackDepth,
+        void *pvParameters,
+        UBaseType_t uxPriority)
+    {
+        return xTaskCreate(pvTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, &t);
+    }
+
+#if portUSING_MPU_WRAPPERS
+    BaseType_t create_restricted(TaskParameters_t *pxTaskDefinition)
+    {
+        return xTaskCreateRestricted(pxTaskDefinition, &t);
+    }
+#endif
+#endif
+
+#if configSUPPORT_STATIC_ALLOCATION
+    BaseType_t create_static(TaskFunction_t pvTaskCode,
+        const char * const pcName,
+        const configSTACK_DEPTH_TYPE uxStackDepth,
+        void *pvParameters,
+        UBaseType_t uxPriority,
+        StackType_t* const puxStackBuffer,
+        StaticTask_t* const pxTaskBuffer)
+    {
+        return xTaskCreate(pvTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, &t);
+    }
+#endif
 
     operator TaskHandle_t () const
     {
