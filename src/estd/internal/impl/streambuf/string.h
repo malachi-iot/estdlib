@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../streambuf.h"
+#include "base.h"
 
 // Since strings always have an "out" component (track how many characters are written to
 // it) we don't have a distinct "in" string buf.
@@ -24,20 +24,7 @@ struct out_stringbuf : stringbuf_base<TString>
 
     TString str_;
 
-#if __cpp_variadic_templates && __cpp_rvalue_references
-    template <class ...TArgs>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    out_stringbuf(TArgs&&...args) :
-        str_(std::forward<TArgs>(args)...)
-    {}
-#else
-    out_stringbuf() {}
-
-    template <class TParam1>
-    out_stringbuf(TParam1& p) : str_(p) {}
-#endif
+    ESTD_CPP_FORWARDING_CTOR_MEMBER(out_stringbuf, str_)
 
     streamsize xsputn(const char_type* s, streamsize count)
     {

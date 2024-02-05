@@ -55,4 +55,11 @@ public:
 
 };
 
+// DEBT: Belongs elsewhere
+// DEBT: Making 'internal' and not 'layer1' because I can't figure out a good name for this guy yet
+#if __cpp_alias_templates
+template <class Streambuf, unsigned N = 64>
+using out_buffered_stringbuf = detail::streambuf<impl::out_buffered_stringbuf<Streambuf, N> >;
+#endif
+
 }}

@@ -64,6 +64,13 @@ public:
         return r;
     }
 
+    bool operator!=(const_reference& compare_to) const
+    {
+        bool r = clock() != compare_to;
+        cunlock();
+        return r;
+    }
+
     // DEBT: This needs to be a trait somewhere
     // experimental flag reflecting that this memory block will never move
     static CONSTEXPR bool is_pinned = true;

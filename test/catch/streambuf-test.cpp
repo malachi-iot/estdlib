@@ -221,6 +221,32 @@ TEST_CASE("streambuf")
 
         REQUIRE(sb.in_avail() == 0);
     }
+    SECTION("'true' streambuf")
+    {
+        using type = internal::out_buffered_stringbuf<layer1::stringbuf<256>, 8>;
+        type sb;
+        auto& str = sb.rdbuf().str();
+
+        sb.sputc('h');
+
+        REQUIRE(str.empty());
+
+        sb.pubsync();
+
+        REQUIRE(str[0] == 'h');
+
+        sb.sputn("1234567", 7);
+
+        REQUIRE(str.size() == 1);
+
+        sb.sputc('8');
+
+        REQUIRE(str.size() == 1);
+
+        sb.sputc('9');
+
+        REQUIRE(str.size() == 9);
+    }
 }
 
 #include "macro/pop.h"
