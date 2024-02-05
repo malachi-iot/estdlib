@@ -1,17 +1,15 @@
 #pragma once
 
 #include "internal/platform.h"
-//#include "traits/char_traits.h"
+#include "internal/streambuf.h"
 #include "traits/allocator_traits.h" // for ESTD_FN_HAS_METHOD dependencies
 #include "type_traits.h"
 // FIX: Temporarily including this at the bottom to satisfy dependencies
 //#include "port/streambuf.h"
-#include "internal/impl/streambuf.h"
 #include "internal/utility.h" // for ESTD_FN_HAS_METHOD itself
 
 #include "internal/impl/streambuf/helpers.h"
 
-#include "internal/streambuf.h"
 
 
 //#include "features.h"
@@ -27,7 +25,7 @@ namespace internal {
 // 3. blocking
 // Note that consuming istream/ostream may independently implement its own timeout code
 // in which case 'never blocking' mode may be utilized for streambuf
-template<class TImpl, class TPolicy = void>
+template<class TImpl, class TPolicy>
 class streambuf :
         public streambuf_baseline,
         public TImpl
@@ -221,60 +219,13 @@ public:
 }
 
 // traditional basic_streambuf, complete with virtual functions
-template<class TChar, class Traits = estd::char_traits<TChar> >
+template<class TChar, class Traits>
 struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> >
 {
     typedef internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> > base_type;
 };
 
-namespace internal {
-// Could use a better name
-// more or less turns a non-virtualized streambuf into a virtualized one
-// but also could be used to wrap a virtualized one
-template<class TStreambuf>
-struct basic_streambuf_wrapped :
-        basic_streambuf<
-                typename estd::remove_reference<TStreambuf>::type::char_type,
-                typename estd::remove_reference<TStreambuf>::type::traits_type
-        >
-{
-    typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;
-    typedef typename streambuf_type::traits_type traits_type;
-    typedef typename traits_type::char_type char_type;
-    typedef typename traits_type::int_type int_type;
-
-protected:
-    // TODO: May have to turn this into an is-a relationship so that we can
-    // get at its protected methods
-    TStreambuf _rdbuf;
-
-    virtual streamsize xsgetn(char_type* s, streamsize count) OVERRIDE
-    {
-        return _rdbuf.xsgetn(s, count);
-    }
-
-    virtual streamsize xsputn(const char_type* s, streamsize count) OVERRIDE
-    {
-        return _rdbuf.xsputn(s, count);
-    }
-
-    virtual int sync() OVERRIDE
-    {
-        return _rdbuf.pubsync();
-    }
-
-    virtual int_type overflow(int_type ch = traits_type::eof()) OVERRIDE
-    {
-        return _rdbuf.overflow();
-    }
-
-public:
-    template <class TParam1>
-    basic_streambuf_wrapped(TParam1& p) : _rdbuf(p) {}
-
-};
-
-}}
+}
 
 
 #include "port/streambuf.h"
