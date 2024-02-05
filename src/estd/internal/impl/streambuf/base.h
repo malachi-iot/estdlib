@@ -86,9 +86,31 @@ protected:
     native_streambuf_base(stream_type& stream) : stream(stream)
     {}
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
+#if __cpp_rvalue_reference
     native_streambuf_base(stream_type&& move_from) : stream(std::move(move_from)) {}
 #endif
+};
+
+
+// For streambufs which wrap other streambufs, this is a convenient helper
+// DEBT: Really should be worked out with instance_provider/instance_evaporator
+// and friends
+template <class Streambuf>
+class wrapped_streambuf_base :
+    public streambuf_base<typename remove_reference<Streambuf>::type::traits_type>
+{
+protected:
+    typedef typename remove_reference<Streambuf>::type streambuf_type;
+
+    // TODO: Make this an is-a not a has-a so we can do both istreambuf and ostreambuf
+    Streambuf streambuf_;
+
+    ESTD_CPP_FORWARDING_CTOR_MEMBER(wrapped_streambuf_base, streambuf_)
+
+public:
+    // Goofy but sensible rdbuf() resulting in possible rdbuf()->rdbuf() calls
+    streambuf_type& rdbuf() { return streambuf_; }
+    const streambuf_type& rdbuf() const { return streambuf_; }
 };
 
 }}}

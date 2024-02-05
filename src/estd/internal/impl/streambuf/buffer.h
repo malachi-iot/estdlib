@@ -14,12 +14,9 @@ namespace estd { namespace internal { namespace impl {
 // DEBT: It's likely we can combine this with existing span buf and stringbuf to have a noop-Streambuf
 // in them
 template <class Streambuf, unsigned len = 64>
-class out_buffered_stringbuf : public streambuf_base<typename Streambuf::traits_type>
+class out_buffered_stringbuf : public wrapped_streambuf_base<Streambuf>
 {
-    using base_type = streambuf_base<typename Streambuf::traits_type>;
-
-    // TODO: Make this an is-a not a has-a so we can do both istreambuf and ostreambuf
-    Streambuf streambuf_;
+    using base_type = wrapped_streambuf_base<Streambuf>;
 
     static constexpr int len_ = len;
 
@@ -43,8 +40,13 @@ class out_buffered_stringbuf : public streambuf_base<typename Streambuf::traits_
 
     int ll_sync()
     {
-        streambuf_.xsputn(buf_.data(), buf_.size());
+        // NOTE: This class only syncs via bulk write
+        // DEBT: We can expect potential spinlock type behavior,
+        // which may be needed due to the simplicity of string buffering
+        // (may need a queue or bipbuffer to really overcome that)
+        base_type::rdbuf().sputn(buf_.data(), buf_.size());
         buf_.clear();
+        // DEBT: Need to heed output of sputn to truly indicate status
         return 0;
     }
 
@@ -52,9 +54,6 @@ public:
     using typename base_type::int_type;
     using typename base_type::char_type;
     using typename base_type::traits_type;
-
-    Streambuf& rdbuf() { return streambuf_; }
-    const Streambuf& rdbuf() const { return streambuf_; }
 
 protected:
     int sync()
@@ -95,7 +94,7 @@ protected:
     }
 
 public:
-    ESTD_CPP_FORWARDING_CTOR_MEMBER(out_buffered_stringbuf, streambuf_)
+    ESTD_CPP_FORWARDING_CTOR(out_buffered_stringbuf)
 
     char_type* pbase() const { return buf_.data(); }
     char_type* pptr() const { return pbase() + buf_.size(); }
@@ -105,6 +104,15 @@ public:
     {
         return overflow(ch);
     }
+};
+
+
+// TODO: Do also a flavor of this using esp-idf's xRingbuffer which itself
+// seems to be an RTOS-friendly bipbuffer
+template <class Streambuf, unsigned len = 64>
+class out_buffered_bipbuf : public wrapped_streambuf_base<Streambuf>
+{
+    // https://github.com/willemt/bipbuffer
 };
 
 
