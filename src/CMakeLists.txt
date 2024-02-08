@@ -10,6 +10,7 @@ include(../tools/cmake/setvars.cmake)
 
 include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)
+include(${TOOLS_DIR}/ext.cmake)
 include(${TOOLS_DIR}/version.cmake)
 
 set(SOURCE_FILES
@@ -60,7 +61,10 @@ else()
     endif()
 endif()
 
-
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
+
+if(ESTD_DRAGONBOX)
+    target_link_libraries(${PROJECT_NAME} dragonbox::dragonbox)
+endif()
 
 include(${TOOLS_DIR}/install.cmake)
