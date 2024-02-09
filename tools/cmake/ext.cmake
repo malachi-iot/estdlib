@@ -2,6 +2,8 @@
 
 # https://github.com/malachi-iot/estdlib/issues/23 
 # Mentioned also in https://github.com/malachi-iot/estdlib/issues/22
+# DEBT: Not conforming to FEATURE_ESTD_xxx convention.  Experimenting
+# with reducing that formality
 
 option(ESTD_DRAGONBOX
     "3rd party float->int lib used for float->string conversions"

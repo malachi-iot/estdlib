@@ -64,6 +64,8 @@ endif()
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
 
 if(ESTD_DRAGONBOX)
+    # DEBT: Discrepancy between FEATURE_ESTD_DRAGONBOX and ESTD_DRAGONBOX convention
+    target_compile_definitions(${PROJECT_NAME} ${ESTD_LINK_TYPE} -DFEATURE_ESTD_DRAGONBOX=1)
     target_link_libraries(${PROJECT_NAME} dragonbox::dragonbox)
 endif()
 
