@@ -390,6 +390,16 @@ TEST_CASE("locale")
                 //REQUIRE(val == "A1");
             }
         }
+        SECTION("floating point")
+        {
+            SECTION("double")
+            {
+                //char* last = n.put(val.data(), fmt, ' ', 0.01);
+                //*last = 0;
+
+                //REQUIRE(val == "0.01");
+            }
+        }
     }
     SECTION("cbase")
     {

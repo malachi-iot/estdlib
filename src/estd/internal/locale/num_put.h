@@ -5,6 +5,14 @@
 #include "numpunct.h"
 
 #include "../charconv.hpp"
+#include "iterated/num_put.h"
+
+#if FEATURE_ESTD_DRAGONBOX
+// NOTE: Would gently prefer to isolate dragonbox away from being generally
+// incuded at the num_put level - but to handle all different Iter types
+// sorta requires we put this here
+#include "dragonbox/dragonbox.h"
+#endif
 
 
 namespace estd {
@@ -65,6 +73,9 @@ public:
     //static iter_type
     put(iter_type out, const ios_base& str, char_type fill, T value)
     {
+#if __cpp_static_assert
+        static_assert(false, "floating point not yet supported");
+#endif
         return out;
     }
 };

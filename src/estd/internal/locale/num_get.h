@@ -283,6 +283,7 @@ public:
     }
 
     // NOTE: Non standard call.  locale is picked up from use_facet
+    // DEBT: Optimize float variety need not even do the above base/get switch
     template <typename T>
     iter_type get(iter_type in, iter_type end, const ios_base& str, ios_base::iostate& err, T& v) const
     {
