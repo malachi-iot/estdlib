@@ -7,14 +7,6 @@
 #include "../charconv.hpp"
 #include "iterated/num_put.h"
 
-#if FEATURE_ESTD_DRAGONBOX
-// NOTE: Would gently prefer to isolate dragonbox away from being generally
-// incuded at the num_put level - but to handle all different Iter types
-// sorta requires we put this here
-#include "dragonbox/dragonbox.h"
-#endif
-
-
 namespace estd {
 
 // In development, not ready, so marked as internal
@@ -40,6 +32,15 @@ private:
         to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
 
         return copy(result.ptr, &buffer[N + 1], out);
+    }
+
+    template <unsigned base, class T>
+    static iter_type put_float(iter_type out, const ios_base& str, char_type fill, T value)
+    {
+#if __cpp_static_assert
+        static_assert(false, "floating point not yet supported");
+#endif
+        return out;
     }
 
 public:
@@ -73,10 +74,7 @@ public:
     //static iter_type
     put(iter_type out, const ios_base& str, char_type fill, T value)
     {
-#if __cpp_static_assert
-        static_assert(false, "floating point not yet supported");
-#endif
-        return out;
+        return put_float(out, str, fill, value);
     }
 };
 
