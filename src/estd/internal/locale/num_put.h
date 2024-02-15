@@ -38,7 +38,7 @@ private:
     static iter_type put_float(iter_type out, const ios_base& str, char_type fill, T value)
     {
 #if __cpp_static_assert
-        static_assert(false, "floating point not yet supported");
+        static_assert(!is_floating_point<T>::value, "floating point not yet supported");
 #endif
         return out;
     }

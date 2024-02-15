@@ -278,4 +278,12 @@ TEST_CASE("utility")
     }
 }
 
+// DEBT: Put this test elsewhere
+#define FEATURE_ESTD_STD_ALIAS 1
+
+#include <estd/internal/alias/cstdint.h>
+#include <estd/internal/alias/string.h>
+#include <estd/internal/alias/type_traits.h>
+
+
 #include "macro/pop.h"
