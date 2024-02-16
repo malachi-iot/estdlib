@@ -86,9 +86,11 @@ static void test_to_chars()
 
     result = estd::to_chars_opt(s.data(), s.data() + s.max_size(), 0xF0, 16);
 
-    TEST_ASSERT_EQUAL(result.ptr, s.data() + 30);
-    TEST_ASSERT_EQUAL('f', s[30]);
-    TEST_ASSERT_EQUAL('0', s[31]);
+    // max_size() is going to be 31, it's a null-terminated string
+    
+    TEST_ASSERT_EQUAL(result.ptr, s.data() + 29);
+    TEST_ASSERT_EQUAL('f', s[29]);
+    TEST_ASSERT_EQUAL('0', s[30]);
 
     result = estd::to_chars(s.data(), s.data() + s.max_size(), bigint);
 
