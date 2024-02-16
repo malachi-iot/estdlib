@@ -11,6 +11,7 @@
 
 * Bringing back `c_str()` to layer1 and layer2 strings
 * Various AVR and `estd::variadic` cleanup
+* Fixed bug in `to_chars` (https://github.com/malachi-iot/estdlib/issues/28)
 
 # v0.6.2 - 26OCT23
 
