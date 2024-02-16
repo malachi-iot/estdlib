@@ -13,11 +13,14 @@
 
 #include "locale/ctype.h"
 #include "locale.h"
+#include "cstdlib.h"
+
+#include "charconv/from_chars.hpp"
+#include "charconv/to_chars.hpp"
 
 //#include "locale/iterated/num_get.h"    // Very minimal dependencies
 
 namespace estd { namespace internal {
-
 
 template<class Cbase, class T, class CharIt>
 detail::from_chars_result<CharIt> from_chars_integer(CharIt first, CharIt last,
@@ -149,6 +152,7 @@ struct base_provider<-1>
 /// \remarks
 /// NOTE: Not using default template arg to maintain c++03 compatibility
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
+/// DEBT: Move this out to charconv/to_chars.hpp
 template <class Cbase, class Int, class CharIt, int base_>
 inline detail::to_chars_result<CharIt> to_chars_integer_opt(
         CharIt first,
@@ -164,13 +168,22 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
     static_assert(is_same<typename cbase_type::char_type, char_type>::value, "CharIt must align with cbase");
 #endif
 
-    if(negative) value *= -1;
+    if(numeric_limits::is_signed && negative) value *= -1;
 
     while(first != --last)
     {
+// EXPERIMENTAL, not sure if this helps at all
+#if FEATURE_ESTD_TO_CHARS_LIBC_DIV
+        using d = div<Int>;
+        const typename d::result v = d::eval(value, base());
+        *last = cbase_type::to_char(v.rem);
+        value = v.quot;
+#else
         // DEBT: Pretty sure there's a div and mod combined operation, use that
+        // i.e. https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf page 36 section 6.2
         *last = cbase_type::to_char(value % base());
         value /= base();
+#endif
 
         if(value == 0)
         {
