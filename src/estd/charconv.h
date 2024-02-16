@@ -76,7 +76,7 @@ inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, from_cha
 /// @param base
 /// @return
 template <class Int>
-typename enable_if<numeric_limits<Int>::is_integer, to_chars_result>::type
+inline typename enable_if<numeric_limits<Int>::is_integer, to_chars_result>::type
     to_chars_opt(char* first, char* last, Int value, const int base = 10)
 {
     if(base > 10)
@@ -103,9 +103,9 @@ template <class TInt>
 to_chars_result to_chars_exp(char* first, char* last, TInt value, const int base = 10)
 {
     if(base > 10)
-        return internal::to_chars_integer<36>(first, last, value, base);
+        return internal::to_chars_integer_reverse<36>(first, last, value, base);
     else
-        return internal::to_chars_integer<10>(first, last, value, base);
+        return internal::to_chars_integer_reverse<10>(first, last, value, base);
 }
 
 
