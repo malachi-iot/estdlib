@@ -166,8 +166,9 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
 
     if(negative) value *= -1;
 
-    while(first != last)
+    while(first != --last)
     {
+        // DEBT: Pretty sure there's a div and mod combined operation, use that
         *last = cbase_type::to_char(value % base());
         value /= base();
 
@@ -182,8 +183,6 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
             return result_type(last, estd::errc(0));
 #endif
         }
-
-        last--;
     }
 
 #ifdef __cpp_initializer_lists

@@ -85,18 +85,16 @@ typename enable_if<numeric_limits<Int>::is_integer, to_chars_result>::type
         return internal::to_chars<10>(first, last, value, base);
 }
 
-template <class TInt>
-inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, to_chars_result>::type
-    to_chars(char* first, char* last, TInt value, const int base = 10)
+template <class Int>
+inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_result>::type
+    to_chars(char* first, char* last, Int value, const int base = 10)
 {
     // uses buffer "in place" and moves it over, since to_chars_opt
     // loves to go right-to-left
 
     to_chars_result opt_result = to_chars_opt(first, last, value, base);
 
-    // TODO: Double check that we really want 'last + 1' and whether
-    // we do or not, document why
-    opt_result.ptr = estd::copy(opt_result.ptr, last + 1, first);
+    opt_result.ptr = estd::copy(opt_result.ptr, last, first);
 
     return opt_result;
 }

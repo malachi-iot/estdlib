@@ -179,7 +179,7 @@ TEST_CASE("charconv")
             {
                 // NOTE: Remember, to_chars is not a null terminating create, so we must
                 // designate the end a little earlier so there's room for the null terminator
-                estd::to_chars_result result = estd::to_chars_opt(&buffer[0], &buffer[126], inputs[i]);
+                estd::to_chars_result result = estd::to_chars_opt(buffer, buffer + sizeof(buffer) - 1, inputs[i]);
 
                 REQUIRE(result.ec == 0);
 

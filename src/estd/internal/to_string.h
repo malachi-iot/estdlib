@@ -45,12 +45,12 @@ to_string(estd::internal::allocated_array<TStrImpl>& s, const T& value)
 
 // helper since we often convert a statically allocated string
 // NOTE: this will behave slightly differently than a regular string, see to_chars_opt
-template <unsigned N, typename TInt>
-inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, to_chars_result>::type
-    to_string_opt(char (&buffer)[N], TInt value, unsigned base)
+template <unsigned N, typename Int>
+inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_result>::type
+    to_string_opt(char (&buffer)[N], Int value, unsigned base)
 {
     // -1 here because to_chars doesn't care about null termination, but we do
-    to_chars_result result = to_chars_opt(buffer, buffer + N - 2, value, base);
+    to_chars_result result = to_chars_opt(buffer, buffer + N - 1, value, base);
 
     // DEBT: Check result for conversion failure
 
