@@ -210,7 +210,9 @@ public:
         const deque& parent;
         array_iterator current;
 
-        forward_iterator(const deque& parent, array_iterator current)
+        // DEBT: Do we need a copy constructor here?
+
+        ESTD_CPP_CONSTEXPR_RET forward_iterator(const deque& parent, array_iterator current)
             : parent(parent),
               current(current)
         {}

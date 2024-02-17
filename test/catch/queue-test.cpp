@@ -159,20 +159,41 @@ TEST_CASE("queue-test")
 
         REQUIRE(queue.size() == 2);
 
-        iterator i(queue, &queue.front());
-
-        REQUIRE(*i++ == 1);
-        REQUIRE(*i++ == 2);
-
-        int counter = 0;
-
-        for(auto& i2 : queue)
+        SECTION("manual")
         {
-            counter++;
-            REQUIRE(i2 == counter);
-        }
+            iterator i(queue, &queue.front());
 
-        REQUIRE(counter == 2);
+            REQUIRE(*i++ == 1);
+            REQUIRE(*i++ == 2);
+        }
+        SECTION("ranged 1")
+        {
+            int counter = 0;
+
+            for(auto& i : queue)
+            {
+                counter++;
+                REQUIRE(i == counter);
+            }
+
+            REQUIRE(counter == 2);
+        }
+        SECTION("ranged 2")
+        {
+            int counter = 0;
+
+            // SHOULD be same logic as ranged 1... I am just extra cautious
+            for(iterator i = queue.begin();i != queue.end(); ++i)
+            {
+                ++counter;
+            }
+
+            REQUIRE(counter == 2);
+
+            iterator i = queue.begin();
+            REQUIRE(*i++ == 1);
+            REQUIRE(*i++ == 2);
+        }
     }
     SECTION("edge case layer1 deque operations")
     {
