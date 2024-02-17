@@ -20,18 +20,19 @@ public:
     typedef OutputIt iter_type;
 
 private:
+    // DEBT: Still need to do 'fill'
     template <unsigned base, class T>
     static iter_type put_integer(iter_type out, const ios_base& str, char_type fill, T value)
     {
-        constexpr unsigned N = estd::numeric_limits<T>::template length<base>::value;
-
         // +1 for potential - sign
+        constexpr unsigned N = estd::numeric_limits<T>::template length<base>::value + 1;
+
         // No extra space for null terminator, not needed for iter_type/stream out
-        char buffer[N + 1];
+        char buffer[N];
 
         to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
 
-        return copy(result.ptr, &buffer[N + 1], out);
+        return copy(result.ptr, buffer + N, out);
     }
 
     template <unsigned base, class T>

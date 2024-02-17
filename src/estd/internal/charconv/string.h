@@ -83,7 +83,7 @@ public:
         return N - begin_;
     }
 
-    allocator_traits::handle_with_offset offset(int offset) const
+    typename allocator_traits::handle_with_offset offset(int offset) const
     {
         return begin_ + offset;
         //return offset;
