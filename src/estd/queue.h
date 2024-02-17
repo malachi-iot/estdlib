@@ -54,6 +54,7 @@ struct normal_array_policy
         // and checks that you only move back and forth within one 'session' of
         // elements
         typedef typename container_type::iterator iterator;
+        typedef typename container_type::const_iterator const_iterator;
     };
 };
 
@@ -93,6 +94,7 @@ class deque : protected TPolicy
     typedef typename policy_type::template Array<T, N> array_policy;
     typedef typename array_policy::container_type container_type;
     typedef typename array_policy::iterator array_iterator;
+    typedef typename array_policy::const_iterator const_array_iterator;
 
     container_type m_array;
 
@@ -116,23 +118,21 @@ class deque : protected TPolicy
 
     // called when i is incremented, evaluates if i reaches rollover point
     // and if so points it back at the beginning
-    void evaluate_rollover(array_iterator* i) const
+    void evaluate_rollover(const_array_iterator* i) const
     {
         if(*i == m_array.end())
-            // FIX: cleanup const abuse
-            *i = (array_iterator)m_array.begin();
+            *i = m_array.begin();
     }
 
     // called when i is decremented, opposite of rollover check
     // returns true when a rollover is detected.  Returns whether
     // we rolled over to help with decrement (again, artifact
     // of no cbegin)
-    bool evaluate_rollunder(array_iterator* i) const
+    bool evaluate_rollunder(const_array_iterator* i) const
     {
         if(*i == m_array.begin())
         {
-            // FIX: cleanup const abuse
-            *i = (array_iterator)m_array.end();
+            *i = m_array.end();
             return true;
         }
         else
@@ -141,19 +141,25 @@ class deque : protected TPolicy
 
     // have to do these increment/decrements out here because array iterator itself
     // wouldn't handle rollovers/rollunders
-    void decrement(array_iterator* i) const
+    void decrement(const_array_iterator* i) const
     {
         // doing i-- after because we don't have a 'before begin' iterator
         evaluate_rollunder(i);
         //if(!evaluate_rollunder(i))
-            (*i)--;
+            //(*i)--;
+            --(*i);
+    }
+
+    void decrement(array_iterator* i)
+    {
+        decrement((const_array_iterator*)i);
     }
 
     // handle rollover and empty-flag set for iterator
     void increment(array_iterator* i) const //, bool empty = false)
     {
         (*i)++;
-        evaluate_rollover(i);
+        evaluate_rollover((const_array_iterator*)i);
         //m_empty = empty;
     }
 
@@ -297,7 +303,7 @@ public:
     bool push_front(const_reference value)
     {
         // NOTE: doesn't do a before-begin style, but for consistency probably should
-        evaluate_rollunder(&m_front);
+        evaluate_rollunder((const_array_iterator*)&m_front);
         m_front--; // due to the non-before-begin approach. confusing
 
         *m_front = value;
@@ -325,7 +331,7 @@ public:
 
         m_front++;
 
-        evaluate_rollover(&m_front);
+        evaluate_rollover((const_array_iterator*)&m_front);
 
         if(m_front == m_back) m_empty = true;
 
@@ -404,7 +410,7 @@ public:
 
         new (&back) value_type(std::move(value));
 
-        evaluate_rollover(&m_back);
+        evaluate_rollover((const_array_iterator*)&m_back);
         m_empty = false;
 
         return true;
