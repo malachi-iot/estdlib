@@ -286,7 +286,7 @@ public:
         *m_back++ = value;
         m_empty = false;
 
-        evaluate_rollover(&m_back);
+        evaluate_rollover((const_array_iterator*)&m_back);
 
         return true;
     }
