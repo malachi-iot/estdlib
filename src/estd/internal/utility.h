@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.h"
+#include "fwd/utility.h"
 #include "raw/utility.h"
 #include "legacy/utility.h"
 #include "raw/type_traits.h"

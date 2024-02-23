@@ -27,7 +27,24 @@ TEST_CASE("miscellaneous")
     SECTION("unordered_set")
     {
         using type = estd::internal::unordered_set<array<int, 10 > >;
+        using rtype = pair<type::iterator, bool>;
 
         type value;
+
+        REQUIRE(value.size() == 0);
+        REQUIRE(value.empty());
+
+        rtype r = value.insert(5);
+
+        REQUIRE(r.second);
+
+        REQUIRE(value.size() == 1);
+        REQUIRE(value.empty() == false);
+
+        r = value.insert(6);
+
+        REQUIRE(r.second);
+
+        REQUIRE(value.size() == 2);
     }
 }
