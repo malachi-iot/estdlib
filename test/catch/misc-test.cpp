@@ -1,7 +1,11 @@
 #include <catch.hpp>
 
+#include <estd/array.h>
+#include <estd/functional.h>
 #include <estd/type_traits.h>
 #include <estd/variant.h>
+#include <estd/internal/container/set.h>
+#include <estd/internal/container/unordered_set.h>
 
 using namespace estd;
 
@@ -19,5 +23,11 @@ TEST_CASE("miscellaneous")
 
             REQUIRE(hash_fn(monostate{}) == hash_fn(monostate{}));
         }
+    }
+    SECTION("unordered_set")
+    {
+        using type = estd::internal::unordered_set<array<int, 10 > >;
+
+        type value;
     }
 }

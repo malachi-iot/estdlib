@@ -2,8 +2,19 @@
 
 namespace estd {
 
-template <class T>
+// Deviates from normal hash with 'precision' - somewhat experimental
+// DEBT: default Precision to estd::size_t
+template <class Key, class Precision = unsigned>
 struct hash;
+
+template <class T = void>
+struct equal_to;
+
+template <class T = void>
+struct less;
+
+template <class T = void>
+struct greater;
 
 namespace detail {
 

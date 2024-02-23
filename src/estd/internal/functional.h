@@ -7,13 +7,13 @@
 
 #include "fwd/functional.h"
 #include "impl/functional.h"
+#include "functional/hash.h"
 #include "../type_traits.h"
 #include "../tuple.h"
 
 namespace estd {
 
-//#if __cplusplus < 201200L
-template<class T>
+template <class T>
 struct less
 {
     ESTD_CPP_CONSTEXPR_RET bool operator()(const T& lhs, const T& rhs) const
@@ -31,14 +31,14 @@ struct greater
     }
 };
 
-/*
-#else
-template< class T = void >
-struct less;
-#endif
-*/
-
-
+template <class T>
+struct equal_to
+{
+    ESTD_CPP_CONSTEXPR_RET bool operator()(const T& lhs, const T& rhs) const
+    {
+        return lhs == rhs;
+    }
+};
 
 namespace experimental {
 
