@@ -15,6 +15,11 @@ public:
 
 protected:
     using node_type = pointer;
+
+public:
+    EXPLICIT ESTD_CPP_CONSTEXPR_RET intrusive(pointer head = NULLPTR) :
+        base_type(head)
+    {}
 };
 
 template <class T, class Traits = intrusive_traits<T> >

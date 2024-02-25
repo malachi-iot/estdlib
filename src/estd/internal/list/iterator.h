@@ -10,12 +10,20 @@ template <class T, class Traits = intrusive_traits<T> >
 struct intrusive_iterator
 {
     using iterator = intrusive_iterator;
+    using nonconst_iterator = intrusive_iterator<typename remove_const<T>::type >;
+    using const_iterator = intrusive_iterator<typename add_const<T>::type >;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 
     pointer current_;
 
 public:
+    // Unclear whether this is recommended, but sure is useful - and doesn't violate any
+    // specific rules.  Conversion from non const -> const or non const
+    ESTD_CPP_CONSTEXPR_RET intrusive_iterator(const nonconst_iterator& copy_from) : // NOLINT
+        current_{copy_from.current_}
+    {}
+
     ESTD_CPP_CONSTEXPR_RET intrusive_iterator(pointer start) :
         current_(start)
     {}
@@ -24,13 +32,15 @@ public:
         current_(nullptr)
     {}
 
+    //ESTD_CPP_CONSTEXPR_RET intrusive_iterator(const iterator& copy_from) = default;
+
     iterator& operator++()
     {
         current_ = Traits::next(current_);
         return *this;
     }
 
-    iterator operator++(int) const
+    iterator operator++(int)
     {
         iterator temp(current_);
         ++*this;
@@ -43,7 +53,7 @@ public:
         return *this;
     }
 
-    iterator operator--(int) const
+    iterator operator--(int)
     {
         iterator temp(current_);
         --*this;

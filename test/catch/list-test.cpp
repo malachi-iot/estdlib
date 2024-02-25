@@ -583,9 +583,10 @@ TEST_CASE("linkedlist")
     }
     SECTION("github issue#11")
     {
-        estd::internal::list::intrusive_forward<test_node2> list;
-        using iterator = decltype(list)::iterator;
-        using const_iterator = decltype(list)::const_iterator;
+        using list_type = estd::internal::list::intrusive_forward<test_node2>;
+        list_type list;
+        using iterator = list_type::iterator;
+        using const_iterator = list_type::const_iterator;
         test_node2 a, b, c;
 
         a.val = 10;
@@ -598,6 +599,12 @@ TEST_CASE("linkedlist")
 
         REQUIRE(a.next() == nullptr);
 
+        SECTION("iterators")
+        {
+            const_iterator ci = list.begin();
+
+            REQUIRE((*ci).val == 10);
+        }
         SECTION("regular housekeeping")
         {
             int counter = 0;

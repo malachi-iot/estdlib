@@ -63,4 +63,24 @@ public:
 };
 
 
+template <class T, class Traits>
+class head_and_tail_base : public head_base<T, Traits>
+{
+    using base_type = head_base<T, Traits>;
+    using typename base_type::node_type;
+
+    node_type tail_;
+
+public:
+    using typename base_type::reference;
+    using typename base_type::const_reference;
+
+    reference back()
+    {
+        return *tail_;
+    }
+};
+
+
+
 }}}

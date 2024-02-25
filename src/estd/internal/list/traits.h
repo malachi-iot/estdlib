@@ -10,7 +10,7 @@ template <class Node, class Data>
 struct intrusive_traits
 {
     // Get next ptr
-    static Node* next(const Node* node)
+    ESTD_CPP_CONSTEXPR_RET static Node* next(const Node* node)
     {
         return node->next();
     }
@@ -19,6 +19,17 @@ struct intrusive_traits
     static void next(Node* node, Node* v)
     {
         node->next(v);
+    }
+
+    ESTD_CPP_CONSTEXPR_RET static Node* prev(const Node* node)
+    {
+        return node->prev();
+    }
+
+    // Re-assign prev ptr
+    static void prev(Node* node, Node* v)
+    {
+        node->prev(v);
     }
 
     // Experimental - seeing if we want to somehow grab data from
