@@ -15,6 +15,13 @@ using namespace estd;
 
 using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
 
+// DEBT: Make a proper Streambuf concept... would be very handy
+template <class Streambuf>
+void true_buffered_test(Streambuf& s)
+{
+
+}
+
 TEST_CASE("streambuf")
 {
     const char raw_str[] = "raw 'traditional' output\n";
@@ -255,7 +262,7 @@ TEST_CASE("streambuf")
 
             REQUIRE(str.size() == 9);
         }
-        SECTION("bipbuffer")
+        SECTION("bipbuffer (layer1)")
         {
             backing sbb;
             using type = internal::out_buffered_bipbuf<backing&, 8>;
@@ -281,6 +288,13 @@ TEST_CASE("streambuf")
             sb.sputc('9');
 
             REQUIRE(str.size() == 9);
+        }
+        SECTION("bipbuffer (layer3)")
+        {
+            backing sbb;
+            internal::layer1::bipbuf<8> bb;
+            using type = internal::out_buffered_bipbuf<backing&, 0>;
+            type sb(bb.native(), sbb);
         }
     }
 }

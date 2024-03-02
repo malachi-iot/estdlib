@@ -2,10 +2,7 @@
 
 #include "base.h"
 #include "../../fwd/string.h"
-
-extern "C" {
-#include "../../../ext/willemt/bipbuffer/bipbuffer.h"
-}
+#include "../../bip/buffer.h"
 
 // Ironic, we have to put the true-blue pseudo-double-buffer that streambuf represents into a distinct
 // 'buffer' area
@@ -110,102 +107,6 @@ public:
     }
 };
 
-namespace layer1 {
-
-// DEBT: Move these to a cpp or hpp somewhere
-// more or less copy/pasting & splitting out what bipbuf_offer does
-
-inline void check_for_switch_to_b(bipbuf_t& buf_)
-{
-    if (buf_.size - buf_.a_end < buf_.a_start - buf_.b_end)
-        buf_.b_inuse = 1;
-}
-
-
-inline unsigned char* offer_begin(bipbuf_t& buf_)
-{
-    return buf_.data + (1 == buf_.b_inuse ? buf_.b_end : buf_.a_end);
-}
-
-inline int offer_end(bipbuf_t& buf_, int size)
-{
-    if (bipbuf_unused(&buf_) < size)
-        return 0;
-
-    if (1 == buf_.b_inuse)
-    {
-        buf_.b_end += size;
-    }
-    else
-    {
-        buf_.a_end += size;
-    }
-
-    check_for_switch_to_b(buf_);
-
-    return size;
-}
-
-
-template <unsigned N>
-class bipbuf
-{
-    // DEBT: I read that we're not guaranteed for backing_buffer_ to start at same spot as
-    // buf_.  I believe the usage we have here is 100% safe though.  Needs a double check
-    union
-    {
-        byte backing_buffer_[sizeof(bipbuf_t) + N];
-        bipbuf_t buf_;
-    };
-
-public:
-    bipbuf()
-    {
-        bipbuf_init(&buf_, N);
-    }
-
-    unsigned char* offer_begin()
-    {
-        return layer1::offer_begin(buf_);
-    }
-
-    int offer_end(int size)
-    {
-        return layer1::offer_end(buf_, size);
-    }
-
-    int offer(const unsigned char* d, int size)
-    {
-        return bipbuf_offer(&buf_, d, size);
-    }
-
-    unsigned char* peek(int len = 0)
-    {
-        return bipbuf_peek(&buf_, len);
-    }
-
-    const unsigned char* peek(int len = 0) const
-    {
-        return bipbuf_peek(&buf_, len);
-    }
-
-    unsigned char* poll(int len)
-    {
-        return bipbuf_poll(&buf_, len);
-    }
-
-    int used() const
-    {
-        return bipbuf_used(&buf_);
-    }
-
-    int unused() const
-    {
-        return bipbuf_unused(&buf_);
-    }
-};
-
-}
 
 // TODO: Do also a flavor of this using esp-idf's xRingbuffer which itself
 // seems to be an RTOS-friendly bipbuffer
@@ -226,9 +127,13 @@ private:
     // would be good as well.  The way willemt's implementation works that would amount to
     // a pure bipbuf_t pointer.
 
+    using bipbuf_type = estd::conditional_t<(len > 0),
+        layer1::bipbuf<len * sizeof(char_type)>,
+        layer3::bipbuf>;
+
     // https://github.com/willemt/bipbuffer
     // abusing mutable to conform with constness of pptr()
-    mutable layer1::bipbuf<len * sizeof(char_type)> buf_;
+    mutable bipbuf_type buf_;
 
 protected:
     unsigned xout_avail() const
@@ -263,10 +168,16 @@ public:
     }
 
 protected:
-    // DEBT: c++ doesn't like init this way PLUS we need a forwarding constructor here
     template <class ...Args>
-    out_buffered_bipbuf(Args&&...args) :
+    explicit out_buffered_bipbuf(Args&&...args) :
         base_type(std::forward<Args>(args)...)
+    {
+    }
+
+    template <class ...Args>
+    explicit out_buffered_bipbuf(bipbuf_t* buf, Args&&...args) :
+        base_type(std::forward<Args>(args)...),
+        buf_(buf)
     {
     }
 
