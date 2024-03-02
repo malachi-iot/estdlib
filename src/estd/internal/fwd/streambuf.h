@@ -40,9 +40,49 @@ template<class Char, class Traits = estd::char_traits<Char> >
 struct basic_streambuf;
 
 #if __cpp_concepts
-namespace concepts {
+namespace concepts { inline namespace v1 {
+
+// Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
+namespace impl {
+
+template <class T>
+concept StreambufBase = requires(T sb)
+{
+    typename T::char_type;
+    typename T::int_type;
+    typename T::traits_type;
+};
+
+template <class T>
+concept OutStreambuf = StreambufBase<T> && requires(T sb)
+{
+    sb.xsputn(nullptr, 0);
+};
+
+
+template <class T>
+concept InStreambuf = StreambufBase<T> && requires(T sb)
+{
+    sb.xsgetn(nullptr, 0);
+};
 
 }
+
+template <class T>
+concept OutStreambuf = impl::StreambufBase<T> && requires(T sb)
+{
+    sb.sputn(nullptr, 0);
+    sb.sputc(typename T::char_type{});
+};
+
+template <class T>
+concept InStreambuf = impl::StreambufBase<T> && requires(T sb)
+{
+    sb.sgetn(nullptr, 0);
+};
+
+
+}}
 #endif
 
 }

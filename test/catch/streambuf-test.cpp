@@ -15,11 +15,31 @@ using namespace estd;
 
 using synthetic_streambuf_base = internal::impl::streambuf_base<estd::char_traits<char> >;
 
-// DEBT: Make a proper Streambuf concept... would be very handy
-template <class Streambuf>
-void true_buffered_test(Streambuf& s)
+// DEBT: Continue fleshing out proper Streambuf concept... would be very handy
+template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) Streambuf>
+void true_buffered_test(Streambuf& sb)
 {
+    auto& str = sb.rdbuf().str();
 
+    sb.sputc('h');
+
+    REQUIRE(str.empty());
+
+    sb.pubsync();
+
+    REQUIRE(str[0] == 'h');
+
+    sb.sputn("1234567", 7);
+
+    REQUIRE(str.size() == 1);
+
+    sb.sputc('8');
+
+    REQUIRE(str.size() == 1);
+
+    sb.sputc('9');
+
+    REQUIRE(str.size() == 9);
 }
 
 TEST_CASE("streambuf")
@@ -295,6 +315,8 @@ TEST_CASE("streambuf")
             internal::layer1::bipbuf<8> bb;
             using type = internal::out_buffered_bipbuf<backing&, 0>;
             type sb(bb.native(), sbb);
+
+            true_buffered_test(sb);
         }
     }
 }

@@ -195,7 +195,7 @@ protected:
     estd::streamsize xsputn(const char_type* s, estd::streamsize count)
     {
         const unsigned out_avail = xout_avail();
-        if(count > out_avail)
+        if(count > (int)out_avail)
             count = out_avail;
 
         // NOTE: Guaranteed to work since we trim to available up above, no need
