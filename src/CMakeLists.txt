@@ -14,6 +14,7 @@ include(${TOOLS_DIR}/ext.cmake)
 include(${TOOLS_DIR}/version.cmake)
 
 set(SOURCE_FILES
+    estd/ext/willemt/bipbuffer/bipbuffer.c
     estd/internal/string_convert.cpp
     estd/internal/utility.cpp
     estd/port/posix/streambuf.cpp

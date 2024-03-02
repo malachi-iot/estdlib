@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include "../../fwd/string.h"
+#include "../../../ext/willemt/bipbuffer/bipbuffer.h"
 
 // Ironic, we have to put the true-blue pseudo-double-buffer that streambuf represents into a distinct
 // 'buffer' area
