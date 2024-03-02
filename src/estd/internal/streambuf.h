@@ -60,6 +60,10 @@ public:
 #if __cpp_alias_templates
 template <class Streambuf, unsigned N = 64>
 using out_buffered_stringbuf = detail::streambuf<impl::out_buffered_stringbuf<Streambuf, N> >;
+
+template <class Streambuf, unsigned N = 64>
+using out_buffered_bipbuf = detail::streambuf<impl::out_buffered_bipbuf<Streambuf, N> >;
+
 #endif
 
 }}

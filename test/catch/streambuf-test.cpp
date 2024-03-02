@@ -223,29 +223,60 @@ TEST_CASE("streambuf")
     }
     SECTION("'true' streambuf")
     {
-        using type = internal::out_buffered_stringbuf<layer1::stringbuf<256>, 8>;
-        type sb;
-        auto& str = sb.rdbuf().str();
+        using backing = layer1::stringbuf<256>;
 
-        sb.sputc('h');
+        SECTION("buffered stringbuf")
+        {
+            using type = internal::out_buffered_stringbuf<backing, 8>;
+            type sb;
+            auto& str = sb.rdbuf().str();
 
-        REQUIRE(str.empty());
+            sb.sputc('h');
 
-        sb.pubsync();
+            REQUIRE(str.empty());
 
-        REQUIRE(str[0] == 'h');
+            sb.pubsync();
 
-        sb.sputn("1234567", 7);
+            REQUIRE(str[0] == 'h');
 
-        REQUIRE(str.size() == 1);
+            sb.sputn("1234567", 7);
 
-        sb.sputc('8');
+            REQUIRE(str.size() == 1);
 
-        REQUIRE(str.size() == 1);
+            sb.sputc('8');
 
-        sb.sputc('9');
+            REQUIRE(str.size() == 1);
 
-        REQUIRE(str.size() == 9);
+            sb.sputc('9');
+
+            REQUIRE(str.size() == 9);
+        }
+        SECTION("bipbuffer")
+        {
+            using type = internal::out_buffered_bipbuf<backing, 8>;
+            type sb;
+            auto& str = sb.rdbuf().str();
+
+            sb.sputc('h');
+
+            REQUIRE(str.empty());
+
+            sb.pubsync();
+
+            REQUIRE(str[0] == 'h');
+
+            sb.sputn("1234567", 7);
+
+            REQUIRE(str.size() == 1);
+
+            sb.sputc('8');
+
+            REQUIRE(str.size() == 1);
+
+            sb.sputc('9');
+
+            REQUIRE(str.size() == 9);
+        }
     }
 }
 
