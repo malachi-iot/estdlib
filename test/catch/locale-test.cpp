@@ -258,7 +258,7 @@ TEST_CASE("locale")
             SECTION("istreambuf_iterator")
             {
                 typedef estd::layer1::stringbuf<32> streambuf_type;
-                streambuf_type sb = test::str_uint1;
+                streambuf_type sb(test::str_uint1);
                 typedef estd::istreambuf_iterator<streambuf_type> iterator_type;
                 iterator_type it(sb), end;
                 num_get<char, iterator_type> n;
@@ -274,7 +274,7 @@ TEST_CASE("locale")
                 // mimics the example at
                 // https://en.cppreference.com/w/cpp/locale/num_get/get
                 typedef estd::layer1::stringbuf<32> streambuf_type;
-                streambuf_type sb = test::str_uint1;
+                streambuf_type sb(test::str_uint1);
                 // Since istreambuf_iterators in our world require knowledge of the streambuf_type
                 // we deviate spec of num_get in this instance to accept a streambuf_type instead of
                 // just char_type, iter_type

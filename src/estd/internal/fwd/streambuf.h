@@ -39,5 +39,10 @@ using streambuf = internal::streambuf<Impl, Policy>;
 template<class Char, class Traits = estd::char_traits<Char> >
 struct basic_streambuf;
 
+#if __cpp_concepts
+namespace concepts {
+
+}
+#endif
 
 }
