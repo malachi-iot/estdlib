@@ -164,8 +164,8 @@ protected:
     }
 
 public:
-    in_span_streambuf(const estd::span<TChar, Extent>& copy_from) :
-            base_type(copy_from)
+    in_span_streambuf(const estd::span<TChar, Extent>& copy_from)
+        : base_type(copy_from)
     {
 
     }

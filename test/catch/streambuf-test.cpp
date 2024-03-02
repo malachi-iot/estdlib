@@ -182,7 +182,7 @@ TEST_CASE("streambuf")
         char buf[128];
 
         typedef estd::internal::impl::in_span_streambuf<const char> sb_impl_type;
-        typedef estd::internal::streambuf<sb_impl_type> sb_type;
+        typedef estd::detail::streambuf<sb_impl_type> sb_type;
         typedef typename sb_type::traits_type traits_type;
 
         sb_type sb(raw_str);

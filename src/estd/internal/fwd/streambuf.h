@@ -20,7 +20,7 @@ namespace concepts { inline namespace v1 {
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
 namespace impl {
 
-template <class T>
+template <class Raw, class T = estd::remove_reference_t<Raw> >
 concept StreambufBase = requires(T sb)
 {
     typename T::char_type;
@@ -28,6 +28,9 @@ concept StreambufBase = requires(T sb)
     typename T::traits_type;
     requires CharTraits<typename T::traits_type>;
 };
+
+// These impl concepts are used somewhat per-function in internal::streambuf.  This
+// approach is needed so as to have visibility into the protected methods it is checking on
 
 template <class T>
 concept OutStreambuf = StreambufBase<T> && requires(T sb)
@@ -40,14 +43,17 @@ concept OutStreambuf = StreambufBase<T> && requires(T sb)
 
 
 template <class T>
-concept InStreambuf = StreambufBase<T> && requires(T sb)
+concept InStreambuf = StreambufBase<T> && requires(T sb,
+    remove_const_t<typename T::char_type>* rhs)
 {
-    sb.xsgetn(nullptr, 0);
+    sb.xsgetn(rhs, 0);
+    sb.xsgetc();
+    sb.underflow();
 };
 
 }
 
-template <class T>
+template <class Raw, class T = remove_reference_t<Raw> >
 concept OutStreambuf = impl::StreambufBase<T> &&
     requires(T sb, T::char_type c)
 {
@@ -60,6 +66,9 @@ concept InStreambuf = impl::StreambufBase<T> &&
     requires(T sb, T::char_type c)
 {
     sb.sgetn(&c, 1);
+    sb.in_avail();
+    sb.sgetc();
+    sb.sbumpc();
 };
 
 
@@ -89,8 +98,19 @@ namespace detail {
 
 #if __cpp_alias_templates
 inline namespace v1 {
+// Only enforces fundamental impl streambuf concept since this MIGHT be input, output or both
 template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Impl, class Policy = void>
 using streambuf = internal::streambuf<Impl, Policy>;
+
+/*
+// Enforces input concepts more aggressively.  Does not preclude output
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::InStreambuf) Impl, class Policy = void>
+using istreambuf = internal::streambuf<Impl, Policy>;
+
+// Enforces output concepts more aggressively.  Does not preclude input
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::OutStreambuf) Impl, class Policy = void>
+using ostreambuf = internal::streambuf<Impl, Policy>;
+ */
 }
 #endif
 

@@ -49,6 +49,21 @@ public:
     // DEBT: 'friend helper_type' makes CLang in c++03 mode mad
     friend struct internal::impl::streambuf_helper;
 
+#if __cpp_concepts
+    static consteval void verify_istream()
+    {
+        static_assert(concepts::v1::impl::InStreambuf<this_type>, "Must conform to istreambuf concept");
+    }
+
+    static consteval void verify_ostream()
+    {
+        static_assert(concepts::v1::impl::OutStreambuf<this_type>, "Must conform to ostreambuf concept");
+    }
+#else
+    static constexpr bool verify_istream() { return {}; }
+    static constexpr bool verify_ostream() { return {}; }
+#endif
+
     int_type sungetc()
     {
         return helper_type::sungetc(this);
@@ -56,6 +71,7 @@ public:
 
     ESTD_CPP_CONSTEXPR_RET int_type xsgetc() const
     {
+        verify_istream();
         return traits_type::to_int_type(base_type::xsgetc());
     }
 
@@ -98,6 +114,7 @@ public:
     // acts like many sbumpc calls
     streamsize sgetn(nonconst_char_type* s, streamsize count)
     {
+        verify_istream();
         return this->xsgetn(s, count);
     }
 
@@ -105,6 +122,8 @@ public:
     // overflow trickery
     streamsize sputn(const char_type *s, streamsize count)
     {
+        verify_ostream();
+
         streamsize written = this->xsputn(s, count);
 
         // TODO: Consider a non-function-present flavor of optimizing to know if
