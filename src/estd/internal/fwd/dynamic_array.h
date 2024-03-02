@@ -8,6 +8,39 @@
 
 namespace estd {
 
+#if __cpp_concepts
+namespace concepts { inline namespace v1 {
+
+namespace impl {
+
+template <class T>
+concept Container =
+requires(T c)
+{
+    typename T::value_type;
+    typename T::size_type;
+};
+
+}
+
+// Maps to https://en.cppreference.com/w/cpp/named_req/Container
+template <class T>
+concept Container = impl::Container<T> &&
+requires(T c)
+{
+    typename T::iterator;
+    typename T::pointer;
+    //typename T::allocator_type;
+
+    c.begin();
+    c.end();
+    c.empty();
+    c.max_size();
+};
+
+}}
+#endif
+
 namespace experimental {
 
 // This is a black-boxed array which provides no means by which to access an underlying
@@ -25,6 +58,7 @@ concept AllocatedArrayImpl = requires(T a)
 {
     typename T::size_type;
     typename T::allocator_type;
+    typename T::allocator_traits;
     //typename T::policy_type;
 
     a.get_allocator();
@@ -47,7 +81,7 @@ concept AllocatedArrayOperations = requires
 #endif
 
 template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) TImpl>
-class allocated_array;;
+class allocated_array;
 
 namespace impl {
 

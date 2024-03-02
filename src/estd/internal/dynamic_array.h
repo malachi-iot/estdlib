@@ -49,16 +49,16 @@ namespace internal {
 //  -
 /// Base class for managing expanding/contracting arrays
 /// Accounts for lock/unlock behaviors. Used for vector and string
-/// @tparam TImpl typically estd::internal::impl::dynamic_array.  Abstracts away allocator-specific behaviors
+/// @tparam Impl typically estd::internal::impl::dynamic_array.  Abstracts away allocator-specific behaviors
 /// @remarks Kind of a superset of vector.
 /// EXPERIMENTAL: specializations via impl MIGHT be read/only i.e. not sizeable
-template <class TImpl>
-class dynamic_array : public allocated_array<TImpl>
+template <class Impl>
+class dynamic_array : public allocated_array<Impl>
 {
-    typedef allocated_array<TImpl> base_type;
+    typedef allocated_array<Impl> base_type;
 
 protected:
-    typedef dynamic_array_helper<TImpl> helper;
+    typedef dynamic_array_helper<Impl> helper;
 
 public:
     typedef typename base_type::allocator_type allocator_type;

@@ -23,26 +23,10 @@ concept CharTraits = requires
     T::to_int_type(typename T::char_type{});
 };
 
-// DEBT: Put this elsewhere
-// Maps to https://en.cppreference.com/w/cpp/named_req/Container
-template <class T>
-concept Container = requires(T c)
-{
-    typename T::value_type;
-    typename T::iterator;
-    //typename T::allocator_type;
-    //typename T::pointer;
-
-    c.begin();
-    c.end();
-    c.empty();
-    c.max_size();
-};
-
 namespace impl {
 
 template <class T> //, class Traits = estd::char_traits<char> >
-concept String = internal::AllocatedArrayImpl<T> &&
+concept String = impl::Container<T> && internal::AllocatedArrayImpl<T> &&
 requires(T s, const T::value_type* rhs)
 {
     typename T::value_type;
@@ -76,9 +60,6 @@ template <class Allocator, class Policy>
 class basic_string;
 
 #if __cpp_concepts
-template <class T> //, class Traits = estd::char_traits<char> >
-concept StringImpl = concepts::v1::impl::String<T>;
-
 template <class T>
 concept StringPolicy = BufferPolicy<T> &&
 requires
@@ -94,7 +75,7 @@ requires
 
 namespace detail {
 
-template <ESTD_CPP_CONCEPT(internal::StringImpl) Impl>
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 class basic_string;
 
 }

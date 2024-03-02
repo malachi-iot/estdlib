@@ -40,8 +40,11 @@ class allocated_array :
 {
 public:
     typedef TImpl impl_type;
+    // was going to go only allocator_type, but there has been a flip flop between favoring traits
+    // or not in the c++ std, so keeping both
     typedef typename impl_type::allocator_type allocator_type;
     typedef typename impl_type::allocator_traits allocator_traits;
+    //typedef typename allocator_traits::allocator_type allocator_type;
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
     typedef typename allocator_traits::pointer pointer;

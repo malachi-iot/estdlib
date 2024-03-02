@@ -239,8 +239,8 @@ detail::basic_string<Impl>& operator+=(detail::basic_string<Impl>& lhs, T rhs)
 }
 
 
-// DEBT: Whip up a flavor of StringImpl concept which itself takes a CharT
-template <typename CharT, ESTD_CPP_CONCEPT(internal::StringImpl) Impl>
+// DEBT: Whip up a flavor of impl::String concept which itself takes a CharT
+template <typename CharT, ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 //bool operator ==(const CharT* lhs, const basic_string<CharT, Traits, Alloc, TStringTraits>& rhs)
 ESTD_CPP_CONSTEXPR_RET bool operator ==(const CharT* lhs, const detail::basic_string<Impl>& rhs)
 {

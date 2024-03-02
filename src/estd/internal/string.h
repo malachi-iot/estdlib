@@ -9,7 +9,7 @@
 
 namespace estd { namespace detail {
 
-template <ESTD_CPP_CONCEPT(internal::StringImpl) Impl>
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 class basic_string : public internal::dynamic_array<Impl>
 {
 protected:
