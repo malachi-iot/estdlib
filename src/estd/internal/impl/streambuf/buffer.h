@@ -296,6 +296,30 @@ protected:
 };
 
 
+template <class Streambuf, unsigned len>
+class in_buffered_bipbuf : public wrapped_streambuf_base<Streambuf>
+{
+    using base_type = wrapped_streambuf_base<Streambuf>;
+
+public:
+    using typename base_type::int_type;
+    using typename base_type::char_type;
+    using typename base_type::traits_type;
+
+private:
+    layer1::bipbuf<len * sizeof(char_type)> buf_;
+
+public:
+    char_type* gptr() const
+    {
+        return reinterpret_cast<char_type*>(buf_.peek());
+    }
+
+    char_type* egptr() const
+    {
+        return gptr() + buf_.used();
+    }
+};
 
 #endif
 

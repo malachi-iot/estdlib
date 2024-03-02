@@ -225,9 +225,9 @@ TEST_CASE("streambuf")
     {
         using backing = layer1::stringbuf<256>;
 
-        internal::impl::layer1::bipbuf<16> bb;
+        //internal::impl::layer1::bipbuf<16> bb;
 
-        bb.offer_begin();
+        //bb.offer_begin();
 
         SECTION("buffered stringbuf")
         {
