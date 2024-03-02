@@ -12,7 +12,7 @@ namespace estd { namespace internal { namespace impl {
 /// - xsgetn
 /// - xsputn
 /// - gbump
-template <class Traits>
+template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
 struct streambuf_base
 {
     typedef Traits traits_type;

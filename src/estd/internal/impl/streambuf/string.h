@@ -6,8 +6,8 @@
 // it) we don't have a distinct "in" string buf.
 namespace estd { namespace internal { namespace impl {
 
-template <class TString>
-struct stringbuf_base : streambuf_base<typename TString::traits_type>
+template <ESTD_CPP_CONCEPT(concepts::v1::String) String>
+struct stringbuf_base : streambuf_base<typename String::traits_type>
 {
     ESTD_CPP_DEFAULT_CTOR(stringbuf_base)
 };

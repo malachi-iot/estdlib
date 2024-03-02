@@ -2,8 +2,69 @@
 
 // DEBT: Do a proper forward for char_traits -- at the moment we can't due to a possible 'using' scenario
 #include "../../traits/char_traits.h"
+#include "string.h"     // Only for CharTraits concept
+
+#if __cpp_lib_concepts
+#include <concepts>
+#endif
 
 namespace estd {
+
+// traditional basic_streambuf, complete with virtual functions
+template<class Char, class Traits = estd::char_traits<Char> >
+struct basic_streambuf;
+
+#if __cpp_concepts
+namespace concepts { inline namespace v1 {
+
+// Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
+namespace impl {
+
+template <class T>
+concept StreambufBase = requires(T sb)
+{
+    typename T::char_type;
+    typename T::int_type;
+    typename T::traits_type;
+    requires CharTraits<typename T::traits_type>;
+};
+
+template <class T>
+concept OutStreambuf = StreambufBase<T> && requires(T sb)
+{
+#if __cpp_lib_concepts
+    // DEBT: Use / make an estd::convertible_to
+    { sb.xsputn((typename T::char_type*){}, 0) } -> std::convertible_to<size_t>;
+#endif
+};
+
+
+template <class T>
+concept InStreambuf = StreambufBase<T> && requires(T sb)
+{
+    sb.xsgetn(nullptr, 0);
+};
+
+}
+
+template <class T>
+concept OutStreambuf = impl::StreambufBase<T> &&
+    requires(T sb, T::char_type c)
+{
+    sb.sputn(&c, 1);
+    sb.sputc(c);
+};
+
+template <class T>
+concept InStreambuf = impl::StreambufBase<T> &&
+    requires(T sb, T::char_type c)
+{
+    sb.sgetn(&c, 1);
+};
+
+
+}}
+#endif
 
 namespace internal {
 
@@ -28,61 +89,11 @@ namespace detail {
 
 #if __cpp_alias_templates
 inline namespace v1 {
-template<class Impl, class Policy = void>
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Impl, class Policy = void>
 using streambuf = internal::streambuf<Impl, Policy>;
 }
 #endif
 
 }
-
-// traditional basic_streambuf, complete with virtual functions
-template<class Char, class Traits = estd::char_traits<Char> >
-struct basic_streambuf;
-
-#if __cpp_concepts
-namespace concepts { inline namespace v1 {
-
-// Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
-namespace impl {
-
-template <class T>
-concept StreambufBase = requires(T sb)
-{
-    typename T::char_type;
-    typename T::int_type;
-    typename T::traits_type;
-};
-
-template <class T>
-concept OutStreambuf = StreambufBase<T> && requires(T sb)
-{
-    sb.xsputn(nullptr, 0);
-};
-
-
-template <class T>
-concept InStreambuf = StreambufBase<T> && requires(T sb)
-{
-    sb.xsgetn(nullptr, 0);
-};
-
-}
-
-template <class T>
-concept OutStreambuf = impl::StreambufBase<T> && requires(T sb)
-{
-    sb.sputn(nullptr, 0);
-    sb.sputc(typename T::char_type{});
-};
-
-template <class T>
-concept InStreambuf = impl::StreambufBase<T> && requires(T sb)
-{
-    sb.sgetn(nullptr, 0);
-};
-
-
-}}
-#endif
 
 }

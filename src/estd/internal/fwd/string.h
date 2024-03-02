@@ -10,14 +10,39 @@
 
 namespace estd {
 
-namespace internal {
-
-template <class Allocator, class Policy>
-class basic_string;
-
 #if __cpp_concepts
+namespace concepts { inline namespace v1 {
+
+template <class T>
+concept CharTraits = requires
+{
+    typename T::char_type;
+    typename T::int_type;
+
+    T::eof();
+    T::to_int_type(typename T::char_type{});
+};
+
+// DEBT: Put this elsewhere
+// Maps to https://en.cppreference.com/w/cpp/named_req/Container
+template <class T>
+concept Container = requires(T c)
+{
+    typename T::value_type;
+    typename T::iterator;
+    //typename T::allocator_type;
+    //typename T::pointer;
+
+    c.begin();
+    c.end();
+    c.empty();
+    c.max_size();
+};
+
+namespace impl {
+
 template <class T> //, class Traits = estd::char_traits<char> >
-concept StringImpl = AllocatedArrayImpl<T> &&
+concept String = internal::AllocatedArrayImpl<T> &&
 requires(T s, const T::value_type* rhs)
 {
     typename T::value_type;
@@ -25,8 +50,34 @@ requires(T s, const T::value_type* rhs)
     // DEBT: Get these online
     //typename T::traits_type;
     //{ s.compare(rhs) };
-    //s.starts_with(rhs);
 };
+
+}
+
+template <class T>
+concept String = //impl::String<T>
+    Container<T> &&
+    requires(T s, T::pointer rhs)
+{
+    typename T::traits_type;
+
+    requires CharTraits<typename T::traits_type>;
+
+    s.starts_with(rhs);
+    //s.operator =(rhs);
+};
+
+}}
+#endif
+
+namespace internal {
+
+template <class Allocator, class Policy>
+class basic_string;
+
+#if __cpp_concepts
+template <class T> //, class Traits = estd::char_traits<char> >
+concept StringImpl = concepts::v1::impl::String<T>;
 
 template <class T>
 concept StringPolicy = BufferPolicy<T> &&

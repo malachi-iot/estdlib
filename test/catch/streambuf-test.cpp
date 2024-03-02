@@ -262,25 +262,7 @@ TEST_CASE("streambuf")
             type sb;
             auto& str = sb.rdbuf().str();
 
-            sb.sputc('h');
-
-            REQUIRE(str.empty());
-
-            sb.pubsync();
-
-            REQUIRE(str[0] == 'h');
-
-            sb.sputn("1234567", 7);
-
-            REQUIRE(str.size() == 1);
-
-            sb.sputc('8');
-
-            REQUIRE(str.size() == 1);
-
-            sb.sputc('9');
-
-            REQUIRE(str.size() == 9);
+            true_buffered_test(sb);
         }
         SECTION("bipbuffer (layer1)")
         {
@@ -289,25 +271,7 @@ TEST_CASE("streambuf")
             type sb(sbb);
             auto& str = sb.rdbuf().str();
 
-            sb.sputc('h');
-
-            REQUIRE(str.empty());
-
-            sb.pubsync();
-
-            REQUIRE(str[0] == 'h');
-
-            sb.sputn("1234567", 7);
-
-            REQUIRE(str.size() == 1);
-
-            sb.sputc('8');
-
-            REQUIRE(str.size() == 1);
-
-            sb.sputc('9');
-
-            REQUIRE(str.size() == 9);
+            true_buffered_test(sb);
         }
         SECTION("bipbuffer (layer3)")
         {
