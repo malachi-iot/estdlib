@@ -225,6 +225,10 @@ TEST_CASE("streambuf")
     {
         using backing = layer1::stringbuf<256>;
 
+        internal::impl::layer1::bipbuf<16> bb;
+
+        bb.offer_begin();
+
         SECTION("buffered stringbuf")
         {
             using type = internal::out_buffered_stringbuf<backing, 8>;
@@ -253,8 +257,9 @@ TEST_CASE("streambuf")
         }
         SECTION("bipbuffer")
         {
-            using type = internal::out_buffered_bipbuf<backing, 8>;
-            type sb;
+            backing sbb;
+            using type = internal::out_buffered_bipbuf<backing&, 8>;
+            type sb(sbb);
             auto& str = sb.rdbuf().str();
 
             sb.sputc('h');
