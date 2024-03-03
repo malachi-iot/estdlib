@@ -1,5 +1,6 @@
 #include <estd/span.h>
 #include <estd/internal/buffer.h>
+#include <estd/internal/bip/buffer.h>
 
 #include "test-data.h"
 
@@ -7,8 +8,43 @@
 
 using namespace estd::internal;
 
+template <ESTD_CPP_CONCEPT(estd::concepts::v1::Bipbuf) Bipbuf>
+void test_bipbuf(Bipbuf& bip)
+{
+    using namespace estd::test;
+    constexpr unsigned sz = sizeof(octet_data);
+
+    bip.offer(octet_data, sz);
+    bip.offer(octet_data, sz);
+
+    REQUIRE(bip.unused() >= sz);
+
+    memcpy(bip.offer_begin(), octet_data, sz);
+    bip.offer_end(sz);
+
+    REQUIRE(bip.offer(octet_data, sz) == 0);
+
+    REQUIRE(bip.used() == sz * 3);
+    REQUIRE(bip.peek(sz * 3) != nullptr);
+    REQUIRE(bip.peek(sz * 4) == nullptr);
+
+    const uint8_t* v = bip.poll(sz * 3);
+
+    REQUIRE(memcmp(octet_data, v, sz) == 0);
+    REQUIRE(memcmp(octet_data, v + sz, sz) == 0);
+    REQUIRE(memcmp(octet_data, v + sz * 2, sz) == 0);
+}
+
 TEST_CASE("buffers")
 {
+    SECTION("layer1")
+    {
+        SECTION("bipbuffer")
+        {
+            estd::layer1::bipbuf<32> bip;
+            test_bipbuf(bip);
+        }
+    }
     SECTION("layer2")
     {
         SECTION("ptr")
@@ -24,6 +60,19 @@ TEST_CASE("buffers")
             layer2::mutable_buffer<10> b(estd::test::octet_data);
 
             REQUIRE(sizeof(b) == sizeof(uint8_t*));
+        }
+    }
+    SECTION("layer3")
+    {
+        SECTION("bipbuffer")
+        {
+            union
+            {
+                estd::byte backing[sizeof(bipbuf_t) + 32];
+                bipbuf_t underlying;
+            };
+            estd::layer3::bipbuf bip(&underlying, 32);
+            test_bipbuf(bip);
         }
     }
     SECTION("empty/default constructed")

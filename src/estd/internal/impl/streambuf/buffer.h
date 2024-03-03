@@ -128,8 +128,8 @@ private:
     // a pure bipbuf_t pointer.
 
     using bipbuf_type = estd::conditional_t<(len > 0),
-        layer1::bipbuf<len * sizeof(char_type)>,
-        layer3::bipbuf>;
+        estd::layer1::bipbuf<len * sizeof(char_type)>,
+        estd::layer3::bipbuf>;
 
     // https://github.com/willemt/bipbuffer
     // abusing mutable to conform with constness of pptr()
@@ -225,7 +225,7 @@ public:
     using typename base_type::traits_type;
 
 private:
-    layer1::bipbuf<len * sizeof(char_type)> buf_;
+    estd::layer1::bipbuf<len * sizeof(char_type)> buf_;
 
 public:
     char_type* gptr() const

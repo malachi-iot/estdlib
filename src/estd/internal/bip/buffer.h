@@ -4,9 +4,26 @@ extern "C" {
 #include "../../ext/willemt/bipbuffer/bipbuffer.h"
 }
 
-namespace estd { namespace internal {
+#if __cpp_concepts
+namespace estd {
+namespace concepts { inline namespace v1 {
 
-namespace layer1 {
+template <class T>
+concept Bipbuf = requires(T b, unsigned char* data)
+{
+    b.peek(0);
+    b.offer(data, 0);
+    b.offer_begin();
+    b.offer_end(0);
+    { b.used() } -> std::convertible_to<unsigned>;
+    { b.unused() } -> std::convertible_to<unsigned>;
+};
+
+}}
+}
+#endif
+
+namespace estd { namespace internal {
 
 // DEBT: Move these to a cpp or hpp somewhere
 // more or less copy/pasting & splitting out what bipbuf_offer does
@@ -18,16 +35,14 @@ inline void check_for_switch_to_b(bipbuf_t& buf_)
 }
 
 
-inline unsigned char* offer_begin(bipbuf_t& buf_)
+constexpr unsigned char* offer_begin(bipbuf_t& buf_)
 {
     return buf_.data + (1 == buf_.b_inuse ? buf_.b_end : buf_.a_end);
 }
 
-inline int offer_end(bipbuf_t& buf_, int size)
+// NOTE: Deviates from regular offer in that a manual check for 'size' is required
+inline void offer_end(bipbuf_t& buf_, unsigned size)
 {
-    if (bipbuf_unused(&buf_) < size)
-        return 0;
-
     if (1 == buf_.b_inuse)
     {
         buf_.b_end += size;
@@ -38,16 +53,19 @@ inline int offer_end(bipbuf_t& buf_, int size)
     }
 
     check_for_switch_to_b(buf_);
-
-    return size;
 }
 
+}
+
+namespace layer1 {
 
 template <unsigned N>
 class bipbuf
 {
-    // DEBT: I read that we're not guaranteed for backing_buffer_ to start at same spot as
-    // buf_.  I believe the usage we have here is 100% safe though.  Needs a double check
+    // Although c++ unions are more nuanced than one would presume, it seems safe to
+    // expect backing_buffer_ will precisely overlap, based on
+    // https://stackoverflow.com/questions/33056403/is-it-legal-to-use-address-of-one-field-of-a-union-to-access-another-field
+    // https://stackoverflow.com/questions/11373203/accessing-inactive-union-member-and-undefined-behavior
     union
     {
         byte backing_buffer_[sizeof(bipbuf_t) + N];
@@ -64,12 +82,14 @@ public:
 
     unsigned char* offer_begin()
     {
-        return layer1::offer_begin(buf_);
+        return internal::offer_begin(buf_);
     }
 
-    int offer_end(int size)
+    /// Low level call, no bounds checking!
+    /// @param size
+    void offer_end(unsigned size)
     {
-        return layer1::offer_end(buf_, size);
+        return internal::offer_end(buf_, size);
     }
 
     int offer(const unsigned char* d, int size)
@@ -77,29 +97,32 @@ public:
         return bipbuf_offer(&buf_, d, size);
     }
 
-    unsigned char* peek(int len = 0)
+    // NOTE: Not 100% sure I like auto casting here, not congruent with rest of object
+    /*
+    template <class T, unsigned N2>
+    int offer(const T (&buffer)[N2])
     {
-        return bipbuf_peek(&buf_, len);
-    }
+        return bipbuf_offer(&buf_, (const unsigned char*)buffer, N2 * sizeof(T));
+    }   */
 
     const unsigned char* peek(int len = 0) const
     {
         return bipbuf_peek(&buf_, len);
     }
 
-    unsigned char* poll(int len)
+    const unsigned char* poll(int len)
     {
         return bipbuf_poll(&buf_, len);
     }
 
-    int used() const
+    unsigned used() const
     {
-        return bipbuf_used(&buf_);
+        return (unsigned)bipbuf_used(&buf_);
     }
 
-    int unused() const
+    unsigned unused() const
     {
-        return bipbuf_unused(&buf_);
+        return (unsigned)bipbuf_unused(&buf_);
     }
 };
 
@@ -117,7 +140,7 @@ public:
         bipbuf_init(buf_, size);
     }
 
-    bipbuf(bipbuf_t* buf) : buf_{buf}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT bipbuf(bipbuf_t* buf) : buf_{buf}
     {
     }
 
@@ -125,12 +148,14 @@ public:
 
     unsigned char* offer_begin()
     {
-        return layer1::offer_begin(*buf_);
+        return internal::offer_begin(*buf_);
     }
 
-    int offer_end(int size)
+    /// Low level call, no bounds checking!
+    /// @param size
+    void offer_end(unsigned size)
     {
-        return layer1::offer_end(*buf_, size);
+        internal::offer_end(*buf_, size);
     }
 
     int offer(const unsigned char* d, int size)
@@ -138,32 +163,27 @@ public:
         return bipbuf_offer(buf_, d, size);
     }
 
-    unsigned char* peek(int len = 0)
-    {
-        return bipbuf_peek(buf_, len);
-    }
-
     const unsigned char* peek(int len = 0) const
     {
         return bipbuf_peek(buf_, len);
     }
 
-    unsigned char* poll(int len)
+    const unsigned char* poll(int len)
     {
         return bipbuf_poll(buf_, len);
     }
 
-    int used() const
+    unsigned used() const
     {
-        return bipbuf_used(buf_);
+        return (unsigned) bipbuf_used(buf_);
     }
 
-    int unused() const
+    unsigned unused() const
     {
-        return bipbuf_unused(buf_);
+        return (unsigned) bipbuf_unused(buf_);
     }
 };
 
 }
 
-}}
+}
