@@ -15,7 +15,23 @@ namespace estd { namespace internal { namespace impl {
 template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
 struct streambuf_base
 {
+#if __cpp_constexpr
+    struct traits_type : Traits
+    {
+        constexpr static bool blocking = false;
+
+        // EXPERIMENTAL - denotes an appended async bool flag on xsgetn and xsputn.  For both, when true
+        // specified data buffer must be non volatile for duration of transaction.  Underlying transport
+        // signals (somehow, TBD) that NV status is released.
+        constexpr static bool nocopy = false;
+
+        // EXPERIMENTAL - impl to place into consuming stream to interact with whatever specialized
+        // signaling mechanism is present
+        using signal = monostate;
+    };
+#else
     typedef Traits traits_type;
+#endif
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
     typedef typename traits_type::pos_type pos_type;

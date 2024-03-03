@@ -68,10 +68,13 @@ protected:
     // DEBT: Needs to be abstract virtual here
     virtual int_type underflow() { return traits_type::eof(); }
 
-
     virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
     virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
     virtual int sync() = 0;
+
+public:
+    // DEBT: Not well thought out, just getting things compiling
+    int_type sputc(char_type ch) { return overflow(ch); }
 };
 
 }}}

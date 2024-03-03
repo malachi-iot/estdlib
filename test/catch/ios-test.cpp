@@ -37,6 +37,7 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 
     int xsputn(const char_type*, int len) { return len; }
     int xsgetn(char_type*, int len) { return len; }
+    int sputc(char_type) { return 0; }
 };
 
 typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;

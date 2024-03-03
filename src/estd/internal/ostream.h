@@ -5,7 +5,7 @@
 namespace estd { namespace detail {
 
 // DEBT: is there a way to make TBase a little less confusing for consumers?
-template <class TStreambuf, class TBase>
+template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) TStreambuf, class TBase>
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual

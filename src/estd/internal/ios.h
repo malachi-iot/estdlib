@@ -125,7 +125,7 @@ public:
 
 
 // See iosfwd for default values
-template<class TStreambuf, bool use_pointer, class TPolicy>
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) TStreambuf, bool use_pointer, class TPolicy>
 class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
     estd::internal::struct_evaporator<TPolicy>,
     estd::internal::struct_evaporator<typename TPolicy::locale_type>

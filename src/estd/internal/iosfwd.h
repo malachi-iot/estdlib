@@ -1,27 +1,28 @@
 #pragma once
 
 #include "stream_flags.h"
+#include "fwd/streambuf.h"
 
 namespace estd {
 
 namespace internal {
 
-template <class TStreambuf,
+template <class Streambuf,
         estd::internal::stream_flags::flag_type flags = estd::internal::stream_flags::_default>
 struct ios_base_policy;
 
-template<class TStreambuf, bool use_pointer = false,
-        class TPolicy = ios_base_policy<TStreambuf> >
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Streambuf, bool use_pointer = false,
+        class Policy = ios_base_policy<Streambuf> >
 class basic_ios;
 
 }
 
 namespace detail {
 
-template <class TStreambuf, class TBase = internal::basic_ios<TStreambuf> >
+template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) Streambuf, class Base = internal::basic_ios<Streambuf> >
 class basic_ostream;
 
-template <class TStreambuf, class TBase = internal::basic_ios<TStreambuf> >
+template <class Streambuf, class Base = internal::basic_ios<Streambuf> >
 class basic_istream;
 
 }
