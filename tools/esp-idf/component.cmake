@@ -1,15 +1,14 @@
 # Is used by, and is independent of, our project.cmake
 
-set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+get_filename_component(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 
 # 'sets' won't propagate upward even with NO_POLICY_SCOPE because
 # components are handled as a specially isolated module in esp-idf
 #set(ESTDLIB_DIR ${ROOT_DIR})
 
-# DEBT: Use list(PREPEND) here and consolidate into sources.cmake
-set(COMPONENT_SRCS 
-    ${ROOT_DIR}/src/estd/ext/willemt/bipbuffer/bipbuffer.c
-    ${ROOT_DIR}/src/estd/internal/string_convert.cpp)
+include(${ROOT_DIR}/src/sources.cmake)
+
+list(TRANSFORM SOURCE_FILES PREPEND ${ROOT_DIR}/src/ OUTPUT_VARIABLE COMPONENT_SRCS)
 
 set(COMPONENT_ADD_INCLUDEDIRS 
     ${ROOT_DIR}/src)

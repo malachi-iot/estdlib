@@ -12,10 +12,9 @@ include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)
 include(${TOOLS_DIR}/ext.cmake)
 include(${TOOLS_DIR}/version.cmake)
+include(sources.cmake)
 
-set(SOURCE_FILES
-    estd/ext/willemt/bipbuffer/bipbuffer.c
-    estd/internal/string_convert.cpp
+set(SOURCE_FILES ${SOURCE_FILES}
     estd/internal/utility.cpp
     estd/port/posix/streambuf.cpp
     )
