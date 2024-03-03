@@ -31,9 +31,11 @@ using namespace estd;
 
 struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<char> >
 {
+    using base_type = internal::impl::streambuf_base<std::char_traits<char> >;
+    using typename base_type::traits_type;
+
     typedef char char_type;
     typedef int int_type;
-    typedef std::char_traits<char_type> traits_type;
 
     int xsputn(const char_type*, int len) { return len; }
     int xsgetn(char_type*, int len) { return len; }

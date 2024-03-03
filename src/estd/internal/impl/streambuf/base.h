@@ -15,9 +15,14 @@ namespace estd { namespace internal { namespace impl {
 template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
 struct streambuf_base
 {
+    // DEBT: Feature flag this as well with something like FEATURE_ESTD_STREAMBUF_TRAITS
+    // generally we want this on, however and c++03 is no longer a priority target
 #if __cpp_constexpr
     struct traits_type : Traits
     {
+        // Since we deal with specialization, sometimes folks need the plain and pure char_traits
+        using char_traits = Traits;
+
         constexpr static bool blocking = false;
 
         // EXPERIMENTAL - denotes an appended async bool flag on xsgetn and xsputn.  For both, when true
@@ -90,10 +95,12 @@ protected:
 template <class TChar, class TStream, class TCharTraits >
 struct native_streambuf_base : streambuf_base<TCharTraits>
 {
+    using base_type = streambuf_base<TCharTraits>;
+    using typename base_type::traits_type;
+
     // NOTE: we'll need to revisit this if we want a proper pointer in here
     typedef typename estd::remove_reference<TStream>::type stream_type;
     typedef TChar char_type;
-    typedef TCharTraits traits_type;
     typedef typename traits_type::int_type int_type;
 
 protected:
