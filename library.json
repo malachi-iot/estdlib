@@ -32,7 +32,7 @@
     "examples": [
         "examples/pio/*/src/*.cpp"
     ],
-    "version": "0.6.2",
+    "version": "0.7.0",
     "frameworks": [
         "arduino",
         "espidf",
