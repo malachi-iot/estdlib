@@ -1,4 +1,4 @@
-# v0.7.0 - XXXXX24
+# v0.7.0 - 02MAR24
 
 ## Added Features
 
