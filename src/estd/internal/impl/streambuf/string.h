@@ -69,14 +69,14 @@ struct out_stringbuf : stringbuf_base<String>
 };
 
 
-template <class TString>
+template <class String>
 struct basic_stringbuf :
-        out_stringbuf<TString>,
-        in_pos_streambuf_base<typename TString::traits_type>,
+        out_stringbuf<String>,
+        in_pos_streambuf_base<typename remove_reference_t<String>::traits_type>,
 
         streambuf_sungetc_tag
 {
-    typedef out_stringbuf<TString> base_type;
+    typedef out_stringbuf<String> base_type;
     typedef typename base_type::traits_type traits_type;
     typedef in_pos_streambuf_base<traits_type> in_base_type;
     typedef typename base_type::char_type char_type;
@@ -86,22 +86,7 @@ struct basic_stringbuf :
     typedef typename base_type::off_type off_type;
     typedef typename base_type::pos_type pos_type;
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
-    template <class ...TArgs>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    basic_stringbuf(TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...)
-    {}
-#else
-    basic_stringbuf() {}
-
-    template <class TParam1>
-    basic_stringbuf(TParam1& p) :
-            base_type(p)
-    {}
-#endif
+    ESTD_CPP_FORWARDING_CTOR(basic_stringbuf)
 
     // See in_base_type::pos() for why we use ref here
     const typename in_base_type::index_type& pos() const { return in_base_type::pos(); }

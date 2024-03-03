@@ -23,6 +23,7 @@ concept StreambufTraits = CharTraits<T>;
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
 namespace impl {
 
+// NOTE: This particular constraint might want to sit outside 'impl'
 template <class Raw, class T = estd::remove_reference_t<Raw> >
 concept StreambufBase = StreambufTraits<typename T::traits_type> && requires(T sb)
 {

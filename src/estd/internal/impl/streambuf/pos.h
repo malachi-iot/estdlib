@@ -66,19 +66,19 @@ public:
     ESTD_CPP_CONSTEXPR_RET const index_type& pos() const { return _pos; }
 };
 
-template <typename TCharTraits, class TIndex = unsigned short>
-struct in_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
+template <typename CharTraits, class Index = unsigned short>
+struct in_pos_streambuf_base : pos_streambuf_base<CharTraits, Index>
 {
-    typedef TCharTraits traits_type;
-    typedef pos_streambuf_base<traits_type, TIndex> base_type;
+    typedef pos_streambuf_base<CharTraits, Index> base_type;
+    using typename base_type::traits_type;
     typedef typename base_type::index_type index_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    in_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
+    EXPLICIT in_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
 #endif
-    in_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
+    EXPLICIT in_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void gbump(int count) { this->_pos += count; }
@@ -95,19 +95,19 @@ protected:
 };
 
 
-template <typename TCharTraits, class TIndex = unsigned short>
-struct out_pos_streambuf_base : pos_streambuf_base<TCharTraits, TIndex>
+template <typename CharTraits, class Index = unsigned short>
+struct out_pos_streambuf_base : pos_streambuf_base<CharTraits, Index>
 {
-    typedef pos_streambuf_base<TCharTraits, TIndex> base_type;
-    typedef TCharTraits traits_type;
+    typedef pos_streambuf_base<CharTraits, Index> base_type;
+    using typename base_type::traits_type;
     typedef typename base_type::pos_type pos_type;
     typedef typename base_type::off_type off_type;
     typedef typename base_type::index_type index_type;
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
-    out_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
+    EXPLICIT out_pos_streambuf_base(index_type&& pos) : base_type(std::move(pos)) {}
 #endif
-    out_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
+    EXPLICIT out_pos_streambuf_base(const index_type& pos = 0) : base_type(pos) {}
 
 protected:
     void pbump(int count) { this->_pos += count; }
