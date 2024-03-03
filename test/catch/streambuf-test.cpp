@@ -267,7 +267,7 @@ TEST_CASE("streambuf")
         SECTION("bipbuffer (layer1)")
         {
             backing sbb;
-            using type = internal::out_buffered_bipbuf<backing&, 8>;
+            using type = internal::out_bipbuf_streambuf<backing&, 8>;
             type sb(sbb);
             auto& str = sb.rdbuf().str();
 
@@ -277,7 +277,7 @@ TEST_CASE("streambuf")
         {
             backing sbb;
             estd::layer1::bipbuf<8> bb;
-            using type = internal::out_buffered_bipbuf<backing&, 0>;
+            using type = internal::out_bipbuf_streambuf<backing&, 0>;
             type sb(bb.native(), sbb);
 
             true_buffered_test(sb);

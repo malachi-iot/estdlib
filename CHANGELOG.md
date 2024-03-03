@@ -1,11 +1,17 @@
-# v0.X.X - XXXXX24
+# v0.7.0 - XXXXX24
 
 ## Added Features
 
-* Added `out_buffered_stringbuf` wrapper for "true" streambuf operations (TBD, and write supporting doc, also marked internal due to naming indecision)
-* Core units capability (TBD, don't include as feature unless we liberate it
-   from internal namespace)
-* `estd::tuple` now can operate in sparse mode, meaning it can (term TBD) auto resolve down to 0 size if all its members are also 0 size.
+* `estd::tuple` now can operate in sparse mode, meaning it can fold down to 0 size if all its members are also 0 size.
+* Wrapping willemt's awesome bipbuffer as `layer1::bipbuf` and `layer3::bipbuf`
+    * See https://www.codeproject.com/Articles/3479/The-Bip-Buffer-The-Circular-Buffer-with-a-Twist
+
+## Added Features (internal)
+
+Early access - marked internal mainly due to naming and API flux, but passes tests:
+
+* Added `out_buffered_stringbuf` and `out_bipbuf_streambuf` wrapper for "true" streambuf operations.  These sit in front of a raw streambuf for additional caching.
+* Core units capability - including `bytes` and `percent` and SI helpers for converting to string
 
 ## Quality Updates & Bug Fixes
 
