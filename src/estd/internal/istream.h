@@ -9,14 +9,14 @@
 
 namespace estd { namespace detail {
 
-template <class TStreambuf, class TBase>
+template <ESTD_CPP_CONCEPT(concepts::v1::InStreambuf) Streambuf, class Base>
 class basic_istream : public
 #ifdef FEATURE_IOS_STREAMBUF_FULL
                       virtual
 #endif
-                      TBase
+                      Base
 {
-    typedef TBase base_type;
+    typedef Base base_type;
 
 public:
     typedef typename base_type::char_type char_type;
@@ -70,7 +70,7 @@ private:
     }
 #endif
 
-    typedef basic_istream<TStreambuf, TBase> __istream_type;
+    typedef basic_istream<Streambuf, Base> __istream_type;
 
     // just a formality for now, to prep for if we ever want a real sentry
     struct sentry

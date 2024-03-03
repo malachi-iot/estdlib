@@ -22,7 +22,7 @@ namespace detail {
 template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) Streambuf, class Base = internal::basic_ios<Streambuf> >
 class basic_ostream;
 
-template <class Streambuf, class Base = internal::basic_ios<Streambuf> >
+template <ESTD_CPP_CONCEPT(concepts::v1::InStreambuf) Streambuf, class Base = internal::basic_ios<Streambuf> >
 class basic_istream;
 
 }

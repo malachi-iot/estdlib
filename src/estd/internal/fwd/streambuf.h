@@ -17,16 +17,18 @@ struct basic_streambuf;
 #if __cpp_concepts
 namespace concepts { inline namespace v1 {
 
+template <class T>
+concept StreambufTraits = CharTraits<T>;
+
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
 namespace impl {
 
 template <class Raw, class T = estd::remove_reference_t<Raw> >
-concept StreambufBase = requires(T sb)
+concept StreambufBase = StreambufTraits<typename T::traits_type> && requires(T sb)
 {
     typename T::char_type;
     typename T::int_type;
     typename T::traits_type;
-    requires CharTraits<typename T::traits_type>;
 };
 
 // These impl concepts are used somewhat per-function in internal::streambuf.  This
@@ -61,7 +63,7 @@ concept OutStreambuf = impl::StreambufBase<T> &&
     sb.sputc(c);
 };
 
-template <class T>
+template <class Raw, class T = remove_reference_t<Raw>>
 concept InStreambuf = impl::StreambufBase<T> &&
     requires(T sb, T::char_type c)
 {

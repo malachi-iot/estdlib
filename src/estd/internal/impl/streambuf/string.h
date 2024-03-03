@@ -7,22 +7,27 @@
 namespace estd { namespace internal { namespace impl {
 
 template <ESTD_CPP_CONCEPT(concepts::v1::String) String>
-struct stringbuf_base : streambuf_base<typename String::traits_type>
+struct stringbuf_base : streambuf_base<typename remove_reference<String>::type::traits_type>
 {
     ESTD_CPP_DEFAULT_CTOR(stringbuf_base)
+
+    typedef typename remove_reference<String>::type string_type;
 };
 
-template <class TString>
-struct out_stringbuf : stringbuf_base<TString>
+template <class String>
+struct out_stringbuf : stringbuf_base<String>
 {
-    typedef typename remove_reference<TString>::type string_type;
+    using base_type = stringbuf_base<String>;
+    using typename base_type::string_type;
+
     typedef typename string_type::value_type char_type;
+    // NOTE: Beware, this is acting a little differently than regular char_traits
     typedef typename string_type::traits_type traits_type;
     typedef typename traits_type::off_type off_type;
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
 
-    TString str_;
+    String str_;
 
     ESTD_CPP_FORWARDING_CTOR_MEMBER(out_stringbuf, str_)
 
