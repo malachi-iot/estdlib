@@ -143,13 +143,21 @@ template <class TStreambuf, class TBase =
 struct wrapped_ostream : estd::detail::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+            typename TBase::traits_type::char_traits>,
+#else
             typename TBase::traits_type>,
+#endif
         TBase>
 {
     typedef estd::detail::basic_ostream<
         estd::basic_streambuf<
             typename TBase::char_type,
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+            typename TBase::traits_type::char_traits>,
+#else
             typename TBase::traits_type>,
+#endif
         TBase> base_type;
 
     // NOTE: Not well supported TStreambuf being a value vs a reference yet, needs work
