@@ -9,14 +9,16 @@ namespace estd {
 namespace concepts { inline namespace v1 {
 
 template <class T>
-concept Bipbuf = requires(T b, unsigned char* data)
+concept Bipbuf = requires(T& b, unsigned char* data)
 {
     b.peek(0);
     b.offer(data, 0);
     b.offer_begin();
     b.offer_end(0);
+#if __cpp_lib_concepts
     { b.used() } -> std::convertible_to<unsigned>;
     { b.unused() } -> std::convertible_to<unsigned>;
+#endif
 };
 
 }}
@@ -66,35 +68,44 @@ class bipbuf
     // expect backing_buffer_ will precisely overlap, based on
     // https://stackoverflow.com/questions/33056403/is-it-legal-to-use-address-of-one-field-of-a-union-to-access-another-field
     // https://stackoverflow.com/questions/11373203/accessing-inactive-union-member-and-undefined-behavior
-    union
+    byte backing_buffer_[sizeof(bipbuf_t) + N];
+
+    // Can't do union here
+    // https://github.com/malachi-iot/estdlib/issues/30
+
+    bipbuf_t* buf()
     {
-        byte backing_buffer_[sizeof(bipbuf_t) + N];
-        bipbuf_t buf_;
-    };
+        return reinterpret_cast<bipbuf_t*>(backing_buffer_);
+    }
+
+    const bipbuf_t* buf() const
+    {
+        return reinterpret_cast<const bipbuf_t*>(backing_buffer_);
+    }
 
 public:
     bipbuf()
     {
-        bipbuf_init(&buf_, N);
+        bipbuf_init(buf(), N);
     }
 
-    bipbuf_t* native() { return &buf_; }
+    bipbuf_t* native() { return buf(); }
 
     unsigned char* offer_begin()
     {
-        return internal::offer_begin(buf_);
+        return internal::offer_begin(*buf());
     }
 
     /// Low level call, no bounds checking!
     /// @param size
     void offer_end(unsigned size)
     {
-        return internal::offer_end(buf_, size);
+        return internal::offer_end(*buf(), size);
     }
 
     int offer(const unsigned char* d, int size)
     {
-        return bipbuf_offer(&buf_, d, size);
+        return bipbuf_offer(buf(), d, size);
     }
 
     // NOTE: Not 100% sure I like auto casting here, not congruent with rest of object
@@ -107,22 +118,22 @@ public:
 
     const unsigned char* peek(int len = 0) const
     {
-        return bipbuf_peek(&buf_, len);
+        return bipbuf_peek(buf(), len);
     }
 
     const unsigned char* poll(int len)
     {
-        return bipbuf_poll(&buf_, len);
+        return bipbuf_poll(buf(), len);
     }
 
     unsigned used() const
     {
-        return (unsigned)bipbuf_used(&buf_);
+        return (unsigned)bipbuf_used(buf());
     }
 
     unsigned unused() const
     {
-        return (unsigned)bipbuf_unused(&buf_);
+        return (unsigned)bipbuf_unused(buf());
     }
 };
 
