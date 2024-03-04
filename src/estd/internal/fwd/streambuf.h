@@ -22,6 +22,10 @@ template <class T>
 concept StreambufTraits = CharTraits<T> && requires
 {
     typename T::signal;
+    typename T::char_traits;
+#if __cpp_lib_concepts
+    //{ T::blocking } -> std::same_as<bool>;
+#endif
 };
 
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
@@ -31,7 +35,7 @@ namespace impl {
 template <class Raw, class T = estd::remove_reference_t<Raw> >
 concept StreambufBase =
     // Not quite working
-#if FEATURE_ESTD_STREAMBUF_TRAITS_
+#if FEATURE_ESTD_STREAMBUF_TRAITS
     StreambufTraits<typename T::traits_type>
 #else
     CharTraits<typename T::traits_type>

@@ -22,7 +22,8 @@ struct out_stringbuf : stringbuf_base<String>
 
     typedef typename string_type::value_type char_type;
     // NOTE: Beware, this is acting a little differently than regular char_traits
-    typedef typename string_type::traits_type traits_type;
+    //typedef typename string_type::traits_type traits_type;
+    using typename base_type::traits_type;
     typedef typename traits_type::off_type off_type;
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
@@ -77,8 +78,9 @@ struct basic_stringbuf :
         streambuf_sungetc_tag
 {
     typedef out_stringbuf<String> base_type;
+    using char_traits = typename remove_reference_t<String>::traits_type;
+    typedef in_pos_streambuf_base<char_traits> in_base_type;
     typedef typename base_type::traits_type traits_type;
-    typedef in_pos_streambuf_base<traits_type> in_base_type;
     typedef typename base_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
     typedef typename base_type::string_type string_type;

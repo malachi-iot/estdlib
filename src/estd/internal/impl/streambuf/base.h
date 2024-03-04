@@ -23,6 +23,8 @@ struct streambuf_base
         // Since we deal with specialization, sometimes folks need the plain and pure char_traits
         using char_traits = Traits;
 
+        // estd streambufs are presumed non blocking.  Once in a while however underlying system
+        // only provides a blocking interface (i.e. Arduino), so account for that
         constexpr static bool blocking = false;
 
         // EXPERIMENTAL - denotes an appended async bool flag on xsgetn and xsputn.  For both, when true
