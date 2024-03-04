@@ -16,9 +16,11 @@ template<class TStreambuf>
 struct basic_streambuf_wrapped :
     basic_streambuf<
         typename estd::remove_reference<TStreambuf>::type::char_type,
-        // DEBT: Peer in and get char_traits based on a feature flag, something like
-        // FEATURE_ESTD_STREAMBUF_TRAITS
+#if FEATURE_ESTD_STREAMBUF_TRAITS
         typename estd::remove_reference<TStreambuf>::type::traits_type::char_traits
+#else
+        typename estd::remove_reference<TStreambuf>::type::traits_type
+#endif
     >
 {
     typedef typename estd::remove_reference<TStreambuf>::type streambuf_type;

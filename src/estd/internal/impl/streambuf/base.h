@@ -2,6 +2,8 @@
 
 #include "fwd.h"
 
+#include "../../feature/streambuf.h"
+
 namespace estd { namespace internal { namespace impl {
 
 /// @brief contains base noop-ish implementation, suitable for hiding (think override,
@@ -15,9 +17,7 @@ namespace estd { namespace internal { namespace impl {
 template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
 struct streambuf_base
 {
-    // DEBT: Feature flag this as well with something like FEATURE_ESTD_STREAMBUF_TRAITS
-    // generally we want this on, however and c++03 is no longer a priority target
-#if __cpp_constexpr
+#if FEATURE_ESTD_STREAMBUF_TRAITS
     struct traits_type : Traits
     {
         // Since we deal with specialization, sometimes folks need the plain and pure char_traits

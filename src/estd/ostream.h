@@ -133,8 +133,11 @@ namespace experimental {
 template <class TStreambuf, class TBase =
         estd::internal::basic_ios<estd::basic_streambuf<
             typename estd::remove_reference<TStreambuf>::type::char_type,
-            // DEBT: only look for char_traits if FEATURE_ESTD_STREAMBUF_TRAITS is present
+#if FEATURE_ESTD_STREAMBUF_TRAITS
             typename estd::remove_reference<TStreambuf>::type::traits_type::char_traits
+#else
+            typename estd::remove_reference<TStreambuf>::type::traits_type
+#endif
             >, true>
         >
 struct wrapped_ostream : estd::detail::basic_ostream<
