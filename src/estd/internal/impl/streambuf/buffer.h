@@ -174,7 +174,7 @@ protected:
         // but only when placed in this spot near templated args.  Placed
         // below function signature inhibits compilation without any clue as
         // to the concept failure reason - useless
-        requires concepts::v1::impl::OutStreambuf<out_buffered_bipbuf>
+        //requires concepts::v1::impl::OutStreambuf<out_buffered_bipbuf>
 #endif
     explicit out_buffered_bipbuf(Args&&...args) :
         base_type(std::forward<Args>(args)...)

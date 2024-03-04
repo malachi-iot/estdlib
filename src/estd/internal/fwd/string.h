@@ -27,7 +27,7 @@ namespace impl {
 
 template <class T> //, class Traits = estd::char_traits<char> >
 concept String = impl::Container<T> && internal::AllocatedArrayImpl<T> &&
-requires(T s, const T::value_type* rhs)
+requires(T s, const typename T::value_type* rhs)
 {
     typename T::value_type;
 
@@ -41,7 +41,7 @@ requires(T s, const T::value_type* rhs)
 template <class T>
 concept String = //impl::String<T>
     Container<T> &&
-    requires(T s, T::pointer rhs)
+    requires(T s, typename T::pointer rhs)
 {
     typename T::traits_type;
 

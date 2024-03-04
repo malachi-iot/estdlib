@@ -40,7 +40,7 @@ concept StreambufBase =
 #else
     CharTraits<typename T::traits_type>
 #endif
-    && requires(T sb)
+    && requires(T& sb)
 {
     typename T::char_type;
     typename T::int_type;
@@ -51,7 +51,7 @@ concept StreambufBase =
 // approach is needed so as to have visibility into the protected methods it is checking on
 
 template <class T>
-concept OutStreambuf = StreambufBase<T> && requires(T sb)
+concept OutStreambuf = StreambufBase<T> && requires(T& sb)
 {
 #if __cpp_lib_concepts
     // DEBT: Use / make an estd::convertible_to
@@ -73,7 +73,7 @@ concept InStreambuf = StreambufBase<T> && requires(T sb,
 
 template <class Raw, class T = remove_reference_t<Raw> >
 concept OutStreambuf = impl::StreambufBase<T> &&
-    requires(T sb, T::char_type c)
+    requires(T& sb, typename T::char_type c)
 {
     sb.sputn(&c, 1);
     sb.sputc(c);
@@ -81,7 +81,7 @@ concept OutStreambuf = impl::StreambufBase<T> &&
 
 template <class Raw, class T = remove_reference_t<Raw>>
 concept InStreambuf = impl::StreambufBase<T> &&
-    requires(T sb, T::char_type c)
+    requires(T& sb, typename T::char_type c)
 {
     sb.sgetn(&c, 1);
     sb.in_avail();
