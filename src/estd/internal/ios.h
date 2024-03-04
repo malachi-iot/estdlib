@@ -58,17 +58,17 @@ namespace internal {
 template <class TStreambuf, bool use_pointer>
 class basic_ios_base;
 
-template <class TStreambuf>
-class basic_ios_base<TStreambuf, true> : public ios_base
+template <class Streambuf>
+class basic_ios_base<Streambuf, true> : public ios_base
 {
 protected:
-    typedef typename remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename remove_reference<Streambuf>::type streambuf_type;
     streambuf_type* _rdbuf;
 
     streambuf_type* rdbuf() const { return _rdbuf; }
 
 protected:
-    basic_ios_base(streambuf_type* sb) : _rdbuf(sb) {}
+    EXPLICIT basic_ios_base(streambuf_type* sb) : _rdbuf(sb) {}
 
     void init(streambuf_type* sb)
     {
@@ -87,14 +87,14 @@ protected:
 
 // this one assumes for now our special 'native_streambuf' which shall be the
 // de-specialized version of our basic_streambuf
-template <class TStreambuf>
-class basic_ios_base<TStreambuf, false> : public ios_base
+template <class Streambuf>
+class basic_ios_base<Streambuf, false> : public ios_base
 {
 public:
-    typedef typename remove_reference<TStreambuf>::type streambuf_type;
+    typedef typename remove_reference<Streambuf>::type streambuf_type;
 
 protected:
-    TStreambuf _rdbuf;
+    Streambuf _rdbuf;
 
     basic_ios_base() {}
 

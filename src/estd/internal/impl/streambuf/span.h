@@ -147,7 +147,7 @@ struct in_span_streambuf :
     typedef in_pos_streambuf_base<TCharTraits> base_pos_type;
     typedef TBase base_type;
 
-    using traits_type = typename base_pos_type::traits_type;
+    using typename base_pos_type::traits_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
     typedef typename traits_type::int_type int_type;

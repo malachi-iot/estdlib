@@ -8,27 +8,28 @@ namespace estd { namespace internal { namespace impl {
 // NOTE: In esp-idf, pos_type is big and doesn't seem to play well
 // with RVO - so returning/passing a "const pos_type&" rather than "pos_type"
 // makes a difference
-template <typename TCharTraits, class TIndex = unsigned short>
-struct pos_streambuf_base : streambuf_base<TCharTraits>
+template <typename CharTraits, class Index = unsigned short>
+struct pos_streambuf_base : streambuf_base<CharTraits>
 {
-    typedef TCharTraits traits_type;
+    using base_type = streambuf_base<CharTraits>;
+    using typename base_type::traits_type;
     typedef typename traits_type::int_type int_type;
     // FIX: Our pos_type here should instead by an unsigned
     // that likely a derived class specifies the bitness of
     //typedef typename traits_type::pos_type pos_type;
-    typedef TIndex pos_type;
+    typedef Index pos_type;
     // Not calling pos_type because that carries a C++ meaning of fpos, statefulness
     // and signed integer - none of which we want for our positioner
-    typedef TIndex index_type;
+    typedef Index index_type;
     typedef typename traits_type::off_type off_type;
 
 protected:
     index_type _pos;
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
-    pos_streambuf_base(index_type&& pos) : _pos(std::move(pos)) {}
+#ifdef __cpp_rvalue_references
+    explicit pos_streambuf_base(index_type&& pos) : _pos(std::move(pos)) {}
 #endif
-    pos_streambuf_base(const index_type& pos) : _pos(pos) {}
+    EXPLICIT pos_streambuf_base(const index_type& pos) : _pos(pos) {}
 
     inline const index_type& seekpos(const pos_type& p)
     {
