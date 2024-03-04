@@ -51,8 +51,8 @@ template <class T> const T& min (const T& a, const T& b)
 
 #ifdef FEATURE_POSIX_IOS
 #ifdef __cpp_alias_templates
-template<class TChar, class Traits = std::char_traits<TChar> >
-using posix_istream = detail::basic_istream< posix_streambuf<TChar, Traits> >;
+template<class Char, class Traits = std::char_traits<Char> >
+using posix_istream = detail::basic_istream< posix_streambuf<Char, Traits> >;
 
 typedef posix_istream<char> istream;
 #endif

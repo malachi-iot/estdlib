@@ -2,6 +2,7 @@
 
 // DEBT: Do a proper forward for char_traits -- at the moment we can't due to a possible 'using' scenario
 #include "../../traits/char_traits.h"
+#include "../feature/streambuf.h"
 #include "string.h"     // Only for CharTraits concept
 
 #if __cpp_lib_concepts
@@ -19,6 +20,10 @@ namespace concepts { inline namespace v1 {
 
 template <class T>
 concept StreambufTraits = CharTraits<T>;
+/*&& requires
+{
+    T::signal;
+};*/
 
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
 namespace impl {
