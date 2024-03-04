@@ -21,7 +21,7 @@ namespace concepts { inline namespace v1 {
 template <class T>
 concept StreambufTraits = CharTraits<T> && requires
 {
-    T::signal;
+    typename T::signal;
 };
 
 // Streambuf impls have a more minimum requirement, since estd::detail::streambuf wraps it and adds more
@@ -31,7 +31,7 @@ namespace impl {
 template <class Raw, class T = estd::remove_reference_t<Raw> >
 concept StreambufBase =
     // Not quite working
-#if FEATURE_ESTD_STREAMBUF_TRAITS___
+#if FEATURE_ESTD_STREAMBUF_TRAITS_
     StreambufTraits<typename T::traits_type>
 #else
     CharTraits<typename T::traits_type>

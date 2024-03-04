@@ -13,16 +13,16 @@ namespace estd { namespace internal { namespace impl {
 template <class T, estd::size_t Extent = detail::dynamic_extent::value,
         class TBase = estd::experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
-        out_pos_streambuf_base<estd::char_traits<T>,
+        out_pos_streambuf_base<char_traits<T>,
             typename TBase::value_type::size_type >,
         TBase
 {
     typedef TBase base_type;
     typedef T char_type;
-    typedef estd::char_traits<char_type> traits_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;
-    typedef out_pos_streambuf_base<traits_type, size_type> base_out_type;
+    typedef out_pos_streambuf_base<char_traits<T>, size_type> base_out_type;
+    using typename base_out_type::traits_type;
     typedef typename base_out_type::off_type off_type;
     typedef typename base_out_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;

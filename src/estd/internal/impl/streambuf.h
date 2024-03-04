@@ -59,7 +59,9 @@ template <class TChar, class TCharTraits>
 struct basic_streambuf
 {
     typedef TChar char_type;
-    typedef TCharTraits traits_type;
+    // DEBT: A little clumsy.  See FEATURE_ESTD_STREAMBUF_TRAITS
+    //using traits_type = typename streambuf_base<TCharTraits>::traits_type; // Somehow this makes everyone mad
+    using traits_type = TCharTraits;
     typedef typename traits_type::int_type int_type;
 
 protected:
