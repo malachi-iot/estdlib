@@ -68,10 +68,17 @@ class bipbuf
     // expect backing_buffer_ will precisely overlap, based on
     // https://stackoverflow.com/questions/33056403/is-it-legal-to-use-address-of-one-field-of-a-union-to-access-another-field
     // https://stackoverflow.com/questions/11373203/accessing-inactive-union-member-and-undefined-behavior
+    // NOTE: Above comment N/A we have left union behind
+
     byte backing_buffer_[sizeof(bipbuf_t) + N];
 
     // Can't do union here
     // https://github.com/malachi-iot/estdlib/issues/30
+
+    // DEBT: Our casting gets compilers happier, but still is nonconformant.
+    // https://stackoverflow.com/questions/31881811/does-extern-c-with-c-avoid-undefined-behavior-that-is-legal-in-c-but-not-c
+    // We have to either ONLY interact with flexible member via C (which we almost do) or go nuclear
+    // and re-write it (which I was debating doing anyway)
 
     bipbuf_t* buf()
     {
