@@ -32,7 +32,17 @@ using namespace estd;
 struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<char> >
 {
     using base_type = internal::impl::streambuf_base<std::char_traits<char> >;
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+    struct traits_type : base_type::traits_type
+    {
+        struct signal
+        {
+
+        };
+    };
+#else
     using typename base_type::traits_type;
+#endif
 
     typedef char char_type;
     typedef int int_type;
