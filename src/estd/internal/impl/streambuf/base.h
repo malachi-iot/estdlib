@@ -36,6 +36,9 @@ struct streambuf_base
         // signaling mechanism is present
         using signal = monostate;
     };
+
+    void signal(monostate*) {}
+
 #else
     typedef Traits traits_type;
 #endif

@@ -63,6 +63,11 @@ class basic_ios_base<Streambuf, true> : public ios_base
 {
 protected:
     typedef typename remove_reference<Streambuf>::type streambuf_type;
+
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+    using signal_type = typename streambuf_type::traits_type::signal;
+#endif
+
     streambuf_type* _rdbuf;
 
     streambuf_type* rdbuf() const { return _rdbuf; }
@@ -89,11 +94,17 @@ protected:
 // de-specialized version of our basic_streambuf
 template <class Streambuf>
 class basic_ios_base<Streambuf, false> : public ios_base
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+    , remove_reference<Streambuf>::type::traits_type::signal
+#endif
 {
 public:
     typedef typename remove_reference<Streambuf>::type streambuf_type;
 
 protected:
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+    using signal_type = typename streambuf_type::traits_type::signal;
+#endif
     Streambuf _rdbuf;
 
     basic_ios_base() {}
@@ -121,6 +132,10 @@ protected:
 public:
     streambuf_type* rdbuf()
     { return &_rdbuf; }
+
+#if UNIT_TESTING
+    signal_type& signal() { return *this; }
+#endif
 };
 
 

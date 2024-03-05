@@ -4,6 +4,9 @@
 
 #include <catch.hpp>
 
+#include <condition_variable>
+#include <future>
+
 #include <estd/istream.h>
 #include <estd/iterator.h>
 #include <estd/ostream.h>
@@ -37,9 +40,49 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
     {
         struct signal
         {
+            signal* next = nullptr;
 
+            static constexpr std::chrono::milliseconds timeout { 100 };
+
+            std::mutex m;
+            std::condition_variable cv;
+            bool dtr_ = false;
+            bool cts_ = false;
+
+            // TODO: add timeouts in parameter lists
+
+            bool wait_dtr()
+            {
+                std::unique_lock lk(m);
+                return cv.wait_for(lk, timeout, [&]{ return dtr_; });
+            }
+
+            bool wait_cts()
+            {
+                std::unique_lock lk(m);
+                return cv.wait_for(lk, timeout, [&]{ return cts_; });
+            }
+
+            void set_cts()
+            {
+                {
+                    std::unique_lock lk(m);
+                    cts_ = true;
+                }
+                cv.notify_one();
+            }
         };
     };
+
+    traits_type::signal* signal_;
+
+    // DEBT: Sets signal pointer - clumsy, but acceptable.  Would prefer RAII, but that's
+    // a huge commitment across all the streambuf constructors
+    void signal(traits_type::signal* v)
+    {
+        signal_ = v;
+    }
+
 #else
     using typename base_type::traits_type;
 #endif
@@ -47,8 +90,16 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
     typedef char char_type;
     typedef int int_type;
 
+    // Make believe circular buffer (perhaps now use actual bipbuffer)
+
+    int xsgetn(char_type*, int len)
+    {
+        // make believe empty out part of circular buffer, signal clear to send
+        signal_->set_cts();
+        return len;
+    }
+
     int xsputn(const char_type*, int len) { return len; }
-    int xsgetn(char_type*, int len) { return len; }
     int sputc(char_type) { return 0; }
 };
 
@@ -404,6 +455,23 @@ TEST_CASE("ios")
 
             REQUIRE(out.tellp() == 4);
         }
+    }
+    SECTION("signaling")
+    {
+        detail::basic_ostream<dummy_streambuf> out;
+        dummy_streambuf& rdbuf = *out.rdbuf();
+
+        rdbuf.signal(&out.signal());
+        std::promise<int> r;
+        std::future<int> v = std::async(std::launch::async, [&]
+        {
+            return rdbuf.sgetn(nullptr, 1);
+        });
+        //rdbuf.sgetn(nullptr, 1);
+
+        bool cts = out.signal().wait_cts();
+        REQUIRE(cts);
+        REQUIRE(v.wait_for(out.signal().timeout)==std::future_status::ready);
     }
 }
 
