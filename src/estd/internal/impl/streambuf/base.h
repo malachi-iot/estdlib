@@ -34,10 +34,17 @@ struct streambuf_base
 
         // EXPERIMENTAL - impl to place into consuming stream to interact with whatever specialized
         // signaling mechanism is present
-        using signal = monostate;
+        struct signal
+        {
+            static constexpr bool set_cts() { return {}; }
+            static constexpr bool set_dtr() { return {}; }
+        };
     };
 
-    void signal(monostate*) {}
+    template <class Signal>
+    static constexpr bool add_signal(Signal*) { return{}; }
+    template <class Signal>
+    static constexpr bool del_signal(Signal*) { return{}; }
 
 #else
     typedef Traits traits_type;

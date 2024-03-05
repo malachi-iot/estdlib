@@ -38,12 +38,20 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 #if FEATURE_ESTD_STREAMBUF_TRAITS
     struct traits_type : base_type::traits_type
     {
+        // this particular type gets lifted and instantiated in hosting istream/ostream
+        // only.  (no auto signaling with a bare streambuf, though you can manually set
+        // up this 'signal' in theory)
         struct signal
         {
+            // NOTE: It's not likely you want multiple copies of an istream/ostream.
+            // just hedging bets here.  Unsure how we should truly deal with that scenario.
+            // Multiple copies of the streambuf, well, that's on you
             signal* next = nullptr;
 
             static constexpr std::chrono::milliseconds timeout { 100 };
 
+            // DEBT: it's likely we'll want distinct mutex/cv for each, but
+            // most of our use cases are istream OR ostream, not the combo
             std::mutex m;
             std::condition_variable cv;
             bool dtr_ = false;
@@ -63,6 +71,15 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
                 return cv.wait_for(lk, timeout, [&]{ return cts_; });
             }
 
+            void set_dtr()
+            {
+                {
+                    std::unique_lock lk(m);
+                    dtr_ = true;
+                }
+                cv.notify_one();
+            }
+
             void set_cts()
             {
                 {
@@ -78,10 +95,13 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 
     // DEBT: Sets signal pointer - clumsy, but acceptable.  Would prefer RAII, but that's
     // a huge commitment across all the streambuf constructors
-    void signal(traits_type::signal* v)
+    void add_signal(traits_type::signal* v)
     {
+        if(signal_) v->next = signal_;
         signal_ = v;
     }
+
+    void del_signal(traits_type::signal* v) {}
 
 #else
     using typename base_type::traits_type;
@@ -461,13 +481,10 @@ TEST_CASE("ios")
         detail::basic_ostream<dummy_streambuf> out;
         dummy_streambuf& rdbuf = *out.rdbuf();
 
-        rdbuf.signal(&out.signal());
-        std::promise<int> r;
         std::future<int> v = std::async(std::launch::async, [&]
         {
             return rdbuf.sgetn(nullptr, 1);
         });
-        //rdbuf.sgetn(nullptr, 1);
 
         bool cts = out.signal().wait_cts();
         REQUIRE(cts);

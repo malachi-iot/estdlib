@@ -104,34 +104,50 @@ public:
 protected:
 #if FEATURE_ESTD_STREAMBUF_TRAITS
     using signal_type = typename streambuf_type::traits_type::signal;
+    void init_signal()
+    {
+        rdbuf_.add_signal(this);
+    }
+#else
+    void init_signal() {}
 #endif
-    Streambuf _rdbuf;
-
-    basic_ios_base() {}
+    Streambuf rdbuf_;
 
     // TODO: constructor needs cleanup here
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+#if __cpp_variadic_templates
     template <class ...TArgs>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-    basic_ios_base(TArgs&&...args) : 
-        _rdbuf(std::forward<TArgs>(args)...) {}
+    constexpr basic_ios_base(TArgs&&...args) :
+        rdbuf_(std::forward<TArgs>(args)...)
+    {
+        init_signal();
+    }
 
-    basic_ios_base(streambuf_type&& streambuf) :
-        _rdbuf(std::move(streambuf))    {}
+    constexpr  basic_ios_base(streambuf_type&& streambuf) :
+        rdbuf_(std::move(streambuf))
+    {
+        init_signal();
+    }
 #else
+    basic_ios_base() {}
+
     template <class TParam1>
-    basic_ios_base(TParam1& p1) : _rdbuf(p1)
+    basic_ios_base(TParam1& p1) : rdbuf_(p1)
             {}
 #endif
     basic_ios_base(streambuf_type& streambuf) :
-        _rdbuf(streambuf) {}
+        rdbuf_(streambuf) {}
+
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+    ~basic_ios_base()
+    {
+        rdbuf_.del_signal(this);
+    }
+#endif
 
 public:
     streambuf_type* rdbuf()
-    { return &_rdbuf; }
+    { return &rdbuf_; }
 
 #if UNIT_TESTING
     signal_type& signal() { return *this; }
