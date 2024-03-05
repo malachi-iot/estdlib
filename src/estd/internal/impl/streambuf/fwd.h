@@ -8,7 +8,7 @@ namespace estd { namespace internal { namespace impl {
 template <class Char, class CharTraits = estd::char_traits<Char> >
 struct basic_streambuf;
 
-template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
+template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits, class Signal = void>
 struct streambuf_base;
 
 // NOTE: Temporarily making a 'complete' type, but plan is to make this always specialized

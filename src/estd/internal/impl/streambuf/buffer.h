@@ -209,6 +209,11 @@ protected:
         // to check result code
         buf_.offer((const unsigned char*)s, count * sizeof(char_type));
 
+#if FEATURE_ESTD_STREAMBUF_TRAITS
+        // set_dtr somehow, but I'm not convinced yet how homogeneous this will be.
+        // (consider netconn callback SEND+ behavior)
+#endif
+
         return count;
     }
 };

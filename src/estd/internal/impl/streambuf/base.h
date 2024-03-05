@@ -14,7 +14,7 @@ namespace estd { namespace internal { namespace impl {
 /// - xsgetn
 /// - xsputn
 /// - gbump
-template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits>
+template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits, class Signal>
 struct streambuf_base
 {
 #if FEATURE_ESTD_STREAMBUF_TRAITS
@@ -34,6 +34,13 @@ struct streambuf_base
 
         // EXPERIMENTAL - impl to place into consuming stream to interact with whatever specialized
         // signaling mechanism is present
+        // TODO: Consider flowing this in externally.  Either additional template parameter,
+        // or upgrade 'Traits' expectation to include this.  Note that the latter has an issue
+        // that some parties still specialization on std traits.  So be ginger when trying that out.
+        // Also it presents an architectural issue, since streambuf itself wants to define the
+        // traits it has rather than an external party.... except for signal, partially.  Signal
+        // is a shared scheme between system and streambuf's likely-bespoke signaler (i.e.
+        // netconn callbacks)
         struct signal
         {
             static constexpr bool set_cts() { return {}; }
@@ -41,10 +48,10 @@ struct streambuf_base
         };
     };
 
-    template <class Signal>
-    static constexpr bool add_signal(Signal*) { return{}; }
-    template <class Signal>
-    static constexpr bool del_signal(Signal*) { return{}; }
+    template <class Signal2>
+    static constexpr bool add_signal(Signal2*) { return{}; }
+    template <class Signal2>
+    static constexpr bool del_signal(Signal2*) { return{}; }
 
 #else
     typedef Traits traits_type;
