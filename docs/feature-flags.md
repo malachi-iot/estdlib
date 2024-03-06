@@ -56,6 +56,12 @@ Enables non-standard behavior to reduce size of tuples when empty (0-byte)
 size elements are used.  Defaults to true.  'get' will end up returning
 a temporary in this case
 
+## FEATURE_ESTD_STREAMBUF_TRAITS
+
+Enables cts/dtr style signaling from streambuf up to istream/ostream.
+Streambuf by itself does not exhibit signals outwardly, instead control
+structure `signal` is allocated in istream/ostream
+
 # CMake level
 
 ## FEATURE_ESTD_INTERFACE
