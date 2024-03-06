@@ -149,7 +149,7 @@ public:
     streambuf_type* rdbuf()
     { return &rdbuf_; }
 
-#if UNIT_TESTING
+#if FEATURE_ESTD_STREAMBUF_TRAITS
     signal_type& signal() { return *this; }
 #endif
 };

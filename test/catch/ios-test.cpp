@@ -114,8 +114,10 @@ struct dummy_streambuf_impl : internal::impl::streambuf_base<std::char_traits<ch
 
     int xsgetn(char_type*, int len)
     {
+#if FEATURE_ESTD_STREAMBUF_TRAITS
         // make believe empty out part of circular buffer, signal clear to send
         signal_->set_cts();
+#endif
         return len;
     }
 
@@ -476,6 +478,7 @@ TEST_CASE("ios")
             REQUIRE(out.tellp() == 4);
         }
     }
+#if FEATURE_ESTD_STREAMBUF_TRAITS
     SECTION("signaling")
     {
         detail::basic_ostream<dummy_streambuf> out;
@@ -490,6 +493,7 @@ TEST_CASE("ios")
         REQUIRE(cts);
         REQUIRE(v.wait_for(out.signal().timeout)==std::future_status::ready);
     }
+#endif
 }
 
 #pragma GCC diagnostic pop
