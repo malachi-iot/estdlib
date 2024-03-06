@@ -28,7 +28,7 @@ These tests are all for variants of Espressif ESP32
 | 19DEC23 | unity    | WaveShare C6-DevKit  | ESP32C6        | v5.1.2   | Pass   |
 | 18NOV23 | unity    | ESP32C3 Xiao         | ESP32C3        | v5.1.2   | Pass   |
 | 20JUL23 | unity    | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
-| 19FEB24 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1.2   | Pass   |
+| 05MAR24 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1.2   | Pass   |
 | 29SEP23 | unity    | Lilygo QT Pro        | ESP32S3        | v5.1.1   | Pass*  | Intermittent failures[^1]
 | 02MAR24 | unity    | Seeed Xiao           | ESP32S3        | v5.1.3   | Pass   |
 | 19FEB24 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.2.0   | Pass   |

@@ -1,3 +1,11 @@
+# v0.7.1 - XXXXX24
+
+## Added Features
+
+## Quality Updates & Bug Fixes
+
+* Improved clang compatibility, especially with c++20 concepts and bipbuffer
+
 # v0.7.0 - 02MAR24
 
 ## Added Features
