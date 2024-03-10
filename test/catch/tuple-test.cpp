@@ -225,7 +225,9 @@ TEST_CASE("tuple")
             // FIX: As it should be, this can't convert a temporary to a reference
             EmptyClass v1 = estd::get<0>(t);
 
-            t.visit([](internal::visitor_instance<EmptyClass> vi)
+            // DEBT: For empty classes, would be nice to avoid const - though technically
+            // const is correct here
+            t.visit([](internal::visitor_instance<const EmptyClass> vi)
             {
                 return false;
             });
@@ -339,20 +341,41 @@ TEST_CASE("tuple")
         {
             tuple<> v;
 
+#if __cplusplus >= 201402L
             v.visit([](auto& v)
             {
                 FAIL();
             });
+#endif
         }
         SECTION("const")
         {
             const tuple<int> v(0);
 
-            /*
-            v.visit([](const auto& v)
+#if __cplusplus >= 201402L
+            int which = v.visit([](const auto& v)
+#else
+            int which = v.visit([](variadic::v3::instance<const int> v)
+#endif
             {
-                REQUIRE(v == 0);
-            }); */
+                REQUIRE(v.value == 0);
+                return true;
+            });
+
+            REQUIRE(which == 0);
+        }
+        SECTION("array ref")
+        {
+            const char (&s)[4] = "hi!";
+            const tuple<decltype(s)> v(s);
+
+            int which = v.visit([](const auto& v)
+            {
+                REQUIRE(v.value == "hi!");
+                return true;
+            });
+
+            REQUIRE(which == 0);
         }
     }
     SECTION("sparse vs non-sparse")

@@ -59,9 +59,12 @@ public:
     {
         static_assert(concepts::v1::impl::OutStreambuf<this_type>, "Must conform to ostreambuf concept");
     }
-#else
+#elif __cpp_constexpr >= 201304L
     static constexpr bool verify_istream() { return {}; }
     static constexpr bool verify_ostream() { return {}; }
+#else
+    static void verify_istream() {}
+    static void verify_ostream() {}
 #endif
 
     int_type sungetc()

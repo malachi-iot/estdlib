@@ -47,7 +47,7 @@ struct visit_tuple_functor
         using type = typename tuple_element<I, Tuple>::const_valref_type;
         type v = get<I>(tuple);
 
-        return f(variadic::instance<I, T>{v}, std::forward<TArgs>(args)...);
+        return f(variadic::instance<I, const T>{v}, std::forward<TArgs>(args)...);
     }
 };
 
@@ -71,6 +71,22 @@ struct visitor_instance : in_place_type_t<T>
     pointer operator->() { return &value; }
     ESTD_CPP_CONSTEXPR_RET const_pointer operator->() const { return &value; }
 };
+
+// string literals like to appear this way.  We need a specialization here
+// because acquiring pointer to this guy is tricky
+template <class T, unsigned N>
+struct visitor_instance<T (&)[N]> : in_place_type_t<T (&)[N]>
+{
+    using reference = T (&)[N];
+
+    reference value;
+
+    constexpr explicit visitor_instance(reference value) : value{value} {}
+
+    // NOTE: No arrow operator - pointer is hard to do and arrow wouldn't
+    // make sense for this type anyway
+};
+
 
 }
 
