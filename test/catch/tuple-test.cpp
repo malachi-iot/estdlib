@@ -369,9 +369,13 @@ TEST_CASE("tuple")
             const char (&s)[4] = "hi!";
             const tuple<decltype(s)> v(s);
 
+#if __cplusplus >= 201402L
             int which = v.visit([](const auto& v)
+#else
+            int which = v.visit([](variadic::v3::instance<decltype(s)> v)
+#endif
             {
-                REQUIRE(v.value == "hi!");
+                REQUIRE(v.value == s);
                 return true;
             });
 

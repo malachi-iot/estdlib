@@ -116,14 +116,20 @@ protected:
     // TODO: constructor needs cleanup here
 
 #if __cpp_variadic_templates
-    template <class ...TArgs>
-    constexpr basic_ios_base(TArgs&&...args) :
-        rdbuf_(std::forward<TArgs>(args)...)
+    template <class ...Args>
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+    explicit basic_ios_base(Args&&...args) :
+        rdbuf_(std::forward<Args>(args)...)
     {
         init_signal();
     }
 
-    constexpr  basic_ios_base(streambuf_type&& streambuf) :
+#if __cpp_constexpr >= 201304L
+    constexpr
+#endif
+    explicit basic_ios_base(streambuf_type&& streambuf) :
         rdbuf_(std::move(streambuf))
     {
         init_signal();

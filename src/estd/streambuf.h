@@ -63,8 +63,8 @@ public:
     static constexpr bool verify_istream() { return {}; }
     static constexpr bool verify_ostream() { return {}; }
 #else
-    static void verify_istream() {}
-    static void verify_ostream() {}
+#define verify_istream()
+#define verify_ostream()
 #endif
 
     int_type sungetc()
@@ -239,6 +239,9 @@ struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streamb
 };
 
 }
+
+#undef verify_istream
+#undef verify_ostream
 
 
 #include "port/streambuf.h"
