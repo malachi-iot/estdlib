@@ -1,5 +1,4 @@
-#ifndef UTIL_EMBEDDED_TESTS_IOSTREAM_POSIX_STREAMBUF_H
-#define UTIL_EMBEDDED_TESTS_IOSTREAM_POSIX_STREAMBUF_H
+#pragma once
 
 // specifically for non-FEATURE_IOS_STREAMBUF_FULL mode
 
@@ -71,6 +70,13 @@ typedef ::FILE& posix_stream_t;
 
 namespace impl {
 
+// TODO: pull this in from embr_prometheus
+template <class Traits>
+struct posix_fd_streambuf : streambuf_base<Traits>
+{
+
+};
+
 struct posix_streambuf :
         native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> >
 {
@@ -109,5 +115,3 @@ public:
 
 }
 //} }
-
-#endif //UTIL_EMBEDDED_TESTS_IOSTREAM_POSIX_STREAMBUF_H

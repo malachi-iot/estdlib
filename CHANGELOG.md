@@ -2,6 +2,8 @@
 
 ## Added Features
 
+* Added `estd::detail::iostream`
+
 ## Quality Updates & Bug Fixes
 
 * Improved clang compatibility, especially with c++20 concepts and bipbuffer

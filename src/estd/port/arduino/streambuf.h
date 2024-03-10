@@ -8,15 +8,15 @@ namespace estd {
 
 namespace internal { namespace impl {
 
-template <class TTraits, class TStream>
-class arduino_streambuf_base : public streambuf_base<TTraits>
+template <class Traits, class ArduinoStream>
+class arduino_streambuf_base : public streambuf_base<Traits>
 {
 protected:
-    typedef TStream stream_type;
+    typedef ArduinoStream stream_type;
 
-    TStream* const print;
+    ArduinoStream* const print;
 
-    arduino_streambuf_base(TStream* print) : print(print) {}
+    arduino_streambuf_base(ArduinoStream* print) : print(print) {}
 };
 
 // This lets you do things with just a raw 'Print' type

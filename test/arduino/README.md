@@ -5,14 +5,15 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | Project     |   Date  | Vendor    | Platform      | Result   | Notes |
 | ----------- | ------- | --------- | ------------- | -------- | -----
 | basic       | 27JUN23 | Microchip | ARM SAMD21 m0 | Partial  | Nearly passes[^2]
-| basic       | 29JUN23 | Microchip | AVR 32u4      | Compiles |
+| basic       | 09MAR24 | Microchip | AVR 32u4      | Compiles |
 | basic       | 25FEB24 | Microchip | AVR 32u4 3.3v | Pass     |
-| basic       | 29JUN23 | Microchip | AVR Attiny    | Compiles |
+| basic       | 09MAR24 | Microchip | AVR Attiny    | Compiles |
 | basic       | 20JUL23 | Microchip | ARM SAM m4    | Pass     |
 | cstddef     | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass   | Use 'unity' project instead
 | from_chars  | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass   |
-| from_chars  | 19APR22 | Microchip | AVR 32u4      | Fail   | Compilation error `incomplete type `char_traits'`
+| from_chars  | 09MAR24 | Microchip | AVR 32u4      | Compiles |
 | from_chars  | 20APR22 | Espressif | ESP32S        | Pass   |
+| from_chars  | 09MAR24 | Microchip | ATtiny        | Compiles |
 | istream     | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass   | [^3]
 | ostream     | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | ostream     | 16NOV23 | Microchip | AVR 32u4      | Pass     |
@@ -20,7 +21,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | ostream     | 27JUN23 | Espressif | ESP32         | Compiles |
 | ostream     | 18NOV23 | Espressif | ESP32C3       | Pass     |
 | ostream     | 27JUN23 | STM       | STM32F303K8   | Compiles |
-| ostream     | 27JUN23 | Microchip | ATtiny        | Compiles |
+| ostream     | 09MAR24 | Microchip | ATtiny        | Compiles |
 | string      | 16NOV23 | Microchip | AVR 32u4      | Pass     |
 | unity       | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | unity       | 20JUL23 | Microchip | ARM SAMD51 m4 | Pass     | regular and CAN both

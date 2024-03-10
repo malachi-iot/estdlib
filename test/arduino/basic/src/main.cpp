@@ -3,8 +3,7 @@
 #include <estd/thread.h>
 #include <estd/type_traits.h>
 #include <estd/chrono.h>
-//#include <estd/iostream.h>    // FIX: Still too sloppy for prime time
-#include <estd/ostream.h>
+#include <estd/iostream.h>
 #include <estd/string.h>
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
