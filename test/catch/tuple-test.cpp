@@ -311,27 +311,49 @@ TEST_CASE("tuple")
     }
     SECTION("visiting")
     {
-        // Large overlap with 'apply' but using our own variadic namespace and a bit more powerful
-        tuple<test::NonTrivial> v(5);
-        int counter = 0;
+        SECTION("main")
+        {
+            // Large overlap with 'apply' but using our own variadic namespace and a bit more powerful
+            tuple<test::NonTrivial> v(5);
+            int counter = 0;
 
-        // NOTE: Cheating a tiny bit, since we only have 1 item in tuple we don't
-        // have to dance around and 'auto' functor.  Only a little bit cheating because
-        // this still won't compile or pass if things aren't just right.  Therefore not debt
-        v.visit(
-            [](variadic::v3::instance<test::NonTrivial> v, int& counter)
+            // NOTE: Cheating a tiny bit, since we only have 1 item in tuple we don't
+            // have to dance around and 'auto' functor.  Only a little bit cheating because
+            // this still won't compile or pass if things aren't just right.  Therefore not debt
+            v.visit(
+                [](variadic::v3::instance<test::NonTrivial> v, int& counter)
+                {
+                    ++counter;
+
+                    REQUIRE(v.value.copied_ == false);
+                    REQUIRE(v.value.moved_ == false);
+
+                    REQUIRE(v.value.code_ == 5);
+
+                    return false;
+                }, counter);
+
+            REQUIRE(counter == 1);
+        }
+        SECTION("empty")
+        {
+            tuple<> v;
+
+            v.visit([](auto& v)
             {
-                ++counter;
+                FAIL();
+            });
+        }
+        SECTION("const")
+        {
+            const tuple<int> v(0);
 
-                REQUIRE(v.value.copied_ == false);
-                REQUIRE(v.value.moved_ == false);
-
-                REQUIRE(v.value.code_ == 5);
-
-                return false;
-            }, counter);
-
-        REQUIRE(counter == 1);
+            /*
+            v.visit([](const auto& v)
+            {
+                REQUIRE(v == 0);
+            }); */
+        }
     }
     SECTION("sparse vs non-sparse")
     {

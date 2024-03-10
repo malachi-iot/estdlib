@@ -22,6 +22,8 @@ class tuple<sparse>
 {
 public:
     //static CONSTEXPR int index = 0;
+    template <class F, class ...Args>
+    constexpr bool visit(F&&, Args&&...) { return {}; }
 };
 
 
