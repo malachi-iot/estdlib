@@ -5,6 +5,7 @@
 ## Quality Updates & Bug Fixes
 
 * Improved clang compatibility, especially with c++20 concepts and bipbuffer
+* Fixed various tuple::visit edge cases https://github.com/malachi-iot/estdlib/issues/32
 
 # v0.7.0 - 02MAR24
 
