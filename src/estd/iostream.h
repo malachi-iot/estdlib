@@ -12,6 +12,19 @@
 
 namespace estd {
 
+namespace detail {
+
+template <class Streambuf>
+class basic_iostream : public basic_ostream<Streambuf, basic_istream<Streambuf> >
+{
+    using base_type = basic_ostream<Streambuf, basic_istream<Streambuf> >;
+
+public:
+    ESTD_CPP_FORWARDING_CTOR(basic_iostream);
+};
+
+}
+
 
 #ifdef FEATURE_IOS_STREAMBUF_FULL
 template <class TChar, class traits = estd::char_traits<TChar>>

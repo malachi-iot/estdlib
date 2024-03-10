@@ -89,6 +89,10 @@ concept InStreambuf = impl::StreambufBase<T> &&
     sb.sbumpc();
 };
 
+// Not naming 'Streambuf' because naming edge case the easy name seems wrong
+template <class T>
+concept InOutStreambuf = OutStreambuf<T> && InStreambuf<T>;
+
 
 }}
 #endif

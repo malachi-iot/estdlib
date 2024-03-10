@@ -25,6 +25,12 @@ class basic_ostream;
 template <ESTD_CPP_CONCEPT(concepts::v1::InStreambuf) Streambuf, class Base = internal::basic_ios<Streambuf> >
 class basic_istream;
 
+// https://github.com/malachi-iot/estdlib/issues/31
+// NOTE: this class depends on basic_istream and basic_ostream both of which enforce c++20 concepts,
+// so we elect not to
+template <class Streambuf>
+class basic_iostream;
+
 }
     
 namespace internal {

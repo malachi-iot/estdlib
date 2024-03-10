@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ostream.h"
-#include "istream.h"
+#include "iostream.h"
 #include "string.h"
 #include "internal/impl/streambuf/string.h"
 
@@ -37,17 +36,24 @@ struct basic_stringbuf : estd::internal::streambuf<
 
 #if __cpp_alias_templates
 namespace layer1 {
-template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
-using basic_ostringstream = estd::detail::basic_ostream<layer1::basic_out_stringbuf<TChar, N, null_terminated, Traits> >;
+template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_ostringstream = estd::detail::basic_ostream<layer1::basic_out_stringbuf<Char, N, null_terminated, Traits> >;
 
-template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
-using basic_istringstream = estd::detail::basic_istream<layer1::basic_stringbuf<TChar, N, null_terminated, Traits> >;
+template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_istringstream = estd::detail::basic_istream<layer1::basic_stringbuf<Char, N, null_terminated, Traits> >;
+
+template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_stringstream = estd::detail::basic_iostream<layer1::basic_stringbuf<Char, N, null_terminated, Traits> >;
 
 template<size_t N, bool null_terminated = true>
 using ostringstream = basic_ostringstream<char, N, null_terminated>;
 
 template<size_t N, bool null_terminated = true>
 using istringstream = basic_istringstream<char, N, null_terminated>;
+
+template<size_t N, bool null_terminated = true>
+using stringstream = basic_stringstream<char, N, null_terminated>;
+
 }
 #endif
 
