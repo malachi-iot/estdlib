@@ -27,4 +27,31 @@ using basic_ios = estd::internal::basic_ios<posix_streambuf <TChar, Traits> >;
 //typedef
 //basic_ios<char> ios;
 
+// NOTE: These deviate from spec in thair attachment to ostream - necessary due to lack of virtual functions
+// Placing here in ios.h anyway just for discoverability and also with hopes c++20 concepts slightly
+// decouple us from ostream (though we may never care)
+
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& dec(detail::basic_ostream<Streambuf, Base>& out)
+{
+    out.setf(ios_base::dec, ios_base::basefield);
+    return out;
+}
+
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& hex(detail::basic_ostream<Streambuf, Base>& out)
+{
+    out.setf(ios_base::hex, ios_base::basefield);
+    return out;
+}
+
+#if FEATURE_ESTD_OSTREAM_OCTAL
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& oct(detail::basic_ostream<Streambuf, Base>& out)
+{
+    out.setf(ios_base::oct, ios_base::basefield);
+    return out;
+}
+#endif
+
 }

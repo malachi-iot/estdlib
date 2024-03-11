@@ -34,20 +34,6 @@ inline detail::basic_ostream<TStreambuf, TBase>& endl(
     return os;
 }
 
-// We have this out here rather than ios_base because of our deviation from virtual methods
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& dec(detail::basic_ostream<TStreambuf, TBase>& __os)
-{
-    __os.setf(ios_base::dec, ios_base::basefield);
-    return __os;
-}
-
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& hex(detail::basic_ostream<TStreambuf, TBase>& __os)
-{
-    __os.setf(ios_base::hex, ios_base::basefield);
-    return __os;
-}
 
 // TODO: All of the below are noop, feature not fully built out
 // NOTE: 'internal' alignment not easy to do since it collides with our namespace
