@@ -44,6 +44,16 @@ public:
 
     }
 
+    template <class Policy2>
+    constexpr basic_string_view(
+        const basic_string_view<Policy2>& other) :
+        // NOTE: Similar to layer3::string init issue, other.size() may properly resulit
+        // in narrowing warnings
+        base_type(init_param_t(other.data(), other.size()))
+    {
+
+    }
+
 
     basic_string_view(const basic_string_view& other)
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
@@ -53,6 +63,15 @@ public:
     {
     }
 #endif
+
+    /*
+    template <class Policy2>
+    basic_string_view& operator=(const basic_string_view<Policy2>& other)
+    {
+        // DEBT: Placement new far from ideal here.  An allocator re-init
+        // is what we really need
+        return * new (this) basic_string_view(other);
+    }   */
 
 
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY

@@ -37,6 +37,10 @@ template <>
 struct is_const_tag_exp_base<true> { typedef void is_constant_tag_exp; };
 
 
+// 12MAR24 MB - these have proven useful and reliable enough to graduate from
+// 'experimental' namespace to 'internal'.  Naming and usage is still too squirrely
+// to put into 'detail'
+
 // explicit constant specified here because:
 // - char_traits by convention doesn't specify const
 // - even if it did, this policy applies to non string allocated arrays too

@@ -10,7 +10,8 @@ using namespace estd;
 
 #include "macro/push.h"
 
-//using tiny_string_view = basic_string_view<
+using tiny_string_view = detail::basic_string_view<
+    estd::experimental::sized_string_policy<char_traits<char>, uint8_t, true> >;
 
 TEST_CASE("string_view")
 {
@@ -18,13 +19,15 @@ TEST_CASE("string_view")
     {
         string_view sv("test", 4);
         string_view sv2 = sv;
-        string_view sv3 = "test3";
+        tiny_string_view sv3 = "test3";
 
         int sz = sizeof(sv);
 
         // policy makes all strings default to size type of uint16_t
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        //REQUIRE(sizeof(string_view::size_type) == sizeof(uint16_t));
+        REQUIRE(sizeof(tiny_string_view::size_type) == sizeof(uint8_t));
+        // Nope, due to alignment/packing
+        //REQUIRE(sizeof(tiny_string_view) == sizeof(char*) + 1);
 #endif
         REQUIRE(sz == sizeof(char*) + sizeof(size_t));
 
