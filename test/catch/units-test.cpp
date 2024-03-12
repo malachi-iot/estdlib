@@ -116,7 +116,8 @@ TEST_CASE("units")
         REQUIRE(percent3.count() == 50.7);
 
         REQUIRE(percent3 == 50.7_pct);
-        REQUIRE(percent1 == percent3);
+        bool comp = percent1 == percent3;
+        REQUIRE(comp);
 
         // lhs precision is lower so dangling .7% falls away
         REQUIRE(50_pct == percent1);
