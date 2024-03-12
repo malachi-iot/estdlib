@@ -7,7 +7,7 @@ namespace estd {
 
 namespace detail {
 
-template <class Policy>
+template <ESTD_CPP_CONCEPT(internal::StringPolicy) Policy>
 class basic_string_view :
     public detail::basic_string<internal::impl::allocated_array<
             layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy> >

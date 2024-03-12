@@ -111,16 +111,15 @@ public:
     }
 };
 
-}
-
-template <class Impl>
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 ESTD_CPP_CONSTEXPR_RET bool operator ==(
-    const detail::basic_string<Impl>& lhs,
-    typename detail::basic_string<Impl>::const_pointer rhs)
+    const basic_string<Impl>& lhs,
+    typename basic_string<Impl>::const_pointer rhs)
 {
     return lhs.compare(rhs) == 0;
 }
 
+}
 
 namespace internal {
 

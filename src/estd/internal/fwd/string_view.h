@@ -10,7 +10,8 @@ namespace estd {
 
 namespace detail {
 
-template <class Policy>
+// NOTE: One could potentially abuse this and do a non-const policy
+template <ESTD_CPP_CONCEPT(internal::StringPolicy) Policy>
 class basic_string_view;
 
 }
