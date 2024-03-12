@@ -53,6 +53,7 @@ test/**/packages/
 
 # Visual Studio code specific
 .vscode/ipch
+**/.vscode/settings.json
 
 # esp-idf: compote
 dist/

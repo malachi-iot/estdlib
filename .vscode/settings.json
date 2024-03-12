@@ -22,5 +22,6 @@
         "fstream": "cpp",
         "streambuf": "cpp"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/test/catch"
+    "cmake.sourceDirectory": "${workspaceFolder}/test/catch",
+    "idf.portWin": "COM3"
 }

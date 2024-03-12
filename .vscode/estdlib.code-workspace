@@ -1,0 +1,41 @@
+{
+	"folders": [
+		{
+			"path": "..",
+			"name": "root"
+		},
+		{
+			"path": "../test/rtos/esp32/basic",
+			"name": "test: basic"
+		},
+		{
+			"path": "../test/rtos/esp32/unity",
+			"name": "test: unity"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"chrono": "cpp",
+			"__locale": "cpp",
+			"regex": "cpp",
+			"sstream": "cpp",
+			"identify_platform.h": "c",
+			"system_error": "cpp",
+			"iosfwd": "cpp",
+			"esp-idf.h": "c",
+			"*.tcc": "cpp",
+			"optional": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"ratio": "cpp",
+			"array": "cpp",
+			"functional": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"variant": "cpp",
+			"fstream": "cpp",
+			"streambuf": "cpp"
+		}
+	}
+}
