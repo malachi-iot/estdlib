@@ -85,6 +85,9 @@ public:
         // FIX: very bad -- don't leave things locked!
         // only doing this because we often pass around layer1, layer2, layer3 strings who
         // don't care about lock/unlock
+        // DEBT: Precision loss here generates warnings and rightly so.  This whole
+        // init mechanism needs a rework - or a deprecation completely, since layer3::basic_string
+        // is more or less a basic_string_view
         : base_t(init_t(copy_from.clock(), copy_from.max_size()))
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
