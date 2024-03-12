@@ -113,6 +113,15 @@ public:
 
 }
 
+template <class Impl>
+ESTD_CPP_CONSTEXPR_RET bool operator ==(
+    const detail::basic_string<Impl>& lhs,
+    typename detail::basic_string<Impl>::const_pointer rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
+
 namespace internal {
 
 // Phase this out in favor of always using detail::basic_string

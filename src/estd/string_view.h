@@ -5,19 +5,15 @@
 
 namespace estd {
 
-template <class CharT,
-          class Traits,
-          // NOTE: Because this is marked as a 'const' string policy, resize-ish operations
-          // are not as available (thus affecting remove_suffix).  Might be prudent to make
-          // a special 'view' policy which is mostly const, but permits changes to size/pointer
-          class Policy
-          >
+namespace detail {
+
+template <class Policy>
 class basic_string_view :
     public detail::basic_string<internal::impl::allocated_array<
-            layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
+            layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy> >
 {
     typedef detail::basic_string<internal::impl::allocated_array<
-        layer3::allocator<const CharT, typename Policy::size_type>, Policy> >
+        layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy> >
         base_type;
 
     typedef typename base_type::allocator_type allocator_type;
@@ -35,14 +31,14 @@ public:
     // scenario
     basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
 
-    ESTD_CPP_CONSTEXPR_RET basic_string_view(const CharT* s, size_type count) :
+    ESTD_CPP_CONSTEXPR_RET basic_string_view(const_pointer s, size_type count) :
         base_type(init_param_t(s, count))
     {
 
     }
 
     // C-style null terminated string
-    ESTD_CPP_CONSTEXPR_RET basic_string_view(const CharT* s) :
+    ESTD_CPP_CONSTEXPR_RET basic_string_view(const_pointer s) :
         base_type(init_param_t(s, strlen(s)))
     {
 
@@ -121,6 +117,7 @@ public:
 #endif
 };
 
+}
 
 typedef basic_string_view<char> string_view;
 

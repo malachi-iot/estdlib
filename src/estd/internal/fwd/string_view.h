@@ -15,10 +15,13 @@ class basic_string_view;
 
 }
 
-template <class CharT,
-    class Traits = estd::char_traits<typename estd::remove_const<CharT>::type>,
+// NOTE: Because this is marked as a 'const' string policy, resize-ish operations
+// are not as available (thus affecting remove_suffix).  Might be prudent to make
+// a special 'view' policy which is mostly const, but permits changes to size/pointer
+template <class Char,
+    class Traits = estd::char_traits<typename estd::remove_const<Char>::type>,
     class Policy = experimental::sized_string_policy<Traits, size_t, true> >
-class basic_string_view;
+using basic_string_view = detail::basic_string_view<Policy>;
 
 #if __cpp_concepts
 namespace concepts { inline namespace v1 {

@@ -265,16 +265,6 @@ bool operator ==( const basic_string<typename TraitsLeft::char_type, TraitsLeft,
     return lhs.compare(rhs) == 0;
 } */
 
-template <class Impl>
-ESTD_CPP_CONSTEXPR_RET bool operator ==(
-    const detail::basic_string<Impl>& lhs,
-    typename detail::basic_string<Impl>::const_pointer rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
-
-
 // have to do this because of our special const char stuff
 // initial tests doing std::char_traits<const char> seem to work, but I don't
 // trust them - where do they specialize to?

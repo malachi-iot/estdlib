@@ -31,7 +31,8 @@ TEST_CASE("string_view")
         REQUIRE(sv3.starts_with(sv));
         REQUIRE(sv2 == sv);
         REQUIRE(sv2.compare(sv) == 0);
-        REQUIRE(sv2 == "test");
+        bool comp = sv2 == "test";
+        REQUIRE(comp);
 
         // NOTE: Only works in an experimental capacity right now.  Adjusted
         // layer3::allocator to have experimental setters to adjust its pointer
