@@ -155,22 +155,19 @@ public:
     }
 
 public:
-    explicit constexpr unit_base(const Rep& rep_) : rep_{rep_} {}
+    explicit constexpr unit_base(const Rep& rep) : rep_{rep} {}
 
     // Converting only precision or F modified
     template <class Rep2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    constexpr unit_base(const unit_base<Rep2, Period, Tag, F2>& s) : rep_{s.count()}
+    constexpr explicit unit_base(const unit_base<Rep2, Period, Tag, F2>& s) : rep_{s.count()}
     {
     }
 
     template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    constexpr unit_base(const unit_base<Rep2, Period2, Tag, F2>& s) : rep_{convert_from(s)}
+    constexpr explicit unit_base(const unit_base<Rep2, Period2, Tag, F2>& s) : rep_{convert_from(s)}
     {
     }
 
-    // DEBT: Made this assignment operator because Clang-Tidy wants converting constructor
-    // marked as explicit.  However, implicit conversion between unit scaling and precision
-    // is immensely useful, so keeping it non-explicit for now
     template <class Rep2, class Period2, class F2>
     unit_base& operator=(const unit_base<Rep2, Period2, Tag, F2>& copy_from)
     {
@@ -201,7 +198,13 @@ public:
     // DEBT: Not tested against F() adjuster
     constexpr bool operator==(const unit_base& compare_to) const
     {
-        return rep_ == compare_to.rep_;
+        return count() == compare_to.count();
+    }
+
+    template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
+    constexpr bool operator==(const unit_base<Rep2, Period2, tag_type, F2>& compare_to) const
+    {
+        return *this == unit_base(compare_to);
     }
 
     unit_base& operator +=(const unit_base& v)
