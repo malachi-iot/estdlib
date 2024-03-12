@@ -8,9 +8,16 @@
 
 namespace estd {
 
+namespace detail {
+
+template <class Policy>
+class basic_string_view;
+
+}
+
 template <class CharT,
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type>,
-    class Policy = experimental::sized_string_policy<Traits, int16_t, true> >
+    class Policy = experimental::sized_string_policy<Traits, size_t, true> >
 class basic_string_view;
 
 #if __cpp_concepts

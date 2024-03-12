@@ -48,16 +48,16 @@ struct buffer_policy : is_const_tag_exp_base<constant_>
     static CONSTEXPR bool is_constant() { return constant_; }
 };
 
-template <class TCharTraits, class TSize = int16_t, bool constant = false >
+template <class CharTraits, class TSize, bool constant = false >
 struct string_policy : buffer_policy<TSize, constant>
 {
-    typedef TCharTraits char_traits;
+    typedef CharTraits char_traits;
 };
 
 
 // Denotes a string whose size is tracked via traditional C null termination
-template <class TCharTraits, class TSize = int16_t, bool constant = false>
-struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, constant>
+template <class CharTraits, class TSize = size_t, bool constant = false>
+struct null_terminated_string_policy : public string_policy<CharTraits, TSize, constant>
 {
     typedef void is_null_terminated_exp_tag;
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
@@ -69,8 +69,8 @@ struct null_terminated_string_policy : public string_policy<TCharTraits, TSize, 
 
 
 // Denotes a string whose buffer size is tracked at runtime via an integer
-template <class TCharTraits, class TSize = int16_t, bool constant = false>
-struct sized_string_policy  : public string_policy<TCharTraits, TSize, constant>
+template <class CharTraits, class TSize = size_t, bool constant = false>
+struct sized_string_policy  : public string_policy<CharTraits, TSize, constant>
 {
     // NOTE: As of this writing, this tag is not used
     typedef void is_explicitly_sized_tag_exp;
@@ -91,10 +91,10 @@ namespace internal { namespace impl {
 
 // applies generally to T[N], RW buffer but also to non-const T*
 // applies specifically to null-terminated
-template <class T, size_t len, class TBuffer, class TCharTraits, bool is_const>
+template <class T, size_t len, class TBuffer, class CharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_allocator<T, len, TBuffer>,
-        experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> >
+        experimental::null_terminated_string_policy<CharTraits, int16_t, is_const> >
         : public dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true, false >
 {
     typedef dynamic_array_base<single_fixedbuf_allocator<T, len, TBuffer>, true, false > base_t;
@@ -127,10 +127,10 @@ public:
 
 // runtime (layer3-ish) version
 // null terminated
-template <class T, class TCharTraits, bool is_const>
+template <class T, class CharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_runtimesize_allocator<T>,
-        experimental::null_terminated_string_policy<TCharTraits, int16_t, is_const> > :
+        experimental::null_terminated_string_policy<CharTraits, int16_t, is_const> > :
         public dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true, false >
 {
     typedef dynamic_array_base<single_fixedbuf_runtimesize_allocator<T>, true, false > base_t;
@@ -153,10 +153,10 @@ public:
 // - size is 1:1 with max_size() allocated
 // we could have pretended we were null-terminated to specialize out size variable, but that's
 // misleading and confusing
-template <class T, class TCharTraits, bool is_const>
+template <class T, class CharTraits, bool is_const>
 class dynamic_array<
         single_fixedbuf_runtimesize_allocator<const T, size_t>,
-        experimental::sized_string_policy<TCharTraits, int16_t, is_const> >
+        experimental::sized_string_policy<CharTraits, int16_t, is_const> >
         : public estd::internal::handle_descriptor_base<
             single_fixedbuf_runtimesize_allocator<const T, size_t>,
             true, true, true, true>
