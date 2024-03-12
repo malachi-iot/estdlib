@@ -2,13 +2,14 @@
 
 ## Added Features
 
-* Added `estd::detail::iostream`
+* [#31](https://github.com/malachi-iot/estdlib/issues/31) Added `estd::detail::iostream`
 
 ## Quality Updates & Bug Fixes
 
 * Improved clang compatibility, especially with c++20 concepts and bipbuffer
-* Fixed various tuple::visit edge cases https://github.com/malachi-iot/estdlib/issues/32
-* Fixed minor glitch with `dec`, `hex` manipulator dependencies https://github.com/malachi-iot/estdlib/issues/33
+* [#24](https://github.com/malachi-iot/estdlib/issues/24) Switched default size_type of strings from `int16` -> `size_t` (can still override with policy)
+* [#32](https://github.com/malachi-iot/estdlib/issues/32) Fixed various tuple::visit edge cases
+* [#33](https://github.com/malachi-iot/estdlib/issues/33) Fixed minor glitch with `dec`, `hex` manipulator dependencies
 
 # v0.7.0 - 02MAR24
 
