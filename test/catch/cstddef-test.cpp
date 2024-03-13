@@ -1,4 +1,5 @@
 #include <estd/cstddef.h>
+#include <estd/cstdint.h>
 
 #include <catch.hpp>
 
