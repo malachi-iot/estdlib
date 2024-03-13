@@ -29,3 +29,13 @@ typedef ::uint64_t int_least64_t;
 
 }
 #endif
+
+// Consumers SHOULD NOT use these but rather the above aliased std:: versions.  This exists in
+// support of edge case libraries that want a full alias to std, such as dragonbox
+namespace estd {
+
+typedef std::int_least16_t int_least16_t;
+typedef std::int_least32_t int_least32_t;
+typedef std::int_least64_t int_least64_t;
+
+}

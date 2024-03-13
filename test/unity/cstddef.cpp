@@ -1,6 +1,7 @@
 #include "unit-test.h"
 
 #include <estd/cstddef.h>
+#include <estd/cstdint.h>
 
 static void test_byte_shift()
 {
@@ -9,6 +10,11 @@ static void test_byte_shift()
     value <<= 1;
 
     TEST_ASSERT_EQUAL_HEX8(2, estd::to_integer<int>(value));
+}
+
+
+static void test_variant_int_types()
+{
 }
 
 
@@ -26,5 +32,6 @@ void test_cstddef()
 {
 	RUN_TEST(test_byte_shift);
     RUN_TEST(test_nullptr_t);
+    RUN_TEST(test_variant_int_types);
 }
 
