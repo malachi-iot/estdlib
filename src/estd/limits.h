@@ -28,12 +28,19 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
-#if __AVR__
-// DEBT: Pretty clunky.  __AVR__ target seems to have 64-bit support
+#if __AVR__ || ESP_PLATFORM
+// DEBT: Pretty clunky.  __AVR__ & ESP32 target seems to have 64-bit support
 // mapped to "long long", but it is missing this crucial macro
 #define LLONG_MAX       9223372036854775807
 #endif
+
+#ifdef LLONG_MAX
 #define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
+#elif defined(LLONG_WIDTH)
+#define SIZEOF_LLONG    (LLONG_WIDTH / 8)
+#else
+#error
+#endif
 #define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
 #define SIZEOF_INT      SIZEOF_INTEGER(INT_MAX)
 #define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
