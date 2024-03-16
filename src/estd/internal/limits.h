@@ -5,10 +5,12 @@
 
 #ifdef FEATURE_STD_CLIMITS
 #include <climits>
+#include <cfloat>
 #else
 // NOTE: Keep an eye on this, make sure we are pulling in proper standard limits.h
 // -- and in fact, our filename probably should be climits.h
 #include <limits.h>
+#include <float.h>
 
 #endif
 
@@ -82,6 +84,7 @@ struct integer_limits : signed_traits<T, is_signed_>
     static CONSTEXPR bool is_signed = is_signed_;
     static CONSTEXPR int digits = bits - (is_signed ? 1 : 0);
     static CONSTEXPR bool is_iec559 = false;
+    static CONSTEXPR unsigned radix = 2;
 
     /// Retrieves maximum length a string of this int, accounting for
     /// base representation
@@ -108,6 +111,7 @@ struct float_limits
 
     static CONSTEXPR bool is_integer = false;
     static CONSTEXPR bool is_signed = is_signed_;
+    static CONSTEXPR unsigned radix = FLT_RADIX;
 
 #if defined(__GCC_IEC_559) || defined(__STDC_IEC_559__)
     static CONSTEXPR bool is_iec559 = true;

@@ -36,6 +36,7 @@ namespace estd {
 #define LLONG_WIDTH     64
 #endif
 
+// DEBT: Move away from SIZEOF_xxx in favor of standards-based xxx_WIDTH
 #ifdef LLONG_MAX
 #define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
 #elif defined(LLONG_WIDTH)
@@ -46,12 +47,13 @@ namespace estd {
 #define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
 #define SIZEOF_CHAR     SIZEOF_INTEGER(CHAR_MAX)
 
+// TODO: Check against _ISOC2X_SOURCE
 #ifndef SHRT_WIDTH
 #define SHRT_WIDTH      (8*SIZEOF_SHORT)
 #define INT_WIDTH       (8*SIZEOF_INT)
 #define LONG_WIDTH      (8*SIZEOF_LONG)
 #endif
-#if !defined(LLONG_WIDTH) && defined(LLONG_MAX)
+#if !defined(LLONG_WIDTH) && defined(SIZEOF_LLONG)
 #define LLONG_WIDTH     (8*SIZEOF_LLONG)
 #endif
 
