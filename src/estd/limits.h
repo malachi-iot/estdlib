@@ -28,11 +28,23 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
+#if __AVR__
+// DEBT: Pretty clunky.  __AVR__ target seems to have 64-bit support
+// mapped to "long long", but it is missing this crucial macro
+#define LLONG_MAX       9223372036854775807
+#endif
 #define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
 #define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
 #define SIZEOF_INT      SIZEOF_INTEGER(INT_MAX)
 #define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
 #define SIZEOF_CHAR     SIZEOF_INTEGER(CHAR_MAX)
+
+#ifndef SHRT_WIDTH
+#define SHRT_WIDTH      (8*SIZEOF_SHORT)
+#define INT_WIDTH       (8*SIZEOF_INT)
+#define LONG_WIDTH      (8*SIZEOF_LONG)
+#define LLONG_WIDTH     (8*SIZEOF_LLONG)
+#endif
 
 namespace internal {
 
@@ -136,6 +148,8 @@ struct numeric_limits<__int128> :  internal::integer_limits<__int128, true>
 
 }
 
+// DEBT: Innocuous code, but incorrect.
+// SIZEOF_CHAR "is always 1" https://isocpp.org/wiki/faq/intrinsic-types#sizeof-char
 #if SIZEOF_CHAR == 16
 template <> struct numeric_limits<signed char> : internal::numeric_limits<int16_t> {};
 template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint16_t> {};
