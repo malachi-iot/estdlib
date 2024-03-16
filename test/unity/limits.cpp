@@ -11,10 +11,31 @@ static void test_limits_1()
     TEST_ASSERT_EQUAL(127, estd::numeric_limits<int8_t>::max());
 }
 
+static void test_limits_least32()
+{
+    TEST_ASSERT(estd::numeric_limits<estd::uint_least32_t>::is_signed == false);
+    TEST_ASSERT_EQUAL(UINT_LEAST32_MAX, estd::numeric_limits<uint_least32_t>::max());
+
+    TEST_ASSERT(estd::numeric_limits<estd::int_least32_t>::is_signed);
+    TEST_ASSERT_EQUAL(INT_LEAST32_MAX, estd::numeric_limits<int_least32_t>::max());
+}
+
+
 static void test_limits_least64()
 {
-    TEST_ASSERT(estd::numeric_limits<estd::uint_least64_t>::is_signed);
-    TEST_ASSERT_EQUAL(INT_LEAST64_MAX, estd::numeric_limits<uint_least64_t>::max());
+    TEST_ASSERT(estd::numeric_limits<estd::uint_least64_t>::is_signed == false);
+    TEST_ASSERT(estd::numeric_limits<estd::int_least64_t>::is_signed);
+    TEST_ASSERT_EQUAL(8, sizeof(estd::uint_least64_t));
+    TEST_ASSERT_EQUAL(8, sizeof(estd::int_least64_t));
+
+// DEBT: Check unity flags for availability of 64 bit tests
+#if __AVR__
+    TEST_ASSERT_TRUE(UINT_LEAST64_MAX == estd::numeric_limits<uint_least64_t>::max());
+    TEST_ASSERT_TRUE(INT_LEAST64_MAX == estd::numeric_limits<int_least64_t>::max());
+#else
+    TEST_ASSERT_EQUAL_UINT64(UINT_LEAST64_MAX, estd::numeric_limits<uint_least64_t>::max());
+    TEST_ASSERT_EQUAL_INT64(INT_LEAST64_MAX, estd::numeric_limits<int_least64_t>::max());
+#endif
 }
 
 
@@ -25,5 +46,6 @@ void test_limits()
 #endif
 {
     RUN_TEST(test_limits_1);
+    RUN_TEST(test_limits_least32);
     RUN_TEST(test_limits_least64);
 }

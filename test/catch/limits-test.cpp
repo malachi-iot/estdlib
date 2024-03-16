@@ -224,4 +224,8 @@ TEST_CASE("limits & common_type tests")
             REQUIRE(v);
         }
     }
+    SECTION("least/fast")
+    {
+        REQUIRE(estd::numeric_limits<estd::uint_least64_t>::max() == UINT_LEAST64_MAX);
+    }
 }
