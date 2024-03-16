@@ -28,18 +28,18 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
+// TODO: Use ESTD_ARCH_BITNESS to assist here -- 32 bit targets let's
+// presume a 64-bit long long exists, but do give a warning
 #if __AVR__ || ESP_PLATFORM
 // DEBT: Pretty clunky.  __AVR__ & ESP32 target seems to have 64-bit support
 // mapped to "long long", but it is missing this crucial macro
-#define LLONG_MAX       9223372036854775807
+#define LLONG_WIDTH     64
 #endif
 
 #ifdef LLONG_MAX
 #define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
 #elif defined(LLONG_WIDTH)
 #define SIZEOF_LLONG    (LLONG_WIDTH / 8)
-#else
-#error
 #endif
 #define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
 #define SIZEOF_INT      SIZEOF_INTEGER(INT_MAX)
@@ -50,6 +50,8 @@ namespace estd {
 #define SHRT_WIDTH      (8*SIZEOF_SHORT)
 #define INT_WIDTH       (8*SIZEOF_INT)
 #define LONG_WIDTH      (8*SIZEOF_LONG)
+#endif
+#if !defined(LLONG_WIDTH) && defined(LLONG_MAX)
 #define LLONG_WIDTH     (8*SIZEOF_LLONG)
 #endif
 
@@ -189,17 +191,22 @@ template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint1
 #if SIZEOF_LONG == 8
 template <> struct numeric_limits<long> : internal::numeric_limits<int64_t> {};
 template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint64_t> {};
-#else
+#elif SIZEOF_LONG == 4
 template <> struct numeric_limits<long> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint32_t> {};
+#else
+#error Failed SIZEOF_LONG sanity check
 #endif
 
 #if SIZEOF_LLONG == 8
 template <> struct numeric_limits<long long> : internal::numeric_limits<int64_t> {};
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint64_t> {};
-#else
+#elif SIZEOF_LLONG == 4
+// DEBT: I am not convinced any has a 32-bit long long, and I am not convinced anyone should
 template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
+#else
+#error Failed SIZEOF_LLONG sanity check
 #endif
 
 template <> struct numeric_limits<bool>
