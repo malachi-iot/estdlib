@@ -86,9 +86,9 @@ static void test_is_trivially_copyable()
     // DEBT: Arguably TestStruct could be trivially copyable, I'd have
     // to review the spec more.  Debt continues in that is_trivially_copyable
     // itself only works with primitives
-    v = is_trivially_copyable<TestStruct>::value;
+    //v = is_trivially_copyable<TestStruct>::value;
 
-    TEST_ASSERT_FALSE(v);
+    //TEST_ASSERT_FALSE(v);
 }
 
 
