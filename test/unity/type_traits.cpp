@@ -77,6 +77,20 @@ static void test_is_assignable()
     TEST_ASSERT_TRUE(v);
 }
 
+static void test_is_trivially_copyable()
+{
+    bool v = is_trivially_copyable<const char*>::value;
+
+    TEST_ASSERT_TRUE(v);
+
+    // DEBT: Arguably TestStruct could be trivially copyable, I'd have
+    // to review the spec more.  Debt continues in that is_trivially_copyable
+    // itself only works with primitives
+    v = is_trivially_copyable<TestStruct>::value;
+
+    TEST_ASSERT_FALSE(v);
+}
+
 
 #ifdef ESP_IDF_TESTING
 TEST_CASE("compile time type_traits", "[type_traits]")
@@ -89,4 +103,5 @@ void test_type_traits()
     RUN_TEST(test_is_constructible);
     RUN_TEST(test_is_convertible);
     RUN_TEST(test_is_assignable);
+    RUN_TEST(test_is_trivially_copyable);
 }

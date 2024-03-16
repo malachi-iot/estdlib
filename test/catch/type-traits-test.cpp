@@ -70,6 +70,7 @@ TEST_CASE("type traits tests")
     {
         using should_be_uint16_t = make_unsigned_t<int16_t>;
 
+        REQUIRE(is_unsigned<should_be_uint16_t>::value);
         REQUIRE(is_same<uint16_t, should_be_uint16_t>::value);
     }
     SECTION("decay")

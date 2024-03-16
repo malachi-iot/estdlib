@@ -36,7 +36,7 @@ template< class T > struct ___is_pointer     : false_type {};
 template< class T > struct ___is_pointer<T*> : true_type {};
 
 template<typename T,bool = is_arithmetic<T>::value>
-struct is_signed : integral_constant<bool, T(-1) < T(0)> {};
+struct is_signed : bool_constant<T(-1) < T(0)> {};
 
 template<typename T>
 struct is_signed<T,false> : false_type {};
@@ -45,6 +45,9 @@ struct is_signed<T,false> : false_type {};
 
 template<typename T>
 struct is_signed : internal::is_signed<T>::type {};
+
+template<typename T>
+struct is_unsigned : bool_constant<!is_signed<T>::value> {};
 
 template< class T > struct is_pointer : internal::___is_pointer<typename remove_cv<T>::type> {};
 
