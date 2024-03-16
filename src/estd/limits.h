@@ -238,6 +238,12 @@ struct numeric_limits<float> : internal::float_limits<float>
     {
         return __FLT_MAX__;
     }
+
+    static CONSTEXPR unsigned digits = FLT_MANT_DIG;
+    static CONSTEXPR unsigned digits10 = FLT_DIG;
+#if FLT_DECIMAL_DIG
+    static CONSTEXPR unsigned max_digita10 = FLT_DECIMAL_DIG;
+#endif
 };
 #endif
 
@@ -259,6 +265,12 @@ struct numeric_limits<double> : internal::float_limits<double>
     {
         return __DBL_MAX__;
     }
+
+    static CONSTEXPR unsigned digits = DBL_MANT_DIG;
+    static CONSTEXPR unsigned digits10 = DBL_DIG;
+#if DBL_DECIMAL_DIG
+    static CONSTEXPR unsigned max_digita10 = DBL_DECIMAL_DIG;
+#endif
 };
 #endif
 
