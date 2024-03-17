@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "fwd/limits.h"
+#include "type_traits.h"
 
 #ifdef FEATURE_STD_CLIMITS
 #include <climits>

@@ -28,7 +28,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | unity       | 16MAR24 | Microchip | AVR 32u4      | Partial  | Passes except for `variant` subtleties[^1]
 | unity       | 09AUG23 | Espressif | ESP32S        | Fail     | FreeRTOS related compile errors
 | unity       | 16NOV23 | Espressif | ESP32C3       | Compiles |
-| unity       | 27JUN23 | STM       | STM32F303K8   | Compiles |
+| unity       | 17MAR24 | STM       | STM32F303K8   | Compiles |
 | unity       | 27JUN23 | Microchip | ATtiny        | Fail     | Not enough space on chip + variant issues[^1]
 
 ## Footnotes

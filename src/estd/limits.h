@@ -5,18 +5,12 @@
  */
 #pragma once
 
+#include "internal/feature/estd.h"
 #include "internal/limits.h"
 #include "cstdint.h"
 #include "cstddef.h"
 
-// Reduced-dependency flavor - for integral_constant only
-// DEBT: Might be better to make a new "traits/type/integral_constant.h" and friends to
-// more clearly provide that
-#include "internal/type_traits.h"
-
-#if FEATURE_CPP_PUSH_MACRO
 #include "internal/macro/push.h"
-#endif
 
 namespace estd {
 
@@ -28,7 +22,14 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
-#if __AVR__ || ESP_PLATFORM || __arm__
+#if LONG_LONG_TYPE_SIZE
+// NOTE: Nobody seems to reach here.  Perhaps I need explicit includes, or it's been
+// deprecated?
+#ifndef LLONG_WIDTH
+#define LLONG_WIDTH LONG_LONG_TYPE_SIZE
+#endif
+// DEBT: xtensa and riscv might in theory be 64-bit here, causing a duplicate define
+#elif __AVR__ || __xtensa__ || __arm__ || __riscv
 // DEBT: Pretty clunky.  __AVR__ & ESP32 && arm32 seems to have 64-bit support
 // mapped to "long long", but it is missing this crucial macro.  Some kind of stdlib thing?
 #define LLONG_WIDTH     64
@@ -283,6 +284,5 @@ struct numeric_limits<double> : internal::float_limits<double>
 
 }
 
-#if FEATURE_CPP_PUSH_MACRO
 #include "internal/macro/pop.h"
-#endif
+

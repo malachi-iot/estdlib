@@ -72,6 +72,11 @@
 #elif __riscv
 // https://github.com/riscv-non-isa/riscv-c-api-doc/blob/master/riscv-c-api.md
 #define ESTD_MCU_RISCV
+#elif __xtensa__
+#if FEATURE_ESTD_COMPILE_VERBOSITY > 2
+#warning "Assuming Xtensa 32 bit architecture"
+#endif
+#define ESTD_ARCH_BITNESS   32
 #else
 #if FEATURE_ESTD_COMPILE_VERBOSITY > 0
 #warning "Assuming 32 bit architecture"

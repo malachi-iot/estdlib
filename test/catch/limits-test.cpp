@@ -1,7 +1,7 @@
 #include <catch.hpp>
 
-#include <estd/chrono.h>
 #include <estd/limits.h>
+#include <estd/type_traits.h>
 
 using namespace estd;
 
