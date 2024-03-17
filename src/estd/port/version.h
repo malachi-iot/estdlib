@@ -6,7 +6,7 @@
 
 #define ESTD_VER_MAJOR     0
 #define ESTD_VER_MINOR     7
-#define ESTD_VER_PATCH     0
+#define ESTD_VER_PATCH     1
 
-#define ESTD_VERSION  ESTD_BUILD_SEMVER(0, 7, 0)
-#define ESTD_VERSION_STR "0.7.0"
+#define ESTD_VERSION  ESTD_BUILD_SEMVER(0, 7, 1)
+#define ESTD_VERSION_STR "0.7.1"
