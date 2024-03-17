@@ -28,7 +28,7 @@ message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
 # DEBT: Include <catch2/catch.hpp> directly and don't rely on this
 INCLUDE_DIRECTORIES(${Catch2_SOURCE_DIR}/include)
 
-add_subdirectory(${ESTD_DIR} estd)
+add_subdirectory(${ROOT_DIR} estd)
 
 add_executable(${PROJECT_NAME} "main.cpp")
 

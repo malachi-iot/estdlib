@@ -15,9 +15,11 @@ include(${TOOLS_DIR}/version.cmake)
 include(sources.cmake)
 
 set(SOURCE_FILES ${SOURCE_FILES}
-    estd/internal/utility.cpp
-    estd/port/posix/streambuf.cpp
+    internal/utility.cpp
+    port/posix/streambuf.cpp
     )
+
+list(TRANSFORM SOURCE_FILES PREPEND estd/)
 
 
 # Guidance from [2.1], otherwise we get INTERFACE_INCLUDE_DIRECTORIES property error
