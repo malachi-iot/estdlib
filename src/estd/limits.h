@@ -28,11 +28,14 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
-// TODO: Use ESTD_ARCH_BITNESS to assist here -- 32 bit targets let's
-// presume a 64-bit long long exists, but do give a warning
-#if __AVR__ || ESP_PLATFORM
-// DEBT: Pretty clunky.  __AVR__ & ESP32 target seems to have 64-bit support
-// mapped to "long long", but it is missing this crucial macro
+#if __AVR__ || ESP_PLATFORM || __arm__
+// DEBT: Pretty clunky.  __AVR__ & ESP32 && arm32 seems to have 64-bit support
+// mapped to "long long", but it is missing this crucial macro.  Some kind of stdlib thing?
+#define LLONG_WIDTH     64
+#elif ESTD_ARCH_BITNESS == 32
+#if FEATURE_ESTD_COMPILE_VERBOSITY > 1
+#warning Assuming long long is 64 bit
+#endif
 #define LLONG_WIDTH     64
 #endif
 
@@ -207,8 +210,8 @@ template <> struct numeric_limits<unsigned long long> : internal::numeric_limits
 // DEBT: I am not convinced any has a 32-bit long long, and I am not convinced anyone should
 template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
-#else
-#error Failed SIZEOF_LLONG sanity check
+#elif FEATURE_ESTD_COMPILE_VERBOSITY > 2
+#warning Failed SIZEOF_LLONG sanity check
 #endif
 
 template <> struct numeric_limits<bool>

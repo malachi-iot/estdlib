@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include "../../internal/feature/estd.h"
+
 // lifted from https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Names.html
 #if __STDC_VERSION__ < 199901L
 # if __GNUC__ >= 2
@@ -71,7 +73,7 @@
 // https://github.com/riscv-non-isa/riscv-c-api-doc/blob/master/riscv-c-api.md
 #define ESTD_MCU_RISCV
 #else
-#if FEATURE_ESTD_STRICT
+#if FEATURE_ESTD_COMPILE_VERBOSITY > 0
 #warning "Assuming 32 bit architecture"
 #endif
 #define ESTD_ARCH_BITNESS   32

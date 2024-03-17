@@ -10,6 +10,8 @@
 #endif
 
 // strictness level (not used yet)
+// Determines how many assumptions we're willing to let slide vs strictly enforcing
+// correctness.  Varies on a case by case basis
 // NOTE: Raising this higher will result in more asserts, so watch out for that
 // 0 = none/completely lax
 // 1 = minimal

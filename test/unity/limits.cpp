@@ -29,10 +29,6 @@ static void test_limits_1()
 #endif
 */
 
-#ifndef LLONG_WIDTH
-#error
-#endif
-
 static void test_limits_least32()
 {
     TEST_ASSERT(estd::numeric_limits<estd::uint_least32_t>::is_signed == false);
@@ -45,6 +41,7 @@ static void test_limits_least32()
 
 static void test_limits_least64()
 {
+#ifdef LLONG_WIDTH
     TEST_ASSERT(estd::numeric_limits<estd::uint_least64_t>::is_signed == false);
     TEST_ASSERT(estd::numeric_limits<estd::int_least64_t>::is_signed);
     TEST_ASSERT_GREATER_OR_EQUAL(8, sizeof(estd::uint_least64_t));
@@ -57,6 +54,7 @@ static void test_limits_least64()
 #else
     TEST_ASSERT_EQUAL_UINT64(UINT_LEAST64_MAX, estd::numeric_limits<uint_least64_t>::max());
     TEST_ASSERT_EQUAL_INT64(INT_LEAST64_MAX, estd::numeric_limits<int_least64_t>::max());
+#endif
 #endif
 }
 
