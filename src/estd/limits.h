@@ -33,10 +33,14 @@ namespace estd {
 // mapped to "long long", but it is missing this crucial macro.  Some kind of stdlib thing?
 #define LLONG_WIDTH     64
 #elif ESTD_ARCH_BITNESS == 32
-#if FEATURE_ESTD_COMPILE_VERBOSITY > 1
+#if FEATURE_ESTD_COMPILE_STRICTNESS > 2
+#error Not making assumption about 'long long' for unknown architecture
+#elif FEATURE_ESTD_COMPILE_VERBOSITY > 1
 #warning Assuming long long is 64 bit
 #endif
 #define LLONG_WIDTH     64
+#elif ESTD_ARCH_BITNESS != 64 && FEATURE_ESTD_COMPILE_VERBOSITY > 0
+#warning Not making assumption about 'long long' for unknown architecture
 #endif
 
 // DEBT: Move away from SIZEOF_xxx in favor of standards-based xxx_WIDTH
