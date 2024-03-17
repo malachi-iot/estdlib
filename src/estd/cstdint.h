@@ -45,6 +45,7 @@ namespace estd {
 typedef std::int_least16_t int_least16_t;
 typedef std::int_least32_t int_least32_t;
 typedef std::int_least64_t int_least64_t;
+typedef std::uint_least16_t uint_least16_t;
 typedef std::uint_least32_t uint_least32_t;
 typedef std::uint_least64_t uint_least64_t;
 
