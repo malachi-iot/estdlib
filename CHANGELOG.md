@@ -1,3 +1,11 @@
+# v0.7.2 - XXXXX24
+
+## Known issues
+
+* https://github.com/malachi-iot/estdlib/issues/35 (CMakeLists.txt top level glitch)
+* https://github.com/malachi-iot/estdlib/issues/36 (limits.h)
+* https://github.com/malachi-iot/estdlib/issues/37 (LLONG error)
+
 # v0.7.1 - 16MAR24
 
 ## Added Features
