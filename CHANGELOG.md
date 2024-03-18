@@ -1,10 +1,11 @@
-# v0.7.2 - XXXXX24
+# v0.7.2 - XXMAR24
 
-## Known issues
+## Quality Updates & Bug Fixes
 
-* https://github.com/malachi-iot/estdlib/issues/35 (CMakeLists.txt top level glitch)
-* https://github.com/malachi-iot/estdlib/issues/36 (limits.h)
-* https://github.com/malachi-iot/estdlib/issues/37 (LLONG error)
+* #35 Top-level CMakeLists.txt now usable
+* Massive cleanup of `estd/limits.h`
+    * https://github.com/malachi-iot/estdlib/issues/36 fixed type_traits dependency
+    * #37 Deducing `long long` far more effectively now
 
 # v0.7.1 - 16MAR24
 
