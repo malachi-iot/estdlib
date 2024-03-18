@@ -16,7 +16,9 @@
 #endif
 
 #ifndef CHAR_BIT
+#if FEATURE_ESTD_COMPILE_VERBOSITY > 1
 #warning CHAR_BIT not set, defaulting to 8 bits
+#endif
 #define CHAR_BIT 8
 #endif
 

@@ -22,17 +22,16 @@ namespace estd {
     (max == INT32_MAX ? 4 : \
     (max == INT16_MAX ? 2 : 1)))
 
-#if LONG_LONG_TYPE_SIZE
-// NOTE: Nobody seems to reach here.  Perhaps I need explicit includes, or it's been
-// deprecated?
-#ifndef LLONG_WIDTH
-#define LLONG_WIDTH LONG_LONG_TYPE_SIZE
-#endif
-// DEBT: xtensa and riscv might in theory be 64-bit here, causing a duplicate define
-#elif __AVR__ || __xtensa__ || __arm__ || __riscv
-// DEBT: Pretty clunky.  __AVR__ & ESP32 && arm32 seems to have 64-bit support
-// mapped to "long long", but it is missing this crucial macro.  Some kind of stdlib thing?
-#define LLONG_WIDTH     64
+// TODO: Error if INT64_MAX isn't available
+
+#if !defined(LLONG_WIDTH)
+
+#if __SIZEOF_LONG_LONG__
+#define LLONG_WIDTH (__SIZEOF_LONG_LONG__ * 8)
+
+#elif defined(LLONG_MAX)
+#define LLONG_WIDTH (SIZEOF_INTEGER(LLONG_MAX) * 8)
+
 #elif ESTD_ARCH_BITNESS == 32
 #if FEATURE_ESTD_COMPILE_STRICTNESS > 2
 #error Not making assumption about 'long long' for unknown architecture
@@ -40,30 +39,42 @@ namespace estd {
 #warning Assuming long long is 64 bit
 #endif
 #define LLONG_WIDTH     64
+
 #elif ESTD_ARCH_BITNESS != 64 && FEATURE_ESTD_COMPILE_VERBOSITY > 0
 #warning Not making assumption about 'long long' for unknown architecture
 #endif
-
-// DEBT: Move away from SIZEOF_xxx in favor of standards-based xxx_WIDTH
-#ifdef LLONG_MAX
-#define SIZEOF_LLONG    SIZEOF_INTEGER(LLONG_MAX)
-#elif defined(LLONG_WIDTH)
-#define SIZEOF_LLONG    (LLONG_WIDTH / 8)
 #endif
-#define SIZEOF_LONG     SIZEOF_INTEGER(LONG_MAX)
-#define SIZEOF_INT      SIZEOF_INTEGER(INT_MAX)
-#define SIZEOF_SHORT    SIZEOF_INTEGER(SHRT_MAX)
-#define SIZEOF_CHAR     SIZEOF_INTEGER(CHAR_MAX)
 
-// TODO: Check against _ISOC2X_SOURCE
+#ifndef __SIZEOF_LONG_LONG__
+#define __SIZEOF_LONG_LONG__    (LLONG_WIDTH / 8)
+#endif
+#ifndef __SIZEOF_LONG__
+#define __SIZEOF_LONG__         SIZEOF_INTEGER(LONG_MAX)
+#endif
+#ifndef __SIZEOF_INT__
+#define __SIZEOF_INT__          SIZEOF_INTEGER(INT_MAX)
+#endif
+#ifndef __SIZEOF_SHORT__
+#define __SIZEOF_SHORT__        SIZEOF_INTEGER(SHRT_MAX)
+#endif
+
+
+// As per https://en.cppreference.com/w/c/types/limits and
+// https://pubs.opengroup.org/onlinepubs/009695399/basedefs/limits.h.html
+#ifndef CHAR_WIDTH
+#define CHAR_WIDTH      CHAR_BIT
+#endif
 #ifndef SHRT_WIDTH
-#define SHRT_WIDTH      (8*SIZEOF_SHORT)
-#define INT_WIDTH       (8*SIZEOF_INT)
-#define LONG_WIDTH      (8*SIZEOF_LONG)
+#define SHRT_WIDTH      (__SIZEOF_SHORT__ * 8)
 #endif
-#if !defined(LLONG_WIDTH) && defined(SIZEOF_LLONG)
-#define LLONG_WIDTH     (8*SIZEOF_LLONG)
+#ifndef INT_WIDTH
+#define INT_WIDTH       (__SIZEOF_INT__ * 8)
 #endif
+#ifndef LONG_WIDTH
+#define LONG_WIDTH      (__SIZEOF_LONG__ * 8)
+#endif
+
+// Long long already handled up above
 
 namespace internal {
 
@@ -73,7 +84,7 @@ namespace internal {
 template <class T> struct numeric_limits;
 
 template <>
-struct numeric_limits<int8_t> : internal::integer_limits<int8_t, true>
+struct numeric_limits<int8_t> : integer_limits<int8_t, true>
 {
     static CONSTEXPR int digits10 = 2;
     static CONSTEXPR int8_t min() { return INT8_MIN; }
@@ -83,7 +94,7 @@ struct numeric_limits<int8_t> : internal::integer_limits<int8_t, true>
 };
 
 template <>
-struct numeric_limits<uint8_t> : internal::integer_limits<uint8_t, false>
+struct numeric_limits<uint8_t> : integer_limits<uint8_t, false>
 {
     static CONSTEXPR int digits10 = 2;
     static CONSTEXPR uint8_t min() { return 0; }
@@ -93,7 +104,7 @@ struct numeric_limits<uint8_t> : internal::integer_limits<uint8_t, false>
 };
 
 template <>
-struct numeric_limits<int16_t> : internal::integer_limits<int16_t, true>
+struct numeric_limits<int16_t> : integer_limits<int16_t, true>
 {
     static CONSTEXPR int digits10 = 4;
     static CONSTEXPR int16_t min() { return INT16_MIN; }
@@ -103,7 +114,7 @@ struct numeric_limits<int16_t> : internal::integer_limits<int16_t, true>
 };
 
 template <>
-struct numeric_limits<uint16_t> : internal::integer_limits<uint16_t, false>
+struct numeric_limits<uint16_t> : integer_limits<uint16_t, false>
 {
     static CONSTEXPR int digits10 = 4;
     static CONSTEXPR uint16_t min() { return 0; }
@@ -113,7 +124,7 @@ struct numeric_limits<uint16_t> : internal::integer_limits<uint16_t, false>
 };
 
 template <>
-struct numeric_limits<int32_t> : internal::integer_limits<int32_t, true>
+struct numeric_limits<int32_t> : integer_limits<int32_t, true>
 {
     static CONSTEXPR int digits10 = 9;
     static CONSTEXPR int32_t min() { return INT32_MIN; }
@@ -123,7 +134,7 @@ struct numeric_limits<int32_t> : internal::integer_limits<int32_t, true>
 };
 
 template <>
-struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
+struct numeric_limits<uint32_t> : integer_limits<uint32_t, false>
 {
     static CONSTEXPR int digits10 = 9;
     static CONSTEXPR uint32_t min() { return 0; }
@@ -133,7 +144,7 @@ struct numeric_limits<uint32_t> : internal::integer_limits<uint32_t, false>
 };
 
 template <>
-struct numeric_limits<int64_t> : internal::integer_limits<int64_t, true>
+struct numeric_limits<int64_t> : integer_limits<int64_t, true>
 {
     static CONSTEXPR int digits10 = 18;
     static CONSTEXPR int64_t min() { return INT64_MIN; }
@@ -143,7 +154,7 @@ struct numeric_limits<int64_t> : internal::integer_limits<int64_t, true>
 };
 
 template <>
-struct numeric_limits<uint64_t> :  internal::integer_limits<uint64_t, false>
+struct numeric_limits<uint64_t> :  integer_limits<uint64_t, false>
 {
     static CONSTEXPR int digits10 = 19;
     static CONSTEXPR uint64_t min() { return 0; }
@@ -152,32 +163,24 @@ struct numeric_limits<uint64_t> :  internal::integer_limits<uint64_t, false>
     typedef int64_t signed_type;
 };
 
-// NOTE: Just discovered the __SIZEOF_xxx__ paradigm, see if I can pare down my own version
-// Basically experimental
 #ifdef __SIZEOF_INT128__
 template <>
-struct numeric_limits<__int128> :  internal::integer_limits<__int128, true>
+struct numeric_limits<__int128> :  integer_limits<__int128, true>
 {
     static CONSTEXPR int digits10 = 19; // FIX: this is wrong, represents 64-bit size
     static CONSTEXPR uint64_t min() { return 0; }
     // FIX: the following is just an approximation for now
-    static CONSTEXPR uint64_t max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
+    static CONSTEXPR __int128 max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
 };
 #endif
 
 }
 
-// DEBT: Innocuous code, but incorrect.
 // SIZEOF_CHAR "is always 1" https://isocpp.org/wiki/faq/intrinsic-types#sizeof-char
-#if SIZEOF_CHAR == 16
-template <> struct numeric_limits<signed char> : internal::numeric_limits<int16_t> {};
-template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint16_t> {};
-#else
 template <> struct numeric_limits<signed char> : internal::numeric_limits<int8_t> {};
 template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint8_t> {};
-#endif
 
-#if SIZEOF_SHORT == 4
+#if SHORT_WIDTH == 32
 template <> struct numeric_limits<short> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uint32_t> {};
 #else
@@ -186,32 +189,34 @@ template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uin
 #endif
 
 
-#if SIZEOF_INT == 8
+#if INT_WIDTH == 64
 template <> struct numeric_limits<int> : internal::numeric_limits<int64_t> {};
 template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint64_t> {};
-#elif SIZEOF_INT == 4
+#elif INT_WIDTH == 32
 template <> struct numeric_limits<int> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint32_t> {};
-#else
+#elif INT_WIDTH == 16
 template <> struct numeric_limits<int> : internal::numeric_limits<int16_t> {};
 template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint16_t> {};
+#else
+#warning Unexpected integer size, not specialized
 #endif
 
 
-#if SIZEOF_LONG == 8
+#if LONG_WIDTH == 64
 template <> struct numeric_limits<long> : internal::numeric_limits<int64_t> {};
 template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint64_t> {};
-#elif SIZEOF_LONG == 4
+#elif LONG_WIDTH == 32
 template <> struct numeric_limits<long> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint32_t> {};
 #else
 #error Failed SIZEOF_LONG sanity check
 #endif
 
-#if SIZEOF_LLONG == 8
+#if LLONG_WIDTH == 64
 template <> struct numeric_limits<long long> : internal::numeric_limits<int64_t> {};
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint64_t> {};
-#elif SIZEOF_LLONG == 4
+#elif LLONG_WIDTH == 32
 // DEBT: I am not convinced any has a 32-bit long long, and I am not convinced anyone should
 template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t> {};
 template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
