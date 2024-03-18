@@ -14,12 +14,6 @@ namespace estd { namespace internal {
 template <unsigned base, unsigned bits>
 struct uint_strlen;
 
-// We maintain this internal one because it helps quite a bit with int -> precision
-// mapping.
-// DEBT: Just as above, strongly consider making this into 'detail' namespace.  Once
-// we settle on that, move this to fwd
-template <class T> struct numeric_limits;
-
 // DEBT: I'm sure there's a more math-y way to do this
 
 template <> struct uint_strlen<10, 8> :

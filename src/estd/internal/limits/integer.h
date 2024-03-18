@@ -9,6 +9,11 @@ namespace estd { namespace internal {
 // they are useful on their own and are approaching stability.  Also, consider a consumer of that
 // 'layer1::numeric_string'
 
+template <unsigned width>
+struct int_limits;
+
+template <unsigned width>
+struct uint_limits;
 
 template <class T, bool is_signed_>
 struct integer_limits : signed_traits<T, is_signed_>
@@ -39,89 +44,90 @@ struct integer_limits : signed_traits<T, is_signed_>
 };
 
 template <>
-struct numeric_limits<int8_t> : integer_limits<int8_t, true>
+struct int_limits<8> : integer_limits<int8_t, true>
 {
     static CONSTEXPR int digits10 = 2;
-    static CONSTEXPR int8_t min() { return INT8_MIN; }
-    static CONSTEXPR int8_t max() { return INT8_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET int8_t min() { return INT8_MIN; }
+    static ESTD_CPP_CONSTEXPR_RET int8_t max() { return INT8_MAX; }
 
     typedef uint8_t unsigned_type;
 };
 
 template <>
-struct numeric_limits<uint8_t> : integer_limits<uint8_t, false>
+struct uint_limits<8> : integer_limits<uint8_t, false>
 {
     static CONSTEXPR int digits10 = 2;
-    static CONSTEXPR uint8_t min() { return 0; }
-    static CONSTEXPR uint8_t max() { return UINT8_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET uint8_t min() { return 0; }
+    static ESTD_CPP_CONSTEXPR_RET uint8_t max() { return UINT8_MAX; }
 
     typedef int8_t signed_type;
 };
 
 template <>
-struct numeric_limits<int16_t> : integer_limits<int16_t, true>
+struct int_limits<16> : integer_limits<int16_t, true>
 {
     static CONSTEXPR int digits10 = 4;
-    static CONSTEXPR int16_t min() { return INT16_MIN; }
-    static CONSTEXPR int16_t max() { return INT16_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET int16_t min() { return INT16_MIN; }
+    static ESTD_CPP_CONSTEXPR_RET int16_t max() { return INT16_MAX; }
 
     typedef uint16_t unsigned_type;
 };
 
 template <>
-struct numeric_limits<uint16_t> : integer_limits<uint16_t, false>
+struct uint_limits<16> : integer_limits<uint16_t, false>
 {
     static CONSTEXPR int digits10 = 4;
-    static CONSTEXPR uint16_t min() { return 0; }
-    static CONSTEXPR uint16_t max() { return UINT16_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET uint16_t min() { return 0; }
+    static ESTD_CPP_CONSTEXPR_RET uint16_t max() { return UINT16_MAX; }
 
     typedef int16_t signed_type;
 };
 
 template <>
-struct numeric_limits<int32_t> : integer_limits<int32_t, true>
+struct int_limits<32> : integer_limits<int32_t, true>
 {
     static CONSTEXPR int digits10 = 9;
-    static CONSTEXPR int32_t min() { return INT32_MIN; }
-    static CONSTEXPR int32_t max() { return INT32_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET int32_t min() { return INT32_MIN; }
+    static ESTD_CPP_CONSTEXPR_RET int32_t max() { return INT32_MAX; }
 
     typedef uint32_t unsigned_type;
 };
 
 template <>
-struct numeric_limits<uint32_t> : integer_limits<uint32_t, false>
+struct uint_limits<32> : integer_limits<uint32_t, false>
 {
     static CONSTEXPR int digits10 = 9;
-    static CONSTEXPR uint32_t min() { return 0; }
-    static CONSTEXPR uint32_t max() { return UINT32_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET uint32_t min() { return 0; }
+    static ESTD_CPP_CONSTEXPR_RET uint32_t max() { return UINT32_MAX; }
 
     typedef int32_t signed_type;
 };
 
 template <>
-struct numeric_limits<int64_t> : integer_limits<int64_t, true>
+struct int_limits<64> : integer_limits<int64_t, true>
 {
     static CONSTEXPR int digits10 = 18;
-    static CONSTEXPR int64_t min() { return INT64_MIN; }
-    static CONSTEXPR int64_t max() { return INT64_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET int64_t min() { return INT64_MIN; }
+    static ESTD_CPP_CONSTEXPR_RET int64_t max() { return INT64_MAX; }
 
     typedef uint64_t unsigned_type;
 };
 
 template <>
-struct numeric_limits<uint64_t> :  integer_limits<uint64_t, false>
+struct uint_limits<64> :  integer_limits<uint64_t, false>
 {
     static CONSTEXPR int digits10 = 19;
-    static CONSTEXPR uint64_t min() { return 0; }
-    static CONSTEXPR uint64_t max() { return UINT64_MAX; }
+    static ESTD_CPP_CONSTEXPR_RET uint64_t min() { return 0; }
+    static ESTD_CPP_CONSTEXPR_RET uint64_t max() { return UINT64_MAX; }
 
     typedef int64_t signed_type;
 };
 
 
+// EXPERIMENTAL and not fully implemented
 #ifdef __SIZEOF_INT128__
 template <>
-struct numeric_limits<__int128> :  integer_limits<__int128, true>
+struct int_limits<128> :  integer_limits<__int128, true>
 {
     static CONSTEXPR int digits10 = 19; // FIX: this is wrong, represents 64-bit size
     static CONSTEXPR uint64_t min() { return 0; }

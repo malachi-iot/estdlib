@@ -10,57 +10,25 @@
 namespace estd {
 
 // sizeof(char) "is always 1" https://isocpp.org/wiki/faq/intrinsic-types#sizeof-char
-template <> struct numeric_limits<signed char> : internal::numeric_limits<int8_t> {};
-template <> struct numeric_limits<unsigned char> : internal::numeric_limits<uint8_t> {};
+template <> struct numeric_limits<signed char> : internal::int_limits<CHAR_WIDTH> {};
+template <> struct numeric_limits<unsigned char> : internal::uint_limits<CHAR_WIDTH> {};
 
-#if SHORT_WIDTH == 32
-template <> struct numeric_limits<short> : internal::numeric_limits<int32_t> {};
-template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uint32_t> {};
-#else
-template <> struct numeric_limits<short> : internal::numeric_limits<int16_t> {};
-template <> struct numeric_limits<unsigned short> : internal::numeric_limits<uint16_t> {};
-#endif
+template <> struct numeric_limits<short> : internal::int_limits<SHRT_WIDTH> {};
+template <> struct numeric_limits<unsigned short> : internal::uint_limits<SHRT_WIDTH> {};
 
+template <> struct numeric_limits<int> : internal::int_limits<INT_WIDTH> {};
+template <> struct numeric_limits<unsigned int> : internal::uint_limits<INT_WIDTH> {};
 
-#if INT_WIDTH == 64
-template <> struct numeric_limits<int> : internal::numeric_limits<int64_t> {};
-template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint64_t> {};
-#elif INT_WIDTH == 32
-template <> struct numeric_limits<int> : internal::numeric_limits<int32_t> {};
-template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint32_t> {};
-#elif INT_WIDTH == 16
-template <> struct numeric_limits<int> : internal::numeric_limits<int16_t> {};
-template <> struct numeric_limits<unsigned int> : internal::numeric_limits<uint16_t> {};
-#else
-#warning Unexpected integer size, not specialized
-#endif
+template <> struct numeric_limits<long> : internal::int_limits<LONG_WIDTH> {};
+template <> struct numeric_limits<unsigned long> : internal::uint_limits<LONG_WIDTH> {};
 
-
-#if LONG_WIDTH == 64
-template <> struct numeric_limits<long> : internal::numeric_limits<int64_t> {};
-template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint64_t> {};
-#elif LONG_WIDTH == 32
-template <> struct numeric_limits<long> : internal::numeric_limits<int32_t> {};
-template <> struct numeric_limits<unsigned long> : internal::numeric_limits<uint32_t> {};
-#else
-#error Failed SIZEOF_LONG sanity check
-#endif
-
-#if LLONG_WIDTH == 64
-template <> struct numeric_limits<long long> : internal::numeric_limits<int64_t> {};
-template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint64_t> {};
-#elif LLONG_WIDTH == 32
-// DEBT: I am not convinced any has a 32-bit long long, and I am not convinced anyone should
-template <> struct numeric_limits<long long> : internal::numeric_limits<int32_t> {};
-template <> struct numeric_limits<unsigned long long> : internal::numeric_limits<uint32_t> {};
-#elif FEATURE_ESTD_COMPILE_VERBOSITY > 2
-#warning Failed SIZEOF_LLONG sanity check
-#endif
+template <> struct numeric_limits<long long> : internal::int_limits<LLONG_WIDTH> {};
+template <> struct numeric_limits<unsigned long long> : internal::uint_limits<LLONG_WIDTH> {};
 
 template <> struct numeric_limits<bool>
 {
-    static CONSTEXPR bool min() { return false; }
-    static CONSTEXPR bool max() { return true; }
+    static ESTD_CPP_CONSTEXPR_RET bool min() { return false; }
+    static ESTD_CPP_CONSTEXPR_RET bool max() { return true; }
 
     static CONSTEXPR int digits = 1;
     static CONSTEXPR int digits10 = 0;
