@@ -1,14 +1,9 @@
-/**
- * @file
- * NOTE: My own exposure to embedded development has been 100% 8-bit oriented, so
- * these limits.h reflect that and focus on 8-bit-boundary computing
- */
 #pragma once
 
+#include "cstddef.h"
+#include "cstdint.h"
 #include "internal/feature/estd.h"
 #include "internal/limits.h"
-#include "cstdint.h"
-#include "cstddef.h"
 
 #include "internal/macro/push.h"
 

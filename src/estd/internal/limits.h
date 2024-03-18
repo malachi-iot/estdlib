@@ -4,9 +4,6 @@
 
 #include "macro/push.h"
 
-#include "fwd/limits.h"
-#include "type_traits.h"
-#include "limits/macros.h"
 #include "limits/integer.h"
 
 namespace estd { namespace internal {
@@ -24,7 +21,9 @@ struct float_limits
     static CONSTEXPR bool is_signed = is_signed_;
     static CONSTEXPR unsigned radix = FLT_RADIX;
 
-#if defined(__GCC_IEC_559) || defined(__STDC_IEC_559__)
+    // https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
+    // https://en.cppreference.com/w/c/preprocessor/replace
+#if __GCC_IEC_559 || __STDC_IEC_559__ || __STDC_IEC_60559_BFP__
     static CONSTEXPR bool is_iec559 = true;
 
 #if FEATURE_ESTD_DRAGONBOX

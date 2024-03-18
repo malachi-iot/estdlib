@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../fwd/limits.h"
+#include "../type_traits.h"
 
 #include "macros.h"
 
