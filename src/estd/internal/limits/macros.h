@@ -18,23 +18,20 @@
 #warning CHAR_BIT not set, defaulting to 8 bits
 #endif
 #define CHAR_BIT 8
-#endif
-
-#if CHAR_BIT != 8
+#elif CHAR_BIT != 8
 #error "Only 8 bit-wide bytes supported"
 #endif
 
 
-// DEBT: Would likely be better off doing SIZEOF_INTEGER and friends with template
-// metaprogramming to avoid potential name collisions
 // size in 8-bit bytes
 #define SIZEOF_INTEGER(max) \
     (max == INT64_MAX ? 8 : \
     (max == INT32_MAX ? 4 : \
-    (max == INT16_MAX ? 2 : 1)))
+    (max == INT16_MAX ? 2 : \
+    (max == INT8_MAX ? 1 : 0))))
 
-// TODO: Error if INT64_MAX isn't available
-
+// DEBT: Hang this off __SIZEOF_LONG_LONG__ == 0 instead, since almost
+// definitely C23's LLONG_WIDTH is not present
 #if !defined(LLONG_WIDTH)
 
 #if __SIZEOF_LONG_LONG__
@@ -51,12 +48,12 @@
 #endif
 #define LLONG_WIDTH     64
 
-#elif ESTD_ARCH_BITNESS != 64 && FEATURE_ESTD_COMPILE_VERBOSITY > 0
+#elif FEATURE_ESTD_COMPILE_VERBOSITY > 0
 #warning Not making assumption about 'long long' for unknown architecture
 #endif
 #endif
 
-#ifndef __SIZEOF_LONG_LONG__
+#if __SIZEOF_LONG_LONG__ == 0 && LLONG_WIDTH > 0
 #define __SIZEOF_LONG_LONG__    (LLONG_WIDTH / 8)
 #endif
 #ifndef __SIZEOF_LONG__
