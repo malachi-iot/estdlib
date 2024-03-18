@@ -248,12 +248,12 @@ public:
             return *current;
         }
 
-        bool operator==(const forward_iterator& compare_to)
+        bool operator==(const forward_iterator& compare_to) const
         {
             return compare_to.current == current;
         }
 
-        bool operator!=(const forward_iterator& compare_to)
+        bool operator!=(const forward_iterator& compare_to) const
         {
             return compare_to.current != current;
         }

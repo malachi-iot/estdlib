@@ -4,6 +4,7 @@
 
 #include "macro/push.h"
 
+#include "feature/estd.h"
 #include "limits/integer.h"
 
 namespace estd { namespace internal {

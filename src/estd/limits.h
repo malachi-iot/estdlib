@@ -2,7 +2,6 @@
 
 #include "cstddef.h"
 #include "cstdint.h"
-#include "internal/feature/estd.h"
 #include "internal/limits.h"
 
 #include "internal/macro/push.h"

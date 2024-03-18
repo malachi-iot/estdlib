@@ -124,8 +124,12 @@ struct uint_limits<64> :  integer_limits<uint64_t, false>
 };
 
 
+#if defined(FEATURE_ESTD_EXPERIMENTAL_INT128) && FEATURE_ESTD_EXPERIMENTAL
+#define FEATURE_ESTD_EXPERIMENTAL_INT128 1
+#endif
+
 // EXPERIMENTAL and not fully implemented
-#ifdef __SIZEOF_INT128__
+#if __SIZEOF_INT128__ && FEATURE_ESTD_EXPERIMENTAL_INT128
 template <>
 struct int_limits<128> :  integer_limits<__int128, true>
 {

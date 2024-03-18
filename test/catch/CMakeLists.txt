@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.12)
 
 project("estd-unit-tests" VERSION 1.0)
 
+set(FEATURE_ESTD_COMPILE_STRICTNESS 4 CACHE STRING
+    "TBD")
+set(FEATURE_ESTD_COMPILE_VERBOSITY 3 CACHE STRING
+    "TBD")
+
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     message(DEBUG "defaulting to c++11")
     set(CMAKE_CXX_STANDARD 11)
@@ -84,6 +89,10 @@ else()
         internal-test.cpp)
 endif()
 
+target_compile_definitions(estd PUBLIC
+    FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
+    FEATURE_ESTD_COMPILE_STRICTNESS=${FEATURE_ESTD_COMPILE_STRICTNESS}
+    )
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
 # TODO: Instead, filter by presence of GCC

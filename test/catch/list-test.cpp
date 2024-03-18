@@ -13,7 +13,7 @@ struct test_value
 {
     int val;
 
-    bool operator ==(const test_value& compare_to)
+    bool operator ==(const test_value& compare_to) const
     {
         return compare_to.val == val;
     }
