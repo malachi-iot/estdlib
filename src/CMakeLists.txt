@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(estd VERSION 0.7.1 LANGUAGES CXX
+project(estd VERSION 0.7.2 LANGUAGES CXX
     DESCRIPTION "Embedded oriented std library"
     HOMEPAGE_URL "https://github.com/malachi-iot/estdlib")
 
