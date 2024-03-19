@@ -5,6 +5,14 @@
 
 using namespace estd;
 
+// To aid in dragonbox testing
+template <class T>
+struct physical_bits
+{
+    static constexpr estd::size_t value =
+        sizeof(T) * estd::numeric_limits<unsigned char>::digits;
+};
+
 TEST_CASE("limits & common_type tests")
 {
     // https://stackoverflow.com/questions/15211463/why-isnt-common-typelong-unsigned-longtype-long-long
@@ -227,5 +235,37 @@ TEST_CASE("limits & common_type tests")
     SECTION("least/fast")
     {
         REQUIRE(estd::numeric_limits<estd::uint_least64_t>::max() == UINT_LEAST64_MAX);
+    }
+    SECTION("floating point")
+    {
+#if __GCC_IEC_559 || __STDC_IEC_559__ || __STDC_IEC_60559_BFP__
+        SECTION("float")
+        {
+            using type = estd::numeric_limits<float>;
+
+            REQUIRE(type::is_iec559);
+            REQUIRE(physical_bits<float>::value == 32);
+            REQUIRE(type::radix == 2);
+        }
+        SECTION("double")
+        {
+            using type = estd::numeric_limits<double>;
+
+            REQUIRE(type::is_iec559);
+            REQUIRE(physical_bits<double>::value == 64);
+            REQUIRE(type::radix == 2);
+        }
+        SECTION("long double")
+        {
+            /*  Not ready yet
+            using type = estd::numeric_limits<long double>;
+
+            REQUIRE(type::is_specialized);
+            REQUIRE(type::is_iec559);
+            const int width = physical_bits<long double>::value;
+            REQUIRE(width == 128);  */
+        }
+#else
+#endif
     }
 }

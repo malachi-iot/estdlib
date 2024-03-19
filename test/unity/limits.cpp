@@ -59,6 +59,28 @@ static void test_limits_least64()
 }
 
 
+static void test_limits_float()
+{
+#if __GCC_IEC_559 || __STDC_IEC_559__ || __STDC_IEC_60559_BFP__
+    using type = estd::numeric_limits<float>;
+
+    TEST_ASSERT_TRUE(type::is_iec559);
+#elif FEATURE_ESTD_COMPILE_VERBOSITY > ESTD_LEVEL_NONE
+#warning Skipping IEC_559 test
+#endif
+}
+
+
+static void test_limits_double()
+{
+#if __GCC_IEC_559 || __STDC_IEC_559__ || __STDC_IEC_60559_BFP__
+    using type = estd::numeric_limits<double>;
+
+    TEST_ASSERT_TRUE(type::is_iec559);
+#endif
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("limits tests", "[limits]")
 #else
