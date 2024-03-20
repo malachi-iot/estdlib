@@ -2,6 +2,8 @@
 
 #include <estd/limits.h>
 
+#include <float.h>
+
 #undef min
 #undef max
 
@@ -57,6 +59,27 @@ static void test_limits_least64()
 #endif
 #endif
 }
+
+#if FEATURE_ESTD_COMPILE_VERBOSITY > ESTD_LEVEL_MEDIUM
+#if defined(__GCC_IEC_559)
+#pragma message "__GCC_IEC_559 defined"
+#if __GCC_IEC_559 == 0
+#pragma message "__GCC_IEC_559 == 0"
+#endif
+#endif
+#if defined(__STDC_IEC_60559_BFP__)
+#pragma message "__STDC_IEC_559__ defined"
+#if __STDC_IEC_60559_BFP__ == 0
+#pragma message "__STDC_IEC_559__ == 0"
+#endif
+#endif
+#if defined(__STDC_IEC_60559_BFP__)
+#pragma message "__STDC_IEC_60559_BFP__ defined"
+#if __STDC_IEC_60559_BFP__ == 0
+#pragma message "__STDC_IEC_60559_BFP__ == 0"
+#endif
+#endif
+#endif
 
 
 static void test_limits_float()
