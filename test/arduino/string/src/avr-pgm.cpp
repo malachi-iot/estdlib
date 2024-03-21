@@ -7,7 +7,7 @@
 #include <estd/exp/pgm/array.h>
 #include <estd/exp/pgm/string.h>
 
-static const estd::v0::test_container<uint32_t, 4> array1 PROGMEM { 0U, 1U, 2U, 3U };
+static const estd::v0::test_container<int, 4> array1 PROGMEM { 0, 1, 2, 3 };
 
 static const char test1[] PROGMEM = "Hello PGM:";
 

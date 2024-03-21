@@ -105,6 +105,14 @@ protected:
 
     ESTD_CPP_DEFAULT_CTOR(single_allocator_base)
 
+#if __cpp_variadic_templates
+    template <typename ...T2>
+    constexpr explicit single_allocator_base(estd::in_place_t, T2...ts) : buffer(ts...)
+    {
+
+    }
+#endif
+
     ESTD_CPP_CONSTEXPR_RET EXPLICIT single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
 
 public:
@@ -332,11 +340,25 @@ namespace layer1 {
 
 // Fixed in place singular buffer
 template <class T, size_t len>
+#if __cpp_alias_templates
+using allocator = estd::internal::single_fixedbuf_allocator<T, len,
+    estd::internal::uninitialized_array<T, len> >;
+
+namespace legacy {
+#endif
+
+// DEBT: See allocator-test.cpp, for specialization (in that one case) something about the aliased
+// version malfunctions
+template <class T, size_t len>
 struct allocator : estd::internal::single_fixedbuf_allocator<T, len,
-        estd::internal::uninitialized_array<T, len> >
+    estd::internal::uninitialized_array<T, len> >
 {
 
 };
+
+#if __cpp_alias_templates
+}
+#endif
 
 }
 
