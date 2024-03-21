@@ -44,8 +44,31 @@ struct pgm_allocator2 : estd::layer2::allocator<const T, N>
         estd::internal::locking_iterator_modes::ro >;   */
 };
 
+
+// Just like pgm_allocator2, but from layer1 not layer2
+/*
 template <class T, size_t N>
-struct pgm_allocator_traits
+struct layer1_pgm_allocator : estd::layer1::allocator<const T, N>
+{
+    using base_type = estd::layer1::allocator<const T, N>;
+
+    ESTD_CPP_FORWARDING_CTOR(layer1_pgm_allocator)
+
+    // DEBT: See pgm_allocator2
+    ESTD_CPP_CONSTEXPR_RET typename base_type::const_pointer data(
+        typename base_type::size_type offset = 0) const
+    {
+        return base_type::data(offset);
+    }
+}; */
+template <class T, size_t N>
+using layer1_pgm_allocator = estd::internal::single_fixedbuf_allocator<T, N>;
+
+
+
+
+template <class T, size_t N, class Allocator>
+struct pgm_allocator_traits_base
 {
     using value_type = add_const_t<T>;
     using pointer = const PROGMEM value_type*;
@@ -53,7 +76,7 @@ struct pgm_allocator_traits
     using handle_type = pointer;
     using handle_with_offset = pointer;
     using size_type = uint16_t;
-    using allocator_type = pgm_allocator2<T, N>;
+    using allocator_type = Allocator;
 
     static CONSTEXPR bool is_stateful_exp = false;
     static CONSTEXPR bool is_locking_exp = false;
@@ -70,6 +93,10 @@ struct pgm_allocator_traits
     //static constexpr estd::internal::allocator_locking_preference::_
     //    locking_preference = internal::allocator_locking_preference::iterator;
 };
+
+// DEBT: Do this with a using
+template <class T, size_t N>
+struct pgm_allocator_traits : pgm_allocator_traits_base<T, N, pgm_allocator2<T, N> > {};
 
 }   // estd::internal::impl
 

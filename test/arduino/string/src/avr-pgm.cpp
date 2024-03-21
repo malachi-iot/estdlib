@@ -68,7 +68,14 @@ void loop1(estd::layer2::string<> name)
 
     //name += F("(value)");
     uint32_t dummy = array1[0];
-    cout << "Dummy: " << dummy << estd::endl;
+    cout << "pgm_array: " << dummy << ", ";
+    
+    for(auto dummy2 : array1)
+    {
+        cout << dummy2 << ", ";
+    }
+
+    cout << estd::endl;
 }
 
 

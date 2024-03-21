@@ -107,7 +107,8 @@ protected:
 
 #if __cpp_variadic_templates
     template <typename ...T2>
-    constexpr explicit single_allocator_base(estd::in_place_t, T2...ts) : buffer(ts...)
+    constexpr explicit single_allocator_base(estd::in_place_t, T2...ts) :
+        buffer{ts...}
     {
 
     }
@@ -213,6 +214,15 @@ public:
     typedef void is_pinned_tag_exp;
 
     ESTD_CPP_DEFAULT_CTOR(single_fixedbuf_allocator)
+
+#if __cpp_variadic_templates
+    template <class ...T2>
+    constexpr explicit single_fixedbuf_allocator(in_place_t, T2...ts) :
+        base_type(in_place_t{}, ts...)
+    {
+
+    }
+#endif
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
