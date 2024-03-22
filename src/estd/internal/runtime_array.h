@@ -109,6 +109,9 @@ protected:
 #endif
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
+    // DEBT: Switch this out for a forwarding constructor and do this down
+    // at m_impl ctor level - thus opening up more comfortable constexpr
+    // possibilities
     allocated_array(std::initializer_list<value_type> initlist)
     {
         pointer p = lock();
@@ -149,6 +152,18 @@ public:
     template <class THelperParam>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT allocated_array(const THelperParam& p) :
             m_impl(p) {}
+
+    // DEBT: Use ESTD_CPP_FORWARDING_CTOR_MEMBER if we can
+    // DEBT: Consider requiring in_place_t here
+    // DEBT: Use && here, not doing so because a complex failure with impl::dynamic_array occurs
+    // and at the moment we are only adding this for true constexpr init on AVR (which is tricky
+    // to do with initializer_list)
+#if __cpp_variadic_templates
+    template <class ...T>
+    constexpr explicit allocated_array(T...t) :
+        m_impl(t...)
+    {}
+#endif
 
 #if UNUSED
     // TODO: make accessor do this comparison in a self contained way

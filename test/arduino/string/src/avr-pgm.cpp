@@ -8,6 +8,7 @@
 #include <estd/exp/pgm/string.h>
 
 static const estd::v0::test_container<int, 4> array1 PROGMEM { 0, 1, 2, 3 };
+static const estd::v0::pgm_array<int, 4> array2 PROGMEM { 0, 1, 2, 3 };
 
 static const char test1[] PROGMEM = "Hello PGM:";
 

@@ -72,6 +72,37 @@ public:
 #endif
 };
 
+// It turns out std::initializer_list seems to be present for AVR and tries
+// to take over in allocated_array, so brute force things
+/*
+template <class T, unsigned N>
+using pgm_array = estd::internal::allocated_array<
+    avr::impl::pgm_array<T, N,
+        internal::impl::PgmPolicy<T,
+            internal::impl::PgmPolicyType::BufferInline,
+            N>
+    > >;
+    */
+template <class T, unsigned N>
+struct pgm_array : estd::internal::allocated_array<
+    avr::impl::pgm_array<T, N,
+        internal::impl::PgmPolicy<T,
+            internal::impl::PgmPolicyType::BufferInline,
+            N>
+    > >
+{
+    using base_type = estd::internal::allocated_array<
+    avr::impl::pgm_array<T, N,
+        internal::impl::PgmPolicy<T,
+            internal::impl::PgmPolicyType::BufferInline,
+            N>
+    > >;
+
+    template <class ...T2>
+    constexpr pgm_array(T2...t) : base_type(t...) {}
+};
+
+
 }}
 
 }

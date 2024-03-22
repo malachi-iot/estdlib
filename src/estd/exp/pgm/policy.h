@@ -10,8 +10,9 @@ namespace impl {
 
 enum class PgmPolicyType
 {
-    Buffer,
-    String
+    Buffer,         // layer2-class buffer
+    String,
+    BufferInline    // layer1-class buffer
 };
 
 // type=String, N = max = null terminated
@@ -26,6 +27,7 @@ template <size_t N>
 struct PgmPolicy<char, PgmPolicyType::String, N> :
     pgm_allocator_traits<char, N>
 {
+    using allocator_traits = pgm_allocator_traits<char, N>;
     using char_traits = estd::char_traits<const char>;
 
     static constexpr size_t size() { return N; }
@@ -36,6 +38,17 @@ struct PgmPolicy<char, PgmPolicyType::String, N> :
     // private_array
     static constexpr bool null_terminated = N == estd::internal::variant_npos();
 };
+
+
+template <class T, size_t N>
+struct PgmPolicy<T, PgmPolicyType::BufferInline, N> :
+    pgm_allocator_traits<T, N>
+{
+    // Prefer a has-a to an is-a I think
+    // DEBT: As we transition to has-a, we have a doubling up from inheritance also
+    using allocator_traits = layer1_pgm_allocator_traits<T, N>;
+};
+
 
 /*
  * TODO: Forgot to consider null term vs fixed size vs runtime size

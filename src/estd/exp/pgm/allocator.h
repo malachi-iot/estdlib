@@ -98,6 +98,10 @@ struct pgm_allocator_traits_base
 template <class T, size_t N>
 struct pgm_allocator_traits : pgm_allocator_traits_base<T, N, pgm_allocator2<T, N> > {};
 
+template <class T, size_t N>
+using layer1_pgm_allocator_traits = pgm_allocator_traits_base<T, N, layer1_pgm_allocator<T, N> >;
+
+
 }   // estd::internal::impl
 
 }   // estd::internal

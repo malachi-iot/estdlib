@@ -20,15 +20,17 @@ struct pgm_array : Policy
     using typename base_type::size_type;
     using typename base_type::const_pointer;
     using base_type::value_type;
-    using allocator_traits = internal::impl::pgm_allocator_traits<T, N>;
+    //using allocator_traits = internal::impl::pgm_allocator_traits<T, N>;
     using policy_type = Policy;
+    using allocator_traits = typename policy_type::allocator_traits;
 
     // DEBT: Dummy value so that regular estd::basic_string gets its
     // dependency satisfied
     using append_result = bool;
 
 #if FEATURE_ESTD_PGM_ALLOCATOR
-    typedef internal::impl::pgm_allocator2<T, N> allocator_type;
+    //typedef internal::impl::pgm_allocator2<T, N> allocator_type;
+    using allocator_type = typename allocator_traits::allocator_type;
     // data_ was working, but let's dogfood a bit
     allocator_type alloc;
 
@@ -39,6 +41,13 @@ struct pgm_array : Policy
 
     constexpr pgm_array(const_pointer data) :
         alloc(data)
+    {}
+
+    // DEBT: Just noticed AVR may indeed have true blue initializer_list support,
+    // so visit that notion
+    template <class ...T2>
+    constexpr explicit pgm_array(T2...t) :
+        alloc(in_place_t{}, t...)
     {}
 
     allocator_type& get_allocator() { return alloc; }
