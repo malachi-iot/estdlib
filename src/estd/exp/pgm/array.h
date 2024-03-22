@@ -11,6 +11,17 @@
 
 namespace estd {
 
+namespace internal {
+
+template <typename T, unsigned N>
+struct dynamic_array_helper<avr::impl::pgm_array<T, N,
+    impl::PgmPolicy<T, impl::PgmPolicyType::BufferInline, N> > >
+{
+
+};
+
+}
+
 inline namespace v0 { inline namespace avr {
 
 // DEBT: Combine this with rest of allocated_array mechanism (dogfooding)

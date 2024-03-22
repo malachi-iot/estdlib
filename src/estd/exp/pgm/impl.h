@@ -46,7 +46,7 @@ struct pgm_array : Policy
     // DEBT: Just noticed AVR may indeed have true blue initializer_list support,
     // so visit that notion
     template <class ...T2>
-    constexpr explicit pgm_array(T2...t) :
+    constexpr explicit pgm_array(T2&&...t) :
         alloc(in_place_t{}, t...)
     {}
 
@@ -71,6 +71,8 @@ struct pgm_array : Policy
 
 #endif
 
+    // FIX: Doesn't quite work how we want it to because data() sometimes comes back
+    // as non-char-* which confuses strnlen_P
     size_type size() const
     {
         return base_type::null_terminated ?
