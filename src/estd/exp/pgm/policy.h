@@ -8,21 +8,6 @@ namespace internal {
 
 namespace impl {
 
-enum class PgmPolicyType
-{
-    Buffer,         // layer2-class buffer
-    String,
-    BufferInline    // layer1-class buffer
-};
-
-// type=String, N = max = null terminated
-// type=String, N != max = fixed compile time size
-// type=Buffer, N = max = runtime sized
-// type=Buffer, N != max = fixed compile time size
-template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
-    size_t N = estd::internal::variant_npos()>
-struct PgmPolicy;
-
 template <size_t N>
 struct PgmPolicy<char, PgmPolicyType::String, N>
 {

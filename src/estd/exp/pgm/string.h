@@ -15,9 +15,10 @@ namespace estd {
 namespace internal {
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<avr::impl::pgm_array<T, N> >
+struct dynamic_array_helper<avr::impl::pgm_string<T, N> >
 {
-    typedef avr::impl::pgm_array<T, N> impl_type;
+    typedef avr::impl::pgm_string<T, N> impl_type;
+
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
 
@@ -70,7 +71,7 @@ struct dynamic_array_helper<avr::impl::pgm_array<T, N> >
 // DEBT: We have to manually specialize this guy too because we DON'T
 // expose locking_preference at allocator_traits level
 template <class O, unsigned N>
-struct out_string_helper<O, avr::impl::pgm_array<char, N> >
+struct out_string_helper<O, avr::impl::pgm_string<char, N> >
 {
 
     template <class A>
@@ -83,7 +84,7 @@ struct out_string_helper<O, avr::impl::pgm_array<char, N> >
 
 #ifdef ARDUINO
 template <unsigned N>
-struct out_string_helper<arduino_ostream, avr::impl::pgm_array<char, N> >
+struct out_string_helper<arduino_ostream, avr::impl::pgm_string<char, N> >
 {
     template <class A>
     static void out(arduino_ostream& out, const A& str)
@@ -102,9 +103,9 @@ inline namespace v0 { inline namespace avr {
 
 template <class CharT, size_t N = internal::variant_npos()>
 struct basic_pgm_string :
-    detail::basic_string<avr::impl::pgm_array<CharT, N> >
+    detail::basic_string<avr::impl::pgm_string<CharT, N> >
 {
-    using base_type = detail::basic_string<avr::impl::pgm_array<CharT, N> >;
+    using base_type = detail::basic_string<avr::impl::pgm_string<CharT, N> >;
 
     constexpr basic_pgm_string(const char* const s) :
         base_type(s)

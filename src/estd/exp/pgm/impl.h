@@ -11,9 +11,12 @@ inline namespace v0 { inline namespace avr { namespace impl {
 // For "legacy" mode, this is not impl but instead entire implementation
 // For newer mode, this Impl feeds estd::internal::allocated_array
 // NOTE: was experimental::private_array_base
-template <class T, size_t N, class Policy = estd::internal::impl::PgmPolicy<
-        T, internal::impl::PgmPolicyType::String, N> >
-struct pgm_array : Policy::allocator_traits
+template <class T, size_t N, class Policy>
+struct pgm_array :
+#if FEATURE_ESTD_PGM_ALLOCATORX
+    //Policy::allocator_traits::allocator_type,
+#endif
+    Policy::allocator_traits
 {
     using base_type = typename Policy::allocator_traits;
 
@@ -34,9 +37,12 @@ struct pgm_array : Policy::allocator_traits
     // data_ was working, but let's dogfood a bit
     allocator_type alloc;
 
+    allocator_type& get_allocator() { return alloc; }
+    constexpr const allocator_type& get_allocator() const { return alloc; }
+
     constexpr const_pointer data(size_type pos = 0) const
     {
-        return alloc.data(pos);
+        return get_allocator().data(pos);
     }
 
     constexpr pgm_array(const_pointer data) :
@@ -50,12 +56,9 @@ struct pgm_array : Policy::allocator_traits
         alloc(in_place_t{}, t...)
     {}
 
-    allocator_type& get_allocator() { return alloc; }
-    const allocator_type& get_allocator() const { return alloc; }
-
     const_pointer offset(unsigned pos) const 
     {
-        return alloc.data(pos);
+        return get_allocator().data(pos);
     }
 #else
     const_pointer data_;
