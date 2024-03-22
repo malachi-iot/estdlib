@@ -76,6 +76,9 @@ void loop1(estd::layer2::string<> name)
         cout << dummy2 << ", ";
     }
 
+    //for(auto dummy2 : array2)
+        //cout << dummy2 << ", ";
+
     cout << estd::endl;
 }
 

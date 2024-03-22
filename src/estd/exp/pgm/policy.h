@@ -24,10 +24,10 @@ template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
 struct PgmPolicy;
 
 template <size_t N>
-struct PgmPolicy<char, PgmPolicyType::String, N> :
-    pgm_allocator_traits<char, N>
+struct PgmPolicy<char, PgmPolicyType::String, N>
 {
     using allocator_traits = pgm_allocator_traits<char, N>;
+    using allocator_type = typename allocator_traits::allocator_type;
     using char_traits = estd::char_traits<const char>;
 
     static constexpr size_t size() { return N; }
@@ -37,16 +37,26 @@ struct PgmPolicy<char, PgmPolicyType::String, N> :
     // DEBT: Along those lines, consider making a private_span alongside
     // private_array
     static constexpr bool null_terminated = N == estd::internal::variant_npos();
+
+    // DEBT: May want to specialize further if we think it will optimize more
+    static size_t size(const char* data)
+    {
+        return null_terminated ?
+            strnlen_P(data, 256) :
+            size();
+    }
 };
 
 
 template <class T, size_t N>
-struct PgmPolicy<T, PgmPolicyType::BufferInline, N> :
-    pgm_allocator_traits<T, N>
+struct PgmPolicy<T, PgmPolicyType::BufferInline, N>
 {
     // Prefer a has-a to an is-a I think
     // DEBT: As we transition to has-a, we have a doubling up from inheritance also
     using allocator_traits = layer1_pgm_allocator_traits<T, N>;
+    using allocator_type = typename allocator_traits::allocator_type;
+
+    static constexpr size_t size(const T*) { return N; }
 };
 
 

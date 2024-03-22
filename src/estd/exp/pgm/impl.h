@@ -13,9 +13,9 @@ inline namespace v0 { inline namespace avr { namespace impl {
 // NOTE: was experimental::private_array_base
 template <class T, size_t N, class Policy = estd::internal::impl::PgmPolicy<
         T, internal::impl::PgmPolicyType::String, N> >
-struct pgm_array : Policy
+struct pgm_array : Policy::allocator_traits
 {
-    using base_type = Policy;
+    using base_type = typename Policy::allocator_traits;
 
     using typename base_type::size_type;
     using typename base_type::const_pointer;
@@ -46,7 +46,7 @@ struct pgm_array : Policy
     // DEBT: Just noticed AVR may indeed have true blue initializer_list support,
     // so visit that notion
     template <class ...T2>
-    constexpr explicit pgm_array(T2&&...t) :
+    constexpr explicit pgm_array(T2...t) :
         alloc(in_place_t{}, t...)
     {}
 
@@ -71,13 +71,10 @@ struct pgm_array : Policy
 
 #endif
 
-    // FIX: Doesn't quite work how we want it to because data() sometimes comes back
-    // as non-char-* which confuses strnlen_P
+    // DEBT: Feels like this actually belongs in dynamic_array_helper
     size_type size() const
     {
-        return base_type::null_terminated ?
-            strnlen_P(data(), 256) :
-            base_type::size();
+        return policy_type::size(data());
     }
 
 
