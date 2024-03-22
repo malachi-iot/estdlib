@@ -15,11 +15,13 @@ namespace estd {
 
 namespace internal {
 
-// DEBT: We can deduce T and N from Policy
-template <class Policy>
-struct pgm_dynamic_array_helper_base
+// DEBT: Try making one that comes from 'Core' policy type that
+// the rest can derive from... a bit squirrely
+template <typename T, impl::PgmPolicyType type_, unsigned N>
+struct dynamic_array_helper<avr::impl::pgm_array<
+    impl::PgmPolicy<T, type_, N> > >
 {
-    using impl_type = avr::impl::pgm_array<Policy>;
+    using impl_type = avr::impl::pgm_array<impl::PgmInlinePolicy<T, N>>;
 
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
@@ -38,28 +40,19 @@ struct pgm_dynamic_array_helper_base
         // back to a pointer smoothly or at all, even though compiles OK
         //const_pointer src = a.ofset(pos);
         
-        // DEBT: A tad TOO knowledgable about allocated_array internals
+        // DEBT: A tad TOO friendly about allocated_array internals
         const_pointer src = a.m_impl.data(pos);
         memcpy_P(dest, src, _end * sizeof(value_type));
         return _end;
     }
 };
 
-template <typename T, unsigned N>
-struct dynamic_array_helper<avr::impl::pgm_array<
-    impl::PgmInlinePolicy<T, N> > > :
-    pgm_dynamic_array_helper_base<impl::PgmInlinePolicy<T, N> >
-{
-
-};
-
 }
 
 inline namespace v0 { inline namespace avr {
 
-// DEBT: Combine this with rest of allocated_array mechanism (dogfooding)
-// yes I know this isn't really an allocated array per se...
 
+// DEBT: This guy works, but pgm_array is better
 template <class T, unsigned N>
 class test_container : //protected estd::layer1::allocator<T, N>
     protected estd::internal::impl::layer1_pgm_allocator<T, N>
@@ -118,15 +111,15 @@ public:
 
 // It turns out std::initializer_list seems to be present for AVR and tries
 // to take over in allocated_array, so brute force things
-/*
+// NOTE: Hmm maybe that was a red herring, now it less confusingly complains
+// about allocated_array's protected constructor
+#define FEATURE_ESTD_PGM_EXP_IL 0
+
+#if FEATURE_ESTD_PGM_EXP_IL
 template <class T, unsigned N>
 using pgm_array = estd::internal::allocated_array<
-    avr::impl::pgm_array<T, N,
-        internal::impl::PgmPolicy<T,
-            internal::impl::PgmPolicyType::BufferInline,
-            N>
-    > >;
-    */
+    avr::impl::pgm_array<internal::impl::PgmInlinePolicy<T, N> > >;
+#else
 template <class T, unsigned N>
 struct pgm_array : estd::internal::allocated_array<
     avr::impl::pgm_array<internal::impl::PgmInlinePolicy<T, N> > >
@@ -135,9 +128,10 @@ struct pgm_array : estd::internal::allocated_array<
     avr::impl::pgm_array<internal::impl::PgmInlinePolicy<T, N> > >;
 
     template <class ...T2>
-    constexpr pgm_array(T2...t) : base_type(t...) {}
+    constexpr pgm_array(T2&&...t) :
+        base_type(std::forward<T2>(t)...) {}
 };
-
+#endif
 
 }}
 

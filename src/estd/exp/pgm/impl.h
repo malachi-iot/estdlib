@@ -20,6 +20,10 @@ struct pgm_array :
     Policy::allocator_traits
 {
     using base_type = typename Policy::allocator_traits;
+    using this_type = pgm_array<Policy>;
+
+    // So that they can see our 'data'
+    friend struct estd::internal::dynamic_array_helper<this_type>;
 
     using typename base_type::size_type;
     using typename base_type::const_pointer;
@@ -41,21 +45,22 @@ struct pgm_array :
     allocator_type& get_allocator() { return *this; }
     constexpr const allocator_type& get_allocator() const { return *this; }
 
-    // DEBT: Want to phase this out - used by dynamic_array_helper
+private:
     constexpr const_pointer data(size_type pos = 0) const
     {
         return allocator_type::data(pos);
     }
 
-    constexpr pgm_array(const_pointer data) :
+public:
+    constexpr explicit pgm_array(const_pointer data) :
         allocator_type(data)
     {}
 
     // DEBT: Just noticed AVR may indeed have true blue initializer_list support,
     // so visit that notion
-    template <class ...T2>
-    constexpr explicit pgm_array(T2...t) :
-        allocator_type(in_place_t{}, t...)
+    template <class ...T>
+    constexpr explicit pgm_array(T&&...t) :
+        allocator_type(in_place_t{}, std::forward<T>(t)...)
     {}
 
     constexpr const_pointer offset(unsigned pos) const 

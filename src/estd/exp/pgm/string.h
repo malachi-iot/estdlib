@@ -15,8 +15,7 @@ namespace estd {
 namespace internal {
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<avr::impl::pgm_string<T, N> > :
-    pgm_dynamic_array_helper_base<impl::PgmStringPolicy<N> >
+struct dynamic_array_helper<avr::impl::pgm_string<T, N> >
 {
     typedef avr::impl::pgm_string<T, N> impl_type;
 
@@ -38,7 +37,7 @@ struct dynamic_array_helper<avr::impl::pgm_string<T, N> > :
         // back to a pointer smoothly or at all, even though compiles OK
         //const_pointer src = a.ofset(pos);
         
-        // DEBT: A tad TOO knowledgable about allocated_array internals
+        // DEBT: A tad TOO friendly about allocated_array internals
         const_pointer src = a.m_impl.data(pos);
         memcpy_P(dest, src, _end * sizeof(T));
         return _end;
