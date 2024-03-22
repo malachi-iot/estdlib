@@ -16,10 +16,10 @@ namespace estd {
 namespace internal {
 
 // DEBT: We can deduce T and N from Policy
-template <typename T, class Policy>
+template <class Policy>
 struct pgm_dynamic_array_helper_base
 {
-    using impl_type = avr::impl::pgm_array<T, Policy>;
+    using impl_type = avr::impl::pgm_array<Policy>;
 
     typedef internal::dynamic_array<impl_type> dynamic_array;
     typedef internal::allocated_array<impl_type> array;
@@ -40,15 +40,15 @@ struct pgm_dynamic_array_helper_base
         
         // DEBT: A tad TOO knowledgable about allocated_array internals
         const_pointer src = a.m_impl.data(pos);
-        memcpy_P(dest, src, _end * sizeof(T));
+        memcpy_P(dest, src, _end * sizeof(value_type));
         return _end;
     }
 };
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<avr::impl::pgm_array<T,
+struct dynamic_array_helper<avr::impl::pgm_array<
     impl::PgmInlinePolicy<T, N> > > :
-    pgm_dynamic_array_helper_base<T, impl::PgmInlinePolicy<T, N> >
+    pgm_dynamic_array_helper_base<impl::PgmInlinePolicy<T, N> >
 {
 
 };
@@ -129,14 +129,10 @@ using pgm_array = estd::internal::allocated_array<
     */
 template <class T, unsigned N>
 struct pgm_array : estd::internal::allocated_array<
-    avr::impl::pgm_array<T,
-        internal::impl::PgmInlinePolicy<T, N>
-    > >
+    avr::impl::pgm_array<internal::impl::PgmInlinePolicy<T, N> > >
 {
     using base_type = estd::internal::allocated_array<
-    avr::impl::pgm_array<T,
-        internal::impl::PgmInlinePolicy<T, N>
-    > >;
+    avr::impl::pgm_array<internal::impl::PgmInlinePolicy<T, N> > >;
 
     template <class ...T2>
     constexpr pgm_array(T2...t) : base_type(t...) {}

@@ -64,10 +64,6 @@ struct PgmPolicy<estd::internal::variant_npos()> : pgm_allocator_traits
 }   // impl
 
 
-template <size_t N>
-using PgmStringPolicy = impl::PgmPolicy<char, impl::PgmPolicyType::String, N>;
-
-
 }   // internal
 
 }

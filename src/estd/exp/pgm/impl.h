@@ -11,7 +11,7 @@ inline namespace v0 { inline namespace avr { namespace impl {
 // For "legacy" mode, this is not impl but instead entire implementation
 // For newer mode, this Impl feeds estd::internal::allocated_array
 // NOTE: was experimental::private_array_base
-template <class T, class Policy>
+template <class Policy>
 struct pgm_array :
 #if FEATURE_ESTD_PGM_ALLOCATOR
     // We prefer has-a so that we can access protected members

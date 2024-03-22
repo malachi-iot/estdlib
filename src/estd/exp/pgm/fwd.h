@@ -16,6 +16,7 @@ struct pgm_allocator_traits;
 
 enum class PgmPolicyType
 {
+    Core,
     Buffer,         // layer2-class buffer
     String,
     BufferInline    // layer1-class buffer
@@ -25,27 +26,29 @@ enum class PgmPolicyType
 // type=String, N != max = fixed compile time size
 // type=Buffer, N = max = runtime sized
 // type=Buffer, N != max = fixed compile time size
-template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
-    size_t N = estd::internal::variant_npos()>
+template <class T, PgmPolicyType type_, size_t N>
 struct PgmPolicy;
 
 template <class T, size_t N>
 using PgmInlinePolicy = PgmPolicy<T, impl::PgmPolicyType::BufferInline, N>;
 
+template <size_t N = estd::internal::variant_npos()>
+using PgmStringPolicy = impl::PgmPolicy<char, impl::PgmPolicyType::String, N>;
 
-}
 
-}
+}   // impl
+
+}   // internal
 
 inline namespace v0 { inline namespace avr {
 
 namespace impl {
 
-template <class T, class Policy>
+template <class Policy>
 struct pgm_array;
 
 template <class T, unsigned N>
-using pgm_string = pgm_array<T, internal::impl::PgmPolicy<
+using pgm_string = pgm_array<internal::impl::PgmPolicy<
     T, internal::impl::PgmPolicyType::String, N> >;
 
 }

@@ -15,7 +15,8 @@ namespace estd {
 namespace internal {
 
 template <typename T, unsigned N>
-struct dynamic_array_helper<avr::impl::pgm_string<T, N> >
+struct dynamic_array_helper<avr::impl::pgm_string<T, N> > :
+    pgm_dynamic_array_helper_base<impl::PgmStringPolicy<N> >
 {
     typedef avr::impl::pgm_string<T, N> impl_type;
 
