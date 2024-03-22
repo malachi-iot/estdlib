@@ -8,7 +8,7 @@
 #include <estd/exp/pgm/string.h>
 
 static const estd::v0::test_container<int, 4> array1 PROGMEM { 0, 1, 2, 3 };
-static const estd::v0::pgm_array<int, 4> array2 PROGMEM { 0, 1, 2, 3 };
+static const estd::v0::pgm_array<int, 4> array2 PROGMEM { 4, 5, 6, 7 };
 
 static const char test1[] PROGMEM = "Hello PGM:";
 
@@ -76,8 +76,8 @@ void loop1(estd::layer2::string<> name)
         cout << dummy2 << ", ";
     }
 
-    //for(auto dummy2 : array2)
-        //cout << dummy2 << ", ";
+    for(auto dummy2 : array2)
+        cout << dummy2 << ", ";
 
     cout << estd::endl;
 }

@@ -15,7 +15,7 @@ struct PgmPolicy<char, PgmPolicyType::String, N>
     using allocator_type = typename allocator_traits::allocator_type;
     using char_traits = estd::char_traits<const char>;
 
-    static constexpr size_t size() { return N; }
+    //static constexpr size_t size() { return N; }
 
     // DEBT: Align this nomenclature with how 'span' does it,
     // since we're kind of making a fancy span here
@@ -28,7 +28,7 @@ struct PgmPolicy<char, PgmPolicyType::String, N>
     {
         return null_terminated ?
             strnlen_P(data, 256) :
-            size();
+            N;
     }
 };
 

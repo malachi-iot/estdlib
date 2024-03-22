@@ -29,6 +29,10 @@ template <class T = char, PgmPolicyType type_ = PgmPolicyType::String,
     size_t N = estd::internal::variant_npos()>
 struct PgmPolicy;
 
+template <class T, size_t N>
+using PgmInlinePolicy = PgmPolicy<T, impl::PgmPolicyType::BufferInline, N>;
+
+
 }
 
 }
@@ -37,11 +41,11 @@ inline namespace v0 { inline namespace avr {
 
 namespace impl {
 
-template <class T, size_t N, class Policy>
+template <class T, class Policy>
 struct pgm_array;
 
 template <class T, unsigned N>
-using pgm_string = pgm_array<T, N, internal::impl::PgmPolicy<
+using pgm_string = pgm_array<T, internal::impl::PgmPolicy<
     T, internal::impl::PgmPolicyType::String, N> >;
 
 }

@@ -11,10 +11,11 @@ inline namespace v0 { inline namespace avr { namespace impl {
 // For "legacy" mode, this is not impl but instead entire implementation
 // For newer mode, this Impl feeds estd::internal::allocated_array
 // NOTE: was experimental::private_array_base
-template <class T, size_t N, class Policy>
+template <class T, class Policy>
 struct pgm_array :
-#if FEATURE_ESTD_PGM_ALLOCATORX
-    //Policy::allocator_traits::allocator_type,
+#if FEATURE_ESTD_PGM_ALLOCATOR
+    // We prefer has-a so that we can access protected members
+    Policy::allocator_traits::allocator_type,
 #endif
     Policy::allocator_traits
 {
@@ -22,7 +23,7 @@ struct pgm_array :
 
     using typename base_type::size_type;
     using typename base_type::const_pointer;
-    using base_type::value_type;
+    using typename base_type::value_type;
     //using allocator_traits = internal::impl::pgm_allocator_traits<T, N>;
     using policy_type = Policy;
     using allocator_traits = typename policy_type::allocator_traits;
@@ -35,30 +36,31 @@ struct pgm_array :
     //typedef internal::impl::pgm_allocator2<T, N> allocator_type;
     using allocator_type = typename allocator_traits::allocator_type;
     // data_ was working, but let's dogfood a bit
-    allocator_type alloc;
+    //allocator_type alloc;
 
-    allocator_type& get_allocator() { return alloc; }
-    constexpr const allocator_type& get_allocator() const { return alloc; }
+    allocator_type& get_allocator() { return *this; }
+    constexpr const allocator_type& get_allocator() const { return *this; }
 
+    // DEBT: Want to phase this out - used by dynamic_array_helper
     constexpr const_pointer data(size_type pos = 0) const
     {
-        return get_allocator().data(pos);
+        return allocator_type::data(pos);
     }
 
     constexpr pgm_array(const_pointer data) :
-        alloc(data)
+        allocator_type(data)
     {}
 
     // DEBT: Just noticed AVR may indeed have true blue initializer_list support,
     // so visit that notion
     template <class ...T2>
     constexpr explicit pgm_array(T2...t) :
-        alloc(in_place_t{}, t...)
+        allocator_type(in_place_t{}, t...)
     {}
 
-    const_pointer offset(unsigned pos) const 
+    constexpr const_pointer offset(unsigned pos) const 
     {
-        return get_allocator().data(pos);
+        return data(pos);
     }
 #else
     const_pointer data_;
@@ -82,7 +84,7 @@ struct pgm_array :
 
 
 #if FEATURE_ESTD_PGM_ALLOCATOR
-    using accessor = internal::impl::pgm_accessor2<T>;
+    using accessor = internal::impl::pgm_accessor2<value_type>;
     using iterator = estd::internal::locking_iterator<
         allocator_type,
         accessor,
