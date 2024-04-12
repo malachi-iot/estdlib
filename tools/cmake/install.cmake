@@ -27,8 +27,13 @@ install(TARGETS ${PROJECT_NAME}
         INCLUDES DESTINATION include/malachi-iot/${PROJECT_NAME}/${PROJECT_VERSION}
         )
 
-install(EXPORT ${PROJECT_NAME}Targets
+# DEBT: Don't fully understand why we have to disable this
+# for ESP-IDF to be happy as a "pure cmake component".  Smells namespace related
+# https://docs.espressif.com/projects/esp-idf/en/v5.1.3/esp32/api-guides/build-system.html#writing-pure-cmake-components 
+if(NOT ESP_PLATFORM)
+    install(EXPORT ${PROJECT_NAME}Targets
         FILE ${PROJECT_NAME}-${LIB_TYPE}-Targets.cmake
         NAMESPACE malachi-iot::
         DESTINATION lib/cmake/${PROJECT_NAME}
         )
+endif()
