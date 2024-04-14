@@ -242,18 +242,22 @@ TEST_CASE("limits & common_type tests")
         SECTION("float")
         {
             using type = estd::numeric_limits<float>;
+            constexpr auto v = physical_bits<float>::value;
+            constexpr auto v2 = type::radix;
 
             REQUIRE(type::is_iec559);
-            REQUIRE(physical_bits<float>::value == 32);
-            REQUIRE(type::radix == 2);
+            REQUIRE(v == 32);
+            REQUIRE(v2 == 2);
         }
         SECTION("double")
         {
             using type = estd::numeric_limits<double>;
+            constexpr auto v = physical_bits<double>::value;
+            constexpr auto radix = type::radix;
 
             REQUIRE(type::is_iec559);
-            REQUIRE(physical_bits<double>::value == 64);
-            REQUIRE(type::radix == 2);
+            REQUIRE(v == 64);
+            REQUIRE(radix == 2);
         }
         SECTION("long double")
         {

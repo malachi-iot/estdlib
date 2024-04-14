@@ -243,6 +243,7 @@ TEST_CASE("experimental tests")
 
         //char* v = s.begin().lock();
         s.copy(copy.c_str(), 3);
+        copy[3] = 0;
 
         REQUIRE(copy == "123");
 
