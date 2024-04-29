@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Guidance from https://community.platformio.org/t/save-assembler-files-during-building/23085/8
+
+# Can't call it .S or .asm because pio finds it and attempts an assembly
+avr-objdump -S  -d .pio/build/promicro/firmware.elf > .pio/out.assembly

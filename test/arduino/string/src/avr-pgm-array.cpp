@@ -3,7 +3,7 @@
 // EXPERIMENTAL
 // AVR PGM container tests
 
-#if EXP_PGM_STRING
+#if EXP_PGM_ARRAY
 #include <estd/exp/pgm/array.h>
 
 // DEBT: I think we may be able to do some CTAD to deduce array count

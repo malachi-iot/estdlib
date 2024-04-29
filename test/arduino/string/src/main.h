@@ -14,4 +14,5 @@ extern estd::arduino_ostream cout;
 
 #if defined(__AVR__) && !defined(EXP_PGM_STRING)
 #define EXP_PGM_STRING 1
+#define EXP_PGM_ARRAY 1
 #endif

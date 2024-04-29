@@ -64,7 +64,6 @@ void loop1(estd::layer2::string<> name)
     //name += Returner::value2();
 
     //name += F("(value)");
-    test_array();
 }
 
 

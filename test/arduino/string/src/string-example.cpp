@@ -50,6 +50,10 @@ void loop()
 #if EXP_PGM_STRING
     avr::loop2();
 #endif
+
+#if EXP_PGM_ARRAY
+    avr::test_array();
+#endif
     
     delay(1000);
 }
