@@ -4,11 +4,7 @@
 // AVR PGM basic_string tests
 
 #if EXP_PGM_STRING
-#include <estd/exp/pgm/array.h>
 #include <estd/exp/pgm/string.h>
-
-static const estd::v0::test_container<int, 4> array1 PROGMEM { 0, 1, 2, 3 };
-static const estd::v0::pgm_array<int, 4> array2 PROGMEM { 4, 5, 6, 7 };
 
 static const char test1[] PROGMEM = "Hello PGM:";
 
@@ -68,18 +64,7 @@ void loop1(estd::layer2::string<> name)
     //name += Returner::value2();
 
     //name += F("(value)");
-    uint32_t dummy = array1[0];
-    cout << "pgm_array: " << dummy << ", ";
-    
-    for(auto dummy2 : array1)
-    {
-        cout << dummy2 << ", ";
-    }
-
-    for(auto dummy2 : array2)
-        cout << dummy2 << ", ";
-
-    cout << estd::endl;
+    test_array();
 }
 
 
