@@ -15,7 +15,7 @@ namespace avr {
 void test_array()
 {
     uint32_t dummy = array1[0];
-    cout << "pgm_array: " << dummy << ", ";
+    cout << F("pgm_array: ") << dummy << ", ";
     
     for(auto dummy2 : array1)
     {

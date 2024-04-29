@@ -6,8 +6,6 @@
 #include "main.h"
 
 
-#define USE_IOS 1
-
 #if USE_IOS
 estd::arduino_ostream cout(Serial);
 #endif
