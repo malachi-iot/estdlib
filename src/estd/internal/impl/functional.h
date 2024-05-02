@@ -31,10 +31,15 @@ struct function_fnptr1<TResult(TArgs...)>
     {
         typedef TResult (model_base::*function_type)(TArgs...);
         typedef void (*deleter_type)(model_base*);  // EXPERIMENTAL
+        typedef void (model_base::*deleter2_type)();  // EXPERIMENTAL
 
         const function_type f;
+        const deleter2_type d;
 
-        constexpr explicit model_base(function_type f) : f(f) {}
+        constexpr explicit model_base(function_type f) : f(f), d{nullptr} {}
+        constexpr explicit model_base(function_type f, deleter2_type d) :
+            f(f), d{d}
+        {}
 
         constexpr model_base(const model_base& copy_from) = default;
         // just like concept_fnptr2, default move constructor somehow
@@ -43,6 +48,11 @@ struct function_fnptr1<TResult(TArgs...)>
         constexpr model_base(model_base&& move_from) noexcept:
             f(move_from.f)
         {}
+
+        ~model_base()
+        {
+            if(d)   (this->*d)();
+        }
 
         // Calls 'exec' down in model, typically
         inline TResult _exec(TArgs&&...args)
@@ -59,12 +69,19 @@ struct function_fnptr1<TResult(TArgs...)>
 
         //template <typename U>
         constexpr explicit model(F&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            base_type(
+                static_cast<typename base_type::function_type>(&model::exec),
+                static_cast<typename base_type::deleter2_type>(&model::dtor)),
             f(std::forward<F>(u))
         {
         }
 
         F f;
+
+        void dtor()
+        {
+            f.~F();
+        }
 
         // DEBT: Use rvalue here
         TResult exec(TArgs...args)

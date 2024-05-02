@@ -523,7 +523,7 @@ TEST_CASE("functional")
                 m(&ctx);
 
             //int sz = sizeof(m.f);
-            REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f));
+            REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f) + sizeof(m.d));
 
             estd::detail::function<int(int)> f(&m);
 
