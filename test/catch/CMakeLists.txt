@@ -89,6 +89,7 @@ else()
         internal-test.cpp)
 endif()
 
+# DEBT: Need to use INTERFACE linkage here when ESTD INTERFACE option is enabled
 target_compile_definitions(estd PUBLIC
     FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
     FEATURE_ESTD_COMPILE_STRICTNESS=${FEATURE_ESTD_COMPILE_STRICTNESS}

@@ -46,7 +46,8 @@ struct function_fnptr1<TResult(TArgs...)>
         // results in make_inline2 leaving f uninitialized
         //concept_fnptr1(concept_fnptr1&& move_from) = default;
         constexpr model_base(model_base&& move_from) noexcept:
-            f(move_from.f)
+            f(move_from.f),
+            d(move_from.d)
         {}
 
         ~model_base()
@@ -171,9 +172,10 @@ struct function_fnptr2<TResult(TArgs...)>
     {
         typedef model_base base_type;
 
-        constexpr explicit model(F&& u) :
+        template <typename U>
+        constexpr explicit model(U&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::__exec)),
-            f(std::forward<F>(u))
+            f(std::forward<U>(u))
         {
         }
 
@@ -199,7 +201,7 @@ struct function_fnptr2<TResult(TArgs...)>
             return f(std::forward<TArgs>(args)...);
         }
 
-        static TResult __exec(void* _this, TArgs&&...args)
+        static TResult __exec(void* _this, TArgs...args)
         {
             auto __this = ((model*)_this);
 
@@ -249,7 +251,8 @@ template <typename TResult, typename... TArgs, typename... TContexts>
 struct function_context_provider<TResult(TArgs...), TContexts...>
 {
 protected:
-    typedef detail::function<TResult(TArgs...)> function;
+    typedef detail::function<TResult(TArgs...),
+        estd::detail::impl::function_fnptr1<TResult(TArgs...)> > function;
     using model_base = typename function::model_base;
 
 public:

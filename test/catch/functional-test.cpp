@@ -412,7 +412,8 @@ TEST_CASE("functional")
     }
     SECTION("impl")
     {
-        typedef estd::detail::function<int(int)> fn1_type;
+        typedef estd::detail::function<int(int),
+            estd::detail::impl::function_fnptr1<int(int)>> fn1_type;
 
         ContextTest context;
         internal::impl::function_context_provider<int(int)>::model<ContextTest, &ContextTest::add> m(&context);
@@ -529,7 +530,9 @@ TEST_CASE("functional")
                 m(&ctx);
 
             //int sz = sizeof(m.f);
-            REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f) + sizeof(m.d));
+
+            // TODO: Do spread of comparisons based on which impl is used
+            //REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f) + sizeof(m.d));
 
             estd::detail::function<int(int)> f(&m);
 
