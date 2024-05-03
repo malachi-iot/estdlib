@@ -368,7 +368,8 @@ TEST_CASE("functional")
             }
             SECTION("fnptr2")
             {
-                typedef estd::detail::function<void(int), estd::detail::impl::function_fnptr2<void(
+                typedef estd::detail::function<void(int),
+                    estd::detail::impl::function_fnptr2<void(
                     int)> > _fb;
 
                 struct model : _fb::model_base
@@ -392,6 +393,51 @@ TEST_CASE("functional")
                 f(5);
 
                 REQUIRE(m.counter == 5);
+            }
+            SECTION("fnptr2_opt")
+            {
+                typedef estd::detail::function<void(int),
+                    estd::detail::impl::function_fnptr2_opt<void(
+                        int)> > _fb;
+
+                int counter = 0;
+
+                // TODO: Test not quite right, because to truly test fnptr2_opt we have to use its model, not
+                // just this one-off special one
+                struct model : _fb::model_base
+                {
+                    typedef _fb::model_base base_type;
+
+                    int counter = 0;
+                    int *ext_counter;
+
+                    explicit model(int* ext_counter) :
+                        base_type(&_exec),
+                        ext_counter(ext_counter)
+                    {}
+                    ~model()
+                    {
+                        ++*ext_counter;
+                    }
+
+                    static void _exec(void* _this, int v)
+                    {
+                        ((model*)_this)->counter += v;
+                    }
+                };
+
+                {
+                    model m(&counter);
+                    _fb f(&m);
+
+                    f(5);
+
+                    REQUIRE(m.counter == 5);
+                    //REQUIRE(counter == 1);
+                }
+
+                REQUIRE(counter == 1);
+
             }
         }
         SECTION("aliased")

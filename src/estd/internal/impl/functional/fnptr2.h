@@ -85,6 +85,50 @@ struct function_fnptr2<TResult(TArgs...)>
     };
 };
 
+// Special version which calls dtor right after function invocation
+template <typename Result, typename... Args>
+struct function_fnptr2_opt<Result(Args...)>
+{
+    struct model_base
+    {
+        typedef Result (*function_type)(void*, Args...);
+
+        const function_type f;
+
+        constexpr explicit model_base(function_type f) : f(f) {}
+
+        inline Result _exec(Args&&...args)
+        {
+            return f(this, std::forward<Args>(args)...);
+        }
+    };
+
+    template <typename F>
+    struct model : model_base
+    {
+        using base_type = model_base;
+        using typename base_type::function_type;
+
+        //template <typename U>
+        constexpr explicit model(F&& u) :
+            base_type(
+                static_cast<function_type>(&model::exec)),
+            f(std::forward<F>(u))
+        {
+        }
+
+        F f;
+
+        static Result exec(void* this_, Args...args)
+        {
+            F& f = ((model*)this_)->f;
+            Result r = f(std::forward<Args>(args)...);
+            f.~F();
+            return r;
+        }
+    };
+};
+
 
 }}}
 
