@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../impl/functional/fwd.h"
+
 namespace estd {
 
 // Deviates from normal hash with 'precision' - somewhat experimental
@@ -19,21 +21,6 @@ struct greater;
 namespace detail {
 
 namespace impl {
-
-template <typename F>
-struct function_fnptr1;
-
-template <typename F>
-struct function_fnptr1_opt;
-
-template <typename F>
-struct function_fnptr2;
-
-template <typename F>
-struct function_fnptr2_opt;
-
-template <typename F>
-struct function_virtual;
 
 #ifdef __cpp_alias_templates
 template <typename F>
