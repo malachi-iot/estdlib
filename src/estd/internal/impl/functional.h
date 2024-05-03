@@ -92,6 +92,45 @@ struct function_fnptr1<TResult(TArgs...)>
 };
 
 
+// Special version which calls dtor right after function invocation
+template <typename Result, typename... Args>
+struct function_fnptr1_opt<Result(Args...)>
+{
+    struct model_base
+    {
+        typedef Result (model_base::*function_type)(Args...);
+
+        const function_type f;
+
+        constexpr explicit model_base(function_type f) : f(f) {}
+    };
+
+    template <typename F>
+    struct model : model_base
+    {
+        typedef model_base base_type;
+
+        //template <typename U>
+        constexpr explicit model(F&& u) :
+            base_type(
+                static_cast<typename base_type::function_type>(&model::exec)),
+            f(std::forward<F>(u))
+        {
+        }
+
+        F f;
+
+        Result exec(Args...args)
+        {
+            Result r = f(std::forward<Args>(args)...);
+            f.~F();
+            return r;
+        }
+    };
+};
+
+
+
 template <typename TResult, typename... TArgs>
 struct function_fnptr2<TResult(TArgs...)>
 {
@@ -100,17 +139,25 @@ struct function_fnptr2<TResult(TArgs...)>
     struct model_base
     {
         typedef TResult (*function_type)(void*, TArgs...);
+        typedef void (*deleter_type)();
 
         const function_type _f;
+        const deleter_type _d;
 
-        constexpr explicit model_base(function_type f) : _f(f) {}
+        constexpr explicit model_base(
+            function_type f,
+            deleter_type d = nullptr) :
+            _f(f),
+            _d{d}
+        {}
 
         model_base(const model_base& copy_from) = default;
         // DEBT: For some reason ESP32's default move constructor
         // doesn't initialize _f
         //concept_fnptr2(concept_fnptr2&& move_from) = default;
         constexpr model_base(model_base&& move_from) noexcept:
-            _f(std::move(move_from._f))
+            _f(std::move(move_from._f)),
+            _d{std::move(move_from._d)}
         {}
 
         inline TResult _exec(TArgs&&...args)
@@ -139,6 +186,11 @@ struct function_fnptr2<TResult(TArgs...)>
         {} */
 
         F f;
+
+        static void dtor(void* _this)
+        {
+            ((model*)_this)->f.~F();
+        }
 
         // TODO: Consolidate different models down to a model_base since they
         // all need this exec function
