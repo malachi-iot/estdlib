@@ -7,24 +7,29 @@
 namespace estd { namespace detail { namespace impl {
 
 
-template <typename TResult, typename... TArgs>
-struct function_fnptr2<TResult(TArgs...)>
+template <typename Result, typename... Args>
+struct function_fnptr2<Result(Args...)>
 {
     // this is a slightly less fancy more brute force approach to try to diagnose esp32
     // woes
     struct model_base
     {
-        typedef TResult (*function_type)(void*, TArgs...);
+        typedef Result (*function_type)(void*, Args...);
         typedef void (*deleter_type)();
 
         const function_type _f;
+#if GITHUB_ISSUE_39_EXP
         const deleter_type _d;
+#endif
 
         constexpr explicit model_base(
             function_type f,
             deleter_type d = nullptr) :
-            _f(f),
+            _f(f)
+#if GITHUB_ISSUE_39_EXP
+            ,
             _d{d}
+#endif
         {}
 
         model_base(const model_base& copy_from) = default;
@@ -32,13 +37,16 @@ struct function_fnptr2<TResult(TArgs...)>
         // doesn't initialize _f
         //concept_fnptr2(concept_fnptr2&& move_from) = default;
         constexpr model_base(model_base&& move_from) noexcept:
-            _f(std::move(move_from._f)),
+            _f(std::move(move_from._f))
+#if GITHUB_ISSUE_39_EXP
+            ,
             _d{std::move(move_from._d)}
+#endif
         {}
 
-        inline TResult _exec(TArgs&&...args)
+        inline Result _exec(Args&&...args)
         {
-            return _f(this, std::forward<TArgs>(args)...);
+            return _f(this, std::forward<Args>(args)...);
         }
     };
 
@@ -71,16 +79,16 @@ struct function_fnptr2<TResult(TArgs...)>
 
         // TODO: Consolidate different models down to a model_base since they
         // all need this exec function
-        TResult exec(TArgs&&...args)
+        Result exec(Args&&...args)
         {
-            return f(std::forward<TArgs>(args)...);
+            return f(std::forward<Args>(args)...);
         }
 
-        static TResult __exec(void* _this, TArgs...args)
+        static Result __exec(void* _this, Args...args)
         {
             auto __this = ((model*)_this);
 
-            return __this->f(std::forward<TArgs>(args)...);
+            return __this->f(std::forward<Args>(args)...);
         }
     };
 };

@@ -30,8 +30,11 @@ struct function_fnptr1<TResult(TArgs...)>
         typedef void (model_base::*deleter2_type)();  // EXPERIMENTAL
 
         const function_type f;
+#if GITHUB_ISSUE_39_EXP
         const deleter2_type d;
+#endif
 
+#if GITHUB_ISSUE_39_EXP
         constexpr explicit model_base(function_type f) : f(f), d{nullptr} {}
         constexpr explicit model_base(function_type f, deleter2_type d) :
             f(f), d{d}
@@ -50,6 +53,9 @@ struct function_fnptr1<TResult(TArgs...)>
         {
             if(d)   (this->*d)();
         }
+#else
+        constexpr explicit model_base(function_type f) : f(f) {}
+#endif
 
         // Calls 'exec' down in model, typically
         inline TResult _exec(TArgs&&...args)
@@ -67,8 +73,12 @@ struct function_fnptr1<TResult(TArgs...)>
         //template <typename U>
         constexpr explicit model(F&& u) :
             base_type(
+#if GITHUB_ISSUE_39_EXP
                 static_cast<typename base_type::function_type>(&model::exec),
                 static_cast<typename base_type::deleter2_type>(&model::dtor)),
+#else
+                static_cast<typename base_type::function_type>(&model::exec)),
+#endif
             f(std::forward<F>(u))
         {
         }
