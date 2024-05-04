@@ -231,7 +231,7 @@ public:
     template <typename F>
     inline static model<F> make_model(F&& f)
     {
-        return model<F>(std::move(f));
+        return model<F>(std::forward<F>(f));
     }
 
     // EXPERIMENTAL

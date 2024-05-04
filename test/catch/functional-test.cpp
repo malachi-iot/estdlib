@@ -372,72 +372,91 @@ TEST_CASE("functional")
                     estd::detail::impl::function_fnptr2<void(
                     int)> > _fb;
 
-                struct model : _fb::model_base
+                SECTION("default model")
                 {
-                    typedef _fb::model_base base_type;
+                    estd::test::Dummy dummy1;
 
                     int counter = 0;
 
-                    model() : base_type(&_exec)
-                    {}
+                    dummy1.inc_on_destruct = &counter;
 
-                    static void _exec(void* _this, int v)
                     {
-                        ((model*)_this)->counter += v;
+                        auto model = _fb::make_model([dummy1](int)
+                        {
+
+                        });
+
+                        _fb f(&model);
+
+                        f(0);
+
+                        REQUIRE(counter == 0);
                     }
-                };
 
-                model m;
-                _fb f(&m);
-
-                f(5);
-
-                REQUIRE(m.counter == 5);
-            }
-            SECTION("fnptr2_opt")
-            {
-                typedef estd::detail::function<void(int),
-                    estd::detail::impl::function_fnptr2_opt<void(
-                        int)> > _fb;
-
-                int counter = 0;
-
-                // TODO: Test not quite right, because to truly test fnptr2_opt we have to use its model, not
-                // just this one-off special one
-                struct model : _fb::model_base
+                    REQUIRE(counter == 1);
+                }
+                SECTION("custom model")
                 {
-                    typedef _fb::model_base base_type;
-
-                    int counter = 0;
-                    int *ext_counter;
-
-                    explicit model(int* ext_counter) :
-                        base_type(&_exec),
-                        ext_counter(ext_counter)
-                    {}
-                    ~model()
+                    struct model : _fb::model_base
                     {
-                        ++*ext_counter;
-                    }
+                        typedef _fb::model_base base_type;
 
-                    static void _exec(void* _this, int v)
-                    {
-                        ((model*)_this)->counter += v;
-                    }
-                };
+                        int counter = 0;
 
-                {
-                    model m(&counter);
+                        model() : base_type(&_exec)
+                        {}
+
+                        static void _exec(void* _this, int v)
+                        {
+                            ((model*)_this)->counter += v;
+                        }
+                    };
+
+                    model m;
                     _fb f(&m);
 
                     f(5);
 
                     REQUIRE(m.counter == 5);
-                    //REQUIRE(counter == 1);
+                }
+            }
+            SECTION("fnptr2_opt")
+            {
+                // ISSUE_39_BRINGUP
+                typedef estd::detail::function<int(void),
+                    estd::detail::impl::function_fnptr2_opt<int(
+                        void)> > _fb;
+
+                int counter = 0;
+
+                estd::test::Dummy dummy1;
+
+                dummy1.inc_on_destruct = &counter;
+
+                {
+                    // Beware there's a copy and a move of 'dummy1'
+                    auto model =
+                        _fb::make_model([dummy1, &counter]
+                        {
+                            ++counter;
+                            return 0;
+                        });
+
+                    {
+                        _fb f(&model);
+
+                        f();
+
+                        //REQUIRE(counter == 1);
+                    }
+
+                    REQUIRE(counter == 2);
                 }
 
-                REQUIRE(counter == 1);
-
+                // NOTE: It's a feature not a bug, dtor is called once too many times.
+                // that is because _opt flavor is conceived of to work in a placement new
+                // scenario where the "delete" never happens.
+                REQUIRE(counter == 3);
             }
         }
         SECTION("aliased")

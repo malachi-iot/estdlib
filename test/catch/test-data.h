@@ -15,27 +15,30 @@ struct Dummy
 {
     int val1;
     const char* value2;
-    const bool moved_ = false;
-    const bool copied_ = false;
+    int* inc_on_destruct = nullptr;
+    const bool moved_ = false;      ///< This object was made from a move
+    const bool copied_ = false;     ///< This object was made via a copy
 
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() = default;
 
     Dummy(int val1, const char* val2) :
-        val1(val1), value2(val2)
+        val1(val1), value2(val2), inc_on_destruct(nullptr)
         {}
 
     Dummy(Dummy&& move_from) NOEXCEPT :
         val1(move_from.val1),
         value2(move_from.value2),
+        inc_on_destruct(move_from.inc_on_destruct),
         moved_{true}
     {
-
+        move_from.inc_on_destruct = nullptr;
     }
 
     Dummy(const Dummy& copy_from) :
         val1(copy_from.val1),
         value2(copy_from.value2),
+        inc_on_destruct(copy_from.inc_on_destruct),
         copied_{true}
     {
 
@@ -44,6 +47,8 @@ struct Dummy
     ~Dummy()
     {
         const char* val3 = value2;
+        if(inc_on_destruct)
+            ++*inc_on_destruct;
     }
 
     // this partially undoes our explicit copy constructor
