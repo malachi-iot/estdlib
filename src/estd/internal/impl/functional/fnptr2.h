@@ -111,16 +111,41 @@ struct function_fnptr2_opt<Result(Args...)>
         }
     };
 
+
     template <typename F>
-    struct model : model_base
+    struct model_void : model_base
     {
         using base_type = model_base;
         using typename base_type::function_type;
 
         //template <typename U>
-        constexpr explicit model(F&& u) :
+        constexpr explicit model_void(F&& u) :
             base_type(
-                static_cast<function_type>(&model::exec)),
+                static_cast<function_type>(&model_void::exec)),
+            f(std::forward<F>(u))
+        {
+        }
+
+        F f;
+
+        static void exec(void* this_, Args...args)
+        {
+            F& f = ((model_void*)this_)->f;
+            f(std::forward<Args>(args)...);
+            f.~F();
+        }
+    };
+
+    template <typename F>
+    struct model_nonvoid : model_base
+    {
+        using base_type = model_base;
+        using typename base_type::function_type;
+
+        //template <typename U>
+        constexpr explicit model_nonvoid(F&& u) :
+            base_type(
+                static_cast<function_type>(&model_nonvoid::exec)),
             f(std::forward<F>(u))
         {
         }
@@ -129,12 +154,17 @@ struct function_fnptr2_opt<Result(Args...)>
 
         static Result exec(void* this_, Args...args)
         {
-            F& f = ((model*)this_)->f;
+            F& f = ((model_nonvoid*)this_)->f;
             Result r = f(std::forward<Args>(args)...);
             f.~F();
             return r;
         }
     };
+
+    template <class F>
+    using model = conditional_t<is_void<Result>::value,
+        model_void<F>,
+        model_nonvoid<F> >;
 };
 
 

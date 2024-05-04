@@ -426,12 +426,17 @@ TEST_CASE("functional")
                 typedef estd::detail::function<int(void),
                     estd::detail::impl::function_fnptr2_opt<int(
                         void)> > _fb;
+                typedef estd::detail::function<void(void),
+                    estd::detail::impl::function_fnptr2_opt<void(
+                        void)> > _fb2;
 
                 int counter = 0;
+                int counter2 = 0;
 
-                estd::test::Dummy dummy1;
+                estd::test::Dummy dummy1, dummy2;
 
                 dummy1.inc_on_destruct = &counter;
+                dummy2.inc_on_destruct = &counter2;
 
                 {
                     // Beware there's a copy and a move of 'dummy1'
@@ -442,12 +447,20 @@ TEST_CASE("functional")
                             return 0;
                         });
 
+                    auto model2 = _fb2::make_model([dummy2]
+                    {
+
+                    });
+
                     {
                         _fb f(&model);
+                        _fb2 f2(&model2);
 
                         f();
+                        f2();
 
-                        //REQUIRE(counter == 1);
+                        REQUIRE(counter == 2);
+                        REQUIRE(counter2 == 1);
                     }
 
                     REQUIRE(counter == 2);
@@ -457,6 +470,7 @@ TEST_CASE("functional")
                 // that is because _opt flavor is conceived of to work in a placement new
                 // scenario where the "delete" never happens.
                 REQUIRE(counter == 3);
+                REQUIRE(counter2 == 2);
             }
         }
         SECTION("aliased")
