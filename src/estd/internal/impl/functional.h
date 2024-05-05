@@ -70,9 +70,11 @@ public:
 };
 
 // EXPERIMENTATION
-template <typename TResult, typename... TArgs>
-struct function_context_provider<detail::function<TResult(TArgs...)> > :
-    function_context_provider<TResult(TArgs...)>
+template <typename Result, typename... Args>
+struct function_context_provider<
+    detail::function<Result(Args...),
+    detail::impl::function_fnptr1<Result(Args...)> > > :
+    function_context_provider<Result(Args...)>
 {
 };
 

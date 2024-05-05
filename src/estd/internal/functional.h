@@ -249,9 +249,11 @@ namespace internal {
 // DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
 template <typename TResult, typename... TArgs>
-class thisify_function<TResult(TArgs...)> : public detail::function<TResult(TArgs...)>
+class thisify_function<TResult(TArgs...)> :
+    public detail::function<TResult(TArgs...), detail::impl::function_fnptr1<TResult(TArgs...)> >
 {
-    typedef detail::function<TResult(TArgs...)> base_type;
+    typedef detail::function<TResult(TArgs...),
+        detail::impl::function_fnptr1<TResult(TArgs...)>> base_type;
     typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
 
 public:
@@ -333,9 +335,9 @@ public:
 // Like a dumbed-down bind
 template <typename TResult, typename... TArgs, typename... TContexts>
 class contextify_function<TResult(TArgs...), TContexts...> :
-    public detail::function<TResult(TArgs...)>
+    public detail::function<TResult(TArgs...), detail::impl::function_fnptr1<TResult(TArgs...)>>
 {
-    typedef detail::function<TResult(TArgs...)> base_type;
+    typedef detail::function<TResult(TArgs...), detail::impl::function_fnptr1<TResult(TArgs...)>> base_type;
 
 public:
     template <class T>

@@ -518,7 +518,8 @@ TEST_CASE("functional")
         // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
         //fn1_type::imbue<internal::impl::method_model, ContextTest, &ContextTest::add> m6(&context);
 
-        detail::function<int(int)> f_m5(&m5);
+        detail::function<int(int),
+            detail::impl::function_fnptr1<int(int)>> f_m5(&m5);
 
         f_m5(2);
 
@@ -613,7 +614,8 @@ TEST_CASE("functional")
             // TODO: Do spread of comparisons based on which impl is used
             //REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f) + sizeof(m.d));
 
-            estd::detail::function<int(int)> f(&m);
+            estd::detail::function<int(int), detail::impl::function_fnptr1<int(int)>>
+                f(&m);
 
             f(5);
 
@@ -655,7 +657,7 @@ TEST_CASE("functional")
     {
         ContextTest c;
         estd::internal::contextify_function<int(int)>::model<ContextTest*, &ContextTest::add3> m(&c);
-        estd::detail::function<int(int)> f(&m);
+        estd::detail::function<int(int), detail::impl::function_fnptr1<int(int)>> f(&m);
 
         f(5);
 

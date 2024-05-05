@@ -24,7 +24,7 @@ namespace impl {
 
 #ifdef __cpp_alias_templates
 template <typename F>
-using function_default = function_fnptr1<F>;
+using function_default = function_fnptr2<F>;
 #endif
 
 }
