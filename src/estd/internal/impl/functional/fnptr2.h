@@ -72,10 +72,11 @@ struct function_fnptr2<Result(Args...)>
 
         F f;
 
+        /*
         static void dtor(void* _this)
         {
             ((model*)_this)->f.~F();
-        }
+        }   */
 
         // TODO: Consolidate different models down to a model_base since they
         // all need this exec function

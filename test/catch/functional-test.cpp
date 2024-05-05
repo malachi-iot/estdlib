@@ -63,6 +63,11 @@ using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 template <typename F>
 struct ProvidedTest1;
 
+template <class F, template <class> class Impl>
+using fn_exp = estd::detail::function<F, Impl<F> >;
+
+
+
 template <typename TResult, typename ...TArgs>
 struct ProvidedTest1<TResult(TArgs...)>
 {
@@ -96,7 +101,7 @@ struct TestFunctor1
 };
 
 // Temporary helper to disable errors while we bring up issue39
-#define ISSUE_39_BRINGUP 0
+#define ISSUE_39_BRINGUP 1
 
 #if ISSUE_39_BRINGUP
 struct TestFunctorProvider
@@ -146,6 +151,19 @@ TEST_CASE("functional")
 {
     SECTION("function")
     {
+        SECTION("fn_exp")
+        {
+            using fn_type = fn_exp<void(), estd::detail::impl::function_fnptr2_opt>;
+            int counter = 0;
+
+            auto m = fn_type::make_model([&]{ ++counter; });
+
+            fn_type f(&m);
+
+            f();
+
+            REQUIRE(counter == 1);
+        }
         SECTION("experimental")
         {
             SECTION("simplest lambda")
