@@ -165,12 +165,9 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
 
 }
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+#if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
 
-// TODO: Put this into actual features.h file
-#define FEATURE_ESTD_FUNCTION_TRIVIAL 1
-
-namespace detail {
+namespace detail { inline namespace v1 {
 
 /// Lower-level version of function which is hands-off for memory management
 template <typename TResult, typename... TArgs, class TImpl>
@@ -242,7 +239,7 @@ public:
     using imbue = TProvided<TResult(TArgs...), TArgs2...>;
 };
 
-}
+}}
 
 namespace internal {
 

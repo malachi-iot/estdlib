@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../feature/functional.h"
 #include "../impl/functional/fwd.h"
 
 namespace estd {
@@ -22,19 +23,20 @@ namespace detail {
 
 namespace impl {
 
-#ifdef __cpp_alias_templates
 template <typename F>
 using function_default = function_fnptr2<F>;
-#endif
 
 }
 
-#ifdef __cpp_alias_templates
-template <typename F, class TImpl = impl::function_default<F> >
-#else
-template <typename F, class TImpl = impl::function_fnptr1<F> >
-#endif
+inline namespace v1 {
+template <typename F, class Impl = impl::function_default<F> >
 class function;
+}
+
+namespace v2 {
+template <typename F, template <class> class Impl = impl::function_default >
+using function = detail::v1::function<F, Impl<F> >;
+}
 
 }
 

@@ -63,11 +63,6 @@ using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 template <typename F>
 struct ProvidedTest1;
 
-template <class F, template <class> class Impl>
-using fn_exp = estd::detail::function<F, Impl<F> >;
-
-
-
 template <typename TResult, typename ...TArgs>
 struct ProvidedTest1<TResult(TArgs...)>
 {
@@ -153,16 +148,18 @@ TEST_CASE("functional")
     {
         SECTION("fn_exp")
         {
-            using fn_type = fn_exp<void(), estd::detail::impl::function_fnptr2_opt>;
+            using fn_type = detail::v2::function<void(), detail::impl::function_fnptr2_opt>;
             int counter = 0;
+            test::Dummy dummy;
+            dummy.inc_on_destruct = &counter;
 
-            auto m = fn_type::make_model([&]{ ++counter; });
+            auto m = fn_type::make_model([&, dummy]{ ++counter; });
 
             fn_type f(&m);
 
             f();
 
-            REQUIRE(counter == 1);
+            REQUIRE(counter == 2);
         }
         SECTION("experimental")
         {
