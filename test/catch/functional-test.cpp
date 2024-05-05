@@ -243,7 +243,7 @@ TEST_CASE("functional")
             {
                 auto i = estd::experimental::function<int(int)>::make_model([](int x) { return x + 1; });
 
-                REQUIRE(i.exec(1) == 2);
+                REQUIRE(i.operator()(1) == 2);
 
                 estd::detail::function<int(int)> f(&i);
 
@@ -352,12 +352,12 @@ TEST_CASE("functional")
 
                 struct model : _fb::model_base
                 {
-                    int counter = 0;
-
-                    void _exec(int v) override
+                    void operator()(int v) override
                     {
                         counter += v;
                     }
+
+                    int counter = 0;
                 };
 
                 model m;
@@ -499,7 +499,7 @@ TEST_CASE("functional")
             {
                 int counter = 0;
 
-                virtual void _exec(int&& v) override
+                void operator()(int&& v) override
                 {
                     counter += v;
                 }

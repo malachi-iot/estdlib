@@ -6,12 +6,12 @@
 
 namespace estd { namespace detail { namespace impl {
 
-template <typename TResult, typename... TArgs>
-struct function_virtual<TResult(TArgs...)>
+template <typename Result, typename... Args>
+struct function_virtual<Result(Args...)>
 {
     struct model_base
     {
-        virtual TResult _exec(TArgs...args) = 0;
+        virtual Result operator()(Args...args) = 0;
         virtual ~model_base() = default;
     };
 
@@ -25,9 +25,9 @@ struct function_virtual<TResult(TArgs...)>
 
         F f;
 
-        TResult _exec(TArgs...args) override
+        Result operator()(Args...args) override
         {
-            return f(std::forward<TArgs>(args)...);
+            return f(std::forward<Args>(args)...);
         }
     };
 };

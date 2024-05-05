@@ -58,7 +58,7 @@ struct function_fnptr1<TResult(TArgs...)>
 #endif
 
         // Calls 'exec' down in model, typically
-        inline TResult _exec(TArgs&&...args)
+        inline TResult operator()(TArgs&&...args)
         {
             return (this->*f)(std::forward<TArgs>(args)...);
         }
@@ -85,10 +85,12 @@ struct function_fnptr1<TResult(TArgs...)>
 
         F f;
 
+#if GITHUB_ISSUE_39_EXP
         void dtor()
         {
             f.~F();
         }
+#endif
 
         // DEBT: Use rvalue here
         TResult exec(TArgs...args)

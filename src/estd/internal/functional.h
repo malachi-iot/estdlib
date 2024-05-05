@@ -222,7 +222,7 @@ public:
 
         // DEBT: Prefer lower overhead of above mess, but while we diagnose ESP32 failures
         // let's make our lives easier
-        return m->_exec(std::forward<TArgs>(args)...);
+        return (*m)(std::forward<TArgs>(args)...);
     }
 
     explicit operator bool() const NOEXCEPT { return m != NULLPTR; }

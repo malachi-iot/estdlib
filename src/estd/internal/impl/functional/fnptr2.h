@@ -48,6 +48,11 @@ struct function_fnptr2<Result(Args...)>
         {
             return _f(this, std::forward<Args>(args)...);
         }
+
+        inline Result operator()(Args&&...args)
+        {
+            return _f(this, std::forward<Args>(args)...);
+        }
     };
 
     template <typename F>
@@ -55,10 +60,10 @@ struct function_fnptr2<Result(Args...)>
     {
         typedef model_base base_type;
 
-        template <typename U>
-        constexpr explicit model(U&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::__exec)),
-            f(std::forward<U>(u))
+        //template <typename U>
+        constexpr explicit model(F&& u) :
+            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            f(std::forward<F>(u))
         {
         }
 
@@ -80,16 +85,16 @@ struct function_fnptr2<Result(Args...)>
 
         // TODO: Consolidate different models down to a model_base since they
         // all need this exec function
-        Result exec(Args&&...args)
+        Result operator()(Args&&...args)
         {
             return f(std::forward<Args>(args)...);
         }
 
-        static Result __exec(void* _this, Args...args)
+        static Result exec(void* _this, Args...args)
         {
-            auto __this = ((model*)_this);
+            F& f = ((model*)_this)->f;
 
-            return __this->f(std::forward<Args>(args)...);
+            return f(std::forward<Args>(args)...);
         }
     };
 };
@@ -106,7 +111,7 @@ struct function_fnptr2_opt<Result(Args...)>
 
         constexpr explicit model_base(function_type f) : f(f) {}
 
-        inline Result _exec(Args&&...args)
+        inline Result operator()(Args&&...args)
         {
             return f(this, std::forward<Args>(args)...);
         }
