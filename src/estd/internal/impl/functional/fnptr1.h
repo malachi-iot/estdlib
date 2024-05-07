@@ -4,6 +4,10 @@
 
 #if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
 
+// Arduino compatibility
+#pragma push_macro("F")
+#undef F
+
 namespace estd { namespace detail { namespace impl {
 
 // Since we prefer 'fnptr1', but can't discount the value of
@@ -138,7 +142,8 @@ struct function_fnptr1_opt<Result(Args...)>
     };
 };
 
-
 }}}
+
+#pragma pop_macro("F")
 
 #endif

@@ -4,6 +4,10 @@
 
 #if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
 
+// Arduino compatibility
+#pragma push_macro("F")
+#undef F
+
 namespace estd { namespace detail { namespace impl {
 
 
@@ -173,7 +177,8 @@ struct function_fnptr2_opt<Result(Args...)>
         model_nonvoid<F> >;
 };
 
-
 }}}
+
+#pragma pop_macro("F")
 
 #endif
