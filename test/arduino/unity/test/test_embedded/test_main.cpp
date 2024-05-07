@@ -57,6 +57,7 @@ void setup()
 #ifdef __AVR__
     test_avr_pgm();
 #endif
+    test_bipbuf();
     test_chrono();
     test_cpp();
     test_cstddef();

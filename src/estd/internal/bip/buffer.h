@@ -4,6 +4,13 @@ extern "C" {
 #include "../../ext/willemt/bipbuffer/bipbuffer.h"
 }
 
+#include "../../cstddef.h"
+
+// NOTE: platformio gcc is currently at 7.3.0 which appears to have the glitch:
+// https://stackoverflow.com/questions/45047888/suppress-wlto-type-mismatch-warning-for-struct-with-flexible-array
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81440
+// Since only the .c file truly touches the flexible array, I believe this does not impede functionality.
+
 #if __cpp_concepts
 namespace estd {
 namespace concepts { inline namespace v1 {

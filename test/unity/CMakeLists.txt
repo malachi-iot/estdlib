@@ -21,6 +21,7 @@ add_subdirectory(${ROOT_DIR}/src estd)
 set(SOURCES
     align.cpp
     array.cpp
+    bipbuf.cpp
     chrono.cpp
     cpp.cpp
     cstddef.cpp
