@@ -235,8 +235,8 @@ public:
     const model_base* getm() const { return m; }
 
     // EXPERIMENTAL
-    template <template <typename F, class ...TArgs2> class TProvided, class ...TArgs2>
-    using imbue = TProvided<TResult(TArgs...), TArgs2...>;
+    template <template <template <class> class, typename F, class ...TArgs2> class TProvided, class ...TArgs2>
+    using imbue = TProvided<detail::impl::function_fnptr1, TResult(TArgs...), TArgs2...>;
 };
 
 }}
@@ -250,7 +250,7 @@ class thisify_function<Result(Args...), Impl> :
     public detail::v2::function<Result(Args...), Impl>
 {
     using base_type = detail::v2::function<Result(Args...), Impl>;
-    using provider_type =  internal::impl::function_context_provider<Result(Args...)>;
+    using provider_type =  internal::impl::function_context_provider<Impl, Result(Args...)>;
 
 public:
     template <class T>

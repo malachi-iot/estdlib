@@ -13,18 +13,17 @@ namespace estd {
 
 namespace internal { namespace impl {
 
-template <typename F, typename... Contexts>
+template <template <class> class Impl, typename F, typename... Contexts>
 struct function_context_provider;
 
 // Adapting from 'context_function'
 // DEBT: provider may want to consider an additional level of specialization on
 // the impl type.  Right now it's hard wired to fnptr1
-template <typename Result, typename... Args, typename... Contexts>
-struct function_context_provider<Result(Args...), Contexts...>
+template <template <class> class Impl, typename Result, typename... Args, typename... Contexts>
+struct function_context_provider<Impl, Result(Args...), Contexts...>
 {
 protected:
-    typedef detail::v2::function<Result(Args...),
-        estd::detail::impl::function_fnptr1> function;
+    typedef detail::v2::function<Result(Args...), Impl> function;
     using model_base = typename function::model_base;
 
 public:
@@ -70,11 +69,11 @@ public:
 };
 
 // EXPERIMENTATION
-template <typename Result, typename... Args>
+template <template <class> class Impl, typename Result, typename... Args>
 struct function_context_provider<
-    detail::function<Result(Args...),
-    detail::impl::function_fnptr1<Result(Args...)> > > :
-    function_context_provider<Result(Args...)>
+    Impl,
+    detail::v2::function<Result(Args...), Impl> > :
+    function_context_provider<Impl, Result(Args...)>
 {
 };
 
@@ -89,17 +88,18 @@ struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
 {
 
 }; */
-template <typename F, typename T>
-using method_type = typename function_context_provider<F>::template function_type<T>;
+template <template <class> class Impl, typename F, typename T>
+using method_type = typename function_context_provider<Impl, F>::template function_type<T>;
 
-template <typename F, typename T, method_type<F, T> f>
+template <template <class> class Impl, typename F, typename T, method_type<Impl, F, T> f>
 struct method_model;
 
-template <typename TResult, typename... TArgs, class T, method_type<TResult(TArgs...), T> f>
-struct method_model<TResult(TArgs...), T, f> :
-    function_context_provider<TResult(TArgs...)>::template model<T, f>
+template <template <class> class Impl, typename TResult, typename... TArgs, class T,
+    method_type<Impl, TResult(TArgs...), T> f>
+struct method_model<Impl, TResult(TArgs...), T, f> :
+    function_context_provider<Impl, TResult(TArgs...)>::template model<T, f>
 {
-    typedef typename function_context_provider<TResult(TArgs...)>::template model<T, f> base_type;
+    typedef typename function_context_provider<Impl, TResult(TArgs...)>::template model<T, f> base_type;
 
     method_model(T* foreign_this) : base_type(foreign_this) {}
 };

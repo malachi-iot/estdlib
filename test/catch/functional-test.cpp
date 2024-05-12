@@ -60,22 +60,22 @@ struct ContextTest
 template <typename T>
 using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 
-template <typename F>
+template <template <class> class Impl, typename F>
 struct ProvidedTest1;
 
-template <typename TResult, typename ...TArgs>
-struct ProvidedTest1<TResult(TArgs...)>
+template <template <class> class Impl, typename TResult, typename ...TArgs>
+struct ProvidedTest1<Impl, TResult(TArgs...)>
 {
     typedef TResult (test)(TArgs...);
 
     static TResult test2(TArgs...) { return TResult(); }
 };
 
-template <typename F, typename TDummy>
+template <template <class> class Impl, typename F, typename TDummy>
 struct ProvidedTest2;
 
-template <typename TResult, typename ...TArgs, class TDummy>
-struct ProvidedTest2<TResult(TArgs...), TDummy>
+template <template <class> class Impl, typename TResult, typename ...TArgs, class TDummy>
+struct ProvidedTest2<Impl, TResult(TArgs...), TDummy>
 {
     TDummy value2;
 
@@ -506,11 +506,13 @@ TEST_CASE("functional")
     }
     SECTION("impl")
     {
+        using impl_type = estd::detail::impl::function_fnptr1<int(int)>;
         typedef estd::detail::function<int(int),
             estd::detail::impl::function_fnptr1<int(int)>> fn1_type;
 
         ContextTest context;
-        internal::impl::function_context_provider<int(int)>::model<ContextTest, &ContextTest::add> m(&context);
+        internal::impl::function_context_provider<
+            estd::detail::impl::function_fnptr1, int(int)>::model<ContextTest, &ContextTest::add> m(&context);
         fn1_type f(&m);
 
         f(5);
@@ -523,18 +525,19 @@ TEST_CASE("functional")
 
         //p1::test2(5);
 
-        internal::impl::function_context_provider<fn1_type>::model<ContextTest, &ContextTest::add>
+        internal::impl::function_context_provider<
+            estd::detail::impl::function_fnptr1,
+            fn1_type>::model<ContextTest, &ContextTest::add>
             m3(&context);
 
         //internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m4(&context);
-        internal::impl::method_type<int(int), ContextTest> m4;
-        internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m5(&context);
+        internal::impl::method_type<estd::detail::impl::function_fnptr1, int(int), ContextTest> m4;
+        internal::impl::method_model<estd::detail::impl::function_fnptr1, int(int), ContextTest, &ContextTest::add> m5(&context);
 
         // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
         //fn1_type::imbue<internal::impl::method_model, ContextTest, &ContextTest::add> m6(&context);
 
-        detail::function<int(int),
-            detail::impl::function_fnptr1<int(int)>> f_m5(&m5);
+        fn1_type  f_m5(&m5);
 
         f_m5(2);
 
@@ -620,7 +623,9 @@ TEST_CASE("functional")
             estd::internal::thisify_function<int(int)>::
                 model<ContextTest, &ContextTest::add> m2(&ctx);
 
-            estd::internal::impl::method_model<int(int),
+            estd::internal::impl::method_model<
+                detail::impl::function_fnptr1,
+                int(int),
                 ContextTest, &ContextTest::add>
                 m(&ctx);
 
@@ -650,7 +655,9 @@ TEST_CASE("functional")
         }
         SECTION("void(void)")
         {
-            estd::internal::impl::method_model<void(void),
+            estd::internal::impl::method_model<
+                detail::impl::function_fnptr1,
+                void(void),
                 ContextTest, &ContextTest::add2>
                 m(&ctx);
 
