@@ -245,13 +245,12 @@ namespace internal {
 
 // DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
-template <typename Result, typename... Args>
-class thisify_function<Result(Args...)> :
-    public detail::function<Result(Args...), detail::impl::function_fnptr1<Result(Args...)> >
+template <typename Result, typename... Args, template <class> class Impl>
+class thisify_function<Result(Args...), Impl> :
+    public detail::v2::function<Result(Args...), Impl>
 {
-    typedef detail::function<Result(Args...),
-        detail::impl::function_fnptr1<Result(Args...)>> base_type;
-    typedef internal::impl::function_context_provider<Result(Args...)> provider_type;
+    using base_type = detail::v2::function<Result(Args...), Impl>;
+    using provider_type =  internal::impl::function_context_provider<Result(Args...)>;
 
 public:
     template <class T>

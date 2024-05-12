@@ -44,7 +44,7 @@ namespace internal {
 
 struct function_base_tag {};
 
-template <typename F>
+template <typename F, template <class> class Impl = detail::impl::function_fnptr1>
 class thisify_function;
 
 #ifdef __cpp_variadic_templates

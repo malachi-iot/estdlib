@@ -9,33 +9,33 @@
 
 namespace estd {
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+#if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
 
 namespace internal { namespace impl {
 
-template <typename F, typename... TContexts>
+template <typename F, typename... Contexts>
 struct function_context_provider;
 
 // Adapting from 'context_function'
 // DEBT: provider may want to consider an additional level of specialization on
 // the impl type.  Right now it's hard wired to fnptr1
-template <typename TResult, typename... TArgs, typename... TContexts>
-struct function_context_provider<TResult(TArgs...), TContexts...>
+template <typename Result, typename... Args, typename... Contexts>
+struct function_context_provider<Result(Args...), Contexts...>
 {
 protected:
-    typedef detail::function<TResult(TArgs...),
-        estd::detail::impl::function_fnptr1<TResult(TArgs...)> > function;
+    typedef detail::v2::function<Result(Args...),
+        estd::detail::impl::function_fnptr1> function;
     using model_base = typename function::model_base;
 
 public:
     template <class T>
-    using function_type = TResult (T::*)(TArgs..., TContexts...);
+    using function_type = Result (T::*)(Args..., Contexts...);
 
     template <class T, function_type<T> f>
     struct model : model_base,
-        estd::tuple<TContexts...>
+        estd::tuple<Contexts...>
     {
-        typedef estd::tuple<TContexts...> contexts_type;
+        typedef estd::tuple<Contexts...> contexts_type;
 
         // DEBT: base class needs this public
     public:
@@ -49,24 +49,24 @@ public:
         {}
 
     public:
-        model(T* foreign_this, TContexts...contexts) :
+        model(T* foreign_this, Contexts...contexts) :
             model_base(static_cast<typename model_base::function_type>(&model::exec)),
-            contexts_type(std::forward<TContexts>(contexts)...),
+            contexts_type(std::forward<Contexts>(contexts)...),
             foreign_this{foreign_this}
         {
 
         }
 
-        TResult exec(TArgs...args)
+        Result exec(Args...args)
         {
             // FIX: Do apply so that we can get at TContexts... also
             
-            return (foreign_this->*f)(std::forward<TArgs>(args)...);
+            return (foreign_this->*f)(std::forward<Args>(args)...);
         }
     };
 
-    template <template <typename F> class TProvided>
-    using provided = TProvided<TResult(TArgs...)>;
+    template <template <typename F> class Provided>
+    using provided = Provided<Result(Args...)>;
 };
 
 // EXPERIMENTATION
