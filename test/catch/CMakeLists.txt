@@ -67,6 +67,7 @@ else()
         limits-test.cpp
         locale-test.cpp
         map-test.cpp
+        memory-pool-test.cpp
         memory-test.cpp
         misc-test.cpp
         optional-test.cpp
@@ -89,11 +90,19 @@ else()
         internal-test.cpp)
 endif()
 
-# DEBT: Need to use INTERFACE linkage here when ESTD INTERFACE option is enabled
-target_compile_definitions(estd PUBLIC
-    FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
-    FEATURE_ESTD_COMPILE_STRICTNESS=${FEATURE_ESTD_COMPILE_STRICTNESS}
+# DEBT: Make a linkage property so that we don't have to double these guys up
+if(FEATURE_ESTD_INTERFACE)
+    target_compile_definitions(estd INTERFACE
+        FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
+        FEATURE_ESTD_COMPILE_STRICTNESS=${FEATURE_ESTD_COMPILE_STRICTNESS}
     )
+else()
+    target_compile_definitions(estd PUBLIC
+        FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
+        FEATURE_ESTD_COMPILE_STRICTNESS=${FEATURE_ESTD_COMPILE_STRICTNESS}
+    )
+endif()
+
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
 # TODO: Instead, filter by presence of GCC

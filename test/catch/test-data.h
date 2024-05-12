@@ -22,8 +22,8 @@ struct Dummy
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() = default;
 
-    Dummy(int val1, const char* val2) :
-        val1(val1), value2(val2), inc_on_destruct(nullptr)
+    Dummy(int val1, const char* val2, int* inc_on_destruct = nullptr) :
+        val1(val1), value2(val2), inc_on_destruct(inc_on_destruct)
         {}
 
     Dummy(Dummy&& move_from) NOEXCEPT :
