@@ -318,6 +318,13 @@ TEST_CASE("functional")
                     //estd::experimental::bind(&ContextTest::add, &ctx);
                 }
             }
+            SECTION("method deduction")
+            {
+                ContextTest ctx;
+
+                internal::impl::method_model_helper2::do_something(&ctx, &ContextTest::add);
+                //internal::impl::method_model_helper<ContextTest, &ContextTest::add>
+            }
         }
     }
     SECTION("obsolete")

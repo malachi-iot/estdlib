@@ -108,6 +108,27 @@ struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
 template <typename F, typename T>
 using method_type = typename function_context_provider_base<F>::template function_type<T>;
 
+// +++ EXPERIMENTAL
+template <typename R, typename... Args>
+struct method_type_helper
+{
+    // DEBT: monostate is dummy as we test things
+    using type = method_type<R(Args...), estd::monostate>;
+};
+
+struct method_model_helper2
+{
+    //typedef TResult (model_base::*function_type)(TArgs...);
+
+    template <class T, class R, typename... Args>
+    static void do_something(T* t, R(T::*v)(Args...))
+    {
+        using type = method_type<R(Args...), T>;
+        type test1(v);
+    }
+};
+// ---
+
 template <typename F, typename T, method_type<F, T> f,
     template <class> class Impl = detail::impl::function_fnptr1>
 struct method_model;
