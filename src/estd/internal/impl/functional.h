@@ -13,29 +13,41 @@ namespace estd {
 
 namespace internal { namespace impl {
 
+template <typename F, typename... Contexts>
+struct function_context_provider_base;
+
 template <template <class> class Impl, typename F, typename... Contexts>
 struct function_context_provider;
 
 // Adapting from 'context_function'
 // DEBT: provider may want to consider an additional level of specialization on
 // the impl type.  Right now it's hard wired to fnptr1
-template <template <class> class Impl, typename Result, typename... Args, typename... Contexts>
-struct function_context_provider<Impl, Result(Args...), Contexts...>
-{
-protected:
-    typedef detail::v2::function<Result(Args...), Impl> function;
-    using model_base = typename function::model_base;
 
-public:
+template <typename Result, typename... Args, typename... Contexts>
+struct function_context_provider_base<Result(Args...), Contexts...>
+{
     template <class T>
     using function_type = Result (T::*)(Args..., Contexts...);
 
-    template <class T, function_type<T> f>
-    struct model : model_base,
-        estd::tuple<Contexts...>
-    {
-        typedef estd::tuple<Contexts...> contexts_type;
+    using contexts_type = estd::tuple<Contexts...>;
+};
 
+template <template <class> class Impl, typename Result, typename... Args, typename... Contexts>
+struct function_context_provider<Impl, Result(Args...), Contexts...> :
+    function_context_provider_base<Result(Args...), Contexts...>
+{
+    using base_type = function_context_provider_base<Result(Args...), Contexts...>;
+
+protected:
+    using impl_type = Impl<Result(Args...)>;
+    using model_base = typename impl_type::model_base;
+    using typename base_type::contexts_type;
+
+public:
+    template <class T, typename base_type::template function_type<T> f>
+    struct model : model_base,
+        contexts_type
+    {
         // DEBT: base class needs this public
     public:
         T* const foreign_this;
@@ -48,7 +60,7 @@ public:
         {}
 
     public:
-        model(T* foreign_this, Contexts...contexts) :
+        explicit model(T* foreign_this, Contexts...contexts) :
             model_base(static_cast<typename model_base::function_type>(&model::exec)),
             contexts_type(std::forward<Contexts>(contexts)...),
             foreign_this{foreign_this}
@@ -61,6 +73,11 @@ public:
             // FIX: Do apply so that we can get at TContexts... also
             
             return (foreign_this->*f)(std::forward<Args>(args)...);
+        }
+
+        Result operator()(Args...args)
+        {
+            return exec(std::forward<Args>(args)...);
         }
     };
 
@@ -88,20 +105,20 @@ struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
 {
 
 }; */
-template <template <class> class Impl, typename F, typename T>
-using method_type = typename function_context_provider<Impl, F>::template function_type<T>;
+template <typename F, typename T>
+using method_type = typename function_context_provider_base<F>::template function_type<T>;
 
-template <template <class> class Impl, typename F, typename T, method_type<Impl, F, T> f>
+template <template <class> class Impl, typename F, typename T, method_type<F, T> f>
 struct method_model;
 
-template <template <class> class Impl, typename TResult, typename... TArgs, class T,
-    method_type<Impl, TResult(TArgs...), T> f>
-struct method_model<Impl, TResult(TArgs...), T, f> :
-    function_context_provider<Impl, TResult(TArgs...)>::template model<T, f>
+template <template <class> class Impl, typename Result, typename... Args, class T,
+    method_type<Result(Args...), T> f>
+struct method_model<Impl, Result(Args...), T, f> :
+    function_context_provider<Impl, Result(Args...)>::template model<T, f>
 {
-    typedef typename function_context_provider<Impl, TResult(TArgs...)>::template model<T, f> base_type;
+    using base_type = typename function_context_provider<Impl, Result(Args...)>::template model<T, f>;
 
-    method_model(T* foreign_this) : base_type(foreign_this) {}
+    explicit method_model(T* foreign_this) : base_type(foreign_this) {}
 };
 
 

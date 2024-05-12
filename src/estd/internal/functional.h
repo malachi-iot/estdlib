@@ -243,7 +243,6 @@ public:
 
 namespace internal {
 
-// DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
 template <typename Result, typename... Args, template <class> class Impl>
 class thisify_function<Result(Args...), Impl> :
@@ -314,7 +313,7 @@ public:
     } */
 
     template <class T, function_type<T> f>
-    constexpr thisify_function(const model<T, f>& m) :
+    constexpr explicit thisify_function(const model<T, f>& m) :
         base_type(&m_),
         m_(m)
     {

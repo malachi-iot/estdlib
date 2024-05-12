@@ -507,8 +507,7 @@ TEST_CASE("functional")
     SECTION("impl")
     {
         using impl_type = estd::detail::impl::function_fnptr1<int(int)>;
-        typedef estd::detail::function<int(int),
-            estd::detail::impl::function_fnptr1<int(int)>> fn1_type;
+        using fn1_type = detail::v2::function<int(int), detail::impl::function_fnptr1>;
 
         ContextTest context;
         internal::impl::function_context_provider<
@@ -531,7 +530,7 @@ TEST_CASE("functional")
             m3(&context);
 
         //internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m4(&context);
-        internal::impl::method_type<estd::detail::impl::function_fnptr1, int(int), ContextTest> m4;
+        internal::impl::method_type<int(int), ContextTest> m4;
         internal::impl::method_model<estd::detail::impl::function_fnptr1, int(int), ContextTest, &ContextTest::add> m5(&context);
 
         // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
@@ -634,7 +633,7 @@ TEST_CASE("functional")
             // TODO: Do spread of comparisons based on which impl is used
             //REQUIRE(sizeof(m) == sizeof(ContextTest*) + sizeof(m.f) + sizeof(m.d));
 
-            estd::detail::function<int(int), detail::impl::function_fnptr1<int(int)>>
+            detail::v2::function<int(int), detail::impl::function_fnptr1>
                 f(&m);
 
             f(5);
