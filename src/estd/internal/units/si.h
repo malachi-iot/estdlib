@@ -69,6 +69,14 @@ struct traits<estd::deca, Tag>
 
 
 template <class Tag>
+struct traits<estd::centi, Tag>
+{
+    static constexpr const char* name() { return "centi"; }
+    static constexpr const char* abbrev() { return "c"; }
+};
+
+
+template <class Tag>
 struct traits<estd::milli, Tag>
 {
     static constexpr const char* name() { return "milli"; }
@@ -82,6 +90,14 @@ struct traits<estd::micro>
     static constexpr const char* name() { return "micro"; }
     // TODO: When character set supports it, use the proper micro symbol here
     static constexpr const char* abbrev() { return "u"; }
+};
+
+
+template <>
+struct traits<estd::nano>
+{
+    static constexpr const char* name() { return "nano"; }
+    static constexpr const char* abbrev() { return "n"; }
 };
 
 
