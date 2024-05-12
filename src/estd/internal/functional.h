@@ -245,13 +245,13 @@ namespace internal {
 
 // DEBT: Only works with 'method 1' concept/model at the moment
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
-template <typename TResult, typename... TArgs>
-class thisify_function<TResult(TArgs...)> :
-    public detail::function<TResult(TArgs...), detail::impl::function_fnptr1<TResult(TArgs...)> >
+template <typename Result, typename... Args>
+class thisify_function<Result(Args...)> :
+    public detail::function<Result(Args...), detail::impl::function_fnptr1<Result(Args...)> >
 {
-    typedef detail::function<TResult(TArgs...),
-        detail::impl::function_fnptr1<TResult(TArgs...)>> base_type;
-    typedef internal::impl::function_context_provider<TResult(TArgs...)> provider_type;
+    typedef detail::function<Result(Args...),
+        detail::impl::function_fnptr1<Result(Args...)>> base_type;
+    typedef internal::impl::function_context_provider<Result(Args...)> provider_type;
 
 public:
     template <class T>
@@ -292,15 +292,15 @@ private:
 
     struct placeholder_result
     {
-        TResult noop(TArgs...args) { return TResult{}; }
+        Result noop(Args...args) { return Result{}; }
     };
 
     struct placeholder_void
     {
-        void noop(TArgs...args) {}
+        void noop(Args...args) {}
     };
 
-    typedef estd::conditional_t<estd::is_void<TResult>::value,
+    typedef estd::conditional_t<estd::is_void<Result>::value,
             placeholder_void,
             placeholder_result> placeholder;
 
