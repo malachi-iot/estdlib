@@ -4,6 +4,10 @@
 namespace estd { namespace internal { namespace memory { inline namespace v1 {
 
 // Lift direct from PGMEM-2, PGMEM-5
+// Rudimentary memory pool.  Does not support:
+// - querying how many blocks are allocated
+// - pairing contiguous blocks together
+// - fine tuned alignment on typed_pool
 
 class pool_core
 {
@@ -28,6 +32,7 @@ protected:
     /// Low level call - assumes there is a free block
     control* alloc_next()
     {
+        // grabs head of list to allocate it
         control* allocated = head_free_;
 
         head_free_ = head_free_->next_;
@@ -39,14 +44,15 @@ protected:
         head_free_{head_free}
     {}
 
-public:
     const control* head() const { return head_free_; }
+public:
+    constexpr bool full() const { return head_free_ == nullptr; }
 
     unsigned available_blocks() const
     {
         unsigned size = 0;
 
-        for(control* i = head_free_; i != nullptr; i = i->next_)
+        for(const control* i = head_free_; i != nullptr; i = i->next_)
             ++size;
 
         return size;
@@ -64,9 +70,10 @@ public:
 
     void* alloc()
     {
-        if(head_free_ == nullptr)   return nullptr;
+        if(full())   return nullptr;
 
-        // DEBT: Could return just pointer to alloc_next result directly
+        // NOTE: value_ is symbolic for benefit of us the maintainer.  We in fact
+        // could return the control* directly
         return alloc_next()->value_;
     }
 };
@@ -90,7 +97,8 @@ protected:
         char value_[block_size_];
     };
 
-    static void reset(control* storage, unsigned blocks)
+    // Work backwards and initialize forward list as empty blocks
+    static void reset(control* const storage, unsigned blocks)
     {
         control* i = storage + blocks;
         base_type::control* current = nullptr;
@@ -128,6 +136,16 @@ public:
     pool() : base_type(storage_, blocks)    {}
 
     static constexpr unsigned max_blocks() { return blocks; }
+
+    int8_t to_handle(void* value) const
+    {
+        return ((control*)value - storage_);
+    }
+
+    void* from_handle(int8_t handle)
+    {
+        return &storage_[handle];
+    }
 };
 
 template <class T, unsigned blocks>
@@ -135,11 +153,15 @@ class typed_pool : public pool<sizeof(T), blocks>
 {
     using base_type = pool<sizeof(T), blocks>;
 
+    // Purposefully hide non-typed alloc/free
+    void alloc() {}
+    void free() {}
+
 public:
     template <class ...Args>
     T* emplace(Args&&...args)
     {
-        void* storage = base_type::alloc();
+        void* const storage = base_type::alloc();
 
         if(storage == nullptr)  return nullptr;
 
@@ -150,6 +172,11 @@ public:
     {
         t->~T();
         base_type::free(t);
+    }
+
+    T* from_handle(int8_t handle)
+    {
+        return (T*)base_type::from_handle(handle);
     }
 };
 

@@ -17,6 +17,40 @@ TEST_CASE("memory pool")
     SECTION("untyped")
     {
         memory::v1::pool<64, 4> pool;
+
+        SECTION("permutations")
+        {
+            void* v1 = pool.alloc();
+            void* v2 = pool.alloc();
+            void* v3 = pool.alloc();
+
+            pool.free(v1);
+            pool.free(v2);
+
+            v1 = pool.alloc();
+
+            pool.free(v3);
+            pool.free(v1);
+
+            REQUIRE(pool.available_blocks() == pool.max_blocks());
+
+            int8_t h2 = pool.to_handle(v2);
+            REQUIRE(pool.from_handle(h2) == v2);
+            int8_t h3 = pool.to_handle(v3);
+            REQUIRE(pool.from_handle(h3) == v3);
+
+            REQUIRE(h2 < pool.max_blocks());
+            REQUIRE(h3 < pool.max_blocks());
+        }
+        SECTION("limit")
+        {
+            pool.alloc();
+            pool.alloc();
+            pool.alloc();
+            pool.alloc();
+
+            REQUIRE(pool.full());
+        }
     }
     SECTION("typed")
     {
