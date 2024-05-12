@@ -531,7 +531,9 @@ TEST_CASE("functional")
 
         //internal::impl::method_model<int(int), ContextTest, &ContextTest::add> m4(&context);
         internal::impl::method_type<int(int), ContextTest> m4;
-        internal::impl::method_model<estd::detail::impl::function_fnptr1, int(int), ContextTest, &ContextTest::add> m5(&context);
+        internal::impl::method_model<
+            int(int), ContextTest, &ContextTest::add,
+            estd::detail::impl::function_fnptr1> m5(&context);
 
         // Doesn't play nice, presumably because TArgs2... doesn't handle the ContextTest::add part well
         //fn1_type::imbue<internal::impl::method_model, ContextTest, &ContextTest::add> m6(&context);
@@ -623,9 +625,9 @@ TEST_CASE("functional")
                 model<ContextTest, &ContextTest::add> m2(&ctx);
 
             estd::internal::impl::method_model<
-                detail::impl::function_fnptr1,
                 int(int),
-                ContextTest, &ContextTest::add>
+                ContextTest, &ContextTest::add,
+                detail::impl::function_fnptr1>
                 m(&ctx);
 
             //int sz = sizeof(m.f);
@@ -655,9 +657,9 @@ TEST_CASE("functional")
         SECTION("void(void)")
         {
             estd::internal::impl::method_model<
-                detail::impl::function_fnptr1,
                 void(void),
-                ContextTest, &ContextTest::add2>
+                ContextTest, &ContextTest::add2
+                >
                 m(&ctx);
 
             // NOTE: In this case we actually are using 'm' to copy

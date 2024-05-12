@@ -108,12 +108,13 @@ struct method_model<TResult(TArgs...), T, TResult (T::*)(TArgs...), f> :
 template <typename F, typename T>
 using method_type = typename function_context_provider_base<F>::template function_type<T>;
 
-template <template <class> class Impl, typename F, typename T, method_type<F, T> f>
+template <typename F, typename T, method_type<F, T> f,
+    template <class> class Impl = detail::impl::function_fnptr1>
 struct method_model;
 
-template <template <class> class Impl, typename Result, typename... Args, class T,
-    method_type<Result(Args...), T> f>
-struct method_model<Impl, Result(Args...), T, f> :
+template <typename Result, typename... Args, class T,
+    method_type<Result(Args...), T> f, template <class> class Impl>
+struct method_model<Result(Args...), T, f, Impl> :
     function_context_provider<Impl, Result(Args...)>::template model<T, f>
 {
     using base_type = typename function_context_provider<Impl, Result(Args...)>::template model<T, f>;
