@@ -155,5 +155,25 @@ struct provider_test : TBase
 
 }}
 
+
+// Mainly used in 'functional' area
+struct ContextTest
+{
+    int val = 0;
+
+    int add(int v) { return val += v; }
+
+    // NOTE: Cannot name 'add' since estd::experimental::context_function is unable to resolve
+    // overloads
+    void add2() { val += 7; }
+
+    static int add3(int v, ContextTest* c)
+    {
+        return c->add(v);
+    }
+};
+
+
+
 #include "macro/pop.h"
 

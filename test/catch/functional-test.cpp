@@ -41,22 +41,6 @@ void forwarder(TArgs&&...args)
     forwarder_func(std::forward<TArgs>(args)...);
 }
 
-struct ContextTest
-{
-    int val = 0;
-
-    int add(int v) { return val += v; }
-
-    // NOTE: Cannot name 'add' since estd::experimental::context_function is unable to resolve
-    // overloads
-    void add2() { val += 7; }
-
-    static int add3(int v, ContextTest* c)
-    {
-        return c->add(v);
-    }
-};
-
 template <typename T>
 using fb = estd::detail::function<T, estd::detail::impl::function_virtual<T> >;
 
@@ -324,6 +308,29 @@ TEST_CASE("functional")
 
                 internal::impl::method_model_helper2::do_something(&ctx, &ContextTest::add);
                 //internal::impl::method_model_helper<ContextTest, &ContextTest::add>
+            }
+            SECTION("13MAY24 new method_model")
+            {
+                ContextTest ctx;
+
+                SECTION("fnptr1")
+                {
+                    detail::impl::function_fnptr1<int(int)>::
+                        method_model<ContextTest, &ContextTest::add> m(&ctx);
+
+                    m(5);
+
+                    REQUIRE(ctx.val == 5);
+                }
+                SECTION("fnptr2")
+                {
+                    detail::impl::function_fnptr2<int(int)>::
+                        method_model<ContextTest, &ContextTest::add> m(&ctx);
+
+                    m(5);
+
+                    REQUIRE(ctx.val == 5);
+                }
             }
         }
     }

@@ -101,6 +101,31 @@ struct function_fnptr2<Result(Args...)>
             return f(std::forward<Args>(args)...);
         }
     };
+
+
+    // 13MAY24 MB EXPERIMENTAL replacement for 'thisify'
+    template <class T, Result (T::*f)(Args...)>
+    struct method_model : model_base
+    {
+        constexpr explicit method_model(T* t) :
+            model_base(static_cast<typename model_base::function_type>(&method_model::exec)),
+            object_{t}
+        {}
+
+        T* const object_;
+
+        // DEBT: Use rvalue here
+        constexpr Result operator()(Args...args) const
+        {
+            return (object_->*f)(std::forward<Args>(args)...);
+        }
+
+        // DEBT: Use rvalue here
+        static Result exec(void* this_, Args...args)
+        {
+            return (*((method_model*)this_))(std::forward<Args>(args)...);
+        }
+    };
 };
 
 // Special version which calls dtor right after function invocation
