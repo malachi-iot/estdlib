@@ -21,15 +21,15 @@ namespace estd { namespace detail { namespace impl {
 //  is permitted if the object is referenced by a pointer to its
 //  class, rather than via a pointer to a class it inherits from."
 // This might be possible with a manual function pointer deleter.
-template <typename TResult, typename... TArgs>
-struct function_fnptr1<TResult(TArgs...)>
+template <typename Result, typename... Args>
+struct function_fnptr1<Result(Args...)>
 {
     // function pointer approach works, but if we have to add in a virtual destructor
     // (which is likely) then we are faced with incurring that overhead anyway so might
     // switch over to virtual operator() in that case
     struct model_base
     {
-        typedef TResult (model_base::*function_type)(TArgs...);
+        typedef Result (model_base::*function_type)(Args...);
         typedef void (*deleter_type)(model_base*);  // EXPERIMENTAL
         typedef void (model_base::*deleter2_type)();  // EXPERIMENTAL
 
@@ -62,9 +62,9 @@ struct function_fnptr1<TResult(TArgs...)>
 #endif
 
         // Calls 'exec' down in model, typically
-        inline TResult operator()(TArgs&&...args)
+        inline Result operator()(Args&&...args)
         {
-            return (this->*f)(std::forward<TArgs>(args)...);
+            return (this->*f)(std::forward<Args>(args)...);
         }
     };
 
@@ -81,6 +81,7 @@ struct function_fnptr1<TResult(TArgs...)>
                 static_cast<typename base_type::function_type>(&model::exec),
                 static_cast<typename base_type::deleter2_type>(&model::dtor)),
 #else
+                // casts Result (model<F>::*)(Args...) -> Result (model_base::*)(Args...)
                 static_cast<typename base_type::function_type>(&model::exec)),
 #endif
             f(std::forward<F>(u))
@@ -97,9 +98,26 @@ struct function_fnptr1<TResult(TArgs...)>
 #endif
 
         // DEBT: Use rvalue here
-        TResult exec(TArgs...args)
+        Result exec(Args...args)
         {
-            return f(std::forward<TArgs>(args)...);
+            return f(std::forward<Args>(args)...);
+        }
+    };
+
+    // 13MAY24 MB EXPERIMENTAL replacement for 'thisify'
+    template <class T, Result (T::*f)(Args...)>
+    struct method_model : model_base
+    {
+        constexpr explicit method_model(T* t) :
+            model_base(static_cast<typename model_base::function_type>(&method_model::exec)),
+            object_{t}
+        {}
+
+        T* const object_;
+        // DEBT: Use rvalue here
+        Result exec(Args...args)
+        {
+            return (object_->*f)(std::forward<Args>(args)...);
         }
     };
 };
