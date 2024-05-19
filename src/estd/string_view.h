@@ -27,6 +27,12 @@ public:
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
 
+    // DEBT: Mainly to satisfy constraints observed by v0::impl::basic_sviewbuf.
+    // There theoretically could be utility here in that a highly constrained
+    // basic_string may generate a similarly constrained string_view (perhaps with
+    // compile time sizing)
+    using view_type = basic_string_view<Policy>;
+
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
     basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}

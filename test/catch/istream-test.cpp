@@ -3,6 +3,10 @@
 #include <estd/istream.h>
 #include <estd/sstream.h>
 
+// DEBT: As we fiddle with bringing string_view istreambuf online, we must manually
+// include this
+#include <estd/string_view.h>
+
 using namespace estd;
 
 TEST_CASE("istream")

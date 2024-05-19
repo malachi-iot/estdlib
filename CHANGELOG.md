@@ -1,3 +1,15 @@
+# v0.x.x - XXXXX24
+
+## Added Features
+
+* Adding rudimentary memory pool TBD: better description
+
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/40 Fixed glitch in Streambuf c++20 concept
+* https://github.com/malachi-iot/estdlib/issues/39 Upgraded & cleaned out internal `detail::function`
+* AVR pgm support additional testing & refinement TBD should this be added feature?
+
 # v0.7.2 - 18MAR24
 
 ## Quality Updates & Bug Fixes
