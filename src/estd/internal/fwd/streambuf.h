@@ -81,7 +81,7 @@ concept OutStreambuf = impl::StreambufBase<T> &&
 
 template <class Raw, class T = remove_reference_t<Raw>>
 concept InStreambuf = impl::StreambufBase<T> &&
-    requires(T& sb, typename T::char_type c)
+    requires(T& sb, remove_const_t<typename T::char_type> c)
 {
     sb.sgetn(&c, 1);
     sb.in_avail();

@@ -8,11 +8,11 @@ using namespace estd;
 TEST_CASE("istream")
 {
     typedef internal::impl::basic_stringbuf<layer1::string<32> > impl_type;
-    typedef internal::streambuf<impl_type> streambuf_type;
+    using streambuf_type = detail::streambuf<impl_type>;
 
     SECTION("basics")
     {
-        layer1::string<32> str = "hi2u";
+        const layer1::string<32> str = "hi2u";
 
         detail::basic_istream<streambuf_type> _cin(str);
 
@@ -88,7 +88,7 @@ TEST_CASE("istream")
         }
         SECTION("istringstream")
         {
-            experimental::istringstream<32> in = "123 456";
+            layer1::istringstream<32> in = "123 456";
 
             int val;
 
@@ -99,6 +99,36 @@ TEST_CASE("istream")
             in >> val;
 
             REQUIRE(val == 456);
+        }
+        SECTION("with const char")
+        {
+            const char* buf = "hi2u";
+
+            SECTION("layer2 string")
+            {
+                using stream_type = layer2::basic_istringstream<const char>;
+                stream_type in(buf);
+                layer1::string<32> buf2;
+
+                in >> buf2;
+
+                REQUIRE(buf2 == buf);
+            }
+            SECTION("string view")
+            {
+                /* ALmost, but not quite.  Doesn't play nice with a 'Container'
+                 * constraint
+                 *
+                using stream_type = detail::basic_istream<
+                    estd::internal::impl::v0::basic_sviewbuf<char>>;
+                stream_type in(buf);
+                layer1::string<32> buf2;
+
+                in >> buf2;
+
+                REQUIRE(buf2 == buf);
+                */
+            }
         }
     }
     SECTION("cin")

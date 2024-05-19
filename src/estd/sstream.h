@@ -3,6 +3,7 @@
 #include "iostream.h"
 #include "string.h"
 #include "internal/impl/streambuf/string.h"
+#include "internal/impl/streambuf/string_view.h"
 
 // TODO: Move non-alias template flavor elsewhere, since it's so bulky
 namespace estd {
@@ -107,12 +108,16 @@ struct ostringstream : estd::detail::basic_ostream<layer1::basic_stringbuf<char,
 namespace layer2 {
 
 #ifdef __cpp_alias_templates
-template<class TChar, size_t N, bool null_terminated = true, class Traits = estd::char_traits<TChar> >
-using basic_stringbuf = internal::streambuf <
+template<class Char, size_t N = 0, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_stringbuf = detail::streambuf <
     internal::impl::basic_stringbuf<
-        layer2::basic_string < TChar, N, null_terminated, Traits> > >;
+        layer2::basic_string <Char, N, null_terminated, Traits> > >;
 
-typedef basic_stringbuf<char, 0> stringbuf;
+using stringbuf = basic_stringbuf<char>;
+
+template <class Char, size_t N = 0, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_istringstream =
+    detail::basic_istream<basic_stringbuf<Char, N, null_terminated, Traits>>;
 #endif
 
 }
@@ -124,15 +129,18 @@ namespace layer3 {
 // other for layer3 ostringstream
 // also - code compiles but is untested
 #ifdef FEATURE_CPP_ALIASTEMPLATE
-template<class TChar, bool null_terminated, class Traits = estd::char_traits<TChar> >
-using basic_stringbuf = estd::internal::streambuf <
+template<class Char, bool null_terminated, class Traits = estd::char_traits<Char> >
+using basic_stringbuf = estd::detail::streambuf <
     estd::internal::impl::basic_stringbuf<
-        layer3::basic_string < TChar, null_terminated, Traits> > >;
+        layer3::basic_string <Char, null_terminated, Traits> > >;
 
-typedef basic_stringbuf<char, 0> stringbuf;
+// DEBT: Deviation from norm where 'null terminated' is expected.  Does make sense
+// for layer3 since it innately tracks a runtime size anyway.  Still, document our
+// thinking here to remove debt
+typedef basic_stringbuf<char, false> stringbuf;
 
-template<class TChar, bool null_terminated, class Traits = estd::char_traits<TChar> >
-using basic_ostringstream = estd::internal::basic_ostream<basic_stringbuf<TChar, null_terminated, Traits> >;
+template<class Char, bool null_terminated, class Traits = estd::char_traits<Char> >
+using basic_ostringstream = estd::detail::basic_ostream<basic_stringbuf<Char, null_terminated, Traits> >;
 
 #endif
 }
