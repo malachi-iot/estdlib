@@ -331,6 +331,15 @@ TEST_CASE("functional")
 
                     REQUIRE(ctx.val == 5);
                 }
+                SECTION("virtual")
+                {
+                    detail::impl::function_virtual<int(int)>::
+                        method_model<ContextTest, &ContextTest::add> m(&ctx);
+
+                    m(5);
+
+                    REQUIRE(ctx.val == 5);
+                }
             }
         }
     }

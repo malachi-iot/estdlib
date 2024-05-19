@@ -114,8 +114,7 @@ struct function_fnptr2<Result(Args...)>
 
         T* const object_;
 
-        // DEBT: Use rvalue here
-        constexpr Result operator()(Args...args) const
+        constexpr Result operator()(Args&&...args) const
         {
             return (object_->*f)(std::forward<Args>(args)...);
         }

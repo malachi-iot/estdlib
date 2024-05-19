@@ -30,6 +30,23 @@ struct function_virtual<Result(Args...)>
             return f(std::forward<Args>(args)...);
         }
     };
+
+
+    // 13MAY24 MB EXPERIMENTAL replacement for 'thisify'
+    template <class T, Result (T::*f)(Args...)>
+    struct method_model : model_base
+    {
+        constexpr explicit method_model(T* t) :
+            object_{t}
+        {}
+
+        T* const object_;
+
+        Result operator()(Args...args) override
+        {
+            return (object_->*f)(std::forward<Args>(args)...);
+        }
+    };
 };
 
 
