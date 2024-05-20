@@ -3,12 +3,18 @@
 ## Added Features
 
 * Adding rudimentary memory pool TBD: better description
+* Adding `make_heap`, `push_heap` and `pop_heap`
 
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/40 Fixed glitch in Streambuf c++20 concept
 * https://github.com/malachi-iot/estdlib/issues/39 Upgraded & cleaned out internal `detail::function`
 * AVR pgm support additional testing & refinement TBD should this be added feature?
+
+## Known Issues & Limitations
+
+* Our heapify functions are crude and won't be as optimized as `std`.
+  Still, it's better than nothing
 
 # v0.7.2 - 18MAR24
 
