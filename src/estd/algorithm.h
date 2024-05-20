@@ -4,6 +4,8 @@
 #include "internal/heap.h"
 #include "internal/functional.h"
 #include "internal/feature/algorithm.h"
+#include "internal/algorithm/raw.h"
+#include "internal/algorithm/heap.h"
 #include "utility.h"
 
 #include "internal/macro/push.h"
@@ -14,7 +16,6 @@
 #undef FEATURE_ESTD_ALGORITHM_OPT
 #endif
 
-// mainly to fill in gaps for pre C++11 compatibility
 namespace estd {
 
 // NOTE: Aliasing these out as best we can because std copy/fill operations may have some nice
@@ -61,35 +62,6 @@ bool equal(InputIt1 first1, InputIt1 last1,
     return true;
 }
 
-// https://en.cppreference.com/w/cpp/algorithm/min
-template <class T>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-const T& min(const T& a, const T& b)
-{
-    return (b < a) ? b : a;
-}
-
-template <class T, class Compare>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-const T& min(const T& a, const T& b, Compare comp)
-{
-    return (comp(b, a)) ? b : a;
-}
-
-template <class T>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-const T& max(const T& a, const T& b)
-{
-    return (b > a) ? b : a;
-}
-
-
 template<class ForwardIt, class Compare>
 #ifdef FEATURE_CPP_CONSTEXPR_METHOD
 constexpr
@@ -109,24 +81,7 @@ ForwardIt min_element(ForwardIt first, ForwardIt last,
     return smallest;
 }
 
-template<class ForwardIt, class Compare>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp)
-{
-    if (first == last)
-        return last;
 
-    ForwardIt largest = first;
-    ++first;
-
-    for (; first != last; ++first)
-        if (comp(*largest, *first))
-            largest = first;
-
-    return largest;
-}
 
 // DEBT: use overall macro push/pop here
 #ifdef ESTD_MIN_SAVER

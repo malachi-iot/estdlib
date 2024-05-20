@@ -8,6 +8,7 @@
 
 #include "../exp/heap.h"
 #include "feature/queue.h"
+#include "algorithm/heap.h"
 
 // DEBT: Obsolete, we now always have priority queue since we have our own
 // heap implementation

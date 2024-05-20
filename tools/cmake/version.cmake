@@ -4,6 +4,8 @@ string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
 
 set(WORKING_DIR ${CMAKE_CURRENT_LIST_DIR}/in)
 
+message(DEBUG "version.cmake: ${CMAKE_CURRENT_SOURCE_DIR} / ${WORKING_DIR}")
+
 # DEBT: 'port' is not a great destination
 configure_file(
     ${WORKING_DIR}/version.in.h
