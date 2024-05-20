@@ -79,8 +79,9 @@ TEST_CASE("algorithm tests")
 
         SECTION("make_heap")
         {
-            // FIX: our implementation is backwards from std
-            estd::make_heap(begin, end, [](int a, int b){ return a > b; });
+            // NOTE: lambda way works too
+            //estd::make_heap(begin, end, [](int a, int b){ return a > b; });
+            estd::make_heap(begin, end, estd::greater<int>{});
 
             REQUIRE(values[0] == 0);
             REQUIRE(values[1] == 2);

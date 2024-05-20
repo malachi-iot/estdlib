@@ -6,13 +6,8 @@
 
 #include "platform.h"
 
-#include "../exp/heap.h"
 #include "feature/queue.h"
 #include "algorithm/heap.h"
-
-// DEBT: Obsolete, we now always have priority queue since we have our own
-// heap implementation
-#define FEATURE_ESTD_PRIORITY_QUEUE 1
 
 #include "../vector.h"
 #include "../functional.h"
@@ -53,7 +48,7 @@ protected:
     void push_heap()
     {
 #if FEATURE_ESTD_ALGORITHM_HEAP
-        estd::experimental::push_heap(c.begin(), c.end(), compare());
+        estd::push_heap(c.begin(), c.end(), compare());
 #else
         std::push_heap(c.begin(), c.end(), compare());
 #endif
@@ -62,7 +57,7 @@ protected:
     void pop_heap()
     {
 #if FEATURE_ESTD_ALGORITHM_HEAP
-        estd::experimental::pop_heap(c.begin(), c.end(), compare());
+        estd::pop_heap(c.begin(), c.end(), compare());
 #else
         std::pop_heap(c.begin(), c.end(), compare());
 #endif
@@ -114,7 +109,7 @@ public:
         push_heap();
     }
 
-    priority_queue& operator =(priority_queue&& move_from)
+    priority_queue& operator =(priority_queue&& move_from) noexcept
     {
         c = std::move(move_from.c);
         return *this;
@@ -180,7 +175,7 @@ public:
         // DEBT: Also, we want to do this from 'v' not c.begin().  However,
         // our accessor-rather-than-pointer makes that a little tricky
 #if FEATURE_ESTD_ALGORITHM_HEAP
-        estd::experimental::make_heap(c.begin(), c.end(), compare());
+        estd::make_heap(c.begin(), c.end(), compare());
 #else
         std::make_heap(c.begin(), c.end(), compare());
 #endif
