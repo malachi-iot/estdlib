@@ -4,6 +4,7 @@
 #include "streambuf/base.h"
 #include "../../queue.h" // for out_queue_streambuf
 #include "../../span.h" // for span streambuf
+#include "streambuf/bipbuf.h"
 #include "streambuf/buffer.h"
 
 namespace estd { namespace internal { namespace impl {
