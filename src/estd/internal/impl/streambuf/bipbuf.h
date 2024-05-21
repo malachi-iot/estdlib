@@ -80,6 +80,8 @@ protected:
         // to the concept failure reason - useless
         //requires concepts::v1::impl::OutStreambuf<out_buffered_bipbuf>
 #endif
+    // 21MAY24 DEBT: Probably we want in_place_t here to disambiguate edge
+    // case where base_type itself wants a bipbuf_t*
     explicit out_buffered_bipbuf(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {
@@ -137,6 +139,7 @@ public:
     using typename base_type::int_type;
     using typename base_type::char_type;
     using typename base_type::traits_type;
+    using nonconst_char_type = remove_const_t<char_type>;
 
 private:
     adapt_bipbuf<sizeof(char_type) * len> buf_;
@@ -163,13 +166,69 @@ protected:
         return 0;
     }
 
-public:
-    char_type* gptr() const
+    constexpr streamsize xin_avail() const
     {
-        return reinterpret_cast<char_type*>(buf_.peek());
+        return buf_.used();
     }
 
-    char_type* egptr() const
+    // DEBT: This needs to interrogate wrapped Streambuf
+    constexpr streamsize showmanyc() const
+    {
+        return xin_avail();
+    }
+
+    streamsize xsgetn(nonconst_char_type* s, streamsize count)
+    {
+        if(count > xin_avail())
+            count = xin_avail();
+
+        copy_n(buf_.peek(), count, s);
+
+        return count;
+    }
+
+    ESTD_CPP_FORWARDING_CTOR(in_buffered_bipbuf)
+
+    int_type underflow()
+    {
+        if(xin_avail() == 0)
+        {
+            // DEBT: Return proper eof
+            if(sync() == -1)    return -1;
+        }
+
+        // DEBT: Wrap with traits
+        return xsgetc();
+    }
+
+    int_type uflow()
+    {
+        // DEBT: ADL + data hiding may be an issue here
+        //return estd::internal::impl::uflow(this);
+
+        const int_type c = underflow();
+
+        if(c != traits_type::eof())
+            gbump(1);
+
+        return c;
+    }
+
+    void gbump(int count)
+    {
+        buf_.poll(count);
+    }
+
+    char_type xsgetc() const { return *gptr(); }
+
+public:
+    // DEBT: Deviation from spec, which doesn't specify const pointer here
+    const char_type* gptr() const
+    {
+        return reinterpret_cast<const char_type*>(buf_.peek());
+    }
+
+    const char_type* egptr() const
     {
         return gptr() + buf_.used();
     }

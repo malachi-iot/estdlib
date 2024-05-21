@@ -68,6 +68,9 @@ using out_buffered_stringbuf = detail::streambuf<impl::out_buffered_stringbuf<St
 template <class Streambuf, unsigned N = 64>
 using out_bipbuf_streambuf = detail::streambuf<impl::out_buffered_bipbuf<Streambuf, N> >;
 
+template <class Streambuf, unsigned N = 64>
+using in_bipbuf_streambuf = detail::streambuf<impl::in_buffered_bipbuf<Streambuf, N> >;
+
 #endif
 
 }}

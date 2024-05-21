@@ -86,7 +86,7 @@ struct streambuf_helper
 
 
 
-
+// DEBT: Watch out for ADL!
 template <class TStreambuf>
 typename TStreambuf::int_type uflow(TStreambuf* sb)
 {

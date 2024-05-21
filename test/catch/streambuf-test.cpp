@@ -264,7 +264,7 @@ TEST_CASE("streambuf")
 
             true_buffered_test(sb);
         }
-        SECTION("bipbuffer (layer1)")
+        SECTION("out bipbuffer (layer1)")
         {
             backing sbb;
             using type = internal::out_bipbuf_streambuf<backing&, 8>;
@@ -273,7 +273,7 @@ TEST_CASE("streambuf")
 
             true_buffered_test(sb);
         }
-        SECTION("bipbuffer (layer3)")
+        SECTION("out bipbuffer (layer3)")
         {
             backing sbb;
             estd::layer1::bipbuf<8> bb;
@@ -281,6 +281,20 @@ TEST_CASE("streambuf")
             type sb(bb.native(), sbb);
 
             true_buffered_test(sb);
+        }
+        SECTION("in bipbuffer")
+        {
+            backing sbb;
+            using type = internal::in_bipbuf_streambuf<backing&, 8>;
+            type sb(sbb);
+
+            REQUIRE(sb.sgetc() == -1);
+            sb.sbumpc();
+
+            sbb.sputn("hi2u", 4);
+
+            REQUIRE(sb.sbumpc() == 'h');
+            REQUIRE(sb.in_avail() == 3);
         }
     }
 }
