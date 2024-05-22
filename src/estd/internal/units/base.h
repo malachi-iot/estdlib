@@ -106,7 +106,7 @@ struct unit_traits
 /// @tparam Rep core unit size of underlying count/ticks
 /// @tparam Period scaling ratio
 /// @tparam Tag differentiating tag so as to disallow one unit from automatically converting to another
-/// @tparam F final conversion.  defaults to passhtrough (noop)
+/// @tparam F final conversion.  defaults to passthrough (noop)
 template <typename Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Adder<Rep>) F>
 class unit_base :
@@ -154,17 +154,27 @@ public:
 #endif
     }
 
+protected:
+    constexpr unit_base() = default;
+
 public:
     explicit constexpr unit_base(const Rep& rep) : rep_{rep} {}
 
+    // Converting constructors are NOT explicit, since we happily want silent conversions
+    // in this case.  We're not converting strings etc, but very narrowly similar unit_bases.  See:
+    // https://stackoverflow.com/questions/66382983/how-do-i-enable-conversion-from-one-class-to-another
+    // https://www.reddit.com/r/cpp_questions/comments/ndnrp0/should_every_singleargument_constructor_be_marked/
+
     // Converting only precision or F modified
     template <class Rep2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    constexpr explicit unit_base(const unit_base<Rep2, Period, Tag, F2>& s) : rep_{s.count()}
+    constexpr unit_base(const unit_base<Rep2, Period, Tag, F2>& s) :    // NOLINT
+        rep_{s.count()}
     {
     }
 
     template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    constexpr explicit unit_base(const unit_base<Rep2, Period2, Tag, F2>& s) : rep_{convert_from(s)}
+    constexpr unit_base(const unit_base<Rep2, Period2, Tag, F2>& s) :   // NOLINT
+        rep_{convert_from(s)}
     {
     }
 
