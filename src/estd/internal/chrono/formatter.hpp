@@ -154,7 +154,7 @@ class hh_mm_ss
 
     constexpr duration_type _abs() const
     {
-        return chrono::internal::abs(value);
+        return chrono::abs(value);
     }
 
 public:

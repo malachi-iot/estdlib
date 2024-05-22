@@ -127,7 +127,7 @@ public:
     // chrono one is supposed to offer compile time protection against overflow
     // and it doesn't, so that's debt/FIX too
     template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    static constexpr Rep convert_from(const unit_base<Rep2, Period2, Tag, F2>& s)
+    static constexpr Rep convert_from(const Rep2& count)
     {
         typedef estd::ratio_divide<Period2, Period> rd;
         // find common type so that we more often have the precision we need.
@@ -143,15 +143,21 @@ public:
         // we prefer not to implicitly ignore that as a compiler feature, but rather
         // explicitly ignore it with some kind of indication elsewhere that narrowing happened
 #if __cpp_constexpr >= 201304L   // "relaxed constexpr" (just to make debugging easier)
-        auto intermediate = static_cast<ct>(s.count());
+        auto intermediate = static_cast<ct>(count);
         constexpr typename F::reversal f;
         intermediate *= rd::num;
         intermediate /= rd::den;
         return f(intermediate);
 #else
         return typename F::reversal{}(
-            static_cast<ct>(s.count()) * rd::num / rd::den);
+            static_cast<ct>(count) * rd::num / rd::den);
 #endif
+    }
+
+    template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
+    static constexpr Rep convert_from(const unit_base<Rep2, Period2, Tag, F2>& v)
+    {
+        return convert_from<Rep2, Period2, F2>(v.count());
     }
 
 protected:

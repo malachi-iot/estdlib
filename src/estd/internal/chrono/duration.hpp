@@ -69,8 +69,8 @@ template<
 #ifdef FEATURE_CPP_CONSTEXPR
 constexpr
 #endif
-    duration<Rep, Period>::duration(const duration<Rep2, Period2>& d)
-    : ticks(convert_from(d))
+    duration<Rep, Period>::duration(const duration<Rep2, Period2>& d) :
+        base_type(convert_from(d))
 {
 }
 

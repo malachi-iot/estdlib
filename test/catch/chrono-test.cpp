@@ -228,7 +228,7 @@ TEST_CASE("chrono tests")
             {
                 // It's useful to have a noop flavor, so we do our own internal version of
                 // abs which does just that
-                estd::chrono::internal::abs(ms);
+                estd::chrono::abs(ms);
             }
         }
     }

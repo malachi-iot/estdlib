@@ -3,6 +3,7 @@
 #include "features.h"
 #include "../../ratio.h"
 #include "../chrono.h"
+#include "../units/base.h"
 
 #include "../macro/push.h"
 
@@ -13,6 +14,13 @@
 namespace estd { namespace chrono {
 
 #ifdef FEATURE_ESTD_CHRONO
+
+namespace internal {
+
+struct seconds_tag {};
+
+}
+
 template <class Rep>
 struct duration_values
 {
@@ -25,11 +33,14 @@ template<
     class Rep,
     class Period
     >
-class duration
+class duration :
+    public estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>
 {
+    using base_type = estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>;
+
     // confusingly, 'ticks' actually represents # of periods, not specifically
     // system ticks
-    Rep ticks;
+    //Rep ticks;
 
 protected:
     template <class Rep2, class Period2>
@@ -44,7 +55,7 @@ public:
     typedef Rep rep;
     typedef typename Period::type period;
 
-    ESTD_CPP_CONSTEXPR_RET rep count() const { return ticks; }
+    //ESTD_CPP_CONSTEXPR_RET rep count() const { return ticks; }
 
     ESTD_CPP_DEFAULT_CTOR(duration)
 
@@ -52,7 +63,7 @@ public:
 #if __cpp_constexpr
     constexpr explicit
 #endif
-        duration(const Rep2& r) : ticks(r)
+        duration(const Rep2& r) : base_type(r)
     {
 
     }
@@ -69,33 +80,33 @@ public:
     constexpr
 #endif
         duration(const std::chrono::duration<Rep2, Period2>& d) :
-        ticks(convert_from(d))
+        base_type(convert_from(d))
     {}
 
     typedef std::ratio<Period::num, Period::den> std_period_type;
 
     ESTD_CPP_CONSTEXPR_RET operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
     {
-        return std::chrono::duration<Rep, std_period_type>(count());
+        return std::chrono::duration<Rep, std_period_type>(base_type::count());
     }
 #endif
 
     duration& operator+=(const duration& d)
     {
-        ticks += d.ticks;
+        base_type::rep_ += d.count();
         return *this;
     }
 
 
     duration& operator-=(const duration& d)
     {
-        ticks -= d.ticks;
+        base_type::rep_ -= d.count();
         return *this;
     }
 
     duration& operator*=(const rep& r)
     {
-        ticks *= r;
+        base_type::rep_ *= r;
         return *this;
     }
 
@@ -105,7 +116,7 @@ public:
         static_assert (numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
 #endif
 
-        return duration(-ticks);
+        return duration(-base_type::rep_);
     }
 
     ESTD_CPP_CONSTEXPR_RET duration operator+() const { return *this; }
