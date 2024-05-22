@@ -142,7 +142,10 @@ public:
         // DEBT: It's likely we hit some narrowing conversion situations here,
         // we prefer not to implicitly ignore that as a compiler feature, but rather
         // explicitly ignore it with some kind of indication elsewhere that narrowing happened
-#if __cpp_constexpr >= 201304L   // "relaxed constexpr" (just to make debugging easier)
+
+        // DEBT: Not quite apples-to-apples, in-place *= & /= don't enjoy type promotion.
+        // Causes occasional issues (namely with embr::word), so disabling for now
+#if FEATURE_ESTD_DEBUG_CONVERT_FROM &&  __cpp_constexpr >= 201304L   // "relaxed constexpr" (just to make debugging easier)
         auto intermediate = static_cast<ct>(count);
         constexpr typename F::reversal f;
         intermediate *= rd::num;
@@ -150,7 +153,7 @@ public:
         return f(intermediate);
 #else
         return typename F::reversal{}(
-            static_cast<ct>(count) * rd::num / rd::den);
+            ct(count) * rd::num / rd::den);
 #endif
     }
 
