@@ -213,6 +213,12 @@ public:
         return *this;
     }
 
+    template <class Rep2, class Period2, class F2>
+    unit_base& operator +=(const unit_base<Rep2, Period2, tag_type, F2>& v)
+    {
+        return operator +=(unit_base(v));
+    }
+
     // EXPERIMENTAL - may have diminished/confusing utility especially for
     // floating point types
     unit_base& operator ++()
