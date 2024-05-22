@@ -10,6 +10,7 @@
 * https://github.com/malachi-iot/estdlib/issues/40 Fixed glitch in Streambuf c++20 concept
 * https://github.com/malachi-iot/estdlib/issues/39 Upgraded & cleaned out internal `detail::function`
 * AVR pgm support additional testing & refinement TBD should this be added feature?
+* Dogfooding internal `units` code into `chrono` support
 
 ## Known Issues & Limitations
 
