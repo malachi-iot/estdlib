@@ -38,16 +38,12 @@ ESTD_CPP_CONSTEXPR_RET Rep duration<Rep, Period>::convert_from(const duration<Re
 }
 
 #ifdef FEATURE_STD_CHRONO
-template<
-    class Rep,
-    class Period
-    >
-template<
-    class Rep2,
-    class Period2
-    >
-CONSTEXPR Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Rep2, Period2>& d)
+template<class Rep, class Period>
+template<class Rep2, class Period2>
+constexpr Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Rep2, Period2>& d)
 {
+    // DEBT: Duplication with estd::ratio flavor is a no no, but needed so far
+
     typedef std::ratio_divide<Period2, Period> rd;
 
     // FIX: Overly simplistic and going to overflow in some conditions
@@ -58,25 +54,8 @@ CONSTEXPR Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Re
 }
 #endif
 
-template<
-    class Rep,
-    class Period
-    >
-template<
-    class Rep2,
-    class Period2
-    >
-#ifdef FEATURE_CPP_CONSTEXPR
-constexpr
-#endif
-    duration<Rep, Period>::duration(const duration<Rep2, Period2>& d) :
-        base_type(convert_from(d))
-{
-}
-
-
 template <class ToDuration, class Rep, class Period>
-ToDuration duration_cast(const duration<Rep, Period>& d)
+constexpr ToDuration duration_cast(const duration<Rep, Period>& d)
 {
     return ToDuration(d);
 }

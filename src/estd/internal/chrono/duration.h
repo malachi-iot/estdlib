@@ -57,35 +57,27 @@ public:
 
     //ESTD_CPP_CONSTEXPR_RET rep count() const { return ticks; }
 
-    ESTD_CPP_DEFAULT_CTOR(duration)
+    constexpr duration() = default;
 
     template <class Rep2>
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-        duration(const Rep2& r) : base_type(r)
-    {
-
-    }
+    constexpr explicit duration(const Rep2& r) :
+        base_type(r)
+    {}
 
     template <class Rep2, class Period2>
-#if __cpp_constexpr
-    constexpr
-#endif
-        duration(const duration<Rep2, Period2>& d);
+    constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
+        base_type(d)
+    {}
 
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
-#ifdef FEATURE_CPP_CONSTEXPR
-    constexpr
-#endif
-        duration(const std::chrono::duration<Rep2, Period2>& d) :
+    constexpr duration(const std::chrono::duration<Rep2, Period2>& d) : // NOLINT
         base_type(convert_from(d))
     {}
 
     typedef std::ratio<Period::num, Period::den> std_period_type;
 
-    ESTD_CPP_CONSTEXPR_RET operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
+    constexpr operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
     {
         return std::chrono::duration<Rep, std_period_type>(base_type::count());
     }

@@ -11,6 +11,9 @@
 
 namespace estd { namespace chrono {
 
+// 22MAY24 DEBT: Obsoleted by units in internal/units/base.h.  However there is likely some lingering
+// functionality we need in here, so keeping for the time being
+
 namespace internal {
 
 // DEBT: Only using these aliases to bring things up.

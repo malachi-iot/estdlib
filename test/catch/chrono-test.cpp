@@ -262,6 +262,8 @@ TEST_CASE("chrono tests")
         microseconds_t t1(3);
         microseconds_t2 t2(6);
 
+        // DEBT: Compiler rightly complains about narrowing conversion.  In this case, we do want
+        // to do it.  How would we gracefully suppress this warning?
         t1 = t2;
 
         REQUIRE(t1 == t2);
