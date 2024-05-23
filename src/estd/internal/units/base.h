@@ -122,11 +122,11 @@ protected:
 public:
 #endif
 
-    // DEBT: Copy/pasted from estd::chrono duration
     // It does work, but it is prone to overflow so be careful.  Also,
     // chrono one is supposed to offer compile time protection against overflow
     // and it doesn't, so that's debt/FIX too
-    template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2 = F>
+    // DEBT: Swap Rep2 and Period2 so that we can auto deduce Rep2
+    template <class Rep2, class Period2>
     static constexpr Rep convert_from(const Rep2& count)
     {
         typedef estd::ratio_divide<Period2, Period> rd;
@@ -160,7 +160,7 @@ public:
     template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
     static constexpr Rep convert_from(const unit_base<Rep2, Period2, Tag, F2>& v)
     {
-        return convert_from<Rep2, Period2, F2>(v.count());
+        return convert_from<decltype(v.count()), Period2>(v.count());
     }
 
 protected:
