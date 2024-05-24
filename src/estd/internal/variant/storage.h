@@ -337,7 +337,7 @@ public:
     ensure_pointer<T> get() { return (T*) storage.raw; }
 
     template <class T>
-    constexpr add_pointer_t<ensure_type<const T>> get() const
+    constexpr add_pointer_t<const ensure_type_t<T>> get() const
     {
         return reinterpret_cast<add_pointer_t<const T>>(storage.raw);
     }

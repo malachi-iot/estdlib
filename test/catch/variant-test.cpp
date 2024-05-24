@@ -350,9 +350,15 @@ TEST_CASE("variant")
         }
         SECTION("NonTrivial, int")
         {
-            internal::variant_storage<estd::test::NonTrivial, int> vs;
+            internal::variant_storage<test::NonTrivial, int> vs;
 
             REQUIRE(!vs.is_trivial);
+
+            SECTION("const")
+            {
+                const internal::variant_storage<test::NonTrivial, int>& vs_const = vs;
+                const test::NonTrivial* v = vs_const.get<test::NonTrivial>();
+            }
         }
         SECTION("variant_size")
         {
