@@ -29,18 +29,11 @@ struct duration_values
     static ESTD_CPP_CONSTEXPR_RET Rep max() { return estd::numeric_limits<Rep>::max(); }
 };
 
-template<
-    class Rep,
-    class Period
-    >
+template<class Rep, class Period>
 class duration :
     public estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>
 {
     using base_type = estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>;
-
-    // confusingly, 'ticks' actually represents # of periods, not specifically
-    // system ticks
-    //Rep ticks;
 
 protected:
     template <class Rep2, class Period2>
@@ -55,8 +48,6 @@ public:
     typedef Rep rep;
     typedef typename Period::type period;
 
-    //ESTD_CPP_CONSTEXPR_RET rep count() const { return ticks; }
-
     constexpr duration() = default;
 
     template <class Rep2>
@@ -64,9 +55,10 @@ public:
         base_type(r)
     {}
 
+    // NOTE: It seems std::duration quietly permits narrowing, so so do we
     template <class Rep2, class Period2>
     constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
-        base_type(d)
+        base_type(d, estd::internal::units::relaxed_narrow_t{})
     {}
 
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO

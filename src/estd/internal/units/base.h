@@ -9,6 +9,10 @@
 
 namespace estd { namespace internal { namespace units {
 
+// Indicates to unit_base that narrowing might happen and to silently
+// permit it
+struct relaxed_narrow_t {};
+
 // DEBT: Pretty sure there's a std/estd flavor of this we can use,
 // though our flavor provides extra value in that reflected 'type'
 // is important for consumer to use for precision/signing
@@ -185,6 +189,12 @@ public:
     template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
     constexpr unit_base(const unit_base<Rep2, Period2, Tag, F2>& s) :   // NOLINT
         rep_{convert_from(s)}
+    {
+    }
+
+    template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
+    constexpr unit_base(const unit_base<Rep2, Period2, Tag, F2>& s, relaxed_narrow_t) :   // NOLINT
+        rep_{Rep(convert_from(s))}
     {
     }
 
