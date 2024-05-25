@@ -5,38 +5,39 @@
 #include "concepts.h"
 #include "fwd.h"
 
+#include "../macro/push.h"
 
 namespace estd { namespace internal { namespace units {
 
 // DEBT: Pretty sure there's a std/estd flavor of this we can use,
 // though our flavor provides extra value in that reflected 'type'
 // is important for consumer to use for precision/signing
-template <typename TInt, TInt add>
-struct subtractor : estd::integral_constant<TInt, add>
+template <typename Int, Int add>
+struct subtractor : estd::integral_constant<Int, add>
 {
-    template <typename TInt2>
-    constexpr TInt operator()(TInt2 v) const
+    template <typename Int2>
+    constexpr Int operator()(Int2 v) const
     {
         return v - add;
     }
 
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     // else.
-    using reversal = adder<TInt, add>;
+    using reversal = adder<Int, add>;
 };
 
-template <typename TInt, TInt add>
-struct adder : estd::integral_constant<TInt, add>
+template <typename Int, Int add>
+struct adder : estd::integral_constant<Int, add>
 {
-    template <typename TInt2>
-    constexpr TInt operator()(TInt2 v) const
+    template <typename Int2>
+    constexpr Int operator()(Int2 v) const
     {
         return v + add;
     }
 
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     // else.
-    using reversal = subtractor<TInt, add>;
+    using reversal = subtractor<Int, add>;
 };
 
 
@@ -249,3 +250,5 @@ public:
 
 
 }}}
+
+#include "../macro/pop.h"
