@@ -288,13 +288,15 @@ template <unsigned base, class Streambuf, class Base, class Numeric>
 inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<Streambuf, Base>& out, Numeric value)
 {
     // +1 for potential - sign
-    // +1 for null terminator
-    char buffer[estd::numeric_limits<Numeric>::template length<base>::value + 2];
+    // +0 for null terminator, none required
+    constexpr unsigned N = estd::numeric_limits<Numeric>::template length<base>::value + 1;
+    char buffer[N];
 
-    const to_chars_result result = to_string_opt<base>(buffer, value);
-    const unsigned sz = &buffer[sizeof(buffer) - 1] - result.ptr;
+    const to_chars_result result = detail::to_chars<base>(buffer, buffer + N, value);
+    const unsigned sz = &buffer[N] - result.ptr;
 
     // DEBT: Need to check to_chars_result error code
+    //switch(result.ec)
 
     write_int_buffer(out, result.ptr, sz);
 

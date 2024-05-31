@@ -40,6 +40,7 @@ to_chars(CharIt first, CharIt last, Int value, unsigned base)
 
 namespace detail {
 
+// This is of the "opt" variety, where last character truly is at 'last'
 template <unsigned b, class Int, class CharIt>
 inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_result<CharIt> >::type
 to_chars(CharIt first, CharIt last, Int value)
