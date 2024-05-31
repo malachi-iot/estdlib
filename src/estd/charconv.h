@@ -52,11 +52,11 @@ to_chars(CharIt first, CharIt last, Int value)
 }
 
 
-template <class TInt>
-inline typename estd::enable_if<estd::numeric_limits<TInt>::is_integer, from_chars_result>::type
+template <class Int>
+inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, from_chars_result>::type
     from_chars(const char* first,
         const char* last,
-        TInt& value,
+        Int& value,
         const int base = 10)
 {
     if(base > 10)

@@ -284,14 +284,14 @@ void write_int_buffer(
 // DEBT: No locale num_put available yet.
 // to_string_opt is less overhead so really we'd like to compile time choose
 // one or the other
-template <unsigned base, class TStreambuf, class TBase, class T>
-inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream<TStreambuf, TBase>& out, T value)
+template <unsigned base, class Streambuf, class Base, class Numeric>
+inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<Streambuf, Base>& out, Numeric value)
 {
     // +1 for potential - sign
     // +1 for null terminator
-    char buffer[estd::numeric_limits<T>::template length<base>::value + 2];
+    char buffer[estd::numeric_limits<Numeric>::template length<base>::value + 2];
 
-    const to_chars_result result = to_string_opt(buffer, value, base);
+    const to_chars_result result = to_string_opt<base>(buffer, value);
     const unsigned sz = &buffer[sizeof(buffer) - 1] - result.ptr;
 
     // DEBT: Need to check to_chars_result error code
@@ -301,8 +301,9 @@ inline detail::basic_ostream<TStreambuf, TBase>& write_int(detail::basic_ostream
     return out;
 }
 
-template <class TStreambuf, class TBase, typename TInt>
-detail::basic_ostream<TStreambuf, TBase>& out_int_helper(detail::basic_ostream<TStreambuf, TBase>& out, TInt value)
+template <class Streambuf, class Base, typename Int>
+detail::basic_ostream<Streambuf, Base>& out_int_helper(
+    detail::basic_ostream<Streambuf, Base>& out, Int value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework
     // support for that really would be useful

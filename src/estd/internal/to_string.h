@@ -61,6 +61,22 @@ inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_
     return result;
 }
 
+template <unsigned base, unsigned N, typename Int>
+inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_result>::type
+    to_string_opt(char (&buffer)[N], Int value)
+{
+    char* const first = buffer;
+    // -1 here because to_chars doesn't care about null termination, but we do
+    char* const last = buffer + N - 1;
+
+    // remember, opt flavor specifies 'ptr' as beginning and we must manually
+    // null terminate the end (ala standard to_chars operation)
+    *last = 0;
+
+    return detail::to_chars<base>(first, last, value);
+}
+
+
 #ifdef FEATURE_CPP_DEFAULT_TARGS
 // NOTE: Counting on return value optimization to eliminate the copy of 's'
 // We do + 1 because remember maxStringLength does not account for NULL termination
