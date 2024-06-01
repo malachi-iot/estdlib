@@ -227,29 +227,6 @@ TEST_CASE("experimental tests")
             REQUIRE(estd::is_same<fn_traits::arg_t<0>, int>::value);
         }
     }
-    SECTION("shifted string")
-    {
-        estd::layer1::string<32> copy;
-        using type = estd::internal::shifted_string<estd::char_traits<char>, 20>;
-        type s;
-
-        char* data = &s.get_allocator().lock({});
-
-        data[17] = '1';
-        data[18] = '2';
-        data[19] = '3';
-
-        s.set_begin(17);
-
-        //char* v = s.begin().lock();
-        s.copy(copy.c_str(), 3);
-        copy[3] = 0;
-
-        REQUIRE(copy == "123");
-
-        REQUIRE(s.compare("hello") == -1);
-        REQUIRE(s.compare("123") == 0);
-    }
 #ifdef STATIC_ASSERT
     SECTION("STATIC_ASSERT")
     {

@@ -76,7 +76,22 @@ inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, to_chars_
     return detail::to_chars<base>(first, last, value);
 }
 
+// Utilize shifted_string, not well tested yet
+#ifdef FEATURE_ESTD_TO_STRING_OPT
+template <class T, size_t N = numeric_limits<T>::template length<10>::value + 1>
+inline internal::shifted_string<char, N> to_string(const T& value)
+{
+    internal::shifted_string<char, N> s;
+    char* const begin = &s.get_allocator().lock({});
+    char* const end = begin + N;
 
+    to_chars_result r = detail::to_chars<10>(begin, end, value);
+    s.begin(r.ptr - begin);
+    s.get_allocator().unlock({});
+    return s;
+}
+#else
+// "normal" behavior
 #ifdef FEATURE_CPP_DEFAULT_TARGS
 // NOTE: Counting on return value optimization to eliminate the copy of 's'
 // We do + 1 because remember maxStringLength does not account for NULL termination
@@ -93,6 +108,7 @@ inline layer1::string<N> to_string(const T& value)
     to_string(s, value);
     return s;
 }
+#endif
 #endif
 
 namespace experimental {

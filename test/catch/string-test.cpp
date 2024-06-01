@@ -1,3 +1,6 @@
+// DEBT Force enabling this, temporarily
+#define FEATURE_ESTD_TO_STRING_OPT 1
+
 #include <estd/string.h>
 #include <estd/vector.h>
 #include <estd/charconv.h>
@@ -625,6 +628,33 @@ TEST_CASE("string tests")
 
             // Unsupported == 0
             REQUIRE(maxStringLength<estd::layer2::const_string>() == 0);
+        }
+        SECTION("shifted string")
+        {
+            estd::layer1::string<32> copy;
+            using type = estd::internal::shifted_string<char, 20>;
+            type s;
+
+            char* data = &s.get_allocator().lock({});
+
+            data[17] = '1';
+            data[18] = '2';
+            data[19] = '3';
+
+            s.begin(17);
+
+            REQUIRE(s == "123");
+            REQUIRE(*s.begin() == '1');
+            REQUIRE(s.starts_with("12"));
+
+            //char* v = s.begin().lock();
+            s.copy(copy.c_str(), 3);
+            copy[3] = 0;
+
+            REQUIRE(copy == "123");
+
+            REQUIRE(s.compare("hello") == -1);
+            REQUIRE(s.compare("123") == 0);
         }
     }
 }

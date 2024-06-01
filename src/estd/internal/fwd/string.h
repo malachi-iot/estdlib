@@ -71,6 +71,9 @@ requires
 };
 #endif
 
+template <class Char, unsigned N, class CharTraits = estd::char_traits<Char> >
+class shifted_string;
+
 }
 
 namespace detail {

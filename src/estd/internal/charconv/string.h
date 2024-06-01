@@ -12,6 +12,7 @@ namespace estd { namespace internal {
 
 namespace impl {
 
+// TODO: Consider byte-packing this
 template <class CharTraits, unsigned N>
 class shifted_string
 {
@@ -59,10 +60,13 @@ private:
 
     allocator_type allocator_;
 
-public: // DEBT: Making this public
+public:
+    // DEBT: Making this public, though only light debt since impls are implicitly hidden anyway
+    // would prefer a friend declaration
     uint8_t begin_;
 
 public:
+    // NOTE: Deviates from std::string behavior in that size (begin_) remains unintialized!
     shifted_string() = default;
 
     const value_type& lock(int pos, int count)
@@ -78,7 +82,8 @@ public:
     void cunlock() const {}
 
     allocator_type& get_allocator() { return allocator_; }
-    size_type size() const
+
+    constexpr size_type size() const
     {
         return N - begin_;
     }
@@ -92,7 +97,8 @@ public:
 
 }
 
-template <class CharTraits, unsigned N>
+// TODO: Goes into layer1 once it's cleaned up a bit/works well enough to graduate from 'internal'
+template <class Char, unsigned N, class CharTraits>
     //, class Policy =
     //experimental::sized_string_policy<
     //    CharTraits, int16_t, estd::is_const<
@@ -108,7 +114,13 @@ class shifted_string : public detail::basic_string<
 public:
     ESTD_CPP_FORWARDING_CTOR(shifted_string)
 
-    void set_begin(uint8_t v) { base_type::impl().begin_ = v; }
+    using typename base_type::pointer;
+    using base_type::begin;
+
+    void begin(uint8_t v) { base_type::impl().begin_ = v; }
+
+    // TODO: consider adding special insert, insert_range since front-only insertion
+    // is fast
 };
 
 }}
