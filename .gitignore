@@ -31,9 +31,8 @@ build/
 # CLion specific
 cmake-build-*/
 build-catch-*/
-**/.idea/workspace.xml
-**/.idea/vcs.xml
-**/.idea/deployment.xml
+# Sorry buddy, causes us too much grief
+**/.idea/
 
 # Qt specific
 src/build/
