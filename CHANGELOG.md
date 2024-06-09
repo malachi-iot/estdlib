@@ -1,15 +1,15 @@
-# v0.7.3 - XXXXX24
+# v0.8.0 - 08JUN24
 
 ## Added Features
 
-* Adding rudimentary memory pool TBD: better description
+* Adding simplistic beta-quality memory pool.  Located in `estd::internal::memory::pool`
 * Adding `make_heap`, `push_heap` and `pop_heap`
 
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/40 Fixed glitch in Streambuf c++20 concept
 * https://github.com/malachi-iot/estdlib/issues/39 Upgraded & cleaned out internal `detail::function`
-* AVR pgm support additional testing & refinement TBD should this be added feature?
+* AVR pgm support additional testing & refinement
 * Dogfooding internal `units` code into `chrono` support
 * Fixed glitch in `variadic::values` when using non-integer types
 

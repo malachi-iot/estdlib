@@ -3,7 +3,7 @@
 // Non-kitchen-sink approach.  Heavily versioning rudimentary memory pools
 // so we can progress forward without breaking API
 
-#include <estd/internal/memory/v1/pool.h>
+#include <estd/internal/memory/pool.h>
 
 #include "test-data.h"
 
