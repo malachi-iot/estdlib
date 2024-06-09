@@ -27,14 +27,19 @@ struct integral_constant
     static CONSTEXPR T value = v;
     typedef T value_type;
     typedef integral_constant type; // using injected-class-name
-#ifdef __cpp_constexpr
-    constexpr
-#endif
-    operator value_type() const NOEXCEPT { return value; }
+
+    ESTD_CPP_CONSTEXPR_RET operator value_type() const NOEXCEPT { return value; }
 #ifdef __cpp_constexpr
     constexpr value_type operator()() const noexcept { return value; } //since c++14
 #endif
 };
+
+// After c++11 this is deprecated, c++ and before it's (technically) required
+#if __cplusplus <= 201103L
+template<class T, T v>
+CONSTEXPR T integral_constant<T, v>::value;
+#endif
+
 
 #ifdef __cpp_alias_templates
 template <bool B>

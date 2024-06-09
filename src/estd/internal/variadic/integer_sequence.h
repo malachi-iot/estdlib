@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "../utility.h"
 #include "../raw/cstddef.h"
 #include "../raw/type_traits.h"
 
