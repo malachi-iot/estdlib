@@ -74,10 +74,10 @@ struct values :
     template <size_t pos>
     using get = internal::get_index_finder<pos, T, Is...>;
 
-    template <int I2>
+    template <T I2>
     using prepend = values<T, I2, Is...>;
 
-    template <int I2>
+    template <T I2>
     using append = values<T, Is..., I2>;
 
     static constexpr T first() { return get<0>::value; }

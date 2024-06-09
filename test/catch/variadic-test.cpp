@@ -461,6 +461,22 @@ TEST_CASE("variadic")
             typedef integer_sequence<void*, nullptr> type;
         }
     }
+    SECTION("value sequence")
+    {
+        // Simplistic test to ensure non-integer types work too
+        enum class type
+        {
+            t1,
+            t2,
+            t3
+        };
+
+        using types = estd::variadic::values<type, type::t1, type::t2, type::t2, type::t3>;
+
+        types t{};  // will fail if not all types are proper through and through
+
+        REQUIRE(t.first() == type::t1);
+    }
     SECTION("projector")
     {
         size_t v;

@@ -1,4 +1,4 @@
-# v0.x.x - XXXXX24
+# v0.7.3 - XXXXX24
 
 ## Added Features
 
@@ -11,6 +11,7 @@
 * https://github.com/malachi-iot/estdlib/issues/39 Upgraded & cleaned out internal `detail::function`
 * AVR pgm support additional testing & refinement TBD should this be added feature?
 * Dogfooding internal `units` code into `chrono` support
+* Fixed glitch in `variadic::values` when using non-integer types
 
 ## Known Issues & Limitations
 
