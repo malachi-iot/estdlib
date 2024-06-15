@@ -1,1 +1,0 @@
-../../esp8266/template/version_finder.mk
