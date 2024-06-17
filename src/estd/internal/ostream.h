@@ -11,7 +11,7 @@ class basic_ostream :
         virtual
 #endif
         public Base,
-        internal::basic_ostream_base
+        public internal::basic_ostream_base
 {
     typedef Base base_type;
 
@@ -88,6 +88,7 @@ private:
 #if FEATURE_ESTD_OSTREAM_SETW
 
 public:
+    // DEBT: ASCII only
     char_type fill() const
     {
         return 0x20 + ostream_.fillchar;
@@ -201,21 +202,6 @@ public:
 
 #ifndef FEATURE_IOS_STREAMBUF_FULL
     ESTD_CPP_FORWARDING_CTOR(basic_ostream)
-#endif
-
-#if FEATURE_ESTD_OSTREAM_SETW
-    streamsize width() const
-    {
-        return ostream_.width;
-    }
-
-    streamsize width(streamsize new_width)
-    {
-        streamsize old_width = width();
-        ostream_.width = new_width;
-        return old_width;
-    }
-
 #endif
 
 };

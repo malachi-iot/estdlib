@@ -25,6 +25,8 @@ public:
     static CONSTEXPR fmtflags oct = 0x03;
 #endif
     static CONSTEXPR fmtflags basefield = dec | hex;
+    // Not supported yet
+    static CONSTEXPR fmtflags uppercase = 0x04;
 
     // NOTE: "Has no effect on input"
     // https://en.cppreference.com/w/cpp/io/manip/left
@@ -50,6 +52,9 @@ public:
 
     typedef uint8_t iostate;
 
+    // DEBT: Try making these enum if we can, primarily to auto deduce
+    // bit field size
+
     static CONSTEXPR iostate goodbit = 0x00;
     static CONSTEXPR iostate badbit = 0x01;
     static CONSTEXPR iostate failbit = 0x02;
@@ -66,15 +71,25 @@ public:
     static CONSTEXPR seekdir cur = 0x02;
 
 private:
-    struct
+    struct state
     {
 #if FEATURE_ESTD_AGGRESIVE_BITFIELD
         fmtflags fmtfl_ : 8;
+        // DEBT: Experimental nodatabit doesn't fit here
         iostate iostate_ : 4;
+        // Width applies to istream *and* ostream
+        unsigned width_ : 4;
 #else
         fmtflags fmtfl_;
         iostate iostate_;
+        unsigned width_ : 16;
 #endif
+
+        constexpr state() :
+            fmtfl_{dec},
+            iostate_{goodbit},
+            width_{0}
+        {}
 
     }   state_;
 
@@ -89,13 +104,20 @@ protected:
     }
 
 public:
-    // DEBT: Use initializer lists for compilers that have it
-    //ios_base() : fmtfl(dec), _iostate(goodbit) {}
-    ios_base()
+    ios_base() = default;
+
+    constexpr streamsize width() const
     {
-        state_.fmtfl_ = dec;
-        state_.iostate_ = goodbit;
+        return state_.width_;
     }
+
+    streamsize width(streamsize new_width)
+    {
+        streamsize old_width = width();
+        state_.width_ = new_width;
+        return old_width;
+    }
+
 
     fmtflags setf(fmtflags flags)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ |= flags; return prior; }
@@ -189,9 +211,6 @@ protected:
 
     struct ostream_internal
     {
-        // DEBT: Width applies to istream *and* ostream
-        unsigned width : 4;
-
         // NOTE: Hitting compiler warning bug
         // https://stackoverflow.com/questions/36005063/gcc-suppress-warning-too-small-to-hold-all-values-of
         // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
@@ -202,13 +221,15 @@ protected:
         //bool showbase : 1;          // DEBT: Unused
 
         ESTD_CPP_CONSTEXPR_RET ostream_internal() :
-            width(0), alignment(positioning_type::left),
+            alignment(positioning_type::left),
             fillchar(0) // equivalent to space ' '
         {
         }
 
     }   ostream_;
+
 #endif
+
 };
 
 }

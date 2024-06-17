@@ -383,11 +383,22 @@ TEST_CASE("locale")
             {
                 // TODO: num_put can't quite do hex just yet
 
-                fmt.setf(ios_base::hex);
+                fmt.setf(ios_base::hex, ios_base::basefield);
                 char* last = n.put(data, fmt, ' ', 161);
                 *last = 0;
 
-                //REQUIRE(val == "A1");
+                // Uppercase not supported yet
+                REQUIRE(val == "a1");
+            }
+            SECTION("left padding")
+            {
+                fmt.width(5);
+                fmt.setf(ios_base::left);
+
+                char* last = n.put(data, fmt, '0', 161);
+                *last = 0;
+
+                REQUIRE(val == "00161");
             }
         }
         SECTION("floating point")
