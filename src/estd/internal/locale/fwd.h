@@ -14,43 +14,54 @@ namespace estd {
 
 namespace internal {
 
-template <typename TChar, unsigned b, class TLocale, typename TEnabled = void>
+// lifted from https://stackoverflow.com/questions/9510514/integer-range-based-template-specialisation
+// DEBT: Put this into a fwd somewhere
+template<bool>
+struct Range;
+
+enum cbase_casing
+{
+    CBASE_LOWER,    // fixed lower case
+    CBASE_UPPER,    // fixed upper case
+    CBASE_DYNAMIC   // runtime selectable
+};
+
+template <typename Char, unsigned b, cbase_casing casing = CBASE_LOWER, typename = estd::internal::Range<true> >
+struct cbase_utf;
+
+template <typename Char, unsigned b, class Locale, typename Enabled = void>
 struct cbase;
 
-template <class TChar, class TLocale, typename TEnabled = void>
+template <class Char, class Locale, typename TEnabled = void>
 class ctype;
 
 template <internal::locale_code::values locale_code, internal::encodings::values encoding>
 struct locale;
 
-template <typename TChar, class TLocale, class TEnabled = void>
+template <typename Char, class Locale, class Enabled = void>
 struct numpunct;
 
 }
 
 namespace iterated {
 
-template <unsigned base, typename TChar, class TLocale>
+template <unsigned base, typename Char, class Locale>
 struct num_get;
 
 }
 
-template <typename TChar, unsigned b, class TLocale = void>
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-using cbase = internal::cbase<TChar, b, TLocale>;
-#else
-struct cbase : internal::cbase<TChar, b, TLocale> {};
-#endif
+template <typename Char, unsigned b, class Locale = void>
+using cbase = internal::cbase<Char, b, Locale>;
 
 
 
-template <typename TChar, class TLocale = void>
+template <typename Char, class Locale = void>
 class ctype;
 
-template <class TChar, class TLocale = void>
+template <class Char, class Locale = void>
 struct numpunct;
 
-template <class TChar, bool international = false, class TLocale = void>
+template <class Char, bool international = false, class Locale = void>
 struct moneypunct;
 
 

@@ -37,7 +37,8 @@ namespace estd { namespace internal {
 template <class Cbase, class Int, class CharIt, int base_>
 inline detail::to_chars_result<CharIt> to_chars_integer_opt(
         CharIt first,
-        CharIt last, Int value, base_provider<base_> base)
+        CharIt last, Int value, base_provider<base_> base,
+        Cbase cbase)
 {
     typedef Cbase cbase_type;
     typedef detail::to_chars_result<CharIt> result_type;

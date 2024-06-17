@@ -32,7 +32,21 @@ to_chars(CharIt first, CharIt last, Int value, unsigned base)
 {
     typedef typename iterator_traits<CharIt>::value_type char_type;
     typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
-    return internal::to_chars_integer_opt<cbase_type>(first, last, value, internal::base_provider<>(base));
+    return internal::to_chars_integer_opt(
+        first, last, value, internal::base_provider<>(base),
+        cbase_type{});
+}
+
+// DORMANT
+template <unsigned b, class Int, class CharIt>
+inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, detail::to_chars_result<CharIt> >::type
+to_chars(CharIt first, CharIt last, Int value, unsigned base, bool uppercase)
+{
+    typedef typename iterator_traits<CharIt>::value_type char_type;
+    typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
+    return internal::to_chars_integer_opt(
+        first, last, value, internal::base_provider<>(base),
+        cbase_type{});
 }
 
 
@@ -47,7 +61,8 @@ to_chars(CharIt first, CharIt last, Int value)
 {
     typedef typename iterator_traits<CharIt>::value_type char_type;
     typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
-    return internal::to_chars_integer_opt<cbase_type>(first, last, value, internal::base_provider<b>());
+    return internal::to_chars_integer_opt(
+        first, last, value, internal::base_provider<b>(), cbase_type{});
 }
 
 }
@@ -84,6 +99,16 @@ inline typename enable_if<numeric_limits<Int>::is_integer, to_chars_result>::typ
         return internal::to_chars<36>(first, last, value, base);
     else
         return internal::to_chars<10>(first, last, value, base);
+}
+
+template <class Int>
+inline typename enable_if<numeric_limits<Int>::is_integer, to_chars_result>::type
+to_chars_opt(char* first, char* last, Int value, const int base, bool upper)
+{
+    if(base > 10)
+        return internal::to_chars<36>(first, last, value, base, upper);
+    else
+        return internal::to_chars<10>(first, last, value, base, upper);
 }
 
 template <class Int>

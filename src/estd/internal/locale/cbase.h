@@ -22,11 +22,26 @@ namespace estd {
 
 namespace internal {
 
-template <typename TChar, unsigned b, typename = estd::internal::Range<true> >
-struct cbase_utf;
+template <typename Char, unsigned b, cbase_casing>
+struct cbase_utf_base;
 
-template <typename TChar, unsigned b>
-struct cbase_utf_base
+template <cbase_casing c>
+struct cbase_casing_base
+{
+    static constexpr cbase_casing casing() { return c; }
+};
+
+template <>
+struct cbase_casing_base<CBASE_DYNAMIC>
+{
+    cbase_casing c;
+
+    constexpr cbase_casing casing() const { return c; }
+};
+
+
+template <typename Char, unsigned b, cbase_casing casing>
+struct cbase_utf_base : cbase_casing_base<casing>
 {
     typedef int16_t int_type;
 
@@ -48,13 +63,13 @@ struct cbase_utf_base
     static inline CONSTEXPR unsigned base() { return b; }
 };
 
-template <typename TChar, unsigned b>
-struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
-    cbase_utf_base<TChar, b>
+template <typename Char, cbase_casing casing, unsigned b>
+struct cbase_utf<Char, b, casing, estd::internal::Range<b <= 10> > :
+    cbase_utf_base<Char, b, casing>
 {
-    typedef cbase_utf_base<TChar, b> base_type;
+    typedef cbase_utf_base<Char, b, casing> base_type;
     typedef typename base_type::int_type int_type;
-    typedef TChar char_type;
+    typedef Char char_type;
 
     // adapted from GNUC
     static ESTD_CPP_CONSTEXPR_RET bool is_in_base(char_type c, const unsigned _base = b)
@@ -92,13 +107,13 @@ struct cbase_utf<TChar, b, estd::internal::Range<b <= 10> > :
 // have specialized on b directly.
 // On the other hand, there is a convenience here in that consumers knowing at compile time
 // what base they are using can auto-feed 'base' to things like 'from_chars_integer'.
-template <typename TChar, unsigned b>
-struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
-    cbase_utf_base<TChar, b>
+template <typename Char, cbase_casing casing, unsigned b>
+struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
+    cbase_utf_base<Char, b, casing>
 {
-    typedef cbase_utf_base<TChar, b> base_type;
+    typedef cbase_utf_base<Char, b, casing> base_type;
     typedef typename base_type::int_type int_type;
-    typedef TChar char_type;
+    typedef Char char_type;
 
     static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
     {
@@ -144,21 +159,21 @@ struct cbase_utf<TChar, b, estd::internal::Range<(b > 10 && b <= 36)> > :
     static ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v)
     {
         return v < 10 ?
-               ('0' + v) :
-               'a' + (v - 10);
+            ('0' + v) :
+                (base_type::casing() == CBASE_LOWER ? 'a' : 'A') + (v - 10);
     }
 };
 
 
-template <typename TChar, unsigned b,
+template <typename Char, unsigned b,
     internal::locale_code::values lc,
     internal::encodings::values encoding>
-struct cbase<TChar, b, internal::locale<lc, encoding>,
+struct cbase<Char, b, internal::locale<lc, encoding>,
     typename estd::enable_if<
         encoding == internal::encodings::ASCII ||
         encoding == internal::encodings::UTF8 ||
         encoding == internal::encodings::UTF16>::type> :
-    cbase_utf<TChar, b>
+    cbase_utf<Char, b>
 {
 
 };
