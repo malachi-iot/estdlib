@@ -5,18 +5,19 @@
 namespace estd { namespace detail {
 
 // DEBT: is there a way to make TBase a little less confusing for consumers?
-template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) TStreambuf, class TBase>
+template <ESTD_CPP_CONCEPT(concepts::v1::OutStreambuf) Streambuf, class Base>
 class basic_ostream :
 #ifdef FEATURE_IOS_STREAMBUF_FULL
         virtual
 #endif
-        public TBase
+        public Base,
+        internal::basic_ostream_base
 {
-    typedef TBase base_type;
+    typedef Base base_type;
 
 public:
     typedef typename base_type::streambuf_type streambuf_type;
-    typedef typename TBase::char_type char_type;
+    typedef typename Base::char_type char_type;
     typedef typename streambuf_type::pos_type pos_type;
     typedef typename streambuf_type::off_type off_type;
 
@@ -83,48 +84,8 @@ private:
             base_type::setstate(ios_base::failbit);
     }
 
+
 #if FEATURE_ESTD_OSTREAM_SETW
-    // NOTE: Deviates from spec - std wants this in ios_base as part of setf
-    // DEBT: Super clumsy, may want additional layer of wrappers for enum class
-    // NOTE: Due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31 below,
-    // not using scoped enum at all in this case
-#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
-    enum class positioning_type
-#else
-    struct positioning_type { enum values
-#endif
-    {
-        left = 0,
-        right,
-        internal
-    };
-#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
-    using positioning = positioning_type;
-#else
-    };
-
-    typedef typename positioning_type::values positioning;
-#endif
-
-    struct ostream_internal
-    {
-        // DEBT: Width applies to istream *and* ostream
-        unsigned width : 4;
-
-        // NOTE: Hitting compiler warning bug
-        // https://stackoverflow.com/questions/36005063/gcc-suppress-warning-too-small-to-hold-all-values-of
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
-        positioning alignment : 2;  // DEBT: Unused
-        char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
-        bool showbase : 1;          // DEBT: Unused
-
-        ESTD_CPP_CONSTEXPR_RET ostream_internal() :
-            width(0), alignment(positioning_type::left),
-            fillchar(0) // equivalent to space ' '
-        {
-        }
-
-    }   ostream_;
 
 public:
     char_type fill() const
@@ -177,9 +138,9 @@ public:
         }
     };
 
-    typedef typename TBase::traits_type traits_type;
+    typedef typename Base::traits_type traits_type;
 
-    typedef basic_ostream<TStreambuf, TBase> __ostream_type;
+    typedef basic_ostream<Streambuf, Base> __ostream_type;
 
     __ostream_type& flush()
     {

@@ -26,6 +26,10 @@ public:
 #endif
     static CONSTEXPR fmtflags basefield = dec | hex;
 
+    // NOTE: "Has no effect on input"
+    // https://en.cppreference.com/w/cpp/io/manip/left
+    // But to optimize it into basic_ostream_base would almost definitely break
+    // compatibility
     static CONSTEXPR fmtflags left = 0x08;
     static CONSTEXPR fmtflags right = 0x10;
     static CONSTEXPR fmtflags adjustfield = left | right;
@@ -152,6 +156,61 @@ inline ios_base& nounitbuf(ios_base& s)
 {
     s.unsetf(ios_base::unitbuf);
     return s;
+}
+
+
+namespace internal {
+
+class basic_ostream_base
+{
+protected:
+#if FEATURE_ESTD_OSTREAM_SETW
+    // NOTE: Deviates from spec - std wants this in ios_base as part of setf
+    // DEBT: Super clumsy, may want additional layer of wrappers for enum class
+    // NOTE: Due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31 below,
+    // not using scoped enum at all in this case
+#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
+    enum class positioning_type
+#else
+    struct positioning_type { enum values
+#endif
+    {
+        left = 0,
+        right,
+        internal
+    };
+#if defined(FEATURE_CPP_ENUM_CLASS) && !(__GNUC__ < 10)
+    using positioning = positioning_type;
+#else
+    };
+
+    typedef typename positioning_type::values positioning;
+#endif
+
+    struct ostream_internal
+    {
+        // DEBT: Width applies to istream *and* ostream
+        unsigned width : 4;
+
+        // NOTE: Hitting compiler warning bug
+        // https://stackoverflow.com/questions/36005063/gcc-suppress-warning-too-small-to-hold-all-values-of
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
+        positioning alignment : 2;  // DEBT: Unused
+
+        // DEBT: Presumes ASCII, 7-bit.  Unicode and friends are out
+        char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
+        //bool showbase : 1;          // DEBT: Unused
+
+        ESTD_CPP_CONSTEXPR_RET ostream_internal() :
+            width(0), alignment(positioning_type::left),
+            fillchar(0) // equivalent to space ' '
+        {
+        }
+
+    }   ostream_;
+#endif
+};
+
 }
 
 }
