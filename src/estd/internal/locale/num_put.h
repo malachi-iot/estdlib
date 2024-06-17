@@ -12,6 +12,28 @@ namespace estd {
 // In development, not ready, so marked as internal
 namespace internal {
 
+//constexpr
+inline unsigned get_base(const ios_base::fmtflags basefield)
+{
+    // DEBT: Consider a switch statement because we can, but might be slightly fragile
+    if(basefield == ios_base::hex)
+    {
+        return 16;
+    }
+    else if(basefield == ios_base::dec)
+    {
+        return 10;
+    }
+    else
+    {
+        return 8;
+        // oct
+        // basefield mask is guaranteed to produce one of these 3 options
+        // DEBT: Ensure there's a unit test to that effect elsewhere
+    }
+
+}
+
 template <class TChar, class OutputIt, class TLocale = classic_locale_type>
 class num_put
 {
@@ -20,12 +42,14 @@ public:
     typedef OutputIt iter_type;
 
 private:
-    // DEBT: Still need to do 'fill'
-    template <unsigned base, class T>
+    template <class T>
     static iter_type put_integer(iter_type out, const ios_base& str, char_type fill, T value)
     {
+        // Hardcode to base 8 since that's the biggest version
         // +1 for potential - sign
-        constexpr unsigned N = estd::numeric_limits<T>::template length<base>::value + 1;
+        constexpr unsigned N = estd::numeric_limits<T>::template length<8>::value + 1;
+
+        const unsigned base = get_base(str.flags() & ios_base::basefield);
 
         // No extra space for null terminator, not needed for iter_type/stream out
         char buffer[N];
@@ -63,9 +87,7 @@ public:
     //static iter_type
     put(iter_type out, const ios_base& str, char_type fill, T value)
     {
-        //const ios_base::fmtflags basefield = str.flags() & ios_base::basefield;
-        constexpr unsigned base = 10;
-        return put_integer<base>(out, str, fill, value);
+        return put_integer(out, str, fill, value);
     }
 
     template <class T>
