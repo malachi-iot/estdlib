@@ -52,11 +52,12 @@ template <typename Char, unsigned b, cbase_casing casing>
 struct cbase_utf_base : cbase_casing_base<casing>
 {
     using base_type = cbase_casing_base<casing>;
+    using char_type = Char;
 
     // Upper or lower case A, depending on configuration
-    constexpr char a_char() const
+    constexpr char_type a_char() const
     {
-        return base_type::casing() == CBASE_UPPER ? 'A' : 'a';
+        return char_type(base_type::casing() == CBASE_UPPER ? 'A' : 'a');
     }
 
     typedef int16_t int_type;

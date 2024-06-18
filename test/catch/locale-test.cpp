@@ -361,10 +361,21 @@ TEST_CASE("locale")
 
         SECTION("bool")
         {
-            char* last = n.put(val.data(), fmt, ' ', true);
-            *last = 0;
+            SECTION("boolalpha = true")
+            {
+                fmt.setf(ios_base::boolalpha);
+                char* last = n.put(val.data(), fmt, ' ', true);
+                *last = 0;
 
-            REQUIRE(val == "true");
+                REQUIRE(val == "true");
+            }
+            SECTION("boolalpha = false (default)")
+            {
+                char* last = n.put(val.data(), fmt, ' ', true);
+                *last = 0;
+
+                REQUIRE(val == "1");
+            }
         }
         SECTION("int")
         {
