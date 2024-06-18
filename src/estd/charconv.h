@@ -43,10 +43,11 @@ inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, detail::t
 to_chars(CharIt first, CharIt last, Int value, unsigned base, bool uppercase)
 {
     typedef typename iterator_traits<CharIt>::value_type char_type;
-    typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
+    //typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
+    using cbase_type = cbase_utf<char_type, b, CBASE_DYNAMIC>;
     return internal::to_chars_integer_opt(
         first, last, value, internal::base_provider<>(base),
-        cbase_type{});
+        cbase_type(uppercase ? CBASE_UPPER : CBASE_LOWER));
 }
 
 

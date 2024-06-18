@@ -29,6 +29,8 @@ void loop()
 #if USE_NUM_PUT
     ios_base fmt;
 
+    fmt.setf(ios_base::hex | ios_base::uppercase, ios_base::basefield);
+
     char val[32];
     char* last;
 

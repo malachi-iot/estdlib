@@ -63,7 +63,7 @@ inline detail::to_chars_result<CharIt> to_chars_integer_opt(
 #else
         // DEBT: Pretty sure there's a div and mod combined operation, use that
         // i.e. https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf page 36 section 6.2
-        *last = cbase_type::to_char(value % base());
+        *last = cbase.to_char(value % base());
         value /= base();
 #endif
 
@@ -108,7 +108,8 @@ to_chars_result to_chars_integer_reverse(char* first, char* last, TInt value, co
 
     while(current != last)
     {
-        *current = cbase_type::to_char(value % base);
+        // DEBT: instance method in case its runtime casing
+        *current = cbase_type{}.to_char(value % base);
         value /= base;
 
         current++;

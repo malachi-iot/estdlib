@@ -384,11 +384,11 @@ TEST_CASE("locale")
                 // TODO: num_put can't quite do hex just yet
 
                 fmt.setf(ios_base::hex, ios_base::basefield);
+                fmt.setf(ios_base::uppercase);
                 char* last = n.put(data, fmt, ' ', 161);
                 *last = 0;
 
-                // Uppercase not supported yet
-                REQUIRE(val == "a1");
+                REQUIRE(val == "A1");
             }
             SECTION("left padding")
             {

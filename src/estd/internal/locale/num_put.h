@@ -64,7 +64,9 @@ private:
         // No extra space for null terminator, not needed for iter_type/stream out
         char buffer[N];
 
-        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base);
+        const bool uppercase = str.flags() & ios_base::uppercase;
+
+        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base, uppercase);
 
         unsigned width = str.width();
         const unsigned result_width = buffer + N - result.ptr;

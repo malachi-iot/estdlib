@@ -37,12 +37,24 @@ struct cbase_casing_base<CBASE_DYNAMIC>
     cbase_casing c;
 
     constexpr cbase_casing casing() const { return c; }
+
+    constexpr cbase_casing_base(cbase_casing c = CBASE_LOWER) :
+        c{c}
+    {}
 };
 
 
 template <typename Char, unsigned b, cbase_casing casing>
 struct cbase_utf_base : cbase_casing_base<casing>
 {
+    using base_type = cbase_casing_base<casing>;
+
+    // Upper or lower case A, depending on configuration
+    constexpr char a_char() const
+    {
+        return base_type::casing() == CBASE_UPPER ? 'A' : 'a';
+    }
+
     typedef int16_t int_type;
 
     //typedef int_type optional_type;
@@ -61,6 +73,8 @@ struct cbase_utf_base : cbase_casing_base<casing>
     inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
 
     static inline CONSTEXPR unsigned base() { return b; }
+
+    ESTD_CPP_FORWARDING_CTOR(cbase_utf_base)
 };
 
 template <typename Char, cbase_casing casing, unsigned b>
@@ -70,6 +84,9 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<b <= 10> > :
     typedef cbase_utf_base<Char, b, casing> base_type;
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
+
+    ESTD_CPP_FORWARDING_CTOR(cbase_utf)
+
 
     // adapted from GNUC
     static ESTD_CPP_CONSTEXPR_RET bool is_in_base(char_type c, const unsigned _base = b)
@@ -115,6 +132,8 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
 
+    ESTD_CPP_FORWARDING_CTOR(cbase_utf)
+
     static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
     {
         return 'A' <= c && c <= ('A' + (char_type)(_base - 11));
@@ -156,11 +175,11 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
             return c - 'a' + 10;
     }
 
-    static ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v)
+    ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v) const
     {
         return v < 10 ?
             ('0' + v) :
-                (base_type::casing() == CBASE_LOWER ? 'a' : 'A') + (v - 10);
+            base_type::a_char() + (v - 10);
     }
 };
 
