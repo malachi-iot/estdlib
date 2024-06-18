@@ -1,6 +1,6 @@
 # C++ Level
 
-## FEATURE_ESTD_AGGRESIVE_BITFIELD
+## FEATURE_ESTD_AGGRESSIVE_BITFIELD
 
 Use bit packed structs to sacrifice speed for space
 

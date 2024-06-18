@@ -16,10 +16,10 @@ struct from_chars_result
     CharIt ptr;
     estd::errc ec;
 
-#ifndef __cpp_initializer_lists
-    from_chars_result(CharIt ptr, estd::errc ec) :
+    constexpr from_chars_result(CharIt ptr, estd::errc ec) :
         ptr(ptr), ec(ec) {}
-#endif
+
+    from_chars_result() = default;
 };
 
 template <class CharIt>
@@ -28,10 +28,10 @@ struct to_chars_result
     CharIt ptr;
     estd::errc ec;
 
-#ifndef __cpp_initializer_lists
-    to_chars_result(CharIt ptr, estd::errc ec) :
+    constexpr to_chars_result(CharIt ptr, estd::errc ec) :
         ptr(ptr), ec(ec) {}
-#endif
+
+    to_chars_result() = default;
 };
 
 }

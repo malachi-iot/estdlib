@@ -73,7 +73,7 @@ public:
 private:
     struct state
     {
-#if FEATURE_ESTD_AGGRESIVE_BITFIELD
+#if FEATURE_ESTD_AGGRESSIVE_BITFIELD
         fmtflags fmtfl_ : 8;
         // DEBT: Experimental nodatabit doesn't fit here
         iostate iostate_ : 4;
@@ -86,7 +86,7 @@ private:
 #endif
 
         constexpr state() :
-            fmtfl_{dec},
+            fmtfl_{dec | right},
             iostate_{goodbit},
             width_{0}
         {}

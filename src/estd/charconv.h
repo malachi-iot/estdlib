@@ -37,7 +37,7 @@ to_chars(CharIt first, CharIt last, Int value, unsigned base)
         cbase_type{});
 }
 
-// DORMANT
+// NOTE: Consider using num_get instead in this circumstance
 template <unsigned b, class Int, class CharIt>
 inline typename estd::enable_if<estd::numeric_limits<Int>::is_integer, detail::to_chars_result<CharIt> >::type
 to_chars(CharIt first, CharIt last, Int value, unsigned base, bool uppercase)
@@ -109,7 +109,7 @@ to_chars_opt(char* first, char* last, Int value, const int base, bool upper)
     if(base > 10)
         return internal::to_chars<36>(first, last, value, base, upper);
     else
-        return internal::to_chars<10>(first, last, value, base, upper);
+        return internal::to_chars<10>(first, last, value, base);
 }
 
 template <class Int>

@@ -29,6 +29,10 @@ template <cbase_casing c>
 struct cbase_casing_base
 {
     static constexpr cbase_casing casing() { return c; }
+
+    // DEBT: Something like a constexpr if to avoid ctor call altogether
+    // would be better
+    constexpr cbase_casing_base(cbase_casing = CBASE_LOWER) {}
 };
 
 template <>

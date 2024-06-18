@@ -47,9 +47,41 @@ public:
     typedef Char char_type;
     typedef OutputIt iter_type;
 
+    // DEBT: Get main cbase up with dynamic/upper/lower
+    template <unsigned b>
+    using cbase_type = cbase_utf<Char, b, CBASE_DYNAMIC>;
+
+    // DEBT: Low level helper - not too problematic, just clumsy name and location
+    // leverages our cbase awareness
+    template <class T>
+    static to_chars_result put_integer_nofill(iter_type first, iter_type last,
+        const ios_base& str,
+        const T& value)
+    {
+        const unsigned base = get_base(str.flags() & ios_base::basefield);
+
+        if(base <= 10)
+        {
+            return internal::to_chars_integer_opt(
+                first, last, value, internal::base_provider<>(base),
+                cbase_type<10>{});
+        }
+        else
+        {
+            const bool uppercase = str.flags() & ios_base::uppercase;
+
+            return internal::to_chars_integer_opt(
+                first, last, value, internal::base_provider<>(base),
+                cbase_type<36>(uppercase ? CBASE_UPPER : CBASE_LOWER));
+        }
+    }
+
+
 private:
     template <class T>
-    static iter_type put_integer(iter_type out, const ios_base& str, char_type fill, T value)
+    static iter_type put_integer(iter_type out, const ios_base& str,
+        char_type fill,
+        const T& value)
     {
         // Hardcode to base 8 since that's the biggest version
         // +1 for potential - sign
@@ -59,14 +91,12 @@ private:
         constexpr unsigned N = estd::numeric_limits<T>::template length<10>::value + 1;
 #endif
 
-        const unsigned base = get_base(str.flags() & ios_base::basefield);
+        //const unsigned base = get_base(str.flags() & ios_base::basefield);
 
         // No extra space for null terminator, not needed for iter_type/stream out
         char buffer[N];
 
-        const bool uppercase = str.flags() & ios_base::uppercase;
-
-        to_chars_result result = to_chars_opt(buffer, buffer + N, value, base, uppercase);
+        to_chars_result result = put_integer_nofill(buffer, buffer + N, str, value);
 
         unsigned width = str.width();
         const unsigned result_width = buffer + N - result.ptr;
@@ -76,12 +106,12 @@ private:
             width -= result_width;
 
             const ios_base::fmtflags adj = str.flags() & ios_base::adjustfield;
-            if(adj == ios_base::left)
+            if(adj == ios_base::right)
             {
                 out = fill_n(out, width, fill);
                 return copy(result.ptr, buffer + N, out);
             }
-            else if(adj == ios_base::right)
+            else if(adj == ios_base::left)
             {
                 out = copy(result.ptr, buffer + N, out);
                 return fill_n(out, width, fill);

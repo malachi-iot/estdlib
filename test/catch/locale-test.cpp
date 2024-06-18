@@ -390,15 +390,24 @@ TEST_CASE("locale")
 
                 REQUIRE(val == "A1");
             }
-            SECTION("left padding")
+            SECTION("right positioning (default)")
             {
                 fmt.width(5);
-                fmt.setf(ios_base::left);
 
                 char* last = n.put(data, fmt, '0', 161);
                 *last = 0;
 
                 REQUIRE(val == "00161");
+            }
+            SECTION("left positioning")
+            {
+                fmt.width(5);
+                fmt.setf(ios_base::left, ios_base::adjustfield);
+
+                char* last = n.put(data, fmt, '*', 161);
+                *last = 0;
+
+                REQUIRE(val == "161**");
             }
         }
         SECTION("floating point")

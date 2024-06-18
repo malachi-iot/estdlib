@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ios.h"
+#include "ostream/integer.h"
 
 namespace estd { namespace detail {
 
@@ -208,72 +209,4 @@ public:
 
 } // detail
 
-namespace internal {
-
-// Low level helper, hopefully gets un-inlined and saves some code space
-template <class TStreambuf, class TBase>
-void write_int_buffer(
-    detail::basic_ostream<TStreambuf, TBase>& out,
-    typename remove_cvref<TStreambuf>::type::char_type* buffer,
-    unsigned sz)
-{
-#if FEATURE_ESTD_OSTREAM_SETW
-    const streamsize pad = out.width();
-
-    out.fill_n(pad - sz);
-    out.width(0);
-#endif
-
-    out.write(buffer, sz);
 }
-
-// Internal call - write an integer of the specified base to the output stream
-// DEBT: No locale num_put available yet.
-// to_string_opt is less overhead so really we'd like to compile time choose
-// one or the other
-template <unsigned base, class Streambuf, class Base, class Numeric>
-inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<Streambuf, Base>& out, Numeric value)
-{
-    // +1 for potential - sign
-    // +0 for null terminator, none required
-    constexpr unsigned N = estd::numeric_limits<Numeric>::template length<base>::value + 1;
-    char buffer[N];
-
-    const to_chars_result result = detail::to_chars<base>(buffer, buffer + N, value);
-    const unsigned sz = &buffer[N] - result.ptr;
-
-    // DEBT: Need to check to_chars_result error code
-    //switch(result.ec)
-
-    write_int_buffer(out, result.ptr, sz);
-
-    return out;
-}
-
-template <class Streambuf, class Base, typename Int>
-detail::basic_ostream<Streambuf, Base>& out_int_helper(
-    detail::basic_ostream<Streambuf, Base>& out, Int value)
-{
-    // DEBT: another typical enum -> traits/template conversion - a framework
-    // support for that really would be useful
-    switch(out.flags() & ios_base::basefield)
-    {
-#if FEATURE_ESTD_OSTREAM_OCTAL
-        case ios_base::oct:
-            return write_int<8>(out, value);
-#endif
-
-        case ios_base::dec:
-            return write_int<10>(out, value);
-
-        case ios_base::hex:
-            return write_int<16>(out, value);
-
-        default:
-            // TODO: assert or log an error condition
-            return out;
-    }
-}
-
-
-}}

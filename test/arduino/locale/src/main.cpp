@@ -14,9 +14,9 @@ void setup()
 
 // 17JUN24 NOTE: So far num_put uses 150b less ROM on AVR.  However, width() code hasn't
 // been reworked for ostream just yet
-// USE_NUM_PUT (0) = 4086
-// USE_NUM_PUT (1) = 3918
-#define USE_NUM_PUT 1
+// USE_NUM_PUT (0) = 4144
+// USE_NUM_PUT (1) = 3890
+#define USE_NUM_PUT 0
 
 #if USE_NUM_PUT
 using num_put = internal::num_put<char, char*>;
