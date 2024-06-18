@@ -17,6 +17,15 @@ struct encodings
     };
 };
 
+// Can ASCII be upcast (or 1:1?) to specified encoding?
+constexpr bool is_ascii_compatible(encodings::values e)
+{
+    return e == encodings::ASCII ||
+        e == encodings::ISO8859_1 ||
+        e == encodings::UTF8 ||
+        e == encodings::UTF16;
+}
+
 
 }
 

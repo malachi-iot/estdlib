@@ -32,7 +32,7 @@ struct cbase_casing_base
 
     // DEBT: Something like a constexpr if to avoid ctor call altogether
     // would be better
-    constexpr cbase_casing_base(cbase_casing = CBASE_LOWER) {}
+    constexpr cbase_casing_base(cbase_casing = {}) {}
 };
 
 template <>
@@ -84,9 +84,9 @@ struct cbase_utf_base : cbase_casing_base<casing>
 
 template <typename Char, cbase_casing casing, unsigned b>
 struct cbase_utf<Char, b, casing, estd::internal::Range<b <= 10> > :
-    cbase_utf_base<Char, b, casing>
+    cbase_utf_base<Char, b, CBASE_LOWER>    // hard code to lower since doesn't matter without hex
 {
-    typedef cbase_utf_base<Char, b, casing> base_type;
+    typedef cbase_utf_base<Char, b, CBASE_LOWER> base_type;
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
 

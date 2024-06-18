@@ -40,14 +40,17 @@ constexpr unsigned get_base(const ios_base::fmtflags basefield)
         8;
 }
 
-template <class Char, class OutputIt, class Locale = classic_locale_type>
-class num_put
+template <class Char, class OutputIt, class Locale = classic_locale_type, class Enabled = void>
+class num_put;
+
+
+template <class Char, class OutputIt, class Locale>
+class num_put<Char, OutputIt, Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
 {
 public:
     typedef Char char_type;
     typedef OutputIt iter_type;
 
-    // DEBT: Decouple from cbase_utf since this is ignoring incoming Locale
     template <unsigned b>
     using cbase_type = cbase_utf<Char, b, CBASE_DYNAMIC>;
 
