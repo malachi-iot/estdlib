@@ -34,7 +34,7 @@ to_chars(CharIt first, CharIt last, Int value, unsigned base)
     typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
     return internal::to_chars_integer_opt(
         first, last, value, internal::base_provider<>(base),
-        cbase_type{});
+        cbase_type());
 }
 
 // NOTE: Consider using num_get instead in this circumstance
@@ -62,9 +62,8 @@ to_chars(CharIt first, CharIt last, Int value)
 {
     typedef typename iterator_traits<CharIt>::value_type char_type;
     typedef cbase<char_type, b, internal::classic_locale_type> cbase_type;
-    // FIX: Has c++20 glitch
     return internal::to_chars_integer_opt(
-        first, last, value, internal::base_provider<b>(), cbase_type{});
+        first, last, value, internal::base_provider<b>(), cbase_type());
 }
 
 }

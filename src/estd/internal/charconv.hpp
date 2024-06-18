@@ -109,7 +109,7 @@ to_chars_result to_chars_integer_reverse(char* first, char* last, TInt value, co
     while(current != last)
     {
         // DEBT: instance method in case its runtime casing
-        *current = cbase_type{}.to_char(value % base);
+        *current = cbase_type().to_char(value % base);
         value /= base;
 
         current++;
