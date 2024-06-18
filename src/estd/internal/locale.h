@@ -48,7 +48,7 @@ struct locale_base_base
 };
 
 
-template <internal::locale_code::values locale_code, internal::encodings::values encoding>
+template <internal::locale_code::values locale_code_, internal::encodings::values encoding_>
 struct locale : locale_base_base
 {
     struct facet
@@ -59,7 +59,11 @@ struct locale : locale_base_base
     // TODO: deviates in that standard version uses a std::string
     // I want my own std::string (beginnings of which are in experimental::layer3::string)
     // but does memory allocation out of our own GC-pool
-    const char* name() const { return internal::locale_name<locale_code, encoding>(); }
+    const char* name() const { return internal::locale_name<locale_code_, encoding_>(); }
+
+    // EXPERIMENTAL
+    static constexpr internal::locale_code::values locale_code = locale_code_;
+    static constexpr internal::encodings::values encoding = encoding_;
 };
 
 typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;

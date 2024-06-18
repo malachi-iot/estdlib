@@ -197,9 +197,10 @@ struct cbase<Char, b, internal::locale<lc, encoding>,
         encoding == internal::encodings::ASCII ||
         encoding == internal::encodings::UTF8 ||
         encoding == internal::encodings::UTF16>::type> :
-    cbase_utf<Char, b>
+    cbase_utf<Char, b, CBASE_LOWER>
 {
-
+    // EXPERIMENTAL
+    using locale_type = internal::locale<lc, encoding>;
 };
 
 template <class TChar, unsigned b, class TLocale>
