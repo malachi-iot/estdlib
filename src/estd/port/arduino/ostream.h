@@ -7,11 +7,11 @@ namespace estd {
 
 typedef estd::detail::basic_ostream<estd::arduino_ostreambuf> arduino_ostream;
 
-namespace internal {
+namespace detail {
 
-template<class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator <<(
-    basic_ostream<TStreambuf, TBase>& os, const __FlashStringHelper* rhs)
+template<class Streambuf, class Base>
+inline basic_ostream<Streambuf, Base>& operator <<(
+    basic_ostream<Streambuf, Base>& os, const __FlashStringHelper* rhs)
 {
     os.rdbuf()->underlying().print(rhs);
 

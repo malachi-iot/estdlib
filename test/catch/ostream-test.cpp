@@ -113,6 +113,16 @@ TEST_CASE("ostream")
                 REQUIRE(s[0] == ' ');
             }
         }
+        SECTION("int (hex)")
+        {
+            out.setf(ios_base::uppercase);
+
+            out << hex << 12;
+
+            auto s = out.rdbuf()->str();
+
+            REQUIRE(s[0] == 'C');
+        }
         SECTION("clock style")
         {
             // TODO: Consider time facet stuff, but mate it more to steady_clock and friends rather than

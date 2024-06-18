@@ -248,7 +248,7 @@ TEST_CASE("ios")
             _cout << str;
 
             // wrap reference to streambuf with (basically) real istream
-            internal::basic_istream<streambuf_type&> _cin(*rdbuf);
+            detail::basic_istream<streambuf_type&> _cin(*rdbuf);
 
             // pull data out, using same rdbuf as _cout
             _cin.read(localbuf, raw_str_len);

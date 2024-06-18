@@ -62,6 +62,37 @@ inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<S
 
 template <class Streambuf, class Base, typename Int>
 detail::basic_ostream<Streambuf, Base>& out_int_helper(
+    detail::basic_ostream<Streambuf, Base>& out, const Int& value)
+{
+    using char_type = typename remove_cvref<Streambuf>::type::char_type;
+    using num_put = internal::num_put<char_type, char_type*>;
+
+    // base 8 for biggest possible string
+    // +1 for potential - sign
+    // +0 for null terminator, none required
+#if FEATURE_ESTD_OSTREAM_OCTAL
+    constexpr unsigned N = estd::numeric_limits<Int>::template length<8>::value + 1;
+#else
+    constexpr unsigned N = estd::numeric_limits<Int>::template length<10>::value + 1;
+#endif
+    char_type buffer[N];
+
+    const to_chars_result result = num_put::put_integer_nofill(buffer, buffer + N, out, value);
+
+    if(result.ec == 0)
+    {
+        const unsigned sz = &buffer[N] - result.ptr;
+        write_filled_buffer(out, result.ptr, sz);
+    }
+    else
+        out.setstate(ios_base::badbit);
+
+    return out;
+}
+
+
+template <class Streambuf, class Base, typename Int>
+detail::basic_ostream<Streambuf, Base>& out_int_helper_old(
     detail::basic_ostream<Streambuf, Base>& out, Int value)
 {
     // DEBT: another typical enum -> traits/template conversion - a framework

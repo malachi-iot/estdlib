@@ -35,17 +35,9 @@ class basic_iostream;
     
 namespace internal {
 
-// Sorry c++03, for you this is a breaking change
-#if __cpp_alias_templates
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
-using basic_ostream = detail::basic_ostream<TStreambuf, TBase>;
-
-template <class TStreambuf, class TBase = basic_ios<TStreambuf> >
-using basic_istream = detail::basic_istream<TStreambuf, TBase>;
-
-#endif
-
 // For our non-standard << overload which takes a functor
+// NOTE: Works great, it's time to put him into 'detail' or a special 'detail::tag'
+// namespace
 struct ostream_functor_tag {};
 
 }
