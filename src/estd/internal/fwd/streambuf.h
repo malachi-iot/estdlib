@@ -3,7 +3,7 @@
 // DEBT: Do a proper forward for char_traits -- at the moment we can't due to a possible 'using' scenario
 #include "../../traits/char_traits.h"
 #include "../feature/streambuf.h"
-#include "string.h"     // Only for CharTraits concept
+#include "string.h"     // NOLINT Only for CharTraits concept
 
 #if __cpp_lib_concepts
 #include <concepts>

@@ -5,10 +5,10 @@
 
 namespace estd {
 
-template <class TState>
+template <class State>
 class fpos;
 
-template<class TStreambuf>
+template<class Streambuf>
 class istreambuf_iterator;
 
 

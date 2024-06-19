@@ -69,7 +69,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
     using policy = typename Base::policy_type;
     using locale_type = typename policy::locale_type;
     using char_type = typename remove_cvref<Streambuf>::type::char_type;
-    using num_put = internal::integer_put<locale_type>;
+    using num_put = internal::integer_put<locale_type, policy::cbase_policy>;
 
     // base 8 for biggest possible string
     // +1 for potential - sign

@@ -19,14 +19,25 @@ namespace internal {
 template<bool>
 struct Range;
 
-enum cbase_casing
+enum cbase_policies
 {
-    CBASE_LOWER,    // fixed lower case
-    CBASE_UPPER,    // fixed upper case
-    CBASE_DYNAMIC   // runtime selectable
+    CBASE_POLICY_CASE_DYNAMIC = 0,  // runtime selectable uppercase or lowercase
+    CBASE_POLICY_CASE_LOWER,  // fixed lower case
+    CBASE_POLICY_CASE_UPPER,  // fixed upper case
+
+    CBASE_POLICY_CASE_MASK = 0x03,
+
+    // If true, treats all int -> string conversions with hex capability.
+    // Can save ROM space in scenarios where both hex and non-hex conversions are used
+    // Incurs slight performance penalty for non-hex conversions
+    CBASE_POLICY_HEX_ALWAYS = 0x04,
+
+    CBASE_POLICY_DEFAULT = CBASE_POLICY_CASE_DYNAMIC,
 };
 
-template <typename Char, unsigned b, cbase_casing casing = CBASE_LOWER, typename = estd::internal::Range<true> >
+using cbase_casing = cbase_policies;
+
+template <typename Char, unsigned b, cbase_policies policy, typename = estd::internal::Range<true> >
 struct cbase_utf;
 
 template <typename Char, unsigned b, class Locale, typename Enabled = void>

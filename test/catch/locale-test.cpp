@@ -431,6 +431,37 @@ TEST_CASE("locale")
                 //REQUIRE(val == "0.01");
             }
         }
+        SECTION("supporting integer_put")
+        {
+            char data[16];
+
+            // policy enforcement is a compile time feature/optimization
+
+            SECTION("lowercase only policy")
+            {
+                fmt.setf(ios_base::uppercase | ios_base::hex, ios_base::basefield);
+
+                internal::integer_put<internal::classic_locale_type,
+                    internal::CBASE_POLICY_CASE_LOWER> p;
+
+                to_chars_result r = p.to_chars(data, data + 15, fmt, 0xAB);
+
+                REQUIRE(r.ptr[0] == 'a');
+                REQUIRE(r.ptr[1] == 'b');
+            }
+            SECTION("hex always policy")
+            {
+                // NOTE: Not really easily testable since outputs are identical
+
+                internal::integer_put<internal::classic_locale_type,
+                    internal::CBASE_POLICY_HEX_ALWAYS> p;
+
+                to_chars_result r = p.to_chars(data, data + 15, fmt, 12);
+
+                REQUIRE(r.ptr[0] == '1');
+                REQUIRE(r.ptr[1] == '2');
+            }
+        }
     }
     SECTION("cbase")
     {

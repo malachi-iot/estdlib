@@ -120,6 +120,8 @@ struct ios_base_policy :
     {
         return flags & estd::internal::stream_flags::block_mask;
     }
+
+    static constexpr cbase_policies cbase_policy = CBASE_POLICY_DEFAULT;
 };
 
 }

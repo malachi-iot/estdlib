@@ -2,6 +2,7 @@
 
 #include "stream_flags.h"
 #include "fwd/streambuf.h"
+#include "locale/fwd.h"
 
 namespace estd {
 

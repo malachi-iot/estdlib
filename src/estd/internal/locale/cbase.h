@@ -29,7 +29,7 @@ namespace estd {
 
 namespace internal {
 
-template <typename Char, unsigned b, cbase_casing>
+template <typename Char, unsigned b, cbase_policies>
 struct cbase_utf_base;
 
 template <typename Char>
@@ -39,7 +39,7 @@ struct cbase_set {};
 // NOTE: Only works for ASCII compatible scenarios.  Not DEBT because:
 // a) what useful scenarios use hex that aren't ASCII compatible?  EBCDIC etc. don't seem to make the grade
 // b) feels like FEATURE_ESTD_CBASE_ARRAY will displace the character math flavor for hex conversions anyway
-template <cbase_casing c>
+template <cbase_policies c>
 struct cbase_casing_base
 {
     static constexpr cbase_casing casing() { return c; }
@@ -51,20 +51,23 @@ struct cbase_casing_base
     // Upper or lower case A, depending on configuration
     constexpr char a_char() const
     {
-        return c == CBASE_UPPER ? 'A' : 'a';
+        return c == CBASE_POLICY_CASE_UPPER ? 'A' : 'a';
     }
 
 };
 
 template <>
-struct cbase_casing_base<CBASE_DYNAMIC>
+struct cbase_casing_base<CBASE_POLICY_CASE_DYNAMIC>
 {
     char a_char_;
 
-    constexpr cbase_casing casing() const { return a_char_ == 'A' ? CBASE_UPPER : CBASE_LOWER; }
+    constexpr cbase_policies casing() const
+    {
+        return a_char_ == 'A' ? CBASE_POLICY_CASE_UPPER : CBASE_POLICY_CASE_LOWER;
+    }
 
-    constexpr cbase_casing_base(cbase_casing c = CBASE_LOWER) :
-        a_char_{c == CBASE_UPPER ? 'A' : 'a'}
+    explicit constexpr cbase_casing_base(cbase_casing c = CBASE_POLICY_CASE_LOWER) :
+        a_char_{c == CBASE_POLICY_CASE_UPPER ? 'A' : 'a'}
     {}
 
     constexpr char a_char() const
@@ -91,11 +94,11 @@ struct cbase_set<char>
 };
 
 
-template <typename Char, unsigned b, cbase_casing casing>
-struct cbase_utf_base : cbase_casing_base<casing>,
+template <typename Char, unsigned b, cbase_policies policy>
+struct cbase_utf_base : cbase_casing_base<policy>,
     cbase_set<Char>
 {
-    using base_type = cbase_casing_base<casing>;
+    using base_type = cbase_casing_base<policy>;
     using char_type = Char;
 
     typedef int16_t int_type;
@@ -120,11 +123,11 @@ struct cbase_utf_base : cbase_casing_base<casing>,
     ESTD_CPP_FORWARDING_CTOR(cbase_utf_base)
 };
 
-template <typename Char, cbase_casing casing, unsigned b>
-struct cbase_utf<Char, b, casing, estd::internal::Range<b <= 10> > :
-    cbase_utf_base<Char, b, CBASE_LOWER>    // hard code to lower since doesn't matter without hex
+template <typename Char, cbase_policies policy, unsigned b>
+struct cbase_utf<Char, b, policy, estd::internal::Range<b <= 10> > :
+    cbase_utf_base<Char, b, CBASE_POLICY_CASE_LOWER>    // hard code to lower since doesn't matter without hex
 {
-    typedef cbase_utf_base<Char, b, CBASE_LOWER> base_type;
+    typedef cbase_utf_base<Char, b, CBASE_POLICY_CASE_LOWER> base_type;
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
 
@@ -167,11 +170,11 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<b <= 10> > :
 // have specialized on b directly.
 // On the other hand, there is a convenience here in that consumers knowing at compile time
 // what base they are using can auto-feed 'base' to things like 'from_chars_integer'.
-template <typename Char, cbase_casing casing, unsigned b>
-struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
-    cbase_utf_base<Char, b, casing>
+template <typename Char, cbase_policies policy, unsigned b>
+struct cbase_utf<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
+    cbase_utf_base<Char, b, policy>
 {
-    typedef cbase_utf_base<Char, b, casing> base_type;
+    typedef cbase_utf_base<Char, b, policy> base_type;
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
 
@@ -247,7 +250,7 @@ struct cbase<Char, b, internal::locale<lc, encoding>,
         encoding == internal::encodings::ASCII ||
         encoding == internal::encodings::UTF8 ||
         encoding == internal::encodings::UTF16>::type> :
-    cbase_utf<Char, b, CBASE_LOWER>
+    cbase_utf<Char, b, CBASE_POLICY_CASE_LOWER>
 {
     // EXPERIMENTAL
     using locale_type = internal::locale<lc, encoding>;

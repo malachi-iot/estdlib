@@ -41,12 +41,14 @@ constexpr unsigned get_base(const ios_base::fmtflags basefield)
 }
 
 // Integer core of num_put, no fill/width padding
-template <class Locale = classic_locale_type, class Enabled = void>
+template <class Locale = classic_locale_type,
+    cbase_policies policy = cbase_policies::CBASE_POLICY_DEFAULT,
+    class Enabled = void>
 class integer_put;
 
 
-template <class Locale>
-class integer_put<Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
+template <class Locale, cbase_policies policy>
+class integer_put<Locale, policy, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
 {
 public:
     /// Low level integer -> string call.  Be mindful, uses to_char_opt so
@@ -59,7 +61,7 @@ public:
     /// @param value
     /// @return
     template <class OutputIt, class T>
-    static to_chars_result to_chars(OutputIt first, OutputIt last,
+    static detail::to_chars_result<OutputIt> to_chars(OutputIt first, OutputIt last,
         const ios_base& str,
         const T& value)
     {
@@ -67,11 +69,14 @@ public:
         using char_type = typename iterator_traits<iter_type>::value_type;
         const unsigned base = get_base(str.flags() & ios_base::basefield);
 
-        if(base <= 10)
+        if(base <= 10 &&
+            cbase_policies(policy & cbase_policies::CBASE_POLICY_HEX_ALWAYS) == 0)
         {
             return internal::to_chars_integer_opt(
                 first, last, value, internal::base_provider<>(base),
-                cbase_utf<char_type, 10>{});
+                // NOTE: lowercase policy doesn't matter and is just a placeholder
+                // for base10 and lower
+                cbase_utf<char_type, 10, CBASE_POLICY_CASE_LOWER>{});
         }
         else
         {
@@ -79,14 +84,16 @@ public:
 
             return internal::to_chars_integer_opt(
                 first, last, value, internal::base_provider<>(base),
-                cbase_utf<char_type, 36, CBASE_DYNAMIC>(uppercase ? CBASE_UPPER : CBASE_LOWER));
+                cbase_utf<char_type, 36,
+                    cbase_policies(policy & cbase_policies::CBASE_POLICY_CASE_MASK)>(
+                    uppercase ? CBASE_POLICY_CASE_UPPER : CBASE_POLICY_CASE_LOWER));
         }
     }
 };
 
 // Fallback for non ASCII systems.  Untested, and doesn't support hex
-template <class Locale>
-class integer_put<Locale, estd::enable_if_t<!is_ascii_compatible(Locale::encoding)> >
+template <class Locale, cbase_policies policy>
+class integer_put<Locale, policy, estd::enable_if_t<!is_ascii_compatible(Locale::encoding)> >
 {
 public:
     template <class OutputIt, class T>
