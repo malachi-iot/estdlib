@@ -41,36 +41,37 @@ constexpr unsigned get_base(const ios_base::fmtflags basefield)
 }
 
 // Integer core of num_put, no fill/width padding
-template <class Char, class OutputIt, class Locale = classic_locale_type, class Enabled = void>
+template <class Locale = classic_locale_type, class Enabled = void>
 class integer_put;
 
 
-template <class Char, class OutputIt, class Locale>
-class integer_put<Char, OutputIt, Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
+template <class Locale>
+class integer_put<Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
 {
 public:
-    typedef Char char_type;
-    typedef OutputIt iter_type;
-
-    template <unsigned b>
-    using cbase_type = cbase_utf<Char, b, CBASE_DYNAMIC>;
-
-    // DEBT: Low level helper - not too problematic, just clumsy name and location
-    // leverages our cbase awareness.  Beware! uses _opt variety meaning that
-    // *start* of str is at to_chars_result::ptr
-    template <class T>
-    static to_chars_result to_chars(iter_type first, iter_type last,
+    /// Low level integer -> string call.  Be mindful, uses to_char_opt so
+    /// result.ptr is non standard in its behavior
+    /// @tparam OutputIt
+    /// @tparam T
+    /// @param first
+    /// @param last
+    /// @param str
+    /// @param value
+    /// @return
+    template <class OutputIt, class T>
+    static to_chars_result to_chars(OutputIt first, OutputIt last,
         const ios_base& str,
         const T& value)
     {
-        //using char_type2 = typename iterator_traits<iter_type>::value_type;
+        using iter_type = OutputIt;
+        using char_type = typename iterator_traits<iter_type>::value_type;
         const unsigned base = get_base(str.flags() & ios_base::basefield);
 
         if(base <= 10)
         {
             return internal::to_chars_integer_opt(
                 first, last, value, internal::base_provider<>(base),
-                cbase_type<10>{});
+                cbase_utf<char_type, 10>{});
         }
         else
         {
@@ -78,7 +79,7 @@ public:
 
             return internal::to_chars_integer_opt(
                 first, last, value, internal::base_provider<>(base),
-                cbase_type<36>(uppercase ? CBASE_UPPER : CBASE_LOWER));
+                cbase_utf<char_type, 36, CBASE_DYNAMIC>(uppercase ? CBASE_UPPER : CBASE_LOWER));
         }
     }
 };
@@ -112,7 +113,7 @@ private:
         // No extra space for null terminator, to_chars_opt gives us start/end ptrs
         char_type buffer[N];
 
-        using helper = internal::integer_put<char_type, iter_type, Locale>;
+        using helper = internal::integer_put<Locale>;
 
         to_chars_result result = helper::to_chars(buffer, buffer + N, str, value);
 
