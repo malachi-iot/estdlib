@@ -10,6 +10,11 @@
 #include "../deduce_fixed_size.h"
 #include "../cctype.h"
 
+#if __AVR__
+#include "../../exp/pgm/fwd.h"
+//#include "../../exp/pgm/array.h"
+#endif
+
 // TODO: A future task.  Japanese character set has 3 different (at least) sets of numerals:
 // 1.  Regular ASCII style
 // 2.  Kanji style
@@ -54,9 +59,12 @@ struct cbase_casing_base<CBASE_DYNAMIC>
 template <>
 struct cbase_set<char>
 {
+#if __AVR__
+#else
     // EXPERIMENTAL
     static constexpr char lset[] = "0123456789abcdef";
     static constexpr char uset[] = "0123456789ABCDEF";
+#endif
 };
 
 

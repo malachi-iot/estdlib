@@ -1,0 +1,3 @@
+#!/bin/sh
+
+simavr -m atmega328p -f 16 .pio/build/simavr/firmware.elf
