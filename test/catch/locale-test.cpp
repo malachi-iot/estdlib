@@ -357,7 +357,7 @@ TEST_CASE("locale")
     {
         layer1::string<64> val;
         ios_base fmt;
-        internal::num_put<char, char*> n;
+        num_put<char, char*> n;
 
         SECTION("bool")
         {

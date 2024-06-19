@@ -40,12 +40,13 @@ constexpr unsigned get_base(const ios_base::fmtflags basefield)
         8;
 }
 
+// Integer core of num_put, no fill/width padding
 template <class Char, class OutputIt, class Locale = classic_locale_type, class Enabled = void>
-class num_put;
+class integer_put;
 
 
 template <class Char, class OutputIt, class Locale>
-class num_put<Char, OutputIt, Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
+class integer_put<Char, OutputIt, Locale, estd::enable_if_t<is_ascii_compatible(Locale::encoding)> >
 {
 public:
     typedef Char char_type;
@@ -58,10 +59,11 @@ public:
     // leverages our cbase awareness.  Beware! uses _opt variety meaning that
     // *start* of str is at to_chars_result::ptr
     template <class T>
-    static to_chars_result put_integer_nofill(iter_type first, iter_type last,
+    static to_chars_result to_chars(iter_type first, iter_type last,
         const ios_base& str,
         const T& value)
     {
+        //using char_type2 = typename iterator_traits<iter_type>::value_type;
         const unsigned base = get_base(str.flags() & ios_base::basefield);
 
         if(base <= 10)
@@ -79,7 +81,19 @@ public:
                 cbase_type<36>(uppercase ? CBASE_UPPER : CBASE_LOWER));
         }
     }
+};
 
+}
+
+template <class Char, class OutputIt, class Locale = internal::classic_locale_type>
+class num_put;
+
+template <class Char, class OutputIt, class Locale>
+class num_put
+{
+public:
+    typedef Char char_type;
+    typedef OutputIt iter_type;
 
 private:
     template <class T>
@@ -95,12 +109,12 @@ private:
         constexpr unsigned N = estd::numeric_limits<T>::template length<10>::value + 1;
 #endif
 
-        //const unsigned base = get_base(str.flags() & ios_base::basefield);
-
         // No extra space for null terminator, to_chars_opt gives us start/end ptrs
         char_type buffer[N];
 
-        to_chars_result result = put_integer_nofill(buffer, buffer + N, str, value);
+        using helper = internal::integer_put<char_type, iter_type, Locale>;
+
+        to_chars_result result = helper::to_chars(buffer, buffer + N, str, value);
 
         unsigned width = str.width();
         const unsigned result_width = buffer + N - result.ptr;
@@ -155,7 +169,6 @@ public:
         {
             using cb = cbase<char_type, 2, Locale>;
             *out++ = cb::to_char(value);
-            return ++out;
         }
 
         return out;
@@ -182,5 +195,5 @@ public:
     }
 };
 
-}
+
 }

@@ -27,6 +27,7 @@ void write_filled_buffer(
 #endif
 }
 
+#if UNUSED
 // Internal call - write an integer of the specified base to the output stream
 // DEBT: No locale num_put available yet.
 // to_string_opt is less overhead so really we'd like to compile time choose
@@ -59,13 +60,16 @@ inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<S
 
     return out;
 }
+#endif
 
 template <class Streambuf, class Base, typename Int>
 detail::basic_ostream<Streambuf, Base>& out_int_helper(
     detail::basic_ostream<Streambuf, Base>& out, const Int& value)
 {
+    using policy = typename Base::policy_type;
+    using locale_type = typename policy::locale_type;
     using char_type = typename remove_cvref<Streambuf>::type::char_type;
-    using num_put = internal::num_put<char_type, char_type*>;
+    using num_put = internal::integer_put<char_type, char_type*, locale_type>;
 
     // base 8 for biggest possible string
     // +1 for potential - sign
@@ -77,7 +81,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
 #endif
     char_type buffer[N];
 
-    const to_chars_result result = num_put::put_integer_nofill(buffer, buffer + N, out, value);
+    const to_chars_result result = num_put::to_chars(buffer, buffer + N, out, value);
 
     if(result.ec == 0)
     {
@@ -90,7 +94,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
     return out;
 }
 
-
+#if UNUSED
 template <class Streambuf, class Base, typename Int>
 detail::basic_ostream<Streambuf, Base>& out_int_helper_old(
     detail::basic_ostream<Streambuf, Base>& out, Int value)
@@ -115,7 +119,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper_old(
             return out;
     }
 }
-
+#endif
 }
 
 }
