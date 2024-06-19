@@ -10,6 +10,11 @@
 
 namespace estd { namespace internal {
 
+
+#if FEATURE_ESTD_CBASE_ARRAY && __AVR__
+constexpr estd::v0::pgm_array<char, 16> cbase_set<char>::lset;
+#endif
+
 #if FEATURE_ESTD_STRING_LEGACY_VALIDATION
 
 const char VALIDATE_NULLSTR_ERROR[] PROGMEM = "Null String";

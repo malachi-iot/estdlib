@@ -11,9 +11,11 @@
 #include "../cctype.h"
 
 #if __AVR__
-#include "../../exp/pgm/fwd.h"
-//#include "../../exp/pgm/array.h"
+#include "../../exp/pgm/array.h"
 #endif
+
+// EXPERIMENTAL
+#define FEATURE_ESTD_CBASE_ARRAY 0
 
 // TODO: A future task.  Japanese character set has 3 different (at least) sets of numerals:
 // 1.  Regular ASCII style
@@ -56,12 +58,17 @@ struct cbase_casing_base<CBASE_DYNAMIC>
 };
 
 
+// EXPERIMENTAL
 template <>
 struct cbase_set<char>
 {
 #if __AVR__
+    static constexpr estd::v0::pgm_array<char, 16> lset PROGMEM
+    {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'a', 'b', 'c', 'd', 'e', 'f'
+    };
 #else
-    // EXPERIMENTAL
     static constexpr char lset[] = "0123456789abcdef";
     static constexpr char uset[] = "0123456789ABCDEF";
 #endif
@@ -211,9 +218,13 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v) const
     {
+#if FEATURE_ESTD_CBASE_ARRAY
+        return base_type::lset[v];
+#else
         return v < 10 ?
             ('0' + v) :
             base_type::a_char() + (v - 10);
+#endif
     }
 };
 

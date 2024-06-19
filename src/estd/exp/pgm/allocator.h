@@ -6,7 +6,6 @@
 #include <estd/internal/dynamic_array.h>
 #include <estd/internal/container/locking_accessor.h>
 #include <estd/internal/container/iterator.h>
-#include "../../string.h"
 
 #include "accessor.h"
 

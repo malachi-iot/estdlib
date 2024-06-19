@@ -19,7 +19,7 @@ void setup()
 // USE_NUM_PUT (0) = 4106
 // USE_NUM_PUT (1) = 3890
 // atmega32u4, USE_WIDTH=1
-// USE_NUM_PUT (0) = 4118
+// USE_NUM_PUT (0) = 4130
 // USE_NUM_PUT (1) = 3988
 #define USE_NUM_PUT 1
 #define USE_WIDTH 1
@@ -46,6 +46,7 @@ void loop()
 #else
 #if USE_WIDTH
     cout.width(4);
+    cout.fill('0');
 #endif
     cout.setf(ios_base::hex | ios_base::uppercase, ios_base::basefield);
     cout << F("Hello World: ") << ++counter << estd::endl;
