@@ -1,3 +1,4 @@
 #!/bin/sh
 
-simavr -m atmega328p -f 16 .pio/build/simavr/firmware.elf
+# DEBT: No matter what I specify, delay(1000) is about ~400ms
+simavr -m atmega328p -f 16000000 .pio/build/simavr/firmware.elf
