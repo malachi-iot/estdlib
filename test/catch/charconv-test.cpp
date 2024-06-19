@@ -109,9 +109,15 @@ TEST_CASE("charconv")
             {
                 const char *src = "FF";
                 int value = 0;
-                from_chars_integer<16>(src, src + 4, value);
+                from_chars_integer<16>(src, src + 2, value);
 
                 REQUIRE(value == 255);
+
+                const char* src2 = "ab";
+
+                from_chars_integer<16>(src2, src2 + 2, value);
+
+                REQUIRE(value == 0xAB);
             }
         }
         SECTION("various types")

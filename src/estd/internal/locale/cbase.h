@@ -154,12 +154,18 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
 
     static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
     {
-        return 'A' <= c && c <= ('A' + (char_type)(_base - 11));
+        return 'A' <= c && c <= ('A' + char_type(_base - 11));
+    }
+
+    // upper or lower - untested
+    static constexpr bool isalpha(char_type c, const unsigned _base)
+    {
+        return isupper(c & ~0x20, _base);
     }
 
     static ESTD_CPP_CONSTEXPR_RET bool islower(char_type c, const unsigned _base = b)
     {
-        return 'a' <= c && c <= ('a' + (char_type)(_base - 11));
+        return 'a' <= c && c <= ('a' + char_type(_base - 11));
     }
 
     static inline CONSTEXPR bool is_in_base(char_type c, const unsigned _base = b)
@@ -176,9 +182,11 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
         // DEBT: We really want to consider ctype's isdigit, toupper and islower here
         if (estd::internal::ascii_isdigit(c)) return c - '0';
 
+        c &= ~0x20;     // Turns lowercase to upper
+
         if (isupper(c, _base)) return c - 'A' + 10;
 
-        if (islower(c, _base)) return c - 'a' + 10;
+        //if (islower(c, _base)) return c - 'a' + 10;
 
         return estd::nullopt;
     }
