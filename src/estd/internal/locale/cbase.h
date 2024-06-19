@@ -35,6 +35,10 @@ struct cbase_utf_base;
 template <typename Char>
 struct cbase_set {};
 
+// Hex converter assist
+// NOTE: Only works for ASCII compatible scenarios.  Not DEBT because:
+// a) what useful scenarios use hex that aren't ASCII compatible?  EBCDIC etc. don't seem to make the grade
+// b) feels like FEATURE_ESTD_CBASE_ARRAY will displace the character math flavor for hex conversions anyway
 template <cbase_casing c>
 struct cbase_casing_base
 {
@@ -43,18 +47,30 @@ struct cbase_casing_base
     // DEBT: Something like a constexpr if to avoid ctor call altogether
     // would be better
     constexpr cbase_casing_base(cbase_casing = {}) {}
+
+    // Upper or lower case A, depending on configuration
+    constexpr char a_char() const
+    {
+        return c == CBASE_UPPER ? 'A' : 'a';
+    }
+
 };
 
 template <>
 struct cbase_casing_base<CBASE_DYNAMIC>
 {
-    cbase_casing c;
+    char a_char_;
 
-    constexpr cbase_casing casing() const { return c; }
+    constexpr cbase_casing casing() const { return a_char_ == 'A' ? CBASE_UPPER : CBASE_LOWER; }
 
     constexpr cbase_casing_base(cbase_casing c = CBASE_LOWER) :
-        c{c}
+        a_char_{c == CBASE_UPPER ? 'A' : 'a'}
     {}
+
+    constexpr char a_char() const
+    {
+        return a_char_;
+    }
 };
 
 
@@ -81,12 +97,6 @@ struct cbase_utf_base : cbase_casing_base<casing>,
 {
     using base_type = cbase_casing_base<casing>;
     using char_type = Char;
-
-    // Upper or lower case A, depending on configuration
-    constexpr char_type a_char() const
-    {
-        return char_type(base_type::casing() == CBASE_UPPER ? 'A' : 'a');
-    }
 
     typedef int16_t int_type;
 
@@ -223,7 +233,7 @@ struct cbase_utf<Char, b, casing, estd::internal::Range<(b > 10 && b <= 36)> > :
 #else
         return v < 10 ?
             ('0' + v) :
-            base_type::a_char() + (v - 10);
+            char_type(base_type::a_char()) + (v - 10);
 #endif
     }
 };

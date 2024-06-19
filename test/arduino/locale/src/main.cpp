@@ -16,10 +16,10 @@ void setup()
 // it's fatter, the price (I thought) was already paid.  It makes sense
 // optimizer would have easier time with isolated num_put, though
 // atmega32u4, USE_WIDTH=0
-// USE_NUM_PUT (0) = 4106
+// USE_NUM_PUT (0) = 4102
 // USE_NUM_PUT (1) = 3890
 // atmega32u4, USE_WIDTH=1
-// USE_NUM_PUT (0) = 4130
+// USE_NUM_PUT (0) = 4126
 // USE_NUM_PUT (1) = 3988
 #define USE_NUM_PUT 1
 #define USE_WIDTH 1
