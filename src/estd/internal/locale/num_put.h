@@ -84,6 +84,26 @@ public:
     }
 };
 
+// Fallback for non ASCII systems.  Untested, and doesn't support hex
+template <class Locale>
+class integer_put<Locale, estd::enable_if_t<!is_ascii_compatible(Locale::encoding)> >
+{
+public:
+    template <class OutputIt, class T>
+    static to_chars_result to_chars(OutputIt first, OutputIt last,
+        const ios_base& str,
+        const T& value)
+    {
+        using iter_type = OutputIt;
+        using char_type = typename iterator_traits<iter_type>::value_type;
+        const unsigned base = get_base(str.flags() & ios_base::basefield);
+
+        return internal::to_chars_integer_opt(
+            first, last, value, internal::base_provider<>(base),
+            cbase<char_type, 10, Locale>{});
+    }
+};
+
 }
 
 template <class Char, class OutputIt, class Locale = internal::classic_locale_type>

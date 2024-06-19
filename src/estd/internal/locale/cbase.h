@@ -25,6 +25,9 @@ namespace internal {
 template <typename Char, unsigned b, cbase_casing>
 struct cbase_utf_base;
 
+template <typename Char>
+struct cbase_set {};
+
 template <cbase_casing c>
 struct cbase_casing_base
 {
@@ -48,8 +51,18 @@ struct cbase_casing_base<CBASE_DYNAMIC>
 };
 
 
+template <>
+struct cbase_set<char>
+{
+    // EXPERIMENTAL
+    static constexpr char lset[] = "0123456789abcdef";
+    static constexpr char uset[] = "0123456789ABCDEF";
+};
+
+
 template <typename Char, unsigned b, cbase_casing casing>
-struct cbase_utf_base : cbase_casing_base<casing>
+struct cbase_utf_base : cbase_casing_base<casing>,
+    cbase_set<Char>
 {
     using base_type = cbase_casing_base<casing>;
     using char_type = Char;

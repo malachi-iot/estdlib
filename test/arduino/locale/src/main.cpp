@@ -12,15 +12,9 @@ void setup()
     Serial.begin(115200);
 }
 
-// 17JUN24 NOTE: So far num_put uses 150b less ROM on AVR.  However, width() code hasn't
-// been reworked for ostream just yet
-// USE_NUM_PUT (0) = 4144
+// USE_NUM_PUT (0) = 4094
 // USE_NUM_PUT (1) = 3890
-#define USE_NUM_PUT 0
-
-#if USE_NUM_PUT
-using num_put = internal::num_put<char, char*>;
-#endif
+#define USE_NUM_PUT 1
 
 void loop()
 {
@@ -34,7 +28,7 @@ void loop()
     char val[32];
     char* last;
 
-    last = num_put::put(val, fmt, ' ', ++counter);
+    last = estd::num_put<char, char*>::put(val, fmt, ' ', ++counter);
     *last = 0;
 
     cout << F("Hello World: ") << val << estd::endl;
