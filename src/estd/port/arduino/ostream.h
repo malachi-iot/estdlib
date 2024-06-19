@@ -5,7 +5,7 @@
 
 namespace estd {
 
-typedef estd::detail::basic_ostream<estd::arduino_ostreambuf> arduino_ostream;
+using arduino_ostream = estd::detail::basic_ostream<estd::arduino_ostreambuf>;
 
 namespace detail {
 

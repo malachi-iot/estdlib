@@ -16,14 +16,14 @@ protected:
 
     ArduinoStream* const print;
 
-    arduino_streambuf_base(ArduinoStream* print) : print(print) {}
+    constexpr arduino_streambuf_base(ArduinoStream* print) : print(print) {}
 };
 
 // This lets you do things with just a raw 'Print' type
-template <class TTraits, class TBase = arduino_streambuf_base<TTraits, Print> >
-class arduino_ostreambuf : public TBase 
+template <class Traits, class Base = arduino_streambuf_base<Traits, Print> >
+class arduino_ostreambuf : public Base 
 {
-    typedef TBase base_type;
+    typedef Base base_type;
 
 public:
     typedef typename base_type::traits_type traits_type;
@@ -31,7 +31,7 @@ public:
     typedef typename traits_type::char_type char_type;
     typedef typename traits_type::int_type int_type;
 
-    arduino_ostreambuf(stream_type& print) : base_type(&print) {}
+    constexpr arduino_ostreambuf(stream_type& print) : base_type(&print) {}
 
     Print& underlying() const { return *this->print; }
 

@@ -19,7 +19,7 @@ namespace internal {
 template<bool>
 struct Range;
 
-enum cbase_policies
+enum cbase_policies : unsigned
 {
     CBASE_POLICY_CASE_DYNAMIC = 0,  // runtime selectable uppercase or lowercase
     CBASE_POLICY_CASE_LOWER,  // fixed lower case

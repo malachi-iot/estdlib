@@ -12,6 +12,12 @@ template <class Streambuf,
         estd::internal::stream_flags::flag_type flags = estd::internal::stream_flags::_default>
 struct ios_base_policy;
 
+// eventually, depending on layering, we will use a pointer to a streambuf or an actual
+// value of streambuf itself
+template <class Streambuf, bool use_pointer>
+class basic_ios_base;
+
+
 template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Streambuf, bool use_pointer = false,
         class Policy = ios_base_policy<Streambuf> >
 class basic_ios;

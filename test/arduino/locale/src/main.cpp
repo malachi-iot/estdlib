@@ -3,9 +3,24 @@
 #include <estd/ostream.h>
 #include <estd/locale.h>
 
-static estd::arduino_ostream cout(Serial);
+#define USE_ALT_POLICY 1
 
 using namespace estd;
+
+#if USE_ALT_POLICY
+struct alt_policy : internal::ios_base_policy<arduino_streambuf>
+{
+    using cbase_policies = internal::cbase_policies;
+
+    static constexpr cbase_policies cbase_policy =
+        cbase_policies(cbase_policies::CBASE_POLICY_CASE_UPPER | cbase_policies::CBASE_POLICY_HEX_ALWAYS);
+};
+
+static detail::basic_ostream<arduino_ostreambuf,
+    internal::basic_ios<arduino_ostreambuf, false, alt_policy> > cout(Serial);
+#else
+static arduino_ostream cout(Serial);
+#endif
 
 void setup()
 {

@@ -53,11 +53,6 @@ struct is_do_timeout_tag_present<T, typename has_typedef<typename T::do_timeout_
 
 namespace internal {
 
-// eventually, depending on layering, we will use a pointer to a streambuf or an actual
-// value of streambuf itself
-template <class TStreambuf, bool use_pointer>
-class basic_ios_base;
-
 template <class Streambuf>
 class basic_ios_base<Streambuf, true> : public ios_base
 {
@@ -162,22 +157,22 @@ public:
 
 
 // See iosfwd for default values
-template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) TStreambuf, bool use_pointer, class TPolicy>
-class basic_ios : public basic_ios_base<TStreambuf, use_pointer>,
-    estd::internal::struct_evaporator<TPolicy>,
-    estd::internal::struct_evaporator<typename TPolicy::locale_type>
+template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Streambuf, bool use_pointer, class Policy>
+class basic_ios : public basic_ios_base<Streambuf, use_pointer>,
+    estd::internal::struct_evaporator<Policy>,
+    estd::internal::struct_evaporator<typename Policy::locale_type>
 {
 public:
-    typedef basic_ios_base<TStreambuf, use_pointer> base_type;
+    typedef basic_ios_base<Streambuf, use_pointer> base_type;
     typedef typename base_type::streambuf_type streambuf_type;
     typedef typename streambuf_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
 
-    typedef TPolicy policy_type;
+    typedef Policy policy_type;
     typedef typename policy_type::locale_type locale_type;
     typedef typename policy_type::blocking_type blocking_type;
 
-    typedef typename estd::internal::struct_evaporator<TPolicy> policy_provider_type;
+    typedef typename estd::internal::struct_evaporator<Policy> policy_provider_type;
     typedef typename policy_provider_type::evaporated_type evaporated_policy_type;
     typedef typename estd::internal::struct_evaporator<locale_type> locale_provider_type;
 
