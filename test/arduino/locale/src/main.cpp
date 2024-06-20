@@ -7,15 +7,14 @@
 
 using namespace estd;
 
-template <class Streambuf, template <class> class Policy>
+template <class Streambuf, template <class, class> class Policy, class Locale = internal::default_locale>
 using basic_ostream_with_policy =
     detail::basic_ostream<Streambuf,
-        internal::basic_ios<Streambuf, false, Policy<Streambuf> > >;
+        internal::basic_ios<Streambuf, false, Policy<Streambuf, Locale> > >;
 
 #if USE_ALT_POLICY
-template <class Streambuf = arduino_ostreambuf>
-    //class Locale = internal::classic_locale_type>
-struct alt_policy : internal::ios_base_policy<Streambuf>
+template <class Streambuf, class Locale>
+struct alt_policy : internal::ios_base_policy<Streambuf, Locale>
 {
     using cbase_policies = internal::cbase_policies;
 
