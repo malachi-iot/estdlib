@@ -55,15 +55,15 @@ public:
 // To do input, we are able to include output stream smarts for zero cost.
 // Therefore, there is no need for arduino_istreambuf.  We can combine into
 // a std-natural normal i/o streambuf
-template <class TTraits>
-class arduino_streambuf : public arduino_ostreambuf<TTraits, 
-    arduino_streambuf_base<TTraits, Stream> >,
+template <class Traits>
+class arduino_streambuf : public arduino_ostreambuf<Traits, 
+    arduino_streambuf_base<Traits, Stream> >,
 #if FEATURE_ARDUINO_STREAM_PEEKBUFFER
     streambuf_gptr_tag,
 #endif
     streambuf_sbumpc_tag
 {
-    typedef arduino_ostreambuf<TTraits, arduino_streambuf_base<TTraits, Stream> > base_type;
+    typedef arduino_ostreambuf<Traits, arduino_streambuf_base<Traits, Stream> > base_type;
 
 public:
     typedef typename base_type::traits_type traits_type;

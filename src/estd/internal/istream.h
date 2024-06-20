@@ -346,24 +346,10 @@ public:
 
 namespace internal {
 
-template <class TStreambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
-#if defined(FEATURE_CPP_ALIASTEMPLATE)
-using flagged_istream = detail::basic_istream<TStreambuf,
-            estd::internal::basic_ios<TStreambuf, false,
-                estd::internal::ios_base_policy<TStreambuf, flags> > >;
-#else
-class flagged_istream : public estd::detail::basic_istream
-        <TStreambuf, estd::internal::basic_ios
-            <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > >
-{
-    typedef estd::detail::basic_istream
-        <TStreambuf, estd::internal::basic_ios
-            <TStreambuf, false, estd::internal::ios_base_policy<TStreambuf, flags> > > base_type;
-
-public:
-    ESTD_CPP_FORWARDING_CTOR(flagged_istream)
-};
-#endif
+template <class Streambuf, internal::istream_flags::flag_type flags = internal::istream_flags::_default>
+using flagged_istream = detail::basic_istream<Streambuf,
+            estd::internal::basic_ios<Streambuf, false,
+                estd::internal::ios_base_policy<Streambuf, default_locale, flags> > >;
 
 }}
 

@@ -113,10 +113,12 @@ public:
 
 }
 
-template <class Char, class OutputIt, class Locale = internal::classic_locale_type>
+template <class Char, class OutputIt,
+    class Locale = internal::classic_locale_type,
+    internal::cbase_policies = internal::CBASE_POLICY_DEFAULT>
 class num_put;
 
-template <class Char, class OutputIt, class Locale>
+template <class Char, class OutputIt, class Locale, internal::cbase_policies policy>
 class num_put
 {
 public:
@@ -140,7 +142,7 @@ private:
         // No extra space for null terminator, to_chars_opt gives us start/end ptrs
         char_type buffer[N];
 
-        using helper = internal::integer_put<Locale>;
+        using helper = internal::integer_put<Locale, policy>;
 
         to_chars_result result = helper::to_chars(buffer, buffer + N, str, value);
 

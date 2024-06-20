@@ -1,3 +1,15 @@
+# v0.8.1 - DDMMM24
+
+## Added Features
+
+* `estd::num_put` for bools & integers now available
+    * Supports foreign locales, encodings, 16 bit characters and more
+    * Compile-time tuning options
+
+## Known Issues & Limitations
+
+* A full `num_put` is extensive functionality.  Currently unsupported are floats, comma and decimal placement
+
 # v0.8.0 - 08JUN24
 
 ## Added Features

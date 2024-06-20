@@ -3,12 +3,19 @@
 #include <estd/ostream.h>
 #include <estd/locale.h>
 
-#define USE_ALT_POLICY 1
+#define USE_ALT_POLICY 0
 
 using namespace estd;
 
+template <class Streambuf, template <class> class Policy>
+using basic_ostream_with_policy =
+    detail::basic_ostream<Streambuf,
+        internal::basic_ios<Streambuf, false, Policy<Streambuf> > >;
+
 #if USE_ALT_POLICY
-struct alt_policy : internal::ios_base_policy<arduino_streambuf>
+template <class Streambuf = arduino_ostreambuf>
+    //class Locale = internal::classic_locale_type>
+struct alt_policy : internal::ios_base_policy<Streambuf>
 {
     using cbase_policies = internal::cbase_policies;
 
@@ -16,8 +23,9 @@ struct alt_policy : internal::ios_base_policy<arduino_streambuf>
         cbase_policies(cbase_policies::CBASE_POLICY_CASE_UPPER | cbase_policies::CBASE_POLICY_HEX_ALWAYS);
 };
 
-static detail::basic_ostream<arduino_ostreambuf,
-    internal::basic_ios<arduino_ostreambuf, false, alt_policy> > cout(Serial);
+//static detail::basic_ostream<arduino_ostreambuf,
+//    internal::basic_ios<arduino_ostreambuf, false, alt_policy<> > > cout(Serial);
+static basic_ostream_with_policy<arduino_ostreambuf, alt_policy> cout(Serial);
 #else
 static arduino_ostream cout(Serial);
 #endif
@@ -36,7 +44,7 @@ void setup()
 // atmega32u4, USE_WIDTH=1
 // USE_NUM_PUT (0) = 4126
 // USE_NUM_PUT (1) = 3988
-#define USE_NUM_PUT 1
+#define USE_NUM_PUT 0
 #define USE_WIDTH 1
 
 void loop()

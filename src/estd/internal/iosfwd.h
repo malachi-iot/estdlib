@@ -8,8 +8,13 @@ namespace estd {
 
 namespace internal {
 
+using default_locale = locale<internal::locale_code::en_US, encodings::UTF8>;
+
 template <class Streambuf,
-        estd::internal::stream_flags::flag_type flags = estd::internal::stream_flags::_default>
+    // DEBT: Deviation, I think std defaults to 'C'/ ASCII ("classic" locale) but
+    // IIRC it's not a hard spec requirement
+    class Locale = default_locale,
+    internal::stream_flags::flag_type flags = estd::internal::stream_flags::_default>
 struct ios_base_policy;
 
 // eventually, depending on layering, we will use a pointer to a streambuf or an actual
