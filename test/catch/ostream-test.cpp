@@ -116,12 +116,45 @@ TEST_CASE("ostream")
         SECTION("int (hex)")
         {
             out.setf(ios_base::uppercase);
+            out << hex;
 
-            out << hex << 12;
+            const auto& s = out.rdbuf()->str();
 
-            auto s = out.rdbuf()->str();
+            SECTION("literal")
+            {
+                out << 12;
 
-            REQUIRE(s[0] == 'C');
+                REQUIRE(s[0] == 'C');
+            }
+            SECTION("uint8_t")
+            {
+                out << setfill('0');
+                out << setw(2);
+
+                uint8_t v = 0xF;
+
+                out << v;
+
+                REQUIRE(s == "0F");
+            }
+            SECTION("unsigned")
+            {
+                out << setfill('0');
+                out << setw(2);
+
+                unsigned v = 0xF;
+
+                out << v;
+
+                REQUIRE(s == "0F");
+
+                out << ':' << v;
+
+                // "The width property of the stream will be reset to zero (meaning "unspecified") if any of the following functions are called:"
+                // ... "Overloads of basic_ostream::operator<<() that take arithmetic type"
+                // https://en.cppreference.com/w/cpp/io/manip/setw#Notes
+                REQUIRE(s == "0F:F");
+            }
         }
         SECTION("clock style")
         {
@@ -181,6 +214,16 @@ TEST_CASE("ostream")
         out_ref << exp_manipulator(5);
 
         REQUIRE(streambuf.str() == "2Hello20");
+    }
+    SECTION("iomanipulators")
+    {
+        SECTION("setbase")
+        {
+            out << setbase(8);
+            out << 8;
+
+            REQUIRE(out_s == "10");
+        }
     }
 }
 

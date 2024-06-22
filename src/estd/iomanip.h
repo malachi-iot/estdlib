@@ -34,5 +34,27 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
     return out;
 }
 
+class setbase : public internal::ostream_functor_tag
+{
+    const ios_base::fmtflags fmt_;
+
+public:
+    static constexpr ios_base::fmtflags to_fmt(int base)
+    {
+        return base == 8 ? ios_base::oct :
+            base == 10 ? ios_base::dec :
+            base == 16 ? ios_base::hex :
+            ios_base::fmtflags(0);
+    }
+
+    constexpr explicit setbase(int base) : fmt_{to_fmt(base)} {}
+
+    template <class Streambuf, class Base>
+    void operator()(detail::basic_ostream<Streambuf, Base>& out) const
+    {
+        out.setf(fmt_, ios_base::basefield);
+    }
+};
+
 
 }
