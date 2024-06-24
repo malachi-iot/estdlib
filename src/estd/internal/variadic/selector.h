@@ -41,6 +41,13 @@ struct is_same_selector
     using evaluator = is_same<T_j, T>;
 };
 
+template <class T, T v>
+struct is_same_value_selector
+{
+    template <T j, size_t>
+    using evaluator = bool_constant<v == j>;
+};
+
 
 /*
  * Actually works, but more complicated than it needs to be since we're
@@ -87,8 +94,8 @@ struct projected_result :
 
 namespace detail {
 
-template <size_t size, class TEval>
-struct selector<size, TEval>
+template <size_t size, class Eval>
+struct selector<size, Eval>
 {
     using indices = index_sequence<>;
     using types = variadic::types<>;
@@ -98,15 +105,15 @@ struct selector<size, TEval>
 };
 
 
-template <size_t size, class TEval, class T, class ...Types>
-struct selector<size, TEval, T, Types...>
+template <size_t size, class Eval, class T, class ...Types>
+struct selector<size, Eval, T, Types...>
 {
 private:
-    typedef selector<size, TEval, Types...> upward;
+    typedef selector<size, Eval, Types...> upward;
 
     static constexpr size_t index = ((size - 1) - sizeof...(Types));
 
-    using evaluated = typename TEval::template evaluator<T, index>;
+    using evaluated = typename Eval::template evaluator<T, index>;
     static constexpr bool eval = evaluated::value;
 
     using projected_type = conditional_t<
@@ -133,17 +140,32 @@ public:
     static constexpr bool all = selected::size() == sizeof...(Types) + 1;
 };
 
-template <size_t size, class TEval, class T, T t, T ...Values>
-struct value_selector<size, TEval, T, t, Values...>
+
+template <size_t size, class Eval, class T>
+struct value_selector<size, Eval, T>
+{
+    using values = variadic::values<T>;
+};
+
+
+template <size_t size, class Eval, class T, T v, T ...Values>
+struct value_selector<size, Eval, T, v, Values...>
 {
 private:
-    typedef value_selector<size, TEval, T, Values...> upward;
+    using upward = value_selector<size, Eval, T, Values...>;
 
 public:
     static constexpr size_t index = ((size - 1) - sizeof...(Values));
 
-    using evaluated = typename TEval::template evaluator<T, index>;
+    using evaluated = typename Eval::template evaluator<v, index>;
     static constexpr bool eval = evaluated::value;
+
+private:
+    template <class Sequence, T v2>
+    using prepend = internal::value_prepend_if<eval, Sequence, v2>;
+
+public:
+    using values = prepend<typename upward::values, v>;
 };
 
 

@@ -50,11 +50,15 @@ struct type_sequence_single<T>
 
 // DEBT: Filter this out by concept/enabled
 // DEBT: We'd like this for integer_sequence too
-template <bool B, class TSequence, class T>
+template <bool B, class Sequence, class T>
 using prepend_if = conditional_t<B,
-    typename TSequence::template prepend<T>,
-    TSequence>;
+    typename Sequence::template prepend<T>,
+    Sequence>;
 
+template <bool B, class Sequence, typename Sequence::value_type v>
+using value_prepend_if = conditional_t<B,
+    typename Sequence::template prepend<v>,
+    Sequence>;
 
 }
 

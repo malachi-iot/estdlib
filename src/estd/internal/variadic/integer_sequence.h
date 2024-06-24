@@ -63,6 +63,13 @@ struct value_sequence_accessor
 
 namespace variadic {
 
+// DEBT: Put this elsewhere, and perhaps we can merely call it CONSTEVAL
+#if __cpp_consteval
+#define ESTD_CPP_CONSTEVAL consteval
+#else
+#define ESTD_CPP_CONSTEVAL constexpr
+#endif
+
 // Since we can track pointers and references too, I prefer the name variadic::values
 // rather than integer_sequence
 template <typename T, T ...Is>
@@ -70,6 +77,8 @@ struct values :
     internal::value_sequence_single<T, Is...>,
     internal::value_sequence_accessor<T, Is...>
 {
+    using value_type = T;
+
     static constexpr size_t size() { return sizeof...(Is); }
 
     template <size_t pos>
@@ -82,6 +91,28 @@ struct values :
     using append = values<T, Is..., I2>;
 
     static constexpr T first() { return get<0>::value; }
+
+    // +++ EXPERIMENTAL
+    struct raw
+    {
+        template <class Eval>
+        using selector = variadic::detail::value_selector<size(), Eval, T, Is...>;
+
+        template <T v>
+        using contains = bool_constant<
+            selector<
+                internal::is_same_value_selector<T, v>>::values::size() == 1>;
+    };
+
+    template <class Eval>
+    using where = typename raw::template selector<Eval>::values;
+
+    template <value_type v>
+    static ESTD_CPP_CONSTEVAL bool contains()
+    {
+        return raw::template contains<v>::value;
+    }
+    // ---
 };
 
 #if __cpp_template_auto

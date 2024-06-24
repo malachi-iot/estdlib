@@ -10,6 +10,9 @@ namespace estd { namespace internal {
 template <size_t pos, class ...Types>
 struct get_type_at_index;
 
+template <class T, T v>
+struct is_same_value_selector;
+
 // Very similar to std::variant_alternative
 template <size_t index, class ...Types>
 using type_at_index = typename get_type_at_index<index, Types...>::type;
@@ -33,21 +36,21 @@ namespace variadic {
 
 namespace detail {
 
-template <size_t size, class TEval, class ...Types>
+template <size_t size, class Eval, class ...Types>
 struct selector;
 
-template <size_t size, class TEval, class T, T ...Types>
+template <size_t size, class Eval, class T, T ...Values>
 struct value_selector;
 
 }
 
 inline namespace v1 {
 
-template <class TEval, class ...Types>
-using selector = typename detail::selector<sizeof...(Types), TEval, Types...>::selected;
+template <class Eval, class ...Types>
+using selector = typename detail::selector<sizeof...(Types), Eval, Types...>::selected;
 
-template <class TEval, class ...Types>
-using projector = typename detail::selector<sizeof...(Types), TEval, Types...>::projected;
+template <class Eval, class ...Types>
+using projector = typename detail::selector<sizeof...(Types), Eval, Types...>::projected;
 
 template <size_t I, class T, T v>
 struct visitor_value;

@@ -397,6 +397,19 @@ TEST_CASE("variadic")
 
             REQUIRE(index == 3);
         }
+        SECTION("selector")
+        {
+            using sel = internal::is_same_value_selector<int, 7>;
+            using selected = values::where<sel>;
+
+            REQUIRE(selected::size() == 1);
+            REQUIRE(selected::single() == 7);
+        }
+        SECTION("contains")
+        {
+            REQUIRE(values::contains<7>() == true);
+            REQUIRE(values::contains<23>() == false);
+        }
     }
     // TODO: Move this out to 'utility' test area
     SECTION("integer_sequence")
