@@ -49,6 +49,19 @@ struct is_same_value_selector
 };
 
 
+// EXPERIMENTAL
+template <class V>
+struct is_same_values_selector;
+
+// EXPERIMENTAL
+template <class T, T ...values>
+struct is_same_values_selector<variadic::values<T, values...> >
+{
+    template <T j, size_t>
+    using evaluator = variadic::values<T, values...>::raw::template contains<j>;
+};
+
+
 /*
  * Actually works, but more complicated than it needs to be since we're
  * not really projecting

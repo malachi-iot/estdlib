@@ -5,6 +5,7 @@
 * `estd::num_put` for bools & integers now available
     * Supports foreign locales, encodings, 16 bit characters and more
     * Compile-time tuning options
+* TBD/EXPERIMENTAL `estd::variadic::values` gets a `where` and `contains` 
 
 ## Known Issues & Limitations
 
