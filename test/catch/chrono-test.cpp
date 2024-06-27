@@ -167,7 +167,7 @@ TEST_CASE("chrono tests")
     }
     SECTION("posix compat")
     {
-        typedef estd::chrono::steady_clock clock;
+        typedef std::chrono::steady_clock clock;
 
         clock::time_point first = clock::now();
         clock::time_point next = clock::now();
@@ -180,6 +180,13 @@ TEST_CASE("chrono tests")
         auto ms2 = estd::chrono::duration_cast<estd::chrono::milliseconds>(duration);
 
         REQUIRE(ms.count() == ms2.count());
+
+        next -= estd::chrono::seconds(2);
+        REQUIRE(next > first);
+        auto n2 = next + estd::chrono::seconds(5);
+        auto n3 = next - estd::chrono::seconds(5);
+
+        REQUIRE(n2 > n3);
     }
     SECTION("duration values")
     {

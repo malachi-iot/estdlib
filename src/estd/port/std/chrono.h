@@ -39,11 +39,29 @@ operator+(const std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
 
 template <class C, class D1, class R2, class P2>
 constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
+operator-(const std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+{
+    typedef std::ratio<P2::num, P2::den> period_type;
+
+    return pt - std::chrono::duration<R2, period_type>(d.count());
+}
+
+template <class C, class D1, class R2, class P2>
+constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
 operator+=(std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
 {
     typedef std::ratio<P2::num, P2::den> period_type;
 
     return pt += std::chrono::duration<R2, period_type>(d.count());
+}
+
+template <class C, class D1, class R2, class P2>
+constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
+operator-=(std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+{
+    typedef std::ratio<P2::num, P2::den> period_type;
+
+    return pt -= std::chrono::duration<R2, period_type>(d.count());
 }
 #endif
 
