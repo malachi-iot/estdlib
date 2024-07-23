@@ -1,0 +1,1 @@
+# estd::variadic namespace

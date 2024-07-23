@@ -35,7 +35,12 @@ INCLUDE_DIRECTORIES(${Catch2_SOURCE_DIR}/include)
 
 add_subdirectory(${ROOT_DIR} estd)
 
-add_executable(${PROJECT_NAME} "main.cpp")
+set(EXTRA_FILES
+    ${ROOT_DIR}/docs/Variadic.md
+    ${ROOT_DIR}/docs/Units.md
+)
+
+add_executable(${PROJECT_NAME} "main.cpp" ${EXTRA_FILES})
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
     # Since unit tests take a while to compile now, have an override
