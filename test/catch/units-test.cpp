@@ -66,15 +66,26 @@ TEST_CASE("units")
         //percent<float> p2(45.0_pct);
         percent<float> p2(45.0);
 
-        // would need conversion too, we're not there yet
-        //auto v = p1 + p2;
-        auto v = adc_p1 + adc_p2;
+        SECTION("addition")
+        {
+            // would need conversion too, we're not there yet
+            //auto v = p1 + p2;
+            auto v = adc_p1 + adc_p2;
 
-        REQUIRE(v.count() == 612);
+            REQUIRE(v.count() == 612);
+        }
+        SECTION("subtraction")
+        {
+            auto v = adc_p2 - adc_p1;
 
-        v = adc_p2 - adc_p1;
+            REQUIRE(v.count() == -412);
+        }
+        SECTION("negation")
+        {
+            auto v = -adc_p1;
 
-        REQUIRE(v.count() == -412);
+            REQUIRE(v.count() == -512);
+        }
     }
     SECTION("ostream")
     {

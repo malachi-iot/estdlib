@@ -256,6 +256,11 @@ public:
         ++rep_;
         return *this;
     }
+
+    constexpr unit_base operator -()
+    {
+        return unit_base(-rep_);
+    }
 };
 
 
