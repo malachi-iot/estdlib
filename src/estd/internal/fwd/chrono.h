@@ -23,6 +23,15 @@ template<
 #if __cpp_concepts
 namespace internal { namespace concepts { inline namespace v1 {
 
+// these concepts may be useful in cases where std vs estd time_point
+// is passed around
+
+template <class T>
+concept Duration = requires(T t)
+{
+    { t.count() };
+};
+
 template <class T>
 concept TimePoint = requires(T t)
 {

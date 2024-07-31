@@ -24,6 +24,14 @@ struct estd::chrono::internal::clock_traits<fake_clock> :
 {
 };
 
+#if __cpp_concepts
+template <estd::chrono::internal::concepts::v1::TimePoint TimePoint>
+struct C1
+{
+
+};
+#endif
+
 TEST_CASE("chrono tests")
 {
     SECTION("default time_point")
@@ -504,4 +512,10 @@ TEST_CASE("chrono tests")
             REQUIRE((int)d2.count() == 213);
         }
     }
+#if __cpp_concepts
+    SECTION("concepts")
+    {
+        C1<fake_clock::time_point> c;
+    }
+#endif
 }
