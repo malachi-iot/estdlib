@@ -26,14 +26,47 @@ namespace internal { namespace concepts { inline namespace v1 {
 // these concepts may be useful in cases where std vs estd time_point
 // is passed around
 
+// DEBT: This guy belongs elsewhere
 template <class T>
-concept Duration = requires(T t)
+concept Ratio = requires(T t)
 {
+    T::num;
+    T::den;
+};
+
+// TODO: Handle return types in below concepts - not doing so yet because there
+// was an odd edge case in which <concepts> was not available (not just AVR) even
+// though c++20 was.
+
+template <class T>
+concept Duration =
+    Ratio<typename T::period> &&
+    requires(T t)
+{
+    typename T::rep;
+
     { t.count() };
 };
 
+
+// Corresponds to https://en.cppreference.com/w/cpp/named_req/Clock
+// https://en.cppreference.com/w/cpp/chrono/is_clock
 template <class T>
-concept TimePoint = requires(T t)
+concept Clock =
+    Duration<typename T::duration> &&
+    requires(T t)
+{
+    typename T::time_point;
+
+    // DEBT: Over permissive, clock really needs a static not instance method
+    t.now();
+};
+
+template <class T>
+concept TimePoint =
+    Duration<typename T::duration> &&
+    Clock<typename T::clock> &&
+    requires(T t)
 {
     { t.time_since_epoch() };
 };

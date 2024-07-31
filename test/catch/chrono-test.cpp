@@ -28,12 +28,18 @@ struct estd::chrono::internal::clock_traits<fake_clock> :
 template <estd::chrono::internal::concepts::v1::TimePoint TimePoint>
 struct C1
 {
+    TimePoint t;
 
+    void dostuff()
+    {
+    }
 };
 #endif
 
 TEST_CASE("chrono tests")
 {
+    fake_clock clock;
+
     SECTION("default time_point")
     {
         fake_clock::time_point default_time_point;
@@ -128,8 +134,6 @@ TEST_CASE("chrono tests")
     }
     SECTION("fake_clock tests")
     {
-        fake_clock clock;
-
         clock.ticks = 0;
 
         auto first = clock.now();
@@ -515,7 +519,9 @@ TEST_CASE("chrono tests")
 #if __cpp_concepts
     SECTION("concepts")
     {
-        C1<fake_clock::time_point> c;
+        C1<fake_clock::time_point> c{clock.now()};
+
+        c.dostuff();
     }
 #endif
 }
