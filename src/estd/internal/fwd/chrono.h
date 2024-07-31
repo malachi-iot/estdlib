@@ -3,6 +3,10 @@
 #include "common_type.h"
 #include "ratio.h"
 
+#if __cpp_lib_concepts
+#include <concepts>
+#endif
+
 namespace estd { namespace chrono {
 
 template<
@@ -15,6 +19,18 @@ template<
     class Clock,
     class Duration = typename Clock::duration
 > class time_point;
+
+#if __cpp_concepts
+namespace internal { namespace concepts { inline namespace v1 {
+
+template <class T>
+concept TimePoint = requires(T t)
+{
+    { t.time_since_epoch() };
+};
+
+}}}
+#endif
 
 
 // DEBT: Would do estd::chrono::internal, but that collides with our estd_chrono trick in port area
