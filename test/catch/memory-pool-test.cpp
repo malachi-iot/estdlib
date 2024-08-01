@@ -39,8 +39,8 @@ TEST_CASE("memory pool")
             int8_t h3 = pool.to_handle(v3);
             REQUIRE(pool.from_handle(h3) == v3);
 
-            REQUIRE(h2 < pool.max_blocks());
-            REQUIRE(h3 < pool.max_blocks());
+            REQUIRE(unsigned(h2) < pool.max_blocks());
+            REQUIRE(unsigned(h3) < pool.max_blocks());
         }
         SECTION("limit")
         {

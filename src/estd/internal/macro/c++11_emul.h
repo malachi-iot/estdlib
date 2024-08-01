@@ -38,15 +38,6 @@
 #define ESTD_CPP_REFQ
 #endif
 
-// Assistance to define typical "typedef T value_type" and friends
-// DEBT: Move elsehwere, doesn't belong in c++11 emul land
-#define ESTD_CPP_STD_VALUE_TYPE(T)  \
-    typedef T value_type;           \
-    typedef value_type& reference;  \
-    typedef const value_type& const_reference;  \
-    typedef value_type* pointer;                \
-    typedef const value_type* const_pointer;
-
 /// Wrapper for c++20 concepts for use in template lists
 #if __cpp_concepts
 #define ESTD_CPP_CONCEPT(T)     T

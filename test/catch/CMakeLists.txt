@@ -71,6 +71,7 @@ else()
         list-test.cpp
         limits-test.cpp
         locale-test.cpp
+        macros-test.cpp
         map-test.cpp
         memory-pool-test.cpp
         memory-test.cpp
