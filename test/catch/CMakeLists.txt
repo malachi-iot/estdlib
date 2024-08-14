@@ -36,6 +36,7 @@ INCLUDE_DIRECTORIES(${Catch2_SOURCE_DIR}/include)
 add_subdirectory(${ROOT_DIR} estd)
 
 set(EXTRA_FILES
+    ${ROOT_DIR}/README.md
     ${ROOT_DIR}/docs/Variadic.md
     ${ROOT_DIR}/docs/Units.md
 )

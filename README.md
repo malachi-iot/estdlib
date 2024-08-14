@@ -134,7 +134,7 @@ Available for your convenience.  No notable differences from `std`
 
 ### Variadic (non standard)
 
-A whole suite of variadic tools exist in `estd::variadic` namespace.  These have no corollary to `std`.
+A whole suite of variadic tools [exist in `estd::variadic` namespace](docs/Variadic.md).  These have no corollary to `std`.
 Loosely inspired by C# LINQ namespace, they are particularly useful when folding expressions aren't available.
 
 ### Variant
