@@ -13,6 +13,11 @@ template <class T, size_t index>
 class tuple_storage<true, T, index, typename enable_if<is_empty<T>::value>::type>
 {
 public:
+    tuple_storage() = default;
+    // DEBT: make_tuple needs this guy because chain isn't smart enough to exclude the placeholder type
+    // while recusring up the ctor chain.  Would be better to do the exclusion, but this will do
+    constexpr tuple_storage(T&&) {}
+
     ESTD_CPP_CONSTEXPR_RET static T first() { return T(); }
 
     typedef T valref_type;

@@ -391,6 +391,10 @@ TEST_CASE("tuple")
 
             REQUIRE(sizeof(t) == sizeof(t2));
             REQUIRE(sizeof(t) == sizeof(int));
+
+            auto t3 = make_tuple(monostate{}, 1);
+
+            REQUIRE(sizeof(t3) == sizeof(t));
         }
         SECTION("full (non-sparse)")
         {
