@@ -14,7 +14,7 @@ configure_file(
 # esp-idf: For internal testing
 configure_file(
     ${WORKING_DIR}/idf_component.in.yml
-    ${ROOT_DIR}/tools/esp-idf/components/estdlib/idf_component.yml)
+    ${ROOT_DIR}/tools/esp-idf/components/estd/idf_component.yml)
 
 # esp-idf: For general use
 configure_file(
