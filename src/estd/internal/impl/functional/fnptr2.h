@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../type_traits.h"
+
 #include "fwd.h"
 
 #if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)

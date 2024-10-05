@@ -5,6 +5,8 @@
 
 #include "internal/raw/cstddef.h"
 
+#include "bit.h"
+
 // mainly to fill in gaps where pre-C++03 is used
 namespace estd {
 
@@ -87,22 +89,6 @@ struct add_pointer<T(Args..., ...), true> {
 
 template< class T >
 struct add_pointer : detail::add_pointer<T, estd::is_function<T>::value> {};
-
-#ifdef FEATURE_CPP_ENUM_CLASS
-// Obviously a simplistic implementation, but it's a start
-enum class endian
-{
-#ifdef _WIN32
-    little = 0,
-    big    = 1,
-    native = little
-#else
-    little = __ORDER_LITTLE_ENDIAN__,
-    big    = __ORDER_BIG_ENDIAN__,
-    native = __BYTE_ORDER__
-#endif
-};
-#endif
 
 // because is_function requires variadic
 #ifdef __cpp_variadic_templates
