@@ -6,6 +6,7 @@
     * Supports foreign locales, encodings, 16 bit characters and more
     * Compile-time tuning options
 * TBD/EXPERIMENTAL `estd::variadic::values` gets a `where` and `contains` 
+* https://github.com/malachi-iot/estdlib/issues/49 rudimentary byteswap
 
 ## Known Issues & Limitations
 
