@@ -53,6 +53,7 @@ else()
         algorithm-test.cpp
         allocator-test.cpp
         array-test.cpp
+        bit-test.cpp
         buffer-test.cpp
         c++03-test.cpp
         charconv-test.cpp
@@ -130,4 +131,4 @@ endif()
 #   so we have to report unused variables in unit tests fused with headers
 # -Wextra) not ready for this just yet, but want it
 
-target_link_libraries(${PROJECT_NAME} estd Catch2)
+target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2)

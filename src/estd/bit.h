@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cstdint.h"
+
 namespace estd {
 
 enum class endian
@@ -16,5 +18,52 @@ enum class endian
 #endif
 };
 
+}
+
+#if __cpp_lib_byteswap >= 202110L
+#include <bit>
+
+namespace estd {
+
+using std::byteswap;
 
 }
+
+#else
+namespace estd {
+
+template <class Unsigned>
+constexpr Unsigned byteswap(Unsigned n) noexcept;
+
+#if __has_builtin(__builtin_bswap16)
+template <>
+constexpr uint16_t byteswap(uint16_t n) noexcept
+{
+    return __builtin_bswap16(n);
+}
+#endif
+
+#if __has_builtin(__builtin_bswap32)
+template <>
+constexpr uint32_t byteswap(uint32_t n) noexcept
+{
+    return __builtin_bswap32(n);
+}
+#endif
+
+#if __has_builtin(__builtin_bswap64)
+
+template <>
+constexpr uint64_t byteswap(uint64_t n) noexcept
+{
+#if __has_builtin(__builtin_bswap32)
+    return __builtin_bswap64(n);
+#else
+    return 0;
+#endif
+}
+#endif
+
+}
+
+#endif
