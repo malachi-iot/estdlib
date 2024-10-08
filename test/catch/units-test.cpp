@@ -24,10 +24,10 @@ struct traits<frequency_tag>
 
 }}}
 
-using namespace estd::internal::units;
-
 TEST_CASE("units")
 {
+    using namespace estd::internal::units;
+
     estd::layer1::ostringstream<256> out;
     auto& s = out.rdbuf()->str();
 
@@ -164,4 +164,17 @@ TEST_CASE("units")
             REQUIRE(adc1.count() == 519);
         }
     }
+}
+
+
+TEST_CASE("units (outside namespace)")
+{
+    //namespace units = estd::internal::units;
+
+    estd::internal::units::percent<int16_t, estd::ratio<100, 1024> >
+        p1(512), p2(100);
+
+    auto p3 = p1 + p2;
+
+    REQUIRE(p3.count() == 612);
 }
