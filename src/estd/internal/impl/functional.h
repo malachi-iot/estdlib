@@ -125,6 +125,7 @@ struct method_model_helper2
     {
         using type = method_type<R(Args...), T>;
         type test1(v);
+        (void)test1;
     }
 };
 // ---

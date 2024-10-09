@@ -134,6 +134,7 @@ TEST_CASE("memory.h tests")
                     to_delete->~Dummy();
                     free(to_delete);
                 };
+                (void)deleter_ran;
                 // FIX: I think we found a bug here, once we added
                 // inc_on_destruct feature to Dummy, this died
 #if ISSUE_39_BRINGUP
@@ -179,6 +180,8 @@ TEST_CASE("memory.h tests")
                     sz = sizeof(F);
 
                     REQUIRE(val == 0);
+
+                    (void)sz;
                 }
 
                 REQUIRE(val == 1);
@@ -243,7 +246,7 @@ TEST_CASE("memory.h tests")
 
             static void destruct(int v)
             {
-                printf("GOT HERE: %d\n", v);
+                //printf("GOT HERE: %d\n", v);
             }
         };
 
