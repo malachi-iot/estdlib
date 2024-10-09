@@ -147,5 +147,23 @@ constexpr bool operator==(
     return lhs.count() == rhs;
 }
 
+template <class Rep1, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr bool operator>(
+    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
+    const Rep2& rhs)
+{
+    return lhs.count() > rhs;
+}
+
+template <class Rep1, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr bool operator<(
+    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
+    const Rep2& rhs)
+{
+    return lhs.count() < rhs;
+}
+
 
 }}}

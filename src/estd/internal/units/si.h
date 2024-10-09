@@ -84,8 +84,8 @@ struct traits<estd::milli, Tag>
 };
 
 
-template <>
-struct traits<estd::micro>
+template <class Tag>
+struct traits<estd::micro, Tag>
 {
     static constexpr const char* name() { return "micro"; }
     // TODO: When character set supports it, use the proper micro symbol here
@@ -93,8 +93,8 @@ struct traits<estd::micro>
 };
 
 
-template <>
-struct traits<estd::nano>
+template <class Tag>
+struct traits<estd::nano, Tag>
 {
     static constexpr const char* name() { return "nano"; }
     static constexpr const char* abbrev() { return "n"; }
