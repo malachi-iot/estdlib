@@ -116,5 +116,36 @@ constexpr bool operator!=(
     return CT(lhs).count() != CT(rhs).count();
 }
 
+// ratio<1> specializations
+
+template <typename Rep1, typename Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr unit_base<Rep1, estd::ratio<1>, Tag, Proj>& operator +=(
+    unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
+    const Rep2& rhs)
+{
+    return lhs += unit_base<Rep1, estd::ratio<1>, Tag, Proj>(rhs);
+}
+
+
+template <typename Rep1, typename Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr unit_base<Rep1, estd::ratio<1>, Tag, Proj>& operator -=(
+    unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
+    const Rep2& rhs)
+{
+    return lhs -= unit_base<Rep1, estd::ratio<1>, Tag, Proj>(rhs);
+}
+
+
+template <class Rep1, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr bool operator==(
+    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
+    const Rep2& rhs)
+{
+    return lhs.count() == rhs;
+}
+
 
 }}}

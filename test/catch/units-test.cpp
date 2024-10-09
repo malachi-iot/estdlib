@@ -67,6 +67,7 @@ TEST_CASE("units")
         //percent<float> p2(45.0_pct);
         percent<float> p2(45.0);
         const percent<uint32_t> p3{90};
+        percent<int> p4{50};
 
         SECTION("addition")
         {
@@ -87,12 +88,22 @@ TEST_CASE("units")
             adc_p2 += percent_type(p3);
 
             REQUIRE(adc_p2.count() == 1021);
+
+            // ratio<1> specializations
+
+            p1 += 3;
+
+            REQUIRE(p1 == 58);
         }
         SECTION("subtraction")
         {
+            p4 -= uint8_t(5);
+            p4 -= int64_t(5);
+
             auto v = adc_p2 - adc_p1;
 
             REQUIRE(v.count() == -412);
+            REQUIRE(p4 == 40);
         }
         SECTION("negation")
         {

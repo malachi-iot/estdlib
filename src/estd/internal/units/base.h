@@ -214,7 +214,7 @@ public:
     typedef Period period;
     typedef Tag tag_type;
 
-    // DEBT: Clean up name here, and document difference between so-called 'root' and regular
+    /// retrieve unprojected count()
     constexpr root_rep root_count() const { return rep_; }
     // DEBT: Hopefully we can get rid of this mutator, brought in while transitioning unit_base
     // to have less implicit behaviors
@@ -235,6 +235,12 @@ public:
     unit_base& operator +=(const unit_base& v)
     {
         rep_ += v.rep_;
+        return *this;
+    }
+
+    unit_base& operator -=(const unit_base& v)
+    {
+        rep_ -= v.rep_;
         return *this;
     }
 
