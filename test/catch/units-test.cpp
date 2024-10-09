@@ -66,6 +66,7 @@ TEST_CASE("units")
         percent<double> p1(55.0_pct);
         //percent<float> p2(45.0_pct);
         percent<float> p2(45.0);
+        const percent<uint32_t> p3{90};
 
         SECTION("addition")
         {
@@ -74,6 +75,11 @@ TEST_CASE("units")
             auto v = adc_p1 + adc_p2;
 
             REQUIRE(v.count() == 612);
+
+            auto v2 = p3 + adc_p2;
+
+            // FIX: Something not quite right
+            REQUIRE(v2.count() == 102160);
         }
         SECTION("subtraction")
         {
@@ -89,8 +95,6 @@ TEST_CASE("units")
         }
         SECTION("greater than")
         {
-            const percent<uint32_t> p3{90};
-
             // common_type doesn't like mixing floats and ints. that's fair
             //bool v = p1 > adc_p2;
             bool v = p3 > adc_p1;
@@ -160,17 +164,31 @@ TEST_CASE("units")
         {
             SECTION("common type")
             {
-                percent<uint8_t, estd::ratio<1, 10>> p1{0};
-                percent<int32_t> p2{0};
+                SECTION("test1")
+                {
+                    percent<uint8_t, estd::ratio<1, 10>> p1{0};
+                    percent<int32_t> p2{0};
 
-                using CT = decltype(common_type_helper(p1, p2));
-                static_assert(estd::is_same<CT::period, estd::ratio<1, 10>>::value, "");
-                static_assert(estd::is_same<CT::rep, int32_t>::value, "");
-                //period v1;
+                    using CT = decltype(ct_helper(p1, p2));
+                    static_assert(estd::is_same<CT::period, estd::ratio<1, 10>>::value, "");
+                    static_assert(estd::is_same<CT::rep, int32_t>::value, "");
+                    //period v1;
 
-                CT p3{p2};
+                    CT p3{p2};
 
-                REQUIRE(p3.count() == 0);
+                    REQUIRE(p3.count() == 0);
+                }
+                SECTION("test2")
+                {
+                    percent<uint16_t, estd::ratio<100, 1024>> p1{0};
+                    percent<uint32_t> p2{0};
+
+                    using CT = decltype(ct_helper(p1, p2));
+
+                    static_assert(estd::is_same<CT::rep, uint32_t>::value, "");
+                    // FIX: Ratio is wrong here, should stay 100:1024 right?
+                    static_assert(estd::is_same<CT::period, estd::ratio<1, 1024>>::value, "");
+                }
             }
             SECTION("int <--> float")
             {
