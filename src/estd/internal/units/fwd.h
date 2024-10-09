@@ -41,7 +41,7 @@ struct passthrough
 
 
 template <class Rep, class Period, class Tag,
-    ESTD_CPP_CONCEPT(Adder<Rep>) = passthrough<Rep> >
+    ESTD_CPP_CONCEPT(Projector<Rep>) = passthrough<Rep> >
 class unit_base;
 
 template <class Rep, class Period>

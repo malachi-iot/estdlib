@@ -149,11 +149,14 @@ TEST_CASE("units")
         REQUIRE(percent3.count() == 50.7);
 
         REQUIRE(percent3 == 50.7_pct);
-        bool comp = percent1 == percent3;
+        // DEBT: Consider auto promotion to double type from int.  Undecided at this time
+        // whether I want to allow it
+        bool comp = percent<double>(percent1) == percent3;
         REQUIRE(comp);
 
-        // lhs precision is lower so dangling .7% falls away
-        REQUIRE(50_pct == percent1);
+        // == / != is smart enough to auto promote 50_pct to percent1 type, so it knows
+        // these don't match, despite potential precision loss
+        REQUIRE(50_pct != percent1);
 
         SECTION("ostream percent2")
         {

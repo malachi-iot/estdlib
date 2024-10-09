@@ -114,7 +114,7 @@ struct unit_traits
 /// @tparam Tag differentiating tag so as to disallow one unit from automatically converting to another
 /// @tparam F final conversion.  defaults to passthrough (noop)
 template <typename Rep, class Period, class Tag,
-    ESTD_CPP_CONCEPT(Adder<Rep>) F>
+    ESTD_CPP_CONCEPT(Projector<Rep>) F>
 class unit_base :
     public unit_base_tag,
     public Tag        // Deriving from tag not necessary, but might be useful for is_base_of query
@@ -226,16 +226,10 @@ public:
     template <class TCompountUnit>
     using per = typename compound_unit_helper<unit_base, TCompountUnit>::type;
 
-    // DEBT: Not tested against F() adjuster
+    // For more exotic cases, see standalone operator==() in operators.hpp
     constexpr bool operator==(const unit_base& compare_to) const
     {
-        return count() == compare_to.count();
-    }
-
-    template <class Rep2, class Period2, ESTD_CPP_CONCEPT(Adder<Rep2>) F2>
-    constexpr bool operator==(const unit_base<Rep2, Period2, tag_type, F2>& compare_to) const
-    {
-        return *this == unit_base(compare_to);
+        return rep_ == compare_to.rep_;
     }
 
     unit_base& operator +=(const unit_base& v)
@@ -271,7 +265,7 @@ public:
         return *this;
     }
 
-    constexpr unit_base operator -()
+    constexpr unit_base operator -() const
     {
         return unit_base(-rep_);
     }

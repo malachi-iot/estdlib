@@ -15,7 +15,7 @@ namespace estd {
 template <typename Dur1Int, typename Dur2Int,
     std::intmax_t Num1, std::intmax_t Num2,
     std::intmax_t Denom1, std::intmax_t Denom2,
-    // DEBT: Add support for adders here, I don't recall if they modify precision or not
+    // DEBT: Add support for projectors here, I believe they do modify precision
     class Tag>
 struct common_type<
     internal::units::unit_base<Dur1Int, ratio<Num1, Denom1>, Tag>,

@@ -38,6 +38,18 @@ constexpr unit_base<Rep, Period, Tag, F> operator -(
 }
 
 
+template <typename Rep1, class Period1, class Rep2, class Period2, class Tag, class Proj1, class Proj2>
+constexpr auto operator -(
+    const unit_base<Rep1, Period1, Tag, Proj1>& lhs,
+    const unit_base<Rep2, Period2, Tag, Proj2>& rhs) -> decltype(ct_helper(lhs, rhs))
+{
+    using CT = decltype(lhs + rhs);
+
+    return CT(lhs) - CT(rhs);
+}
+
+
+
 template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
 constexpr bool operator>(
     const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
@@ -83,20 +95,26 @@ constexpr bool operator<=(
 
 
 
-
-/*
- * TODO: Not quite ready yet, need a specialization of common_type which can wrangle
- * unit_base similar to the chrono::duration variety
-template <class Rep1, class Period1, class Rep2, class Period2, class Tag>
-constexpr bool operator==(const unit_base<Rep1, Period1, Tag>& lhs,
-    const unit_base<Rep2, Period2, Tag>& rhs)
+template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+constexpr bool operator==(
+    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
+    const unit_base<Rep2, Period2, Tag, Adder2>& rhs)
 {
-    typedef typename estd::common_type<unit_base<Rep1, Period1, Tag>,
-        unit_base<Rep2, Period2, Tag> >::type CT;
+    using CT = decltype(lhs + rhs);
 
     return CT(lhs).count() == CT(rhs).count();
 }
-*/
+
+
+template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+constexpr bool operator!=(
+    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
+    const unit_base<Rep2, Period2, Tag, Adder2>& rhs)
+{
+    using CT = decltype(lhs + rhs);
+
+    return CT(lhs).count() != CT(rhs).count();
+}
 
 
 }}}
