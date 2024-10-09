@@ -6,6 +6,7 @@
 #include <estd/internal/units/percent.h>
 #include <estd/internal/units/operators.hpp>
 #include <estd/sstream.h>
+#include <estd/type_traits.h>
 
 struct frequency_tag {};
 
@@ -86,6 +87,16 @@ TEST_CASE("units")
 
             REQUIRE(v.count() == -512);
         }
+        SECTION("greater than")
+        {
+            const percent<uint32_t> p3{90};
+
+            // common_type doesn't like mixing floats and ints. that's fair
+            //bool v = p1 > adc_p2;
+            bool v = p3 > adc_p1;
+
+            REQUIRE(v);
+        }
     }
     SECTION("ostream")
     {
@@ -147,21 +158,38 @@ TEST_CASE("units")
         }
         SECTION("conversion")
         {
-            // Need 100:1024 because ->
-            // 512/1024 = 0.5 then we need * 100
-            percent<int16_t, estd::ratio<100, 1024> > adc1{512};
-            percent<int> p{adc1};
-            percent<double> percent4{adc1};
+            SECTION("common type")
+            {
+                percent<uint8_t, estd::ratio<1, 10>> p1{0};
+                percent<int32_t> p2{0};
 
-            REQUIRE(p.count() == 50);
+                using CT = decltype(common_type_helper(p1, p2));
+                static_assert(estd::is_same<CT::period, estd::ratio<1, 10>>::value, "");
+                static_assert(estd::is_same<CT::rep, int32_t>::value, "");
+                //period v1;
 
-            percent3 = adc1;
+                CT p3{p2};
 
-            REQUIRE(percent3.count() == 50);
+                REQUIRE(p3.count() == 0);
+            }
+            SECTION("int <--> float")
+            {
+                // Need 100:1024 because ->
+                // 512/1024 = 0.5 then we need * 100
+                percent<int16_t, estd::ratio<100, 1024> > adc1{512};
+                percent<int> p{adc1};
+                percent<double> percent4{adc1};
 
-            adc1 = percent1;
+                REQUIRE(p.count() == 50);
 
-            REQUIRE(adc1.count() == 519);
+                percent3 = adc1;
+
+                REQUIRE(percent3.count() == 50);
+
+                adc1 = percent1;
+
+                REQUIRE(adc1.count() == 519);
+            }
         }
     }
 }
