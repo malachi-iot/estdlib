@@ -70,16 +70,17 @@ TEST_CASE("units")
 
         SECTION("addition")
         {
-            // would need conversion too, we're not there yet
-            //auto v = p1 + p2;
             auto v = adc_p1 + adc_p2;
 
             REQUIRE(v.count() == 612);
 
             auto v2 = p3 + adc_p2;
 
-            // FIX: Something not quite right
+            // 1:1024 precision
             REQUIRE(v2.count() == 102160);
+
+            // almost there, some fine detail about converting float <--> double having an issue
+            //auto v3 = p1 + p2;
         }
         SECTION("subtraction")
         {
@@ -186,7 +187,8 @@ TEST_CASE("units")
                     using CT = decltype(ct_helper(p1, p2));
 
                     static_assert(estd::is_same<CT::rep, uint32_t>::value, "");
-                    // FIX: Ratio is wrong here, should stay 100:1024 right?
+                    // NOTE: since 100:1024 precision has some clicky fine points that a regular
+                    // 1:1 integer wouldn't, we promote to 1:1024
                     static_assert(estd::is_same<CT::period, estd::ratio<1, 1024>>::value, "");
                 }
             }
