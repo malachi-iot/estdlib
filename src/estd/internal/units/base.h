@@ -247,10 +247,21 @@ public:
     template <class Rep2, class Period2, class F2>
     unit_base& operator +=(const unit_base<Rep2, Period2, tag_type, F2>& v)
     {
-        //using CT = ct_helper(*this, v);
+        using CT = decltype(ct_helper(*this, v));
+        static_assert(is_same<CT, unit_base>::value, "Using += this way would result in precision loss");
 
         return operator +=(unit_base(v));
     }
+
+    template <class Rep2, class Period2, class F2>
+    unit_base& operator -=(const unit_base<Rep2, Period2, tag_type, F2>& v)
+    {
+        using CT = decltype(ct_helper(*this, v));
+        static_assert(is_same<CT, unit_base>::value, "Using -= this way would result in precision loss");
+
+        return operator -=(unit_base(v));
+    }
+
 
     // EXPERIMENTAL - may have diminished/confusing utility especially for
     // floating point types

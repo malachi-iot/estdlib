@@ -61,8 +61,8 @@ TEST_CASE("units")
     {
         // DEBT: 55_pct doesn't auto play nice with percent<double>
 
-        percent<int16_t, estd::ratio<100, 1024> >
-            adc_p1(512), adc_p2(100);
+        using percent_type = percent<int16_t, estd::ratio<100, 1024> >;
+        percent_type adc_p1(512), adc_p2(100);
         percent<double> p1(55.0_pct);
         //percent<float> p2(45.0_pct);
         percent<float> p2(45.0);
@@ -81,6 +81,12 @@ TEST_CASE("units")
 
             // almost there, some fine detail about converting float <--> double having an issue
             //auto v3 = p1 + p2;
+
+            // implicit precision loss not permitted here
+            //adc_p2 += p3;
+            adc_p2 += percent_type(p3);
+
+            REQUIRE(adc_p2.count() == 1021);
         }
         SECTION("subtraction")
         {
