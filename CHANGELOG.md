@@ -7,6 +7,7 @@
     * Compile-time tuning options
 * TBD/EXPERIMENTAL `estd::variadic::values` gets a `where` and `contains` 
 * https://github.com/malachi-iot/estdlib/issues/49 rudimentary byteswap
+* https://github.com/malachi-iot/estdlib/issues/51 enhanced operators for `units`
 
 ## Known Issues & Limitations
 
