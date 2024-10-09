@@ -271,7 +271,7 @@ public:
         return *this;
     }
 
-    constexpr unit_base operator -() const
+    constexpr const unit_base operator -() const
     {
         return unit_base(-rep_);
     }

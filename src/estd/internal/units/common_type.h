@@ -24,7 +24,7 @@ struct common_type<
 private:
     // gracefully promote (or not) types used.  non-specialized common_type is very
     // aggressive about promoting and almost always adds bits - otherwise we'd use it
-    using common_int_type = promoted_type<Dur1Int, Dur2Int>::type;
+    using common_int_type = typename promoted_type<Dur1Int, Dur2Int>::type;
 
     static constexpr std::intmax_t gcd_num = internal::gcd<Num1, Num2>::value;
     static constexpr std::intmax_t lcm_den = internal::lcm<Denom1, Denom2>::value;
