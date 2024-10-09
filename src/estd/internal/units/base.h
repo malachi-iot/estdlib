@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../../ratio.h"
+#include "../fwd/ratio.h"
 
 #include "concepts.h"
+#include "common_type.h"
 #include "fwd.h"
 
 #include "../macro/push.h"
@@ -246,6 +247,8 @@ public:
     template <class Rep2, class Period2, class F2>
     unit_base& operator +=(const unit_base<Rep2, Period2, tag_type, F2>& v)
     {
+        //using CT = ct_helper(*this, v);
+
         return operator +=(unit_base(v));
     }
 

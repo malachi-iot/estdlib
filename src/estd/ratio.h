@@ -139,15 +139,4 @@ struct ratio_divide<ratio<Num1, Denom1>, std::ratio<Num2, Denom2> > :
 
 }
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template <class R1, class R2>
-using ratio_multiply = typename detail::ratio_multiply<R1, R2>::type;
-
-template <class R1, class R2>
-using ratio_divide = typename detail::ratio_divide<R1, R2>::type;
-
-template <class R1, class R2>
-using ratio_add = typename detail::ratio_add<R1, R2>::type;
-#endif
-
 }

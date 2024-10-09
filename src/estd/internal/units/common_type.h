@@ -1,4 +1,9 @@
+#pragma once
+
 #include "../fwd/common_type.h"
+#include "../fwd/ratio.h"
+#include "../numeric.h"
+#include "../promoted_type.h"
 #include "fwd.h"
 
 namespace estd {
@@ -29,5 +34,19 @@ public:
 
     using type = internal::units::unit_base<common_int_type, ratio_type, Tag>;
 };
+
+namespace internal { namespace units {
+
+template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+constexpr common_type_t<
+    unit_base<Rep1, Period1, Tag, Adder1>,
+    unit_base<Rep2, Period2, Tag, Adder2>> ct_helper(
+    const unit_base<Rep1, Period1, Tag, Adder1>&,
+    const unit_base<Rep2, Period2, Tag, Adder2>&)
+{
+    return {};
+}
+
+}}
 
 }
