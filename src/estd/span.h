@@ -150,13 +150,18 @@ public:
     // dynamic flavor
     // DEBT: add c++20 'explicit' version
     template <estd::size_t N, estd::size_t ExtentLocal = Extent,
-              class ExtentOnly = typename enable_if<ExtentLocal == detail::dynamic_extent::value>::type>
+        class ExtentOnly = typename enable_if<ExtentLocal == detail::dynamic_extent::value>::type>
     constexpr span(element_type (&data) [N]) : base_type(data, N) {}
 
     // constant size flavor
     template <estd::size_t N, estd::size_t ExtentLocal = Extent,
-              class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
+        class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
     constexpr span(element_type (&data) [N], bool = true) : base_type(data) {}
+
+    template <estd::size_t N, estd::size_t ExtentLocal = Extent,
+        class ExtentOnly = typename enable_if<ExtentLocal == detail::dynamic_extent::value>::type>
+    constexpr span(const estd::span<T, N>& other) :
+        base_type(other.data(), N) {}
 #else
     // Only works with dynamic extend mode
     template <estd::size_t N>

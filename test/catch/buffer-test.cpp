@@ -6,7 +6,7 @@
 
 #include <catch.hpp>
 
-using namespace estd::internal;
+using namespace estd::internal;     // DEBT: Get rid of this, causes too much confusion
 
 template <ESTD_CPP_CONCEPT(estd::concepts::v1::Bipbuf) Bipbuf>
 void test_bipbuf(Bipbuf& bip)
@@ -173,6 +173,13 @@ TEST_CASE("buffers")
             auto s2 = estd::as_bytes(s);
 
             REQUIRE(s2.size() == sizeof(int) * sz);
+        }
+        SECTION("converting constructor")
+        {
+            estd::span<const uint8_t, sizeof(buf)> s1(buf);
+            estd::span<const uint8_t> s2(s1);
+
+            REQUIRE(s2.size() == sizeof(buf));
         }
     }
 }
