@@ -8,6 +8,7 @@
 #include "fwd/functional.h"
 #include "impl/functional.h"
 #include "functional/hash.h"
+#include "functional/function_traits.h"
 #include "../type_traits.h"
 #include "../tuple.h"
 
@@ -108,71 +109,9 @@ public:
 #endif
 
 #if __cpp_variadic_templates && __cpp_decltype
-// Adapted from
-// https://stackoverflow.com/questions/9065081/how-do-i-get-the-argument-types-of-a-function-pointer-in-a-variadic-template-cla
-// Additional guidance from
-// https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda/7943765#7943765
-template<typename T>
-struct function_traits :
-    function_traits<decltype(&T::operator())> {};
 
 template <typename F, F f>
 struct function_ptr_traits;
-
-template<typename R, typename ...Args>
-struct function_traits<R(Args...)>
-{
-    static constexpr size_t nargs = sizeof...(Args);
-
-    static constexpr bool is_method = false;
-
-    using function_type = R(Args...);
-
-    using result_type = R;
-    using tuple = estd::tuple<Args...>;
-
-    template <size_t i>
-    using arg = typename estd::tuple_element<i, tuple>;
-
-    template <size_t i>
-    using arg_t = typename arg<i>::type;
-};
-
-template<typename R, typename ...Args>
-struct function_traits<estd::detail::function<R(Args...)> > :
-    function_traits<R(Args...)>
-{
-};
-
-// Friendly to lambda-functors
-template<class C, typename R, typename ...Args>
-struct function_traits<R(C::*)(Args...) const> :
-    function_traits<R(Args...)>
-{
-    using function_type = R(C::*)(Args...) const;
-    using class_type = C;
-    static constexpr bool is_method = true;
-};
-
-
-// Regular methods are happy with this one
-template<class C, typename R, typename ...Args>
-struct function_traits<R(C::*)(Args...)> :
-    function_traits<R(Args...)>
-{
-    using function_type = R(C::*)(Args...);
-    using class_type = C;
-    static constexpr bool is_method = true;
-};
-
-
-// This one works well for functors from regular functions
-template<typename R, typename ...Args>
-struct function_traits<R (&)(Args...)> :
-    function_traits<R(Args...)>
-{
-
-};
 
 // Guidance from
 // https://stackoverflow.com/questions/39131137/function-pointer-as-template-argument-and-signature

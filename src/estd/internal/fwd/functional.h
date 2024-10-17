@@ -19,6 +19,9 @@ struct less;
 template <class T = void>
 struct greater;
 
+template<typename T>
+struct function_traits;
+
 namespace detail {
 
 namespace impl {

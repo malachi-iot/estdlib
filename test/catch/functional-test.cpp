@@ -19,9 +19,9 @@ int do_something(const char* msg)
 template <typename F, class ...Args>
 int do_something_inspector(F&& f, Args&&...args)
 {
-    using traits = estd::experimental::function_traits<F>;
+    using traits = estd::function_traits<F>;
 
-    static_assert(estd::is_same<typename traits::result_type, int>::value, "functor must return int");
+    static_assert(estd::is_same<typename traits::return_type, int>::value, "functor must return int");
 
     return f(std::forward<Args>(args)...);
 }
@@ -617,15 +617,13 @@ TEST_CASE("functional")
     }
     SECTION("function_traits")
     {
-        using namespace estd::experimental;
-
         SECTION("detail::function")
         {
             typedef estd::detail::function<int(int)> fn_type;
             using traits = function_traits<fn_type>;
 
-            REQUIRE(estd::is_same<traits::arg_t<0>, int>::value);
-            REQUIRE(estd::is_same<traits::arg_t<0>, float>::value == false);
+            REQUIRE(estd::is_same<traits::arg<0>, int>::value);
+            REQUIRE(estd::is_same<traits::arg<0>, float>::value == false);
 
             static_assert(traits::is_method == false, "");
         }
@@ -633,8 +631,8 @@ TEST_CASE("functional")
         {
             typedef function_traits<decltype(do_something)> traits;
 
-            REQUIRE(estd::is_same<traits::arg_t<0>, const char*>::value);
-            REQUIRE(estd::is_same<traits::result_type, int>::value);
+            REQUIRE(estd::is_same<traits::arg<0>, const char*>::value);
+            REQUIRE(estd::is_same<traits::return_type, int>::value);
 
             static_assert(traits::is_method == false, "");
         }
@@ -648,7 +646,7 @@ TEST_CASE("functional")
 
             typedef function_traits<decltype(l)> traits;
 
-            static_assert(estd::is_same<traits::result_type, int>::value, "Should be int");
+            static_assert(estd::is_same<traits::return_type, int>::value, "Should be int");
             static_assert(traits::nargs == 1, "Should be 1 argument only");
             static_assert(traits::is_method, "");
 
@@ -662,11 +660,15 @@ TEST_CASE("functional")
         }
         SECTION("member function")
         {
-            using fn_traits = function_traits<decltype(&test::TestB::add)>;
+            using traits = function_traits<decltype(&test::TestB::add)>;
 
-            static_assert(fn_traits::nargs == 1, "");
-            static_assert(estd::is_same<fn_traits::arg_t<0>, int>::value, "");
-            static_assert(fn_traits::is_method, "");
+            static_assert(traits::nargs == 1, "");
+            static_assert(estd::is_same<traits::arg<0>, int>::value, "");
+            static_assert(traits::is_method, "");
+        }
+        SECTION("uso")
+        {
+            //using traits = function_traits<int>;
         }
     }
     SECTION("thisify")

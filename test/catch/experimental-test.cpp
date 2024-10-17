@@ -217,7 +217,7 @@ TEST_CASE("experimental tests")
             typedef function_ptr_traits<decltype(&TestB::add), &TestB::add> fn_traits;
 
             REQUIRE(estd::is_same<fn_traits::this_type, TestB>::value);
-            REQUIRE(estd::is_same<fn_traits::arg_t<0>, int>::value);
+            REQUIRE(estd::is_same<fn_traits::arg<0>, int>::value);
         }
     }
 #ifdef STATIC_ASSERT
