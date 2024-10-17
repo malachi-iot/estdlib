@@ -107,13 +107,14 @@ public:
 };
 #endif
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
+#if __cpp_variadic_templates && __cpp_decltype
 // Adapted from
 // https://stackoverflow.com/questions/9065081/how-do-i-get-the-argument-types-of-a-function-pointer-in-a-variadic-template-cla
 // Additional guidance from
 // https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda/7943765#7943765
 template<typename T>
-struct function_traits;
+struct function_traits :
+    function_traits<decltype(&T::operator())> {};
 
 template <typename F, F f>
 struct function_ptr_traits;
@@ -121,20 +122,16 @@ struct function_ptr_traits;
 template<typename R, typename ...Args>
 struct function_traits<R(Args...)>
 {
-    static const size_t nargs = sizeof...(Args);
+    static constexpr size_t nargs = sizeof...(Args);
 
-    typedef R result_type;
+    using result_type = R;
+    using tuple = estd::tuple<Args...>;
 
     template <size_t i>
-    struct arg
-    {
-        typedef typename estd::tuple_element<i, estd::tuple<Args...>>::type type;
-    };
+    using arg = typename estd::tuple_element<i, tuple>;
 
     template <size_t i>
     using arg_t = typename arg<i>::type;
-
-    using tuple = estd::tuple<Args...>;
 };
 
 template<typename R, typename ...Args>
@@ -143,6 +140,14 @@ struct function_traits<estd::detail::function<R(Args...)> > :
 {
 
 };
+
+// Friendly to lambda-functors
+template<class C, typename R, typename ...Args>
+struct function_traits<R(C::*)(Args...) const> :
+    function_traits<R(Args...)>
+{
+};
+
 
 // This one works well for functors from regular functions
 template<typename R, typename ...Args>

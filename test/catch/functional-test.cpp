@@ -634,8 +634,8 @@ TEST_CASE("functional")
 
             typedef function_traits<decltype(l)> traits;
 
-            // Not ready
-            //REQUIRE(estd::is_same<traits::resullt_type, int>::value);
+            static_assert(estd::is_same<traits::result_type, int>::value, "Should be int");
+            static_assert(traits::nargs == 1, "Should be 1 argument only");
         }
     }
     SECTION("thisify")
