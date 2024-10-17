@@ -16,12 +16,14 @@ int do_something(const char* msg)
     return -1;
 }
 
-template <typename F>
-void do_something_inspector(F&&)
+template <typename F, class ...Args>
+int do_something_inspector(F&& f, Args&&...args)
 {
-    typedef estd::experimental::function_traits<F> traits;
+    using traits = estd::experimental::function_traits<F>;
 
-    REQUIRE(estd::is_same<typename traits::result_type, int>::value);
+    static_assert(estd::is_same<typename traits::result_type, int>::value, "functor must return int");
+
+    return f(std::forward<Args>(args)...);
 }
 
 using namespace estd;
@@ -638,7 +640,7 @@ TEST_CASE("functional")
         }
         SECTION("functor")
         {
-            do_something_inspector(do_something);
+            do_something_inspector(do_something, "hello");
         }
         SECTION("lambda")
         {
@@ -649,6 +651,14 @@ TEST_CASE("functional")
             static_assert(estd::is_same<traits::result_type, int>::value, "Should be int");
             static_assert(traits::nargs == 1, "Should be 1 argument only");
             static_assert(traits::is_method, "");
+
+            int v = do_something_inspector(std::forward<decltype(l)>(l), 5);
+
+            REQUIRE(v == 10);
+
+            v = do_something_inspector([&](int i, int j) { return i + j + l(5); }, 4, 5);
+
+            REQUIRE(v == 19);
         }
         SECTION("member function")
         {

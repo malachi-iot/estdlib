@@ -126,6 +126,8 @@ struct function_traits<R(Args...)>
 
     static constexpr bool is_method = false;
 
+    using function_type = R(Args...);
+
     using result_type = R;
     using tuple = estd::tuple<Args...>;
 
@@ -147,6 +149,7 @@ template<class C, typename R, typename ...Args>
 struct function_traits<R(C::*)(Args...) const> :
     function_traits<R(Args...)>
 {
+    using function_type = R(C::*)(Args...) const;
     using class_type = C;
     static constexpr bool is_method = true;
 };
@@ -157,6 +160,7 @@ template<class C, typename R, typename ...Args>
 struct function_traits<R(C::*)(Args...)> :
     function_traits<R(Args...)>
 {
+    using function_type = R(C::*)(Args...);
     using class_type = C;
     static constexpr bool is_method = true;
 };
