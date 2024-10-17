@@ -5,13 +5,18 @@
 * `estd::num_put` for bools & integers now available
     * Supports foreign locales, encodings, 16 bit characters and more
     * Compile-time tuning options
-* TBD/EXPERIMENTAL `estd::variadic::values` gets a `where` and `contains` 
+* TBD/EXPERIMENTAL `estd::variadic::values` gets a `where` and `contains`
 * https://github.com/malachi-iot/estdlib/issues/49 rudimentary byteswap
 * https://github.com/malachi-iot/estdlib/issues/51 enhanced operators for `units`
+* https://github.com/malachi-iot/estdlib/issues/53 `function_traits` now active
 
 ## Known Issues & Limitations
 
 * A full `num_put` is extensive functionality.  Currently unsupported are floats, comma and decimal placement
+
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/48 more flexible span constructor
 
 # v0.8.0 - 08JUN24
 
