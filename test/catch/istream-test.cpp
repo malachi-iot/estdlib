@@ -80,15 +80,18 @@ TEST_CASE("istream")
         }
         SECTION("integer conversion from spanbuf")
         {
-            estd::span<const char> s("123");
-            estd::detail::basic_ispanbuf<const char> in(s);
+            estd::span<const char> s("123 A");
+            estd::detail::basic_ispanstream<const char> in(s);
 
-            /*
             unsigned v = 0;
 
             in >> v;
 
-            REQUIRE(v == 123);  */
+            REQUIRE(v == 123);
+
+            in >> hex >> v;
+
+            REQUIRE(v == 10);
         }
         SECTION("integer overflow")
         {

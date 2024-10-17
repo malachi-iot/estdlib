@@ -133,6 +133,7 @@ public:
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
+// DEBT: Refactor this to take CharTraits directly
 template <class TChar,
         class TCharTraits =  estd::char_traits<TChar>,
         std::size_t Extent = detail::dynamic_extent::value,
