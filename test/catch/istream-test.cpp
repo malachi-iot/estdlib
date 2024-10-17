@@ -78,6 +78,18 @@ TEST_CASE("istream")
 
             REQUIRE(v == 10);
         }
+        SECTION("integer conversion from spanbuf")
+        {
+            estd::span<const char> s("123");
+            estd::detail::basic_ispanbuf<const char> in(s);
+
+            /*
+            unsigned v = 0;
+
+            in >> v;
+
+            REQUIRE(v == 123);  */
+        }
         SECTION("integer overflow")
         {
             SECTION("signed")

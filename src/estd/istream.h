@@ -167,14 +167,14 @@ detail::basic_istream<Streambuf, Base>& operator >>(
 }
 
 
+namespace detail {
 
-// Experimental because:
-// - naming I'm 90% on, not 100%
-// - spans prefer to be uint8_t, streams prefer char
-namespace experimental {
-typedef estd::internal::streambuf<estd::internal::impl::in_span_streambuf<char> > ispanbuf;
+template <class Char>
+using basic_ispanbuf = estd::internal::streambuf<estd::internal::impl::in_span_streambuf<Char> >;
 
-typedef estd::detail::basic_istream<ispanbuf> ispanstream;
+using ispanbuf = basic_ispanbuf<char>;
+
+using ispanstream = estd::detail::basic_istream<ispanbuf>;
 }
 
 // Working out best way for consumers to really configure their istreams

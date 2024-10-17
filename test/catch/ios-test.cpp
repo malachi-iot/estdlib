@@ -463,7 +463,7 @@ TEST_CASE("ios")
             strcpy(buf, "hello\r\n");
             estd::layer1::string<32> s;
 
-            estd::experimental::ispanstream in(span);
+            estd::detail::ispanstream in(span);
 
             in >> s;
 
