@@ -205,7 +205,7 @@ struct cbase_utf<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
     }
 
     static inline typename base_type::optional_type
-    from_char(char_type c, const unsigned short _base = b)
+    from_char(estd::remove_const_t<char_type> c, const unsigned short _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit, toupper and islower here
         if (estd::internal::ascii_isdigit(c)) return c - '0';
