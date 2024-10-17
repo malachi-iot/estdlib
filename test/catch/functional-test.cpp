@@ -617,12 +617,24 @@ TEST_CASE("functional")
     {
         using namespace estd::experimental;
 
+        SECTION("detail::function")
+        {
+            typedef estd::detail::function<int(int)> fn_type;
+            using traits = function_traits<fn_type>;
+
+            REQUIRE(estd::is_same<traits::arg_t<0>, int>::value);
+            REQUIRE(estd::is_same<traits::arg_t<0>, float>::value == false);
+
+            static_assert(traits::is_method == false, "");
+        }
         SECTION("direct")
         {
             typedef function_traits<decltype(do_something)> traits;
 
             REQUIRE(estd::is_same<traits::arg_t<0>, const char*>::value);
             REQUIRE(estd::is_same<traits::result_type, int>::value);
+
+            static_assert(traits::is_method == false, "");
         }
         SECTION("functor")
         {
@@ -636,6 +648,15 @@ TEST_CASE("functional")
 
             static_assert(estd::is_same<traits::result_type, int>::value, "Should be int");
             static_assert(traits::nargs == 1, "Should be 1 argument only");
+            static_assert(traits::is_method, "");
+        }
+        SECTION("member function")
+        {
+            using fn_traits = function_traits<decltype(&test::TestB::add)>;
+
+            static_assert(fn_traits::nargs == 1, "");
+            static_assert(estd::is_same<fn_traits::arg_t<0>, int>::value, "");
+            static_assert(fn_traits::is_method, "");
         }
     }
     SECTION("thisify")

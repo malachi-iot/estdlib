@@ -210,13 +210,6 @@ TEST_CASE("experimental tests")
     {
         using namespace estd::experimental;
 
-        typedef estd::detail::function<int(int)> fn_type;
-
-        SECTION("basic")
-        {
-            REQUIRE(estd::is_same<function_traits<fn_type>::arg_t<0>, int>::value);
-            REQUIRE(estd::is_same<function_traits<fn_type>::arg_t<0>, float>::value == false);
-        }
         SECTION("member function pointer")
         {
             TestB v;

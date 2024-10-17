@@ -124,6 +124,8 @@ struct function_traits<R(Args...)>
 {
     static constexpr size_t nargs = sizeof...(Args);
 
+    static constexpr bool is_method = false;
+
     using result_type = R;
     using tuple = estd::tuple<Args...>;
 
@@ -138,7 +140,6 @@ template<typename R, typename ...Args>
 struct function_traits<estd::detail::function<R(Args...)> > :
     function_traits<R(Args...)>
 {
-
 };
 
 // Friendly to lambda-functors
@@ -146,6 +147,18 @@ template<class C, typename R, typename ...Args>
 struct function_traits<R(C::*)(Args...) const> :
     function_traits<R(Args...)>
 {
+    using class_type = C;
+    static constexpr bool is_method = true;
+};
+
+
+// Regular methods are happy with this one
+template<class C, typename R, typename ...Args>
+struct function_traits<R(C::*)(Args...)> :
+    function_traits<R(Args...)>
+{
+    using class_type = C;
+    static constexpr bool is_method = true;
 };
 
 
