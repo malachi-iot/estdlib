@@ -56,6 +56,20 @@ TEST_CASE("istream")
 
             if(_cin) FAIL();
         }
+        SECTION("integer conversion from hex")
+        {
+            layer2::basic_istringstream<const char> in("FF");
+
+            // Not quite ready yet, see
+            // https://github.com/malachi-iot/estdlib/issues/47
+            /*
+            unsigned v;
+
+            in >> hex;
+            in >> v;
+
+            REQUIRE(v == 255);  */
+        }
         SECTION("integer overflow")
         {
             SECTION("signed")

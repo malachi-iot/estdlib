@@ -155,11 +155,13 @@ detail::basic_istream<Streambuf, Base>& operator >>(
     char& value)
 {
     using stream_type = detail::basic_istream<Streambuf, Base>;
-    using traits = stream_type::traits_type;
+    using traits = typename stream_type::traits_type;
+
+    in >> ws;
+
     const typename traits::int_type c = in.get();
 
-    if(traits::not_eof(c))
-        value = traits::to_char_type(c);
+    if(traits::not_eof(c))  value = traits::to_char_type(c);
 
     return in;
 }
