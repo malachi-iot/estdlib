@@ -110,10 +110,12 @@ inline detail::basic_istream<TStreambuf, TBase>& ws(
 
 // NOTE: Works well, just needs more testing (and hopefully elevation of experimental::num_get
 // to non-experimental) before elevating to API level
-template <class TStreambuf, class TBase, class T>
-typename enable_if<is_arithmetic<T>::value, detail::basic_istream<TStreambuf, TBase>&>::type
+template <class Streambuf, class Base, class T>
+typename enable_if<
+    is_arithmetic<T>::value && is_same<T, char>::value == false,
+    detail::basic_istream<Streambuf, Base>&>::type
 operator >>(
-    detail::basic_istream<TStreambuf, TBase>& in,
+    detail::basic_istream<Streambuf, Base>& in,
     T& value)
 {
     // NOTE:
@@ -122,7 +124,7 @@ operator >>(
     // Since gcount is mentioned nowhere else on the page, we don't update gcount.
     // A very specific gcount update is mentioned for scenario #11 in [1], which
     // is outside the scope of this method.
-    typedef detail::basic_istream<TStreambuf, TBase> istream_type;
+    typedef detail::basic_istream<Streambuf, Base> istream_type;
     typedef typename istream_type::streambuf_type streambuf_type;
     typedef typename istream_type::traits_type traits_type;
     typedef typename traits_type::char_type char_type;
@@ -145,7 +147,22 @@ operator >>(
     return in;
 }
 
+// DEBT: Mate this instead to inherent char_type.  Also, spec calls for unsigned char
+// https://en.cppreference.com/w/cpp/io/basic_istream/operator_gtgt2
+template <class Streambuf, class Base>
+detail::basic_istream<Streambuf, Base>& operator >>(
+    detail::basic_istream<Streambuf, Base>& in,
+    char& value)
+{
+    using stream_type = detail::basic_istream<Streambuf, Base>;
+    using traits = stream_type::traits_type;
+    const typename traits::int_type c = in.get();
 
+    if(traits::not_eof(c))
+        value = traits::to_char_type(c);
+
+    return in;
+}
 
 
 

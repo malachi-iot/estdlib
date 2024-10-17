@@ -118,8 +118,35 @@ TEST_CASE("istream")
 
                 REQUIRE(buf2 == buf);
             }
+            SECTION("const string")
+            {
+                using stream_type = layer2::basic_istringstream<const char>;
+                layer2::const_string v("hello");
+                stream_type in(v);
+            }
             SECTION("string view")
             {
+                using stream_type = layer2::basic_istringstream<const char>;
+                string_view v("Hello");
+                stream_type in(v);
+
+                char c = 0;
+
+                in >> c;
+
+                REQUIRE(c == 'H');
+
+                in >> c;
+                in >> c;
+                in >> c;
+                in >> c;
+
+                REQUIRE(c == 'o');
+
+                in >> c;
+
+                REQUIRE(in.good() == false);
+
                 /* ALmost, but not quite.  Doesn't play nice with a 'Container'
                  * constraint
                  *

@@ -33,7 +33,7 @@ struct num_get
     typedef Locale locale_type;
     typedef Char char_type;
     typedef cbase<char_type, base, locale_type> cbase_type;
-    typedef ctype<char_type, locale_type> ctype_type;
+    typedef ctype<estd::remove_const_t<char_type>, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
     typedef numpunct<char_type, locale_type> numpunct_type;

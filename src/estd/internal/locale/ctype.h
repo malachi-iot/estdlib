@@ -40,13 +40,13 @@ namespace internal {
 // to default-ASCII behaviors.  Ultimately this will be an issue but
 // we can build out ctype at that time
 // strongly implies a layer1 behavior
-template <class TLocale>
-class ctype<char, TLocale,
+template <class Locale>
+class ctype<char, Locale,
     typename enable_if<
-        internal::is_compatible_with_classic_locale<TLocale>::value>::type> :
+        internal::is_compatible_with_classic_locale<Locale>::value>::type> :
     public ctype_base
 {
-    typedef TLocale locale_type;
+    typedef Locale locale_type;
 
 public:
     static bool isspace(char ch)

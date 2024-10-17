@@ -101,7 +101,15 @@ public:
 #if FEATURE_ESTD_IOS_GCOUNT
         ++_gcount;
 #endif
-        return this->rdbuf()->sbumpc();
+        int_type c = this->rdbuf()->sbumpc();
+
+        if(c == traits_type::eof())
+        {
+            base_type::setstate(
+                ios_base::failbit | ios_base::eofbit);
+        }
+
+        return c;
     }
 
     // UNTESTED
