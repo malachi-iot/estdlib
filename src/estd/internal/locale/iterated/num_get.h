@@ -36,7 +36,7 @@ struct num_get
     typedef ctype<estd::remove_const_t<char_type>, locale_type> ctype_type;
     typedef typename cbase_type::optional_type optional_type;
     typedef typename cbase_type::int_type int_type;
-    typedef numpunct<char_type, locale_type> numpunct_type;
+    typedef numpunct<estd::remove_const_t<char_type>, locale_type> numpunct_type;
 
     enum state
     {

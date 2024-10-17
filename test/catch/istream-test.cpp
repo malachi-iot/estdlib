@@ -62,13 +62,12 @@ TEST_CASE("istream")
 
             // Not quite ready yet, see
             // https://github.com/malachi-iot/estdlib/issues/47
-            /*
-            unsigned v;
+            //unsigned v;
 
             in >> hex;
-            in >> v;
+            //in >> v;
 
-            REQUIRE(v == 255);  */
+            //REQUIRE(v == 255);
         }
         SECTION("integer overflow")
         {

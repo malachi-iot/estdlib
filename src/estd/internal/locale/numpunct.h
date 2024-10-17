@@ -106,12 +106,12 @@ struct numpunct : internal::numpunct<Char, Locale> {};
 
 namespace internal {
 
-template <class TChar, class TLocale>
-struct use_facet_helper<estd::numpunct<TChar, void>, TLocale>
+template <class Char, class Locale>
+struct use_facet_helper<estd::numpunct<Char, void>, Locale>
 {
-    typedef estd::numpunct<TChar, TLocale> facet_type;
+    typedef estd::numpunct<Char, Locale> facet_type;
     
-    inline static facet_type use_facet(TLocale) { return facet_type(); }
+    inline static facet_type use_facet(Locale) { return facet_type(); }
 };
 
 }
