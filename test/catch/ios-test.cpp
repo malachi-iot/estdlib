@@ -469,14 +469,6 @@ TEST_CASE("ios")
 
             REQUIRE(s.starts_with("hello"));
         }
-        SECTION("out")
-        {
-            estd::experimental::ospanstream out(span);
-
-            out << "hi2u";
-
-            REQUIRE(out.tellp() == 4);
-        }
     }
 #if FEATURE_ESTD_STREAMBUF_TRAITS
     SECTION("signaling")

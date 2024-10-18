@@ -11,13 +11,13 @@ namespace estd { namespace internal { namespace impl {
 // be implemented in a derived class
 // TODO: Do char_traits the same between this and in_span_streambuf
 template <class T, estd::size_t Extent = detail::dynamic_extent::value,
-        class TBase = estd::experimental::instance_provider<estd::span<T, Extent> > >
+        class Base = estd::experimental::instance_provider<estd::span<T, Extent> > >
 struct out_span_streambuf :
         out_pos_streambuf_base<char_traits<T>,
-            typename TBase::value_type::size_type >,
-        TBase
+            typename Base::value_type::size_type >,
+        Base
 {
-    typedef TBase base_type;
+    typedef Base base_type;
     typedef T char_type;
     typedef typename base_type::value_type span_type;
     typedef typename span_type::size_type size_type;

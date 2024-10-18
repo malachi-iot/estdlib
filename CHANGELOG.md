@@ -17,6 +17,7 @@
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/48 more flexible span constructor
+* `basic_ispanbuf` and friends promoted from `experimental` to `estd`
 
 # v0.8.0 - 08JUN24
 

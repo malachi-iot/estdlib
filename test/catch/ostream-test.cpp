@@ -225,6 +225,18 @@ TEST_CASE("ostream")
             REQUIRE(out_s == "10");
         }
     }
+    SECTION("ospanstream")
+    {
+        char buf[128];
+        estd::span<char> span(buf);
+
+        estd::detail::ospanstream out(span);
+
+        out << "hi2u";
+
+        REQUIRE(out.tellp() == 4);
+    }
+
 }
 
 #include "macro/pop.h"

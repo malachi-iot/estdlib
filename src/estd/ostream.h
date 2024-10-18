@@ -200,13 +200,18 @@ using posix_ostream = detail::basic_ostream< posix_streambuf<TChar, Traits> >;
 #endif
 #endif
 
-// Experimental because:
-// - naming I'm 90% on, not 100%
-// - spans prefer to be uint8_t, streams prefer char
-namespace experimental {
-typedef estd::internal::streambuf<estd::internal::impl::out_span_streambuf<char> > ospanbuf;
+namespace detail {
 
-typedef estd::detail::basic_ostream<ospanbuf> ospanstream;
+template <class Char>
+using basic_ospanbuf = estd::detail::streambuf<estd::internal::impl::out_span_streambuf<Char> >;
+
+using ospanbuf = basic_ospanbuf<char>;
+
+template <class Char>
+using basic_ospanstream = estd::detail::basic_ostream<basic_ospanbuf<Char>>;
+
+using ospanstream = basic_ospanstream<char>;
+
 }
 
 }
