@@ -29,6 +29,11 @@ static expected<T, errc> err_return()
 #endif
 }
 
+static void handler(expected<int, errc> e)
+{
+
+}
+
 typedef estd::test::NonTrivial ExplicitError;
 
 TEST_CASE("expected")
@@ -192,6 +197,8 @@ TEST_CASE("expected")
         infuse_unexpected<int>(estd::errc::invalid_argument);
         infuse_unexpected<void>(estd::errc::invalid_argument);
         infuse_unexpected<estd::test::Dummy>(estd::errc::invalid_argument);
+
+        handler(unexpected<errc>(errc::bad_address));
     }
     SECTION("pointer type")
     {
