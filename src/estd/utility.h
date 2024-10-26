@@ -126,6 +126,16 @@ using make_index_sequence = make_integer_sequence<std::size_t, N>;
 template<typename... T>
 using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
+// 26OCT24 MB Adapted from above technique
+template<typename T, std::size_t NN, std::size_t N = NN, T... Is>
+struct make_reverse_integer_sequence : make_reverse_integer_sequence<T, NN, N-1, NN-N, Is...> {};
+
+template<typename T, std::size_t NN, T... Is>
+struct make_reverse_integer_sequence<T, NN, 0, Is...> : estd::integer_sequence<T, Is...> {};
+
+template<std::size_t N>
+using make_reverse_index_sequence = make_reverse_integer_sequence<std::size_t, N>;
+
 #endif
 
 }

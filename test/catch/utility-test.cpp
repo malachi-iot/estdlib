@@ -276,6 +276,27 @@ TEST_CASE("utility")
 
         REQUIRE(estd::get<0>(p) == 2.0);
     }
+    SECTION("integer_sequence")
+    {
+        SECTION("normal")
+        {
+            using seq = estd::make_index_sequence<4>;
+
+            REQUIRE(seq::size() == 4);
+            REQUIRE(seq::get<0>::value == 0);
+            REQUIRE(seq::get<3>::value == 3);
+        }
+        SECTION("reversed")
+        {
+            using seq = estd::make_reverse_index_sequence<4>;
+
+            REQUIRE(seq::size() == 4);
+            REQUIRE(seq::get<0>::value == 3);
+            REQUIRE(seq::get<1>::value == 2);
+            REQUIRE(seq::get<2>::value == 1);
+            REQUIRE(seq::get<3>::value == 0);
+        }
+    }
 }
 
 // DEBT: Put this test elsewhere
