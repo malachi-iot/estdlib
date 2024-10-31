@@ -108,7 +108,7 @@ struct values :
     using where = typename raw::template selector<Eval>::values;
 
     template <value_type v>
-    static ESTD_CPP_CONSTEVAL bool contains()
+    static constexpr bool contains()
     {
         return raw::template contains<v>::value;
     }

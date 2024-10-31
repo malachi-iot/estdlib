@@ -39,6 +39,14 @@ int key = 77;
 int index = values::visit(identify_value_functor{}, key);
 ```
 
+For singular values, we favor constexpr function call syntax i.e.
+
+`values::first()`
+
+For tuple/variadic multiple results, we favor direct struct access i.e.
+
+`values::where<Predicate>`
+
 ## Lists
 
 The meat and potatoes of this namespace are compile time lists.
