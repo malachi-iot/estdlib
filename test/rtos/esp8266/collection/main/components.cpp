@@ -1,1 +1,0 @@
-../../../esp32/collection/main/components.cpp
