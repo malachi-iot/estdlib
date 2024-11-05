@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(ESTDLIB_DIR ../../../..)
+set(ROOT_DIR ../../../..)
 
-include(${ESTDLIB_DIR}/tools/esp-idf/project.cmake)
+include(${ROOT_DIR}/tools/esp-idf/project.cmake)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 project(chrono)
