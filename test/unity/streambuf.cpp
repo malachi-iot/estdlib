@@ -18,7 +18,7 @@ static void test_ospanbuf()
     char buf[128];
     estd::span<char> span(buf);
 
-    estd::experimental::ospanbuf os(span);
+    estd::detail::ospanbuf os(span);
 
     os.sputc('a');
     os.sputn(" test 567", 9);
@@ -36,7 +36,7 @@ static void test_ispanbuf()
     char buf[] = "hi2u 1234";
     estd::span<char> span(buf);
     
-    estd::experimental::ispanbuf os(span);
+    estd::detail::ispanbuf os(span);
 
     char c = os.sbumpc();
 
@@ -66,7 +66,7 @@ static void test_ospanstream()
     char buf[128];
     estd::span<char> span(buf);
 
-    estd::experimental::ospanstream os(span);
+    estd::detail::ospanstream os(span);
 
     os << "hi2u";
 
@@ -85,7 +85,7 @@ static void test_ispanstream()
     // DEBT: make const char span operable
     estd::span<char> span(buf);
 
-    estd::experimental::ispanstream is(span);
+    estd::detail::ispanstream is(span);
 
     estd::layer1::string<64> s;
 

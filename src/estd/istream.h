@@ -166,7 +166,8 @@ detail::basic_istream<Streambuf, Base>& operator >>(
     return in;
 }
 
-
+// 05NOV24 MB - perhaps these would more comfortably
+// live in estd itself rather than estd::detail
 namespace detail {
 
 template <class Char, class CharTraits = estd::char_traits<Char>>
