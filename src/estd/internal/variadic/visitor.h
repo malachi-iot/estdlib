@@ -60,7 +60,11 @@ struct visitor_index : in_place_index_t<I>
 template <class T>
 struct visitor_instance : in_place_type_t<T>
 {
-    ESTD_CPP_STD_VALUE_TYPE(T)
+    using value_type = estd::remove_reference_t<T>;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
     reference value;
 

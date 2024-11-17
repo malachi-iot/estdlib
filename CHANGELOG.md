@@ -1,3 +1,9 @@
+# v0.?.? - DDMMM24
+
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/66 `tuple.visit()` now works with references too
+
 # v0.8.1 - 31OCT24
 
 ## Added Features

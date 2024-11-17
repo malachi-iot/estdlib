@@ -174,6 +174,14 @@ TEST_CASE("tuple")
             int_ref = 5;
 
             REQUIRE(int_value == 5);
+
+            tuple3.visit([](estd::variadic::v2::instance<0, int&> i)
+            {
+                i.value = 10;
+                return false;
+            });
+
+            REQUIRE(int_value == 10);
         }
         SECTION("multiple identical")
         {

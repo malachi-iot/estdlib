@@ -9,7 +9,7 @@
 
 // Assistance to define typical "typedef T value_type" and friends
 #define ESTD_CPP_STD_VALUE_TYPE(T)  \
-typedef T value_type;           \
+    typedef T value_type;           \
     typedef value_type& reference;  \
     typedef const value_type& const_reference;  \
     typedef value_type* pointer;                \

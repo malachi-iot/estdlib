@@ -37,6 +37,7 @@ add_subdirectory(${ROOT_DIR} estd)
 
 set(EXTRA_FILES
     ${ROOT_DIR}/README.md
+    ${ROOT_DIR}/CHANGELOG.md
     ${ROOT_DIR}/docs/Variadic.md
     ${ROOT_DIR}/docs/Units.md
 )
