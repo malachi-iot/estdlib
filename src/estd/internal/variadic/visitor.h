@@ -182,7 +182,7 @@ struct visitor_index :
     type_identity<T>
 {
     // Needed to soften 'explicit' in_place_type_t
-    constexpr visitor_index() = default;
+    constexpr visitor_index() : in_place_type_t<T>()    {}
 };
 
 template <size_t I, class T>
