@@ -32,6 +32,29 @@
 #define ESTD_CPP_CONSTEXPR_RET inline
 #endif
 
+// Take pages out of GCC playbook
+// DEBT: These belong elsewhere, not in c++_emul per se
+#if __cplusplus >= 202002L
+#define ESTD_CPP20_CONSTEXPR constexpr
+#else
+#define ESTD_CPP20_CONSTEXPR
+#endif
+
+#if __cplusplus >= 201703L
+#define ESTD_CPP17_CONSTEXPR constexpr
+#else
+#define ESTD_CPP17_CONSTEXPR
+#endif
+
+#if __cplusplus >= 201402L
+#define ESTD_CPP14_CONSTEXPR constexpr
+#else
+#define ESTD_CPP14_CONSTEXPR
+#endif
+
+
+#define ESTD_CPP_CONSTEXPR(v)    ESTD_CPP ## v ## _CONSTEXPR
+
 #if __cpp_ref_qualifiers
 #define ESTD_CPP_REFQ &
 #else

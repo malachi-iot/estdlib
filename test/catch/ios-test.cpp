@@ -130,7 +130,7 @@ typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;
 TEST_CASE("ios")
 {
     const char raw_str[] = "raw 'traditional' output\n";
-    CONSTEXPR int raw_str_len = sizeof(raw_str) - 1;
+    constexpr int raw_str_len = sizeof(raw_str) - 1;
 
     /* This old cute and clever function-detector method no longer employed.
      * Ended up being more complicated than not using it in the end

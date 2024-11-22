@@ -23,7 +23,7 @@ namespace estd {
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
 template<class OutputIt, class Size, class T>
-inline OutputIt fill_n(OutputIt first, Size count, const T& value)
+ESTD_CPP_CONSTEXPR(20) OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
     return std::fill_n(first, count, value);
@@ -89,7 +89,7 @@ ForwardIt min_element(ForwardIt first, ForwardIt last,
 #endif
 
 template<class InputIt, class OutputIt>
-inline OutputIt copy(InputIt first, InputIt last,
+ESTD_CPP_CONSTEXPR(20) OutputIt copy(InputIt first, InputIt last,
               OutputIt d_first)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
@@ -106,12 +106,16 @@ inline OutputIt copy(InputIt first, InputIt last,
 // has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
 // iterator unnecessarily?
 template <class InputIt, class Size, class OutputIt>
-inline OutputIt copy_n(InputIt first, Size count, OutputIt result)
+ESTD_CPP_CONSTEXPR(20) OutputIt copy_n(InputIt first, Size count, OutputIt result)
 {
+#if FEATURE_ESTD_ALGORITHM_OPT
+    return std::copy_n(first, count, result);
+#else
     while(count--)
         *result++ = *first++;
 
     return result;
+#endif
 }
 
 
@@ -160,25 +164,19 @@ InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
     return last;
 }
 
-template<class T>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-const T& clamp( const T& v, const T& lo, const T& hi )
-{
-    return clamp( v, lo, hi, estd::less<T>() );
-}
-
-
 template<class T, class Compare>
-#if defined(FEATURE_CPP_CONSTEXPR_METHOD) && !defined(ESP8266)
-constexpr
-#endif
-const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )
+ESTD_CPP_CONSTEXPR(17) const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )
 {
     return assert( !comp(hi, lo) ),
         comp(v, lo) ? lo : comp(hi, v) ? hi : v;
 }
+
+template<class T>
+ESTD_CPP_CONSTEXPR(17) const T& clamp( const T& v, const T& lo, const T& hi )
+{
+    return estd::clamp( v, lo, hi, estd::less<T>() );
+}
+
 
 // UNTESTED
 template<class InputIt1, class InputIt2>

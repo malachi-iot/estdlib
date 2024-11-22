@@ -24,7 +24,7 @@ struct type_identity { typedef T type; };
 template<class T, T v>
 struct integral_constant
 {
-    static CONSTEXPR T value = v;
+    static constexpr T value = v;
     typedef T value_type;
     typedef integral_constant type; // using injected-class-name
 
