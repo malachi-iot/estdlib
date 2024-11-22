@@ -8,7 +8,6 @@
 #include "tuple/get.h"  // DEBT: Must precede 'visitor.h' likely due to probable lack of 'get' forward declaration
 #include "tuple/sparse.h"
 
-// EXPERIMENTAL
 #include "variadic/visitor.h"
 
 namespace estd { namespace internal {

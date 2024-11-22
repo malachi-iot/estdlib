@@ -181,6 +181,8 @@ struct visitor_index :
     in_place_type_t<T>,
     type_identity<T>
 {
+    // Needed to soften 'explicit' in_place_type_t
+    constexpr visitor_index() = default;
 };
 
 template <size_t I, class T>
@@ -220,23 +222,23 @@ struct visitor_instance<internal::variant_npos(), T> : internal::visitor_instanc
 
 namespace concepts {
 
-template <class T, class TProvider>
-concept GetterFunctor = requires(T f, TProvider& provider)
+template <class T, class Provider>
+concept GetterFunctor = requires(T f, Provider& provider)
 {
     f(visitor_index<0, int>{}, provider);
 };
 
-template <class T, class ...TArgs>
-concept ClassVisitorFunctor = requires(T f, TArgs&&...args)
+template <class T, class ...Args>
+concept ClassVisitorFunctor = requires(T f, Args&&...args)
 {
-    { f(visitor_index<0, int>{}, std::forward<TArgs>(args)...) } -> std::same_as<bool>;
+    { f(visitor_index<0, int>{}, std::forward<Args>(args)...) } -> std::same_as<bool>;
 };
 
 
-template <class T, class ...TArgs>
-concept InstanceVisitorFunctor = requires(T f, TArgs&&...args, int v)
+template <class T, class ...Args>
+concept InstanceVisitorFunctor = requires(T f, Args&&...args, int v)
 {
-    { f(visitor_instance<0, int>(v), std::forward<TArgs>(args)...) } -> std::same_as<bool>;
+    { f(visitor_instance<0, int>(v), std::forward<Args>(args)...) } -> std::same_as<bool>;
 };
 
 }
@@ -254,18 +256,18 @@ struct value_visitor
 
     template <size_t I,
         class enabled = enable_if_t<(I == sizeof...(Values))>,
-        class... TArgs,
+        class... Args,
         class F>
-    static constexpr short visit(F&&, TArgs&&...) { return -1; }
+    static constexpr short visit(F&&, Args&&...) { return -1; }
 
     template <size_t I = 0, class F,
         class enabled = enable_if_t<(I < sizeof...(Values))>,
-        class... TArgs>
-    constexpr static int visit(F&& f, TArgs&&...args)
+        class... Args>
+    constexpr static int visit(F&& f, Args&&...args)
     {
-        return f(value<I>{}, std::forward<TArgs>(args)...) ?
+        return f(value<I>{}, std::forward<Args>(args)...) ?
             I :
-            visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+            visit<I + 1>(std::forward<F>(f), std::forward<Args>(args)...);
     }
 };
 
@@ -278,23 +280,23 @@ struct type_visitor
 
     template <size_t I = 0,
             class enabled = enable_if_t<(I == size)>,
-            class... TArgs,
+            class... Args,
 #if __cpp_concepts
-            concepts::ClassVisitorFunctor<TArgs...> F>
+            concepts::ClassVisitorFunctor<Args...> F>
 #else
             class F>
 #endif
-    static constexpr short visit(F&&, TArgs&&...) { return -1; }
+    static constexpr short visit(F&&, Args&&...) { return -1; }
 
     template <size_t I = 0, class F,
             class enabled = enable_if_t<(I < size)>,
-            class... TArgs>
-    static int visit(F&& f, TArgs&&...args)
+            class... Args>
+    static int visit(F&& f, Args&&...args)
     {
-        if(f(visitor_index<I, internal::type_at_index<I, Types...>>{}, std::forward<TArgs>(args)...))
+        if(f(visitor_index<I, internal::type_at_index<I, Types...>>{}, std::forward<Args>(args)...))
             return I;
 
-        return visit<I + 1>(std::forward<F>(f), std::forward<TArgs>(args)...);
+        return visit<I + 1>(std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <size_t I = size,
