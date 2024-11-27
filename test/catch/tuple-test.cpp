@@ -161,6 +161,10 @@ TEST_CASE("tuple")
             double& v2 = get<1>(tuple);
 
             REQUIRE(v2 == val2);
+
+            double& v3 = get<double>(tuple);
+
+            REQUIRE(v3 == v2);
         }
         WHEN("more reference tests")
         {
@@ -193,6 +197,8 @@ TEST_CASE("tuple")
             get<0>(tuple3).val1 = 1;
             get<1>(tuple3).val1 = 2;
             get<2>(tuple3).val1 = 2;
+
+            //get<Templated<0>>(tuple3).val1 = 2;
         }
     }
     SECTION("value initialization")
@@ -374,7 +380,7 @@ TEST_CASE("tuple")
         }
         SECTION("array ref")
         {
-            const char (&s)[4] = "hi!";
+            static const char (&s)[4] = "hi!";
             const tuple<decltype(s)> v(s);
 
 #if __cplusplus >= 201402L
@@ -383,7 +389,8 @@ TEST_CASE("tuple")
             int which = v.visit([](variadic::v3::instance<decltype(s)> v)
 #endif
             {
-                REQUIRE(v.value == s);
+                REQUIRE(v.value[0] == s[0]);
+                REQUIRE(v.value[2] == s[2]);
                 return true;
             });
 

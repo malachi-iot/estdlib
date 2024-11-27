@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "../variadic/type_sequence.h"
 
 namespace estd {
 
@@ -64,14 +65,14 @@ constexpr typename tuple_element<index, tuple<Types...> >::const_valref_type get
 }
 
 template<int index, bool sparse, typename... Types>
-inline typename tuple_element<index, tuple<Types...> >::valref_type get(
+ESTD_CPP_CONSTEXPR(20) typename tuple_element<index, tuple<Types...> >::valref_type get(
     internal::tuple<sparse, Types...>& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(t);
 }
 
 template<int index, bool sparse, typename... Types>
-inline tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
+ESTD_CPP_CONSTEXPR(20) tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(std::move(t));
 }
@@ -80,6 +81,31 @@ template<int index, bool sparse, typename... Types>
 constexpr tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<sparse, Types...>&& t)
 {
     return internal::GetImpl<sparse, index, Types...>::value(t);
+}
+
+template <class T, bool sparse, typename... Types>
+ESTD_CPP_CONSTEXPR(14) T& get(internal::tuple<sparse, Types...>& t)
+{
+    return get<internal::get_index_of_type<T, Types...>::index>(t);
+}
+
+
+template <class T, bool sparse, typename... Types>
+ESTD_CPP_CONSTEXPR(14) T&& get(internal::tuple<sparse, Types...>&& t)
+{
+    return get<internal::get_index_of_type<T, Types...>::index>(t);
+}
+
+template <class T, bool sparse, typename... Types>
+constexpr const T& get(const internal::tuple<sparse, Types...>& t)
+{
+    return get<internal::get_index_of_type<T, Types...>::index>(t);
+}
+
+template <class T, bool sparse, typename... Types>
+constexpr const T&& get(const internal::tuple<sparse, Types...>&& t)
+{
+    return get<internal::get_index_of_type<T, Types...>::index>(t);
 }
 
 }

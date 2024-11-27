@@ -19,6 +19,23 @@ struct get_type_at_index<pos, T, Types...> :
 };
 
 
+template <class Matching, class T, class ...Types>
+struct get_index_of_type : get_index_of_type<Matching, Types...>
+{
+    static constexpr bool matched = false;
+    //static constexpr unsigned index = sizeof ...(Types);
+};
+
+template <class Matched, class ...Types>
+struct get_index_of_type<Matched, Matched, Types...>
+{
+    //static_assert(get_index_of_type<Matched, Types...>::matched == false, "Only one match allowed");
+
+    static constexpr bool matched = true;
+    static constexpr unsigned index = sizeof ...(Types);
+};
+
+
 template <class ...Types>
 struct type_sequence_accessor
 {
