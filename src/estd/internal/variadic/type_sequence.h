@@ -18,20 +18,20 @@ struct get_type_at_index<pos, T, Types...> :
 {
 };
 
+// defaults to no match (value == false)
+template <class Matching, class ...Types>
+struct get_index_of_type : bool_constant<false> { };
 
+// keeps looking during no match
 template <class Matching, class T, class ...Types>
-struct get_index_of_type : get_index_of_type<Matching, Types...>
-{
-    static constexpr bool matched = false;
-    //static constexpr unsigned index = sizeof ...(Types);
-};
+struct get_index_of_type<Matching, T, Types...> : get_index_of_type<Matching, Types...> {};
 
 template <class Matched, class ...Types>
-struct get_index_of_type<Matched, Matched, Types...>
+struct get_index_of_type<Matched, Matched, Types...> : bool_constant<true>
 {
-    //static_assert(get_index_of_type<Matched, Types...>::matched == false, "Only one match allowed");
+    // looks through remaining types to see if others are present
+    static_assert(get_index_of_type<Matched, Types...>::value == false, "Only one match allowed");
 
-    static constexpr bool matched = true;
     static constexpr unsigned index = sizeof ...(Types);
 };
 
