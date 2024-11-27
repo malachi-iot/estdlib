@@ -18,21 +18,35 @@ struct get_type_at_index<pos, T, Types...> :
 {
 };
 
-// defaults to no match (value == false)
+// DEBT: See if we can consolidate with "get_index_finder"
+
+// defaults to zero matches (value == 0)
 template <class Matching, class ...Types>
-struct get_index_of_type : bool_constant<false> { };
+struct detail_get_index_of_type : integral_constant<int, 0> { };
 
 // keeps looking during no match
 template <class Matching, class T, class ...Types>
-struct get_index_of_type<Matching, T, Types...> : get_index_of_type<Matching, Types...> {};
+struct detail_get_index_of_type<Matching, T, Types...> : detail_get_index_of_type<Matching, Types...> {};
 
+// increments match counter (++value), finds first occurence of Match but continues
+//
 template <class Matched, class ...Types>
-struct get_index_of_type<Matched, Matched, Types...> : bool_constant<true>
+struct detail_get_index_of_type<Matched, Matched, Types...> :
+    integral_constant<int, detail_get_index_of_type<Matched, Types...>::value + 1>
 {
     // looks through remaining types to see if others are present
-    static_assert(get_index_of_type<Matched, Types...>::value == false, "Only one match allowed");
+    //static_assert(get_index_of_type<Matched, Types...>::value == false, "Only one match allowed");
 
     static constexpr unsigned index = sizeof ...(Types);
+};
+
+template <class Match, class ...Types>
+struct get_index_of_type
+{
+    using detail = detail_get_index_of_type<Match, Types...>;
+
+    static constexpr unsigned matches = detail::value;
+    static constexpr unsigned index = (sizeof...(Types) - 1) - detail::index;
 };
 
 

@@ -578,6 +578,15 @@ TEST_CASE("variadic")
             REQUIRE(result == 2);
         }
     }
+    SECTION("get_index_of_type")
+    {
+        using type1 = internal::get_index_of_type<int, double, int, int, int, int>;
+        int index = type1::index;
+
+        REQUIRE(index == 1);
+        //static_assert(type1::index == 3, "");
+        static_assert(type1::matches == 4, "");
+    }
 }
 
 #include "macro/pop.h"
