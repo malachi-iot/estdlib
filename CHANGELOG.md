@@ -1,4 +1,8 @@
-# v0.?.? - DDMMM24
+# v0.8.2 - DDMMM24
+
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/69 `get<T>(tuple)` now available
 
 ## Quality Updates & Bug Fixes
 

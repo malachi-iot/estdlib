@@ -580,12 +580,21 @@ TEST_CASE("variadic")
     }
     SECTION("get_index_of_type")
     {
-        using type1 = internal::get_index_of_type<int, double, int, int, int, int>;
+        using type1 = internal::first_index_of_type<int, double, int, int, int, int>;
+        using type2 = internal::first_index_of_type<double, double, int, int, int, int>;
+        using type3 = internal::single_index_of_type<monostate, double, int, int, monostate, int>;
+        //using type4 = internal::single_index_of_type<int, double, int, int, monostate, int>;
         int index = type1::index;
 
         REQUIRE(index == 1);
         //static_assert(type1::index == 3, "");
         static_assert(type1::matches == 4, "");
+        static_assert(type2::index == 0, "");
+        static_assert(type2::matches == 1, "");
+        static_assert(type3::index == 3, "");
+        static_assert(type3::matches == 1, "");
+        // compile-time fails as it should
+        //static_assert(type4::index == 1, "");
     }
 }
 

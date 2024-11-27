@@ -86,26 +86,26 @@ constexpr tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<s
 template <class T, bool sparse, typename... Types>
 ESTD_CPP_CONSTEXPR(14) T& get(internal::tuple<sparse, Types...>& t)
 {
-    return get<internal::get_index_of_type<T, Types...>::index>(t);
+    return get<internal::single_index_of_type<T, Types...>::index>(t);
 }
 
 
 template <class T, bool sparse, typename... Types>
 ESTD_CPP_CONSTEXPR(14) T&& get(internal::tuple<sparse, Types...>&& t)
 {
-    return get<internal::get_index_of_type<T, Types...>::index>(t);
+    return get<internal::single_index_of_type<T, Types...>::index>(t);
 }
 
 template <class T, bool sparse, typename... Types>
 constexpr const T& get(const internal::tuple<sparse, Types...>& t)
 {
-    return get<internal::get_index_of_type<T, Types...>::index>(t);
+    return get<internal::single_index_of_type<T, Types...>::index>(t);
 }
 
 template <class T, bool sparse, typename... Types>
 constexpr const T&& get(const internal::tuple<sparse, Types...>&& t)
 {
-    return get<internal::get_index_of_type<T, Types...>::index>(t);
+    return get<internal::single_index_of_type<T, Types...>::index>(t);
 }
 
 }

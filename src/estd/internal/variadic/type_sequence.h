@@ -18,7 +18,7 @@ struct get_type_at_index<pos, T, Types...> :
 {
 };
 
-// DEBT: See if we can consolidate with "get_index_finder"
+// DEBT: Try to consolidate with "get_index_finder" and "selector"
 
 // defaults to zero matches (value == 0)
 template <class Matching, class ...Types>
@@ -29,19 +29,15 @@ template <class Matching, class T, class ...Types>
 struct detail_get_index_of_type<Matching, T, Types...> : detail_get_index_of_type<Matching, Types...> {};
 
 // increments match counter (++value), finds first occurence of Match but continues
-//
 template <class Matched, class ...Types>
 struct detail_get_index_of_type<Matched, Matched, Types...> :
     integral_constant<int, detail_get_index_of_type<Matched, Types...>::value + 1>
 {
-    // looks through remaining types to see if others are present
-    //static_assert(get_index_of_type<Matched, Types...>::value == false, "Only one match allowed");
-
     static constexpr unsigned index = sizeof ...(Types);
 };
 
 template <class Match, class ...Types>
-struct get_index_of_type
+struct first_index_of_type
 {
     using detail = detail_get_index_of_type<Match, Types...>;
 
@@ -49,6 +45,11 @@ struct get_index_of_type
     static constexpr unsigned index = (sizeof...(Types) - 1) - detail::index;
 };
 
+template <class Match, class ...Types>
+struct single_index_of_type : first_index_of_type<Match, Types...>
+{
+    static_assert(first_index_of_type<Match, Types...>::matches == 1, "One and only one match is permitted");
+};
 
 template <class ...Types>
 struct type_sequence_accessor
