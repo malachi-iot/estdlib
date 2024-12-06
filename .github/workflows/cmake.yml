@@ -34,7 +34,8 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       working-directory: ${{env.unit_test_dir}}
-      run: cmake --build $unit_test_dir/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build $unit_test_dir/build
+      # --config ${{env.BUILD_TYPE}}
 
     - name: Test
       working-directory: $unit_test_dir/build
