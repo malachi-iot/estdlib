@@ -30,7 +30,7 @@
 // https://stackoverflow.com/questions/259248/how-to-test-the-current-version-of-gcc-at-compile-time
 // GLIBC detection gleaned from
 // http://web.mit.edu/freebsd/head/contrib/wpa/src/utils/common.h
-//#include <features.h>     // Apparently this pisses off Ubuntu somehow
+#include <features.h>
 #endif
 
 // If after all of above we still don't have one, manually create it

@@ -1,0 +1,27 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "dev/**", "alpha" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    env:
+      unit_test_dir: ${{github.workspace}}/test/catch
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build
+      uses: threeal/cmake-action@v2.0.0
+      with:
+        source-dir: ${{env.unit_test_dir}}
+
