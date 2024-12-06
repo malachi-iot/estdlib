@@ -30,8 +30,7 @@
 // https://stackoverflow.com/questions/259248/how-to-test-the-current-version-of-gcc-at-compile-time
 // GLIBC detection gleaned from
 // http://web.mit.edu/freebsd/head/contrib/wpa/src/utils/common.h
-#include <stddef.h>     // features.h seems to need a prereq of some kind
-#include <features.h>
+//#include <features.h>     // Apparently this pisses off Ubuntu somehow
 #endif
 
 // If after all of above we still don't have one, manually create it
