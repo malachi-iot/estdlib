@@ -21,7 +21,10 @@ jobs:
         submodules: recursive
 
     - name: Build
-      uses: threeal/cmake-action@v2.0.0
+      uses: threeal/cmake-action@v2.1.0
       with:
         source-dir: ${{env.unit_test_dir}}
+
+    - name: Test
+      uses: threeal/ctest-action@v1.1.0
 
