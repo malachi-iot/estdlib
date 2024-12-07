@@ -133,3 +133,9 @@ endif()
 # -Wextra) not ready for this just yet, but want it
 
 target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2)
+
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(${PROJECT_NAME})
