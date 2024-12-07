@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4.2.2
       with:
         submodules: recursive
 
@@ -27,4 +27,7 @@ jobs:
 
     - name: Test
       uses: threeal/ctest-action@v1.1.0
+      with:
+        # DEBT: Grab "build-dir" from above cmake-action
+        test-dir: ${{env.unit_test_dir}}/build
 
