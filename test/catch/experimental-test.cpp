@@ -13,9 +13,6 @@
 //#include <estd/locale.h>
 #include "estd/exp/unique_handle.h"
 
-// DEBT: Move this out to a 'port.cpp' test
-#include <estd/port/esp-idf/fake/esp_log.h>
-
 using namespace estd::test;
 
 struct Test

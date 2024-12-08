@@ -81,6 +81,7 @@ else()
         misc-test.cpp
         optional-test.cpp
         ostream-test.cpp
+        port-test.cpp
         priority-queue-test.cpp
         queue-test.cpp
         stack-test.cpp

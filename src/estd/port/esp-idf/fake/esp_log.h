@@ -8,10 +8,6 @@ extern "C" {
 
 #include <stdio.h>
 
-//#define LOG_LOCAL_LEVEL
-
-//#define ESP_LOG_LEVEL
-
 enum esp_log_level_t
 {
     ESP_LOG_NONE,
@@ -22,6 +18,10 @@ enum esp_log_level_t
     ESP_LOG_VERBOSE
 };
 
+#define LOG_LOCAL_LEVEL ESP_LOG_INFO
+
+//#define ESP_LOG_LEVEL
+
 #define ESP_LOGE(tag, fmt...)     { printf("E %s: ", tag); printf(fmt); puts(""); }
 #define ESP_LOGW(tag, fmt...)     { printf("W %s: ", tag); printf(fmt); puts(""); }
 #define ESP_LOGI(tag, fmt...)     { printf("I %s: ", tag); printf(fmt); puts(""); }
@@ -30,7 +30,10 @@ enum esp_log_level_t
 
 #define ESP_LOG_BUFFER_HEX(tag, buffer, len)
 
+typedef int (*vprintf_like_t)(const char*, va_list);
+
 void esp_log_write(esp_log_level_t level, const char *tag, const char *format, ...);
+vprintf_like_t esp_log_set_vprintf(vprintf_like_t func);
 
 #ifdef __cplusplus
 }
