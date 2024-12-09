@@ -64,7 +64,8 @@ void test_clock()
         (long)now.time_since_epoch().count());
 #endif
 
-    TEST_ASSERT_GREATER_THAN(
+    // 09DEC24 MB Fun fact: ESP32C6 comes up so fast, FreeRTOS tick is 0 == 0
+    TEST_ASSERT_GREATER_OR_EQUAL(
         min.time_since_epoch().count(),
         now.time_since_epoch().count());
     //TEST_ASSERT(n > min);
