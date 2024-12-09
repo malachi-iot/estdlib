@@ -324,6 +324,7 @@ static void test_event_groups()
 
 }
 
+// DEBT: Move some of this out to 'freertos.cpp' test area
 static void test_freertos()
 {
     freertos::sync_sem.create_binary();

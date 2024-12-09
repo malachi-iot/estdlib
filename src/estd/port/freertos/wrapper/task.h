@@ -70,6 +70,21 @@ public:
         return pcTaskGetName(t);
     }
 
+    void delay(const TickType_t xTicksToDelay) const
+    {
+        vTaskDelay(xTicksToDelay);
+    }
+
+    void resume() const
+    {
+        vTaskResume(t);
+    }
+
+    void suspend() const
+    {
+        vTaskSuspend(t);
+    }
+
 #if configUSE_APPLICATION_TASK_TAG 
     TaskHookFunction_t tag() const
     {
@@ -120,15 +135,21 @@ public:
 #endif
 
 #if configSUPPORT_STATIC_ALLOCATION
-    BaseType_t create_static(TaskFunction_t pvTaskCode,
-        const char * const pcName,
+    using static_type = StaticTask_t;
+
+    static task create_static(TaskFunction_t pvTaskCode,
+        const char* const pcName,
         const configSTACK_DEPTH_TYPE uxStackDepth,
-        void *pvParameters,
+        void* pvParameters,
         UBaseType_t uxPriority,
         StackType_t* const puxStackBuffer,
-        StaticTask_t* const pxTaskBuffer)
+        static_type* const pxTaskBuffer)
     {
-        return xTaskCreate(pvTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, &t);
+        return task(xTaskCreateStatic(pvTaskCode,
+            pcName, uxStackDepth,
+            pvParameters, uxPriority,
+            puxStackBuffer,
+            pxTaskBuffer));
     }
 #endif
 
