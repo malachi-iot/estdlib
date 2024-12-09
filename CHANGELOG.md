@@ -2,7 +2,9 @@
 
 ## Added Features
 
+* https://github.com/malachi-iot/estdlib/issues/70 CMake compiler option macro helper
 * https://github.com/malachi-iot/estdlib/issues/69 `get<T>(tuple)` now available
+* https://github.com/malachi-iot/estdlib/issues/58 ESP-IDF logging emulation
 
 ## Quality Updates & Bug Fixes
 
