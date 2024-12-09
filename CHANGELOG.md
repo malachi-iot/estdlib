@@ -8,6 +8,7 @@
 
 ## Quality Updates & Bug Fixes
 
+* https://github.com/malachi-iot/estdlib/issues/68 `freertos::wrapper::task::create_static` now truly calls `xTaskCreateStatic`
 * https://github.com/malachi-iot/estdlib/issues/66 `tuple.visit()` now works with references too
 
 # v0.8.1 - 31OCT24

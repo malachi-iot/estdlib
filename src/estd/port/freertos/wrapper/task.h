@@ -70,11 +70,6 @@ public:
         return pcTaskGetName(t);
     }
 
-    void delay(const TickType_t xTicksToDelay) const
-    {
-        vTaskDelay(xTicksToDelay);
-    }
-
     void resume() const
     {
         vTaskResume(t);
@@ -135,7 +130,15 @@ public:
 #endif
 
 #if configSUPPORT_STATIC_ALLOCATION
-    using static_type = StaticTask_t;
+    // N represents byte count, not word count
+    template <unsigned N>
+    struct storage
+    {
+        static constexpr unsigned stack_depth = N / sizeof(StackType_t);
+
+        StaticTask_t task;
+        StackType_t stack[stack_depth];
+    };
 
     static task create_static(TaskFunction_t pvTaskCode,
         const char* const pcName,
@@ -143,7 +146,7 @@ public:
         void* pvParameters,
         UBaseType_t uxPriority,
         StackType_t* const puxStackBuffer,
-        static_type* const pxTaskBuffer)
+        StaticTask_t* const pxTaskBuffer)
     {
         return task(xTaskCreateStatic(pvTaskCode,
             pcName, uxStackDepth,
@@ -151,6 +154,30 @@ public:
             puxStackBuffer,
             pxTaskBuffer));
     }
+
+    template <unsigned N>
+    static task create_static(TaskFunction_t pvTaskCode,
+        const char* const pcName,
+        void* pvParameters,
+        UBaseType_t uxPriority,
+        storage<N>* s)
+    {
+        // "The size of the task stack specified as the NUMBER OF BYTES. Note that this differs from vanilla FreeRTOS"
+        // https://docs.espressif.com/projects/esp-idf/en/v5.3.2/esp32/api-reference/system/freertos_idf.html
+        // We believe them.  The penalty for stack size inaccuracy is so high we do an assert
+        // anyway.
+#if ESP_PLATFORM
+        static_assert(N == storage<N>::stack_depth, "ESP-IDF indicates stack depth is bytes");
+#endif
+
+        return task(xTaskCreateStatic(pvTaskCode,
+            pcName,
+            storage<N>::stack_depth,
+            pvParameters, uxPriority,
+            s->stack,
+            &s->task));
+    }
+
 #endif
 
     operator TaskHandle_t () const
