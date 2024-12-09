@@ -20,13 +20,11 @@ enum esp_log_level_t
 
 #define LOG_LOCAL_LEVEL ESP_LOG_INFO
 
-//#define ESP_LOG_LEVEL
-
-#define ESP_LOGE(tag, fmt...)     { printf("E %s: ", tag); printf(fmt); puts(""); }
-#define ESP_LOGW(tag, fmt...)     { printf("W %s: ", tag); printf(fmt); puts(""); }
-#define ESP_LOGI(tag, fmt...)     { printf("I %s: ", tag); printf(fmt); puts(""); }
-#define ESP_LOGD(tag, fmt...)     { printf("D %s: ", tag); printf(fmt); puts(""); }
-#define ESP_LOGV(tag, fmt...)     { printf("V %s: ", tag); printf(fmt); puts(""); }
+#define ESP_LOGE(tag, fmt...)     { esp_log_write(ESP_LOG_ERROR, tag, fmt); }
+#define ESP_LOGW(tag, fmt...)     { esp_log_write(ESP_LOG_WARN, tag, fmt); }
+#define ESP_LOGI(tag, fmt...)     { esp_log_write(ESP_LOG_INFO, tag, fmt); }
+#define ESP_LOGD(tag, fmt...)     { esp_log_write(ESP_LOG_DEBUG, tag, fmt); }
+#define ESP_LOGV(tag, fmt...)     { esp_log_write(ESP_LOG_VERBOSE, tag, fmt); }
 
 #define ESP_LOG_BUFFER_HEX(tag, buffer, len)
 
