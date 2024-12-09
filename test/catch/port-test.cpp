@@ -38,5 +38,7 @@ TEST_CASE("port (cross plat specific) tests")
         ESP_LOGE("Tag2", "uh oh! %d", 5);
 
         REQUIRE(fake_log_out == "E Tag2: uh oh! 5\n");
+
+        ESP_LOGW("Tag2", "Goodbye");
     }
 }

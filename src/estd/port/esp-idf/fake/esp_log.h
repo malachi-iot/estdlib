@@ -8,6 +8,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#include "esp_err.h"
+
 enum esp_log_level_t
 {
     ESP_LOG_NONE,

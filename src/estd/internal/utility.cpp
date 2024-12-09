@@ -54,7 +54,6 @@ void esp_log_write(esp_log_level_t level, const char* tag, const char* format, .
 {
     if(level <= LOG_LOCAL_LEVEL)
     {
-        // TODO: Write out tag
         esp_log_write_header(level, tag);
 
         va_list args;
