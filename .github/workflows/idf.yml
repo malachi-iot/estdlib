@@ -4,8 +4,10 @@ on:
   push:
     branches: [ "dev/**", "alpha" ]
     paths:
-      - '**/.c??'
-      - '**/.h??'
+      - '**/.c'
+      - '**/.h'
+      - '**/.cpp'
+      - '**/.hpp'
       - '**/.yml'
       - '**/CMakeLists.txt'
       - '**/*.cmake'
