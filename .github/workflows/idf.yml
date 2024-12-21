@@ -10,10 +10,13 @@ jobs:
 
     strategy:
       matrix:
-        version: [v5.2.3, v5.3.2, v5.4-beta]
+        version: [v5.2.3, v5.3.2, v5.4-beta2]
         target: [esp32, esp32c3, esp32c6, esp32s3]
 
     steps:
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Checkout repo
       uses: actions/checkout@v4
       with:
