@@ -13,15 +13,27 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
+    - name: ESP32
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.3.2
+        target: esp32
+        path: 'test/rtos/esp32/unity'
     - name: ESP32S3
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.3.2
         target: esp32s3
-        path: 'tests/rtos/esp32/unity'
+        path: 'test/rtos/esp32/unity'
     - name: ESP32P4
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.3.2
         target: esp32p4
-        path: 'tests/rtos/esp32/unity'
+        path: 'test/rtos/esp32/unity'
+    - name: ESP32C6
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.4-beta2
+        target: esp32p4
+        path: 'test/rtos/esp32/unity'
