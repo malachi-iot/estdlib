@@ -1,3 +1,6 @@
+# Interesting for reference, but I think it's obsoleted - can't get it to work,
+# cmake2.yml works though
+
 name: CMake
 
 on:

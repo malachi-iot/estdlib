@@ -1,3 +1,9 @@
+name: ESP-IDF
+
+on:
+  push:
+    branches: [ "dev/**", "alpha" ]
+
 jobs:
   build:
     runs-on: ubuntu-22.04
