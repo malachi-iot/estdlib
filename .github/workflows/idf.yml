@@ -8,29 +8,45 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    strategy:
+      matrix:
+        target: [esp32, esp32s3]
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-    - name: ESP32
+    - name: ${{ matrix.target }}
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.3.2
-        target: esp32
+        target: ${{ matrix.target }}
         path: 'test/rtos/esp32/unity'
-    - name: ESP32S3
-      uses: espressif/esp-idf-ci-action@v1
+
+  build-p4:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
       with:
-        esp_idf_version: v5.3.2
-        target: esp32s3
-        path: 'test/rtos/esp32/unity'
+        submodules: 'recursive'
     - name: ESP32P4
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.3.2
         target: esp32p4
         path: 'test/rtos/esp32/unity'
+
+  build-beta:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
     - name: ESP32C6
       uses: espressif/esp-idf-ci-action@v1
       with:
