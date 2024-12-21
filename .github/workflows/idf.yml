@@ -3,6 +3,12 @@ name: ESP-IDF
 on:
   push:
     branches: [ "dev/**", "alpha" ]
+    paths:
+      - '**/.c??'
+      - '**/.h??'
+      - '**/.yml'
+      - '**/CMakeLists.txt'
+      - '**/*.cmake'
 
 jobs:
   build:
