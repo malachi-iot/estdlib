@@ -17,6 +17,10 @@ TEST_CASE("bit operations")
             auto v = estd::byteswap<int32_t>(0x1234);
 
             REQUIRE(v == 0x34120000);
+
+            auto v1 = estd::byteswap<int32_t>(-500);
+
+            REQUIRE(estd::byteswap(v1) == -500);
         }
     }
 }

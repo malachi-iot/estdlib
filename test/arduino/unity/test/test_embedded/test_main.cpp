@@ -58,6 +58,7 @@ void setup()
     test_avr_pgm();
 #endif
     test_bipbuf();
+    test_bit();
     test_chrono();
     test_cpp();
     test_cstddef();

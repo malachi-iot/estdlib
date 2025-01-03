@@ -19,6 +19,7 @@ void test_align();
 void test_array();
 void test_avr_pgm();
 void test_bipbuf();
+void test_bit();
 void test_cpp();
 void test_chrono();
 void test_cstddef();
