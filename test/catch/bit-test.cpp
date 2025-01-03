@@ -6,8 +6,17 @@ TEST_CASE("bit operations")
 {
     SECTION("byteswap")
     {
-        auto v = estd::byteswap<uint16_t>(0x1234);
+        SECTION("uint16_t")
+        {
+            auto v = estd::byteswap<uint16_t>(0x1234);
 
-        REQUIRE(v == 0x3412);
+            REQUIRE(v == 0x3412);
+        }
+        SECTION("int32_t")
+        {
+            auto v = estd::byteswap<int32_t>(0x1234);
+
+            REQUIRE(v == 0x34120000);
+        }
     }
 }
