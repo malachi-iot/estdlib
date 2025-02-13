@@ -61,6 +61,7 @@ else()
         chrono-test.cpp
         cstddef-test.cpp
         dynamic-array-test.cpp
+        flags-test.cpp
         experimental/memory-pool1-test.cpp
         experimental/memory-pool2-test.cpp
         experimental/memory-pool3-test.cpp
