@@ -19,6 +19,7 @@
 #include "type_traits/is_convertible.h"
 #include "type_traits/is_member.h"
 #include "type_traits/make_unsigned.h"
+#include "type_traits/is_trivial.h"
 
 
 #include "../port/support_platform.h"
