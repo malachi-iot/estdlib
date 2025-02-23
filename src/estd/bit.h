@@ -41,10 +41,9 @@ namespace detail {
 
 #else // not xor (gcc)
 
-#if __has_builtin(__builtin_bswap16) || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
+#if FEATURE_TOOLCHAIN_BUILTIN_BSWAP16 || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
 
-constexpr uint16_t
-byteswap(uint16_t n) noexcept
+constexpr uint16_t byteswap(uint16_t n) noexcept
 {
     return __builtin_bswap16(n);
 }
@@ -54,15 +53,14 @@ byteswap(uint16_t n) noexcept
 // the high order bit.  This gives us confidence that we can swap bits around safely, trusting that
 // whoever "unswaps" them will end up with the expected high order signed bit.
 
-constexpr int16_t
-byteswap(int16_t n) noexcept
+constexpr int16_t byteswap(int16_t n) noexcept
 {
     return __builtin_bswap16(n);
 }
 
 #endif
 
-#if __has_builtin(__builtin_bswap32) || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
+#if FEATURE_TOOLCHAIN_BUILTIN_BSWAP32 || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
 
 constexpr uint32_t
 byteswap(uint32_t n) noexcept
@@ -78,7 +76,7 @@ byteswap(int32_t n) noexcept
 
 #endif
 
-#if __has_builtin(__builtin_bswap64) || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
+#if FEATURE_TOOLCHAIN_BUILTIN_BSWAP64 || FEATURE_ESTD_BYTESWAP_MODE == FEATURE_ESTD_BYTESWAP_GCC
 
 constexpr uint64_t
 byteswap(uint64_t n) noexcept

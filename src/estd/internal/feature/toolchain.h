@@ -21,4 +21,14 @@
 #endif
 #endif
 
+#if __AVR__
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP16  1
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP32  1
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP64  1
+#else
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP16  __has_builtin(__builtin_bswap16) 
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP32  __has_builtin(__builtin_bswap32) 
+#define FEATURE_TOOLCHAIN_BUILTIN_BSWAP64  __has_builtin(__builtin_bswap64) 
+#endif
+
 #endif
