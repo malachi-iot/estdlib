@@ -5,6 +5,9 @@
 #include "feature/std.h"
 #include "feature/cpp.h"
 #include "macro/c++11_emul.h"
+#include "macro/c++/attr.h"
+#include "macro/c++/ctor.h"
+#include "macro/c++/const.h"
 #include "macro/cpp.h"
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
@@ -31,14 +34,6 @@
 #else
 #define CONSTEXPR const
 #define EXPLICIT
-#endif
-
-#ifdef __cpp_conditional_explicit
-#define CONSTEXPR_EXPLICIT(conditional) constexpr explicit(conditional)
-#elif __cpp_constexpr
-#define CONSTEXPR_EXPLICIT(conditional) constexpr explicit
-#else
-#define CONSTEXPR_EXPLICIT(conditional) inline
 #endif
 
 #ifdef FEATURE_CPP_NOEXCEPT

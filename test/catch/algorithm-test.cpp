@@ -21,7 +21,7 @@ using namespace estd;
 
 TEST_CASE("algorithm tests")
 {
-    test_class_1 tc1;
+    //test_class_1 tc1;
 
     SECTION("find_if in class")
     {

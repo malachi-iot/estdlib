@@ -34,7 +34,7 @@ public:
 
     constexpr flags(const value_type& value) : value_{value}    {}
 
-    constexpr flags& operator|=(const flags& v)
+    ESTD_CPP_CONSTEXPR(14) flags& operator|=(const flags& v)
     {
         value_ |= v;
         return *this;
