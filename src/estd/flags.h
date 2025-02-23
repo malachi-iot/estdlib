@@ -7,7 +7,7 @@
 namespace estd { namespace detail { inline namespace v1 {
 
 ///
-/// \brief The flags class
+/// Designed really to be fully consteval friendly, but works as intended merely as contextp
 ///
 template <class Enum>
 class flags
@@ -101,6 +101,6 @@ constexpr estd::detail::v1::flags<Enum> operator~(const Enum& v)    \
 { return estd::detail::v1::flags<Enum>(lhs) ^ rhs; }     \
     constexpr estd::detail::v1::flags<Enum> operator|(const Enum& lhs, const Enum& rhs)    \
 { return estd::detail::v1::flags<Enum>(lhs) | rhs; }     \
-    constexpr embr::v1::flags<Enum> operator&(const Enum& lhs, const Enum& rhs)    \
+    constexpr estd::detail::v1::flags<Enum> operator&(const Enum& lhs, const Enum& rhs)    \
 { return estd::detail::v1::flags<Enum>(lhs) & rhs; }
 
