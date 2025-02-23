@@ -1,9 +1,14 @@
-# v0.X.X - XXXXXXX
+# v0.8.3 - XXXXXXX
 
 ## Added Features
 
+* https://github.com/malachi-iot/estdlib/issues/83 `ESTD_FLAGS` constexpr enum flags helper
+* https://github.com/malachi-iot/estdlib/issues/78 `estd::pair` now has ==, != and < operators
+
 ## Quality Updates & Bug Fixes
 
+* https://github.com/malachi-iot/estdlib/issues/77 byteswap code much cleaner and compiles on AVR now
+* https://github.com/malachi-iot/estdlib/issues/80 & https://github.com/malachi-iot/estdlib/issues/54 improved ESP-IDF chrono support
 
 # v0.8.2 - 10DEC24
 
