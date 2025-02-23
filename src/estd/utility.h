@@ -15,10 +15,8 @@
 
 namespace estd {
 
-template<
-    class T1,
-    class T2
-> struct pair
+template<class T1, class T2>
+struct pair
 {
     T1 first;
     T2 second;
@@ -39,10 +37,7 @@ template<
 };
 
 template <class T1, class T2>
-#ifdef FEATURE_CPP_CONSTEXPR
-constexpr
-#endif
-pair<T1, T2> make_pair(T1 t, T2 u)
+ESTD_CPP_CONSTEXPR(11) pair<T1, T2> make_pair(T1 t, T2 u)
 {
 #ifdef FEATURE_CPP_INITIALIZER_LIST
     return pair<T1, T2> { t, u };
@@ -53,23 +48,35 @@ pair<T1, T2> make_pair(T1 t, T2 u)
 
 
 template <class T1, class T2>
-constexpr bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+ESTD_CPP_CONSTEXPR(11) bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
     return lhs.first == rhs.first && lhs.second == rhs.second;
 }
 
 template <class T1, class T2>
-constexpr bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+ESTD_CPP_CONSTEXPR(11) bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
     return lhs.first != rhs.first || lhs.second != rhs.second;
 }
 
-/*
 template <class T1, class T2>
-constexpr bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+ESTD_CPP_CONSTEXPR(11) bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
 {
-    return lhs.first < rhs.first && lhs.second < rhs.second;
-}   */
+    return
+        lhs.first < rhs.first ? true :
+        lhs.first > rhs.first ? false :
+        lhs.second < rhs.second;
+}
+
+// NOT TESTED
+template <class T1, class T2>
+ESTD_CPP_CONSTEXPR(11) bool operator>(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+{
+    return
+        lhs.first > rhs.first ? true :
+        lhs.first < rhs.first ? false :
+        lhs.second > rhs.second;
+}
 
 
 template <class T1, class T2>

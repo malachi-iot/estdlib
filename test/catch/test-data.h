@@ -69,6 +69,13 @@ struct Dummy
         return val1 == compare_to.val1 &&
             value2 == compare_to.value2;
     }
+
+    bool operator<(const Dummy& compare_to) const
+    {
+        return val1 < compare_to.val1 ? true :
+            val1 > compare_to.val1 ? false :
+            value2 < compare_to.value2;
+    }
 };
 
 struct ChildOfDummy : Dummy {};

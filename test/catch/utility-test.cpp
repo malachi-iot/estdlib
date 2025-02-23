@@ -281,9 +281,15 @@ TEST_CASE("utility")
         {
             REQUIRE(pair_type(2, 3) == p);
         }
-        SECTION("operator 1=")
+        SECTION("operator !=")
         {
             REQUIRE(pair_type(2.1, 3) != p);
+        }
+        SECTION("operator <")
+        {
+            REQUIRE(pair_type(1.9, 3) < p);
+            REQUIRE(pair_type(2, 2.9) < p);
+            REQUIRE((pair_type(2.1, 2.9) < p) == false);
         }
     }
     SECTION("integer_sequence")

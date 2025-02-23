@@ -132,7 +132,7 @@ template <size_t I, class T, class TNext>
 typename enable_if<(I > 0)>::type _iterate_test(tuple_impl<T, TNext>& t)
 {
     //typedef typename tuple_impl<T, TNext>::next_type next_type;
-    int val_ = I;
+    //int val_ = I;
     _iterate_test<I - 1>(t.next());
 }
 
