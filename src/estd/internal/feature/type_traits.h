@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../platform.h"
+#include "../feature/std.h"
 
 // By default, if available, we alias a bunch of type_traits stuff to its underlying
 // std.  This can be turned off to use a subset of our own implementation which is
