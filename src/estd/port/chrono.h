@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../internal/chrono.h"
-#include "../internal/chrono/duration.h"
-#include "../internal/chrono/time_point.h"
 #include "../internal/chrono/literals.h"
 #include "../ratio.h"
 #include "../limits.h"

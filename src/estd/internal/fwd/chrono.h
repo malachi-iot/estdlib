@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../chrono/features.h"
+
 #include "common_type.h"
 #include "ratio.h"
 
@@ -113,6 +115,19 @@ typedef int32_t days_rep;
 typedef int32_t weeks_rep;
 typedef int32_t months_rep;
 typedef int16_t years_rep;      ///< Deviates from spec which calls for 17 bit minimum
+#endif
+
+// Use this to turn on incomplete estd::chrono support namespace
+// there's a lot that goes into a healthy, functioning chrono namespace
+// so we default to using std::chrono
+#ifdef FEATURE_ESTD_CHRONO
+namespace estd_ratio = estd;
+namespace estd_chrono = estd::chrono;
+#elif FEATURE_STD_CHRONO
+namespace estd_ratio = std;
+namespace estd_chrono = std::chrono;
+#else
+#warning Invalid configuration, neither std or estd chrono fully activated
 #endif
 
 

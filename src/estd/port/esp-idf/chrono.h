@@ -2,6 +2,9 @@
 
 #include "esp_timer.h"
 
+#include "../../internal/chrono/duration.h"
+#include "../../internal/chrono/time_point.h"
+
 namespace estd { namespace chrono {
 
 struct esp_clock
