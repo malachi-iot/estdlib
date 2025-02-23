@@ -272,9 +272,19 @@ TEST_CASE("utility")
     }
     SECTION("pair")
     {
-        const estd::pair<float, float> p(2.0, 3.0);
+        using pair_type = estd::pair<float, float>;
+        const pair_type p(2.0, 3.0);
 
         REQUIRE(estd::get<0>(p) == 2.0);
+
+        SECTION("operator ==")
+        {
+            REQUIRE(pair_type(2, 3) == p);
+        }
+        SECTION("operator 1=")
+        {
+            REQUIRE(pair_type(2.1, 3) != p);
+        }
     }
     SECTION("integer_sequence")
     {

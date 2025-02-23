@@ -51,6 +51,27 @@ pair<T1, T2> make_pair(T1 t, T2 u)
 #endif
 }
 
+
+template <class T1, class T2>
+constexpr bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+{
+    return lhs.first == rhs.first && lhs.second == rhs.second;
+}
+
+template <class T1, class T2>
+constexpr bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+{
+    return lhs.first != rhs.first || lhs.second != rhs.second;
+}
+
+/*
+template <class T1, class T2>
+constexpr bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+{
+    return lhs.first < rhs.first && lhs.second < rhs.second;
+}   */
+
+
 template <class T1, class T2>
 struct tuple_size<pair<T1, T2> > : integral_constant<std::size_t, 2> {};
 
