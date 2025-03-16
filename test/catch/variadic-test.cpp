@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <estd/internal/variadic.h>
 #include <estd/variant.h>

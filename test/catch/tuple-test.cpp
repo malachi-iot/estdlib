@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <estd/tuple.h>
 #include <estd/internal/variadic.h>

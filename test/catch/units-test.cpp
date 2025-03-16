@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <estd/internal/units/base.h>
 #include <estd/internal/units/bytes.h>

@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <estd/sstream.h>
 #include <estd/iostream.h>

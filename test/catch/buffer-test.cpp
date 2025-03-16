@@ -4,7 +4,7 @@
 
 #include "test-data.h"
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using namespace estd::internal;     // DEBT: Get rid of this, causes too much confusion
 

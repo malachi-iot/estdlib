@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <estd/exp/memory/memory_pool2.h>
 #include "../test-data.h"

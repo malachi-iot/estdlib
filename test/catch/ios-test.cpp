@@ -2,7 +2,7 @@
 // Created by malachi on 8/10/18.
 //
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include <condition_variable>
 #include <future>
