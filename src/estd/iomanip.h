@@ -34,7 +34,7 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
     return out;
 }
 
-class setbase : public internal::ostream_functor_tag
+class setbase : public detail::ostream_functor_tag
 {
     const ios_base::fmtflags fmt_;
 

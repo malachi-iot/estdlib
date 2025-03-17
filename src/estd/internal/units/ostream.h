@@ -79,19 +79,19 @@ void write_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out,
 
 namespace detail {
 
-template <class TUnit>
-struct unit_put : estd::internal::ostream_functor_tag
+template <class Unit>
+struct unit_put : estd::detail::ostream_functor_tag
 {
-    const TUnit unit;
+    const Unit unit;
     const bool abbrev;
 
-    constexpr unit_put(const TUnit& unit, bool abbrev) :
+    constexpr unit_put(const Unit& unit, bool abbrev) :
         unit{unit},
         abbrev{abbrev}
     {}
 
-    template <class TStreambuf, class TBase>
-    void operator()(estd::detail::basic_ostream<TStreambuf, TBase>& out) const
+    template <class Streambuf, class Base>
+    void operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
     {
         if(abbrev)
             write_abbrev(out, unit);

@@ -8,7 +8,7 @@ using namespace estd;
 
 #include "macro/push.h"
 
-struct exp_manipulator : internal::ostream_functor_tag
+struct exp_manipulator : detail::ostream_functor_tag
 {
     int v;
 

@@ -43,14 +43,15 @@ class basic_istream;
 template <class Streambuf>
 class basic_iostream;
 
+// For our non-standard << overload which takes a functor
+struct ostream_functor_tag {};
+
 }
     
 namespace internal {
 
-// For our non-standard << overload which takes a functor
-// NOTE: Works great, it's time to put him into 'detail' or a special 'detail::tag'
-// namespace
-struct ostream_functor_tag {};
+// NOTE: Deprecated, use detail flavor
+using ostream_functor_tag = detail::ostream_functor_tag;
 
 }
 

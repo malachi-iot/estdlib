@@ -104,9 +104,9 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 #if __cpp_rvalue_references
 // DEBT: Would really like to filter this out by is_invocable, but we don't have that
 // in estd yet
-template <class TStreambuf, class TBase, class F,
-    enable_if_t<is_base_of<internal::ostream_functor_tag, F>::value, bool> = true>
-constexpr basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out, F&& f)
+template <class Streambuf, class Base, class F,
+    enable_if_t<is_base_of<ostream_functor_tag, F>::value, bool> = true>
+constexpr basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out, F&& f)
 {
     return (f(out), out);
 }
