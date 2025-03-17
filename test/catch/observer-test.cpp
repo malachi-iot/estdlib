@@ -1,7 +1,7 @@
 #include <estd/exp/observer.h>
 #include <estd/vector.h>
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #warning This code is deprecated and excluded from the unit tests.  Use 'embr' flavor instead
 

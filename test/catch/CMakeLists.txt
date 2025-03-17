@@ -30,8 +30,6 @@ FetchContent_MakeAvailable(Catch2)
 
 message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
 
-# DEBT: Include <catch2/catch.hpp> directly and don't rely on this
-INCLUDE_DIRECTORIES(${Catch2_SOURCE_DIR}/include)
 
 add_subdirectory(${ROOT_DIR} estd)
 
