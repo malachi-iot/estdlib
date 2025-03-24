@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include "estd/internal/value_evaporator.h"
 #include "estd/internal/chooser.h"

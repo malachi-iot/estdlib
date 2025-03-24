@@ -2,7 +2,7 @@
 // Created by malachi on 5/21/18.
 //
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include "estd/internal/platform.h"
 #include "test-data.h"

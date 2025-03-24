@@ -3,7 +3,7 @@
 
 #include "test-data.h"
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";

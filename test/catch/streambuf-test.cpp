@@ -2,7 +2,7 @@
 // Created by malachi on 4/29/22.
 //
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <estd/istream.h>
 #include <estd/ostream.h>

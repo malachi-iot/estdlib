@@ -7,26 +7,9 @@ set(FEATURE_ESTD_COMPILE_STRICTNESS 4 CACHE STRING
 set(FEATURE_ESTD_COMPILE_VERBOSITY 3 CACHE STRING
     "TBD")
 
-if(NOT DEFINED CMAKE_CXX_STANDARD)
-    message(DEBUG "defaulting to c++11")
-    set(CMAKE_CXX_STANDARD 11)
-else()
-    message(STATUS "using c++${CMAKE_CXX_STANDARD}")
-endif()
-
 include(../../tools/cmake/setvars.cmake)
 
-Set(FETCHCONTENT_QUIET FALSE)
-
-FetchContent_Declare(
-    Catch2
-    GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
-    GIT_TAG         v2.13.10
-    GIT_PROGRESS    TRUE
-    GIT_SHALLOW     TRUE
-)
-
-FetchContent_MakeAvailable(Catch2)
+CPMAddPackage("gh:catchorg/Catch2@3.8.0")
 
 message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
 
@@ -40,7 +23,7 @@ set(EXTRA_FILES
     ${ROOT_DIR}/docs/Units.md
 )
 
-add_executable(${PROJECT_NAME} "main.cpp" ${EXTRA_FILES})
+add_executable(${PROJECT_NAME} ${EXTRA_FILES})
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
     # Since unit tests take a while to compile now, have an override
@@ -116,10 +99,11 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
 estd_compile_options()
 
-target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2)
+target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2WithMain)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
 list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
 
 include(CTest)
-include(Catch)
-catch_discover_tests(${PROJECT_NAME})
+#include(Catch)
+#catch_discover_tests(${PROJECT_NAME})

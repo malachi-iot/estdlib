@@ -26,7 +26,7 @@ struct integral_constant
 {
     static constexpr T value = v;
     typedef T value_type;
-    typedef integral_constant type; // using injected-class-name
+    using type = integral_constant; // using injected-class-name
 
     ESTD_CPP_CONSTEXPR_RET operator value_type() const NOEXCEPT { return value; }
 #ifdef __cpp_constexpr
