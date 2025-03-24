@@ -82,7 +82,8 @@ else()
         internal-test.cpp)
 endif()
 
-# DEBT: Make a linkage property so that we don't have to double these guys up
+# DEBT: Make a linkage property so that we don't have to double these guys up,
+# and also put into estd proper not unit test
 if(FEATURE_ESTD_INTERFACE)
     target_compile_definitions(estd INTERFACE
         FEATURE_ESTD_COMPILE_VERBOSITY=${FEATURE_ESTD_COMPILE_VERBOSITY}
@@ -102,8 +103,8 @@ estd_compile_options()
 target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2WithMain)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
 
 include(CTest)
-#include(Catch)
-#catch_discover_tests(${PROJECT_NAME})
+include(Catch)
+catch_discover_tests(${PROJECT_NAME})
