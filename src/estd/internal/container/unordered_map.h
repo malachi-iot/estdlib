@@ -104,6 +104,9 @@ private:
             // If we reach end of entire set, indicate we are at the end
             if(it_ == it.it_)   return true;
 
+            // If we reach a null slot, then that's the end of the bucket
+            if(is_null(*it_)) return true;
+
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
             return n_ != index(it_->first);
@@ -113,6 +116,10 @@ private:
         {
             // If we reach end of entire set, indicate we are NOT NOT at the end
             if(it_ == it.it_)   return false;
+
+            // If we reach a null slot, that's the end of the bucket - so we fail
+            // to assert it's not the end (return false)
+            if(is_null(*it_)) return false;
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
@@ -173,20 +180,35 @@ public:
         return { it, true };
     }
 
-    pair<iterator, bool> insert(const_reference value)
+    pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
     {
-        unsigned hashed = index(value.first);
+        const size_type idx = index(value.first);
 
         // linear probing
-        iterator it = &container_[hashed];
-        while(is_null(*it) == false)
+
+        iterator it = &container_[idx];
+        // While we don't have null, keep moving forward over occupied
+        // spots
+        for(;is_null(*it) == false; ++it)
         {
-            if(++it == cend())
+            // if we get to the complete end, that's a fail
+            // if we've moved to the next bucket, that's also a fail
+            if(it == cend() || index(it->first) != idx)
+                return { nullptr, false };
+            else if(!permit_duplicates)
             {
-                return { it, false };
+                if(KeyEqual{}(value.first, it->first))
+                    // "value set to true if and only if the insertion took place."
+                    return { it, false };
             }
+
+            // Unlike std::unordered_map, we don't always kick back duplicate keys.
+            // Instead, that's undefined behavior if you try to pull via [],
+            // but iterating through a bucket you can get to all of them (and more, likely)
         }
 
+        // We've made it here without reaching the end or bonking into another bucket,
+        // we're good to go
         new (it) value_type(value);
 
         return { it, true };
@@ -203,6 +225,11 @@ public:
     }
 
     constexpr end_local_iterator end(size_type) const
+    {
+        return { cend() };
+    }
+
+    constexpr end_local_iterator cend(size_type) const
     {
         return { cend() };
     }

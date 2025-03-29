@@ -54,6 +54,7 @@ TEST_CASE("miscellaneous")
         using type = estd::internal::unordered_map<10, int, layer1::string<32>>;
         using value_type = typename type::value_type;
         using it = typename type::const_local_iterator;
+        using pair = estd::pair<typename type::iterator, bool>;
 
         type map;
         
@@ -63,7 +64,11 @@ TEST_CASE("miscellaneous")
         // placements.  We need to check against bucket a bit more during insert/emplace.
         // FIX: Key '0' not working due to collision between hash(0) and Null
 
-        map.insert({1, "hi2u"});
+        pair r1 = map.insert({1, "hi2u"});
+        REQUIRE(r1.second);
+        r1 = map.insert({1, "hi again"});
+        REQUIRE(r1.second == false);
+        REQUIRE(r1.first->second == "hi2u");
         int bucket1 = map.bucket(1);
         unsigned counter = 0;
 
