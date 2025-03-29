@@ -60,7 +60,7 @@ public:
             }
         }
 
-        //*it = value;
+        new (it) iterator(value);
 
         return { it, true };
     }

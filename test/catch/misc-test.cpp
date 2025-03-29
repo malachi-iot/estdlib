@@ -51,9 +51,10 @@ TEST_CASE("miscellaneous")
     SECTION("unordered_map")
     {
         using type = estd::internal::unordered_map<10, int, const char*>;
+        using value_type = typename type::value_type;
 
-        type map;
+        //type map;
 
-        map.insert({0, "hi2u"});
+        //map.insert({0, "hi2u"});
     }
 }

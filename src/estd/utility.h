@@ -24,26 +24,21 @@ struct pair
     typedef T1 first_type;
     typedef T2 second_type;
 
-#if __cplusplus >= 201103L
-    constexpr pair() : first(), second() {}
+    pair() = default;
+    pair(const pair&) = default;
+    pair(pair&&) = default;
 
-    pair(const T1& first, const T2& second) : first(first), second(second) {}
+    constexpr pair(const T1& first, const T2& second) :
+        first(first), second(second) {}
 
     template <class U1, class U2>
     constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
-#else
-    pair() : first(), second() {}
-#endif
 };
 
 template <class T1, class T2>
 ESTD_CPP_CONSTEXPR(11) pair<T1, T2> make_pair(T1 t, T2 u)
 {
-#ifdef FEATURE_CPP_INITIALIZER_LIST
     return pair<T1, T2> { t, u };
-#else
-    return pair<T1, T2>(t, u);
-#endif
 }
 
 
