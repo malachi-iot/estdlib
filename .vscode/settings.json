@@ -20,7 +20,15 @@
         "utility": "cpp",
         "variant": "cpp",
         "fstream": "cpp",
-        "streambuf": "cpp"
+        "streambuf": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "bitset": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/test/catch",
     "idf.portWin": "COM3"

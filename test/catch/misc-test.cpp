@@ -6,6 +6,7 @@
 #include <estd/variant.h>
 #include <estd/internal/container/set.h>
 #include <estd/internal/container/unordered_set.h>
+#include <estd/internal/container/unordered_map.h>
 
 using namespace estd;
 
@@ -46,5 +47,13 @@ TEST_CASE("miscellaneous")
         REQUIRE(r.second);
 
         REQUIRE(value.size() == 2);
+    }
+    SECTION("unordered_map")
+    {
+        using type = estd::internal::unordered_map<10, int, const char*>;
+
+        type map;
+
+        map.insert({0, "hi2u"});
     }
 }

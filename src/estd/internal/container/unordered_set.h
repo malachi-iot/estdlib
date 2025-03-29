@@ -9,6 +9,7 @@ namespace estd {
 namespace internal {
 
 // NOTE: Was gonna use quadratic probing here, but 'Hash' signature might be incompatible
+// TODO: If possible consolidate/dogfood in unordered_map
 
 template <class Container,
     class Key = typename Container::value_type,
@@ -63,7 +64,9 @@ public:
 
     pair<iterator, bool> insert(const_reference value)
     {
-        unsigned hashed = hasher{}(value);
+        unsigned hashed = hasher{}(value) % set_.size();
+
+        // linear probing
         iterator it = &set_[hashed];
         while(*it != Null)
         {
