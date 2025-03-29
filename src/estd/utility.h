@@ -33,6 +33,8 @@ struct pair
 
     template <class U1, class U2>
     constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
+
+    pair& operator=(const pair& other) = default;
 };
 
 template <class T1, class T2>
