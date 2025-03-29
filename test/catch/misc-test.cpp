@@ -3,6 +3,7 @@
 #include <estd/array.h>
 #include <estd/functional.h>
 #include <estd/type_traits.h>
+#include <estd/string.h>
 #include <estd/variant.h>
 #include <estd/internal/container/set.h>
 #include <estd/internal/container/unordered_set.h>
@@ -50,7 +51,7 @@ TEST_CASE("miscellaneous")
     }
     SECTION("unordered_map")
     {
-        using type = estd::internal::unordered_map<10, int, const char*>;
+        using type = estd::internal::unordered_map<10, int, layer1::string<32>>;
         using value_type = typename type::value_type;
         using it = typename type::const_local_iterator;
 
@@ -67,9 +68,14 @@ TEST_CASE("miscellaneous")
 
         for(it i = map.cbegin(bucket1); i != map.end(bucket1); ++i, ++counter)
         {
-
+            REQUIRE(i->second == "hi2u");
         }
 
         REQUIRE(counter == 1);
+
+        REQUIRE(map.bucket_size(bucket1) == 1);
+        REQUIRE(map.contains(0) == false);
+        REQUIRE(map.contains(1));
+        REQUIRE(map.contains(2) == false);
     }
 }

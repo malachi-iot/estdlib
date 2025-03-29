@@ -43,6 +43,7 @@ public:
     //using const_local_iterator = const_iterator;
 
 private:
+    // FIX: We need this semi-initialized, with keys all being Null
     uninitialized_array<value_type, N> container_;
 
     // DEBT: Doesn't handle non-empty hasher
@@ -67,7 +68,9 @@ private:
 
         LocalIt it_;
 
-        constexpr value_type operator*() { return *it_; }
+        constexpr value_type operator*() const { return *it_; }
+
+        constexpr const_pointer operator->() const { return it_; }
 
         constexpr bool operator!=(end_local_iterator) const
         {
@@ -124,12 +127,6 @@ public:
         return { it, true };
     }
 
-    /*
-    size_type bucket_size(size_type n) const
-    {
-
-    }   */
-
     local_iterator begin(size_type n)
     {
         return { n, &container_[n] };
@@ -140,9 +137,25 @@ public:
         return { n, &container_[n] };
     }
 
-    static constexpr end_local_iterator end(size_type n)
+    static constexpr end_local_iterator end(size_type)
     {
         return {};
+    }
+
+    // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
+    size_type bucket_size(size_type n) const
+    {
+        unsigned counter = 0;
+
+        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+            ++counter;
+
+        return counter;
+    }
+
+    constexpr bool contains(const key_type key) const
+    {
+        return container_[index(key)].first != Null;
     }
 };
 
