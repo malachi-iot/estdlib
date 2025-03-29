@@ -11,12 +11,20 @@ namespace internal {
 
 // DEBT: Hard-wired to layer1 stlye
 
-template <class Key, Key Null = Key()>
-struct is_null_key
+// DEBT: This guy wants to play with estd::layer1::optional you can feel it
+// We are doing this rather than a Null = T{} from the get go because some T won't
+// play nice in that context
+template <class T>
+struct nullable_traits
 {
-    constexpr bool operator()(const Key& compare_to)
+    static constexpr bool is_null(const T& value)
     {
-        return compare_to == Null;
+        return value == T{};
+    }
+
+    static void set_null(T* value)
+    {
+        *value = T{};
     }
 };
 
@@ -25,11 +33,11 @@ template <
     class Key,
     class T,
     class Hash = hash<Key>,
-    class IsKeyNull = is_null_key<Key>,
+    class Nullable = nullable_traits<Key>,
     class KeyEqual = equal_to<Key> >
 class unordered_map;
 
-template <unsigned N, class Key, class T, class Hash, class IsKeyNull, class KeyEqual>
+template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
 class unordered_map :
     protected Hash,  // EBO
     protected KeyEqual  // EBO
@@ -46,14 +54,19 @@ public:
     using hasher = Hash;
     using size_type = unsigned;
 
-    using end_local_iterator = monostate;
+    struct end_local_iterator
+    {
+        const_iterator it_;
+    };
+
+    using end_iterator = monostate;
 
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
 
     static constexpr bool is_null(const_reference v)
     {
-        return IsKeyNull{}(v.first);
+        return Nullable{}.is_null(v.first);
     }
 
 private:
@@ -86,8 +99,21 @@ private:
 
         constexpr const_pointer operator->() const { return it_; }
 
-        constexpr bool operator!=(end_local_iterator) const
+        constexpr bool operator==(end_local_iterator it) const
         {
+            // If we reach end of entire set, indicate we are at the end
+            if(it_ == it.it_)   return true;
+
+            // if n_ doesn't match current key hash, we have reached the end
+            // of this bucket
+            return n_ != index(it_->first);
+        }
+
+        constexpr bool operator!=(end_local_iterator it) const
+        {
+            // If we reach end of entire set, indicate we are NOT NOT at the end
+            if(it_ == it.it_)   return false;
+
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
             return n_ == index(it_->first);
@@ -176,9 +202,9 @@ public:
         return { n, &container_[n] };
     }
 
-    static constexpr end_local_iterator end(size_type)
+    constexpr end_local_iterator end(size_type) const
     {
-        return {};
+        return { cend() };
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
