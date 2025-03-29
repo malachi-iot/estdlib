@@ -50,7 +50,7 @@ struct GetImpl<sparse, 0, First, Rest...>
 
     static First&& value(tuple<sparse, First, Rest...>&& t)
     {
-        return t.first();
+        return std::forward<First>(t.first());
     }
 };
 
@@ -74,13 +74,15 @@ ESTD_CPP_CONSTEXPR(20) typename tuple_element<index, tuple<Types...> >::valref_t
 template<int index, bool sparse, typename... Types>
 ESTD_CPP_CONSTEXPR(20) tuple_element_t<index, tuple<Types...> >&& get(internal::tuple<sparse, Types...>&& t)
 {
-    return internal::GetImpl<sparse, index, Types...>::value(std::move(t));
+    return internal::GetImpl<sparse, index, Types...>::value(
+        std::forward<internal::tuple<sparse, Types...>>(t));
 }
 
 template<int index, bool sparse, typename... Types>
 constexpr tuple_element_t<index, tuple<Types...> >&& get(const internal::tuple<sparse, Types...>&& t)
 {
-    return internal::GetImpl<sparse, index, Types...>::value(t);
+    return internal::GetImpl<sparse, index, Types...>::value(
+        std::forward<const internal::tuple<sparse, Types...>>(t));
 }
 
 template <class T, bool sparse, typename... Types>

@@ -294,11 +294,13 @@ TEST_CASE("utility")
         }
         SECTION("piecewise")
         {
-            /*
             estd::pair<std::string, float> p(
                 estd::piecewise_construct_t{},
-                estd::make_tuple(10, '!'),
-                estd::make_tuple(0.1F));    */
+                estd::make_tuple(5, '!'),
+                estd::make_tuple(0.1F));
+
+            REQUIRE(p.first == "!!!!!");
+            REQUIRE(p.second == 0.1F);
         }
     }
     SECTION("integer_sequence")

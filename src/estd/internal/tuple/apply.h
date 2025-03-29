@@ -7,12 +7,11 @@ namespace estd {
 
 namespace internal {
 
-// 29MAR25 MB DEBT: Pretty sure we need to std::forward<Tuple>(t) around here
 template <class F2, class Tuple, size_t... Is>
 constexpr auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
-decltype (f(get<Is>(t)...))
+decltype (f(get<Is>(std::forward<Tuple>(t))...))
 {
-    return f(get<Is>(t)...);
+    return f(get<Is>(std::forward<Tuple>(t))...);
 }
 
 

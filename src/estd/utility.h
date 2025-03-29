@@ -43,9 +43,10 @@ struct pair
 
 #if FEATURE_ESTD_CPP03_TUPLE == 0
     template <class ...Args1, class ...Args2>
-    pair(piecewise_construct_t,
+    constexpr pair(piecewise_construct_t,
         tuple<Args1...> first_args,
         tuple<Args2...> second_args) :
+        // DEBT: Feels like we can avoid an implied && move here
         first{make_from_tuple<T1>(std::move(first_args))},
         second{make_from_tuple<T2>(std::move(second_args))}
     {

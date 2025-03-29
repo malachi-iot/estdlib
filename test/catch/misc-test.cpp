@@ -52,7 +52,7 @@ TEST_CASE("miscellaneous")
     SECTION("unordered_map")
     {
         using type = estd::internal::unordered_map<10, int, layer1::string<32>>;
-        using value_type = typename type::value_type;
+        //using value_type = typename type::value_type;
         using it = typename type::const_local_iterator;
         using pair = estd::pair<typename type::iterator, bool>;
 
