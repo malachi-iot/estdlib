@@ -15,6 +15,8 @@
 
 namespace estd {
 
+struct piecewise_construct_t {};
+
 template<class T1, class T2>
 struct pair
 {

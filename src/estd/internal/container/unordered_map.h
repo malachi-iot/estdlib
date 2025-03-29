@@ -11,16 +11,25 @@ namespace internal {
 
 // DEBT: Hard-wired to layer1 stlye
 
+template <class Key, Key Null = Key()>
+struct is_null_key
+{
+    constexpr bool operator()(const Key& compare_to)
+    {
+        return compare_to == Null;
+    }
+};
+
 template <
     unsigned sz,
     class Key,
     class T,
     class Hash = hash<Key>,
-    Key Null = Key(),
+    class IsKeyNull = is_null_key<Key>,
     class KeyEqual = equal_to<Key> >
 class unordered_map;
 
-template <unsigned N, class Key, class T, class Hash, Key Null, class KeyEqual>
+template <unsigned N, class Key, class T, class Hash, class IsKeyNull, class KeyEqual>
 class unordered_map :
     protected Hash,  // EBO
     protected KeyEqual  // EBO
@@ -41,6 +50,11 @@ public:
 
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
+
+    static constexpr bool is_null(const_reference v)
+    {
+        return IsKeyNull{}(v.first);
+    }
 
 private:
     // FIX: We need this semi-initialized, with keys all being Null
@@ -108,13 +122,38 @@ public:
         return container_[index(key)].second;
     }
 
+    template <class ...Args1, class ...Args2>
+    pair<iterator, bool> emplace(estd::piecewise_construct_t,
+        estd::tuple<Args1...> first_args,
+        estd::tuple<Args2...> second_args)
+    {
+        const key_type& key = estd::get<0>(first_args);
+        unsigned hashed = index(key);
+
+        // linear probing
+        iterator it = &container_[hashed];
+        // Look for a null entry
+        while(is_null(*it) == false)
+        {
+            if(++it == cend())
+            {
+                return { it, false };
+            }
+        }
+
+        // FIX: Not ready for prime time
+        //new (it) value_type(value);
+
+        return { it, true };
+    }
+
     pair<iterator, bool> insert(const_reference value)
     {
         unsigned hashed = index(value.first);
 
         // linear probing
         iterator it = &container_[hashed];
-        while(it->first != Null)
+        while(is_null(*it) == false)
         {
             if(++it == cend())
             {
@@ -155,7 +194,7 @@ public:
 
     constexpr bool contains(const key_type key) const
     {
-        return container_[index(key)].first != Null;
+        return is_null(container_[index(key)]) == false;
     }
 };
 

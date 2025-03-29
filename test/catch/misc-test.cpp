@@ -56,7 +56,11 @@ TEST_CASE("miscellaneous")
         using it = typename type::const_local_iterator;
 
         type map;
+        
 
+        // FIX: Linear probing may span across two (or more) different
+        // key spaces before it finds something, resulting in incorrect and undiscoverable
+        // placements.  We need to check against bucket a bit more during insert/emplace.
         // FIX: Key '0' not working due to collision between hash(0) and Null
 
         map.insert({1, "hi2u"});
