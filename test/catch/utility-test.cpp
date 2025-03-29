@@ -3,6 +3,7 @@
 #include <estd/utility.h>
 #include <estd/internal/utility.h>
 #include <estd/type_traits.h>
+#include <estd/tuple.h>
 
 #include "macro/push.h"
 
@@ -290,6 +291,14 @@ TEST_CASE("utility")
             REQUIRE(pair_type(1.9, 3) < p);
             REQUIRE(pair_type(2, 2.9) < p);
             REQUIRE((pair_type(2.1, 2.9) < p) == false);
+        }
+        SECTION("piecewise")
+        {
+            /*
+            estd::pair<std::string, float> p(
+                estd::piecewise_construct_t{},
+                estd::make_tuple(10, '!'),
+                estd::make_tuple(0.1F));    */
         }
     }
     SECTION("integer_sequence")

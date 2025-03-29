@@ -9,9 +9,11 @@
 #include "internal/fwd/tuple-shared.h"
 #include "internal/type_traits.h"
 #include "internal/variadic/integer_sequence.h"
+#include "internal/utility/sequence.h"
 #include "internal/utility.h"
 #if FEATURE_ESTD_CPP03_TUPLE == 0
 #include "internal/fwd/tuple.h"
+#include "internal/tuple/make.h"
 #endif
 
 #include "cstddef.h"
@@ -39,12 +41,16 @@ struct pair
     template <class U1, class U2>
     constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
 
+#if FEATURE_ESTD_CPP03_TUPLE == 0
     template <class ...Args1, class ...Args2>
     pair(piecewise_construct_t,
         tuple<Args1...> first_args,
-        tuple<Args2...> second_arts)
+        tuple<Args2...> second_args) :
+        first{make_from_tuple<T1>(std::move(first_args))},
+        second{make_from_tuple<T2>(std::move(second_args))}
     {
     }
+#endif
 
     pair& operator=(const pair& other) = default;
 };
@@ -149,35 +155,6 @@ typename tuple_element<index, pair<T1, T2> >::type& get(const pair<T1, T2>& p)
 template<class T>
 typename estd::add_rvalue_reference<T>::type declval() */
 
-#ifdef __cpp_variadic_templates
-// adapted from https://gist.github.com/ntessore/dc17769676fb3c6daa1f
-template<typename T, std::size_t N, T... Is>
-struct make_integer_sequence : make_integer_sequence<T, N-1, N-1, Is...> {};
-
-template<typename T, T... Is>
-struct make_integer_sequence<T, 0, Is...> : integer_sequence<T, Is...> {};
-
-template<std::size_t N>
-using make_index_sequence = make_integer_sequence<std::size_t, N>;
-
-template<typename... T>
-using index_sequence_for = make_index_sequence<sizeof...(T)>;
-
-// 26OCT24 MB Adapted from above technique
-template<typename T, std::size_t NN, std::size_t N = NN, T... Is>
-struct make_reverse_integer_sequence : make_reverse_integer_sequence<T, NN, N-1, NN-N, Is...> {};
-
-template<typename T, std::size_t NN, T... Is>
-struct make_reverse_integer_sequence<T, NN, 0, Is...> : estd::integer_sequence<T, Is...> {};
-
-template<std::size_t N>
-using make_reverse_index_sequence = make_reverse_integer_sequence<std::size_t, N>;
-
-#endif
-
-}
-
-namespace estd {
 
 #ifdef FEATURE_CPP_MOVESEMANTIC
 template<class T, class U = T>

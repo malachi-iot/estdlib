@@ -7,6 +7,7 @@
 #include "utility.h"    // For std::move
 #include "tuple/apply.h"
 #include "tuple/get.h"  // DEBT: Must precede 'visitor.h' likely due to probable lack of 'get' forward declaration
+#include "tuple/make.h"
 #include "tuple/sparse.h"
 
 #include "variadic/visitor.h"

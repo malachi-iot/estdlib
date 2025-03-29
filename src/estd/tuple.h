@@ -69,38 +69,6 @@ struct tuple_size<estd::tuple<TArgs...> >
 
 
 
-template <class... Types>
-CONSTEXPR tuple<Types...> make_tuple(Types&&... args )
-{
-    return tuple<Types...>(std::forward<Types>(args)...);
-}
-
-namespace internal {
-
-template <class F2, class Tuple, size_t... Is>
-constexpr auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
-    decltype (f(get<Is>(t)...))
-{
-    return f(get<Is>(t)...);
-}
-
-}
-
-template <class F2, class Tuple, class Seq = make_index_sequence<
-              tuple_size<
-                  remove_reference_t<Tuple>
-              >::value> >
-constexpr auto apply(F2&& f, Tuple&& t) ->
-    decltype (internal::apply_impl(std::forward<F2>(f),
-                                   std::forward<Tuple>(t),
-                                   Seq {}))
-{
-    return internal::apply_impl(std::forward<F2>(f),
-               std::forward<Tuple>(t),
-               Seq {});
-}
-
-
 }
 
 #else
