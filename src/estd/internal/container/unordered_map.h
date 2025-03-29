@@ -36,19 +36,57 @@ public:
     using const_iterator = const_pointer;
     using hasher = Hash;
     using size_type = unsigned;
-    
-    using local_iterator = iterator;
-    using const_local_iterator = const_iterator;
+
+    using end_local_iterator = monostate;
+
+    //using local_iterator = iterator;
+    //using const_local_iterator = const_iterator;
 
 private:
     uninitialized_array<value_type, N> container_;
 
-    constexpr size_type index(const key_type& key) const
+    // DEBT: Doesn't handle non-empty hasher
+    static constexpr size_type index(const key_type& key)
     {
         return hasher{}(key) % max_size();
     }
 
+    // indicates whether already-hashed (lhs) matches to-hash (rhs)
+    static constexpr bool match(size_type lhs, const key_type& rhs)
+    {
+        return lhs == index(rhs);
+    }
+
+    template <class LocalIt>
+    struct local_iterator_base
+    {
+        using this_type = local_iterator_base;
+
+        // bucket designator
+        const size_type n_;
+
+        LocalIt it_;
+
+        constexpr value_type operator*() { return *it_; }
+
+        constexpr bool operator!=(end_local_iterator) const
+        {
+            // if n_ matches current key hash, we haven't yet reached the
+            // end of this bucket
+            return n_ == index(it_->first);
+        }
+
+        this_type& operator++()
+        {
+            ++it_;
+            return *this;
+        }
+    };
+
 public:
+    using local_iterator = local_iterator_base<iterator>;
+    using const_local_iterator = local_iterator_base<const_iterator>;
+
     // NOTE: Not sure if end/cend represents end of raw container or end of active, useful
     // buckets but I think it's the former
     constexpr const_iterator cend() const { return container_.end(); }
@@ -94,12 +132,16 @@ public:
 
     local_iterator begin(size_type n)
     {
-        return &container_[n];
+        return { n, &container_[n] };
     }
 
-    const_local_iterator end(size_type n) const
+    const_local_iterator cbegin(size_type n) const
     {
-        // TBD
+        return { n, &container_[n] };
+    }
+
+    static constexpr end_local_iterator end(size_type n)
+    {
         return {};
     }
 };

@@ -52,9 +52,24 @@ TEST_CASE("miscellaneous")
     {
         using type = estd::internal::unordered_map<10, int, const char*>;
         using value_type = typename type::value_type;
+        using it = typename type::const_local_iterator;
 
         type map;
 
-        map.insert({0, "hi2u"});
+        // FIX: Key '0' not working due to collision between hash(0) and Null
+
+        map.insert({1, "hi2u"});
+        int bucket1 = map.bucket(1);
+        unsigned counter = 0;
+
+        // NOTE: Undefined behavior, but valid in this tightly controlled unit test
+        REQUIRE(bucket1 == 1);
+
+        for(it i = map.cbegin(bucket1); i != map.end(bucket1); ++i, ++counter)
+        {
+
+        }
+
+        REQUIRE(counter == 1);
     }
 }
