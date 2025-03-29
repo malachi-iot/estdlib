@@ -5,6 +5,7 @@
 #include "fwd/tuple.h"
 #include "feature/tuple.h"
 #include "utility.h"    // For std::move
+#include "tuple/apply.h"
 #include "tuple/get.h"  // DEBT: Must precede 'visitor.h' likely due to probable lack of 'get' forward declaration
 #include "tuple/sparse.h"
 

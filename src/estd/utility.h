@@ -11,7 +11,7 @@
 #include "internal/variadic/integer_sequence.h"
 #include "internal/utility.h"
 #if FEATURE_ESTD_CPP03_TUPLE == 0
-//#include "internal/fwd/tuple.h"
+#include "internal/fwd/tuple.h"
 #endif
 
 #include "cstddef.h"
@@ -39,12 +39,12 @@ struct pair
     template <class U1, class U2>
     constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
 
-    /*
     template <class ...Args1, class ...Args2>
     pair(piecewise_construct_t,
         tuple<Args1...> first_args,
         tuple<Args2...> second_arts)
-    {}  */
+    {
+    }
 
     pair& operator=(const pair& other) = default;
 };

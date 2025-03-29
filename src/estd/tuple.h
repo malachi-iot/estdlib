@@ -86,18 +86,18 @@ constexpr auto apply_impl(F2&& f, Tuple&& t, index_sequence<Is...>) ->
 
 }
 
-template <class F2, class Tuple, class TSeq = make_index_sequence<
+template <class F2, class Tuple, class Seq = make_index_sequence<
               tuple_size<
                   remove_reference_t<Tuple>
               >::value> >
 constexpr auto apply(F2&& f, Tuple&& t) ->
     decltype (internal::apply_impl(std::forward<F2>(f),
                                    std::forward<Tuple>(t),
-                                   TSeq {}))
+                                   Seq {}))
 {
     return internal::apply_impl(std::forward<F2>(f),
                std::forward<Tuple>(t),
-               TSeq {});
+               Seq {});
 }
 
 

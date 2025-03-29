@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../port/is_empty.h"
 #include "../feature/tuple.h"
 
 #include "tuple-shared.h"
