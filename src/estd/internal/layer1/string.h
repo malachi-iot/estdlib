@@ -29,7 +29,7 @@ class basic_string
     typedef base_type base_t;
 
 public:
-    basic_string() {}
+    basic_string() = default;
 
     basic_string(const CharT* s)
     {

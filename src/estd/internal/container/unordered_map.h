@@ -49,7 +49,9 @@ public:
     // The more collisions and/or duplicates you expect, the bigger this wants to be.
     // Idea being if you have two buckets near each other of only size 1, you'll never
     // have room to insert a collision/duplicate
-    static constexpr unsigned bucket_depth = 2;
+    static constexpr unsigned bucket_depth = 4;
+
+    // DEBT: Do static assert to make sure N is evenly divisible by bucket_depth
 
     using key_type = Key;
     using mapped_type = T;
@@ -74,6 +76,11 @@ public:
 
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
+
+    static constexpr size_type max_bucket_count()
+    {
+        return N / bucket_depth;
+    }
 
 private:
     // DEBT: casting away Key const in this crude manner
@@ -101,7 +108,8 @@ private:
     uninitialized_array<value_type, N> container_;
 
     // DEBT: Doesn't handle non-empty hasher
-    static constexpr size_type index(const key_type& key)
+    template <class K>
+    static constexpr size_type index(const K& key)
     {
         return bucket_depth * hasher{}(key) % max_size();
     }
@@ -213,23 +221,42 @@ public:
 
     // NOTE: Not sure if end/cend represents end of raw container or end of active, useful
     // buckets but I think it's the former
+    // FIX: https://en.cppreference.com/w/cpp/container/unordered_map/clear
+    // finally tells us that these begin/ends are supposed to filter by not-nulled
+    constexpr iterator end() { return container_.end(); }
     constexpr const_iterator cend() const { return container_.end(); }
     constexpr const_iterator cbegin() const { return container_.begin(); }
+
+    void clear()
+    {
+        for(reference v : container_)
+        {
+            v.second.~mapped_type();
+            set_null(v);
+        }
+    }
 
     static constexpr size_type max_size() { return N; }
 
     // DEBT: May be a deviation since our buckets are a little more fluid, but I think
     // it conforms to spec
-    constexpr size_type bucket(const key_type& key) const
+    template <class K>
+    constexpr size_type bucket(const K& key) const
     {
         return index(key);
     }
 
     mapped_type& operator[](const key_type& key)
     {
-        return container_[index(key)].second;
+        iterator found = find(key);
+
+        if(found != cend()) return found->second;
+
+        return try_emplace(key).first->second;
     }
 
+    // try_emplace not needed because we don't attempt to construct unless
+    // the slot is open
     template <class ...Args>
     pair<iterator, bool> emplace(const key_type& key, Args&&...args)
     {
@@ -255,6 +282,22 @@ public:
             new (ret.first) value_type(piecewise_construct_t{},
                 std::forward<estd::tuple<Args1...>>(first_args),
                 std::forward<estd::tuple<Args2...>>(second_args));
+
+        return ret;
+    }
+
+    // try_emplace only used right now since unlike regular emplace it can operate
+    // without any parameter (aside from key)
+    template <class K>
+    pair<iterator, bool> try_emplace(const K& key)
+    {
+        pair<iterator, bool> ret = insert_precheck(key, false);
+
+        // pair requires two parameters to construct, PLUS it's a const key.
+        // fortunately, since we presume it's a trivial-ish type (no dtor)
+        // we can brute force the key assignment
+        if(ret.second)
+            reinterpret_cast<cheater_iterator>(ret.first)->first = key;
 
         return ret;
     }
@@ -316,9 +359,10 @@ public:
         return counter;
     }
 
-    constexpr bool contains(const key_type key) const
+    template <class K>
+    constexpr bool contains(const K& key) const
     {
-        return is_null(container_[index(key)]) == false;
+        return find(key) != cend();
     }
 
     // deviates from std in that other iterators part of this bucket could be invalidated
@@ -345,6 +389,16 @@ public:
         swap(start, pos);
     }
 
+    size_type erase(const key_type& key)
+    {
+        iterator found = find(key);
+
+        if(found == cend()) return 0;
+
+        erase(found);
+        return 1;
+    }
+
     template <class K>
     size_type count(const K& x) const
     {
@@ -358,6 +412,46 @@ public:
         }
 
         return counter;
+    }
+
+    template <class K>
+    const_iterator find(const K& x) const
+    {
+        size_type n = index(x);
+
+        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+            if(KeyEqual{}(x, it->first))
+                return it;
+
+        return cend();
+    }
+
+    template <class K>
+    iterator find(const K& x)
+    {
+        size_type n = index(x);
+
+        for(local_iterator it = begin(n); it != end(n); ++it)
+            if(KeyEqual{}(x, it->first))
+                return it;
+
+        return end();
+    }
+
+    // Not ready yet because buckets don't preserve key order, so this gets tricky
+    // Also, it's incongruous because elsewhere I read no duplicate keys allowed
+    template <class K>
+    pair<const_iterator, const_iterator> equal_range_exp(const K& x)
+    {
+        const size_type n = index(x);
+        const_local_iterator start = cbegin(n);
+        const_local_iterator it = start;
+
+        for(; it != end(n); ++it)
+        {
+        }
+
+        return { start, it };
     }
 };
 

@@ -51,7 +51,7 @@ TEST_CASE("miscellaneous")
     }
     SECTION("unordered_map")
     {
-        using type = estd::internal::unordered_map<10, int, layer1::string<32>>;
+        using type = estd::internal::unordered_map<16, int, layer1::string<32>>;
         //using value_type = typename type::value_type;
         using iter = typename type::local_iterator;
         using const_iter = typename type::const_local_iterator ;
@@ -119,5 +119,11 @@ TEST_CASE("miscellaneous")
         REQUIRE(map[2] == "hello1.1");
         map.erase(it_bucket_2);
         REQUIRE(map.count(2) == 0);
+
+        REQUIRE(map.find(3)->second == "hello2");
+        map.erase(3);
+        REQUIRE(map.find(3) == map.cend());
+
+        map[5] = "hello4";
     }
 }
