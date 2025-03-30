@@ -177,7 +177,8 @@ private:
         }
     };
 
-    pair<iterator, bool> insert_precheck(const key_type& key, bool permit_duplicates)
+    template <class K>
+    pair<iterator, bool> insert_precheck(const K& key, bool permit_duplicates)
     {
         const size_type idx = index(key);
 
@@ -255,8 +256,6 @@ public:
         return try_emplace(key).first->second;
     }
 
-    // try_emplace not needed because we don't attempt to construct unless
-    // the slot is open
     template <class ...Args>
     pair<iterator, bool> emplace(const key_type& key, Args&&...args)
     {
@@ -326,6 +325,24 @@ public:
             new (ret.first) value_type(std::forward<P>(value));
 
         return ret;
+    }
+
+    template <class K, class M>
+    pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
+    {
+        iterator found = find(k);
+
+        if(found != cend())
+        {
+            new (&found->second) mapped_type(std::forward<M>(obj));
+            return { found, true };
+        }
+        else
+        {
+            // DEBT: Would prefer an emplace here, but it's not smart enough to reliably
+            // sort out class K
+            return insert({k, std::forward<M>(obj)});
+        }
     }
 
     local_iterator begin(size_type n)
