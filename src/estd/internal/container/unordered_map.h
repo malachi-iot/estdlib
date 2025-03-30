@@ -116,6 +116,13 @@ private:
         return Nullable{}.is_null(v.first);
     }
 
+    static constexpr bool is_sparse(const_reference v)
+    {
+        // TODO: Need to check against gc/bucket as well
+
+        return is_null(v);
+    }
+
     ///
     /// @param v
     /// @remark Does not run destructor
@@ -147,6 +154,31 @@ private:
         return lhs == index(rhs);
     }
 
+    // semi-smart, can skip null spots
+    template <class It>
+    class iterator_base
+    {
+        using parent_type = unordered_map;
+        using this_type = iterator_base;
+
+        const parent_type& parent_;
+        It it_;
+
+        this_type& operator++()
+        {
+            ++it_;
+
+            for(; is_null(*it_) && it_ != parent_.cend(); ++it_)  {}
+
+            return *this;
+        }
+
+        constexpr const_reference operator*() const { return *it_; }
+
+        constexpr const_pointer operator->() const { return it_; }
+
+    };
+
     template <class LocalIt>
     struct local_iterator_base
     {
@@ -157,7 +189,7 @@ private:
 
         LocalIt it_;
 
-        constexpr value_type operator*() const { return *it_; }
+        constexpr const_reference operator*() const { return *it_; }
 
         constexpr const_pointer operator->() const { return it_; }
 
@@ -193,6 +225,9 @@ private:
         this_type& operator++()
         {
             ++it_;
+
+            //for(; is_sparse(*it_); it_++)   {}
+
             return *this;
         }
 
