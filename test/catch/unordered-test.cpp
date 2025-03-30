@@ -83,5 +83,7 @@ TEST_CASE("unordered")
         REQUIRE(map.find(3) == map.cend());
 
         map[5] = "hello4";
+
+        REQUIRE(map.try_emplace(6, "hello5").second);
     }
 }

@@ -9,7 +9,7 @@ namespace estd {
 //constexpr T make_from_tuple(Tuple&& t);
 
 template <class T, class ...Args>
-constexpr T make_from_tuple(tuple<Args...>&& t)
+constexpr T make_from_tuple(tuple<Args...>&& t) noexcept
 {
     return apply([](Args&&...args)
     {
@@ -17,10 +17,17 @@ constexpr T make_from_tuple(tuple<Args...>&& t)
     }, std::forward<tuple<Args...>>(t));
 }
 
+// DEBT: Need to do decay as per https://en.cppreference.com/w/cpp/utility/tuple/make_tuple
 template <class... Types>
-constexpr tuple<Types...> make_tuple(Types&&... args )
+constexpr tuple<Types...> make_tuple(Types&&... args) noexcept
 {
     return tuple<Types...>(std::forward<Types>(args)...);
+}
+
+template <class... Types>
+constexpr tuple<Types&&...> forward_as_tuple(Types&&... args) noexcept
+{
+    return tuple<Types&&...>(std::forward<Types>(args)...);
 }
 
 

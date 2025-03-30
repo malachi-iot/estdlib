@@ -287,8 +287,8 @@ public:
 
     // try_emplace only used right now since unlike regular emplace it can operate
     // without any parameter (aside from key)
-    template <class K>
-    pair<iterator, bool> try_emplace(const K& key)
+    template <class K, class ...Args>
+    pair<iterator, bool> try_emplace(const K& key, Args&&...args)
     {
         pair<iterator, bool> ret = insert_precheck(key, false);
 
@@ -296,7 +296,16 @@ public:
         // fortunately, since we presume it's a trivial-ish type (no dtor)
         // we can brute force the key assignment
         if(ret.second)
-            reinterpret_cast<cheater_iterator>(ret.first)->first = key;
+        {
+            // NOTE: Deviation from spec in that spec implies ->second gets value initialized,
+            // where we do not do that.  Not 100% sure if that's what spec calls for though
+            if constexpr(sizeof...(Args) == 0)
+                reinterpret_cast<cheater_iterator>(ret.first)->first = key;
+            else
+                new (ret.first) value_type(piecewise_construct_t{},
+                    forward_as_tuple(key),
+                    forward_as_tuple(std::forward<Args>(args)...));
+        }
 
         return ret;
     }
