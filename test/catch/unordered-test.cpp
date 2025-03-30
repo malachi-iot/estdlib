@@ -2,6 +2,7 @@
 
 #include <estd/string.h>
 #include <estd/internal/container/unordered_map.h>
+#include <estd/optional.h>
 
 using namespace estd;
 
@@ -17,11 +18,12 @@ TEST_CASE("unordered")
 
         type map;
 
-
         // FIX: Linear probing may span across two (or more) different
         // key spaces before it finds something, resulting in incorrect and undiscoverable
         // placements.  We need to check against bucket a bit more during insert/emplace.
-        // FIX: Key '0' not working due to collision between hash(0) and Null
+
+        // NOTE: Key '0' won't work due to collision between hash(0) and Null, but that can be overcome
+        // by tuning nullable_traits
 
         pair r1 = map.insert({1, "hi2u"});
         REQUIRE(r1.second);
@@ -51,39 +53,58 @@ TEST_CASE("unordered")
             make_tuple(3),
             make_tuple("hello2"));
 
-        REQUIRE(map.contains(2));
-        REQUIRE(map.contains(3));
+        SECTION("counts / contains")
+        {
+            REQUIRE(map.contains(2));
+            REQUIRE(map.contains(3));
 
-        REQUIRE(map.count(0) == 0);
-        REQUIRE(map.count(1) == 1);
-        REQUIRE(map.count(2) == 1);
-        REQUIRE(map.count(3) == 1);
+            REQUIRE(map.count(0) == 0);
+            REQUIRE(map.count(1) == 1);
+            REQUIRE(map.count(2) == 1);
+            REQUIRE(map.count(3) == 1);
+        }
+        SECTION("emplace and erase_and_gc")
+        {
+            // Duplicates not permitted on this flavor of emplace
+            REQUIRE(map.emplace(2, "hello1.1").second == false);
+            REQUIRE(map.emplace(4, "hello3").second);
 
-        // Duplicates not permitted on this flavor of emplace
-        REQUIRE(map.emplace(2, "hello1.1").second == false);
-        REQUIRE(map.emplace(4, "hello3").second);
+            // Overriding and permitting duplicate for this guy
+            // NOTE: Would fail if bucket_depth wasn't > 1, since 1 and 3 buckets are adjacent
+            REQUIRE(map.insert({2, "hello1.1"}, true).second);
 
-        // Overriding and permitting duplicate for this guy
-        // NOTE: Would fail if bucket_depth wasn't > 1, since 1 and 3 buckets are adjacent
-        REQUIRE(map.insert({2, "hello1.1"}, true).second);
-
-        REQUIRE(map.count(2) == 2);
-        REQUIRE(map[2] == "hello1");
-        iter it_bucket_2 = map.begin(map.bucket(2));
-        REQUIRE(it_bucket_2->second == "hello1");
-        REQUIRE((it_bucket_2 + 1)->second == "hello1.1");
-        map.erase(it_bucket_2);
-        REQUIRE(map.count(2) == 1);
-        REQUIRE(map[2] == "hello1.1");
-        map.erase(it_bucket_2);
-        REQUIRE(map.count(2) == 0);
-
-        REQUIRE(map.find(3)->second == "hello2");
-        map.erase(3);
-        REQUIRE(map.find(3) == map.cend());
-
-        map[5] = "hello4";
-
-        REQUIRE(map.try_emplace(6, "hello5").second);
+            REQUIRE(map.count(2) == 2);
+            REQUIRE(map[2] == "hello1");
+            iter it_bucket_2 = map.begin(map.bucket(2));
+            REQUIRE(it_bucket_2->second == "hello1");
+            REQUIRE((it_bucket_2 + 1)->second == "hello1.1");
+            map.erase_and_gc(it_bucket_2);
+            REQUIRE(map.count(2) == 1);
+            REQUIRE(map[2] == "hello1.1");
+            map.erase_and_gc(it_bucket_2);
+            REQUIRE(map.count(2) == 0);
+        }
+        SECTION("find")
+        {
+            REQUIRE(map.find(3)->second == "hello2");
+            map.erase_and_gc(map.find(3));
+            REQUIRE(map.find(3) == map.cend());
+        }
+        SECTION("operator[] assignment")
+        {
+            map[5] = "hello4";
+        }
+        SECTION("try_emplace")
+        {
+            REQUIRE(map.try_emplace(6, "hello5").second);
+        }
+        SECTION("erase and gc (distinct steps)")
+        {
+            // DEBT: Would try emplace but that one doesn't permit dups
+            r1 = map.insert({2, "hello1.1"}, true);
+            REQUIRE(r1.second);
+            map.erase(map.find(2));
+            map.gc(r1.first);
+        }
     }
 }

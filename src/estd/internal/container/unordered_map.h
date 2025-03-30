@@ -25,7 +25,7 @@ struct nullable_traits
     // DEBT: Don't want to use this, just helpful for init and erase
     static constexpr T get_null() { return T(); }
 
-    static void set_null(T* value)
+    ESTD_CPP_CONSTEXPR(17) static void set(T* value)
     {
         *value = T{};
     }
@@ -45,6 +45,13 @@ class unordered_map :
     protected Hash,  // EBO
     protected KeyEqual  // EBO
 {
+    struct meta
+    {
+        uint16_t marked_for_gc : 1;
+        // which bucket this empty slot *used to* belong to
+        uint16_t bucket : 6;
+    };
+
 public:
     // The more collisions and/or duplicates you expect, the bigger this wants to be.
     // Idea being if you have two buckets near each other of only size 1, you'll never
@@ -55,6 +62,17 @@ public:
 
     using key_type = Key;
     using mapped_type = T;
+
+    // EXPERIMENTAL
+    union key_wrapper
+    {
+        const key_type key;
+        key_type nulled;
+
+        operator const key_type&() { return key; }
+    };
+
+
     using value_type = estd::pair<const Key, T>;
     using reference = value_type&;
     using const_reference = const value_type&;
@@ -72,6 +90,9 @@ public:
 
     // DEBT: This sucks, a glorified const_cast
     using cheater_iterator = estd::pair<Key, T>*;
+    // DEBT: Similar to above, for managing extended data in null-key guys, NOT USED
+    using control_type = estd::pair<Key, meta>;
+    using control_iterator = control_type*;
     using end_iterator = monostate;
 
     //using local_iterator = iterator;
@@ -101,7 +122,13 @@ private:
     static void set_null(reference v)
     {
         // DEBT: I hate const_cast'ing
-        Nullable{}.set_null(const_cast<key_type*>(&v.first));
+        Nullable{}.set(const_cast<key_type*>(&v.first));
+    }
+
+    static void destruct(iterator v)
+    {
+        set_null(*v);
+        v->second.~mapped_type();
     }
 
     // FIX: We need this semi-initialized, with keys all being Null
@@ -230,11 +257,7 @@ public:
 
     void clear()
     {
-        for(reference v : container_)
-        {
-            v.second.~mapped_type();
-            set_null(v);
-        }
+        for(reference v : container_)   destruct(v);
     }
 
     static constexpr size_type max_size() { return N; }
@@ -391,14 +414,50 @@ public:
         return find(key) != cend();
     }
 
+    /// perform garbage collection on the bucket containing this pos, namely swapping this pos
+    /// if gc wishes it
+    /// @param pos entry to possibly move
+    /// @returns potentially moved 'pos'
+    iterator gc(iterator pos)
+    {
+        const key_type& key = pos->first;
+        const size_type n = index(key);
+
+        for(local_iterator it = begin(n); it != cend(n); ++it)
+        {
+            if(is_null(*it) && it < pos)
+            {
+                swap(it, pos);
+                return it;
+            }
+        }
+
+        return pos;
+    }
+
+    // Not operational yet
+    void erase(iterator pos)
+    {
+        const size_type n = index(pos->first);
+
+        destruct(pos);
+
+        // "mark and sweep" erase rather than erase (and swap) immediately in place.
+        // More inline with spec, namely doesn't disrupt other iterators
+        auto control = reinterpret_cast<control_iterator>(pos);
+
+        // NOTE: Doesn't do anything yet
+        control->second.marked_for_gc = 1;
+        control->second.bucket = n;
+    }
+
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
-    void erase(iterator pos)
+    void erase_and_gc(iterator pos)
     {
         iterator start = pos;
 
-        set_null(*pos);
-        pos->second.~mapped_type();
+        destruct(pos);
 
         ++pos;
 
