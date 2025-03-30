@@ -54,6 +54,12 @@ struct pair
 #endif
 
     pair& operator=(const pair& other) = default;
+
+    void swap(pair& other)
+    {
+        estd::swap(first, other.first);
+        estd::swap(second, other.second);
+    }
 };
 
 template <class T1, class T2>
@@ -168,10 +174,7 @@ T exchange(T& obj, U&& new_value)
 #endif
 
 template <class T>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-void swap(T& a, T& b)
+ESTD_CPP_CONSTEXPR(14) void swap(T& a, T& b)
 {
     // NOTE: perhaps we should use move/forward here...?  so that
     // objects with underlying self-referencing pointers can be managed?
