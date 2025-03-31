@@ -573,18 +573,21 @@ public:
         return 1;
     }
 
-    template <bool stop_on_match, class K, class F, class R = monostate>
+    // In fact, works for find too but it seems to make things more complicated,
+    // not more tidy
+    template <class K, class F, class R = monostate>
     R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
     {
         const size_type n = bucket(key);
-        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+        for(const_local_iterator it = begin(n); it != end(n); ++it)
         {
             if(KeyEqual{}(key, it->first))
             {
-                if constexpr(stop_on_match)
-                    return f();
+                // monostate means no real return type
+                if constexpr(!is_same<R, monostate>::value)
+                    return std::forward<R>(f(it));
                 else
-                    f();
+                    f(it);
             }
         }
 
@@ -595,7 +598,7 @@ public:
     size_type count(const K& x) const
     {
         unsigned counter = 0;
-        bucket_foreach<false>(x, [&] { ++counter; });
+        bucket_foreach(x, [&](const_local_iterator) { ++counter; });
         return counter;
     }
 
@@ -605,8 +608,7 @@ public:
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(KeyEqual{}(x, it->first))
-                return it;
+            if(KeyEqual{}(x, it->first))    return it;
 
         return container_.cend();
     }
