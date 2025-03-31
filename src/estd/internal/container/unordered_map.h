@@ -520,7 +520,7 @@ public:
     }
 
     // Not operational yet
-    void erase(iterator pos)
+    void erase_ll(pointer pos)
     {
         const size_type n = index(pos->first);
 
@@ -534,6 +534,8 @@ public:
         control->second.marked_for_gc = 1;
         control->second.bucket = n;
     }
+
+    void erase(iterator pos) { erase_ll(pos); }
 
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
@@ -565,11 +567,11 @@ public:
 
     size_type erase(const key_type& key)
     {
-        iterator found = find(key);
+        pointer found = find_ll(key);
 
-        if(found == cend()) return 0;
+        if(found == container_.cend()) return 0;
 
-        erase(found);
+        erase_ll(found);
         return 1;
     }
 
@@ -614,7 +616,7 @@ public:
     }
 
     template <class K>
-    iterator find(const K& x)
+    pointer find(const K& x)
     {
         // DEBT: I hate const_cast
         return const_cast<pointer>(find_ll(x));
