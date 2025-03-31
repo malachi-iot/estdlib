@@ -16,14 +16,14 @@ namespace estd { namespace internal {
 
 namespace impl {
 
-template <unsigned N, typename TSize = typename internal::deduce_fixed_size_t<N>::size_type>
+template <unsigned N, typename Size = typename internal::deduce_fixed_size_t<N>::size_type>
 struct array_base_size
 {
-    typedef TSize size_type;
+    typedef Size size_type;
 
-    ESTD_CPP_CONSTEXPR_RET bool empty() const { return N == 0; }
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return N; }
-    ESTD_CPP_CONSTEXPR_RET size_type max_size() const { return N; }
+    constexpr bool empty() const { return N == 0; }
+    constexpr size_type size() const { return N; }
+    constexpr size_type max_size() const { return N; }
 };
 
 
@@ -62,13 +62,14 @@ struct uninitialized_array : array_base_size<N>
         return reinterpret_cast<pointer>(data_);
     }
 
-    ESTD_CPP_CONSTEXPR_RET const_pointer data() const
+    constexpr const_pointer data() const
     {
         return reinterpret_cast<const_pointer>(data_);
     }
 
     pointer end() { return data() + N; }
-    ESTD_CPP_CONSTEXPR_RET const_pointer end() const { return data() + N; }
+    constexpr const_pointer end() const { return data() + N; }
+    constexpr const_pointer cend() const { return data() + N; }
 
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
@@ -78,7 +79,7 @@ protected:
         return reinterpret_cast<pointer>(data_[pos].data);
     }
 
-    ESTD_CPP_CONSTEXPR_RET const_pointer get_at(size_type pos) const
+    constexpr const_pointer get_at(size_type pos) const
     {
         return reinterpret_cast<const_pointer>(data_[pos].data);
     }
@@ -122,10 +123,10 @@ protected:
 
 }
 
-template <class TBase>
-struct array_base2 : TBase
+template <class Base>
+struct array_base2 : Base
 {
-    typedef TBase base_type;
+    using base_type = Base;
 
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
@@ -137,16 +138,17 @@ struct array_base2 : TBase
     typedef typename base_type::size_type size_type;
 
     iterator begin() { return base_type::data(); }
-    ESTD_CPP_CONSTEXPR_RET const_iterator begin() const { return base_type::data(); }
+    constexpr const_iterator begin() const { return base_type::data(); }
+    constexpr const_iterator cbegin() const { return base_type::data(); }
 
     reference front() { return *begin(); }
-    ESTD_CPP_CONSTEXPR_RET const_reference front() const { return *begin(); }
+    constexpr const_reference front() const { return *begin(); }
 
     reference back() { return *base_type::end(); }
-    ESTD_CPP_CONSTEXPR_RET const_reference back() const { return *base_type::end(); }
+    constexpr const_reference back() const { return *base_type::end(); }
 
     reference operator[](size_type pos) { return *base_type::get_at(pos); }
-    ESTD_CPP_CONSTEXPR_RET const_reference operator[](size_type pos) const
+    constexpr const_reference operator[](size_type pos) const
     {
         return *base_type::get_at(pos);
     }

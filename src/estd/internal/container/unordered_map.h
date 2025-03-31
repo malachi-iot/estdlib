@@ -73,7 +73,8 @@ public:
     using cheater_iterator = estd::pair<Key, T>*;
     // DEBT: Similar to above, for managing extended data in null-key guys, NOT USED
     using control_type = estd::pair<Key, meta>;
-    using control_iterator = control_type*;
+    using control_pointer = control_type*;
+    using const_control_pointer = const control_type*;
     using end_iterator = monostate;
 
     //using local_iterator = iterator;
@@ -97,11 +98,28 @@ private:
         return Nullable{}.is_null(v.first);
     }
 
-    static constexpr bool is_sparse(const_reference v)
+    /// Checks for null but NOT sparse
+    /// @param v
+    /// @param n
+    /// @return
+    static constexpr bool is_null(const_reference v, size_type n)
     {
-        // TODO: Need to check against gc/bucket as well
+        auto ctl = (const_control_pointer) &v;
 
-        return is_null(v);
+        return Nullable{}.is_null(v.first);
+    }
+
+    ///
+    /// @param v
+    /// @param n bucket#
+    /// @return
+    static constexpr bool is_sparse(const_reference v, size_type n)
+    {
+        auto ctl = (const_control_pointer) &v;
+
+        return is_null(v) &&
+            ctl->second.marked_for_gc &&
+            ctl->second.bucket == n;
     }
 
     ///
@@ -113,7 +131,7 @@ private:
         Nullable{}.set(const_cast<key_type*>(&v.first));
     }
 
-    static void destruct(iterator v)
+    static void destruct(pointer v)
     {
         set_null(*v);
         v->second.~mapped_type();
@@ -141,14 +159,25 @@ private:
         using parent_type = unordered_map;
         using this_type = iterator_base;
 
-        const parent_type& parent_;
+        const parent_type* parent_;
         It it_;
+
+        template <class OtherIt>
+        friend class iterator_base;
+
+    public:
+        constexpr iterator_base(const parent_type* parent, It it) :
+            parent_{parent},
+            it_{it}
+        {}
+
+        iterator_base(const iterator_base&) = default;
 
         this_type& operator++()
         {
             ++it_;
 
-            for(; is_null(*it_) && it_ != parent_.cend(); ++it_)  {}
+            for(; is_null(*it_) && it_ != parent_->cend(); ++it_)   {}
 
             return *this;
         }
@@ -157,6 +186,19 @@ private:
 
         constexpr const_pointer operator->() const { return it_; }
 
+        pointer operator->() { return it_; }
+
+        template <class OtherIt>
+        constexpr bool operator==(const iterator_base<OtherIt>& other) const
+        {
+            return it_ == other.it_;
+        }
+
+        template <class OtherIt>
+        constexpr bool operator!=(const iterator_base<OtherIt>& other) const
+        {
+            return it_ != other.it_;
+        }
     };
 
     template <class LocalIt>
@@ -165,7 +207,7 @@ private:
         using parent_type = unordered_map;
         using this_type = local_iterator_base;
 
-        parent_type& parent_;
+        const parent_type& parent_;
 
         // bucket designator
         const size_type n_;
@@ -209,14 +251,14 @@ private:
         {
             ++it_;
 
-            //for(; is_sparse(*it_); it_++)   {}
+            for(; is_sparse(*it_, n_) && it_ != parent_.cend(); ++it_)   {}
 
             return *this;
         }
 
         this_type operator++(int)
         {
-            ++it_;
+            operator++();
 
             return { n_, it_ - 1 };
         }
@@ -225,18 +267,19 @@ private:
     template <class K>
     pair<iterator, bool> insert_precheck(const K& key, bool permit_duplicates)
     {
-        const size_type idx = index(key);
+        const size_type n = index(key);
 
         // linear probing
 
-        iterator it = &container_[idx];
+        iterator it = &container_[n];
         // While we don't have null, keep moving forward over occupied
-        // spots
-        for(;is_null(*it) == false; ++it)
+        // spots.  Sparse also counts as occupied
+        // DEBT: optimize is_null/is_sparse together
+        for(;is_null(*it) == false || is_sparse(*it, n); ++it)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == cend() || index(it->first) != idx)
+            if(it == cend() || index(it->first) != n)
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
@@ -256,8 +299,8 @@ private:
 
 
 public:
-    using local_iterator = local_iterator_base<iterator>;
-    using const_local_iterator = local_iterator_base<const_iterator>;
+    using local_iterator = local_iterator_base<pointer>;
+    using const_local_iterator = local_iterator_base<const_pointer>;
 
     unordered_map()
     {
@@ -270,12 +313,29 @@ public:
     // FIX: https://en.cppreference.com/w/cpp/container/unordered_map/clear
     // finally tells us that these begin/ends are supposed to filter by not-nulled
     constexpr iterator end() { return container_.end(); }
-    constexpr const_iterator cend() const { return container_.end(); }
+    constexpr const_iterator cend() const { return container_.cend(); }
     constexpr const_iterator cbegin() const { return container_.begin(); }
+
+    // DEBT: eventually this displaces current end/begin
+    iterator_base<pointer> begin2()
+    {
+        pointer p = container_.begin();
+        for(; is_null(*p) && p != container_.cend(); ++p)   {}
+
+        return { this, p };
+    }
+
+    // DEBT: as above, eventually displaces things
+    // DEBT: can probably use a hard type like end_iterator (optimization) though
+    // that does double down on carrying parent* around
+    constexpr iterator_base<const_pointer> end2() const
+    {
+        return { this, container_.cend() };
+    }
 
     void clear()
     {
-        for(reference v : container_)   destruct(v);
+        for(reference v : container_)   destruct(&v);
     }
 
     static constexpr size_type max_size() { return N; }
@@ -290,9 +350,10 @@ public:
 
     mapped_type& operator[](const key_type& key)
     {
-        iterator found = find(key);
+        // DEBT: Hate const_cast
+        auto found = const_cast<pointer>(find_ll(key));
 
-        if(found != cend()) return found->second;
+        if(found != container_.cend()) return found->second;
 
         return try_emplace(key).first->second;
     }
@@ -382,7 +443,7 @@ public:
     {
         iterator found = find(k);
 
-        if(found != cend())
+        if(found != container_.cend())
         {
             new (&found->second) mapped_type(std::forward<M>(obj));
             return { found, true };
@@ -400,6 +461,11 @@ public:
         return { *this, n, &container_[n] };
     }
 
+    const_local_iterator begin(size_type n) const
+    {
+        return { *this, n, &container_[n] };
+    }
+
     const_local_iterator cbegin(size_type n) const
     {
         return { *this, n, &container_[n] };
@@ -407,12 +473,12 @@ public:
 
     constexpr end_local_iterator end(size_type) const
     {
-        return { cend() };
+        return { container_.cend() };
     }
 
     constexpr end_local_iterator cend(size_type) const
     {
-        return { cend() };
+        return { container_.cend() };
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
@@ -429,7 +495,7 @@ public:
     template <class K>
     constexpr bool contains(const K& key) const
     {
-        return find(key) != cend();
+        return find_ll(key) != container_.cend();
     }
 
     /// perform garbage collection on the bucket containing this pos, namely swapping this pos
@@ -462,7 +528,7 @@ public:
 
         // "mark and sweep" erase rather than erase (and swap) immediately in place.
         // More inline with spec, namely doesn't disrupt other iterators
-        auto control = reinterpret_cast<control_iterator>(pos);
+        auto control = reinterpret_cast<control_pointer>(pos);
 
         // NOTE: Doesn't do anything yet
         control->second.marked_for_gc = 1;
@@ -471,9 +537,9 @@ public:
 
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
-    void erase_and_gc(iterator pos)
+    void erase_and_gc_ll(pointer pos)
     {
-        iterator start = pos;
+        pointer start = pos;
 
         destruct(pos);
 
@@ -490,6 +556,11 @@ public:
         --pos;
 
         swap(start, pos);
+    }
+
+    void erase_and_gc(iterator pos)
+    {
+        erase_and_gc_ll(pos);
     }
 
     size_type erase(const key_type& key)
@@ -518,27 +589,28 @@ public:
     }
 
     template <class K>
-    const_iterator find(const K& x) const
+    const_pointer find_ll(const K& x) const
     {
-        size_type n = index(x);
+        const size_type n = index(x);
 
-        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+        for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(KeyEqual{}(x, it->first))
                 return it;
 
-        return cend();
+        return container_.cend();
     }
 
     template <class K>
     iterator find(const K& x)
     {
-        size_type n = index(x);
+        // DEBT: I hate const_cast
+        return const_cast<pointer>(find_ll(x));
+    }
 
-        for(local_iterator it = begin(n); it != end(n); ++it)
-            if(KeyEqual{}(x, it->first))
-                return it;
-
-        return end();
+    template <class K>
+    const_iterator find(const K& x) const
+    {
+        return find_ll(x);
     }
 
     // Not ready yet because buckets don't preserve key order, so this gets tricky

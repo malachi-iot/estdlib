@@ -79,7 +79,8 @@ else()
         variadic-test.cpp
         variant-test.cpp
         vector-test.cpp
-        internal-test.cpp)
+        internal-test.cpp
+        unordered-test.cpp)
 endif()
 
 # DEBT: Make a linkage property so that we don't have to double these guys up,

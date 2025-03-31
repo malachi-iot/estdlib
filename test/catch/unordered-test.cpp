@@ -64,7 +64,7 @@ TEST_CASE("unordered")
             REQUIRE(map.count(2) == 1);
             REQUIRE(map.count(3) == 1);
         }
-        SECTION("emplace and erase_and_gc")
+        SECTION("duplicate, emplace and erase_and_gc")
         {
             // Duplicates not permitted on this flavor of emplace
             REQUIRE(map.emplace(2, "hello1.1").second == false);
@@ -106,6 +106,25 @@ TEST_CASE("unordered")
             REQUIRE(r1.second);
             map.erase(map.find(2));
             map.gc(r1.first);
+        }
+        SECTION("clear")
+        {
+            // https://en.cppreference.com/w/cpp/container/unordered_map/clear
+            auto it1 = map.begin2();
+
+            REQUIRE(it1->first == 1);
+            ++it1;
+            REQUIRE(it1->first == 2);
+            REQUIRE(it1 != map.end2());
+            ++it1;
+            REQUIRE(it1->first == 3);
+            ++it1;
+            REQUIRE(it1 == map.end2());
+
+            map.clear();
+
+            it1 = map.begin2();
+            REQUIRE(it1 == map.end2());
         }
     }
     SECTION("unordered_set")
