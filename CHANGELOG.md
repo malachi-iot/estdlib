@@ -1,5 +1,9 @@
 # v0.X.X - XXXXX25
 
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/76 TBD (needs wrap still)
+
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/84, https://github.com/malachi-iot/estdlib/issues/92 upgrading Catch2 to 3.8.0

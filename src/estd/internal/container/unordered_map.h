@@ -23,9 +23,9 @@ template <
 class unordered_map;
 
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
-class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual>>
+class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual, Nullable>>
 {
-    using base_type = l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual>>;
+    using base_type = l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual, Nullable>>;
     using base_type::index;
     using base_type::match;
 
@@ -85,8 +85,10 @@ public:
     using end_iterator = monostate;
 
     // Check that our casting wizardry doesn't get us into too much trouble
-    static_assert(sizeof(meta) == sizeof(typename value_type::second_type), "");
-    static_assert(sizeof(control_type) == sizeof(value_type), "");
+    static_assert(sizeof(meta) == sizeof(typename value_type::second_type),
+            "size mismatch between meta and exposed value_type");
+    static_assert(sizeof(control_type) == sizeof(value_type),
+            "size mismatch between meta and exposed value_type");
 
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
@@ -145,6 +147,14 @@ private:
 
     uninitialized_array<value_type, N> container_;
 
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
+    {
+        for(; is_null(*it) && it != container_.cend(); ++it)   {}
+
+        return it;
+    }
+
     // semi-smart, can skip null spots
     template <class It>
     class iterator_base
@@ -170,8 +180,7 @@ private:
         {
             ++it_;
 
-            // skip over null entries
-            for(; is_null(*it_) && it_ != parent_->container_.cend(); ++it_)   {}
+            it_ = parent_->skip_null(it_);
 
             return *this;
         }
@@ -295,7 +304,7 @@ public:
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
 
-    unordered_map()
+    ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
         // DEBT: Feels clunky
         for(reference v : container_)   set_null(v);
@@ -309,18 +318,12 @@ public:
 
     iterator_base<pointer> begin()
     {
-        pointer p = container_.begin();
-        for(; is_null(*p) && p != container_.cend(); ++p)   {}
-
-        return { this, p };
+        return { this, skip_null(container_.begin()) };
     }
 
-    iterator_base<const_pointer> begin() const
+    constexpr iterator_base<const_pointer> begin() const
     {
-        const_pointer p = container_.begin();
-        for(; is_null(*p) && p != container_.cend(); ++p)   {}
-
-        return { this, p };
+        return { this, skip_null(container_.cbegin()) };
     }
 
     // DEBT: as above, eventually displaces things
@@ -331,7 +334,7 @@ public:
         return { this, container_.cend() };
     }
 
-    void clear()
+    ESTD_CPP_CONSTEXPR(14) void clear()
     {
         for(reference v : container_)   destruct(&v);
     }
