@@ -502,7 +502,7 @@ public:
     /// if gc wishes it
     /// @param pos entry to possibly move
     /// @returns potentially moved 'pos'
-    iterator gc(iterator pos)
+    pointer gc_ll(pointer pos)
     {
         const key_type& key = pos->first;
         const size_type n = index(key);

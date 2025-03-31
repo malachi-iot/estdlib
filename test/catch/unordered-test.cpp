@@ -16,6 +16,7 @@ TEST_CASE("unordered")
         using iter = typename type::local_iterator;
         using const_iter = typename type::const_local_iterator ;
         using pair = estd::pair<typename type::iterator, bool>;
+        using ptr = typename type::pointer;
 
         type map;
 
@@ -104,8 +105,13 @@ TEST_CASE("unordered")
             // DEBT: Would try emplace but that one doesn't permit dups
             r1 = map.insert({2, "hello1.1"}, true);
             REQUIRE(r1.second);
-            map.erase(map.find(2));
-            map.gc(r1.first);
+            ptr p1 = map.find(2);
+            REQUIRE(p1->second == "hello1");
+            map.erase(p1);
+            p1 = map.gc_ll(r1.first);
+            REQUIRE(p1->second == "hello1.1");
+            map.erase(p1);
+            p1 = map.gc_ll(p1);
         }
         SECTION("clear")
         {
