@@ -35,7 +35,8 @@ struct integral_constant
 };
 
 // After c++11 this is deprecated, c++ and before it's (technically) required
-#if __cplusplus <= 201103L
+// 31MAR25 MB DEBT: It seems c++14 needs it
+#if __cplusplus <= 201402L
 template<class T, T v>
 CONSTEXPR T integral_constant<T, v>::value;
 #endif

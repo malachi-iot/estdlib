@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../numeric.h"
 #include "../platform.h"
 #include "../fwd/functional.h"
 #include "../fwd/utility.h"
@@ -170,7 +171,7 @@ private:
             ++it_;
 
             // skip over null entries
-            for(; is_null(*it_) && it_ != parent_->cend(); ++it_)   {}
+            for(; is_null(*it_) && it_ != parent_->container_.cend(); ++it_)   {}
 
             return *this;
         }
@@ -244,7 +245,7 @@ private:
         {
             ++it_;
 
-            for(; is_sparse(*it_, n_) && it_ != parent_.cend(); ++it_)   {}
+            for(; is_sparse(*it_, n_) && it_ != parent_.container_.cend(); ++it_)   {}
 
             return *this;
         }
@@ -271,7 +272,7 @@ private:
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == cend() || index(it->first) != n)
+            if(it == container_.cend() || index(it->first) != n)
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
@@ -304,14 +305,19 @@ public:
     // buckets but I think it's the former
     // FIX: https://en.cppreference.com/w/cpp/container/unordered_map/clear
     // finally tells us that these begin/ends are supposed to filter by not-nulled
-    constexpr iterator end() { return container_.end(); }
-    constexpr const_iterator cend() const { return container_.cend(); }
-    constexpr const_iterator cbegin() const { return container_.begin(); }
+    constexpr const_iterator cend_old() const { return container_.cend(); }
 
-    // DEBT: eventually this displaces current end/begin
-    iterator_base<pointer> begin2()
+    iterator_base<pointer> begin()
     {
         pointer p = container_.begin();
+        for(; is_null(*p) && p != container_.cend(); ++p)   {}
+
+        return { this, p };
+    }
+
+    iterator_base<const_pointer> begin() const
+    {
+        const_pointer p = container_.begin();
         for(; is_null(*p) && p != container_.cend(); ++p)   {}
 
         return { this, p };
@@ -320,7 +326,7 @@ public:
     // DEBT: as above, eventually displaces things
     // DEBT: can probably use a hard type like end_iterator (optimization) though
     // that does double down on carrying parent* around
-    constexpr iterator_base<const_pointer> end2() const
+    constexpr iterator_base<const_pointer> end() const
     {
         return { this, container_.cend() };
     }
@@ -391,7 +397,7 @@ public:
         {
             // NOTE: Deviation from spec in that spec implies ->second gets value initialized,
             // where we do not do that.  Not 100% sure if that's what spec calls for though
-            if constexpr(sizeof...(Args) == 0)
+            ESTD_CPP_IF_CONSTEXPR(sizeof...(Args) == 0)
                 reinterpret_cast<cheater_iterator>(ret.first)->first = key;
             else
                 new (ret.first) value_type(piecewise_construct_t{},
@@ -484,11 +490,9 @@ public:
 
     size_type size() const
     {
-        iterator_base<const_pointer> it(*this, container_.cbegin());
-
-        // TODO: Use estd::accumulate
-
-        return {};
+        return distance(
+            begin(),
+            {this, container_.end()});
     }
 
     template <class K>
@@ -550,9 +554,9 @@ public:
         if(is_null(*pos)) return;
 
         // Quick-deduce our bucket#
-        size_type n = start - cbegin();
+        size_type n = start - container_.cbegin();
         // Find last one in bucket
-        for(;n == index(pos->first) && pos < cend(); ++pos) {}
+        for(;n == index(pos->first) && pos < container_.cend(); ++pos) {}
 
         --pos;
 

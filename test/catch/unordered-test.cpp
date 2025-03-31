@@ -64,6 +64,8 @@ TEST_CASE("unordered")
             REQUIRE(map.count(1) == 1);
             REQUIRE(map.count(2) == 1);
             REQUIRE(map.count(3) == 1);
+
+            REQUIRE(map.size() == 3);
         }
         SECTION("duplicate, emplace and erase_and_gc")
         {
@@ -90,7 +92,7 @@ TEST_CASE("unordered")
         {
             REQUIRE(map.find(3)->second == "hello2");
             map.erase_and_gc(map.find(3));
-            REQUIRE(map.find(3) == map.cend());
+            REQUIRE(map.find(3) == map.cend_old());
         }
         SECTION("operator[] assignment")
         {
@@ -117,21 +119,21 @@ TEST_CASE("unordered")
         SECTION("clear")
         {
             // https://en.cppreference.com/w/cpp/container/unordered_map/clear
-            auto it1 = map.begin2();
+            auto it1 = map.begin();
 
             REQUIRE(it1->first == 1);
             ++it1;
             REQUIRE(it1->first == 2);
-            REQUIRE(it1 != map.end2());
+            REQUIRE(it1 != map.end());
             ++it1;
             REQUIRE(it1->first == 3);
             ++it1;
-            REQUIRE(it1 == map.end2());
+            REQUIRE(it1 == map.end());
 
             map.clear();
 
-            it1 = map.begin2();
-            REQUIRE(it1 == map.end2());
+            it1 = map.begin();
+            REQUIRE(it1 == map.end());
         }
     }
     SECTION("unordered_set")

@@ -36,3 +36,8 @@
 #define CONSTEXPR_EXPLICIT(conditional) inline
 #endif
 
+#if __cplusplus >= 201703L
+#define ESTD_CPP_IF_CONSTEXPR if constexpr
+#else
+#define ESTD_CPP_IF_CONSTEXPR if
+#endif

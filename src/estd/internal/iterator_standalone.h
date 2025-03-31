@@ -33,18 +33,19 @@ struct random_access_iterator_tag : public bidirectional_iterator_tag {};
 
 namespace estd {
 
-template< class InputIt >
+template <class InputIt>
+ESTD_CPP_CONSTEXPR(14)
 //typename std::iterator_traits<InputIt>::difference_type
 int
-distance( InputIt first, InputIt last )
+distance(InputIt first, InputIt last)
 {
-    int count = 0;
-    while(first != last)
-    {
-        count++;
-        first++;
-    }
     //std::iterator_traits<InputIt>::difference_type count = 0;
+
+    // DEBT: Optimization - do an inquiry into random access iterator type to then
+    // try pointer math rather than counting it all
+
+    int count = 0;
+    for(; first != last; ++count, ++first)  {}
 
     return count;
 }

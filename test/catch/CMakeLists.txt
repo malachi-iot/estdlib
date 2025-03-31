@@ -13,8 +13,10 @@ CPMAddPackage("gh:catchorg/Catch2@3.8.0")
 
 message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
 
-
 add_subdirectory(${ROOT_DIR} estd)
+
+# Even when this is configured to c++11, we end up with c++14
+message(DEBUG "c++${CMAKE_CXX_STANDARD} / required=${CMAKE_CXX_STANDARD_REQUIRED}")
 
 set(EXTRA_FILES
     ${ROOT_DIR}/README.md
@@ -61,6 +63,7 @@ else()
         memory-pool-test.cpp
         memory-test.cpp
         misc-test.cpp
+        numeric-test.cpp
         optional-test.cpp
         ostream-test.cpp
         port-test.cpp
