@@ -482,6 +482,15 @@ public:
         return counter;
     }
 
+    size_type size() const
+    {
+        iterator_base<const_pointer> it(*this, container_.cbegin());
+
+        // TODO: Use estd::accumulate
+
+        return {};
+    }
+
     template <class K>
     constexpr bool contains(const K& key) const
     {

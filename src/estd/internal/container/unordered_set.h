@@ -4,6 +4,8 @@
 #include "../fwd/functional.h"
 #include "../fwd/utility.h"
 
+#include "unordered/base.h"
+
 namespace estd {
 
 namespace internal {
@@ -19,18 +21,18 @@ template <class Container,
 class unordered_set;
 
 template <class Container, class Key, class Hash, Key Null, class KeyEqual>
-class unordered_set :
-    protected Hash,  // EBO
-    protected KeyEqual  // EBO
+class unordered_set : public unordered_base<unordered_traits<Key, Hash, KeyEqual>>
 {
+    using base_type = unordered_base<unordered_traits<Key, Hash, KeyEqual>>;
+
     Container set_;
 
 public:
     ESTD_CPP_STD_VALUE_TYPE(Key)
 
     using key_type = value_type;
-    using hasher = Hash;
-    using size_type = unsigned;
+    using hasher = typename base_type::hasher;
+    using size_type = typename base_type::size_type;
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
 
