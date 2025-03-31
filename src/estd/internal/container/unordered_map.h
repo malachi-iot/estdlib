@@ -573,18 +573,29 @@ public:
         return 1;
     }
 
+    template <bool stop_on_match, class K, class F, class R = monostate>
+    R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
+    {
+        const size_type n = bucket(key);
+        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+        {
+            if(KeyEqual{}(key, it->first))
+            {
+                if constexpr(stop_on_match)
+                    return f();
+                else
+                    f();
+            }
+        }
+
+        return std::forward<R>(r);
+    }
+
     template <class K>
     size_type count(const K& x) const
     {
-        size_type n = index(x);
         unsigned counter = 0;
-
-        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
-        {
-            if(KeyEqual{}(x, it->first))
-                ++counter;
-        }
-
+        bucket_foreach<false>(x, [&] { ++counter; });
         return counter;
     }
 
