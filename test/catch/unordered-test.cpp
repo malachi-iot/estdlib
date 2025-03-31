@@ -112,6 +112,7 @@ TEST_CASE("unordered")
             REQUIRE(p1->second == "hello1.1");
             map.erase(p1);
             p1 = map.gc_ll(p1);
+            REQUIRE(map.count(2) == 0);
         }
         SECTION("clear")
         {

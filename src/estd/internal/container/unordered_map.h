@@ -22,25 +22,31 @@ template <
 class unordered_map;
 
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
-class unordered_map : public unordered_base<Key, Hash, KeyEqual>
+class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual>>
 {
-    using base_type = unordered_base<Key, Hash, KeyEqual>;
+    using base_type = l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual>>;
+    using base_type::index;
+    using base_type::match;
 
-    struct meta
+    union meta
     {
-        uint16_t marked_for_gc : 1;
-        // which bucket this empty slot *used to* belong to
-        uint16_t bucket : 6;
+        byte storage[sizeof(T)];
+
+        struct
+        {
+            uint16_t marked_for_gc : 1;
+            // which bucket this empty slot *used to* belong to
+            uint16_t bucket : 6;
+        };
+
+        operator T& () { return * (T*) storage; }
+        constexpr operator const T& () const { return * (T*) storage; }
+
+        T& mapped() { return * (T*) storage; }
     };
 
 public:
-    // The more collisions and/or duplicates you expect, the bigger this wants to be.
-    // Idea being if you have two buckets near each other of only size 1, you'll never
-    // have room to insert a collision/duplicate
-    static constexpr unsigned bucket_depth = 4;
-
-    // DEBT: Do static assert to make sure N is evenly divisible by bucket_depth
-
+    using base_type::bucket_depth;
     using typename base_type::key_type;
     using mapped_type = T;
 
@@ -53,7 +59,6 @@ public:
         operator const key_type&() { return key; }
     };
 
-
     using value_type = estd::pair<const Key, T>;
     using reference = value_type&;
     using const_reference = const value_type&;
@@ -61,8 +66,8 @@ public:
     using const_pointer = const value_type*;
     using iterator = pointer;
     using const_iterator = const_pointer;
-    using hasher = Hash;
-    using size_type = unsigned;
+    using typename base_type::hasher;
+    using typename base_type::size_type;
 
     struct end_local_iterator
     {
@@ -77,13 +82,12 @@ public:
     using const_control_pointer = const control_type*;
     using end_iterator = monostate;
 
+    // Check that our casting wizardry doesn't get us into too much trouble
+    static_assert(sizeof(meta) == sizeof(typename value_type::second_type), "");
+    static_assert(sizeof(control_type) == sizeof(value_type), "");
+
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
-
-    static constexpr size_type max_bucket_count()
-    {
-        return N / bucket_depth;
-    }
 
 private:
     // DEBT: casting away Key const in this crude manner
@@ -139,19 +143,6 @@ private:
 
     uninitialized_array<value_type, N> container_;
 
-    // DEBT: Doesn't handle non-empty hasher
-    template <class K>
-    static constexpr size_type index(const K& key)
-    {
-        return bucket_depth * hasher{}(key) % max_size();
-    }
-
-    // indicates whether already-hashed (lhs) matches to-hash (rhs)
-    static constexpr bool match(size_type lhs, const key_type& rhs)
-    {
-        return lhs == index(rhs);
-    }
-
     // semi-smart, can skip null spots
     template <class It>
     class iterator_base
@@ -177,6 +168,7 @@ private:
         {
             ++it_;
 
+            // skip over null entries
             for(; is_null(*it_) && it_ != parent_->cend(); ++it_)   {}
 
             return *this;
@@ -272,8 +264,7 @@ private:
         // linear probing
 
         iterator it = &container_[n];
-        // While we don't have null, keep moving forward over occupied
-        // spots.  Sparse also counts as occupied
+        // Move over occupied spots.  Sparse also counts as occupied
         // DEBT: optimize is_null/is_sparse together
         for(;is_null(*it) == false || is_sparse(*it, n); ++it)
         {
@@ -337,8 +328,6 @@ public:
     {
         for(reference v : container_)   destruct(&v);
     }
-
-    static constexpr size_type max_size() { return N; }
 
     // DEBT: May be a deviation since our buckets are a little more fluid, but I think
     // it conforms to spec
