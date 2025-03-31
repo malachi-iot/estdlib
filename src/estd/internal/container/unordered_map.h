@@ -4,32 +4,13 @@
 #include "../fwd/functional.h"
 #include "../fwd/utility.h"
 #include "../array.h"
+#include "unordered/base.h"
 
 namespace estd {
 
 namespace internal {
 
 // DEBT: Hard-wired to layer1 stlye
-
-// DEBT: This guy wants to play with estd::layer1::optional you can feel it
-// We are doing this rather than a Null = T{} from the get go because some T won't
-// play nice in that context
-template <class T>
-struct nullable_traits
-{
-    static constexpr bool is_null(const T& value)
-    {
-        return value == T{};
-    }
-
-    // DEBT: Don't want to use this, just helpful for init and erase
-    static constexpr T get_null() { return T(); }
-
-    ESTD_CPP_CONSTEXPR(17) static void set(T* value)
-    {
-        *value = T{};
-    }
-};
 
 template <
     unsigned sz,
@@ -41,10 +22,10 @@ template <
 class unordered_map;
 
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
-class unordered_map :
-    protected Hash,  // EBO
-    protected KeyEqual  // EBO
+class unordered_map : public unordered_base<Key, Hash, KeyEqual>
 {
+    using base_type = unordered_base<Key, Hash, KeyEqual>;
+
     struct meta
     {
         uint16_t marked_for_gc : 1;
@@ -60,7 +41,7 @@ public:
 
     // DEBT: Do static assert to make sure N is evenly divisible by bucket_depth
 
-    using key_type = Key;
+    using typename base_type::key_type;
     using mapped_type = T;
 
     // EXPERIMENTAL
@@ -138,7 +119,6 @@ private:
         v->second.~mapped_type();
     }
 
-    // FIX: We need this semi-initialized, with keys all being Null
     uninitialized_array<value_type, N> container_;
 
     // DEBT: Doesn't handle non-empty hasher
@@ -182,7 +162,10 @@ private:
     template <class LocalIt>
     struct local_iterator_base
     {
+        using parent_type = unordered_map;
         using this_type = local_iterator_base;
+
+        parent_type& parent_;
 
         // bucket designator
         const size_type n_;
@@ -414,12 +397,12 @@ public:
 
     local_iterator begin(size_type n)
     {
-        return { n, &container_[n] };
+        return { *this, n, &container_[n] };
     }
 
     const_local_iterator cbegin(size_type n) const
     {
-        return { n, &container_[n] };
+        return { *this, n, &container_[n] };
     }
 
     constexpr end_local_iterator end(size_type) const

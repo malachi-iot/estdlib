@@ -1,6 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <estd/string.h>
+#include <estd/internal/container/unordered_set.h>
 #include <estd/internal/container/unordered_map.h>
 #include <estd/optional.h>
 
@@ -106,5 +107,28 @@ TEST_CASE("unordered")
             map.erase(map.find(2));
             map.gc(r1.first);
         }
+    }
+    SECTION("unordered_set")
+    {
+        using type = estd::internal::unordered_set<array<int, 10 > >;
+        using rtype = pair<type::iterator, bool>;
+
+        type value;
+
+        REQUIRE(value.size() == 0);
+        REQUIRE(value.empty());
+
+        rtype r = value.insert(5);
+
+        REQUIRE(r.second);
+
+        REQUIRE(value.size() == 1);
+        REQUIRE(value.empty() == false);
+
+        r = value.insert(6);
+
+        REQUIRE(r.second);
+
+        REQUIRE(value.size() == 2);
     }
 }
