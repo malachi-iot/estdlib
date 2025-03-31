@@ -45,6 +45,11 @@ class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, Ke
         T& mapped() { return * (T*) storage; }
     };
 
+    // DEBT: Key SHOULD be value-initializable at this time.
+    using control_type = estd::pair<Key, meta>;
+    using control_pointer = control_type*;
+    using const_control_pointer = const control_type*;
+
 public:
     using base_type::bucket_depth;
     using typename base_type::key_type;
@@ -76,10 +81,6 @@ public:
 
     // DEBT: This sucks, a glorified const_cast
     using cheater_iterator = estd::pair<Key, T>*;
-    // DEBT: Similar to above, for managing extended data in null-key guys, NOT USED
-    using control_type = estd::pair<Key, meta>;
-    using control_pointer = control_type*;
-    using const_control_pointer = const control_type*;
     using end_iterator = monostate;
 
     // Check that our casting wizardry doesn't get us into too much trouble

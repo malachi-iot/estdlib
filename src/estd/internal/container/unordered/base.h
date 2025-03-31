@@ -36,16 +36,14 @@ public:
     // Idea being if you have two buckets near each other of only size 1, you'll never
     // have room to insert a collision/duplicate
     static constexpr unsigned bucket_depth = 4;
-
-    // DEBT: Do static assert to make sure N is evenly divisible by bucket_depth
-
-
 };
 
 template <unsigned N, class Traits>
 class l1_unordered_base : public unordered_base<Traits>
 {
     using base_type = unordered_base<Traits>;
+
+    // DEBT: Do assert to make sure N is evenly divisible by bucket_depth
 
 public:
     using typename base_type::size_type;
@@ -70,6 +68,18 @@ protected:
     static constexpr bool match(size_type lhs, const typename base_type::key_type& rhs)
     {
         return lhs == index(rhs);
+    }
+
+    // rehash: increasing size of a bucket
+    void rehash_up()
+    {
+
+    }
+
+    // rehash: decreasing size of a bucket
+    void rehash_down()
+    {
+
     }
 };
 
