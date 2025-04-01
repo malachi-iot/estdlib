@@ -1,5 +1,6 @@
 #include <catch2/catch_all.hpp>
 
+#include <estd/functional.h>
 #include <estd/string.h>
 #include <estd/internal/container/unordered_set.h>
 #include <estd/internal/container/unordered_map.h>
@@ -166,6 +167,6 @@ TEST_CASE("unordered")
         // synthetic (but representative, possibly reference) use case of transport retry logic
         test::retry_tracker<layer1::string<32>, test::NonTrivial> tracker;
 
-        //tracker.track("hello", {});
+        tracker.track("hello", test::NonTrivial{ 5 });
     }
 }

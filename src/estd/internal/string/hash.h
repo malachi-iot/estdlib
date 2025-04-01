@@ -13,12 +13,14 @@ struct string_hash
     template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) StringImpl>
     ESTD_CPP_CONSTEXPR(14) int operator()(const detail::basic_string<StringImpl>& v) const
     {
-        using value_type = detail::basic_string<StringImpl>;
+        using string = detail::basic_string<StringImpl>;
         int hashed = 0;
 
         // DEBT: Not a fantastic hash, but it will get us started
-        for(typename value_type::char_type c : v)
+        for(typename string::value_type c : v)
         {
+            hashed <<= 1;
+            hashed ^= c;
             hashed <<= 1;
             hashed ^= c;
         }
