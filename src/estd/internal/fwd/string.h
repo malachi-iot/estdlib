@@ -94,18 +94,20 @@ template<
 namespace internal {
 
 // DEBT: Clumsy
-template <class Traits, bool null_terminated>
+// We're using std::char_traits (aliased) when available, which doesn't handle const char
+// so that's why we pass in Char in addition to Traits
+template <class Char, class Traits, bool null_terminated>
 using string_policy_helper =
     typename conditional<null_terminated,
-        experimental::null_terminated_string_policy<Traits, int16_t, is_const<typename Traits::char_type>::value>,
-        experimental::sized_string_policy<Traits, int16_t, is_const<typename Traits::char_type>::value> >::type;
+        experimental::null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
+        experimental::sized_string_policy<Traits, int16_t, is_const<Char>::value> >::type;
 }
 
 
 namespace layer1 {
 
 template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Traits, null_terminated>>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
 class basic_string;
 
 
@@ -133,7 +135,7 @@ namespace layer2 {
 
 template<class Char, size_t N, bool null_terminated = true,
     class Traits = estd::char_traits<typename remove_const<Char>::type>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Traits, null_terminated>>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
 class basic_string;
 
 }

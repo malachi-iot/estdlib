@@ -10,6 +10,23 @@
 
 using namespace estd;
 
+namespace estd {
+
+// For these synthetic tests only, priority_queue ignores key during compare
+template <class Key>
+struct less<pair<Key, test::NonTrivial>*>
+{
+    using value_type = pair<Key, test::NonTrivial>*;
+    using const_reference = const value_type&;
+
+    bool operator()(const_reference lhs, const_reference rhs) const
+    {
+        return lhs->second.code_ < rhs->second.code_;
+    }
+};
+
+}
+
 TEST_CASE("unordered")
 {
     SECTION("unordered_map")
