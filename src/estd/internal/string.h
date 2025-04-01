@@ -4,6 +4,8 @@
 #include "layer1/string.h"
 #include "layer2/string.h"
 #include "layer3/string.h"
+#include "string/hash.h"
+#include "string/operators.h"
 
 #include "dynamic_array.h"
 

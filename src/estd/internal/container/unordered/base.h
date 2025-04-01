@@ -1,28 +1,11 @@
 #pragma once
 
+#include "fwd.h"
 #include "traits.h"
 
 namespace estd {
 
 namespace internal {
-
-template <class Key, class Hash, class KeyEqual, class Nullable = nullable_traits<Key>>
-class unordered_traits :
-    // NOTE: Although EBO is interesting, spec suggests they aren't relevant here
-    // i.e. https://en.cppreference.com/w/cpp/container/unordered_map/hash_function
-    protected Hash,  // EBO
-    protected KeyEqual  // EBO
-{
-public:
-    using key_type = Key;
-    using hasher = Hash;
-    using key_equal = KeyEqual;
-    using nullable = nullable_traits<Key>;
-
-    //hasher& hash_function() { return *this; }
-    //constexpr const hasher& hash_function() const { return *this; }
-    //hasher hash_function() const { return {}; }
-};
 
 template <class Traits>
 class unordered_base : public Traits

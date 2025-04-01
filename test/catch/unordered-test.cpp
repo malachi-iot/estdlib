@@ -5,6 +5,8 @@
 #include <estd/internal/container/unordered_map.h>
 #include <estd/optional.h>
 
+#include "test/retry.h"
+
 using namespace estd;
 
 TEST_CASE("unordered")
@@ -158,5 +160,12 @@ TEST_CASE("unordered")
         REQUIRE(r.second);
 
         REQUIRE(value.size() == 2);
+    }
+    SECTION("synthetic retry")
+    {
+        // synthetic (but representative, possibly reference) use case of transport retry logic
+        test::retry_tracker<layer1::string<32>, test::NonTrivial> tracker;
+
+        //tracker.track("hello", {});
     }
 }

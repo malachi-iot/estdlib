@@ -11,17 +11,6 @@ namespace estd {
 
 namespace internal {
 
-// DEBT: Hard-wired to layer1 stlye
-
-template <
-    unsigned sz,
-    class Key,
-    class T,
-    class Hash = hash<Key>,
-    class Nullable = nullable_traits<Key>,
-    class KeyEqual = equal_to<Key> >
-class unordered_map;
-
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
 class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual, Nullable>>
 {

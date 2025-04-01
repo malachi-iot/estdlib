@@ -91,15 +91,21 @@ template<
     ESTD_CPP_CONCEPT(internal::StringPolicy) Policy
 > class basic_string;
 
+namespace internal {
+
+// DEBT: Clumsy
+template <class Traits, bool null_terminated>
+using string_policy_helper =
+    typename conditional<null_terminated,
+        experimental::null_terminated_string_policy<Traits, int16_t, is_const<typename Traits::char_type>::value>,
+        experimental::sized_string_policy<Traits, int16_t, is_const<typename Traits::char_type>::value> >::type;
+}
+
 
 namespace layer1 {
 
-template<class CharT, size_t N, bool null_terminated = true, class Traits = estd::char_traits<CharT >,
-         // DEBT: Move resolution for particular policy elsewhere
-        ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type
-                >
+template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char>,
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Traits, null_terminated>>
 class basic_string;
 
 
@@ -120,6 +126,15 @@ public:
     }
 };
 #endif
+
+}
+
+namespace layer2 {
+
+template<class Char, size_t N, bool null_terminated = true,
+    class Traits = estd::char_traits<typename remove_const<Char>::type>,
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Traits, null_terminated>>
+class basic_string;
 
 }
 

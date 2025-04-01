@@ -9,11 +9,9 @@ namespace estd { namespace layer2 {
 // DEBT: Rework to only handle null terminated, because otherwise we're looking
 // at a fixed-size string which would be better served by a
 // layer1::basic_string_view
-template<class CharT, size_t N, bool null_terminated = true,
-         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
-         class StringPolicy = typename estd::conditional<null_terminated,
-                estd::experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                estd::experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type >
+template<class CharT, size_t N, bool null_terminated,
+         class Traits,
+         ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
 class basic_string
         : public estd::basic_string<
                 CharT,

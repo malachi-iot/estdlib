@@ -3,6 +3,7 @@
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/76 TBD (needs wrap still)
+* Adding crude estd::hash for layer1 and layer2 strings
 
 ## Quality Updates & Bug Fixes
 
