@@ -93,6 +93,10 @@ public:
     //using local_iterator = iterator;
     //using const_local_iterator = const_iterator;
 
+    // pointer and bucket
+    template <class Pointer>
+    using find_result = pair<Pointer, size_type>;
+
 private:
     // DEBT: casting away Key const in this crude manner
     static constexpr void swap(iterator lhs, iterator rhs)
@@ -349,8 +353,7 @@ public:
 
     mapped_type& operator[](const key_type& key)
     {
-        // DEBT: Hate const_cast
-        auto found = const_cast<pointer>(find_ll(key));
+        pointer found = find_ll(key).first;
 
         if(found != container_.cend()) return found->second;
 
@@ -501,7 +504,7 @@ public:
     template <class K>
     constexpr bool contains(const K& key) const
     {
-        return find_ll(key) != container_.cend();
+        return find_ll(key).first != container_.cend();
     }
 
     /// perform garbage collection on the bucket containing this pos, namely swapping this pos
@@ -525,23 +528,24 @@ public:
         return pos;
     }
 
-    // Not operational yet
-    void erase_ll(pointer pos)
+    void erase_ll(find_result<pointer> pos)
     {
-        const size_type n = index(pos->first);
+        const size_type n = pos.second;
 
-        destruct(pos);
+        destruct(pos.first);
 
         // "mark and sweep" erase rather than erase (and swap) immediately in place.
         // More inline with spec, namely doesn't disrupt other iterators
-        auto control = reinterpret_cast<control_pointer>(pos);
+        auto control = reinterpret_cast<control_pointer>(pos.first);
 
-        // NOTE: Doesn't do anything yet
         control->second.marked_for_gc = 1;
         control->second.bucket = n;
     }
 
-    void erase(iterator pos) { erase_ll(pos); }
+    void erase(iterator pos)
+    {
+        erase_ll({ pos, index(pos->first) });
+    }
 
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
@@ -573,9 +577,9 @@ public:
 
     size_type erase(const key_type& key)
     {
-        pointer found = find_ll(key);
+        find_result<pointer> found = find_ll(key);
 
-        if(found == container_.cend()) return 0;
+        if(found.first == container_.cend()) return 0;
 
         erase_ll(found);
         return 1;
@@ -611,27 +615,37 @@ public:
     }
 
     template <class K>
-    const_pointer find_ll(const K& x) const
+    find_result<const_pointer> find_ll(const K& x) const
     {
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(KeyEqual{}(x, it->first))    return it;
+            if(KeyEqual{}(x, it->first))    return { it.it_, n };
 
-        return container_.cend();
+        return { container_.cend(), 0 };
     }
 
     template <class K>
-    pointer find(const K& x)
+    find_result<pointer> find_ll(const K& x)
     {
-        // DEBT: I hate const_cast
-        return const_cast<pointer>(find_ll(x));
+        const size_type n = index(x);
+
+        for(local_iterator it = begin(n); it != end(n); ++it)
+            if(KeyEqual{}(x, it->first))    return { it.it_, n };
+
+        return { container_.end(), 0 };
+    }
+
+    template <class K>
+    iterator find(const K& x)
+    {
+        return find_ll(x).first;
     }
 
     template <class K>
     const_iterator find(const K& x) const
     {
-        return find_ll(x);
+        return find_ll(x).first;
     }
 
     // Not ready yet because buckets don't preserve key order, so this gets tricky
