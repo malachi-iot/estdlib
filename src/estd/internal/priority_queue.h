@@ -130,10 +130,10 @@ public:
 
 
 #if __cpp_rvalue_references && __cpp_variadic_templates
-    template <class ...TArgs>
-    accessor emplace(TArgs&&...args)
+    template <class ...Args>
+    accessor emplace(Args&&...args)
     {
-        c.emplace_back(std::forward<TArgs>(args)...);
+        c.emplace_back(std::forward<Args>(args)...);
         push_heap();
         return c.back();
     }
@@ -145,10 +145,10 @@ public:
     /// @param f
     /// @param args
     /// @return
-    template <class F, class ...TArgs>
-    accessor emplace_with_notify(F f, TArgs&&...args)
+    template <class F, class ...Args>
+    accessor emplace_with_notify(F f, Args&&...args)
     {
-        auto accessor = c.emplace_back(std::forward<TArgs>(args)...);
+        auto accessor = c.emplace_back(std::forward<Args>(args)...);
         f(accessor.lock());
         accessor.unlock();
         push_heap();

@@ -14,14 +14,15 @@ namespace estd {
 
 // For these synthetic tests only, priority_queue ignores key during compare
 template <class Key>
-struct less<pair<Key, test::NonTrivial>*>
+struct less<pair<Key, test::retry_item>*>
 {
-    using value_type = pair<Key, test::NonTrivial>*;
+    using value_type = pair<Key, test::retry_item>*;
     using const_reference = const value_type&;
 
     bool operator()(const_reference lhs, const_reference rhs) const
     {
-        return lhs->second.code_ < rhs->second.code_;
+        // NOTE: Doing a 'more' here for convenience
+        return lhs->second.timestamp_ > rhs->second.timestamp_;
     }
 };
 
@@ -182,8 +183,33 @@ TEST_CASE("unordered")
     SECTION("synthetic retry")
     {
         // synthetic (but representative, possibly reference) use case of transport retry logic
-        test::retry_tracker<layer1::string<32>, test::NonTrivial> tracker;
+        test::retry_tracker<layer1::string<32>, test::retry_item> tracker;
 
-        tracker.track("hello", test::NonTrivial{ 5 });
+        tracker.track("hello5", test::retry_item{ 5 });
+
+        REQUIRE(tracker.tracked_.size() == 1);
+        REQUIRE(tracker.queue_.size() == 1);
+
+        tracker.track("hello5", test::retry_item{ 10 });
+
+        REQUIRE(tracker.tracked_.size() == 1);
+        REQUIRE(tracker.queue_.size() == 1);
+
+        tracker.track("hello10", test::retry_item{ 10 });
+
+        REQUIRE(tracker.tracked_.size() == 2);
+        REQUIRE(tracker.queue_.size() == 2);
+
+        unsigned processed;
+
+        processed = tracker.poll_one(5);
+        REQUIRE(processed == 1);
+        processed = tracker.poll_one(9);
+        REQUIRE(processed == 0);
+        tracker.incoming("hello5");
+        processed = tracker.poll(15);
+        REQUIRE(processed == 2);
+
+        REQUIRE(tracker.queue_.size() == 1);
     }
 }
