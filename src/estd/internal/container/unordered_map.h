@@ -75,6 +75,8 @@ public:
     using typename base_type::hasher;
     using typename base_type::size_type;
 
+    static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
+
     struct end_local_iterator
     {
         const_iterator it_;
@@ -96,6 +98,8 @@ public:
     // pointer and bucket
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
+
+    using insert_result = pair<iterator, bool>;
 
 private:
     // DEBT: casting away Key const in this crude manner
@@ -272,7 +276,7 @@ private:
     };
 
     template <class K>
-    pair<iterator, bool> insert_precheck(const K& key, bool permit_duplicates)
+    insert_result insert_precheck(const K& key, bool permit_duplicates)
     {
         const size_type n = index(key);
 
@@ -394,7 +398,7 @@ public:
     template <class K, class ...Args>
     pair<iterator, bool> try_emplace(const K& key, Args&&...args)
     {
-        pair<iterator, bool> ret = insert_precheck(key, false);
+        const pair<iterator, bool> ret = insert_precheck(key, false);
 
         // pair requires two parameters to construct, PLUS it's a const key.
         // fortunately, since we presume it's a trivial-ish type (no dtor)
@@ -416,7 +420,7 @@ public:
 
     pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
     {
-        pair<iterator, bool> ret = insert_precheck(value.first, permit_duplicates);
+        const pair<iterator, bool> ret = insert_precheck(value.first, permit_duplicates);
 
         if(ret.second)
             // We've made it here without reaching the end or bonking into another bucket,
@@ -622,7 +626,7 @@ public:
         for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(KeyEqual{}(x, it->first))    return { it.it_, n };
 
-        return { container_.cend(), 0 };
+        return { container_.cend(), npos() };
     }
 
     template <class K>
@@ -633,7 +637,7 @@ public:
         for(local_iterator it = begin(n); it != end(n); ++it)
             if(KeyEqual{}(x, it->first))    return { it.it_, n };
 
-        return { container_.end(), 0 };
+        return { container_.end(), npos() };
     }
 
     template <class K>
