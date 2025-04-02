@@ -41,7 +41,7 @@ template <class Char, size_t N, bool null_terminated, class Traits>
 struct hash<layer2::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
 
 // DEBT: Not well tested and in wrong location
-template <class Char, class Traits>
-struct hash<basic_string_view<Char, Traits>> : internal::string_hash {};
+template <class Policy>
+struct hash<detail::basic_string_view<Policy>> : internal::string_hash {};
 
 }
