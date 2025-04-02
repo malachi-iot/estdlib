@@ -131,10 +131,10 @@ TEST_CASE("unordered")
             ptr p1 = map.find(2);
             REQUIRE(p1->second == "hello1");
             map.erase(p1);
-            p1 = map.gc_ll(r1.first);
+            p1 = map.gc_active_ll(r1.first);
             REQUIRE(p1->second == "hello1.1");
             map.erase(p1);
-            p1 = map.gc_ll(p1);
+            //p1 = map.gc_active_ll(p1);
             REQUIRE(map.count(2) == 0);
         }
         SECTION("clear")

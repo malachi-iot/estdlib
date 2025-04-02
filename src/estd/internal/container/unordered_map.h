@@ -24,6 +24,7 @@ class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, Ke
 
         struct
         {
+            // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
             uint16_t marked_for_gc : 1;
             // which bucket this empty slot *used to* belong to
             uint16_t bucket : 6;
@@ -98,7 +99,10 @@ private:
             *reinterpret_cast<cheater_iterator>(rhs));
     }
 
-    static constexpr bool is_null(const_reference v)
+    /// @brief Checks for null OR sparse
+    /// @param v
+    /// @return
+    static constexpr bool is_null_or_spase(const_reference v)
     {
         return Nullable{}.is_null(v.first);
     }
@@ -107,14 +111,15 @@ private:
     /// @param v
     /// @param n
     /// @return
-    static constexpr bool is_null(const_reference v, size_type n)
+    /// DEBT: Passing in size_type n seems optional since we have our gc flag
+    static constexpr bool is_null(const_reference v, size_type)
     {
         auto ctl = (const_control_pointer) &v;
 
-        return Nullable{}.is_null(v.first);
+        return is_null_or_spase(v) && ctl->second.marked_for_gc == false;
     }
 
-    ///
+    /// Determines if this ref is sparse - bucket must match also
     /// @param v
     /// @param n bucket#
     /// @return
@@ -122,7 +127,7 @@ private:
     {
         auto ctl = (const_control_pointer) &v;
 
-        return is_null(v) &&
+        return is_null_or_spase(v) &&
             ctl->second.marked_for_gc &&
             ctl->second.bucket == n;
     }
@@ -130,16 +135,22 @@ private:
     ///
     /// @param v
     /// @remark Does not run destructor
-    static void set_null(reference v)
+    static void set_null(pointer v)
     {
-        // DEBT: I hate const_cast'ing
-        Nullable{}.set(const_cast<key_type*>(&v.first));
+        // DEBT: Control-casting annoying, but a slight improvement over const_cast
+        Nullable{}.set(&cast_control(v)->first);
     }
 
+    // runs destructor + nulls out key
     static void destruct(pointer v)
     {
-        set_null(*v);
+        set_null(v);
         v->second.~mapped_type();
+    }
+
+    static constexpr control_pointer cast_control(pointer pos)
+    {
+        return reinterpret_cast<control_pointer>(pos);
     }
 
     uninitialized_array<value_type, N> container_;
@@ -147,7 +158,7 @@ private:
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
-        for(; is_null(*it) && it != container_.cend(); ++it)   {}
+        for(; is_null_or_spase(*it) && it != container_.cend(); ++it)   {}
 
         return it;
     }
@@ -226,7 +237,7 @@ private:
             if(it_ == it.it_)   return true;
 
             // If we reach a null slot, then that's the end of the bucket
-            if(is_null(*it_)) return true;
+            if(is_null_or_spase(*it_)) return true;
 
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
@@ -240,7 +251,7 @@ private:
 
             // If we reach a null slot, that's the end of the bucket - so we fail
             // to assert it's not the end (return false)
-            if(is_null(*it_)) return false;
+            if(is_null_or_spase(*it_)) return false;
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
@@ -251,6 +262,8 @@ private:
         {
             ++it_;
 
+            // skip over any sparse entries belonging to this bucket.  They are invisible
+            // null entries for this iterator
             for(; is_sparse(*it_, n_) && it_ != parent_.container_.cend(); ++it_)   {}
 
             return *this;
@@ -274,7 +287,7 @@ private:
         iterator it = &container_[n];
         // Move over occupied spots.  Sparse also counts as occupied
         // DEBT: optimize is_null/is_sparse together
-        for(;is_null(*it) == false || is_sparse(*it, n); ++it)
+        for(;is_null_or_spase(*it) == false || is_sparse(*it, n); ++it)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
@@ -304,7 +317,7 @@ public:
     ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
         // DEBT: Feels clunky
-        for(reference v : container_)   set_null(v);
+        for(reference v : container_)   set_null(&v);
     }
 
     // NOTE: Not sure if end/cend represents end of raw container or end of active, useful
@@ -500,27 +513,57 @@ public:
         return find_ll(key).first != container_.cend();
     }
 
-    /// perform garbage collection on the bucket containing this pos, namely swapping this pos
-    /// if gc wishes it
+    /// perform garbage collection on the bucket containing this active pos, namely moving
+    /// pos if gc wishes it
     /// @param pos entry to possibly move
     /// @returns potentially moved 'pos'
-    pointer gc_ll(pointer pos)
+    pointer gc_active_ll(pointer pos)
     {
         const key_type& key = pos->first;
         const size_type n = index(key);
 
-        for(local_iterator it = begin(n); it != cend(n); ++it)
+        // look through other items in this bucket.  Not using local_iterator because he's
+        // designed to skip over nulls, while we specifically are looking for those guys.
+        // Also, we don't want to swap our active guy further down the bucket, only earlier
+        for(pointer it = &container_[n]; it != container_.cend() && it < pos; ++it)
         {
-            if(is_null(*it) && it < pos)
+            // if item is null (maybe) sparse
+            if(is_null_or_spase(*it))
             {
-                swap(it, pos);
-                return it;
+                control_pointer control = cast_control(it);
+
+                // if sparse, it's not a swap candidate
+                if(control->second.marked_for_gc)
+                {
+                    // make sure we're in the same bucket
+                    // moving out of the bucket terminates the GC operation, no null slot found
+                    if(control->second.bucket != n) return pos;
+                }
+                // if regular null (not sparse) and we are physically before active
+                // item 'pos', do a swap and exit
+                else
+                {
+                    swap(it, pos);
+                    return it;
+                }
             }
         }
 
         return pos;
     }
 
+    pointer gc_sparse_ll(pointer pos)
+    {
+        const key_type& key = pos->first;
+        //const size_type n = index(key);
+
+        control_pointer control = cast_control(pos);
+
+        control->second.bucket = npos();
+        control->second.marked_for_gc = false;
+    }
+
+    // DEBT: Let's do return 'iterator' like spec wants
     void erase_ll(find_result<pointer> pos)
     {
         const size_type n = pos.second;
@@ -529,7 +572,7 @@ public:
 
         // "mark and sweep" erase rather than erase (and swap) immediately in place.
         // More inline with spec, namely doesn't disrupt other iterators
-        auto control = reinterpret_cast<control_pointer>(pos.first);
+        control_pointer control = cast_control(pos.first);
 
         control->second.marked_for_gc = 1;
         control->second.bucket = n;
@@ -550,8 +593,9 @@ public:
 
         ++pos;
 
-        // No housekeeping if next guy is null
-        if(is_null(*pos)) return;
+        // No housekeeping if next guy is null (sparse is OK, but
+        // not yet accounted for here)
+        if(is_null_or_spase(*pos)) return;
 
         // Quick-deduce our bucket#
         size_type n = start - container_.cbegin();
