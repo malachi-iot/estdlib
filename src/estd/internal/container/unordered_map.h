@@ -559,7 +559,7 @@ public:
 
         control_pointer control = cast_control(pos);
 
-        control->second.bucket = npos();
+        //control->second.bucket = npos();
         control->second.marked_for_gc = false;
     }
 

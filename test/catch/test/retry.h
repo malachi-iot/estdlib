@@ -26,6 +26,8 @@ public:
     internal::unordered_map<N, Key, T> tracked_;
     layer1::priority_queue<value_type, N> queue_;
 
+    value_type gc_target_ {};
+
 public:
     void track(Key key, const T& value)
     {
@@ -34,6 +36,12 @@ public:
         if(r.second == false) return;
 
         queue_.emplace(r.first);
+    }
+
+    // TBD
+    void gc_one()
+    {
+        tracked_.gc_active_ll(gc_target_);
     }
 
     // boost-style
