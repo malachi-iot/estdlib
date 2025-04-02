@@ -210,6 +210,7 @@ TEST_CASE("unordered")
         processed = tracker.poll(15);
         REQUIRE(processed == 2);
 
+        REQUIRE(tracker.tracked_.size() == 1);
         REQUIRE(tracker.queue_.size() == 1);
     }
 }

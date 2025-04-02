@@ -9,6 +9,8 @@ namespace internal {
 // DEBT: This guy wants to play with estd::layer1::optional you can feel it
 // We are doing this rather than a Null = T{} from the get go because some T won't
 // play nice in that context
+// TODO: layer1::string ought to only operate on value[0] null termination here, which is
+// an ideal usage.  However it MAY be overzealously setting deeper chars to null.  Doublecheck
 template <class T>
 struct nullable_traits
 {

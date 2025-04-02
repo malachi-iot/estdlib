@@ -18,6 +18,10 @@ class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, Ke
     using base_type::index;
     using base_type::match;
 
+#if UNIT_TESTING
+public:
+#endif
+
     union meta
     {
         byte storage[sizeof(T)];
@@ -46,15 +50,6 @@ public:
     using base_type::bucket_depth;
     using typename base_type::key_type;
     using mapped_type = T;
-
-    // EXPERIMENTAL
-    union key_wrapper
-    {
-        const key_type key;
-        key_type nulled;
-
-        operator const key_type&() { return key; }
-    };
 
     using value_type = estd::pair<const Key, T>;
     using reference = value_type&;
@@ -156,6 +151,7 @@ private:
 
     uninitialized_array<value_type, N> container_;
 
+    // It must be pointer or const_pointer
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
@@ -553,10 +549,13 @@ public:
         return pos;
     }
 
-    pointer gc_sparse_ll(pointer pos)
+    // Demotes this sparse 'pos' to completely deleted 'null'
+    void gc_sparse_ll(pointer pos)
     {
-        const key_type& key = pos->first;
+        //const key_type& key = pos->first;
         //const size_type n = index(key);
+
+        assert(is_null_or_spase(*pos));
 
         control_pointer control = cast_control(pos);
 
@@ -564,7 +563,9 @@ public:
         control->second.marked_for_gc = false;
     }
 
-    // DEBT: Let's do return 'iterator' like spec wants
+    // Conforms to spec in that:
+    // "References and iterators to the erased elements are invalidated.
+    //  Other iterators and references are not invalidated. "
     void erase_ll(find_result<pointer> pos)
     {
         const size_type n = pos.second;
@@ -579,9 +580,15 @@ public:
         control->second.bucket = n;
     }
 
-    void erase(iterator pos)
+    // https://en.cppreference.com/w/cpp/container/unordered_map/erase
+    // NOTE: example implies internal ordering of unordered_map is predictable, which
+    // on one hand feels reasonable, but on the other seems to conflict with the notion
+    // that we are officially unordered.
+    iterator erase(iterator pos)
     {
         erase_ll({ pos, index(pos->first) });
+
+        return skip_null(pos + 1);
     }
 
     // deviates from std in that other iterators part of this bucket could be invalidated

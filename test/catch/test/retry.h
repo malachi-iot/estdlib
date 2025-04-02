@@ -53,8 +53,9 @@ public:
         // Don't requeue when ack has been received
         if(value.ack_received_)
         {
-            // TODO: do a tracker_.erase here also or a tracker_.erase on
-            // receipt and a tracker.gc here
+            // ack_received is only set by 'incoming', who also marks this
+            // guy for deletion
+            tracked_.gc_sparse_ll(it);
 
             return 1;
         }
@@ -99,6 +100,8 @@ public:
         if(found.second != tracked_.npos())
         {
             found.first->second.ack_received_ = true;
+
+            // mark this guy for deletion (but don't delete yet)
             tracked_.erase_ll(found);
         }
     }
