@@ -37,6 +37,7 @@ class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, Ke
     };
 
     // DEBT: Key SHOULD be value-initializable at this time.
+    // TODO: eventually container is populated by control_type, not value_type
     using control_type = estd::pair<Key, meta>;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
@@ -72,8 +73,6 @@ public:
         const_iterator it_;
     };
 
-    // DEBT: This sucks, a glorified const_cast
-    using cheater_iterator = estd::pair<Key, T>*;
     using end_iterator = monostate;
 
     // Check that our casting wizardry doesn't get us into too much trouble
@@ -92,11 +91,10 @@ public:
     using insert_result = pair<iterator, bool>;
 
 private:
-    // DEBT: casting away Key const in this crude manner
-    static constexpr void swap(iterator lhs, iterator rhs)
+    // DEBT: casting to control a bummer
+    static constexpr void swap(pointer lhs, pointer rhs)
     {
-        reinterpret_cast<cheater_iterator>(lhs)->swap(
-            *reinterpret_cast<cheater_iterator>(rhs));
+        cast_control(lhs)->swap(*cast_control(rhs));
     }
 
     /// @brief Checks for null OR sparse
@@ -114,9 +112,7 @@ private:
     /// DEBT: Passing in size_type n seems optional since we have our gc flag
     static constexpr bool is_null(const_reference v, size_type)
     {
-        auto ctl = (const_control_pointer) &v;
-
-        return is_null_or_spase(v) && ctl->second.marked_for_gc == false;
+        return is_null_or_spase(v) && cast_control(&v)->marked_for_gc == false;
     }
 
     /// Determines if this ref is sparse - bucket must match also
@@ -125,14 +121,14 @@ private:
     /// @return
     static constexpr bool is_sparse(const_reference v, size_type n)
     {
-        auto ctl = (const_control_pointer) &v;
+        const_control_pointer ctl = cast_control(&v);
 
         return is_null_or_spase(v) &&
             ctl->second.marked_for_gc &&
             ctl->second.bucket == n;
     }
 
-    ///
+    /// Nulls out key
     /// @param v
     /// @remark Does not run destructor
     static void set_null(pointer v)
@@ -151,6 +147,11 @@ private:
     static constexpr control_pointer cast_control(pointer pos)
     {
         return reinterpret_cast<control_pointer>(pos);
+    }
+
+    static constexpr const_control_pointer cast_control(const_pointer pos)
+    {
+        return reinterpret_cast<const_control_pointer>(pos);
     }
 
     uninitialized_array<value_type, N> container_;
@@ -410,7 +411,7 @@ public:
             // NOTE: Deviation from spec in that spec implies ->second gets value initialized,
             // where we do not do that.  Not 100% sure if that's what spec calls for though
             ESTD_CPP_IF_CONSTEXPR(sizeof...(Args) == 0)
-                reinterpret_cast<cheater_iterator>(ret.first)->first = key;
+                cast_control(ret.first)->first = key;
             else
                 new (ret.first) value_type(piecewise_construct_t{},
                     forward_as_tuple(key),
