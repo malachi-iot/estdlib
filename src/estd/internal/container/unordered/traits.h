@@ -29,7 +29,7 @@ struct nullable_traits
 };
 
 
-template <class Key, class Hash, class KeyEqual, class Nullable = nullable_traits<Key>>
+template <class Key, class T, class Hash, class KeyEqual, class Nullable = nullable_traits<Key>>
 class unordered_traits :
     // NOTE: Although EBO is interesting, spec suggests they aren't relevant here
     // i.e. https://en.cppreference.com/w/cpp/container/unordered_map/hash_function

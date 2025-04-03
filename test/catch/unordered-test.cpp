@@ -159,7 +159,7 @@ TEST_CASE("unordered")
     }
     SECTION("unordered_set")
     {
-        using type = estd::internal::unordered_set<array<int, 10 > >;
+        using type = estd::internal::unordered_set<array<int, 10 >>;
         using rtype = pair<type::iterator, bool>;
 
         type value;

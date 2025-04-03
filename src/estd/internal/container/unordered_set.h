@@ -21,9 +21,9 @@ template <class Container,
 class unordered_set;
 
 template <class Container, class Key, class Hash, Key Null, class KeyEqual>
-class unordered_set : public unordered_base<unordered_traits<Key, Hash, KeyEqual>>
+class unordered_set : public unordered_base<unordered_traits<Key, Key, Hash, KeyEqual>>
 {
-    using base_type = unordered_base<unordered_traits<Key, Hash, KeyEqual>>;
+    using base_type = unordered_base<unordered_traits<Key, Key, Hash, KeyEqual>>;
 
     Container set_;
 

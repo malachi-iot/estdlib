@@ -12,9 +12,9 @@ namespace estd {
 namespace internal {
 
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
-class unordered_map : public l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual, Nullable>>
+class unordered_map : public l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
 {
-    using base_type = l1_unordered_base<N, unordered_traits<Key, Hash, KeyEqual, Nullable>>;
+    using base_type = l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>;
     using base_type::index;
     using base_type::match;
 
