@@ -345,9 +345,10 @@ private:
         return { it, true };
     }
 
-    constexpr pair<iterator, bool> wrap_result(insert_result r) const
+    // For insert/emplace operations specifically
+    constexpr pair<iterator_base<pointer>, bool> wrap_result(insert_result r) const
     {
-        return r;
+        return { { this, r.first }, r.second };
     }
 
 
@@ -415,7 +416,7 @@ public:
     }
 
     template <class ...Args>
-    pair<iterator, bool> emplace(const key_type& key, Args&&...args)
+    pair<iter_new, bool> emplace(const key_type& key, Args&&...args)
     {
         const insert_result ret = insert_precheck(key, false);
 
@@ -426,7 +427,7 @@ public:
     }
 
     template <class ...Args1, class ...Args2>
-    pair<iterator, bool> emplace(piecewise_construct_t,
+    pair<iter_new, bool> emplace(piecewise_construct_t,
         estd::tuple<Args1...>&& first_args,
         estd::tuple<Args2...>&& second_args,
         bool permit_duplicates = false)
@@ -446,7 +447,7 @@ public:
     // try_emplace only used right now since unlike regular emplace it can operate
     // without any parameter (aside from key)
     template <class K, class ...Args>
-    pair<iterator, bool> try_emplace(const K& key, Args&&...args)
+    pair<iter_new, bool> try_emplace(const K& key, Args&&...args)
     {
         const insert_result ret = insert_precheck(key, false);
 
@@ -482,7 +483,7 @@ public:
 
     template <class P>
     auto insert(P&& value, bool permit_duplicates = false) ->
-        enable_if_t<is_constructible<value_type, P&&>::value, pair<iterator, bool>>
+        enable_if_t<is_constructible<value_type, P&&>::value, pair<iter_new, bool>>
     {
         const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
@@ -495,7 +496,7 @@ public:
     }
 
     template <class K, class M>
-    pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
+    pair<iter_new, bool> insert_or_assign(const K& k, M&& obj)
     {
         iter_new found = find(k);
 

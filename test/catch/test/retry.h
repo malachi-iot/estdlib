@@ -19,23 +19,24 @@ class retry_tracker
 public:
     using key_type = Key;
     using map_type = internal::unordered_map<N, Key, T>;
-    using value_type = typename map_type::iterator;
+    using pointer = typename map_type::pointer;
+    using iter_type = typename map_type::iter_new;
 
 // Since this is unit testing, these are public
 //private:
     internal::unordered_map<N, Key, T> tracked_;
-    layer1::priority_queue<value_type, N> queue_;
+    layer1::priority_queue<pointer, N> queue_;
 
-    value_type gc_target_ {};
+    pointer gc_target_ {};
 
 public:
     void track(Key key, const T& value)
     {
-        pair<value_type, bool> r = tracked_.emplace(key, value);
+        pair<iter_type, bool> r = tracked_.emplace(key, value);
 
         if(r.second == false) return;
 
-        queue_.emplace(r.first);
+        queue_.emplace(r.first.value());
     }
 
     // TBD
@@ -49,7 +50,7 @@ public:
     {
         if(queue_.empty())  return 0;
 
-        value_type it = queue_.top();
+        pointer it = queue_.top();
         T& value = it->second;
 
         // DEBT: Hard wired to test::retry_item
