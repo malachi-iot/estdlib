@@ -468,7 +468,7 @@ public:
         return wrap_result(ret);
     }
 
-    pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
+    pair<iter_new, bool> insert(const_reference value, bool permit_duplicates = false)
     {
         const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
@@ -477,7 +477,7 @@ public:
             // we're good to go
             new (ret.first) value_type(value);
 
-        return wrap_result(ret);
+        return { iter_new{this, ret.first}, ret.second };
     }
 
     template <class P>

@@ -39,6 +39,7 @@ TEST_CASE("unordered")
         using iterl = typename type::local_iterator;
         using const_iterl = typename type::const_local_iterator ;
         using pair = estd::pair<typename type::iterator, bool>;
+        using pair_new = estd::pair<typename type::iter_new, bool>;
 
         type map;
 
@@ -49,11 +50,11 @@ TEST_CASE("unordered")
         // NOTE: Key '0' won't work due to collision between hash(0) and Null, but that can be overcome
         // by tuning nullable_traits
 
-        pair r1 = map.insert({1, "hi2u"});
-        REQUIRE(r1.second);
-        r1 = map.insert({1, "hi again"});
-        REQUIRE(r1.second == false);
-        REQUIRE(r1.first->second == "hi2u");
+        pair_new r2 = map.insert({1, "hi2u"});
+        REQUIRE(r2.second);
+        r2 = map.insert({1, "hi again"});
+        REQUIRE(r2.second == false);
+        REQUIRE(r2.first->second == "hi2u");
         int bucket1 = map.bucket(1);
         unsigned counter = 0;
 
@@ -127,13 +128,13 @@ TEST_CASE("unordered")
         SECTION("erase and gc (distinct steps)")
         {
             // DEBT: Would try emplace but that one doesn't permit dups
-            r1 = map.insert({2, "hello1.1"}, true);
-            REQUIRE(r1.second);
+            r2 = map.insert({2, "hello1.1"}, true);
+            REQUIRE(r2.second);
             iter p1 = map.find(2);
             REQUIRE(p1->second == "hello1");
             map.erase(p1);
             // DEBT: insert itself needs to pass back iter
-            p1 = map.gc_active(iter{ &map, r1.first });
+            p1 = map.gc_active(r2.first);
             REQUIRE(p1->second == "hello1.1");
             map.erase(p1);
             //p1 = map.gc_active_ll(p1);
