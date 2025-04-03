@@ -153,6 +153,7 @@ private:
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr pointer get_value(unsigned i) { return &container_[i]; }
     constexpr const_pointer get_value(unsigned i) const { return &container_[i]; }
+    constexpr const_pointer get_value_cend() const { return container_.cend(); }
 
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr control_pointer get_control(unsigned i) { return cast_control(&container_[i]); }
@@ -162,7 +163,7 @@ private:
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
-        for(; is_null_or_spase(*it) && it != container_.cend(); ++it)   {}
+        for(; is_null_or_spase(*it) && it != get_value_cend(); ++it)   {}
 
         return it;
     }
@@ -284,7 +285,7 @@ private:
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
             // null entries for this iterator
-            for(; is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
+            for(; is_sparse(*it_, n_) && it_ != parent_->get_value_cend(); ++it_)   {}
 
             return *this;
         }
@@ -322,7 +323,7 @@ private:
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == container_.cend() || index(it->first) != n)
+            if(it == get_value_cend() || index(it->first) != n)
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
@@ -374,12 +375,12 @@ public:
     // that does double down on carrying parent* around
     constexpr iterator_base<const_pointer> end() const
     {
-        return { this, container_.cend() };
+        return { this, get_value_cend() };
     }
 
     constexpr iterator_base<const_pointer> cend() const
     {
-        return { this, container_.cend() };
+        return { this, get_value_cend() };
     }
 
     ESTD_CPP_CONSTEXPR(14) void clear()
@@ -399,7 +400,7 @@ public:
     {
         pointer found = find_ll(key).first;
 
-        if(found != container_.cend()) return found->second;
+        if(found != get_value_cend()) return found->second;
 
         return try_emplace(key).first->second;
     }
@@ -489,7 +490,7 @@ public:
     {
         iterator found = find(k);
 
-        if(found != container_.cend())
+        if(found != get_value_cend())
         {
             new (&found->second) mapped_type(std::forward<M>(obj));
             return { found, true };
@@ -519,12 +520,12 @@ public:
 
     constexpr end_local_iterator end(size_type) const
     {
-        return { container_.cend() };
+        return { get_value_cend() };
     }
 
     constexpr end_local_iterator cend(size_type) const
     {
-        return { container_.cend() };
+        return { get_value_cend() };
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
@@ -542,13 +543,13 @@ public:
     {
         return distance(
             begin(),
-            {this, container_.end()});
+            {this, get_value_cend()});
     }
 
     template <class K>
     constexpr bool contains(const K& key) const
     {
-        return find_ll(key).first != container_.cend();
+        return find_ll(key).first != get_value_cend();
     }
 
     /// perform garbage collection on the bucket containing this active pos, namely moving
@@ -563,7 +564,7 @@ public:
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(pointer it = get_value(n); it != container_.cend() && it < pos; ++it)
+        for(pointer it = get_value(n); it != get_value_cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_null_or_spase(*it))
@@ -654,7 +655,7 @@ public:
         // Quick-deduce our bucket#
         size_type n = start - container_.cbegin();
         // Find last one in bucket
-        for(;n == index(pos->first) && pos < container_.cend(); ++pos) {}
+        for(;n == index(pos->first) && pos < get_value_cend(); ++pos) {}
 
         --pos;
 
@@ -675,7 +676,7 @@ public:
     {
         find_result<pointer> found = find_ll(key);
 
-        if(found.first == container_.cend()) return 0;
+        if(found.first == get_value_cend()) return 0;
 
         erase_ll(found);
         return 1;
@@ -718,7 +719,7 @@ public:
         for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(KeyEqual{}(x, it->first))    return { it.it_, n };
 
-        return { container_.cend(), npos() };
+        return { get_value_cend(), npos() };
     }
 
     template <class K>
