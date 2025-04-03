@@ -208,6 +208,12 @@ private:
 
         pointer operator->() { return it_; }
 
+        // temporary as we transition container_
+        pointer value() { return it_; }
+        constexpr const_pointer value() const { return it_; }
+        control_pointer control() { return cast_control(it_); }
+        constexpr const_control_pointer control() const { return cast_control(it_); }
+
         template <class OtherIt>
         constexpr bool operator==(const iterator_base<OtherIt>& other) const
         {
@@ -346,6 +352,8 @@ private:
 
 
 public:
+    using iter_new = iterator_base<pointer>;
+    using const_iter_new = iterator_base<const_pointer>;
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
 
@@ -375,6 +383,11 @@ public:
     // DEBT: can probably use a hard type like end_iterator (optimization) though
     // that does double down on carrying parent* around
     constexpr iterator_base<const_pointer> end() const
+    {
+        return { this, container_.cend() };
+    }
+
+    constexpr iterator_base<const_pointer> cend() const
     {
         return { this, container_.cend() };
     }
@@ -484,7 +497,7 @@ public:
     template <class K, class M>
     pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
     {
-        iterator found = find(k);
+        iter_new found = find(k);
 
         if(found != container_.cend())
         {
@@ -629,6 +642,13 @@ public:
         return skip_null(pos + 1);
     }
 
+    iterator erase(iter_new pos)
+    {
+        erase_ll({ pos.value(), index(pos->first) });
+
+        return skip_null(pos.value() + 1);
+    }
+
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
     void erase_and_gc_ll(pointer pos)
@@ -653,9 +673,14 @@ public:
         swap(start, pos);
     }
 
-    void erase_and_gc(iterator pos)
+    void erase_and_gc(iter_new pos)
     {
-        erase_and_gc_ll(pos);
+        erase_and_gc_ll(pos.value());
+    }
+
+    void erase_and_gc(local_iterator pos)
+    {
+        erase_and_gc_ll(pos.it_);
     }
 
     size_type erase(const key_type& key)
@@ -720,15 +745,15 @@ public:
     }
 
     template <class K>
-    iterator find(const K& x)
+    iter_new find(const K& x)
     {
-        return find_ll(x).first;
+        return { this, find_ll(x).first };
     }
 
     template <class K>
-    const_iterator find(const K& x) const
+    const_iter_new find(const K& x) const
     {
-        return find_ll(x).first;
+        return { this, find_ll(x).first };
     }
 
     // Not ready yet because buckets don't preserve key order, so this gets tricky
