@@ -132,7 +132,8 @@ TEST_CASE("unordered")
             iter p1 = map.find(2);
             REQUIRE(p1->second == "hello1");
             map.erase(p1);
-            p1 = map.gc_active_ll(r1.first);
+            // DEBT: insert itself needs to pass back iter
+            p1 = map.gc_active(iter{ &map, r1.first });
             REQUIRE(p1->second == "hello1.1");
             map.erase(p1);
             //p1 = map.gc_active_ll(p1);

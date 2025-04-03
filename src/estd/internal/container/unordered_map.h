@@ -573,7 +573,7 @@ public:
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(pointer it = &container_[n]; it != container_.cend() && it < pos; ++it)
+        for(pointer it = get_value(n); it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_null_or_spase(*it))
@@ -598,6 +598,11 @@ public:
         }
 
         return pos;
+    }
+
+    iterator_base<pointer> gc_active(iterator_base<pointer> pos)
+    {
+        return { this, gc_active_ll(pos.value()) };
     }
 
     // Demotes this sparse 'pos' to completely deleted 'null'
