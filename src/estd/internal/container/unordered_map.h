@@ -56,8 +56,6 @@ public:
     using const_reference = const value_type&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
-    using iterator = pointer;
-    using const_iterator = const_pointer;
     using typename base_type::hasher;
     using typename base_type::size_type;
 
@@ -65,7 +63,7 @@ public:
 
     struct end_local_iterator
     {
-        const_iterator it_;
+        const_pointer it_;
     };
 
     using end_iterator = monostate;
@@ -75,9 +73,6 @@ public:
             "size mismatch between meta and exposed value_type");
     static_assert(sizeof(control_type) == sizeof(value_type),
             "size mismatch between meta and exposed value_type");
-
-    //using local_iterator = iterator;
-    //using const_local_iterator = const_iterator;
 
     // pointer and bucket
     template <class Pointer>
@@ -364,12 +359,6 @@ public:
         for(reference v : container_)   set_null(&v);
     }
 
-    // NOTE: Not sure if end/cend represents end of raw container or end of active, useful
-    // buckets but I think it's the former
-    // FIX: https://en.cppreference.com/w/cpp/container/unordered_map/clear
-    // finally tells us that these begin/ends are supposed to filter by not-nulled
-    constexpr const_iterator cend_old() const { return container_.cend(); }
-
     iterator_base<pointer> begin()
     {
         return { this, skip_null(container_.begin()) };
@@ -641,18 +630,11 @@ public:
     // NOTE: example implies internal ordering of unordered_map is predictable, which
     // on one hand feels reasonable, but on the other seems to conflict with the notion
     // that we are officially unordered.
-    iterator erase(iterator pos)
-    {
-        erase_ll({ pos, index(pos->first) });
-
-        return skip_null(pos + 1);
-    }
-
-    iterator erase(iter_new pos)
+    iter_new erase(iter_new pos)
     {
         erase_ll({ pos.value(), index(pos->first) });
 
-        return skip_null(pos.value() + 1);
+        return { this, skip_null(pos.value() + 1) };
     }
 
     // deviates from std in that other iterators part of this bucket could be invalidated
@@ -765,7 +747,7 @@ public:
     // Not ready yet because buckets don't preserve key order, so this gets tricky
     // Also, it's incongruous because elsewhere I read no duplicate keys allowed
     template <class K>
-    pair<const_iterator, const_iterator> equal_range_exp(const K& x)
+    pair<const_pointer, const_pointer> equal_range_exp(const K& x)
     {
         const size_type n = index(x);
         const_local_iterator start = cbegin(n);

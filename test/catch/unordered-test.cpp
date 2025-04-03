@@ -38,8 +38,7 @@ TEST_CASE("unordered")
         using const_iter = typename type::const_iter_new;
         using iterl = typename type::local_iterator;
         using const_iterl = typename type::const_local_iterator ;
-        using pair = estd::pair<typename type::iterator, bool>;
-        using pair_new = estd::pair<typename type::iter_new, bool>;
+        using pair = estd::pair<typename type::iter_new, bool>;
 
         type map;
 
@@ -50,7 +49,7 @@ TEST_CASE("unordered")
         // NOTE: Key '0' won't work due to collision between hash(0) and Null, but that can be overcome
         // by tuning nullable_traits
 
-        pair_new r2 = map.insert({1, "hi2u"});
+        pair r2 = map.insert({1, "hi2u"});
         REQUIRE(r2.second);
         r2 = map.insert({1, "hi again"});
         REQUIRE(r2.second == false);
