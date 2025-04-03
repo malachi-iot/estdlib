@@ -20,7 +20,7 @@ public:
     using key_type = Key;
     using map_type = internal::unordered_map<N, Key, T>;
     using pointer = typename map_type::pointer;
-    using iter_type = typename map_type::iter_new;
+    using iter_type = typename map_type::iterator;
 
 // Since this is unit testing, these are public
 //private:

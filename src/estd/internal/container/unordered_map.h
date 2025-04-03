@@ -348,8 +348,8 @@ private:
 
 
 public:
-    using iter_new = iterator_base<pointer>;
-    using const_iter_new = iterator_base<const_pointer>;
+    using iterator = iterator_base<pointer>;
+    using const_iterator = iterator_base<const_pointer>;
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
 
@@ -405,7 +405,7 @@ public:
     }
 
     template <class ...Args>
-    pair<iter_new, bool> emplace(const key_type& key, Args&&...args)
+    pair<iterator, bool> emplace(const key_type& key, Args&&...args)
     {
         const insert_result ret = insert_precheck(key, false);
 
@@ -416,7 +416,7 @@ public:
     }
 
     template <class ...Args1, class ...Args2>
-    pair<iter_new, bool> emplace(piecewise_construct_t,
+    pair<iterator, bool> emplace(piecewise_construct_t,
         estd::tuple<Args1...>&& first_args,
         estd::tuple<Args2...>&& second_args,
         bool permit_duplicates = false)
@@ -436,7 +436,7 @@ public:
     // try_emplace only used right now since unlike regular emplace it can operate
     // without any parameter (aside from key)
     template <class K, class ...Args>
-    pair<iter_new, bool> try_emplace(const K& key, Args&&...args)
+    pair<iterator, bool> try_emplace(const K& key, Args&&...args)
     {
         const insert_result ret = insert_precheck(key, false);
 
@@ -458,7 +458,7 @@ public:
         return wrap_result(ret);
     }
 
-    pair<iter_new, bool> insert(const_reference value, bool permit_duplicates = false)
+    pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
     {
         const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
@@ -467,12 +467,12 @@ public:
             // we're good to go
             new (ret.first) value_type(value);
 
-        return { iter_new{this, ret.first}, ret.second };
+        return { iterator{this, ret.first}, ret.second };
     }
 
     template <class P>
     auto insert(P&& value, bool permit_duplicates = false) ->
-        enable_if_t<is_constructible<value_type, P&&>::value, pair<iter_new, bool>>
+        enable_if_t<is_constructible<value_type, P&&>::value, pair<iterator, bool>>
     {
         const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
@@ -485,9 +485,9 @@ public:
     }
 
     template <class K, class M>
-    pair<iter_new, bool> insert_or_assign(const K& k, M&& obj)
+    pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
     {
-        iter_new found = find(k);
+        iterator found = find(k);
 
         if(found != container_.cend())
         {
@@ -630,7 +630,7 @@ public:
     // NOTE: example implies internal ordering of unordered_map is predictable, which
     // on one hand feels reasonable, but on the other seems to conflict with the notion
     // that we are officially unordered.
-    iter_new erase(iter_new pos)
+    iterator erase(iterator pos)
     {
         erase_ll({ pos.value(), index(pos->first) });
 
@@ -661,7 +661,7 @@ public:
         swap(start, pos);
     }
 
-    void erase_and_gc(iter_new pos)
+    void erase_and_gc(iterator pos)
     {
         erase_and_gc_ll(pos.value());
     }
@@ -733,13 +733,13 @@ public:
     }
 
     template <class K>
-    iter_new find(const K& x)
+    iterator find(const K& x)
     {
         return { this, find_ll(x).first };
     }
 
     template <class K>
-    const_iter_new find(const K& x) const
+    const_iterator find(const K& x) const
     {
         return { this, find_ll(x).first };
     }
