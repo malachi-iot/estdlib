@@ -83,7 +83,7 @@ public:
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
 
-    using insert_result = pair<iterator, bool>;
+    using insert_result = pair<pointer, bool>;
 
 private:
     // DEBT: casting to control a bummer
@@ -95,7 +95,8 @@ private:
     /// @brief Checks for null OR sparse
     /// @param v
     /// @return
-    static constexpr bool is_null_or_spase(const_reference v)
+    template <class K, class T2>
+    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
     {
         return Nullable{}.is_null(v.first);
     }
@@ -105,7 +106,8 @@ private:
     /// @param n
     /// @return
     /// DEBT: Passing in size_type n seems optional since we have our gc flag
-    static constexpr bool is_null(const_reference v, size_type)
+    template <class K, class T2>
+    static constexpr bool is_null(const pair<K, T2>& v, size_type)
     {
         return is_null_or_spase(v) && cast_control(&v)->marked_for_gc == false;
     }
@@ -114,7 +116,8 @@ private:
     /// @param v
     /// @param n bucket#
     /// @return
-    static constexpr bool is_sparse(const_reference v, size_type n)
+    template <class K, class T2>
+    static constexpr bool is_sparse(const pair<K, T2>& v, size_type n)
     {
         const_control_pointer ctl = cast_control(&v);
 
@@ -126,7 +129,8 @@ private:
     /// Nulls out key
     /// @param v
     /// @remark Does not run destructor
-    static void set_null(pointer v)
+    template <class K, class T2>
+    static void set_null(pair<K, T2>* v)
     {
         // DEBT: Control-casting annoying, but a slight improvement over const_cast
         Nullable{}.set(&cast_control(v)->first);
@@ -150,6 +154,14 @@ private:
     }
 
     uninitialized_array<value_type, N> container_;
+
+    // DEBT: Temporary as we transition container_ from value_type -> control_type
+    constexpr pointer get_value(unsigned i) { return &container_[i]; }
+    constexpr const_pointer get_value(unsigned i) const { return &container_[i]; }
+
+    // DEBT: Temporary as we transition container_ from value_type -> control_type
+    constexpr control_pointer get_control(unsigned i) { return cast_control(&container_[i]); }
+    constexpr const_control_pointer get_control(unsigned i) const { return cast_control(&container_[i]); }
 
     // It must be pointer or const_pointer
     template <class It>
@@ -207,6 +219,16 @@ private:
         {
             return it_ != other.it_;
         }
+
+        constexpr bool operator==(const It& other) const
+        {
+            return it_ == other;
+        }
+
+        constexpr bool operator!=(const It& other) const
+        {
+            return it_ != other;
+        }
     };
 
     template <class LocalIt>
@@ -215,7 +237,7 @@ private:
         using parent_type = unordered_map;
         using this_type = local_iterator_base;
 
-        const parent_type& parent_;
+        const parent_type* const parent_;
 
         // bucket designator
         const size_type n_;
@@ -261,7 +283,7 @@ private:
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
             // null entries for this iterator
-            for(; is_sparse(*it_, n_) && it_ != parent_.container_.cend(); ++it_)   {}
+            for(; is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
 
             return *this;
         }
@@ -272,6 +294,16 @@ private:
 
             return { n_, it_ - 1 };
         }
+
+        constexpr bool operator==(const LocalIt& other) const
+        {
+            return it_ == other;
+        }
+
+        constexpr bool operator!=(const LocalIt& other) const
+        {
+            return it_ != other;
+        }
     };
 
     template <class K>
@@ -281,7 +313,8 @@ private:
 
         // linear probing
 
-        iterator it = &container_[n];
+        pointer it = get_value(n);
+
         // Move over occupied spots.  Sparse also counts as occupied
         // DEBT: optimize is_null/is_sparse together
         for(;is_null_or_spase(*it) == false || is_sparse(*it, n); ++it)
@@ -304,6 +337,11 @@ private:
 
         // Success, but someone else still needs to initialize 'it'
         return { it, true };
+    }
+
+    constexpr pair<iterator, bool> wrap_result(insert_result r) const
+    {
+        return r;
     }
 
 
@@ -366,12 +404,12 @@ public:
     template <class ...Args>
     pair<iterator, bool> emplace(const key_type& key, Args&&...args)
     {
-        pair<iterator, bool> ret = insert_precheck(key, false);
+        const insert_result ret = insert_precheck(key, false);
 
         if(ret.second)
             new (ret.first) value_type(key, std::forward<Args>(args)...);
 
-        return ret;
+        return wrap_result(ret);
     }
 
     template <class ...Args1, class ...Args2>
@@ -382,14 +420,14 @@ public:
     {
         const key_type& key = estd::get<0>(first_args);
 
-        pair<iterator, bool> ret = insert_precheck(key, permit_duplicates);
+        const insert_result ret = insert_precheck(key, permit_duplicates);
 
         if(ret.second)
             new (ret.first) value_type(piecewise_construct_t{},
                 std::forward<estd::tuple<Args1...>>(first_args),
                 std::forward<estd::tuple<Args2...>>(second_args));
 
-        return ret;
+        return wrap_result(ret);
     }
 
     // try_emplace only used right now since unlike regular emplace it can operate
@@ -397,7 +435,7 @@ public:
     template <class K, class ...Args>
     pair<iterator, bool> try_emplace(const K& key, Args&&...args)
     {
-        const pair<iterator, bool> ret = insert_precheck(key, false);
+        const insert_result ret = insert_precheck(key, false);
 
         // pair requires two parameters to construct, PLUS it's a const key.
         // fortunately, since we presume it's a trivial-ish type (no dtor)
@@ -414,33 +452,33 @@ public:
                     forward_as_tuple(std::forward<Args>(args)...));
         }
 
-        return ret;
+        return wrap_result(ret);
     }
 
     pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
     {
-        const pair<iterator, bool> ret = insert_precheck(value.first, permit_duplicates);
+        const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
         if(ret.second)
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(value);
 
-        return ret;
+        return wrap_result(ret);
     }
 
     template <class P>
     auto insert(P&& value, bool permit_duplicates = false) ->
         enable_if_t<is_constructible<value_type, P&&>::value, pair<iterator, bool>>
     {
-        pair<iterator, bool> ret = insert_precheck(value.first, permit_duplicates);
+        const insert_result ret = insert_precheck(value.first, permit_duplicates);
 
         if(ret.second)
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(std::forward<P>(value));
 
-        return ret;
+        return wrap_result(ret);
     }
 
     template <class K, class M>
@@ -463,17 +501,17 @@ public:
 
     local_iterator begin(size_type n)
     {
-        return { *this, n, &container_[n] };
+        return { this, n, get_value(n) };
     }
 
-    const_local_iterator begin(size_type n) const
+    constexpr const_local_iterator begin(size_type n) const
     {
-        return { *this, n, &container_[n] };
+        return { this, n, get_value(n) };
     }
 
-    const_local_iterator cbegin(size_type n) const
+    constexpr const_local_iterator cbegin(size_type n) const
     {
-        return { *this, n, &container_[n] };
+        return { this, n, get_value(n) };
     }
 
     constexpr end_local_iterator end(size_type) const

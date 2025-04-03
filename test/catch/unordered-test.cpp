@@ -34,10 +34,11 @@ TEST_CASE("unordered")
     {
         using type = estd::internal::unordered_map<16, int, layer1::string<32>>;
         //using value_type = typename type::value_type;
-        using iter = typename type::local_iterator;
-        using const_iter = typename type::const_local_iterator ;
+        using iter = typename type::iterator;
+        using const_iter = typename type::const_iterator;
+        using iterl = typename type::local_iterator;
+        using const_iterl = typename type::const_local_iterator ;
         using pair = estd::pair<typename type::iterator, bool>;
-        using ptr = typename type::pointer;
 
         type map;
 
@@ -59,7 +60,7 @@ TEST_CASE("unordered")
         // NOTE: Undefined behavior, but valid in this tightly controlled unit test
         REQUIRE(bucket1 == type::bucket_depth);     // key 1 x bucket_depth
 
-        for(const_iter i = map.cbegin(bucket1); i != map.end(bucket1); ++i, ++counter)
+        for(const_iterl i = map.cbegin(bucket1); i != map.end(bucket1); ++i, ++counter)
         {
             REQUIRE(i->second == "hi2u");
         }
@@ -100,7 +101,7 @@ TEST_CASE("unordered")
 
             REQUIRE(map.count(2) == 2);
             REQUIRE(map[2] == "hello1");
-            iter it_bucket_2 = map.begin(map.bucket(2));
+            iterl it_bucket_2 = map.begin(map.bucket(2));
             REQUIRE(it_bucket_2->second == "hello1");
             REQUIRE((it_bucket_2 + 1)->second == "hello1.1");
             map.erase_and_gc(it_bucket_2);
@@ -128,7 +129,7 @@ TEST_CASE("unordered")
             // DEBT: Would try emplace but that one doesn't permit dups
             r1 = map.insert({2, "hello1.1"}, true);
             REQUIRE(r1.second);
-            ptr p1 = map.find(2);
+            iter p1 = map.find(2);
             REQUIRE(p1->second == "hello1");
             map.erase(p1);
             p1 = map.gc_active_ll(r1.first);
