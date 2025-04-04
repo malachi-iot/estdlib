@@ -21,11 +21,10 @@ template <class Container,
 class unordered_set;
 
 template <class Container, class Key, class Hash, Key Null, class KeyEqual>
-class unordered_set : public unordered_base<unordered_traits<Key, Key, Hash, KeyEqual>>
+class unordered_set : public unordered_base<Container, unordered_traits<Key, Key, Hash, KeyEqual>>
 {
-    using base_type = unordered_base<unordered_traits<Key, Key, Hash, KeyEqual>>;
-
-    Container set_;
+    using base_type = unordered_base<Container, unordered_traits<Key, Key, Hash, KeyEqual>>;
+    using base_type::container_;
 
 public:
     ESTD_CPP_STD_VALUE_TYPE(Key)
@@ -42,9 +41,9 @@ private:
 public:
     bool empty() const
     {
-        const_iterator i = set_.begin();
+        const_iterator i = container_.begin();
 
-        for(;i != set_.end(); ++i)
+        for(;i != container_.end(); ++i)
         {
             if(*i != Null) return false;
         }
@@ -57,22 +56,21 @@ public:
         //return set_.size();
         size_type sz = 0;
 
-        for(const_reference v : set_)
+        for(const_reference v : container_)
             if(v != Null)  ++sz;
 
         return sz;
     }
-    constexpr size_type max_size() const { return set_.max_size(); }
 
     pair<iterator, bool> insert(const_reference value)
     {
-        unsigned hashed = hasher{}(value) % set_.size();
+        unsigned hashed = hasher{}(value) % container_.size();
 
         // linear probing
-        iterator it = &set_[hashed];
+        iterator it = &container_[hashed];
         while(*it != Null)
         {
-            if(++it == set_.end())
+            if(++it == container_.end())
             {
                 return { it, false };
             }

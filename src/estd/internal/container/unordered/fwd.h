@@ -21,7 +21,8 @@ template <unsigned N, class Key, class T,
     class Hash = hash<Key>,
     class Nullable = nullable_traits<Key>,
     class KeyEqual = equal_to<Key>>
-using unordered_map = unordered_map_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>;
+using unordered_map = unordered_map_base<N,
+    unordered_traits<Key, T, Hash, KeyEqual, Nullable>>;
 
 
 }}

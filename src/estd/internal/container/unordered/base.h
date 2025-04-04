@@ -12,23 +12,10 @@ namespace estd {
 namespace internal {
 
 template <class Traits>
-class unordered_base : public Traits
+struct unordered_helper
 {
-    using base_type = Traits;
     using traits = Traits;
-
-protected:
-    //Container container_;
-
-public:
-    using typename traits::mapped_type;
-    using typename traits::nullable;
-    using size_type = unsigned;
-
-    // The more collisions and/or duplicates you expect, the bigger this wants to be.
-    // Idea being if you have two buckets near each other of only size 1, you'll never
-    // have room to insert a collision/duplicate
-    static constexpr unsigned bucket_depth = 4;
+    using mapped_type = typename traits::mapped_type;
 
     // Mainly used for unordered_map since it has an unused area when key is null
     union meta
@@ -50,6 +37,28 @@ public:
     };
 
     using map_control_type = estd::pair<typename traits::key_type, meta>;
+};
+
+template <class Container, class Traits>
+class unordered_base : public Traits
+{
+    using base_type = Traits;
+    using traits = Traits;
+
+protected:
+    Container container_;
+
+public:
+    using typename traits::mapped_type;
+    using typename traits::nullable;
+    using size_type = unsigned;
+    using meta = typename unordered_helper<Traits>::meta;
+    using map_control_type = typename unordered_helper<Traits>::map_control_type;
+
+    // The more collisions and/or duplicates you expect, the bigger this wants to be.
+    // Idea being if you have two buckets near each other of only size 1, you'll never
+    // have room to insert a collision/duplicate
+    static constexpr unsigned bucket_depth = 4;
 
     /// @brief Checks for null OR sparse
     /// @param v
@@ -59,24 +68,27 @@ public:
     {
         return nullable{}.is_null(v.first);
     }
+
+    constexpr size_type max_size() const { return container_.max_size(); }
 };
 
 template <unsigned N, class Traits>
-class l1_unordered_base : public unordered_base<Traits>
+class l1_unordered_base :
+    public unordered_base<
+        uninitialized_array<typename unordered_helper<Traits>::map_control_type, N>,
+        Traits>
 {
-    using base_type = unordered_base<Traits>;
+    using base_type =
+        unordered_base<
+            uninitialized_array<typename unordered_helper<Traits>::map_control_type, N>,
+            Traits>;
 
     // DEBT: Do assert to make sure N is evenly divisible by bucket_depth
 
-protected:
-    // DEBT: Temporarily hard coded to unitialized_array here (rather than Container)
-    uninitialized_array<typename base_type::map_control_type, N> container_;
-
 public:
+    using base_type::max_size;
     using typename base_type::size_type;
     using base_type::bucket_depth;
-
-    constexpr size_type max_size() const { return container_.max_size(); }
 
     constexpr size_type max_bucket_count() const
     {
