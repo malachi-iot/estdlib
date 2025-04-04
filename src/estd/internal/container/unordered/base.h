@@ -68,30 +68,31 @@ class l1_unordered_base : public unordered_base<Traits>
 
     // DEBT: Do assert to make sure N is evenly divisible by bucket_depth
 
+protected:
+    // DEBT: Temporarily hard coded to unitialized_array here (rather than Container)
+    uninitialized_array<typename base_type::map_control_type, N> container_;
+
 public:
     using typename base_type::size_type;
     using base_type::bucket_depth;
 
-    static constexpr size_type max_bucket_count()
+    constexpr size_type max_size() const { return container_.max_size(); }
+
+    constexpr size_type max_bucket_count() const
     {
-        return N / bucket_depth;
+        return max_size() / bucket_depth;
     }
 
-    static constexpr size_type max_size() { return N; }
-
 protected:
-    // DEBT: Temporarily located here
-    uninitialized_array<typename base_type::map_control_type, N> container_;
-
     // DEBT: Doesn't handle non-empty hasher
     template <class K>
-    static constexpr size_type index(const K& key)
+    constexpr size_type index(const K& key) const
     {
         return bucket_depth * typename base_type::hasher{}(key) % max_size();
     }
 
     // indicates whether already-hashed (lhs) matches to-hash (rhs)
-    static constexpr bool match(size_type lhs, const typename base_type::key_type& rhs)
+    constexpr bool match(size_type lhs, const typename base_type::key_type& rhs) const
     {
         return lhs == index(rhs);
     }

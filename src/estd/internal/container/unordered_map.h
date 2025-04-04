@@ -165,7 +165,7 @@ private:
 
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
-            return n_ != index(it_->first);
+            return n_ != parent_->index(it_->first);
         }
 
         constexpr bool operator!=(end_local_iterator it) const
@@ -179,7 +179,7 @@ private:
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
-            return n_ == index(it_->first);
+            return n_ == parent_->index(it_->first);
         }
 
         this_type& operator++()
