@@ -26,8 +26,8 @@ struct unordered_helper
             uint16_t bucket : 6;
         };
 
-        operator mapped_type& () { return * (mapped_type*) storage; }
-        constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
+        //operator mapped_type& () { return * (mapped_type*) storage; }
+        //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
 
         mapped_type& mapped() { return * (mapped_type*) storage; }
     };
@@ -59,6 +59,7 @@ public:
     /// @brief Checks for null OR sparse
     /// @param v
     /// @return
+    // DEBT: Hmm, this guy really is unordered_map specific get him outta here
     template <class K, class T2>
     static constexpr bool is_null_or_spase(const pair<K, T2>& v)
     {
