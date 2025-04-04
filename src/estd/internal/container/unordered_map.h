@@ -11,15 +11,16 @@ namespace estd {
 
 namespace internal {
 
-template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
-class unordered_map : public l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
+template <unsigned N, class Traits>
+class unordered_map_base : public l1_unordered_base<N, Traits>
 {
-    using this_type = unordered_map;
-    using base_type = l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>;
+    using this_type = unordered_map_base;
+    using base_type = l1_unordered_base<N, Traits>;
     using base_type::index;
     using base_type::match;
     using base_type::is_null_or_spase;
     using base_type::container_;
+    using base_type::key_eq;
 
 #if UNIT_TESTING
 public:
@@ -33,9 +34,10 @@ public:
 public:
     using base_type::bucket_depth;
     using typename base_type::key_type;
-    using mapped_type = T;
+    using typename base_type::mapped_type;
+    using typename base_type::nullable;
 
-    using value_type = estd::pair<const Key, T>;
+    using value_type = estd::pair<const key_type, mapped_type>;
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;
@@ -93,8 +95,7 @@ private:
     /// @remark Does not run destructor
     static ESTD_CPP_CONSTEXPR(14) void set_null(control_pointer v)
     {
-        // DEBT: Control-casting annoying, but a slight improvement over const_cast
-        Nullable{}.set(&v->first);
+        nullable{}.set(&v->first);
     }
 
 
@@ -137,7 +138,7 @@ private:
     template <class LocalIt>
     struct local_iterator_base
     {
-        using parent_type = unordered_map;
+        using parent_type = unordered_map_base;
         using this_type = local_iterator_base;
 
         const parent_type* const parent_;
@@ -230,7 +231,7 @@ private:
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
-                if(KeyEqual{}(key, it->first))
+                if(key_eq()(key, it->first))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
             }
@@ -263,7 +264,7 @@ private:
     }
 
 public:
-    ESTD_CPP_CONSTEXPR(14) unordered_map()
+    ESTD_CPP_CONSTEXPR(14) unordered_map_base()
     {
         // DEBT: Feels clunky
         for(control_type& v : container_)   set_null(&v);
@@ -598,7 +599,7 @@ public:
         const size_type n = bucket(key);
         for(const_local_iterator it = begin(n); it != end(n); ++it)
         {
-            if(KeyEqual{}(key, it->first))
+            if(key_eq()(key, it->first))
             {
                 // monostate means no real return type
                 if constexpr(!is_same<R, monostate>::value)
@@ -625,7 +626,7 @@ public:
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(KeyEqual{}(x, it->first))    return { it.it_, n };
+            if(key_eq()(x, it->first))    return { it.it_, n };
 
         return { get_value_cend(), npos() };
     }
@@ -636,7 +637,7 @@ public:
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
-            if(KeyEqual{}(x, it->first))    return { it.it_, n };
+            if(key_eq()(x, it->first))    return { it.it_, n };
 
         return { get_value_end(), npos() };
     }
