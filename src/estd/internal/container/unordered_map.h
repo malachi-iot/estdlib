@@ -11,11 +11,11 @@ namespace estd {
 
 namespace internal {
 
-template <unsigned N, class Traits>
-class unordered_map_base : public l1_unordered_base<N, Traits>
+template <class Container, class Traits>
+class unordered_map_base : public unordered_base<Container, Traits>
 {
     using this_type = unordered_map_base;
-    using base_type = l1_unordered_base<N, Traits>;
+    using base_type = unordered_base<Container, Traits>;
     using base_type::index;
     using base_type::match;
     using base_type::is_null_or_spase;

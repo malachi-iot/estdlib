@@ -1,9 +1,5 @@
 #pragma once
 
-// DEBT: Eventually Container is passed into these base classes and this guy
-// won't be needed
-#include "../../array.h"
-
 #include "fwd.h"
 #include "traits.h"
 
@@ -70,25 +66,6 @@ public:
     }
 
     constexpr size_type max_size() const { return container_.max_size(); }
-};
-
-template <unsigned N, class Traits>
-class l1_unordered_base :
-    public unordered_base<
-        uninitialized_array<typename unordered_helper<Traits>::map_control_type, N>,
-        Traits>
-{
-    using base_type =
-        unordered_base<
-            uninitialized_array<typename unordered_helper<Traits>::map_control_type, N>,
-            Traits>;
-
-    // DEBT: Do assert to make sure N is evenly divisible by bucket_depth
-
-public:
-    using base_type::max_size;
-    using typename base_type::size_type;
-    using base_type::bucket_depth;
 
     constexpr size_type max_bucket_count() const
     {
@@ -187,9 +164,7 @@ protected:
             return it_ != other;
         }
     };
-
 };
-
 
 }
 
