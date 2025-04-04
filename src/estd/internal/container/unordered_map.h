@@ -14,35 +14,19 @@ namespace internal {
 template <unsigned N, class Key, class T, class Hash, class Nullable, class KeyEqual>
 class unordered_map : public l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
 {
+    using this_type = unordered_map;
     using base_type = l1_unordered_base<N, unordered_traits<Key, T, Hash, KeyEqual, Nullable>>;
     using base_type::index;
     using base_type::match;
+    using base_type::is_null_or_spase;
+    using base_type::container_;
 
 #if UNIT_TESTING
 public:
 #endif
 
-    union meta
-    {
-        byte storage[sizeof(T)];
-
-        struct
-        {
-            // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
-            uint16_t marked_for_gc : 1;
-            // which bucket this empty slot *used to* belong to
-            uint16_t bucket : 6;
-        };
-
-        operator T& () { return * (T*) storage; }
-        constexpr operator const T& () const { return * (T*) storage; }
-
-        T& mapped() { return * (T*) storage; }
-    };
-
     // DEBT: Key SHOULD be value-initializable at this time.
-    // TODO: eventually container is populated by control_type, not value_type
-    using control_type = estd::pair<Key, meta>;
+    using control_type = typename base_type::map_control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
 
@@ -56,7 +40,6 @@ public:
     using const_reference = const value_type&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
-    using typename base_type::hasher;
     using typename base_type::size_type;
 
     static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
@@ -69,7 +52,7 @@ public:
     using end_iterator = monostate;
 
     // Check that our casting wizardry doesn't get us into too much trouble
-    static_assert(sizeof(meta) == sizeof(typename value_type::second_type),
+    static_assert(sizeof(typename base_type::meta) == sizeof(typename value_type::second_type),
             "size mismatch between meta and exposed value_type");
     static_assert(sizeof(control_type) == sizeof(value_type),
             "size mismatch between meta and exposed value_type");
@@ -81,21 +64,6 @@ public:
     using insert_result = pair<pointer, bool>;
 
 private:
-    // DEBT: casting to control a bummer
-    static constexpr void swap(pointer lhs, pointer rhs)
-    {
-        cast_control(lhs)->swap(*cast_control(rhs));
-    }
-
-    /// @brief Checks for null OR sparse
-    /// @param v
-    /// @return
-    template <class K, class T2>
-    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
-    {
-        return Nullable{}.is_null(v.first);
-    }
-
     /// Checks for null but NOT sparse
     /// @param v
     /// @param n
@@ -122,29 +90,13 @@ private:
     }
 
     /// Nulls out key
-    /// @param v
     /// @remark Does not run destructor
-    template <class K, class T2>
-    static void set_null(pair<K, T2>* v)
-    {
-        // DEBT: Control-casting annoying, but a slight improvement over const_cast
-        Nullable{}.set(&cast_control(v)->first);
-    }
-
-    /// Nulls out key
-    static void set_null(control_pointer v)
+    static ESTD_CPP_CONSTEXPR(14) void set_null(control_pointer v)
     {
         // DEBT: Control-casting annoying, but a slight improvement over const_cast
         Nullable{}.set(&v->first);
     }
 
-
-    // runs destructor + nulls out key
-    static void destruct(pointer v)
-    {
-        set_null(v);
-        v->second.~mapped_type();
-    }
 
     // runs destructor + nulls out key
     static void destruct(control_pointer v)
@@ -162,8 +114,6 @@ private:
     {
         return reinterpret_cast<const_control_pointer>(pos);
     }
-
-    uninitialized_array<control_type, N> container_;
 
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
@@ -183,71 +133,6 @@ private:
 
         return it;
     }
-
-    // semi-smart, can skip null spots
-    template <class It>
-    class iterator_base
-    {
-        using parent_type = unordered_map;
-        using this_type = iterator_base;
-
-        const parent_type* parent_;
-        It it_;
-
-        template <class OtherIt>
-        friend class iterator_base;
-
-    public:
-        constexpr iterator_base(const parent_type* parent, It it) :
-            parent_{parent},
-            it_{it}
-        {}
-
-        iterator_base(const iterator_base&) = default;
-
-        this_type& operator++()
-        {
-            ++it_;
-
-            it_ = parent_->skip_null(it_);
-
-            return *this;
-        }
-
-        constexpr const_reference operator*() const { return *it_; }
-
-        constexpr const_pointer operator->() const { return it_; }
-
-        pointer operator->() { return it_; }
-
-        // temporary as we transition container_
-        pointer value() { return it_; }
-        constexpr const_pointer value() const { return it_; }
-        control_pointer control() { return cast_control(it_); }
-        constexpr const_control_pointer control() const { return cast_control(it_); }
-
-        template <class OtherIt>
-        constexpr bool operator==(const iterator_base<OtherIt>& other) const
-        {
-            return it_ == other.it_;
-        }
-
-        template <class OtherIt>
-        constexpr bool operator!=(const iterator_base<OtherIt>& other) const
-        {
-            return it_ != other.it_;
-        }
-
-        constexpr bool operator==(const It& other) const
-        {
-            return it_ == other;
-        }
-
-        constexpr bool operator!=(const It& other) const
-        {
-            return it_ != other;
-        }
-    };
 
     template <class LocalIt>
     struct local_iterator_base
@@ -359,44 +244,49 @@ private:
         return { it, true };
     }
 
+    template <class It, class Parent>
+    friend class base_type::iterator_base;
+
+
+public:
+    using iterator = typename base_type::iterator_base<pointer, this_type>;
+    using const_iterator = typename base_type::iterator_base<const_pointer, this_type>;
+    using local_iterator = local_iterator_base<pointer>;
+    using const_local_iterator = local_iterator_base<const_pointer>;
+
+private:
+
     // For insert/emplace operations specifically
-    constexpr pair<iterator_base<pointer>, bool> wrap_result(insert_result r) const
+    constexpr pair<iterator, bool> wrap_result(insert_result r) const
     {
         return { { this, r.first }, r.second };
     }
 
-
 public:
-    using iterator = iterator_base<pointer>;
-    using const_iterator = iterator_base<const_pointer>;
-    using local_iterator = local_iterator_base<pointer>;
-    using const_local_iterator = local_iterator_base<const_pointer>;
-
     ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
         // DEBT: Feels clunky
         for(control_type& v : container_)   set_null(&v);
     }
 
-    iterator_base<pointer> begin()
+    iterator begin()
     {
         return { this, skip_null(get_value(0)) };
     }
 
-    constexpr iterator_base<const_pointer> begin() const
+    constexpr const_iterator begin() const
     {
         return { this, skip_null(get_value(0)) };
     }
 
-    // DEBT: as above, eventually displaces things
     // DEBT: can probably use a hard type like end_iterator (optimization) though
     // that does double down on carrying parent* around
-    constexpr iterator_base<const_pointer> end() const
+    constexpr const_iterator end() const
     {
         return { this, get_value_cend() };
     }
 
-    constexpr iterator_base<const_pointer> cend() const
+    constexpr const_iterator cend() const
     {
         return { this, get_value_cend() };
     }
@@ -574,7 +464,7 @@ public:
     /// pos if gc wishes it
     /// @param pos entry to possibly move
     /// @returns potentially moved 'pos'
-    pointer gc_active_ll(pointer pos)
+    control_pointer gc_active_ll(control_pointer pos)
     {
         const key_type& key = pos->first;
         const size_type n = index(key);
@@ -582,12 +472,12 @@ public:
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(pointer it = get_value(n); it != get_value_cend() && it < pos; ++it)
+        for(control_pointer it = get_control(n); it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_null_or_spase(*it))
             {
-                control_pointer control = cast_control(it);
+                control_pointer control = it;
 
                 // if sparse, it's not a swap candidate
                 if(control->second.marked_for_gc)
@@ -600,7 +490,7 @@ public:
                 // item 'pos', do a swap and exit
                 else
                 {
-                    swap(it, pos);
+                    it->swap(*pos);
                     return it;
                 }
             }
@@ -609,9 +499,9 @@ public:
         return pos;
     }
 
-    iterator_base<pointer> gc_active(iterator_base<pointer> pos)
+    iterator gc_active(iterator pos)
     {
-        return { this, gc_active_ll(pos.value()) };
+        return { this, (pointer) gc_active_ll(cast_control(pos.value())) };
     }
 
     // Demotes this sparse 'pos' to completely deleted 'null'
@@ -635,7 +525,7 @@ public:
     {
         const size_type n = pos.second;
 
-        destruct(pos.first);
+        destruct(cast_control(pos.first));
 
         // "mark and sweep" erase rather than erase (and swap) immediately in place.
         // More inline with spec, namely doesn't disrupt other iterators
@@ -682,7 +572,7 @@ public:
 
     void erase_and_gc(iterator pos)
     {
-        erase_and_gc_ll(pos.control());
+        erase_and_gc_ll(cast_control(pos.value()));
     }
 
     void erase_and_gc(local_iterator pos)

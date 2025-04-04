@@ -37,6 +37,7 @@ class unordered_traits :
     protected KeyEqual  // EBO
 {
 public:
+    using mapped_type = T;
     using key_type = Key;
     using hasher = Hash;
     using key_equal = KeyEqual;
