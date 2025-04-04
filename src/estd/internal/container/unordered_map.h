@@ -131,11 +131,26 @@ private:
         Nullable{}.set(&cast_control(v)->first);
     }
 
+    /// Nulls out key
+    static void set_null(control_pointer v)
+    {
+        // DEBT: Control-casting annoying, but a slight improvement over const_cast
+        Nullable{}.set(&v->first);
+    }
+
+
     // runs destructor + nulls out key
     static void destruct(pointer v)
     {
         set_null(v);
         v->second.~mapped_type();
+    }
+
+    // runs destructor + nulls out key
+    static void destruct(control_pointer v)
+    {
+        set_null(v);
+        v->second.mapped().~mapped_type();
     }
 
     static constexpr control_pointer cast_control(pointer pos)
@@ -148,18 +163,19 @@ private:
         return reinterpret_cast<const_control_pointer>(pos);
     }
 
-    uninitialized_array<value_type, N> container_;
+    uninitialized_array<control_type, N> container_;
 
     // DEBT: Temporary as we transition container_ from value_type -> control_type
-    constexpr pointer get_value(unsigned i) { return &container_[i]; }
-    constexpr const_pointer get_value(unsigned i) const { return &container_[i]; }
-    constexpr const_pointer get_value_cend() const { return container_.cend(); }
+    constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
+    constexpr const_pointer get_value(unsigned i) const { return (const_pointer) &container_[i]; }
+    ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
+    constexpr const_pointer get_value_cend() const { return (const_pointer) container_.cend(); }
 
     // DEBT: Temporary as we transition container_ from value_type -> control_type
-    constexpr control_pointer get_control(unsigned i) { return cast_control(&container_[i]); }
-    constexpr const_control_pointer get_control(unsigned i) const { return cast_control(&container_[i]); }
+    constexpr control_pointer get_control(unsigned i) { return &container_[i]; }
+    constexpr const_control_pointer get_control(unsigned i) const { return &container_[i]; }
 
-    // It must be pointer or const_pointer
+    // It must be control_pointer or const_control_pointer
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
@@ -249,6 +265,8 @@ private:
         constexpr const_reference operator*() const { return *it_; }
 
         constexpr const_pointer operator->() const { return it_; }
+
+        control_pointer control() { return cast_control(it_); }
 
         operator LocalIt&() { return it_; }
 
@@ -357,17 +375,17 @@ public:
     ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
         // DEBT: Feels clunky
-        for(reference v : container_)   set_null(&v);
+        for(control_type& v : container_)   set_null(&v);
     }
 
     iterator_base<pointer> begin()
     {
-        return { this, skip_null(container_.begin()) };
+        return { this, skip_null(get_value(0)) };
     }
 
     constexpr iterator_base<const_pointer> begin() const
     {
-        return { this, skip_null(container_.cbegin()) };
+        return { this, skip_null(get_value(0)) };
     }
 
     // DEBT: as above, eventually displaces things
@@ -385,7 +403,7 @@ public:
 
     ESTD_CPP_CONSTEXPR(14) void clear()
     {
-        for(reference v : container_)   destruct(&v);
+        for(control_type& v : container_)   destruct(&v);
     }
 
     // DEBT: May be a deviation since our buckets are a little more fluid, but I think
@@ -640,9 +658,9 @@ public:
 
     // deviates from std in that other iterators part of this bucket could be invalidated
     // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
-    void erase_and_gc_ll(pointer pos)
+    void erase_and_gc_ll(control_pointer pos)
     {
-        pointer start = pos;
+        auto start = pos;
 
         destruct(pos);
 
@@ -655,21 +673,21 @@ public:
         // Quick-deduce our bucket#
         size_type n = start - container_.cbegin();
         // Find last one in bucket
-        for(;n == index(pos->first) && pos < get_value_cend(); ++pos) {}
+        for(;n == index(pos->first) && pos < container_.cend(); ++pos) {}
 
         --pos;
 
-        swap(start, pos);
+        start->swap(*pos);
     }
 
     void erase_and_gc(iterator pos)
     {
-        erase_and_gc_ll(pos.value());
+        erase_and_gc_ll(pos.control());
     }
 
     void erase_and_gc(local_iterator pos)
     {
-        erase_and_gc_ll(pos.it_);
+        erase_and_gc_ll(pos.control());
     }
 
     size_type erase(const key_type& key)
@@ -730,7 +748,7 @@ public:
         for(local_iterator it = begin(n); it != end(n); ++it)
             if(KeyEqual{}(x, it->first))    return { it.it_, n };
 
-        return { container_.end(), npos() };
+        return { get_value_end(), npos() };
     }
 
     template <class K>

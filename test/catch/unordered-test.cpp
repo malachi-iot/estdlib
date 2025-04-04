@@ -35,7 +35,7 @@ TEST_CASE("unordered")
         using type = estd::internal::unordered_map<16, int, layer1::string<32>>;
         //using value_type = typename type::value_type;
         using iter = typename type::iterator;
-        using const_iter = typename type::const_iterator;
+        //using const_iter = typename type::const_iterator;
         using iterl = typename type::local_iterator;
         using const_iterl = typename type::const_local_iterator ;
         using pair = estd::pair<iter, bool>;
