@@ -49,7 +49,7 @@ public:
 
     struct end_local_iterator
     {
-        const_pointer it_;
+        const_control_pointer it_;
     };
 
     using end_iterator = monostate;
@@ -125,7 +125,7 @@ private:
         return skip_null(it, get_value_cend());
     }
 
-    template <class LocalIt>
+    template <class LocalIt, class ControlIt = const_control_pointer >
     struct local_iterator_base
     {
         using parent_type = unordered_map;
@@ -136,15 +136,23 @@ private:
         // bucket designator
         const size_type n_;
 
-        LocalIt it_;
+        ControlIt it_;
 
-        constexpr const_reference operator*() const { return *it_; }
+        constexpr LocalIt cast() const
+        {
+            // DEBT: Do static assert to verify convertibility
 
-        constexpr const_pointer operator->() const { return it_; }
+            return (LocalIt) it_;
+        }
 
-        control_pointer control() { return cast_control(it_); }
+        constexpr const_reference operator*() const { return *cast(); }
 
-        operator LocalIt&() { return it_; }
+        constexpr const_pointer operator->() const { return cast(); }
+
+        // DEBT: Effectively a const_cast
+        control_pointer control() { return (control_pointer)it_; }
+
+        operator LocalIt() { return cast(); }
 
         constexpr bool operator==(end_local_iterator it) const
         {
@@ -179,7 +187,7 @@ private:
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
             // null entries for this iterator
-            for(; is_sparse(*cast_control(it_), n_) && it_ != parent_->get_value_cend(); ++it_)   {}
+            for(; is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
 
             return *this;
         }
@@ -407,27 +415,27 @@ public:
 
     local_iterator begin(size_type n)
     {
-        return { this, n, get_value(n) };
+        return { this, n, &container_[n] };
     }
 
     constexpr const_local_iterator begin(size_type n) const
     {
-        return { this, n, get_value(n) };
+        return { this, n, &container_[n] };
     }
 
     constexpr const_local_iterator cbegin(size_type n) const
     {
-        return { this, n, get_value(n) };
+        return { this, n, &container_[n] };
     }
 
     constexpr end_local_iterator end(size_type) const
     {
-        return { get_value_cend() };
+        return { container_.cend() };
     }
 
     constexpr end_local_iterator cend(size_type) const
     {
-        return { get_value_cend() };
+        return { container_.cend() };
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
@@ -619,7 +627,7 @@ public:
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq()(x, it->first))    return { it.it_, n };
+            if(key_eq()(x, it->first))    return { it.cast(), n };
 
         return { get_value_cend(), npos() };
     }
@@ -630,7 +638,7 @@ public:
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq()(x, it->first))    return { it.it_, n };
+            if(key_eq()(x, it->first))    return { it.cast(), n };
 
         return { get_value_end(), npos() };
     }
