@@ -12,9 +12,9 @@ namespace estd {
 namespace internal {
 
 template <class Container, class Traits>
-class unordered_map_base : public unordered_base<Container, Traits>
+class unordered_map : public unordered_base<Container, Traits>
 {
-    using this_type = unordered_map_base;
+    using this_type = unordered_map;
     using base_type = unordered_base<Container, Traits>;
     using base_type::index;
     using base_type::match;
@@ -138,7 +138,7 @@ private:
     template <class LocalIt>
     struct local_iterator_base
     {
-        using parent_type = unordered_map_base;
+        using parent_type = unordered_map;
         using this_type = local_iterator_base;
 
         const parent_type* const parent_;
@@ -264,7 +264,7 @@ private:
     }
 
 public:
-    ESTD_CPP_CONSTEXPR(14) unordered_map_base()
+    ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
         // DEBT: Feels clunky
         for(control_type& v : container_)   set_null(&v);

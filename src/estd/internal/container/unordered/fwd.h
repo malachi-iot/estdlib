@@ -19,21 +19,10 @@ template <class Key, class T, class Hash, class KeyEqual, class Nullable = nulla
 class unordered_traits;
 
 template <class Container, class Traits>
-class unordered_map_base;
+class unordered_map;
 
 template <class Container, class Traits>
 class unordered_set_base;
-
-// DEBT: Will want to live in layer1 namespace
-template <unsigned N, class Key, class T,
-    class Hash = hash<Key>,
-    class Nullable = nullable_traits<Key>,
-    class KeyEqual = equal_to<Key>,
-    class Traits = unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
-using unordered_map = unordered_map_base<
-    uninitialized_array<typename unordered_helper<Traits>::map_control_type, N>,
-    Traits>;
-
 
 template <class Container,
     class Key = typename Container::value_type,
@@ -41,4 +30,18 @@ template <class Container,
     class KeyEqual = equal_to<Key>>
 using unordered_set = unordered_set_base<Container, unordered_traits<Key, Key, Hash, KeyEqual>>;
 
-}}
+}
+
+namespace layer1 {
+
+template <unsigned N, class Key, class T,
+    class Hash = hash<Key>,
+    class Nullable = internal::nullable_traits<Key>,
+    class KeyEqual = equal_to<Key>,
+    class Traits = internal::unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
+using unordered_map = internal::unordered_map<
+    internal::uninitialized_array<typename internal::unordered_helper<Traits>::map_control_type, N>,
+    Traits>;
+}
+
+}

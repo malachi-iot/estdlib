@@ -18,13 +18,13 @@ class retry_tracker
 {
 public:
     using key_type = Key;
-    using map_type = internal::unordered_map<N, Key, T>;
+    using map_type = layer1::unordered_map<N, Key, T>;
     using pointer = typename map_type::pointer;
     using iter_type = typename map_type::iterator;
 
 // Since this is unit testing, these are public
 //private:
-    internal::unordered_map<N, Key, T> tracked_;
+    map_type tracked_;
     layer1::priority_queue<pointer, N> queue_;
 
     pointer gc_target_ {};
