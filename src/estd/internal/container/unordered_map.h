@@ -21,6 +21,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::is_null_or_spase;
     using base_type::container_;
     using base_type::key_eq;
+    using base_type::is_sparse;
 
 #if UNIT_TESTING
 public:
@@ -77,17 +78,6 @@ private:
         return is_null_or_spase(v) && cast_control(&v)->marked_for_gc == false;
     }
 
-    /// Determines if this ref is sparse - bucket must match also
-    /// @param v
-    /// @param n bucket#
-    /// @return
-    static constexpr bool is_sparse(const control_type& v, size_type n)
-    {
-        return is_null_or_spase(v) &&
-            v.second.marked_for_gc &&
-            v.second.bucket == n;
-    }
-
     /// Nulls out key
     /// @remark Does not run destructor
     static ESTD_CPP_CONSTEXPR(14) void set_null(control_pointer v)
@@ -120,12 +110,19 @@ private:
     constexpr const_pointer get_value_cend() const { return (const_pointer) container_.cend(); }
 
     // It must be control_pointer or const_control_pointer
+    // DEBT: Get rid of 'It2'
+    template <class It, class It2>
+    static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
+    {
+        for(; is_null_or_spase(*it) && it != end; ++it)   {}
+
+        return it;
+    }
+
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
-        for(; is_null_or_spase(*it) && it != get_value_cend(); ++it)   {}
-
-        return it;
+        return skip_null(it, get_value_cend());
     }
 
     template <class LocalIt>
@@ -253,8 +250,8 @@ private:
     // For insert/emplace operations specifically
     constexpr pair<iterator, bool> wrap_result(insert_result r) const
     {
-        //static_assert(is_same<insert_result::first, control_pointer>::value,
-        //    "Failed sanity check: r.first must be castable to pointer");
+        static_assert(is_same<typename insert_result::first_type, control_pointer>::value,
+            "Failed sanity check: r.first must be castable to pointer");
 
         return { { this, (pointer)r.first }, r.second };
     }
@@ -617,7 +614,7 @@ public:
     }
 
     template <class K>
-    find_result<const_pointer> find_ll(const K& x) const
+    ESTD_CPP_CONSTEXPR(14) find_result<const_pointer> find_ll(const K& x) const
     {
         const size_type n = index(x);
 
@@ -628,7 +625,7 @@ public:
     }
 
     template <class K>
-    find_result<pointer> find_ll(const K& x)
+    ESTD_CPP_CONSTEXPR(14) find_result<pointer> find_ll(const K& x)
     {
         const size_type n = index(x);
 

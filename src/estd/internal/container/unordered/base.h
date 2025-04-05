@@ -7,44 +7,6 @@ namespace estd {
 
 namespace internal {
 
-template <class Key, class T, class Hash, class KeyEqual, class Nullable>
-struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
-{
-    using traits = unordered_map_traits;
-    using nullable = Nullable;
-    using mapped_type = typename traits::mapped_type;
-
-    // Mainly used for unordered_map since it has an unused area when key is null
-    union meta
-    {
-        byte storage[sizeof(mapped_type)];
-
-        struct
-        {
-            // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
-            uint16_t marked_for_gc : 1;
-            // which bucket this empty slot *used to* belong to
-            uint16_t bucket : 6;
-        };
-
-        //operator mapped_type& () { return * (mapped_type*) storage; }
-        //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
-
-        mapped_type& mapped() { return * (mapped_type*) storage; }
-    };
-
-    using control_type = pair<typename traits::key_type, meta>;
-
-    /// @brief Checks for null OR sparse
-    /// @param v
-    /// @return
-    template <class K, class T2>
-    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
-    {
-        return nullable{}.is_null(v.first);
-    }
-};
-
 template <class Key, class Hash, class KeyEqual, class Nullable>
 struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
 {

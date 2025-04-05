@@ -51,6 +51,66 @@ public:
 };
 
 
+template <class Key, class T, class Hash, class KeyEqual, class Nullable>
+struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
+{
+    using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
+    using traits = unordered_map_traits;
+    using nullable = Nullable;
+    using mapped_type = typename traits::mapped_type;
+    using base_type::key_eq;
+
+    // Mainly used for unordered_map since it has an unused area when key is null
+    union meta
+    {
+        byte storage[sizeof(mapped_type)];
+
+        struct
+        {
+            // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
+            uint16_t marked_for_gc : 1;
+            // which bucket this empty slot *used to* belong to
+            uint16_t bucket : 6;
+        };
+
+        //operator mapped_type& () { return * (mapped_type*) storage; }
+        //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
+
+        mapped_type& mapped() { return * (mapped_type*) storage; }
+    };
+
+    using control_type = pair<typename traits::key_type, meta>;
+
+    /// @brief Checks for null OR sparse
+    /// @param v
+    /// @return
+    template <class K, class T2>
+    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
+    {
+        return nullable{}.is_null(v.first);
+    }
+
+
+    /// Determines if this ref is sparse - bucket must match also
+    /// @param v
+    /// @param n bucket#
+    /// @return
+    static constexpr bool is_sparse(const control_type& v, unsigned n)
+    {
+        return is_null_or_spase(v) &&
+            v.second.marked_for_gc &&
+            v.second.bucket == n;
+    }
+
+    // EXPERIMENTAL
+    template <class K, class K2, class T2>
+    static constexpr bool key_eq(const K& k, const pair<K2, T2>& v)
+    {
+        return key_eq()(k, v.first);
+    }
+};
+
+
 }
 
 }
