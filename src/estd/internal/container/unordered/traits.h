@@ -80,6 +80,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     };
 
     using control_type = pair<typename traits::key_type, meta>;
+    using value_type = pair<const typename traits::key_type, mapped_type>;
 
     /// @brief Checks for null OR sparse
     /// @param v

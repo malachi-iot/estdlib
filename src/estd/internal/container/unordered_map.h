@@ -103,11 +103,19 @@ private:
         return reinterpret_cast<const_control_pointer>(pos);
     }
 
+    static constexpr pointer cast(control_pointer p)
+    {
+        return reinterpret_cast<pointer>(p);
+    }
+
+    static constexpr const_pointer cast(const_control_pointer p)
+    {
+        return reinterpret_cast<const_pointer>(p);
+    }
+
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
-    constexpr const_pointer get_value(unsigned i) const { return (const_pointer) &container_[i]; }
     ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
-    constexpr const_pointer get_value_cend() const { return (const_pointer) container_.cend(); }
 
     // It must be control_pointer or const_control_pointer
     // DEBT: Get rid of 'It2'
@@ -122,7 +130,7 @@ private:
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
     {
-        return skip_null(it, get_value_cend());
+        return skip_null(it, cast(container_.cend()));
     }
 
     template <class LocalIt, class ControlIt = const_control_pointer >
@@ -278,19 +286,19 @@ public:
 
     constexpr const_iterator begin() const
     {
-        return { this, skip_null(get_value(0)) };
+        return { this, skip_null(cast(container_.cbegin())) };
     }
 
     // DEBT: can probably use a hard type like end_iterator (optimization) though
     // that does double down on carrying parent* around
     constexpr const_iterator end() const
     {
-        return { this, get_value_cend() };
+        return { this, cast(container_.cend())  };
     }
 
     constexpr const_iterator cend() const
     {
-        return { this, get_value_cend() };
+        return { this, cast(container_.cend()) };
     }
 
     ESTD_CPP_CONSTEXPR(14) void clear()
@@ -308,9 +316,9 @@ public:
 
     mapped_type& operator[](const key_type& key)
     {
-        pointer found = find_ll(key).first;
+        find_result<pointer> found = find_ll(key);
 
-        if(found != get_value_cend()) return found->second;
+        if(found.second != npos()) return found.first->second;
 
         return try_emplace(key).first->second;
     }
@@ -398,9 +406,10 @@ public:
     template <class K, class M>
     pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
     {
+        // DEBT: Use find_ll here
         iterator found = find(k);
 
-        if(found != get_value_cend())
+        if(found != cast(container_.cend()))
         {
             new (&found->second) mapped_type(std::forward<M>(obj));
             return { found, true };
@@ -439,7 +448,7 @@ public:
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
-    size_type bucket_size(size_type n) const
+    ESTD_CPP_CONSTEXPR(14) size_type bucket_size(size_type n) const
     {
         unsigned counter = 0;
 
@@ -449,17 +458,15 @@ public:
         return counter;
     }
 
-    size_type size() const
+    ESTD_CPP_CONSTEXPR(14) size_type size() const
     {
-        return distance(
-            begin(),
-            {this, get_value_cend()});
+        return distance(begin(), cend());
     }
 
     template <class K>
     constexpr bool contains(const K& key) const
     {
-        return find_ll(key).first != get_value_cend();
+        return find_ll(key).second != npos();
     }
 
     /// perform garbage collection on the bucket containing this active pos, namely moving
@@ -586,7 +593,7 @@ public:
     {
         find_result<pointer> found = find_ll(key);
 
-        if(found.first == get_value_cend()) return 0;
+        if(found.first == npos()) return 0;
 
         erase_ll(found);
         return 1;
@@ -629,7 +636,7 @@ public:
         for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq()(x, it->first))    return { it.cast(), n };
 
-        return { get_value_cend(), npos() };
+        return { cast(container_.cend()), npos() };
     }
 
     template <class K>
@@ -640,7 +647,7 @@ public:
         for(local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq()(x, it->first))    return { it.cast(), n };
 
-        return { get_value_end(), npos() };
+        return { cast(container_.end()), npos() };
     }
 
     template <class K>
