@@ -27,7 +27,7 @@ public:
 #endif
 
     // DEBT: Key SHOULD be value-initializable at this time.
-    using control_type = typename base_type::map_control_type;
+    using control_type = typename base_type::control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
 
@@ -63,7 +63,7 @@ public:
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
 
-    using insert_result = pair<pointer, bool>;
+    using insert_result = pair<control_pointer, bool>;
 
 private:
     /// Checks for null but NOT sparse
@@ -81,14 +81,11 @@ private:
     /// @param v
     /// @param n bucket#
     /// @return
-    template <class K, class T2>
-    static constexpr bool is_sparse(const pair<K, T2>& v, size_type n)
+    static constexpr bool is_sparse(const control_type& v, size_type n)
     {
-        const_control_pointer ctl = cast_control(&v);
-
         return is_null_or_spase(v) &&
-            ctl->second.marked_for_gc &&
-            ctl->second.bucket == n;
+            v.second.marked_for_gc &&
+            v.second.bucket == n;
     }
 
     /// Nulls out key
@@ -121,10 +118,6 @@ private:
     constexpr const_pointer get_value(unsigned i) const { return (const_pointer) &container_[i]; }
     ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
     constexpr const_pointer get_value_cend() const { return (const_pointer) container_.cend(); }
-
-    // DEBT: Temporary as we transition container_ from value_type -> control_type
-    constexpr control_pointer get_control(unsigned i) { return &container_[i]; }
-    constexpr const_control_pointer get_control(unsigned i) const { return &container_[i]; }
 
     // It must be control_pointer or const_control_pointer
     template <class It>
@@ -189,7 +182,7 @@ private:
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
             // null entries for this iterator
-            for(; is_sparse(*it_, n_) && it_ != parent_->get_value_cend(); ++it_)   {}
+            for(; is_sparse(*cast_control(it_), n_) && it_ != parent_->get_value_cend(); ++it_)   {}
 
             return *this;
         }
@@ -219,7 +212,7 @@ private:
 
         // linear probing
 
-        pointer it = get_value(n);
+        control_pointer it = &container_[n];
 
         // Move over occupied spots.  Sparse also counts as occupied
         // DEBT: optimize is_null/is_sparse together
@@ -227,7 +220,7 @@ private:
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == get_value_cend() || index(it->first) != n)
+            if(it == container_.cend() || index(it->first) != n)
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
@@ -260,7 +253,10 @@ private:
     // For insert/emplace operations specifically
     constexpr pair<iterator, bool> wrap_result(insert_result r) const
     {
-        return { { this, r.first }, r.second };
+        //static_assert(is_same<insert_result::first, control_pointer>::value,
+        //    "Failed sanity check: r.first must be castable to pointer");
+
+        return { { this, (pointer)r.first }, r.second };
     }
 
 public:
@@ -358,7 +354,7 @@ public:
             // NOTE: Deviation from spec in that spec implies ->second gets value initialized,
             // where we do not do that.  Not 100% sure if that's what spec calls for though
             ESTD_CPP_IF_CONSTEXPR(sizeof...(Args) == 0)
-                cast_control(ret.first)->first = key;
+                ret.first->first = key;
             else
                 new (ret.first) value_type(piecewise_construct_t{},
                     forward_as_tuple(key),
@@ -377,7 +373,7 @@ public:
             // we're good to go
             new (ret.first) value_type(value);
 
-        return { iterator{this, ret.first}, ret.second };
+        return wrap_result(ret);
     }
 
     template <class P>
@@ -473,7 +469,7 @@ public:
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(control_pointer it = get_control(n); it != container_.cend() && it < pos; ++it)
+        for(control_pointer it = container_.begin(); it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_null_or_spase(*it))

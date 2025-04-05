@@ -9,13 +9,16 @@
 
 namespace estd { namespace internal {
 
-template <class Traits>
-struct unordered_helper;
-
 template <class T>
 struct nullable_traits;
 
-template <class Key, class T, class Hash, class KeyEqual, class Nullable = nullable_traits<Key>>
+template <class Key, class T, class Hash = hash<Key>, class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>
+struct unordered_map_traits;
+
+template <class Key, class Hash = hash<Key>, class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>
+struct unordered_set_traits;
+
+template <class Key, class T, class Hash, class KeyEqual, class Nullable>
 class unordered_traits;
 
 template <class Container, class Traits>
@@ -28,7 +31,7 @@ template <class Container,
     class Key = typename Container::value_type,
     class Hash = hash<Key>,
     class KeyEqual = equal_to<Key>>
-using unordered_set = unordered_set_base<Container, unordered_traits<Key, Key, Hash, KeyEqual>>;
+using unordered_set = unordered_set_base<Container, unordered_set_traits<Key, Hash, KeyEqual>>;
 
 }
 
@@ -38,9 +41,9 @@ template <unsigned N, class Key, class T,
     class Hash = hash<Key>,
     class Nullable = internal::nullable_traits<Key>,
     class KeyEqual = equal_to<Key>,
-    class Traits = internal::unordered_traits<Key, T, Hash, KeyEqual, Nullable>>
+    class Traits = internal::unordered_map_traits<Key, T, Hash, KeyEqual, Nullable>>
 using unordered_map = internal::unordered_map<
-    internal::uninitialized_array<typename internal::unordered_helper<Traits>::map_control_type, N>,
+    internal::uninitialized_array<typename Traits::control_type, N>,
     Traits>;
 }
 

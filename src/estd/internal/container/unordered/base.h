@@ -7,10 +7,11 @@ namespace estd {
 
 namespace internal {
 
-template <class Traits>
-struct unordered_helper
+template <class Key, class T, class Hash, class KeyEqual, class Nullable>
+struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
 {
-    using traits = Traits;
+    using traits = unordered_map_traits;
+    using nullable = Nullable;
     using mapped_type = typename traits::mapped_type;
 
     // Mainly used for unordered_map since it has an unused area when key is null
@@ -32,8 +33,24 @@ struct unordered_helper
         mapped_type& mapped() { return * (mapped_type*) storage; }
     };
 
-    using map_control_type = estd::pair<typename traits::key_type, meta>;
+    using control_type = pair<typename traits::key_type, meta>;
+
+    /// @brief Checks for null OR sparse
+    /// @param v
+    /// @return
+    template <class K, class T2>
+    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
+    {
+        return nullable{}.is_null(v.first);
+    }
 };
+
+template <class Key, class Hash, class KeyEqual, class Nullable>
+struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
+{
+
+};
+
 
 template <class Container, class Traits>
 class unordered_base : public Traits
@@ -45,26 +62,12 @@ protected:
     Container container_;
 
 public:
-    using typename traits::mapped_type;
-    using typename traits::nullable;
     using size_type = unsigned;
-    using meta = typename unordered_helper<Traits>::meta;
-    using map_control_type = typename unordered_helper<Traits>::map_control_type;
 
     // The more collisions and/or duplicates you expect, the bigger this wants to be.
     // Idea being if you have two buckets near each other of only size 1, you'll never
     // have room to insert a collision/duplicate
     static constexpr unsigned bucket_depth = 4;
-
-    /// @brief Checks for null OR sparse
-    /// @param v
-    /// @return
-    // DEBT: Hmm, this guy really is unordered_map specific get him outta here
-    template <class K, class T2>
-    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
-    {
-        return nullable{}.is_null(v.first);
-    }
 
     constexpr size_type max_size() const { return container_.max_size(); }
 
