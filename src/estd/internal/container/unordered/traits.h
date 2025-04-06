@@ -128,6 +128,7 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
     }
 
     static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&) { return false; }
+    static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&, unsigned) { return false; }
 };
 
 

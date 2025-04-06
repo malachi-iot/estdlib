@@ -97,6 +97,42 @@ protected:
 
     }
 
+    using insert_result = pair<control_pointer, bool>;
+
+    template <class K>
+    insert_result insert_precheck(const K& key, bool permit_duplicates)
+    {
+        const size_type n = index(key);
+
+        // linear probing
+
+        control_pointer it = &container_[n];
+
+        // Move over occupied spots.  Sparse also counts as occupied
+        // DEBT: optimize is_null/is_sparse together
+        for(;traits::is_null_or_sparse(*it) == false || traits::is_sparse(*it, n); ++it)
+        {
+            // if we get to the complete end, that's a fail
+            // if we've moved to the next bucket, that's also a fail
+            if(it == container_.cend() || index(it->first) != n)
+                return { nullptr, false };
+            else if(!permit_duplicates)
+            {
+                if(traits::key_eq(key, *it))
+                    // "value set to true if and only if the insertion took place."
+                    return { it, false };
+            }
+
+            // Unlike std::unordered_map, we don't always kick back duplicate keys.
+            // Instead, that's undefined behavior if you try to pull via [],
+            // but iterating through a bucket you can get to all of them (and more, likely)
+        }
+
+        // Success, but someone else still needs to initialize 'it'
+        return { it, true };
+    }
+
+
     // semi-smart, can skip null spots
     template <class It, class Parent>
     class iterator_base

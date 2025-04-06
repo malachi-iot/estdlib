@@ -24,6 +24,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::is_sparse;
     using base_type::skip_null;
     using base_type::cast;
+    using base_type::insert_precheck;
 
 #if UNIT_TESTING
 public:
@@ -104,39 +105,6 @@ private:
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
     ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
-
-    template <class K>
-    insert_result insert_precheck(const K& key, bool permit_duplicates)
-    {
-        const size_type n = index(key);
-
-        // linear probing
-
-        control_pointer it = &container_[n];
-
-        // Move over occupied spots.  Sparse also counts as occupied
-        // DEBT: optimize is_null/is_sparse together
-        for(;is_null_or_sparse(*it) == false || is_sparse(*it, n); ++it)
-        {
-            // if we get to the complete end, that's a fail
-            // if we've moved to the next bucket, that's also a fail
-            if(it == container_.cend() || index(it->first) != n)
-                return { nullptr, false };
-            else if(!permit_duplicates)
-            {
-                if(key_eq(key, *it))
-                    // "value set to true if and only if the insertion took place."
-                    return { it, false };
-            }
-
-            // Unlike std::unordered_map, we don't always kick back duplicate keys.
-            // Instead, that's undefined behavior if you try to pull via [],
-            // but iterating through a bucket you can get to all of them (and more, likely)
-        }
-
-        // Success, but someone else still needs to initialize 'it'
-        return { it, true };
-    }
 
     template <class It, class Parent>
     friend class base_type::iterator_base;
