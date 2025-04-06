@@ -36,6 +36,9 @@ private:
 public:
     pair<iterator, bool> insert(const_reference value)
     {
+        // Very close
+        //base_type::insert_precheck(value, false);
+
         unsigned hashed = hasher{}(value) % container_.size();
 
         // linear probing

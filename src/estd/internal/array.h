@@ -101,6 +101,7 @@ struct traditional_array : array_base_size<N>
 
     pointer end() { return data() + N; }
     ESTD_CPP_CONSTEXPR_RET const_pointer end() const { return data() + N; }
+    ESTD_CPP_CONSTEXPR_RET const_pointer cend() const { return data() + N; }
 
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our

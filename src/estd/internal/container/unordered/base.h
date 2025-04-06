@@ -114,7 +114,7 @@ protected:
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == container_.cend() || index(it->first) != n)
+            if(it == container_.cend() || index(base_type::key(*it)) != n)
                 return { nullptr, false };
             else if(!permit_duplicates)
             {

@@ -105,6 +105,9 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
             v.second.bucket == n;
     }
 
+    template <class K, class T2>
+    static constexpr const Key& key(const pair<K, T2>& v) { return v.first; }
+
     // EXPERIMENTAL
     template <class K, class K2, class T2>
     static constexpr bool key_eq(const K& k, const pair<K2, T2>& v)
@@ -129,6 +132,15 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
 
     static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&) { return false; }
     static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&, unsigned) { return false; }
+
+    // EXPERIMENTAL
+    template <class K, class K2>
+    static constexpr bool key_eq(const K& k, const K2& k2)
+    {
+        return base_type::key_eq()(k, k2);
+    }
+
+    static constexpr const Key& key(const value_type& v) { return v; }
 };
 
 
