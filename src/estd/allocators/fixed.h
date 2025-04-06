@@ -41,6 +41,7 @@ struct allocator_buffer_traits<T[]>
     typedef T* handle_type;
 };
 
+// DEBT: On some (not all) compilers, we get a warning that this specialization will never get used
 template <class T, size_t N, class Base>
 struct allocator_buffer_traits<uninitialized_array<T, N, Base> >
 {

@@ -34,29 +34,6 @@ private:
     //size_type size_ = 0;
 
 public:
-    bool empty() const
-    {
-        const_iterator i = container_.begin();
-
-        for(;i != container_.end(); ++i)
-        {
-            if(nullable{}.is_null(*i) == false) return false;
-        }
-
-        return true;
-    }
-
-    size_type size() const
-    {
-        //return set_.size();
-        size_type sz = 0;
-
-        for(const_reference v : container_)
-            if(nullable{}.is_null(v) == false)  ++sz;
-
-        return sz;
-    }
-
     pair<iterator, bool> insert(const_reference value)
     {
         unsigned hashed = hasher{}(value) % container_.size();

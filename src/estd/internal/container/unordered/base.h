@@ -11,6 +11,7 @@ namespace internal {
 template <class Container, class Traits>
 class unordered_base : public Traits
 {
+    using this_type = unordered_base;
     using base_type = Traits;
     using traits = Traits;
 
@@ -244,6 +245,33 @@ protected:
             return it_ != other;
         }
     };
+
+public:
+    ESTD_CPP_CONSTEXPR(14) bool empty() const
+    {
+        for(const control_type& v : container_)
+            if(traits::is_null_or_sparse(v) == false) return false;
+
+        return true;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type size() const
+    {
+        // Not doing estd::distance approach, a bit more efficient to skip 'iterator' usage
+        size_type sz = 0;
+
+        for(const control_type& v : container_)
+            if(traits::is_null_or_sparse(v) == false)  ++sz;
+
+        return sz;
+    }
+
+
+    // Not directly used yet
+    using iterator = iterator_base<pointer, this_type>;
+    using const_iterator = iterator_base<const_pointer, this_type>;
+    using local_iterator = local_iterator_base<pointer>;
+    using const_local_iterator = local_iterator_base<const_pointer>;
 };
 
 }

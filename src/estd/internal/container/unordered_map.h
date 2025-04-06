@@ -159,6 +159,45 @@ private:
         return { { this, (pointer)r.first }, r.second };
     }
 
+    /// perform garbage collection on the bucket containing this active pos, namely moving
+    /// pos if gc wishes it
+    /// @param pos entry to possibly move
+    /// @returns potentially moved 'pos'
+    control_pointer gc_active_ll(control_pointer pos)
+    {
+        const key_type& key = pos->first;
+        const size_type n = index(key);
+
+        // look through other items in this bucket.  Not using local_iterator because he's
+        // designed to skip over nulls, while we specifically are looking for those guys.
+        // Also, we don't want to swap our active guy further down the bucket, only earlier
+        for(control_pointer it = container_.begin(); it != container_.cend() && it < pos; ++it)
+        {
+            // if item is null (maybe) sparse
+            if(is_null_or_sparse(*it))
+            {
+                control_pointer control = it;
+
+                // if sparse, it's not a swap candidate
+                if(control->second.marked_for_gc)
+                {
+                    // make sure we're in the same bucket
+                    // moving out of the bucket terminates the GC operation, no null slot found
+                    if(control->second.bucket != n) return pos;
+                }
+                // if regular null (not sparse) and we are physically before active
+                // item 'pos', do a swap and exit
+                else
+                {
+                    it->swap(*pos);
+                    return it;
+                }
+            }
+        }
+
+        return pos;
+    }
+
 public:
     ESTD_CPP_CONSTEXPR(14) unordered_map()
     {
@@ -293,13 +332,13 @@ public:
     template <class K, class M>
     pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
     {
-        // DEBT: Use find_ll here
-        iterator found = find(k);
+        find_result<pointer> found = find_ll(k);
 
-        if(found != cast(container_.cend()))
+        if(found.second != npos())
         {
-            new (&found->second) mapped_type(std::forward<M>(obj));
-            return { found, true };
+            reference p = found->first;
+            new (&p.second) mapped_type(std::forward<M>(obj));
+            return { { this, &p }, true };
         }
         else
         {
@@ -345,10 +384,11 @@ public:
         return counter;
     }
 
+    /*
     ESTD_CPP_CONSTEXPR(14) size_type size() const
     {
         return distance(begin(), cend());
-    }
+    }   */
 
     template <class K>
     constexpr bool contains(const K& key) const
@@ -356,44 +396,7 @@ public:
         return find_ll(key).second != npos();
     }
 
-    /// perform garbage collection on the bucket containing this active pos, namely moving
-    /// pos if gc wishes it
-    /// @param pos entry to possibly move
-    /// @returns potentially moved 'pos'
-    control_pointer gc_active_ll(control_pointer pos)
-    {
-        const key_type& key = pos->first;
-        const size_type n = index(key);
 
-        // look through other items in this bucket.  Not using local_iterator because he's
-        // designed to skip over nulls, while we specifically are looking for those guys.
-        // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(control_pointer it = container_.begin(); it != container_.cend() && it < pos; ++it)
-        {
-            // if item is null (maybe) sparse
-            if(is_null_or_sparse(*it))
-            {
-                control_pointer control = it;
-
-                // if sparse, it's not a swap candidate
-                if(control->second.marked_for_gc)
-                {
-                    // make sure we're in the same bucket
-                    // moving out of the bucket terminates the GC operation, no null slot found
-                    if(control->second.bucket != n) return pos;
-                }
-                // if regular null (not sparse) and we are physically before active
-                // item 'pos', do a swap and exit
-                else
-                {
-                    it->swap(*pos);
-                    return it;
-                }
-            }
-        }
-
-        return pos;
-    }
 
     iterator gc_active(iterator pos)
     {
