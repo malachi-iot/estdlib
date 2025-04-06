@@ -140,7 +140,7 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
         return base_type::key_eq()(k, k2);
     }
 
-    static constexpr const Key& key(const value_type& v) { return v; }
+    static constexpr const Key& key(const control_type& v) { return v; }
 };
 
 

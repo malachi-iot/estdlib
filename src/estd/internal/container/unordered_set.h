@@ -19,6 +19,8 @@ class unordered_set_base : public unordered_base<Container, Traits>
     using base_type = unordered_base<Container, Traits>;
     using typename base_type::nullable;
     using base_type::container_;
+    using typename base_type::insert_result;
+    using base_type::insert_precheck;
 
 public:
     using typename base_type::key_type;
@@ -36,24 +38,12 @@ private:
 public:
     pair<iterator, bool> insert(const_reference value)
     {
-        // Very close
-        //base_type::insert_precheck(value, false);
+        const insert_result ret = insert_precheck(value, false);
 
-        unsigned hashed = hasher{}(value) % container_.size();
+        if(ret.second)
+            new (ret.first) value_type(value);
 
-        // linear probing
-        iterator it = &container_[hashed];
-        while(nullable{}.is_null(*it) == false)
-        {
-            if(++it == container_.end())
-            {
-                return { it, false };
-            }
-        }
-
-        *it = value;
-
-        return { it, true };
+        return { { ret.first }, ret.second };
     }
 };
 

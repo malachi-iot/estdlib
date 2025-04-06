@@ -16,6 +16,7 @@ class unordered_base : public Traits
     using traits = Traits;
 
 public:
+    using base_type::key_eq;
     using typename base_type::control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
@@ -99,6 +100,13 @@ protected:
 
     using insert_result = pair<control_pointer, bool>;
 
+    ///
+    /// @tparam K
+    /// @param key
+    /// @param permit_duplicates
+    /// @return control_pointer + true = success.
+    ///         nullptr + false = no insert can occur.
+    ///         control_pointer + false = duplicate found, and here it is
     template <class K>
     insert_result insert_precheck(const K& key, bool permit_duplicates)
     {
@@ -236,7 +244,7 @@ protected:
 
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
-            return n_ != parent_->index(it_->first);
+            return n_ != parent_->index(traits::key(*it_));
         }
 
         constexpr bool operator!=(end_local_iterator it) const
@@ -250,7 +258,7 @@ protected:
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
-            return n_ == parent_->index(it_->first);
+            return n_ == parent_->index(traits::key(*it_));
         }
 
         this_type& operator++()
@@ -282,7 +290,42 @@ protected:
         }
     };
 
+    static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
+
+    // pointer and bucket
+    template <class Pointer>
+    using find_result = pair<Pointer, size_type>;
+
+    template <class K>
+    ESTD_CPP_CONSTEXPR(14) find_result<const_pointer> find_ll(const K& x) const
+    {
+        const size_type n = index(x);
+
+        for(const_local_iterator it = begin(n); it != end(n); ++it)
+            if(key_eq(x, *it))    return { it.cast(), n };
+
+        return { cast(container_.cend()), npos() };
+    }
+
+    template <class K>
+    ESTD_CPP_CONSTEXPR(14) find_result<pointer> find_ll(const K& x)
+    {
+        const size_type n = index(x);
+
+        for(local_iterator it = begin(n); it != end(n); ++it)
+            if(key_eq(x, *it))    return { it.cast(), n };
+
+        return { cast(container_.end()), npos() };
+    }
+
+
 public:
+    template <class K>
+    constexpr bool contains(const K& key) const
+    {
+        return find_ll(key).second != npos();
+    }
+
     ESTD_CPP_CONSTEXPR(14) bool empty() const
     {
         for(const control_type& v : container_)
@@ -308,6 +351,53 @@ public:
     using const_iterator = iterator_base<const_pointer, this_type>;
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
+
+    iterator begin()
+    {
+        return { this, skip_null(cast(container_.begin())) };
+    }
+
+    constexpr const_iterator begin() const
+    {
+        return { this, skip_null(cast(container_.cbegin())) };
+    }
+
+    // DEBT: can probably use a hard type like end_iterator (optimization) though
+    // that does double down on carrying parent* around
+    constexpr const_iterator end() const
+    {
+        return { this, cast(container_.cend())  };
+    }
+
+    constexpr const_iterator cend() const
+    {
+        return { this, cast(container_.cend()) };
+    }
+
+    local_iterator begin(size_type n)
+    {
+        return { this, n, &container_[n] };
+    }
+
+    constexpr const_local_iterator begin(size_type n) const
+    {
+        return { this, n, &container_[n] };
+    }
+
+    constexpr const_local_iterator cbegin(size_type n) const
+    {
+        return { this, n, &container_[n] };
+    }
+
+    constexpr end_local_iterator end(size_type) const
+    {
+        return { container_.cend() };
+    }
+
+    constexpr end_local_iterator cend(size_type) const
+    {
+        return { container_.cend() };
+    }
 };
 
 }

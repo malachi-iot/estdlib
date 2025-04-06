@@ -20,11 +20,11 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::match;
     using base_type::is_null_or_sparse;
     using base_type::container_;
-    using base_type::key_eq;
     using base_type::is_sparse;
     using base_type::skip_null;
     using base_type::cast;
     using base_type::insert_precheck;
+    using traits = Traits;
 
 #if UNIT_TESTING
 public:
@@ -37,7 +37,11 @@ public:
     using typename base_type::end_local_iterator;
 
 public:
+    using base_type::find_ll;
     using base_type::bucket_depth;
+    using base_type::begin;
+    using base_type::end;
+    using base_type::key_eq;
     using typename base_type::key_type;
     using typename base_type::mapped_type;
     using typename base_type::nullable;
@@ -106,15 +110,11 @@ private:
     constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
     ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
 
-    template <class It, class Parent>
-    friend class base_type::iterator_base;
-
-
 public:
-    using iterator = typename base_type::template iterator_base<pointer, this_type>;
-    using const_iterator = typename base_type::template iterator_base<const_pointer, this_type>;
-    using local_iterator = typename base_type::template local_iterator_base<pointer>;
-    using const_local_iterator = typename base_type::template local_iterator_base<const_pointer>;
+    using typename base_type::iterator;
+    using typename base_type::const_iterator;
+    using typename base_type::local_iterator;
+    using typename base_type::const_local_iterator;
 
 private:
 
@@ -171,28 +171,6 @@ public:
     {
         // DEBT: Feels clunky
         for(control_type& v : container_)   set_null(&v);
-    }
-
-    iterator begin()
-    {
-        return { this, skip_null(get_value(0)) };
-    }
-
-    constexpr const_iterator begin() const
-    {
-        return { this, skip_null(cast(container_.cbegin())) };
-    }
-
-    // DEBT: can probably use a hard type like end_iterator (optimization) though
-    // that does double down on carrying parent* around
-    constexpr const_iterator end() const
-    {
-        return { this, cast(container_.cend())  };
-    }
-
-    constexpr const_iterator cend() const
-    {
-        return { this, cast(container_.cend()) };
     }
 
     ESTD_CPP_CONSTEXPR(14) void clear()
@@ -316,37 +294,12 @@ public:
         }
     }
 
-    local_iterator begin(size_type n)
-    {
-        return { this, n, &container_[n] };
-    }
-
-    constexpr const_local_iterator begin(size_type n) const
-    {
-        return { this, n, &container_[n] };
-    }
-
-    constexpr const_local_iterator cbegin(size_type n) const
-    {
-        return { this, n, &container_[n] };
-    }
-
-    constexpr end_local_iterator end(size_type) const
-    {
-        return { container_.cend() };
-    }
-
-    constexpr end_local_iterator cend(size_type) const
-    {
-        return { container_.cend() };
-    }
-
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
     ESTD_CPP_CONSTEXPR(14) size_type bucket_size(size_type n) const
     {
         unsigned counter = 0;
 
-        for(const_local_iterator it = cbegin(n); it != end(n); ++it)
+        for(const_local_iterator it = begin(n); it != end(n); ++it)
             ++counter;
 
         return counter;
@@ -357,14 +310,6 @@ public:
     {
         return distance(begin(), cend());
     }   */
-
-    template <class K>
-    constexpr bool contains(const K& key) const
-    {
-        return find_ll(key).second != npos();
-    }
-
-
 
     iterator gc_active(iterator pos)
     {
@@ -484,28 +429,6 @@ public:
         unsigned counter = 0;
         bucket_foreach(x, [&](const_local_iterator) { ++counter; });
         return counter;
-    }
-
-    template <class K>
-    ESTD_CPP_CONSTEXPR(14) find_result<const_pointer> find_ll(const K& x) const
-    {
-        const size_type n = index(x);
-
-        for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq()(x, it->first))    return { it.cast(), n };
-
-        return { cast(container_.cend()), npos() };
-    }
-
-    template <class K>
-    ESTD_CPP_CONSTEXPR(14) find_result<pointer> find_ll(const K& x)
-    {
-        const size_type n = index(x);
-
-        for(local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq()(x, it->first))    return { it.cast(), n };
-
-        return { cast(container_.end()), npos() };
     }
 
     template <class K>

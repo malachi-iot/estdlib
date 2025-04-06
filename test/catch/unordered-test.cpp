@@ -168,10 +168,13 @@ TEST_CASE("unordered")
 
         REQUIRE(value.size() == 0);
         REQUIRE(value.empty());
+        REQUIRE(value.contains(5) == false);
 
         rtype r = value.insert(5);
 
         REQUIRE(r.second);
+        REQUIRE(value.contains(5));
+        REQUIRE(value.contains(4) == false);
 
         REQUIRE(value.size() == 1);
         REQUIRE(value.empty() == false);
