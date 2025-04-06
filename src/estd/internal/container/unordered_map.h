@@ -22,6 +22,8 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::container_;
     using base_type::key_eq;
     using base_type::is_sparse;
+    using base_type::skip_null;
+    using base_type::cast;
 
 #if UNIT_TESTING
 public:
@@ -31,6 +33,7 @@ public:
     using control_type = typename base_type::control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
+    using typename base_type::end_local_iterator;
 
 public:
     using base_type::bucket_depth;
@@ -46,11 +49,6 @@ public:
     using typename base_type::size_type;
 
     static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
-
-    struct end_local_iterator
-    {
-        const_control_pointer it_;
-    };
 
     using end_iterator = monostate;
 
@@ -103,120 +101,9 @@ private:
         return reinterpret_cast<const_control_pointer>(pos);
     }
 
-    static constexpr pointer cast(control_pointer p)
-    {
-        return reinterpret_cast<pointer>(p);
-    }
-
-    static constexpr const_pointer cast(const_control_pointer p)
-    {
-        return reinterpret_cast<const_pointer>(p);
-    }
-
     // DEBT: Temporary as we transition container_ from value_type -> control_type
     constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
     ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
-
-    // It must be control_pointer or const_control_pointer
-    // DEBT: Get rid of 'It2'
-    template <class It, class It2>
-    static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
-    {
-        for(; is_null_or_sparse(*it) && it != end; ++it)   {}
-
-        return it;
-    }
-
-    template <class It>
-    ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
-    {
-        return skip_null(it, cast(container_.cend()));
-    }
-
-    template <class LocalIt, class ControlIt = const_control_pointer>
-    struct local_iterator_base
-    {
-        using parent_type = unordered_map;
-        using this_type = local_iterator_base;
-
-        const parent_type* const parent_;
-
-        // bucket designator
-        const size_type n_;
-
-        ControlIt it_;
-
-        constexpr LocalIt cast() const
-        {
-            // DEBT: Do static assert to verify convertibility
-
-            return (LocalIt) it_;
-        }
-
-        constexpr const_reference operator*() const { return *cast(); }
-
-        constexpr const_pointer operator->() const { return cast(); }
-
-        // DEBT: Effectively a const_cast
-        control_pointer control() { return (control_pointer)it_; }
-
-        operator LocalIt() { return cast(); }
-
-        constexpr bool operator==(end_local_iterator it) const
-        {
-            // If we reach end of entire set, indicate we are at the end
-            if(it_ == it.it_)   return true;
-
-            // If we reach a null slot, then that's the end of the bucket
-            if(is_null_or_sparse(*it_)) return true;
-
-            // if n_ doesn't match current key hash, we have reached the end
-            // of this bucket
-            return n_ != parent_->index(it_->first);
-        }
-
-        constexpr bool operator!=(end_local_iterator it) const
-        {
-            // If we reach end of entire set, indicate we are NOT NOT at the end
-            if(it_ == it.it_)   return false;
-
-            // If we reach a null slot, that's the end of the bucket - so we fail
-            // to assert it's not the end (return false)
-            if(is_null_or_sparse(*it_)) return false;
-
-            // if n_ matches current key hash, we haven't yet reached the
-            // end of this bucket
-            return n_ == parent_->index(it_->first);
-        }
-
-        this_type& operator++()
-        {
-            ++it_;
-
-            // skip over any sparse entries belonging to this bucket.  They are invisible
-            // null entries for this iterator
-            for(; is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
-
-            return *this;
-        }
-
-        this_type operator++(int)
-        {
-            operator++();
-
-            return { n_, it_ - 1 };
-        }
-
-        constexpr bool operator==(const LocalIt& other) const
-        {
-            return it_ == other;
-        }
-
-        constexpr bool operator!=(const LocalIt& other) const
-        {
-            return it_ != other;
-        }
-    };
 
     template <class K>
     insert_result insert_precheck(const K& key, bool permit_duplicates)
@@ -237,7 +124,7 @@ private:
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
-                if(key_eq()(key, it->first))
+                if(key_eq(key, *it))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
             }
@@ -256,10 +143,10 @@ private:
 
 
 public:
-    using iterator = typename base_type::iterator_base<pointer, this_type>;
-    using const_iterator = typename base_type::iterator_base<const_pointer, this_type>;
-    using local_iterator = local_iterator_base<pointer>;
-    using const_local_iterator = local_iterator_base<const_pointer>;
+    using iterator = typename base_type::template iterator_base<pointer, this_type>;
+    using const_iterator = typename base_type::template iterator_base<const_pointer, this_type>;
+    using local_iterator = typename base_type::template local_iterator_base<pointer>;
+    using const_local_iterator = typename base_type::template local_iterator_base<const_pointer>;
 
 private:
 

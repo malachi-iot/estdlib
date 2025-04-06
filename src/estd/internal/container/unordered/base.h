@@ -2,6 +2,7 @@
 
 #include "fwd.h"
 #include "traits.h"
+#include "../../platform.h"
 
 namespace estd {
 
@@ -13,11 +14,49 @@ class unordered_base : public Traits
     using base_type = Traits;
     using traits = Traits;
 
+public:
+    using typename base_type::control_type;
+    using control_pointer = control_type*;
+    using const_control_pointer = const control_type*;
+    ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type);
+
 protected:
     Container container_;
 
+    static constexpr pointer cast(control_pointer p)
+    {
+        return reinterpret_cast<pointer>(p);
+    }
+
+    static constexpr const_pointer cast(const_control_pointer p)
+    {
+        return reinterpret_cast<const_pointer>(p);
+    }
+
+    // 'It' must be control_pointer or const_control_pointer
+    // DEBT: Get rid of 'It2'
+    template <class It, class It2>
+    static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
+    {
+        for(; traits::is_null_or_sparse(*it) && it != end; ++it)   {}
+
+        return it;
+    }
+
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
+    {
+        return skip_null(it, cast(container_.cend()));
+    }
+
+
 public:
     using size_type = unsigned;
+
+    struct end_local_iterator
+    {
+        const_control_pointer it_;
+    };
 
     // The more collisions and/or duplicates you expect, the bigger this wants to be.
     // Idea being if you have two buckets near each other of only size 1, you'll never
@@ -63,10 +102,6 @@ protected:
     {
         using parent_type = Parent;
         using this_type = iterator_base;
-        using pointer = typename parent_type::pointer;
-        using const_pointer = typename parent_type::const_pointer;
-        using reference = typename parent_type::reference;
-        using const_reference = typename parent_type::const_reference;
 
         const parent_type* parent_;
         It it_;
@@ -119,6 +154,92 @@ protected:
         }
 
         constexpr bool operator!=(const It& other) const
+        {
+            return it_ != other;
+        }
+    };
+
+    // Skips null spots, omits sparse guys and ends if we go outside of bucket
+    template <class LocalIt>
+    struct local_iterator_base
+    {
+        using parent_type = unordered_base;
+        using this_type = local_iterator_base;
+
+        const parent_type* const parent_;
+
+        // bucket designator
+        const size_type n_;
+
+        const_control_pointer it_;
+
+        constexpr LocalIt cast() const
+        {
+            // DEBT: Do static assert to verify convertibility
+
+            return (LocalIt) it_;
+        }
+
+        constexpr const_reference operator*() const { return *cast(); }
+
+        constexpr const_pointer operator->() const { return cast(); }
+
+        // DEBT: Effectively a const_cast
+        control_pointer control() { return (control_pointer)it_; }
+
+        operator LocalIt() { return cast(); }
+
+        constexpr bool operator==(end_local_iterator it) const
+        {
+            // If we reach end of entire set, indicate we are at the end
+            if(it_ == it.it_)   return true;
+
+            // If we reach a null slot, then that's the end of the bucket
+            if(parent_->is_null_or_sparse(*it_)) return true;
+
+            // if n_ doesn't match current key hash, we have reached the end
+            // of this bucket
+            return n_ != parent_->index(it_->first);
+        }
+
+        constexpr bool operator!=(end_local_iterator it) const
+        {
+            // If we reach end of entire set, indicate we are NOT NOT at the end
+            if(it_ == it.it_)   return false;
+
+            // If we reach a null slot, that's the end of the bucket - so we fail
+            // to assert it's not the end (return false)
+            if(parent_->is_null_or_sparse(*it_)) return false;
+
+            // if n_ matches current key hash, we haven't yet reached the
+            // end of this bucket
+            return n_ == parent_->index(it_->first);
+        }
+
+        this_type& operator++()
+        {
+            ++it_;
+
+            // skip over any sparse entries belonging to this bucket.  They are invisible
+            // null entries for this iterator
+            for(; parent_->is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
+
+            return *this;
+        }
+
+        this_type operator++(int)
+        {
+            operator++();
+
+            return { n_, it_ - 1 };
+        }
+
+        constexpr bool operator==(const LocalIt& other) const
+        {
+            return it_ == other;
+        }
+
+        constexpr bool operator!=(const LocalIt& other) const
         {
             return it_ != other;
         }

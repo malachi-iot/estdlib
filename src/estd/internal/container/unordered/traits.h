@@ -117,7 +117,17 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
 template <class Key, class Hash, class KeyEqual, class Nullable>
 struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
 {
+    using base_type = unordered_traits<Key, Key, Hash, KeyEqual, Nullable>;
 
+    using value_type = Key;
+    using control_type = Key;
+
+    static constexpr bool is_null_or_sparse(const value_type& v)
+    {
+        return typename base_type::nullable{}.is_null(v);
+    }
+
+    static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&) { return false; }
 };
 
 
