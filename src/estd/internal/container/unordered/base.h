@@ -7,13 +7,6 @@ namespace estd {
 
 namespace internal {
 
-template <class Key, class Hash, class KeyEqual, class Nullable>
-struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
-{
-
-};
-
-
 template <class Container, class Traits>
 class unordered_base : public Traits
 {

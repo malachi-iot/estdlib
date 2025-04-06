@@ -18,7 +18,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type = unordered_base<Container, Traits>;
     using base_type::index;
     using base_type::match;
-    using base_type::is_null_or_spase;
+    using base_type::is_null_or_sparse;
     using base_type::container_;
     using base_type::key_eq;
     using base_type::is_sparse;
@@ -122,7 +122,7 @@ private:
     template <class It, class It2>
     static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
     {
-        for(; is_null_or_spase(*it) && it != end; ++it)   {}
+        for(; is_null_or_sparse(*it) && it != end; ++it)   {}
 
         return it;
     }
@@ -133,7 +133,7 @@ private:
         return skip_null(it, cast(container_.cend()));
     }
 
-    template <class LocalIt, class ControlIt = const_control_pointer >
+    template <class LocalIt, class ControlIt = const_control_pointer>
     struct local_iterator_base
     {
         using parent_type = unordered_map;
@@ -168,7 +168,7 @@ private:
             if(it_ == it.it_)   return true;
 
             // If we reach a null slot, then that's the end of the bucket
-            if(is_null_or_spase(*it_)) return true;
+            if(is_null_or_sparse(*it_)) return true;
 
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
@@ -182,7 +182,7 @@ private:
 
             // If we reach a null slot, that's the end of the bucket - so we fail
             // to assert it's not the end (return false)
-            if(is_null_or_spase(*it_)) return false;
+            if(is_null_or_sparse(*it_)) return false;
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
@@ -229,7 +229,7 @@ private:
 
         // Move over occupied spots.  Sparse also counts as occupied
         // DEBT: optimize is_null/is_sparse together
-        for(;is_null_or_spase(*it) == false || is_sparse(*it, n); ++it)
+        for(;is_null_or_sparse(*it) == false || is_sparse(*it, n); ++it)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
@@ -484,7 +484,7 @@ public:
         for(control_pointer it = container_.begin(); it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
-            if(is_null_or_spase(*it))
+            if(is_null_or_sparse(*it))
             {
                 control_pointer control = it;
 
@@ -519,7 +519,7 @@ public:
         //const key_type& key = pos->first;
         //const size_type n = index(key);
 
-        assert(is_null_or_spase(*pos));
+        assert(is_null_or_sparse(*pos));
 
         control_pointer control = cast_control(pos);
 
@@ -567,7 +567,7 @@ public:
 
         // No housekeeping if next guy is null (sparse is OK, but
         // not yet accounted for here)
-        if(is_null_or_spase(*pos)) return;
+        if(is_null_or_sparse(*pos)) return;
 
         // Quick-deduce our bucket#
         size_type n = start - container_.cbegin();

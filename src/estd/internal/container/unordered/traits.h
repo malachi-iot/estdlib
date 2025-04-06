@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../../cstdint.h"
+#include "../../../utility.h"
 #include "../../platform.h"
 
 namespace estd {
@@ -86,7 +88,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     /// @param v
     /// @return
     template <class K, class T2>
-    static constexpr bool is_null_or_spase(const pair<K, T2>& v)
+    static constexpr bool is_null_or_sparse(const pair<K, T2>& v)
     {
         return nullable{}.is_null(v.first);
     }
@@ -98,7 +100,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     /// @return
     static constexpr bool is_sparse(const control_type& v, unsigned n)
     {
-        return is_null_or_spase(v) &&
+        return is_null_or_sparse(v) &&
             v.second.marked_for_gc &&
             v.second.bucket == n;
     }
@@ -110,6 +112,14 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
         return key_eq()(k, v.first);
     }
 };
+
+
+template <class Key, class Hash, class KeyEqual, class Nullable>
+struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
+{
+
+};
+
 
 
 }
