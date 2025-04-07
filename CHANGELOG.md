@@ -2,12 +2,18 @@
 
 ## Added Features
 
+* `layer1::unordered_map` now available
 * https://github.com/malachi-iot/estdlib/issues/76 TBD (needs wrap still)
 * Adding crude estd::hash for layer1 and layer2 strings
 
 ## Quality Updates & Bug Fixes
 
+* `unordered_map` work has also upgraded `unordered_set`
 * https://github.com/malachi-iot/estdlib/issues/84, https://github.com/malachi-iot/estdlib/issues/92 upgrading Catch2 to 3.8.0
+
+## Known Issues & Limitations
+
+* `unordered_map` has only core functionality.  Missing are node_type and hints
 
 # v0.8.3 - 23FEB25
 
