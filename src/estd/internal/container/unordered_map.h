@@ -35,6 +35,7 @@ public:
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
     using typename base_type::end_local_iterator;
+    using typename base_type::insert_result;
 
 public:
     using base_type::find_ll;
@@ -66,8 +67,6 @@ public:
     // pointer and bucket
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
-
-    using insert_result = pair<control_pointer, bool>;
 
 private:
     /// Checks for null but NOT sparse
@@ -176,14 +175,6 @@ public:
     ESTD_CPP_CONSTEXPR(14) void clear()
     {
         for(control_type& v : container_)   destruct(&v);
-    }
-
-    // DEBT: May be a deviation since our buckets are a little more fluid, but I think
-    // it conforms to spec
-    template <class K>
-    constexpr size_type bucket(const K& key) const
-    {
-        return index(key);
     }
 
     mapped_type& operator[](const key_type& key)
@@ -305,12 +296,6 @@ public:
         return counter;
     }
 
-    /*
-    ESTD_CPP_CONSTEXPR(14) size_type size() const
-    {
-        return distance(begin(), cend());
-    }   */
-
     iterator gc_active(iterator pos)
     {
         return { this, (pointer) gc_active_ll(cast_control(pos.value())) };
@@ -400,35 +385,6 @@ public:
 
         erase_ll(found);
         return 1;
-    }
-
-    // In fact, works for find too but it seems to make things more complicated,
-    // not more tidy
-    template <class K, class F, class R = monostate>
-    R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
-    {
-        const size_type n = bucket(key);
-        for(const_local_iterator it = begin(n); it != end(n); ++it)
-        {
-            if(key_eq()(key, it->first))
-            {
-                // monostate means no real return type
-                if constexpr(!is_same<R, monostate>::value)
-                    return std::forward<R>(f(it));
-                else
-                    f(it);
-            }
-        }
-
-        return std::forward<R>(r);
-    }
-
-    template <class K>
-    size_type count(const K& x) const
-    {
-        unsigned counter = 0;
-        bucket_foreach(x, [&](const_local_iterator) { ++counter; });
-        return counter;
     }
 
     template <class K>

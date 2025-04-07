@@ -100,6 +100,33 @@ protected:
 
     using insert_result = pair<control_pointer, bool>;
 
+    // In fact, works for find too but it seems to make things more complicated,
+    // not more tidy
+    template <class K, class F, class R = monostate>
+    R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
+    {
+        const size_type n = bucket(key);
+        for(const_local_iterator it = begin(n); it != end(n); ++it)
+        {
+            if(key_eq(key, *it))
+            {
+                // monostate means no real return type
+                if constexpr(!is_same<R, monostate>::value)
+                    return std::forward<R>(f(it));
+                else
+                    f(it);
+            }
+        }
+
+        return std::forward<R>(r);
+    }
+
+    template <class K, class Control>
+    static constexpr bool key_eq(const K& k, const Control& c)
+    {
+        return key_eq()(k, traits::key(c));
+    }
+
     ///
     /// @tparam K
     /// @param key
@@ -126,7 +153,7 @@ protected:
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
-                if(traits::key_eq(key, *it))
+                if(key_eq(key, *it))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
             }
@@ -321,6 +348,14 @@ protected:
 
 public:
     template <class K>
+    size_type count(const K& x) const
+    {
+        unsigned counter = 0;
+        bucket_foreach(x, [&](const_local_iterator) { ++counter; });
+        return counter;
+    }
+
+    template <class K>
     constexpr bool contains(const K& key) const
     {
         return find_ll(key).second != npos();
@@ -345,8 +380,14 @@ public:
         return sz;
     }
 
+    // DEBT: May be a deviation since our buckets are a little more fluid, but I think
+    // it conforms to spec
+    template <class K>
+    constexpr size_type bucket(const K& key) const
+    {
+        return index(key);
+    }
 
-    // Not directly used yet
     using iterator = iterator_base<pointer, this_type>;
     using const_iterator = iterator_base<const_pointer, this_type>;
     using local_iterator = local_iterator_base<pointer>;
