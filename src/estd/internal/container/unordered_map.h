@@ -179,9 +179,9 @@ public:
 
     mapped_type& operator[](const key_type& key)
     {
-        find_result<pointer> found = find_ll(key);
+        find_result<control_pointer> found = find_ll(key);
 
-        if(found.second != npos()) return found.first->second;
+        if(found.second != npos()) return found.first->second.mapped();
 
         return try_emplace(key).first->second;
     }
@@ -318,16 +318,15 @@ public:
     // Conforms to spec in that:
     // "References and iterators to the erased elements are invalidated.
     //  Other iterators and references are not invalidated. "
-    void erase_ll(find_result<pointer> pos)
+    void erase_ll(find_result<control_pointer> pos)
     {
         const size_type n = pos.second;
+        control_pointer control = pos.first;
 
-        destruct(cast_control(pos.first));
+        destruct(control);
 
         // "mark and sweep" erase rather than erase (and swap) immediately in place.
         // More inline with spec, namely doesn't disrupt other iterators
-        control_pointer control = cast_control(pos.first);
-
         control->second.marked_for_gc = 1;
         control->second.bucket = n;
     }
@@ -338,7 +337,7 @@ public:
     // that we are officially unordered.
     iterator erase(iterator pos)
     {
-        erase_ll({ pos.value(), index(pos->first) });
+        erase_ll({ cast_control(pos.value()), index(traits::key(*pos)) });
 
         return { this, skip_null(pos.value() + 1) };
     }
@@ -379,7 +378,7 @@ public:
 
     size_type erase(const key_type& key)
     {
-        find_result<pointer> found = find_ll(key);
+        find_result<control_pointer> found = find_ll(key);
 
         if(found.first == npos()) return 0;
 
@@ -390,13 +389,13 @@ public:
     template <class K>
     iterator find(const K& x)
     {
-        return { this, find_ll(x).first };
+        return { this, cast(find_ll(x).first) };
     }
 
     template <class K>
     const_iterator find(const K& x) const
     {
-        return { this, find_ll(x).first };
+        return { this, cast(find_ll(x).first) };
     }
 
     // Not ready yet because buckets don't preserve key order, so this gets tricky

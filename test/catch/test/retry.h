@@ -108,7 +108,7 @@ public:
 
         if(found.second != tracked_.npos())
         {
-            found.first->second.ack_received_ = true;
+            found.first->second.mapped().ack_received_ = true;
 
             // mark this guy for deletion (but don't delete yet)
             tracked_.erase_ll(found);

@@ -258,6 +258,7 @@ protected:
 
         // DEBT: Effectively a const_cast
         control_pointer control() { return (control_pointer)it_; }
+        const_control_pointer control() const { return it_; }
 
         operator LocalIt() { return cast(); }
 
@@ -324,25 +325,25 @@ protected:
     using find_result = pair<Pointer, size_type>;
 
     template <class K>
-    ESTD_CPP_CONSTEXPR(14) find_result<const_pointer> find_ll(const K& x) const
+    ESTD_CPP_CONSTEXPR(14) find_result<const_control_pointer> find_ll(const K& x) const
     {
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq(x, *it))    return { it.cast(), n };
+            if(key_eq(x, *it))    return { it.control(), n };
 
-        return { cast(container_.cend()), npos() };
+        return { container_.cend(), npos() };
     }
 
     template <class K>
-    ESTD_CPP_CONSTEXPR(14) find_result<pointer> find_ll(const K& x)
+    ESTD_CPP_CONSTEXPR(14) find_result<control_pointer> find_ll(const K& x)
     {
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq(x, *it))    return { it.cast(), n };
+            if(key_eq(x, *it))    return { it.control(), n };
 
-        return { cast(container_.end()), npos() };
+        return { container_.end(), npos() };
     }
 
 
