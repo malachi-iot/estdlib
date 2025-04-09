@@ -15,7 +15,7 @@ template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 class basic_string : public internal::dynamic_array<Impl>
 {
 protected:
-    typedef internal::dynamic_array<Impl> base_type;
+    using base_type = internal::dynamic_array<Impl>;
 
     typedef typename base_type::helper helper;
 
@@ -111,6 +111,43 @@ public:
 
         return npos;
     }
+
+    // --- writeable operations below
+    // Be mindful that detail::basic_string is basic class of string_view too, so these are disabled in that
+    // context
+
+    basic_string& erase(size_type index = 0, size_type count = npos)
+    {
+        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+
+        size_type size_minus_index = base_type::size() - index;
+        // NOTE: A bit tricky, if we don't use helper size_minus_index, template
+        // resolution fails, presumably because the math operation implicitly
+        // creates an int
+        size_type to_remove_count = estd::min(count, size_minus_index);
+
+        base_type::_erase(index, to_remove_count);
+
+        return *this;
+    }
+
+    template <class Impl2>
+    basic_string& operator=(const internal::allocated_array<Impl2>& copy_from)   // NOLINT
+    {
+        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+
+        base_type::assign(copy_from);
+        return *this;
+    }
+
+    basic_string& operator=(const_pointer s)
+    {
+        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+
+        // DEBT: This can be optimized
+        base_type::assign(s, strlen(s));
+        return *this;
+    }
 };
 
 template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
@@ -120,23 +157,5 @@ ESTD_CPP_CONSTEXPR_RET bool operator ==(
 {
     return lhs.compare(rhs) == 0;
 }
-
-}
-
-namespace internal {
-
-// Phase this out in favor of always using detail::basic_string
-// Keeping for the edge cases where Allocator/Policy is more convenient
-template <class Allocator, class Policy>
-class basic_string : public detail::basic_string<
-    internal::impl::dynamic_array<Allocator, Policy> >
-{
-protected:
-    typedef detail::basic_string<internal::impl::dynamic_array<Allocator, Policy> > base_type;
-
-public:
-    ESTD_CPP_FORWARDING_CTOR(basic_string)
-};
-
 
 }}

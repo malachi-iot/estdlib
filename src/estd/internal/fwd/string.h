@@ -56,9 +56,6 @@ concept String = //impl::String<T>
 
 namespace internal {
 
-template <class Allocator, class Policy>
-class basic_string;
-
 #if __cpp_concepts
 template <class T>
 concept StringPolicy = BufferPolicy<T> &&
@@ -101,6 +98,13 @@ using string_policy_helper =
     typename conditional<null_terminated,
         experimental::null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
         experimental::sized_string_policy<Traits, int16_t, is_const<Char>::value> >::type;
+
+// Phase this out in favor of always using detail::basic_string
+// Keeping for the edge cases where Allocator/Policy is more convenient
+template <class Allocator, class Policy>
+using basic_string = detail::basic_string<
+    internal::impl::dynamic_array<Allocator, Policy> >;
+
 }
 
 

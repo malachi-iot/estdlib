@@ -59,6 +59,8 @@ public:
 
     typedef dynamic_array_helper<impl_type> helper;
 
+    using policy_type = typename impl_type::policy_type;
+
     friend struct dynamic_array_helper<impl_type>;
 
 protected:

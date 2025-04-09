@@ -101,14 +101,7 @@ public:
 
     basic_string& erase(size_type index = 0, size_type count = npos)
     {
-        size_type size_minus_index = base_type::size() - index;
-        // NOTE: A bit tricky, if we don't use helper size_minus_index, template
-        // resolution fails, presumably because the math operation implicitly
-        // creates an int
-        size_type to_remove_count = estd::min(count, size_minus_index);
-
-        base_type::_erase(index, to_remove_count);
-
+        base_type::erase(index, count);
         return *this;
     }
 
@@ -118,7 +111,6 @@ public:
 
         return *this;
     }
-
 
     template <class Impl2>
     basic_string& append(const internal::allocated_array<Impl2>& str)
@@ -159,8 +151,7 @@ public:
     template <class TForeignImpl>
     basic_string& operator=(const experimental::private_array<TForeignImpl>& copy_from)   // NOLINT
     {
-        // DEBT: Sloppy
-        base_t::base_type::operator =(copy_from);
+        base_type::operator =(copy_from);
         return *this;
     }
 
@@ -168,13 +159,13 @@ public:
     template <class TForeignImpl>
     basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)   // NOLINT
     {
-        base_type::assign(copy_from);
+        base_type::operator =(copy_from);
         return *this;
     }
 
     basic_string& operator=(const_pointer s)
     {
-        base_type::assign(s, strlen(s));
+        base_type::operator =(s);
         return *this;
     }
 };

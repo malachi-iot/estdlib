@@ -144,7 +144,7 @@ public:
 
 }
 
-typedef basic_string_view<char> string_view;
+using string_view = basic_string_view<char>;
 
 
 }
