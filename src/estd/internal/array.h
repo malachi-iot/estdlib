@@ -21,13 +21,12 @@ struct array_base_size
 {
     typedef Size size_type;
 
-    constexpr bool empty() const { return N == 0; }
-    constexpr size_type size() const { return N; }
-    constexpr size_type max_size() const { return N; }
+    static ESTD_CPP_CONSTEVAL bool empty() { return N == 0; }
+    static ESTD_CPP_CONSTEVAL size_type size() { return N; }
+    static ESTD_CPP_CONSTEVAL size_type max_size() { return N; }
 };
 
 
-// DEBT: Move this part to impl area
 template <class T, unsigned N>
 struct uninitialized_array : array_base_size<N>
 {
@@ -67,10 +66,6 @@ struct uninitialized_array : array_base_size<N>
         return reinterpret_cast<const_pointer>(data_);
     }
 
-    pointer end() { return data() + N; }
-    constexpr const_pointer end() const { return data() + N; }
-    constexpr const_pointer cend() const { return data() + N; }
-
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
@@ -99,10 +94,6 @@ struct traditional_array : array_base_size<N>
     pointer data() { return data_; }
     ESTD_CPP_CONSTEXPR_RET const_pointer data() const { return data_; }
 
-    pointer end() { return data() + N; }
-    ESTD_CPP_CONSTEXPR_RET const_pointer end() const { return data() + N; }
-    ESTD_CPP_CONSTEXPR_RET const_pointer cend() const { return data() + N; }
-
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
@@ -129,9 +120,10 @@ struct array_base2 : Base
 {
     using base_type = Base;
     using base_type::data;
+    using base_type::max_size;
 
-    typedef typename base_type::pointer pointer;
-    typedef typename base_type::const_pointer const_pointer;
+    using typename base_type::pointer;
+    using typename base_type::const_pointer;
     typedef pointer iterator;
     typedef const_pointer const_iterator;
     typedef typename base_type::value_type value_type;
@@ -142,6 +134,11 @@ struct array_base2 : Base
     iterator begin() { return data(); }
     constexpr const_iterator begin() const { return data(); }
     constexpr const_iterator cbegin() const { return data(); }
+
+    pointer end() { return data() + max_size(); }
+    constexpr const_iterator end() const { return data() + max_size(); }
+    constexpr const_iterator cend() const { return data() + max_size(); }
+
 
     reference front() { return *begin(); }
     constexpr const_reference front() const { return *begin(); }
