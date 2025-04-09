@@ -37,6 +37,7 @@ static constexpr const int data_[] = {0, 1, 2, 3};
 struct synthetic_impl
 {
     using size_type = unsigned;
+    using policy_type = estd::internal::buffer_policy<size_type, false>;
 
     using allocator_type = _allocator<const int>;
     struct allocator_traits : estd::allocator_traits<allocator_type>

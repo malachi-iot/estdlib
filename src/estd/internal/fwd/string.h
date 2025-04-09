@@ -3,6 +3,7 @@
 #include "dynamic_array.h"
 #include "../../policy/string.h"
 #include "../../traits/char_traits.h"
+#include "../raw/type_traits.h"
 
 #if __cpp_lib_concepts
 #include <concepts>
@@ -94,10 +95,9 @@ namespace internal {
 // We're using std::char_traits (aliased) when available, which doesn't handle const char
 // so that's why we pass in Char in addition to Traits
 template <class Char, class Traits, bool null_terminated>
-using string_policy_helper =
-    typename conditional<null_terminated,
-        experimental::null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
-        experimental::sized_string_policy<Traits, int16_t, is_const<Char>::value> >::type;
+using string_policy_helper = conditional_t<null_terminated,
+        null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
+        sized_string_policy<Traits, int16_t, is_const<Char>::value>>;
 
 // Phase this out in favor of always using detail::basic_string
 // Keeping for the edge cases where Allocator/Policy is more convenient

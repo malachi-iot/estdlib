@@ -42,7 +42,7 @@ template<
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
 #ifdef FEATURE_STD_MEMORY
     class Allocator = std::allocator<CharT>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = experimental::sized_string_policy<Traits>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::sized_string_policy<Traits>
 #else
     class Allocator, ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy
 #endif

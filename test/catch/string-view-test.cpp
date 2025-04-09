@@ -11,7 +11,7 @@ using namespace estd;
 #include "macro/push.h"
 
 using tiny_string_view = detail::basic_string_view<
-    estd::experimental::sized_string_policy<char_traits<char>, uint8_t, true> >;
+    estd::internal::sized_string_policy<char_traits<char>, uint8_t, true> >;
 
 TEST_CASE("string_view")
 {

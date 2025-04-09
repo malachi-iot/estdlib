@@ -23,7 +23,7 @@ class shifted_string
 
 public:
 
-    using policy_type = experimental::sized_string_policy<
+    using policy_type = sized_string_policy<
         CharTraits, int16_t, estd::is_const<char_type>::value>;
 
     using value_type = char_type;

@@ -10,6 +10,7 @@
 
 * `unordered_map` work has also upgraded `unordered_set`
 * https://github.com/malachi-iot/estdlib/issues/84, https://github.com/malachi-iot/estdlib/issues/92 upgrading Catch2 to 3.8.0
+* Behind the scenes cleanup of arrays, strings
 
 ## Known Issues & Limitations
 

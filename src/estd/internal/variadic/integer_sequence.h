@@ -63,13 +63,6 @@ struct value_sequence_accessor
 
 namespace variadic {
 
-// DEBT: Put this elsewhere, and perhaps we can merely call it CONSTEVAL
-#if __cpp_consteval
-#define ESTD_CPP_CONSTEVAL consteval
-#else
-#define ESTD_CPP_CONSTEVAL constexpr
-#endif
-
 // Since we can track pointers and references too, I prefer the name variadic::values
 // rather than integer_sequence
 template <typename T, T ...Is>

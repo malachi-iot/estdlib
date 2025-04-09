@@ -41,3 +41,11 @@
 #else
 #define ESTD_CPP_IF_CONSTEXPR if
 #endif
+
+// DEBT: Perhaps we can merely call this CONSTEVAL
+#if __cpp_consteval
+#define ESTD_CPP_CONSTEVAL consteval
+#else
+#define ESTD_CPP_CONSTEVAL constexpr
+#endif
+

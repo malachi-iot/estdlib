@@ -10,8 +10,8 @@ namespace estd { namespace layer3 {
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class Policy = typename estd::conditional<null_terminated,
-                experimental::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                experimental::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
+                internal::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
+                internal::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
 class basic_string
         : public estd::basic_string<
                 CharT, Traits,

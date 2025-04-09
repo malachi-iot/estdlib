@@ -274,7 +274,7 @@ TEST_CASE("string tests")
                 char,
                 std::char_traits<char>,
                 internal::single_fixedbuf_allocator<char, 30>,
-                experimental::null_terminated_string_policy<std::char_traits<char> >
+                internal::null_terminated_string_policy<std::char_traits<char> >
                 > s;
         int sz = sizeof(s);
         char buf[128];
