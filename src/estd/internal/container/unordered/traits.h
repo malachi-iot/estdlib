@@ -123,8 +123,8 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
         return typename base_type::nullable{}.is_null(v);
     }
 
-    static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&) { return false; }
-    static ESTD_CPP_CONSTEVAL bool is_sparse(const value_type&, unsigned) { return false; }
+    static constexpr bool is_sparse(const value_type&) { return false; }
+    static constexpr bool is_sparse(const value_type&, unsigned) { return false; }
 
     static constexpr const Key& key(const control_type& v) { return v; }
 };

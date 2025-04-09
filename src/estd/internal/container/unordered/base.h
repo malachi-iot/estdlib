@@ -296,7 +296,7 @@ protected:
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
             // null entries for this iterator
-            for(; parent_->is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
+            for(; traits::is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
 
             return *this;
         }
