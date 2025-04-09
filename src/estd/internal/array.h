@@ -128,6 +128,7 @@ template <class Base>
 struct array_base2 : Base
 {
     using base_type = Base;
+    using base_type::data;
 
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
@@ -138,9 +139,9 @@ struct array_base2 : Base
     typedef const typename base_type::value_type& const_reference;
     typedef typename base_type::size_type size_type;
 
-    iterator begin() { return base_type::data(); }
-    constexpr const_iterator begin() const { return base_type::data(); }
-    constexpr const_iterator cbegin() const { return base_type::data(); }
+    iterator begin() { return data(); }
+    constexpr const_iterator begin() const { return data(); }
+    constexpr const_iterator cbegin() const { return data(); }
 
     reference front() { return *begin(); }
     constexpr const_reference front() const { return *begin(); }
@@ -189,15 +190,6 @@ template <class T, unsigned N>
 struct allocator_traits<internal::layer1_allocator<T, N> >
 {
 
-};
-
-template<class T, std::size_t N, typename TSize>
-struct array : public internal::array_base2<internal::impl::traditional_array<T, N> >
-{
-    typedef internal::array_base2<internal::impl::traditional_array<T, N> > base_type;
-
-    ESTD_CPP_FORWARDING_CTOR(array)
-    ESTD_CPP_FORWARDING_CTOR_LIST(T, array)
 };
 
 }

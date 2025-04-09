@@ -30,7 +30,7 @@ These tests are all for variants of Espressif ESP32
 | 19DEC23 | unity    | WaveShare C6-DevKit  | ESP32C6        | v5.1.2   | Pass   |
 | 18NOV23 | unity    | ESP32C3 Xiao         | ESP32C3        | v5.1.2   | Pass   |
 | 03JAN24 | unity    | ESP32C6 Xiao         | ESP32C6        | v5.3.2   | Pass   | Manual indication of USJ required.  test_freertos_clock fails
-| 05JAN25 | unity    | ESP32C6 Xiao         | ESP32C6        | v5.4.0   | Pass   | Manual indication of USJ required
+| 08APR25 | unity    | ESP32C6 Xiao         | ESP32C6        | v5.4.1   | Pass   | Manual indication of USJ required
 | 20JUL23 | unity    | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
 | 05MAR24 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1.2   | Pass   |
 | 29SEP23 | unity    | Lilygo QT Pro        | ESP32S3        | v5.1.1   | Pass*  | Intermittent failures[^1]

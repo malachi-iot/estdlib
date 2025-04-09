@@ -23,7 +23,7 @@ namespace estd {
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
 template<class OutputIt, class Size, class T>
-ESTD_CPP_CONSTEXPR(20) OutputIt fill_n(OutputIt first, Size count, const T& value)
+inline ESTD_CPP_CONSTEXPR(17) OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
     return std::fill_n(first, count, value);
@@ -37,7 +37,7 @@ ESTD_CPP_CONSTEXPR(20) OutputIt fill_n(OutputIt first, Size count, const T& valu
 }
 
 template< class ForwardIt, class T >
-inline void fill(ForwardIt first, ForwardIt last, const T& value)
+inline ESTD_CPP_CONSTEXPR(17) void fill(ForwardIt first, ForwardIt last, const T& value)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
     std::fill(first, last, value);

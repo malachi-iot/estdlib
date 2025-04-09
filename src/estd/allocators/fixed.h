@@ -41,16 +41,10 @@ struct allocator_buffer_traits<T[]>
     using handle_type = T*;
 };
 
-template <class T, size_t N>
-struct allocator_buffer_traits<estd::array<T, N>>
+template <class Base>
+struct allocator_buffer_traits<array_base2<Base>>
 {
-    using handle_type = T*;
-};
-
-template <class T, size_t N>
-struct allocator_buffer_traits<array_base2<impl::uninitialized_array<T, N>>>
-{
-    using handle_type = T*;
+    using handle_type = typename array_base2<Base>::pointer;
 };
 
 

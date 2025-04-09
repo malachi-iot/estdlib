@@ -7,13 +7,12 @@
 
 namespace estd {
 
-namespace internal {
+namespace legacy {
 
 struct array_traits
 {
     typedef std::size_t size_type;
 };
-
 
 #define FEATURE_ESTD_ARRAY_PROVIDER
 
@@ -199,15 +198,11 @@ public:
 };
 
 
-}
-
-namespace legacy {
-
 // See internal/fwd/array.h for TSize default
 template <class T, std::size_t N, typename TSize>
-struct array : public internal::array_base<T, T[N], size_t>
+struct array : public array_base<T, T[N], size_t>
 {
-    typedef internal::array_base<T, T[N], size_t> base_t;
+    typedef array_base<T, T[N], size_t> base_t;
 
 public:
     typedef TSize size_type;
@@ -257,9 +252,9 @@ template<
         class T,
         std::size_t N,
         typename size_t = typename estd::internal::deduce_fixed_size_t<N>::size_type
-> struct array : public internal::array_base<T, T*, size_t>
+> struct array : public legacy::array_base<T, T*, size_t>
 {
-    typedef internal::array_base<T, T*, size_t> base_t;
+    typedef legacy::array_base<T, T*, size_t> base_t;
 
 private:
     //T* m_array() { return base_t::m_array; }
@@ -301,9 +296,9 @@ namespace layer3 {
 template<
         class T,
         typename size_t = std::size_t
-> struct array : public internal::array_base<T, T*, size_t>
+> struct array : public legacy::array_base<T, T*, size_t>
 {
-    typedef internal::array_base<T, T*, size_t> base_t;
+    typedef legacy::array_base<T, T*, size_t> base_t;
 
 protected:
     size_t m_size;
