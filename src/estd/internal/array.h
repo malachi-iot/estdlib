@@ -174,14 +174,12 @@ struct layer1_allocator
 // Just like regular std::array except T constructor is not called
 // NOTE: We flow through with Base and fall back to regular estd::array if dealing
 // with integral types, since they have no constructor and it makes debugging easier and
-// likely the codebase slightly smaller since the optimizer works less hard
-// TODO: Consider eliminating 'Base' here, though that interrupts allocator_buffer_traits ability to specialize
-template <class T, unsigned N, class Base =
-        typename estd::conditional_t<
-            is_integral<T>::value,
-            estd::array<T, N>,
-            array_base2<impl::uninitialized_array<T, N>>>>
-using uninitialized_array = Base;
+// potentially the codebase slightly smaller since the optimizer works less hard
+template <class T, unsigned N>
+using uninitialized_array = conditional_t<
+    is_integral<T>::value,
+    estd::array<T, N>,
+    array_base2<impl::uninitialized_array<T, N>>>;
 
 
 }

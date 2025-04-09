@@ -38,14 +38,19 @@ struct allocator_buffer_traits<T*>
 template <class T>
 struct allocator_buffer_traits<T[]>
 {
-    typedef T* handle_type;
+    using handle_type = T*;
 };
 
-// DEBT: On some (not all) compilers, we get a warning that this specialization will never get used
-template <class T, size_t N, class Base>
-struct allocator_buffer_traits<uninitialized_array<T, N, Base> >
+template <class T, size_t N>
+struct allocator_buffer_traits<estd::array<T, N>>
 {
-    typedef T* handle_type;
+    using handle_type = T*;
+};
+
+template <class T, size_t N>
+struct allocator_buffer_traits<array_base2<impl::uninitialized_array<T, N>>>
+{
+    using handle_type = T*;
 };
 
 
