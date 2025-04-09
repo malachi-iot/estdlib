@@ -6,14 +6,14 @@ namespace estd {
 
 namespace internal {
 
-// DEBT: Deprecated name
-template <class Base>
-struct array_base2;
-
 // DEBT: A concept here would be nice, though we don't anticipate anyone other than
 // traditional_array and uninitialized_array as impl
 template <class Impl>
-using array = array_base2<Impl>;
+struct array;
+
+// Deprecated name
+template <class Base>
+using array_base2 = array<Base>;
 
 namespace impl {
 

@@ -115,10 +115,10 @@ protected:
 
 }
 
-template <class Base>
-struct array_base2 : Base
+template <class Impl>
+struct array : Impl
 {
-    using base_type = Base;
+    using base_type = Impl;
     using base_type::data;
     using base_type::max_size;
 
@@ -157,8 +157,8 @@ struct array_base2 : Base
         estd::fill_n(begin(), base_type::size(), value);
     }
 
-    ESTD_CPP_FORWARDING_CTOR(array_base2)
-    ESTD_CPP_FORWARDING_CTOR_LIST(value_type, array_base2)
+    ESTD_CPP_FORWARDING_CTOR(array)
+    ESTD_CPP_FORWARDING_CTOR_LIST(value_type, array)
 
 };
 
@@ -177,7 +177,7 @@ template <class T, unsigned N>
 using uninitialized_array = conditional_t<
     is_integral<T>::value,
     estd::array<T, N>,
-    array_base2<impl::uninitialized_array<T, N>>>;
+    internal::array<impl::uninitialized_array<T, N>>>;
 
 
 }

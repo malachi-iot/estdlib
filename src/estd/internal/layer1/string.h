@@ -10,7 +10,9 @@ class basic_string
         : public estd::basic_string<
                 CharT, Traits,
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-                estd::layer1::allocator<CharT, N>,
+                // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
+                // light of https://github.com/malachi-iot/estdlib/issues/88
+                estd::layer1::allocator<CharT, N, CharT[N]>,
 #else
                 estd::internal::single_fixedbuf_allocator <CharT, N>,
 #endif

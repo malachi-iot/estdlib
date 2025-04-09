@@ -349,10 +349,13 @@ public:
 namespace layer1 {
 
 // Fixed in place singular buffer
-template <class T, size_t len>
+template <class T, size_t len,
+    class Array = conditional_t<
+        is_integral<T>::value,
+        T[len],
+        internal::uninitialized_array<T, len>>>
 #if __cpp_alias_templates
-using allocator = estd::internal::single_fixedbuf_allocator<T, len,
-    estd::internal::uninitialized_array<T, len> >;
+using allocator = estd::internal::single_fixedbuf_allocator<T, len, Array>;
 
 namespace legacy {
 #endif

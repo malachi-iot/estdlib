@@ -19,7 +19,7 @@ struct pa_impl
 template <>
 struct experimental::private_array<pa_impl> : public array<int, 10>
 {
-    using base_type = array<int, 10>;
+    using base_type = estd::array<int, 10>;
 
     private_array() : base_type{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
     {
