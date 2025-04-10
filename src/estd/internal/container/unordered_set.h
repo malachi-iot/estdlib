@@ -14,7 +14,7 @@ namespace internal {
 // TODO: If possible consolidate/dogfood in unordered_map
 
 template <class Container, class Traits>
-class unordered_set_base : public unordered_base<Container, Traits>
+class unordered_set : public unordered_base<Container, Traits>
 {
     using base_type = unordered_base<Container, Traits>;
     using typename base_type::nullable;

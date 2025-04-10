@@ -18,7 +18,7 @@ class retry_tracker
 {
 public:
     using key_type = Key;
-    using map_type = layer1::unordered_map<N, Key, T>;
+    using map_type = layer1::unordered_map<Key, T, N>;
     using pointer = typename map_type::pointer;
     using iter_type = typename map_type::iterator;
 
