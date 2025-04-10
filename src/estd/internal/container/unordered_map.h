@@ -46,6 +46,8 @@ public:
     using base_type::begin;
     using base_type::end;
     using base_type::key_eq;
+    using base_type::set_null;
+    using base_type::destruct;
     using typename base_type::key_type;
     using typename base_type::mapped_type;
     using typename base_type::nullable;
@@ -77,21 +79,6 @@ private:
     static constexpr bool is_null(const pair<K, T2>& v, size_type)
     {
         return is_null_or_spase(v) && cast_control(&v)->marked_for_gc == false;
-    }
-
-    /// Nulls out key
-    /// @remark Does not run destructor
-    static ESTD_CPP_CONSTEXPR(14) void set_null(control_pointer v)
-    {
-        nullable{}.set(&v->first);
-    }
-
-
-    // runs destructor + nulls out key
-    static void destruct(control_pointer v)
-    {
-        set_null(v);
-        v->second.mapped().~mapped_type();
     }
 
     static constexpr control_pointer cast_control(pointer pos)
@@ -165,12 +152,6 @@ private:
     }
 
 public:
-    ESTD_CPP_CONSTEXPR(14) unordered_map()
-    {
-        // DEBT: Feels clunky
-        for(control_type& v : container_)   set_null(&v);
-    }
-
     ESTD_CPP_CONSTEXPR(14) void clear()
     {
         for(control_type& v : container_)   destruct(&v);
@@ -341,38 +322,14 @@ public:
         return { this, skip_null(pos.value() + 1) };
     }
 
-    // deviates from std in that other iterators part of this bucket could be invalidated
-    // DEBT: We do want to return 'iterator', it's just unclear from spec how that really works
-    void erase_and_gc_ll(control_pointer pos)
-    {
-        auto start = pos;
-
-        destruct(pos);
-
-        ++pos;
-
-        // No housekeeping if next guy is null (sparse is OK, but
-        // not yet accounted for here)
-        if(is_null_or_sparse(*pos)) return;
-
-        // Quick-deduce our bucket#
-        size_type n = start - container_.cbegin();
-        // Find last one in bucket
-        for(;n == index(pos->first) && pos < container_.cend(); ++pos) {}
-
-        --pos;
-
-        start->swap(*pos);
-    }
-
     void erase_and_gc(iterator pos)
     {
-        erase_and_gc_ll(cast_control(pos.value()));
+        base_type::erase_and_gc_ll(cast_control(pos.value()));
     }
 
     void erase_and_gc(local_iterator pos)
     {
-        erase_and_gc_ll(pos.control());
+        base_type::erase_and_gc_ll(pos.control());
     }
 
     size_type erase(const key_type& key)

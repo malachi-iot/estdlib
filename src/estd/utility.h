@@ -55,12 +55,18 @@ struct pair
 
     pair& operator=(const pair& other) = default;
 
-    void swap(pair& other)
+    constexpr void swap(pair& other)
     {
         estd::swap(first, other.first);
         estd::swap(second, other.second);
     }
 };
+
+template <class T1, class T2>
+ESTD_CPP_CONSTEXPR(14) void swap(pair<T1, T2>& x, pair<T1, T2>& y)
+{
+    x.swap(y);
+}
 
 template <class T1, class T2>
 ESTD_CPP_CONSTEXPR(11) pair<T1, T2> make_pair(T1 t, T2 u)

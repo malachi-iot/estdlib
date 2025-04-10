@@ -107,6 +107,23 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
 
     template <class K, class T2>
     static constexpr const Key& key(const pair<K, T2>& v) { return v.first; }
+
+    static constexpr mapped_type& mapped(control_type& v)
+    {
+        return v.second.mapped();
+    }
+
+    static constexpr const mapped_type& mapped(const control_type& v)
+    {
+        return v.second.mapped();
+    }
+
+    /// Nulls out key
+    /// @remark Does not run destructor
+    static ESTD_CPP_CONSTEXPR(14) void set_null(control_type* v)
+    {
+        nullable{}.set(&v->first);
+    }
 };
 
 
@@ -114,19 +131,28 @@ template <class Key, class Hash, class KeyEqual, class Nullable>
 struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
 {
     using base_type = unordered_traits<Key, Key, Hash, KeyEqual, Nullable>;
+    using typename base_type::nullable;
 
     using value_type = Key;
     using control_type = Key;
+    using mapped_type = Key;
+
+    static ESTD_CPP_CONSTEXPR(14) void set_null(value_type* v)
+    {
+        nullable{}.set(v);
+    }
 
     static constexpr bool is_null_or_sparse(const value_type& v)
     {
-        return typename base_type::nullable{}.is_null(v);
+        return nullable{}.is_null(v);
     }
 
     static constexpr bool is_sparse(const value_type&) { return false; }
     static constexpr bool is_sparse(const value_type&, unsigned) { return false; }
 
     static constexpr const Key& key(const control_type& v) { return v; }
+    static constexpr mapped_type& mapped(control_type& v) { return v; }
+    static constexpr const mapped_type& mapped(const control_type& v) { return v; }
 };
 
 

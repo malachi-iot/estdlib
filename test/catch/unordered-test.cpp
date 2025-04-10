@@ -185,7 +185,12 @@ TEST_CASE("unordered")
 
         REQUIRE(value.size() == 2);
 
-        //value.erase(5);
+        value.erase(5);
+
+        REQUIRE(value.contains(5) == false);
+        REQUIRE(value.contains(6));
+
+        REQUIRE(value.size() == 1);
     }
     SECTION("synthetic retry")
     {

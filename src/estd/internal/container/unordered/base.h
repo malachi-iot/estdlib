@@ -13,17 +13,31 @@ class unordered_base : public Traits
 {
     using this_type = unordered_base;
     using base_type = Traits;
-    using traits = Traits;
 
 public:
+    using traits = Traits;
     using base_type::key_eq;
+    using typename base_type::mapped_type;
     using typename base_type::control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
     ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type);
 
 protected:
+    ESTD_CPP_CONSTEXPR(14) unordered_base()
+    {
+        // DEBT: Feels clunky
+        for(control_type& v : container_)   base_type::set_null(&v);
+    }
+
     Container container_;
+
+    // runs destructor + nulls out key
+    static void destruct(control_pointer v)
+    {
+        traits::mapped(*v).~mapped_type();
+        base_type::set_null(v);
+    }
 
     static constexpr pointer cast(control_pointer p)
     {
@@ -65,8 +79,10 @@ public:
     // have room to insert a collision/duplicate
     static constexpr unsigned bucket_depth = 4;
 
+    ESTD_CPP_ATTR_NODISCARD
     constexpr size_type max_size() const { return container_.max_size(); }
 
+    ESTD_CPP_ATTR_NODISCARD
     constexpr size_type max_bucket_count() const
     {
         return max_size() / bucket_depth;
@@ -347,6 +363,29 @@ protected:
         return { container_.end(), npos() };
     }
 
+    // deviates from std in that other iterators part of this bucket could be invalidated
+    void erase_and_gc_ll(control_pointer pos)
+    {
+        auto start = pos;
+
+        destruct(pos);
+
+        ++pos;
+
+        // No housekeeping if next guy is null (sparse is OK, but
+        // not yet accounted for here)
+        if (base_type::is_null_or_sparse(*pos))
+            return;
+
+        // Quick-deduce our bucket#
+        size_type n = start - container_.cbegin();
+        // Find last one in bucket
+        for(;n == index(traits::key(*pos)) && pos < container_.cend(); ++pos) {}
+        // Decrement to position on actual last one in bucket
+        --pos;
+
+        swap(*pos, *start);
+    }
 
 public:
     template <class K>
@@ -363,7 +402,7 @@ public:
         return find_ll(key).second != npos();
     }
 
-    ESTD_CPP_CONSTEXPR(14) bool empty() const
+    ESTD_CPP_CONSTEXPR(14) bool empty() const   // NOLINT
     {
         for(const control_type& v : container_)
             if(traits::is_null_or_sparse(v) == false) return false;
@@ -371,7 +410,7 @@ public:
         return true;
     }
 
-    ESTD_CPP_CONSTEXPR(14) size_type size() const
+    ESTD_CPP_CONSTEXPR(14) size_type size() const   // NOLINT
     {
         // Not doing estd::distance approach, a bit more efficient to skip 'iterator' usage
         size_type sz = 0;
