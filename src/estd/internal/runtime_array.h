@@ -30,8 +30,8 @@ struct no_max_string_length_tag {};
 // importantly, this allocated_array doesn't provide for growing/shrinking the array,
 // which means things like insert, append, erase are also not present.  Look to
 // dynamic array for that
-// TImpl is usually some flavor of estd::internal::impl::dynamic_array
-template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) TImpl>
+// Impl is usually some flavor of estd::internal::impl::dynamic_array
+template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) Impl>
 class allocated_array :
 #ifdef ARDUINO
     public print_handler_tag,
@@ -39,11 +39,12 @@ class allocated_array :
     public no_max_string_length_tag
 {
 public:
-    typedef TImpl impl_type;
+    using impl_type = Impl;
     // was going to go only allocator_type, but there has been a flip flop between favoring traits
     // or not in the c++ std, so keeping both
-    typedef typename impl_type::allocator_type allocator_type;
-    typedef typename impl_type::allocator_traits allocator_traits;
+    using allocator_type = typename impl_type::allocator_type;
+    using allocator_traits = typename impl_type::allocator_traits;
+
     //typedef typename allocator_traits::allocator_type allocator_type;
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
@@ -66,7 +67,7 @@ public:
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
     // allocated array pointed to a static const(expr) * of some kind
-    TImpl m_impl;
+    Impl m_impl;
 
 public:
     static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;

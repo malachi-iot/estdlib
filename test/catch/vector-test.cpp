@@ -182,7 +182,7 @@ TEST_CASE("vector tests")
     {
         struct complex
         {
-            int value;
+            int value = -1;
             const char* s;
         };
 
@@ -196,6 +196,9 @@ TEST_CASE("vector tests")
 
         REQUIRE(v2.value == 3);
         REQUIRE(v2.s == test::str_hello);
+
+        v.at(0).value = 1;
+        REQUIRE(v.at(0).value == 1);
     }
     SECTION("vector with actual default std::allocator")
     {

@@ -69,6 +69,18 @@ public:
     // a corresponding free operation
     T* data() { return base_t::lock(); }
     const T* data() const { return base_t::clock(); }
+
+    // +++ DEBT: Workaround for https://github.com/malachi-iot/estdlib/issues/97
+    reference at(unsigned i)
+    {
+        return base_t::at(i).lock();
+    }
+
+    const_reference at(unsigned i) const
+    {
+        return base_t::at(i).clock();
+    }
+    // ---
 };
 
 }
