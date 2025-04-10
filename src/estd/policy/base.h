@@ -14,13 +14,21 @@ struct policy_base
 {
     static constexpr const bool is_singular = false;
     static constexpr const bool is_resizable = false;
+    static constexpr const bool is_const = false;
 
     using size_type = size_t;
 
     // - emulated/shim (MAY perform lock)
     // - unavailable (MUST NOT perform lock)
     // - required (MUST perform lock)
-    static constexpr rfc2119 locking = rfc2119::must_not;
+    static constexpr rfc::terms locking = rfc::terms::must_not;
+};
+
+struct layer1_policy_base : policy_base { };
+
+struct layer3_policy_base : policy_base
+{
+    static constexpr const bool is_resizable = true;
 };
 
 }}
