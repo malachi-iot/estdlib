@@ -21,6 +21,32 @@ class unordered_set_base : public unordered_base<Container, Traits>
     using base_type::container_;
     using typename base_type::insert_result;
     using base_type::insert_precheck;
+    using base_type::skip_null;
+    using base_type::npos;
+    using base_type::find_ll;
+    using typename base_type::control_pointer;
+
+    template <class Pointer>
+    using find_result = typename base_type::template find_result<Pointer>;
+
+    // Not ready yet, and maybe we can consolidate too
+    static ESTD_CPP_CONSTEXPR(14) void set_null(control_pointer v)
+    {
+        nullable{}.set(&v->first);
+    }
+
+    static void destruct(control_pointer v)
+    {
+        v->~value_type();
+        set_null(v);
+    }
+
+    void erase_ll(find_result<control_pointer> pos)
+    {
+        control_pointer control = pos.first;
+
+        destruct(control);
+    }
 
 public:
     using typename base_type::key_type;
@@ -44,6 +70,24 @@ public:
             new (ret.first) value_type(value);
 
         return { { ret.first }, ret.second };
+    }
+
+    iterator erase(iterator pos)
+    {
+        erase_ll({ cast_control(pos.value()), index(*pos) });
+
+        return { this, skip_null(pos.value() + 1) };
+    }
+
+    // NOTE: Feels like this might be able to live in base class
+    size_type erase(const key_type& key)
+    {
+        find_result<control_pointer> found = find_ll(key);
+
+        if(found.second == npos()) return 0;
+
+        erase_ll(found);
+        return 1;
     }
 };
 

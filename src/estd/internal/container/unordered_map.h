@@ -26,6 +26,9 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::insert_precheck;
     using traits = Traits;
 
+    template <class Pointer>
+    using find_result = typename base_type::template find_result<Pointer>;
+
 #if UNIT_TESTING
 public:
 #endif
@@ -63,10 +66,6 @@ public:
             "size mismatch between meta and exposed value_type");
     static_assert(sizeof(control_type) == sizeof(value_type),
             "size mismatch between meta and exposed value_type");
-
-    // pointer and bucket
-    template <class Pointer>
-    using find_result = pair<Pointer, size_type>;
 
 private:
     /// Checks for null but NOT sparse
@@ -380,7 +379,7 @@ public:
     {
         find_result<control_pointer> found = find_ll(key);
 
-        if(found.first == npos()) return 0;
+        if(found.second == npos()) return 0;
 
         erase_ll(found);
         return 1;

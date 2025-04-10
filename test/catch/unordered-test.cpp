@@ -166,7 +166,7 @@ TEST_CASE("unordered")
 
         type value;
 
-        REQUIRE(value.size() == 0);
+        REQUIRE(value.size() == 0);     // NOLINT
         REQUIRE(value.empty());
         REQUIRE(value.contains(5) == false);
 
@@ -184,6 +184,8 @@ TEST_CASE("unordered")
         REQUIRE(r.second);
 
         REQUIRE(value.size() == 2);
+
+        //value.erase(5);
     }
     SECTION("synthetic retry")
     {
