@@ -114,24 +114,8 @@ template<class Char, size_t N, bool null_terminated = true, class Traits = estd:
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
 class basic_string;
 
-
-#if __cpp_alias_templates
 template <size_t N, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
-#else
-template <size_t N, bool null_terminated = true>
-class string : public basic_string<char, N, null_terminated>
-{
-    typedef basic_string<char, N, null_terminated> base_t;
-
-public:
-    string() {}
-
-    string(const char* s) : base_t(s)
-    {
-    }
-};
-#endif
 
 }
 

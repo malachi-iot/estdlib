@@ -18,47 +18,35 @@ using vector = internal::dynamic_array<internal::impl::dynamic_array<Allocator, 
 namespace layer1 {
 
 template <class T, size_t N>
-class vector : public estd::vector<T,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        estd::layer1::allocator<T, N>
-#else
-        estd::internal::single_fixedbuf_allocator<T, N >
-#endif
-        >
+class vector : public estd::vector<T, estd::layer1::allocator<T, N>>
 {
-    typedef estd::vector<T,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-        estd::layer1::allocator<T, N>
-#else
-        estd::internal::single_fixedbuf_allocator<T, N >
-#endif
-    > base_t;
+    using base_type = estd::vector<T, estd::layer1::allocator<T, N>>;
 
 public:
-    typedef typename base_t::reference reference;
-    typedef typename base_t::const_reference const_reference;
+    typedef typename base_type::reference reference;
+    typedef typename base_type::const_reference const_reference;
 
     ESTD_CPP_DEFAULT_CTOR(vector)
 
 #ifdef FEATURE_CPP_INITIALIZER_LIST
-    vector(std::initializer_list<T> initlist) : base_t(initlist) {}
+    vector(std::initializer_list<T> initlist) : base_type(initlist) {}
 #endif
 
     // Because layer1 is *always* a simple fixed buffer, enable data() call here
     // Also, for that same reason, lock/clock are no-ops, so we can call them without
     // a corresponding free operation
-    T* data() { return base_t::lock(); }
-    const T* data() const { return base_t::clock(); }
+    T* data() { return base_type::lock(); }
+    const T* data() const { return base_type::clock(); }
 
     // +++ DEBT: Workaround for https://github.com/malachi-iot/estdlib/issues/97
     reference at(unsigned i)
     {
-        return base_t::at(i).lock();
+        return base_type::at(i).lock();
     }
 
     const_reference at(unsigned i) const
     {
-        return base_t::at(i).clock();
+        return base_type::at(i).clock();
     }
     // ---
 };

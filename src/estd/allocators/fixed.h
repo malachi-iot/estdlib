@@ -53,8 +53,8 @@ struct allocator_buffer_traits<array_base2<Base>>
 // maps to one and only one regular non-locking buffer
 // also this is a stateful allocator, by nature of TBuffer taking up some space
 // if one wishes to be stateless, a different (base) class should be used
-template <class T, class TBuffer, typename TSize,
-          typename TDiff = typename estd::make_signed<TSize>::type>
+template <class T, class Buffer, typename Size,
+    typename Diff = estd::make_signed_t<Size>>
 struct single_allocator_base
 {
     // TODO: Phase this out in favor of SFINAE/detection method from allocator_traits
@@ -66,9 +66,11 @@ struct single_allocator_base
 #else
     typedef bool handle_type;
 #endif
-    typedef TSize size_type;
-    typedef TDiff difference_type;
-    typedef allocator_buffer_traits<TBuffer> buffer_traits; // EXPERIMENTAL
+    using size_type = Size;
+    using difference_type = Diff;
+
+    typedef allocator_buffer_traits<Buffer> buffer_traits; // EXPERIMENTAL
+
     //typedef handle_type handle_with_size;
     typedef estd::internal::handle_with_only_offset<handle_type, size_type> handle_with_offset;
     typedef T value_type;
@@ -87,7 +89,7 @@ struct single_allocator_base
 protected:
     // NOTE: Would make private but 'adjust_offset_exp' (which basic_string_view uses)
     // needs it.
-    TBuffer buffer;
+    Buffer buffer;
 
 protected:
 
@@ -114,7 +116,7 @@ protected:
     }
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_allocator_base(const TBuffer& buffer) : buffer(buffer) {}
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_allocator_base(const Buffer& buffer) : buffer(buffer) {}
 
 public:
     static CONSTEXPR handle_type invalid() { return false; }

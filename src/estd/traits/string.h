@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../internal/platform.h"
+#include "../policy/base.h"
 
 namespace estd {
 
@@ -46,7 +47,9 @@ namespace internal {
 // - char_traits by convention doesn't specify const
 // - even if it did, this policy applies to non string allocated arrays too
 template <class Size, bool constant_>
-struct buffer_policy : experimental::is_const_tag_exp_base<constant_>
+struct buffer_policy :
+    policy_base,    // EXPERIMENTAL, not used directly
+    experimental::is_const_tag_exp_base<constant_>
 {
     typedef Size size_type;
 

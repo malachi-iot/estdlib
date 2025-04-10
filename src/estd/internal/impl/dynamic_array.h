@@ -5,6 +5,7 @@
 #include "../../allocators/handle_desc.h"
 #include "../fwd/dynamic_array.h"
 #include "../../traits/char_traits.h"
+#include "../../policy/base.h"
 
 namespace estd { namespace internal { namespace impl {
 

@@ -70,7 +70,7 @@ protected:
     Impl m_impl;
 
 public:
-    static bool CONSTEXPR is_locking = internal::has_locking_tag<allocator_type>::value;
+    static bool constexpr is_locking = internal::has_locking_tag<allocator_type>::value;
 
     // DEBT: a_it = allocator_iterator, fix up name after we formalize or phase out
     // FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
