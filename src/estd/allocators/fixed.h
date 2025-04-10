@@ -98,7 +98,7 @@ protected:
         return static_cast<pointer>(&buffer[offset]);
     }
 
-    ESTD_CPP_CONSTEXPR_RET const_pointer data(size_type offset = 0) const
+    constexpr const_pointer data(size_type offset = 0) const
     {
         return static_cast<const_pointer>(&buffer[offset]);
     }

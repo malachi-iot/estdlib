@@ -142,6 +142,10 @@ TEST_CASE("vector tests")
 
         REQUIRE(a == 3);
 
+        *v.data() = 4;
+
+        REQUIRE(*v.data() == 4);
+
         // Push it to the very limit
         v.clear();
 

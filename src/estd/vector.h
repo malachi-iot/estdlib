@@ -12,27 +12,7 @@ template <class T, class Allocator
           = std::allocator<T>
 #endif
           >
-class vector : public internal::dynamic_array<internal::impl::dynamic_array<Allocator, void > >
-{
-public:
-    typedef T value_type;
-
-private:
-    typedef internal::dynamic_array<internal::impl::dynamic_array<Allocator, void > > base_t;
-
-protected:
-    template <class TImplParam>
-    vector(const TImplParam& p) : base_t(p) {}
-
-public:
-    EXPLICIT vector(Allocator& alloc) : base_t(alloc) {}
-
-    ESTD_CPP_DEFAULT_CTOR(vector)
-
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-    vector(std::initializer_list<value_type> initlist) : base_t(initlist) {}
-#endif
-};
+using vector = internal::dynamic_array<internal::impl::dynamic_array<Allocator, void>>;
 
 
 namespace layer1 {
