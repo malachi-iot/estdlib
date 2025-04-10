@@ -248,7 +248,7 @@ class dynamic_array_base :
         public estd::handle_descriptor<TAllocator>,
         dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
 {
-    typedef estd::handle_descriptor<TAllocator> base_type;
+    using base_type = estd::handle_descriptor<TAllocator>;
     //typedef estd::internal::impl::allocated_array<TAllocator> base_type;
     typedef base_type base_t;
     typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
@@ -259,11 +259,12 @@ public:
     // this works better with < c++11
     static CONSTEXPR bool uses_termination_exp = null_terminated;
 
-    typedef typename base_t::allocator_type allocator_type;
+    using typename base_type::allocator_type;
     // NOTE: Necessary to do allocator_traits here to disambiguate all the ones from
     // multiple inheritance above (though I think that should have worked, unless
     // they are resolving to different types... i.e. one is a TAllocator&)
-    typedef typename base_t::allocator_traits allocator_traits;
+    using typename base_type::allocator_traits;
+
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::size_type size_type;
     //typedef typename allocator_traits::handle_with_offset handle_with_offset;

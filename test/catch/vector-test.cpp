@@ -10,6 +10,12 @@
 
 using namespace estd;
 
+struct complex
+{
+    int value = -1;
+    const char* s;
+};
+
 
 TEST_CASE("vector tests")
 {
@@ -184,12 +190,6 @@ TEST_CASE("vector tests")
     }
     SECTION("vector with semi-complex type/find")
     {
-        struct complex
-        {
-            int value = -1;
-            const char* s;
-        };
-
         estd::layer1::vector<complex, 10> v;
 
         v.push_back(complex { 3, test::str_hello });
@@ -203,6 +203,8 @@ TEST_CASE("vector tests")
 
         v.at(0).value = 1;
         REQUIRE(v.at(0).value == 1);
+
+        //v[0].value = 1;
     }
     SECTION("vector with actual default std::allocator")
     {

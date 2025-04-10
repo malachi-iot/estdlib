@@ -74,7 +74,7 @@ public:
 
     // DEBT: a_it = allocator_iterator, fix up name after we formalize or phase out
     // FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
-    typedef typename allocator_traits::iterator a_it;
+    using a_it = typename allocator_traits::iterator;
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
@@ -204,7 +204,7 @@ public:
         return v;
     }
 #else
-    typedef typename a_it::accessor accessor;
+    using accessor = typename a_it::accessor;
     //typedef handle_accessor accessor;
     //typedef traditional_accessor<value_type> accessor;
 

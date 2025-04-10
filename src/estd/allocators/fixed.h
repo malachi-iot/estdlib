@@ -80,9 +80,9 @@ struct single_allocator_base
 
     // For scenarios where someone wishes to specifically treat this allocated
     // item as a container of T
-    typedef locking_iterator<
+    using iterator = locking_iterator<
         single_allocator_base,
-        traditional_accessor<value_type> > iterator;
+        traditional_accessor<value_type> >;
 
 protected:
     // NOTE: Would make private but 'adjust_offset_exp' (which basic_string_view uses)

@@ -185,14 +185,15 @@ struct locking_allocator_traits<TAllocator, true>
 
 
 /// shim for non locking activities
-template <class TAllocator>
-struct locking_allocator_traits<TAllocator, false>
+template <class Allocator>
+struct locking_allocator_traits<Allocator, false>
 {
-    typedef TAllocator                          allocator_type;
-    typedef typename TAllocator::value_type     value_type;
+    using allocator_type = Allocator;
+    using value_type = typename allocator_type::value_type;
+
     typedef value_type*                         pointer;
     typedef const value_type*                   const_pointer;
-    typedef typename TAllocator::size_type      size_type;
+    typedef typename allocator_type::size_type      size_type;
     typedef pointer                             handle_type;
 
     // EXPERIMENTAL
@@ -243,10 +244,10 @@ struct locking_allocator_traits<TAllocator, false>
 
     // Non standard, for scenarios in which a consumer specifically wants to treat
     // a handle region as a container of T
-    typedef typename internal::locking_iterator<
+    using iterator = typename internal::locking_iterator<
         allocator_type,
         traditional_accessor<value_type>,
-        internal::locking_iterator_modes::shim> iterator;
+        internal::locking_iterator_modes::shim>;
 
     static CONSTEXPR allocator_locking_preference::_ locking_preference =
         allocator_locking_preference::none;
