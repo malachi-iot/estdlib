@@ -16,8 +16,7 @@ class basic_string : public internal::dynamic_array<Impl>
 {
 protected:
     using base_type = internal::dynamic_array<Impl>;
-
-    typedef typename base_type::helper helper;
+    using typename base_type::helper;
 
 public:
     typedef typename base_type::allocator_type  allocator_type;

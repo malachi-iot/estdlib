@@ -55,7 +55,7 @@ struct pair
 
     pair& operator=(const pair& other) = default;
 
-    constexpr void swap(pair& other)
+    ESTD_CPP_CONSTEXPR(14) void swap(pair& other)
     {
         estd::swap(first, other.first);
         estd::swap(second, other.second);

@@ -14,7 +14,8 @@
 
 ## Known Issues & Limitations
 
-* `unordered_map` has only core functionality.  Missing are node_type and hints
+* `unordered_map`, `unordered_set` has only core functionality.
+  Missing are node_type and hints.  Also, they've undergone only limited testing
 
 # v0.8.3 - 23FEB25
 

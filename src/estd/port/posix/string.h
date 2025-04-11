@@ -15,9 +15,10 @@ namespace estd
 
 // Somehow clang has slightly different expectations during catch << resolution
 #if defined(__clang__) || defined(__MINGW32__)
-template <class TChar, class TStringTraits, class TAllocator>
-std::ostream& operator <<( std::ostream& os,
-                           const estd::basic_string<TChar, typename TStringTraits::char_traits, TAllocator, TStringTraits>& value)
+template <class Char, class Impl>
+std::ostream& operator <<(
+    std::ostream& os,
+    const estd::detail::basic_string<Impl>& value)
 {
     // DEBT: This only works for null terminated
     const char* s = value.clock();
@@ -25,7 +26,9 @@ std::ostream& operator <<( std::ostream& os,
     value.cunlock();
     return os;
 }
-#elif defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
+#endif
+
+#if defined(FEATURE_STD_OSTREAM) || defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
 
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Char, class Traits, class Impl>
