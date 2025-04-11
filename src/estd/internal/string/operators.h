@@ -34,11 +34,12 @@ constexpr bool operator ==(
 // DEBT: std::ostream support should actually be elsewhere
 
 #if FEATURE_STD_OSTREAM
+namespace detail {
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Char, class Traits, class Impl>
 inline std::basic_ostream<Char, Traits>& operator<<(
     std::basic_ostream<Char, Traits>& os,
-    const estd::detail::basic_string<Impl>& str)
+    const basic_string<Impl>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient
@@ -48,13 +49,12 @@ inline std::basic_ostream<Char, Traits>& operator<<(
 
     return os;
 }
-#endif
 
 // Clang seems to want this pseudo-specialization
 // Somehow clang has slightly different expectations during catch << resolution
 template <class Char, class Impl>
 std::ostream& operator <<(
-    std::ostream& os, const estd::detail::basic_string<Impl>& value)
+    std::ostream& os, const basic_string<Impl>& value)
 {
     // DEBT: This only works for null terminated
     const char* s = value.clock();
@@ -62,5 +62,8 @@ std::ostream& operator <<(
     value.cunlock();
     return os;
 }
+
+}
+#endif
 
 }

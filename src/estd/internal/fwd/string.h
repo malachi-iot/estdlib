@@ -84,6 +84,14 @@ namespace detail {
 template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 class basic_string;
 
+#if FEATURE_STD_OSTREAM
+template <class Char, class Traits, class Impl>
+inline std::basic_ostream<Char, Traits>& operator<<(
+    std::basic_ostream<Char, Traits>& os,
+    const basic_string<Impl>& str);
+#endif
+
+
 }
 
 
@@ -136,12 +144,5 @@ template<class Char, size_t N, bool null_terminated = true,
 class basic_string;
 
 }
-
-#if FEATURE_STD_OSTREAM
-template <class Char, class Traits, class Impl>
-inline std::basic_ostream<Char, Traits>& operator<<(
-    std::basic_ostream<Char, Traits>& os,
-    const estd::detail::basic_string<Impl>& str);
-#endif
 
 }
