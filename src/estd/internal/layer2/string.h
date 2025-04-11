@@ -23,8 +23,8 @@ class basic_string : public estd::internal::basic_string<
     typedef typename base_t::impl_type helper_type;
 
 public:
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename base_t::size_type size_type;
+    using typename base_type::allocator_type;
+    using typename base_type::size_type;
     using base_type::data;
 
     // this one we presume we're looking at either:
@@ -32,7 +32,7 @@ public:
     // - a size=capacity variant, in which str_buffer isn't (necessarily) null terminated
     //   but size() still reflects the right size of the string
     // This particular constructor is good for string literals, assuming CharT is const char
-    ESTD_CPP_CONSTEXPR_RET basic_string(CharT* str_buffer) : base_type(str_buffer)
+    constexpr basic_string(CharT* str_buffer) : base_type(str_buffer)
     {
     }
 
@@ -86,14 +86,12 @@ public:
     }
 
     template <class Impl>
-    ESTD_CPP_CONSTEXPR_RET basic_string(estd::internal::allocated_array<Impl>& copy_from)
-        // FIX: very bad -- don't leave things locked!  Also, we really want
-        // to only permit this operation when copy_from is a null term string,
+    ESTD_CPP_CONSTEXPR(14) basic_string(estd::internal::allocated_array<Impl>& copy_from)
+        // DEBT: only permit this operation when copy_from is a null term string,
         // otherwise copy_from won't know if we've changed the str len.
-        // Only doing this because we often pass around layer1, layer2, layer3 strings who
-        // don't care about lock/unlock
         : base_type(copy_from.lock())
     {
+        copy_from.unlock();
     }
 
     // Assigns incoming copy_from to whatever pointer we are tracking.
@@ -129,7 +127,7 @@ public:
 
     constexpr operator typename base_type::view_type() const
     {
-        return { data(), base_t::size() };
+        return { data(), base_type::size() };
     }
 };
 

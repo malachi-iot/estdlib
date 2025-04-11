@@ -17,8 +17,6 @@ class basic_string : public estd::internal::basic_string<
         estd::layer1::allocator<CharT, N>,
         StringPolicy>;
 
-    typedef base_type base_t;
-
 public:
     using base_type::data;
 
@@ -26,7 +24,7 @@ public:
 
     basic_string(const CharT* s)
     {
-        base_t::operator =(s);
+        base_type::operator =(s);
     }
 
     template <class Impl>
@@ -60,7 +58,7 @@ public:
 
     constexpr operator typename base_type::view_type() const
     {
-        return { data(), base_t::size() };
+        return { data(), base_type::size() };
     }
 };
 

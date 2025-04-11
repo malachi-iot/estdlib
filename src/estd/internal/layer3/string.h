@@ -6,7 +6,9 @@
 
 namespace estd { namespace layer3 {
 
-// NOTE: Slowly phasing this guy out in favor of basic_string_view
+// NOTE: Slowly phasing this guy out in favor of basic_string_view.
+// Keep in mind though he supports a size 0 (infinite) for null terminated strings.  Also
+// he differs in that '=' does a deep copy
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class Policy = typename estd::conditional<null_terminated,
@@ -28,6 +30,7 @@ class basic_string : public estd::internal::basic_string<
 
 public:
     using typename base_type::size_type;
+    using typename base_type::view_type;
     using base_type::data;
 
 protected:
@@ -67,11 +70,8 @@ public:
         base_t::impl().size(initial_size);
     }
 
-    template <class ForeignAllocator, class ForeignTraits>
-    basic_string(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits> & copy_from)
-        // FIX: very bad -- don't leave things locked!
-        // only doing this because we often pass around layer1, layer2, layer3 strings who
-        // don't care about lock/unlock
+    template <class Impl>
+    basic_string(const estd::detail::basic_string<Impl>& copy_from)
         // DEBT: Precision loss here generates warnings and rightly so.  This whole
         // init mechanism needs a rework - or a deprecation completely, since layer3::basic_string
         // is more or less a basic_string_view
@@ -92,11 +92,14 @@ public:
         {
             base_t::helper.size(copy_from.size());
         } */
+        copy_from.cunlock();
     }
 
 
-    template <class ForeignAllocator, class ForeignTraits>
-    basic_string& operator=(const estd::basic_string<CharT, Traits, ForeignAllocator, ForeignTraits>& copy_from)
+    // DEBT: Above copy constructor ought to handle this, but we have a const/InitParam issue
+    // holding us back
+    template <class Impl>
+    basic_string& operator=(const estd::detail::basic_string<Impl>& copy_from)
     {
         base_type::operator =(copy_from);
         return *this;
@@ -106,9 +109,9 @@ public:
     // so if we are converting from a const_string we have to remove const from CharT
     //typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
 
-    constexpr operator typename base_type::view_type() const
+    constexpr operator view_type() const
     {
-        return { data(), base_type::size() };
+        return { data(), typename view_type::size_type(base_type::size()) };
     }
 };
 
