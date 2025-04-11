@@ -47,6 +47,31 @@ protected:
         return helper::compare(*this, s, s_size);
     }
 
+    // +++ non-locking helpers, protected so only conforming child classes expose them
+
+    pointer data()
+    {
+        return base_type::lock();
+    }
+
+    constexpr const_pointer data() const
+    {
+        return base_type::clock();
+    }
+
+    // A little clumsy since basic_string_view treats everything as const already,
+    // so if we are converting from a const_string we have to remove const from CharT
+    //using view_type = basic_string_view<policy_type>;
+    using view_type = estd::basic_string_view<value_type, traits_type>;
+
+    /*
+    constexpr operator view_type() const
+    {
+        return view_type(data(), base_type::size());
+    }   */
+
+    // ---
+
 public:
     ESTD_CPP_DEFAULT_CTOR(basic_string)
 

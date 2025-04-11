@@ -20,6 +20,8 @@ class basic_string : public estd::internal::basic_string<
     typedef base_type base_t;
 
 public:
+    using base_type::data;
+
     basic_string() = default;
 
     basic_string(const CharT* s)
@@ -40,20 +42,12 @@ public:
         return *this;
     }
 
-    // layer1 strings can safely issue a lock like this, since unlock is a no-op
-    CharT* data() { return base_t::lock(); }
-
     CharT* c_str()
     {
 #if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
 #endif
         return data();
-    }
-
-    constexpr const CharT* data() const
-    {
-        return base_t::clock();
     }
 
     constexpr const CharT* c_str() const
@@ -64,14 +58,9 @@ public:
         return data();
     }
 
-
-    // A little clumsy since basic_string_view treats everything as const already,
-    // so if we are converting from a const_string we have to remove const from CharT
-    typedef basic_string_view<CharT, Traits> view_type;
-
-    ESTD_CPP_CONSTEXPR_RET operator view_type() const
+    constexpr operator typename base_type::view_type() const
     {
-        return view_type(data(), base_t::size());
+        return { data(), base_t::size() };
     }
 };
 

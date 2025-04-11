@@ -25,6 +25,7 @@ class basic_string : public estd::internal::basic_string<
 public:
     typedef typename base_t::allocator_type allocator_type;
     typedef typename base_t::size_type size_type;
+    using base_type::data;
 
     // this one we presume we're looking at either:
     // - an already initialized null terminated string
@@ -110,16 +111,6 @@ public:
         return *this;
     }
 
-    // layer2 strings can safely issue a lock like this, since unlock is a no-op
-    CharT* data()
-    {
-        //static_assert(base_type::is_locking == false, "Operation only valid for non-locking, contiguous allocators");
-
-        return base_t::lock();
-    }
-
-    constexpr const CharT* data() const { return base_t::clock(); }
-
     CharT* c_str()
     {
 #if __cpp_static_assert
@@ -136,13 +127,9 @@ public:
         return data();
     }
 
-    // A little clumsy since basic_string_view treats everything as const already,
-    // so if we are converting from a const_string we have to remove const from CharT
-    typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
-
-    ESTD_CPP_CONSTEXPR_RET operator view_type() const
+    constexpr operator typename base_type::view_type() const
     {
-        return view_type(data(), base_t::size());
+        return { data(), base_t::size() };
     }
 };
 

@@ -12,36 +12,23 @@ template<class CharT, bool null_terminated = true,
          class Policy = typename estd::conditional<null_terminated,
                 internal::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
                 internal::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >::type>
-class basic_string
-        : public estd::basic_string<
-                CharT, Traits,
-// FIX: Not ready yet, because layer3::allocator constructor and class InitParam doesn't fully
-// initialize underlying allocator
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+class basic_string : public estd::internal::basic_string<
                 estd::layer3::allocator<CharT, typename Policy::size_type>,
-#else
-                estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
-#endif
                 Policy>
 {
-    typedef estd::basic_string<
-            CharT, Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-            estd::layer3::allocator<CharT, typename Policy::size_type>,
-#else
-            estd::internal::single_fixedbuf_runtimesize_allocator < CharT >,
-#endif
-            Policy>
-            base_t;
+    using base_type = estd::internal::basic_string<
+        estd::layer3::allocator<CharT, typename Policy::size_type>,
+        Policy>;
 
-    typedef base_t base_type;
+    using base_t = base_type;
     typedef typename base_t::allocator_type allocator_type;
     // DEBT: Change helper_type name to impl_type if it isn't aligned with new (also poorly named)
     // string optimization "helper"
     typedef typename base_t::impl_type helper_type;
 
 public:
-    typedef typename base_t::size_type size_type;
+    using typename base_type::size_type;
+    using base_type::data;
 
 protected:
     typedef typename allocator_type::InitParam init_t;
@@ -115,16 +102,13 @@ public:
         return *this;
     }
 
-    // layer3 strings can safely issue a lock like this, since unlock is a no-op
-    const CharT* data() const { return base_type::clock(); }
-
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT
-    typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
+    //typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
 
-    ESTD_CPP_CONSTEXPR_RET operator view_type() const
+    constexpr operator typename base_type::view_type() const
     {
-        return view_type(data(), base_type::size());
+        return { data(), base_type::size() };
     }
 };
 
