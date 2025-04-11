@@ -12,27 +12,14 @@ namespace estd { namespace layer2 {
 template<class CharT, size_t N, bool null_terminated,
          class Traits,
          ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
-class basic_string
-        : public estd::basic_string<
-                CharT,
-                Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-                estd::layer2::allocator<CharT, N>,
-#else
-                estd::internal::single_fixedbuf_allocator < CharT, N, CharT* >,
-#endif
-                StringPolicy >
+class basic_string : public estd::internal::basic_string<
+    estd::layer2::allocator<CharT, N>,
+    StringPolicy >
 {
-    typedef estd::basic_string<
-            CharT, Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
+    using base_type = estd::internal::basic_string<
             estd::layer2::allocator<CharT, N>,
-#else
-            estd::internal::single_fixedbuf_allocator < CharT, N, CharT* >,
-#endif
-            StringPolicy >
-            base_type;
-    typedef base_type base_t;
+            StringPolicy>;
+    using base_t = base_type;
     typedef typename base_t::impl_type helper_type;
 
 public:
@@ -124,9 +111,14 @@ public:
     }
 
     // layer2 strings can safely issue a lock like this, since unlock is a no-op
-    CharT* data() { return base_t::lock(); }
+    CharT* data()
+    {
+        //static_assert(base_type::is_locking == false, "Operation only valid for non-locking, contiguous allocators");
 
-    ESTD_CPP_CONSTEXPR_RET const CharT* data() const { return base_t::clock(); }
+        return base_t::lock();
+    }
+
+    constexpr const CharT* data() const { return base_t::clock(); }
 
     CharT* c_str()
     {
@@ -136,7 +128,7 @@ public:
         return data();
     }
 
-    const CharT* c_str() const
+    constexpr const CharT* c_str() const
     {
 #if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
