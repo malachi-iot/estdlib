@@ -112,11 +112,6 @@ template<
 >
 using basic_string = internal::basic_string<Allocator, StringPolicy>;
 
-#ifdef FEATURE_STD_MEMORY
-using string = basic_string<char>;
-#endif
-
-
 namespace layer1 {
 
 template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char>,

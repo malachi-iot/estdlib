@@ -23,6 +23,7 @@ class basic_string : public estd::internal::basic_string<
     typedef typename base_t::impl_type helper_type;
 
 public:
+    using typename base_type::view_type;
     using typename base_type::allocator_type;
     using typename base_type::size_type;
     using base_type::data;

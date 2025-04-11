@@ -78,12 +78,12 @@ public:
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
-    value_type* lock(size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(17) value_type* lock(size_type pos = 0, size_type count = 0)
     {
         return &m_impl.lock(pos, count);
     }
 
-    const value_type* clock(size_type pos = 0, size_type count = 0) const
+    ESTD_CPP_CONSTEXPR(17) const value_type* clock(size_type pos = 0, size_type count = 0) const
     {
         return &m_impl.clock(pos, count);
     }

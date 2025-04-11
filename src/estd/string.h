@@ -10,6 +10,7 @@
 #include "traits/string.h"
 #include "internal/string.h"
 #include "internal/fwd/string_view.h"
+#include "internal/to_string.h"
 #include "policy/string.h"
 #include "port/string.h"
 #include "algorithm.h"
@@ -17,12 +18,17 @@
 #include "cstdlib.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
-#include <ostream>
+//#include <ostream>
 #endif
 
 #include "internal/macro/push.h"
 
 namespace estd {
+
+#ifdef FEATURE_STD_MEMORY
+using string = basic_string<char>;
+#endif
+
 
 // DEBT: Move this out to layer3/string.h if we plan to keep const_string.
 // That is difficult because it's template-instantiating basic_string
@@ -123,9 +129,6 @@ int stoi(
 
 
 }
-
-
-#include "internal/to_string.h"
 
 
 #include "internal/macro/pop.h"

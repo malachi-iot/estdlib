@@ -30,7 +30,7 @@ public:
     //typedef typename allocator_type::const_pointer const_pointer;
     typedef const value_type* const_pointer;
 
-    static ESTD_CPP_CONSTEVAL size_type npos = (size_type) -1;
+    static constexpr size_type npos = (size_type) -1;
 
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
@@ -49,7 +49,7 @@ protected:
 
     // +++ non-locking helpers, protected so only conforming child classes expose them
 
-    pointer data()
+    ESTD_CPP_CONSTEXPR(17) pointer data()
     {
         return base_type::lock();
     }

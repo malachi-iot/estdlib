@@ -49,7 +49,7 @@ struct out_stringbuf : stringbuf_base<String>
 
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
-    ESTD_CPP_CONSTEXPR_RET const string_type& str() const { return str_; }
+    constexpr const string_type& str() const { return str_; }
 
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {
@@ -57,7 +57,7 @@ struct out_stringbuf : stringbuf_base<String>
         return str_.size();
     }
 
-    ESTD_CPP_CONSTEXPR_RET typename string_type::view_type view() const
+    constexpr typename string_type::view_type view() const
     {
         return str_;
     }

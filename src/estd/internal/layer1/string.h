@@ -18,6 +18,7 @@ class basic_string : public estd::internal::basic_string<
         StringPolicy>;
 
 public:
+    using typename base_type::view_type;
     using base_type::data;
 
     basic_string() = default;
@@ -56,7 +57,7 @@ public:
         return data();
     }
 
-    constexpr operator typename base_type::view_type() const
+    constexpr operator view_type() const
     {
         return { data(), base_type::size() };
     }

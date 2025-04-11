@@ -11,6 +11,7 @@
 #include "../initializer_list.h"
 #include "../limits.h"
 #ifdef FEATURE_CPP_STATIC_ASSERT
+// DEBT: Change over to cassert - first have to see if AVR permits that
 #include <assert.h>
 #endif
 
@@ -95,7 +96,7 @@ protected:
 
     // use this instead of direct buffer reference, for upcoming aligned_storage
     // compatibility
-    pointer data(size_type offset = 0)
+    ESTD_CPP_CONSTEXPR(17) pointer data(size_type offset = 0)
     {
         return static_cast<pointer>(&buffer[offset]);
     }
@@ -143,29 +144,29 @@ public:
     typedef void is_singular_tag;
     typedef void is_stateful_tag;
 
-    value_type& lock(handle_type, int pos = 0, int = 0)
+    ESTD_CPP_CONSTEXPR(17) value_type& lock(handle_type, int pos = 0, int = 0)
     {
         return *data(pos);
     }
 
-    value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
+    ESTD_CPP_CONSTEXPR(17) value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
     {
         return *data(h.offset() + pos);
     }
 
-    const value_type& clock(handle_type, int pos = 0, int = 0) const
+    constexpr const value_type& clock(handle_type, int pos = 0, int = 0) const
     {
         return *data(pos);
     }
 
-    const value_type& clock(const handle_with_offset& h, int pos = 0, int = 0) const
+    constexpr const value_type& clock(const handle_with_offset& h, int pos = 0, int = 0) const
     {
         return *data(h.offset() + pos);
     }
 
-    void unlock(handle_type) {}
+    ESTD_CPP_CONSTEXPR(17) void unlock(handle_type) {}
 
-    void cunlock(handle_type) const {}
+    ESTD_CPP_CONSTEXPR(17) void cunlock(handle_type) const {}
 
     handle_with_offset offset(handle_type h, size_t pos) const
     {

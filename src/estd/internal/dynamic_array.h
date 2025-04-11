@@ -94,12 +94,12 @@ protected:
 
 public:
     // redeclared just for conveineince
-    value_type* lock(size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(17) value_type* lock(size_type pos = 0, size_type count = 0)
     {
         return base_type::lock(pos, count);
     }
 
-    void unlock() { return base_type::unlock(); }   // NOLINT
+    ESTD_CPP_CONSTEXPR(17) void unlock() { return base_type::unlock(); }   // NOLINT
 
 protected:
     // Use this instead of 'success' ptr
