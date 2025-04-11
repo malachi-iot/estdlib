@@ -28,12 +28,10 @@ std::ostream& operator <<( std::ostream& os,
 #elif defined(FEATURE_ESTD_IOSTREAM_NATIVE) && !defined(__ADSPBLACKFIN__)
 
 //A bit finicky so that we can remove const (via Traits::char_type)
-template <class Allocator, class StringTraits,
-    class Traits,
-    class CharT>
-inline std::basic_ostream<typename Traits::char_type, Traits>&
-operator<<(std::basic_ostream<typename Traits::char_type, Traits>& os,
-    const estd::basic_string<CharT, Traits, Allocator, StringTraits>& str)
+template <class Char, class Traits, class Impl>
+inline std::basic_ostream<Char, Traits>& operator<<(
+    std::basic_ostream<Char, Traits>& os,
+    const estd::detail::basic_string<Impl>& str)
 {
     // TODO: Do query for null terminated vs non null terminated so that
     // this might be more efficient

@@ -148,6 +148,62 @@ public:
         base_type::assign(s, strlen(s));
         return *this;
     }
+
+    // DEBT: Does not conform to 'strong exception safety guarantee'
+    template <class AppendResult>
+    static void assert_append(AppendResult) //typename base_type::append_result r)
+    {
+#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
+        if(r.has_value() == false)
+        {
+#if __cpp_exceptions
+            throw std::length_error("Could not allocate enough memory");
+#else
+            std::abort();
+#endif
+        }
+#endif
+    }
+
+    basic_string& operator+=(value_type c)
+    {
+        assert_append(base_type::push_back(c));
+        return *this;
+    }
+
+
+    template <class ForeignImpl>
+    basic_string& operator=(const experimental::private_array<ForeignImpl>& copy_from)   // NOLINT
+    {
+        operator=(copy_from);
+        return *this;
+    }
+
+    basic_string& append(size_type count, value_type c) // NOLINT
+    {
+        while(count--) *this += c;
+
+        return *this;
+    }
+
+    template <class Impl2>
+    basic_string& append(const internal::allocated_array<Impl2>& str)   // NOLINT
+    {
+        assert_append(base_type::append(str));
+        return *this;
+    }
+
+    basic_string& append(const_pointer s, size_type count)  // NOLINT
+    {
+        assert_append(base_type::append(s, count));
+        return *this;
+    }
+
+    // DEBT: Helper can optimize this guy
+    basic_string& append(const_pointer s)
+    {
+        return append(s, strlen(s));
+    }
 };
 
 template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>

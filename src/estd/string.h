@@ -24,6 +24,7 @@
 
 namespace estd {
 
+#if UNUSED
 // TODO: Determine how to organize different string implementations
 // a) wrapper around standard C null terminated variety
 // b) wrapper around pascal-style length tracking variety (which we'll also combine with dynamic allocation)
@@ -66,21 +67,6 @@ public:
 
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
-
-    // DEBT: Does not conform to 'strong exception safety guarantee'
-    static void assert_append(typename base_type::append_result r)
-    {
-#if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
-        if(r.has_value() == false)
-        {
-#if __cpp_exceptions
-            throw std::length_error("Could not allocate enough memory");
-#else
-            std::abort();
-#endif
-        }
-#endif
-    }
 
 public:
     ESTD_CPP_DEFAULT_CTOR(basic_string)
@@ -141,21 +127,6 @@ public:
     } */
 
 
-    basic_string& operator+=(value_type c)
-    {
-        assert_append(base_type::push_back(c));
-        return *this;
-    }
-
-
-    template <class TForeignImpl>
-    basic_string& operator=(const experimental::private_array<TForeignImpl>& copy_from)   // NOLINT
-    {
-        base_type::operator =(copy_from);
-        return *this;
-    }
-
-
     template <class TForeignImpl>
     basic_string& operator=(const internal::allocated_array<TForeignImpl>& copy_from)   // NOLINT
     {
@@ -169,7 +140,19 @@ public:
         return *this;
     }
 };
-
+#else
+template<
+    class CharT,
+    class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
+#ifdef FEATURE_STD_MEMORY
+    class Allocator = std::allocator<CharT>,
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::sized_string_policy<Traits>
+#else
+    class Allocator, ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy
+#endif
+>
+using basic_string = internal::basic_string<Allocator, StringPolicy>;
+#endif
 
 // this typedef relies on std::allocator
 #ifdef FEATURE_STD_MEMORY
@@ -296,18 +279,22 @@ long stol(
     return result;
 }
 
-template <class TChar, class Traits, class Alloc, class TStringTraits>
+template <class Impl>
 unsigned long stoul(
-        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        const detail::basic_string<Impl>& str,
         size_t* pos = 0, int base = 10
         )
 {
+    using string_type = detail::basic_string<Impl>;
+
     // FIX: very clunky way to ensure we're looking at a null terminated string
     // somehow I never expose null_termination indicators on the string itself
-    TStringTraits::is_null_termination(0);
+    //TStringTraits::is_null_termination(0);
+    string_type::policy_type::is_null_termination(0);
+    using char_type = typename string_type::value_type;
 
-    const TChar* data = str.clock();
-    typename estd::remove_const<TChar>::type* end;
+    const char_type* data = str.clock();
+    typename estd::remove_const<char_type>::type* end;
     unsigned long result = strtoul(data, &end, base);
     str.cunlock();
     if(pos != NULLPTR)
@@ -321,9 +308,9 @@ unsigned long stoul(
 // NOTE: Interestingly, spec calls for stoi to call strtol or wcstol.
 // TODO: This is  an optimization opportunity, to call something like atoi
 // for lower-precision conversion
-template <class TChar, class Traits, class Alloc, class TStringTraits>
+template <class Impl>
 int stoi(
-        const basic_string<TChar, Traits, Alloc, TStringTraits>& str,
+        const detail::basic_string<Impl>& str,
         size_t* pos = 0, int base = 10)
 {
     return (int) stol(str, pos, base);
