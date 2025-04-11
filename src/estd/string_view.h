@@ -3,18 +3,15 @@
 #include "string.h"
 #include "internal/fwd/string_view.h"
 
-namespace estd {
-
-namespace detail {
+namespace estd { namespace detail {
 
 template <ESTD_CPP_CONCEPT(internal::StringPolicy) Policy>
 class basic_string_view :
     public detail::basic_string<internal::impl::allocated_array<
-            layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy> >
+        layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy>>
 {
-    typedef detail::basic_string<internal::impl::allocated_array<
-        layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy> >
-        base_type;
+    using base_type = detail::basic_string<internal::impl::allocated_array<
+        layer3::allocator<const typename Policy::char_traits::char_type, typename Policy::size_type>, Policy>>;
 
     typedef typename base_type::allocator_type allocator_type;
 
@@ -23,7 +20,9 @@ class basic_string_view :
     typedef typename allocator_type::InitParam init_param_t;
 
 public:
-    typedef typename base_type::size_type size_type;
+    using base_type::data;
+    using typename base_type::size_type;
+
     typedef typename base_type::pointer pointer;
     typedef typename base_type::const_pointer const_pointer;
 
@@ -35,16 +34,16 @@ public:
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
-    basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
+    constexpr basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
 
-    ESTD_CPP_CONSTEXPR_RET basic_string_view(const_pointer s, size_type count) :
+    constexpr basic_string_view(const_pointer s, size_type count) :
         base_type(init_param_t(s, count))
     {
 
     }
 
     // C-style null terminated string
-    ESTD_CPP_CONSTEXPR_RET basic_string_view(const_pointer s) :
+    constexpr basic_string_view(const_pointer s) :
         base_type(init_param_t(s, strlen(s)))
     {
 
@@ -61,14 +60,7 @@ public:
     }
 
 
-    basic_string_view(const basic_string_view& other)
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-        = default;
-#else
-        : base_type(other)
-    {
-    }
-#endif
+    basic_string_view(const basic_string_view& other) = default;
 
     /*
     template <class Policy2>
@@ -80,7 +72,6 @@ public:
     }   */
 
 
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
     void remove_suffix(size_type n)
     {
         // FIX: Not right - reallocate does nothing in this context
@@ -101,25 +92,16 @@ public:
         a.adjust_offset_exp(true, n);
     }
 
-    // DEBT: Stop sprinkling all these 'data' methods around and instead inspect the
-    // allocator to see if it's locking or not and disable or enable 'data' methods accordingly
-    pointer data() { return base_type::lock(); }
-    ESTD_CPP_CONSTEXPR_RET const_pointer data() const { return base_type::clock(); }
-
     // DEBT: Similar to above, for scenarios which are never gonna be locking (like layer strings)
     // we don't need the fancy locking iterator.  So continue to plumb the depths of locking_accessor,
     // base allocators and friends to smooth this out
     typedef pointer iterator;
     typedef const_pointer const_iterator;
 
-    ESTD_CPP_CONSTEXPR_RET const_iterator begin() const { return data(); }
-    ESTD_CPP_CONSTEXPR_RET const_iterator end() const { return data() + base_type::size(); }
+    constexpr const_iterator begin() const { return data(); }
+    constexpr const_iterator end() const { return data() + base_type::size(); }
 
-
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-    CONSTEXPR
-#endif
-    basic_string_view substr(
+    ESTD_CPP_CONSTEXPR(17) basic_string_view substr(
             size_type pos = 0,
             size_type count = base_type::npos) const
     {
@@ -139,12 +121,6 @@ public:
 
         return copy;
     }
-#endif
 };
 
-}
-
-using string_view = basic_string_view<char>;
-
-
-}
+}}

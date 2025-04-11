@@ -3,9 +3,6 @@
 #include "../../policy/string.h"
 #include "../../traits/char_traits.h"
 
-// DEBT: Remove this dependency
-#include "string.h" // NOLINT
-
 namespace estd {
 
 namespace detail {
@@ -20,8 +17,8 @@ class basic_string_view;
 // are not as available (thus affecting remove_suffix).  Might be prudent to make
 // a special 'view' policy which is mostly const, but permits changes to size/pointer
 template <class Char,
-    class Traits = estd::char_traits<typename estd::remove_const<Char>::type>,
-    class Policy = internal::sized_string_policy<Traits, size_t, true> >
+    class Traits = estd::char_traits<remove_const_t<Char>>,
+    class Policy = internal::sized_string_policy<Traits, size_t, true>>
 using basic_string_view = detail::basic_string_view<Policy>;
 
 #if __cpp_concepts
@@ -35,5 +32,7 @@ concept StringViewLike =
 
 }}
 #endif
+
+using string_view = basic_string_view<char>;
 
 }
