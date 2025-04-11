@@ -1,6 +1,11 @@
 #pragma once
 
+#include "../feature/std.h"
 #include "../fwd/string.h"
+
+#if FEATURE_STD_OSTREAM
+#include <ostream>
+#endif
 
 namespace estd {
 
@@ -24,6 +29,38 @@ constexpr bool operator ==(
     const detail::basic_string<Impl2>& rhs)
 {
     return lhs.compare(rhs) == 0;
+}
+
+// DEBT: std::ostream support should actually be elsewhere
+
+#if FEATURE_STD_OSTREAM
+//A bit finicky so that we can remove const (via Traits::char_type)
+template <class Char, class Traits, class Impl>
+inline std::basic_ostream<Char, Traits>& operator<<(
+    std::basic_ostream<Char, Traits>& os,
+    const estd::detail::basic_string<Impl>& str)
+{
+    // TODO: Do query for null terminated vs non null terminated so that
+    // this might be more efficient
+    os.write(str.clock(), str.size());
+
+    str.cunlock();
+
+    return os;
+}
+#endif
+
+// Clang seems to want this pseudo-specialization
+// Somehow clang has slightly different expectations during catch << resolution
+template <class Char, class Impl>
+std::ostream& operator <<(
+    std::ostream& os, const estd::detail::basic_string<Impl>& value)
+{
+    // DEBT: This only works for null terminated
+    const char* s = value.clock();
+    operator <<(os, s);
+    value.cunlock();
+    return os;
 }
 
 }
