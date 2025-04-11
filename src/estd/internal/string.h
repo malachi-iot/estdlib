@@ -30,7 +30,7 @@ public:
     //typedef typename allocator_type::const_pointer const_pointer;
     typedef const value_type* const_pointer;
 
-    static CONSTEXPR size_type npos = (size_type) -1;
+    static ESTD_CPP_CONSTEVAL size_type npos = (size_type) -1;
 
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
@@ -73,9 +73,9 @@ protected:
     // ---
 
 public:
-    ESTD_CPP_DEFAULT_CTOR(basic_string)
+    basic_string() = default;
 
-    size_type length() const { return base_type::size(); }
+    constexpr size_type length() const { return base_type::size(); }
 
     template <class Impl2>
     int compare(const internal::allocated_array<Impl2>& a) const
@@ -178,6 +178,8 @@ public:
     template <class AppendResult>
     static void assert_append(AppendResult) //typename base_type::append_result r)
     {
+        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(r.has_value() == false)
         {
@@ -206,6 +208,7 @@ public:
 
     basic_string& append(size_type count, value_type c) // NOLINT
     {
+        // NOTE: Minor optimization opportunity (don't push around size/null term a bunch of times)
         while(count--) *this += c;
 
         return *this;
@@ -231,6 +234,7 @@ public:
     }
 };
 
+// DEBT: move this guy out to string/operators.h
 template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
 ESTD_CPP_CONSTEXPR_RET bool operator ==(
     const basic_string<Impl>& lhs,

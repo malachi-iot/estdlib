@@ -82,15 +82,6 @@ class basic_string;
 }
 
 
-/*
-template<
-    class CharT,
-    class Traits,
-    class Allocator,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) Policy
-> class basic_string;
-*/
-
 namespace internal {
 
 // DEBT: Clumsy
@@ -101,8 +92,8 @@ using string_policy_helper = conditional_t<null_terminated,
         null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
         sized_string_policy<Traits, int16_t, is_const<Char>::value>>;
 
-// Phase this out in favor of always using detail::basic_string
-// Keeping for the edge cases where Allocator/Policy is more convenient
+// Favor using detail::basic_string, but there are edge cases where
+// Allocator/Policy is more convenient
 template <class Allocator, class Policy>
 using basic_string = detail::basic_string<
     internal::impl::dynamic_array<Allocator, Policy> >;
@@ -120,6 +111,11 @@ template<
 #endif
 >
 using basic_string = internal::basic_string<Allocator, StringPolicy>;
+
+#ifdef FEATURE_STD_MEMORY
+using string = basic_string<char>;
+#endif
+
 
 namespace layer1 {
 
