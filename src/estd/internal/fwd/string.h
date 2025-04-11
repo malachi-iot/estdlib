@@ -4,6 +4,11 @@
 #include "../../policy/string.h"
 #include "../../traits/char_traits.h"
 #include "../raw/type_traits.h"
+#include "../feature/std.h"
+
+#if FEATURE_STD_OSTREAM
+#include <iosfwd>
+#endif
 
 #if __cpp_lib_concepts
 #include <concepts>
@@ -131,5 +136,12 @@ template<class Char, size_t N, bool null_terminated = true,
 class basic_string;
 
 }
+
+#if FEATURE_STD_OSTREAM
+template <class Char, class Traits, class Impl>
+inline std::basic_ostream<Char, Traits>& operator<<(
+    std::basic_ostream<Char, Traits>& os,
+    const estd::detail::basic_string<Impl>& str);
+#endif
 
 }
