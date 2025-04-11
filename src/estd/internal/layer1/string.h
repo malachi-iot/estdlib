@@ -7,27 +7,15 @@ namespace estd { namespace layer1 {
 
 template<class CharT, size_t N, bool null_terminated, class Traits,
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
-class basic_string
-        : public estd::basic_string<
-                CharT, Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-                // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
-                // light of https://github.com/malachi-iot/estdlib/issues/88
-                estd::layer1::allocator<CharT, N, CharT[N]>,
-#else
-                estd::internal::single_fixedbuf_allocator <CharT, N>,
-#endif
-                StringPolicy>
+class basic_string : public estd::internal::basic_string<
+    // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
+    // light of https://github.com/malachi-iot/estdlib/issues/88
+    estd::layer1::allocator<CharT, N, CharT[N]>,
+    StringPolicy>
 {
-    typedef estd::basic_string<
-                CharT, Traits,
-#ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-                estd::layer1::allocator<CharT, N>,
-#else
-                estd::internal::single_fixedbuf_allocator <CharT, N>,
-#endif
-                StringPolicy>
-                base_type;
+    using base_type = estd::internal::basic_string<
+        estd::layer1::allocator<CharT, N>,
+        StringPolicy>;
 
     typedef base_type base_t;
 
@@ -63,9 +51,12 @@ public:
         return data();
     }
 
-    ESTD_CPP_CONSTEXPR_RET const CharT* data() const { return base_t::clock(); }
+    constexpr const CharT* data() const
+    {
+        return base_t::clock();
+    }
 
-    const CharT* c_str() const
+    constexpr const CharT* c_str() const
     {
 #if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
