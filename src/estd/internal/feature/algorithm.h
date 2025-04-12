@@ -19,5 +19,5 @@
 
 // Aliases out general operations to std library in anticipation of them being quicker
 #ifndef FEATURE_ESTD_ALGORITHM_OPT
-#define FEATURE_ESTD_ALGORITHM_OPT FEATURE_STD_ALGORITHM
+//#define FEATURE_ESTD_ALGORITHM_OPT FEATURE_STD_ALGORITHM
 #endif
