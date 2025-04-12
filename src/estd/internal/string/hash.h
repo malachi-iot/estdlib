@@ -3,6 +3,7 @@
 #include "../fwd/string.h"
 #include "../fwd/string_view.h"
 #include "../fwd/functional.h"
+#include "../functional/hash.h"
 
 namespace estd {
 
@@ -13,20 +14,7 @@ struct string_hash
     template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) StringImpl>
     ESTD_CPP_CONSTEXPR(14) int operator()(const detail::basic_string<StringImpl>& v) const
     {
-        using string = detail::basic_string<StringImpl>;
-        int hashed = 0;
-
-        // DEBT: Not a fantastic hash, but it will get us started.  Not using FNV
-        // because all those 32-bit multiplies feels like a death nell for MCUs
-        for(typename string::value_type c : v)
-        {
-            hashed <<= 1;
-            hashed ^= c;
-            hashed <<= 1;
-            hashed ^= c;
-        }
-
-        return hashed;
+        return fnv_hash<uint32_t>::hash(v.begin(), v.end());
     }
 };
 
@@ -39,7 +27,13 @@ template <class Char, size_t N, bool null_terminated, class Traits>
 struct hash<layer1::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
 
 template <class Char, size_t N, bool null_terminated, class Traits>
+struct hash<const layer1::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
+
+template <class Char, size_t N, bool null_terminated, class Traits>
 struct hash<layer2::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
+
+template <class Char, size_t N, bool null_terminated, class Traits>
+struct hash<const layer2::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
 
 // DEBT: Not well tested and in wrong location
 template <class Policy>

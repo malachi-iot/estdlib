@@ -145,6 +145,17 @@ static void test_char_traits()
     TEST_ASSERT_GREATER_THAN(0, traits_type::compare(TEST_STR, TEST_STR2, 5));
 }
 
+// Verified with https://fnvhash.github.io/fnv-calculator-online/
+
+static void test_string_hash()
+{
+    constexpr estd::layer2::const_string s = TEST_STR;
+
+    unsigned hashed = estd::hash<decltype(s)>{}(s);
+
+    TEST_ASSERT_EQUAL_UINT(0x4c0a9277, hashed);
+}
+
 #ifdef __AVR__
 
 #endif
@@ -163,4 +174,5 @@ void test_string()
     RUN_TEST(test_to_string);
     RUN_TEST(test_to_string_opt);
     RUN_TEST(test_char_traits);
+    RUN_TEST(test_string_hash);
 }

@@ -138,7 +138,7 @@ template <size_t N = 0, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
 #endif
 
-typedef basic_string<const char, 0> const_string;
+using const_string = basic_string<const char, 0>;
 
 namespace experimental {
 

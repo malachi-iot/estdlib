@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../platform.h"
 #include "../fwd/functional.h"
+#include "../../cstdint.h"
 
 namespace estd {
 
@@ -45,7 +47,8 @@ template <>
 struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
 {
     template <class It>
-    static uint32_t hash(It begin, It end, uint32_t hashval = FNV1A_32_OFFSET_BASIS)
+    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
+        uint32_t hashval = FNV1A_32_OFFSET_BASIS)
     {
         for(It current = begin; current != end; ++current)
         {
@@ -62,7 +65,8 @@ template <>
 struct fnv_hash<uint32_t, FNV_1A> : fnv_hash_base
 {
     template <class It>
-    static uint32_t hash(It begin, It end, uint32_t hashval = FNV1A_32_OFFSET_BASIS)
+    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
+        uint32_t hashval = FNV1A_32_OFFSET_BASIS)
     {
         for(It current = begin; current != end; ++current)
         {
@@ -78,7 +82,7 @@ template <>
 struct fnv_hash<uint64_t, FNV_1> : fnv_hash_base
 {
     template <class It>
-    static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
     {
         It current = begin;
         for (; current != end; ++current)
@@ -94,7 +98,7 @@ template <>
 struct fnv_hash<uint64_t, FNV_1A> : fnv_hash_base
 {
     template <class It>
-    static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
     {
         It current = begin;
         for (; current != end; ++current)

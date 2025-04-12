@@ -4,7 +4,7 @@
 
 * `layer1::unordered_map` now available
 * https://github.com/malachi-iot/estdlib/issues/76 added `estd::accumulate`
-* Adding crude estd::hash for layer1 and layer2 strings
+* Added `estd::hash` for layer1 and layer2 strings.  Uses 32-bit FNV_1a
 * Added `internal::fnv_hash` (Fowler Noll Vo)
 
 ## Quality Updates & Bug Fixes
@@ -18,7 +18,7 @@
 
 * `unordered_map`, `unordered_set` has only core functionality.
   Missing are node_type and hints.  Also, they've undergone only limited testing
-* FNV hash
+* FNV hash (internal)
     * Implementation naming subject to change
     * Doesn't auto deduce out signed integers, etc. uint32_t or uint64_t is required
     * May not be the speediest performer for MCUs.  16-bit flavor unavailable.

@@ -1,6 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <estd/internal/functional/hash.h>
+#include <estd/string.h>
 
 #include "test-data.h"
 
@@ -34,5 +35,15 @@ TEST_CASE("hash")
 
             REQUIRE(v == 0xd824008dad4b6b6c);
         }
+    }
+    SECTION("string")
+    {
+        // Verified with https://fnvhash.github.io/fnv-calculator-online/
+
+        constexpr estd::layer2::const_string s = "hi2u";
+
+        unsigned hashed = estd::hash<estd::layer2::const_string>{}(s);
+
+        REQUIRE(hashed == 0x4c0a9277);
     }
 }
