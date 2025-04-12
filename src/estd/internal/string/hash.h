@@ -16,7 +16,8 @@ struct string_hash
         using string = detail::basic_string<StringImpl>;
         int hashed = 0;
 
-        // DEBT: Not a fantastic hash, but it will get us started
+        // DEBT: Not a fantastic hash, but it will get us started.  Not using FNV
+        // because all those 32-bit multiplies feels like a death nell for MCUs
         for(typename string::value_type c : v)
         {
             hashed <<= 1;
