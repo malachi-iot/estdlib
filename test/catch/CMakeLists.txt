@@ -51,6 +51,7 @@ else()
         expected-test.cpp
         experimental-test.cpp
         functional-test.cpp
+        hash-test.cpp
         ios-test.cpp
         iostream-test.cpp
         istream-test.cpp

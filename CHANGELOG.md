@@ -3,7 +3,7 @@
 ## Added Features
 
 * `layer1::unordered_map` now available
-* https://github.com/malachi-iot/estdlib/issues/76 TBD (needs wrap still)
+* https://github.com/malachi-iot/estdlib/issues/76 added `estd::accumulate`
 * Adding crude estd::hash for layer1 and layer2 strings
 
 ## Quality Updates & Bug Fixes

@@ -118,6 +118,7 @@ protected:
 
     // In fact, works for find too but it seems to make things more complicated,
     // not more tidy
+    // DEBT: Given above and also the c++17 requirement, not decided if we're gonna keep him
     template <class K, class F, class R = monostate>
     R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
     {
@@ -392,6 +393,7 @@ public:
     size_type count(const K& x) const
     {
         unsigned counter = 0;
+        // DEBT: Depends on c++17
         bucket_foreach(x, [&](const_local_iterator) { ++counter; });
         return counter;
     }

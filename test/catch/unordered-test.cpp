@@ -2,9 +2,8 @@
 
 #include <estd/functional.h>
 #include <estd/string.h>
-#include <estd/internal/container/unordered_set.h>
-#include <estd/internal/container/unordered_map.h>
-#include <estd/optional.h>
+#include <estd/unordered_set.h>
+#include <estd/unordered_map.h>
 
 #include "test/retry.h"
 
