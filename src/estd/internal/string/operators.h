@@ -7,10 +7,11 @@
 #include <ostream>
 #endif
 
-namespace estd {
+namespace estd { namespace detail {
 
+// DEBT: A little too permissive, though will work
 template <class Impl, class T>
-detail::basic_string<Impl>& operator+=(detail::basic_string<Impl>& lhs, T rhs)
+inline basic_string<Impl>& operator+=(basic_string<Impl>& lhs, T rhs)
 {
     lhs.append(rhs);
     return lhs;
@@ -18,15 +19,13 @@ detail::basic_string<Impl>& operator+=(detail::basic_string<Impl>& lhs, T rhs)
 
 // DEBT: Grab CharT right from Impl, this is a little too permissive
 template <typename CharT, ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-constexpr bool operator ==(const CharT* lhs, const detail::basic_string<Impl>& rhs)
+constexpr bool operator ==(const CharT* lhs, const basic_string<Impl>& rhs)
 {
     return rhs.compare(lhs) == 0;
 }
 
 template <class Impl1, class Impl2>
-constexpr bool operator ==(
-    const detail::basic_string<Impl1>& lhs,
-    const detail::basic_string<Impl2>& rhs)
+constexpr bool operator ==(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
 {
     return lhs.compare(rhs) == 0;
 }
@@ -34,7 +33,6 @@ constexpr bool operator ==(
 // DEBT: std::ostream support should actually be elsewhere
 
 #if FEATURE_STD_OSTREAM
-namespace detail {
 //A bit finicky so that we can remove const (via Traits::char_type)
 template <class Char, class Traits, class Impl>
 inline std::basic_ostream<Char, Traits>& operator<<(
@@ -63,7 +61,6 @@ std::ostream& operator <<(
     return os;
 }
 
-}
 #endif
 
-}
+}}
