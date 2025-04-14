@@ -131,8 +131,8 @@ typedef ::nullptr_t nullptr_t;
 
 namespace estd {
 
-typedef std::size_t size_t;
-typedef std::ptrdiff_t ptrdiff_t;
-typedef std::nullptr_t nullptr_t;
+using std::size_t;
+using std::ptrdiff_t;
+using std::nullptr_t;
 
 }

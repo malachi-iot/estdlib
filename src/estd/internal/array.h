@@ -8,15 +8,13 @@
 
 namespace estd { namespace internal {
 
-// NOTE: Replaces the unused experimental::aligned_storage_array which itself is dependent
-// on deprecated aligned_storage API
-
 // Guidance from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf and pggcc-29
 // Turns out alignment isn't a critical issue here
 
 namespace impl {
 
-template <unsigned N, typename Size = typename internal::deduce_fixed_size_t<N>::size_type>
+// 14APR25 MB DEBT: I forgot the point of deviating the size type here.  For constexpr world, feels useless
+template <size_t N, typename Size = typename internal::deduce_fixed_size_t<N>::size_type>
 struct array_base_size
 {
     typedef Size size_type;
@@ -27,14 +25,13 @@ struct array_base_size
 };
 
 
-template <class T, unsigned N>
+template <class T, size_t N>
 struct uninitialized_array : array_base_size<N>
 {
-    typedef array_base_size<N> base_type;
+    using base_type = array_base_size<N>;
+    using typename base_type::size_type;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
-
-    typedef typename base_type::size_type size_type;
 
     struct container
     {
@@ -52,11 +49,7 @@ struct uninitialized_array : array_base_size<N>
 
     container data_[N];
 
-#if __cplusplus >= 201703L
-    // Not yet tested
-    //constexpr
-#endif
-    pointer data()
+    ESTD_CPP_CONSTEXPR(14) pointer data()
     {
         return reinterpret_cast<pointer>(data_);
     }
@@ -69,7 +62,7 @@ struct uninitialized_array : array_base_size<N>
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
-    pointer get_at(size_type pos)
+    ESTD_CPP_CONSTEXPR(14) pointer get_at(size_type pos)
     {
         return reinterpret_cast<pointer>(data_[pos].data);
     }
@@ -80,7 +73,7 @@ protected:
     }
 };
 
-template <class T, unsigned N>
+template <class T, size_t N>
 struct traditional_array : array_base_size<N>
 {
     typedef array_base_size<N> base_type;
@@ -91,14 +84,14 @@ struct traditional_array : array_base_size<N>
 
     T data_[N];
 
-    pointer data() { return data_; }
-    ESTD_CPP_CONSTEXPR_RET const_pointer data() const { return data_; }
+    ESTD_CPP_CONSTEXPR(14) pointer data() { return data_; }
+    constexpr const_pointer data() const { return data_; }
 
 protected:
     // Making these internal/protected APIs so that we can dogfood and really test our
     // alignment with the [] operator
-    pointer get_at(size_type pos) { return data() + pos; }
-    ESTD_CPP_CONSTEXPR_RET const_pointer get_at(size_type pos) const
+    ESTD_CPP_CONSTEXPR(14) pointer get_at(size_type pos) { return data() + pos; }
+    constexpr const_pointer get_at(size_type pos) const
     {
         return data() + pos;
     }
