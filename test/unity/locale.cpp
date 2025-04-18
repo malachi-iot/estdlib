@@ -24,11 +24,11 @@ static void test_use_facet()
 
 static const char input[] = "123 456/789";
 
-template <class TNumGet, class TStr>
-static void _test_num_get(TNumGet& facet, 
-    TStr& istream,
-    typename TNumGet::iter_type it,
-    typename TNumGet::iter_type end)
+template <class NumGet, class Str>
+static void _test_num_get(NumGet& facet, 
+    const Str& istream,
+    typename NumGet::iter_type it,
+    typename NumGet::iter_type end)
 {
     ios_base::iostate err = ios_base::goodbit;
     unsigned val = 0;
@@ -73,7 +73,7 @@ static void test_num_get_alt()
     num_get<char, const char*, locale::classic_type> facet = 
         use_facet<num_get<char, const char*> >(locale::classic());
 
-    _test_num_get(facet, istream, input, input + sizeof(input) - 1);
+    _test_num_get(facet, istream.flags(), input, input + sizeof(input) - 1);
 }
 
 
