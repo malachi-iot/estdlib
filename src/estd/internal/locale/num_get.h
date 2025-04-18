@@ -27,7 +27,9 @@ public:
 
 private:
 
-    struct _helper
+    // DEBT: "helper" name sucks.  These guys help us adapt to incoming context either directly
+    // specified or indirectly carried in via an istream
+    struct localizer
     {
         // NOTE: iterated::num_get efficiently deals with unsigned as well
         // std::num_get deals with two different locales -- the one specified
@@ -73,43 +75,59 @@ private:
         }
 
 
-        template <unsigned base, class IncomingLocale, class T>
-        inline static iter_type get_signed_number(iter_type i, iter_type end,
-            const ios_base&, ios_base::iostate& err, IncomingLocale l, T& v)
+        template <class IncomingLocale, typename T>
+        static inline iter_type get(iter_type in, iter_type end,
+            const ios_base::fmtflags basefield,
+            ios_base::iostate& err,
+            IncomingLocale l,
+            T& v)
         {
-            return get_signed_number<base>(i, end, err,l, v);
+            switch(basefield)
+            {
+#if FEATURE_ESTD_OSTREAM_OCTAL
+                case estd::ios_base::oct:   return get_signed_number<8>(in, end, err,l, v);
+#endif
+                case estd::ios_base::hex:   return get_signed_number<16>(in, end, err,l, v);
+
+                // DEBT: What about interpreted?
+                default:
+                    return get_signed_number<10>(in, end, err, l, v);
+            }
         }
     };
 
     template <class Streambuf, class Base>
-    struct helper : _helper
+    struct istream_localizer : localizer
     {
-        typedef estd::detail::basic_istream<Streambuf, Base> istream_type;
-        typedef typename istream_type::locale_type locale_type;
+        using base_type = localizer;
+        using istream_type = detail::basic_istream<Streambuf, Base>;
+        using locale_type = typename istream_type::locale_type;
 
         template <unsigned base, class T>
         inline static iter_type get_signed_integer(iter_type i, iter_type end,
             ios_base::iostate& err, const istream_type& str, T& v)
         {
-            return _helper::template get_signed_number<base>(
-                i, end, str, err, str.getloc(),v);
+            return base_type::template get_signed_number<base>(
+                i, end, err, str.getloc(), v);
         }
 
+        // NOTE: underlying iterated::num_get compile-time resolves whether we're signed or
+        // unsigned, so this may be superfluous.
         template <unsigned base, class T>
         inline static iter_type get_unsigned_integer(iter_type i, iter_type end,
             ios_base::iostate& err, const istream_type& str, T& v)
         {
-            return _helper::template get_signed_number<base>(
-                i, end, str, err, str.getloc(), v);
+            return base_type::template get_signed_number<base>(
+                i, end, err, str.getloc(), v);
         }
 
         // For float and double
         template <class T>
         inline static iter_type get_float(iter_type i, iter_type end,
-            ios_base::iostate& err, istream_type& str, T& v)
+            ios_base::iostate& err, const istream_type& str, T& v)
         {
-            return _helper::template get_signed_number<10>(
-                i, end, str, err, str.getloc(), v);
+            return base_type::template get_signed_number<10>(
+                i, end, err, str.getloc(), v);
         }
 
         template <bool boolalpha>
@@ -237,55 +255,20 @@ private:
     // Also consider a cut-down one with only maybe 64 characters instead of 128 or 256, because unless
     // we do 256 we have to do bounds checking anyway
 
-    // NOTE: Keeping this private just so we don't offer too many non standard options
-    template <unsigned base, typename T>
-    inline iter_type get(iter_type in, iter_type end, ios_base::iostate& err, T& v) const
-    {
-        return _helper::template get_signed_number<base>(in, end, err, locale_type(), v);
-    }
-
 
 public:
-    // NOTE: Non standard call.  locale is picked up from use_facet
-    // DEBT: Non standard call.  At this time only supports base 8/10/16.
-    // DEBT: Although convenient, I don't like adding confusion by deviating the spec this way.  In the end, it does
-    // save a few bytes because ios_base doesn't need to exist and basefield can be optimized away.  Then again,
-    // optimizers are so good they probably can optimize away ios_base as well.  May revert back to ios_base& only
-    // flavor
+    // NOTE: Non standard call.  locale is picked up from locale_type (use_facet)
     template <typename T>
-#if __cplusplus >= 201402L
-    [[deprecated("Unsure if we are keeping this API.  Use get(iter_type, iter_type, ios_base, ios_base::iostate, T) instead")]]
-#endif
-    inline iter_type get(iter_type in, iter_type end, const ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
+    inline iter_type get(iter_type in, iter_type end, ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
     {
-        switch(basefield)
-        {
-#if FEATURE_ESTD_OSTREAM_OCTAL
-            case estd::ios_base::oct:
-                return get<8>(in, end, err, v);
-#endif
-
-            case estd::ios_base::hex:
-                return get<16>(in, end, err, v);
-
-            default:
-                return get<10>(in, end, err, v);
-        }
-    }
-
-    // NOTE: Non standard call.  locale is picked up from use_facet
-    // DEBT: Optimize float variety need not even do the above base/get switch
-    template <typename T>
-    iter_type get(iter_type in, iter_type end, const ios_base& str, ios_base::iostate& err, T& v) const
-    {
-        return get(in, end, str.flags() & ios_base::basefield, err, v);
+        return localizer::get(in, end, basefield, err, locale_type{}, v);
     }
 
     template <typename T, class Streambuf, class Base>
     iter_type get(iter_type in, iter_type end,
         estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
     {
-        return helper<Streambuf, Base>::get(in, end, str, err, v,
+        return istream_localizer<Streambuf, Base>::get(in, end, str, err, v,
            is_integral<T>(), is_signed<T>());
     }
 };

@@ -280,7 +280,7 @@ TEST_CASE("locale")
                 // just char_type, iter_type
                 auto n = use_facet<num_get<streambuf_type>>(fmt.getloc());
 
-                n.get(sb, {}, fmt2, state, v);
+                n.get(sb, {}, fmt2.flags(), state, v);
 
                 REQUIRE(state == eofbit);
                 REQUIRE(v == test::uint1);
@@ -350,7 +350,7 @@ TEST_CASE("locale")
             // This call looks identical to standard call, but it deduces locale from
             // use_facet rather than fmt.  I bet if those two are different in std
             // version of things, it's undefined behavior.  So likely a very safe move here
-            n.get(in, in + strlen(in), fmt2, state, v);
+            n.get(in, in + strlen(in), fmt2.flags(), state, v);
         }
     }
     SECTION("num_put")
