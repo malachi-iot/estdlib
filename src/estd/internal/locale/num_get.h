@@ -16,13 +16,14 @@
 
 namespace estd {
 
-template <class TChar, class InputIt = void, class TLocale = void>
+template <class Char, class InputIt = void, class Locale = void>
 class num_get
 {
 public:
-    typedef TChar char_type;
+    using char_type = Char;
+    using locale_type = Locale;
+
     typedef InputIt iter_type;
-    typedef TLocale locale_type;
 
 private:
 
@@ -33,11 +34,11 @@ private:
         // on initial use_facet, then the one that is present in std::ios_base,
         // incoming by way of str.
         // Documentation [1] indicates to favor the latter
-        template <unsigned base, class TIncomingLocale, class T>
+        template <unsigned base, class IncomingLocale, class T>
         static iter_type get_signed_number(iter_type i, iter_type end,
-            ios_base::iostate& err, TIncomingLocale l, T& v)
+            ios_base::iostate& err, IncomingLocale l, T& v)
         {
-            iterated::num_get<base, char_type, TIncomingLocale> n(l);
+            iterated::num_get<base, char_type, IncomingLocale> n(l);
             typedef bool_constant<numeric_limits<T>::is_integer> is_integer;
             // DEBT: We really ought to push these traits in from somewhere else
             typedef estd::iterator_traits<iter_type> iter_traits_type;
@@ -72,23 +73,23 @@ private:
         }
 
 
-        template <unsigned base, class TIncomingLocale, class T>
+        template <unsigned base, class IncomingLocale, class T>
         inline static iter_type get_signed_number(iter_type i, iter_type end,
-            ios_base&, ios_base::iostate& err, TIncomingLocale l, T& v)
+            const ios_base&, ios_base::iostate& err, IncomingLocale l, T& v)
         {
             return get_signed_number<base>(i, end, err,l, v);
         }
     };
 
-    template <class TStreambuf, class TBase>
+    template <class Streambuf, class Base>
     struct helper : _helper
     {
-        typedef estd::detail::basic_istream<TStreambuf, TBase> istream_type;
+        typedef estd::detail::basic_istream<Streambuf, Base> istream_type;
         typedef typename istream_type::locale_type locale_type;
 
         template <unsigned base, class T>
         inline static iter_type get_signed_integer(iter_type i, iter_type end,
-            ios_base::iostate& err, istream_type& str, T& v)
+            ios_base::iostate& err, const istream_type& str, T& v)
         {
             return _helper::template get_signed_number<base>(
                 i, end, str, err, str.getloc(),v);
@@ -96,7 +97,7 @@ private:
 
         template <unsigned base, class T>
         inline static iter_type get_unsigned_integer(iter_type i, iter_type end,
-                                            ios_base::iostate& err, istream_type& str, T& v)
+            ios_base::iostate& err, const istream_type& str, T& v)
         {
             return _helper::template get_signed_number<base>(
                 i, end, str, err, str.getloc(), v);
@@ -113,7 +114,7 @@ private:
 
         template <bool boolalpha>
         static iter_type get_bool(iter_type in, iter_type end,
-            ios_base::iostate& err, istream_type& str, bool& v)
+            ios_base::iostate& err, const istream_type& str, bool& v)
         {
             estd::iterated::bool_get<char_type, locale_type, boolalpha> n(str.getloc());
 
@@ -187,28 +188,18 @@ private:
             T& v,
             estd::true_type, estd::true_type)
         {
-            const ios_base::fmtflags basefield = str.flags() & estd::ios_base::basefield;
+            const ios_base::fmtflags basefield = str.flags() & ios_base::basefield;
 
+            switch(basefield)
+            {
 #if FEATURE_ESTD_OSTREAM_OCTAL
-            if(basefield == estd::ios_base::oct)
-            {
-                return get_signed_integer<8>(in, end, err, str, v);
-            }
-            else
+                case ios_base::oct: return get_signed_integer<8>(in, end, err, str, v);
 #endif
-            if(basefield == estd::ios_base::hex)
-            {
-                // No real negative in hex, so presume caller knows this and passed in a
-                // signed type for their own convenience
-                return get_unsigned_integer<16>(in, end, err, str, v);
-            }
-            else if(basefield == 0)
-            {
-                return get_interpreted(in, end, str, err, v);
-            }
-            else // if(basefield == estd::ios_base::dec)
-            {
-                return get_signed_integer<10>(in, end, err, str, v);
+                case ios_base::dec: return get_signed_integer<10>(in, end, err, str, v);
+                case ios_base::hex: return get_signed_integer<16>(in, end, err, str, v);
+
+                // 0 value
+                default: return get_interpreted(in, end, str, err, v);
             }
         }
 
@@ -287,15 +278,15 @@ public:
     template <typename T>
     iter_type get(iter_type in, iter_type end, const ios_base& str, ios_base::iostate& err, T& v) const
     {
-        return get(in, end, str.flags() & estd::ios_base::basefield, err, v);
+        return get(in, end, str.flags() & ios_base::basefield, err, v);
     }
 
-    template <typename T, class TStreambuf, class TBase>
+    template <typename T, class Streambuf, class Base>
     iter_type get(iter_type in, iter_type end,
-        estd::detail::basic_istream<TStreambuf, TBase>& str, ios_base::iostate& err, T& v) const
+        estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
     {
-        return helper<TStreambuf, TBase>::get(in, end, str, err, v,
-           estd::is_integral<T>(), estd::is_signed<T>());
+        return helper<Streambuf, Base>::get(in, end, str, err, v,
+           is_integral<T>(), is_signed<T>());
     }
 };
 

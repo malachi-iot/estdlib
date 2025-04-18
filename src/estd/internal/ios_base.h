@@ -79,17 +79,25 @@ private:
         iostate iostate_ : 4;
         // Width applies to istream *and* ostream
         unsigned width_ : 4;
-#else
-        fmtflags fmtfl_;
-        iostate iostate_;
-        unsigned width_ : 16;
-#endif
 
         constexpr state() :
             fmtfl_{dec | right},
             iostate_{goodbit},
             width_{0}
         {}
+
+#else
+        unsigned width_ : 16;
+        fmtflags fmtfl_ : 8;
+        iostate iostate_ : 8;
+
+        constexpr state() :
+            width_{0},
+            fmtfl_{dec | right},
+            iostate_{goodbit}
+        {}
+
+#endif
 
     }   state_;
 
