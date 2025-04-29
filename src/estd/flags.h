@@ -60,7 +60,7 @@ public:
 
     constexpr flags operator |(const value_type& v) const
     {
-        return flags{int_type(v) ^ int_type(value_)};
+        return flags{int_type(v) | int_type(value_)};
     }
 
     constexpr flags operator &(const value_type& v) const

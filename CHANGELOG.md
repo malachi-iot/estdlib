@@ -1,3 +1,9 @@
+# v0.X.X - XXXXX25
+
+## Quality Updates & Bug Fixes
+
+* Fixed sneaky or vs xor bug in ESTD_FLAGS
+
 # v0.8.4 - 12APR25
 
 ## Added Features
