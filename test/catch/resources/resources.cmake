@@ -1,0 +1,1 @@
+#set(RESOURCES hello.txt)
