@@ -20,6 +20,7 @@ static void test_span_1()
 
 static void test_span_copy()
 {
+    ESTD_CPP_ATTR_MAYBE_UNUSED
     estd::span<char> span1(span_buf), span2 = span1;
 
     TEST_ASSERT_EQUAL('A', span1[0]);

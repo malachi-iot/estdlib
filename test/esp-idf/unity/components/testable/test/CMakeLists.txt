@@ -14,6 +14,7 @@ get_filename_component(CATCH_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../../../catch 
 
 include(${CATCH_DIR}/resources/resources.cmake)
 
+list(APPEND RESOURCES "hello.txt")
 list(TRANSFORM RESOURCES PREPEND ${CATCH_DIR}/resources/)
 
 set(COMPONENT_EMBED_FILES ${RESOURCES})

@@ -37,6 +37,7 @@ protected:
     T* const data_;
 
     ESTD_CPP_CONSTEXPR_RET span_base(pointer data) : data_(data) {}
+    ESTD_CPP_CONSTEXPR_RET span_base() : data_(nullptr) {}
 
 public:
     template <estd::size_t count>
@@ -93,6 +94,7 @@ struct span<T, detail::dynamic_extent::value> : span_base<T>
 
     ESTD_CPP_CONSTEXPR_RET size_type size() const { return size_; }
 
+    ESTD_CPP_CONSTEXPR_RET span() : size_{0}    {}
     ESTD_CPP_CONSTEXPR_RET span(pointer data, size_type size) : base_type(data),
         size_(size) {}
 
@@ -150,12 +152,21 @@ public:
     // dynamic flavor
     // DEBT: add c++20 'explicit' version
     template <estd::size_t N, estd::size_t ExtentLocal = Extent,
-        class ExtentOnly = typename enable_if<ExtentLocal == detail::dynamic_extent::value>::type>
+        class ExtentOnly = enable_if_t<ExtentLocal == detail::dynamic_extent::value>>
     constexpr span(element_type (&data) [N]) : base_type(data, N) {}
+
+    // DEBT: Really we need to take in template <class In, class End>
+    template <estd::size_t ExtentLocal = Extent,
+        class ExtentOnly = enable_if_t<ExtentLocal == detail::dynamic_extent::value>>
+    constexpr span(T* first, T* last) : base_type(first, last - first) {}
+
+    template <estd::size_t ExtentLocal = Extent,
+        class ExtentOnly = enable_if_t<ExtentLocal == detail::dynamic_extent::value>>
+    constexpr span(T* first, size_type count) : base_type(first, count) {}
 
     // constant size flavor
     template <estd::size_t N, estd::size_t ExtentLocal = Extent,
-        class ExtentOnly = typename enable_if<ExtentLocal == N>::type>
+        class ExtentOnly = enable_if_t<ExtentLocal == N>>
     constexpr span(element_type (&data) [N], bool = true) : base_type(data) {}
 
     template <estd::size_t N, estd::size_t ExtentLocal = Extent,
