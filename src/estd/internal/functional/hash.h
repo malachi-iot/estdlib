@@ -44,25 +44,36 @@ struct fnv_hash_base
 
     // NOTE: This double-casting probably isn't needed, playing it safe since original code did this
 
+    // Crude way to enforce that only 8 bit values come in as 'v'
+    template <class T>
+    static constexpr uint8_t cast8(T v)
+    {
+        static_assert(sizeof(T) == 1, "Only 8 bit values are permitted");
+
+        return static_cast<uint8_t>(v);
+    }
+
     template <class T>
     static constexpr uint32_t cast32(T v)
     {
-        return static_cast<uint32_t>(static_cast<uint8_t>(v));
+        return static_cast<uint32_t>(cast8(v));
     }
 
     template <class T>
     static constexpr uint64_t cast64(T v)
     {
-        return static_cast<uint64_t>(static_cast<uint8_t>(v));
+        return static_cast<uint64_t>(cast8(v));
     }
 };
 
 template <>
 struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
 {
+    static constexpr uint32_t INIT = FNV1A_32_OFFSET_BASIS;
+
     template <class It>
     ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
-        uint32_t hashval = FNV1A_32_OFFSET_BASIS)
+        uint32_t hashval = INIT)
     {
         for(It current = begin; current != end; ++current)
         {
@@ -78,9 +89,11 @@ struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
 template <>
 struct fnv_hash<uint32_t, FNV_1A> : fnv_hash_base
 {
+    static constexpr uint32_t INIT = FNV1A_32_OFFSET_BASIS;
+
     template <class It>
     ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
-        uint32_t hashval = FNV1A_32_OFFSET_BASIS)
+        uint32_t hashval = INIT)
     {
         for(It current = begin; current != end; ++current)
         {
@@ -95,8 +108,10 @@ struct fnv_hash<uint32_t, FNV_1A> : fnv_hash_base
 template <>
 struct fnv_hash<uint64_t, FNV_1> : fnv_hash_base
 {
+    static constexpr uint64_t INIT = FNV1_64_INIT;
+
     template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
     {
         It current = begin;
         for (; current != end; ++current)
@@ -111,8 +126,10 @@ struct fnv_hash<uint64_t, FNV_1> : fnv_hash_base
 template <>
 struct fnv_hash<uint64_t, FNV_1A> : fnv_hash_base
 {
+    static constexpr uint64_t INIT = FNV1A_64_INIT;
+
     template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = FNV1_64_INIT)
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
     {
         It current = begin;
         for (; current != end; ++current)
