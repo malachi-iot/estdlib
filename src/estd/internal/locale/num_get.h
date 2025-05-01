@@ -148,7 +148,7 @@ private:
         // TODO: Need to build this out for 0x, 0, etc. support
         template <class T>
         static iter_type get_interpreted(iter_type in, iter_type end,
-            istream_type& str, ios_base::iostate& err,
+            const istream_type& str, ios_base::iostate& err,
             T& v)
         {
             err |= ios_base::failbit;
@@ -166,7 +166,7 @@ private:
         // 'false_type' = unsigned
         template <class T>
         static iter_type get(iter_type in, iter_type end,
-            istream_type& str, ios_base::iostate& err,
+            const istream_type& str, ios_base::iostate& err,
             T& v,
             estd::true_type, estd::false_type)
         {
@@ -202,7 +202,7 @@ private:
         // 'true_type' = signed
         template <class T>
         static iter_type get(iter_type in, iter_type end,
-            istream_type& str, ios_base::iostate& err,
+            const istream_type& str, ios_base::iostate& err,
             T& v,
             estd::true_type, estd::true_type)
         {
@@ -227,7 +227,7 @@ private:
         // 'true_type' = signed
         template <class T>
         static iter_type get(iter_type in, iter_type end,
-            istream_type& str, ios_base::iostate& err,
+            const istream_type& str, ios_base::iostate& err,
             T& v,
             estd::false_type, estd::true_type)
         {
@@ -239,7 +239,7 @@ private:
         // 'true_type' = is integer
         // 'false_type' = unsigned
         static iter_type get(iter_type in, iter_type end,
-            istream_type& str,ios_base::iostate& err,
+            const istream_type& str,ios_base::iostate& err,
             bool& v,
             estd::true_type, estd::false_type)
         {
@@ -266,7 +266,7 @@ public:
 
     template <typename T, class Streambuf, class Base>
     iter_type get(iter_type in, iter_type end,
-        estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
+        const estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
     {
         return istream_localizer<Streambuf, Base>::get(in, end, str, err, v,
            is_integral<T>(), is_signed<T>());
