@@ -3,6 +3,7 @@
 ## Quality Updates & Bug Fixes
 
 * Fixed sneaky or vs xor bug in ESTD_FLAGS
+* https://github.com/malachi-iot/estdlib/issues/98 fix minor glitch w/ array specialization
 
 # v0.8.4 - 12APR25
 
