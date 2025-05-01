@@ -48,6 +48,18 @@ TEST_CASE("hash")
             v = fnv1a::hash(f1.begin(), f1.end());
 
             REQUIRE(v == 0x325d0001);
+
+            //f1 = fs.open("resources/libembr_static.a");
+
+            //v = fnv1a::hash(f1.begin(), f1.end());
+
+            //REQUIRE(v == 0x5047DCBA);
+
+            f1 = fs.open("resources/blob1");
+
+            v = fnv1a::hash(f1.begin(), f1.end());
+
+            REQUIRE(v == 0x774dd18d);
         }
         SECTION("64-bit")
         {

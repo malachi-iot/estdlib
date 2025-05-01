@@ -41,6 +41,20 @@ struct fnv_hash_base
         return (hashval << 1) + (hashval << 4) + (hashval << 5) +
             (hashval << 7) + (hashval << 8) + (hashval << 40);
     }
+
+    // NOTE: This double-casting probably isn't needed, playing it safe since original code did this
+
+    template <class T>
+    static constexpr uint32_t cast32(T v)
+    {
+        return static_cast<uint32_t>(static_cast<uint8_t>(v));
+    }
+
+    template <class T>
+    static constexpr uint64_t cast64(T v)
+    {
+        return static_cast<uint64_t>(static_cast<uint8_t>(v));
+    }
 };
 
 template <>
@@ -53,7 +67,7 @@ struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
         for(It current = begin; current != end; ++current)
         {
             hashval *= FNV1A_32_PRIME;
-            hashval ^= static_cast<uint32_t>(*current);
+            hashval ^= cast32(*current);
         }
 
         return hashval;
@@ -70,7 +84,7 @@ struct fnv_hash<uint32_t, FNV_1A> : fnv_hash_base
     {
         for(It current = begin; current != end; ++current)
         {
-            hashval ^= static_cast<uint32_t>(*current);
+            hashval ^= cast32(*current);
             hashval *= FNV1A_32_PRIME;
         }
 
@@ -88,7 +102,7 @@ struct fnv_hash<uint64_t, FNV_1> : fnv_hash_base
         for (; current != end; ++current)
         {
             hashval += shift_sum(hashval);
-            hashval ^= static_cast<uint64_t>(*current);
+            hashval ^= cast64(*current);
         }
         return hashval;
     }
@@ -103,7 +117,7 @@ struct fnv_hash<uint64_t, FNV_1A> : fnv_hash_base
         It current = begin;
         for (; current != end; ++current)
         {
-            hashval ^= static_cast<uint64_t>(*current);
+            hashval ^= cast64(*current);
             hashval += shift_sum(hashval);
         }
         return hashval;

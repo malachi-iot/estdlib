@@ -4,6 +4,7 @@
 
 * Fixed sneaky or vs xor bug in ESTD_FLAGS
 * https://github.com/malachi-iot/estdlib/issues/98 fix minor glitch w/ array specialization
+* https://github.com/malachi-iot/estdlib/issues/101 FNV hash bug repaired
 
 # v0.8.4 - 12APR25
 

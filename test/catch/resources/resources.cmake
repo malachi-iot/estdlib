@@ -1,1 +1,1 @@
-#set(RESOURCES hello.txt)
+set(RESOURCES blob1)
