@@ -36,8 +36,7 @@ struct span_base
 protected:
     T* const data_;
 
-    ESTD_CPP_CONSTEXPR_RET span_base(pointer data) : data_(data) {}
-    ESTD_CPP_CONSTEXPR_RET span_base() : data_(nullptr) {}
+    ESTD_CPP_CONSTEXPR_RET span_base(pointer data = NULLPTR) : data_(data) {}
 
 public:
     template <estd::size_t count>
@@ -140,11 +139,7 @@ public:
 
     // DEBT:
     // "This overload participates in overload resolution only if extent == 0 || extent == std::dynamic_extent."
-    ESTD_CPP_CONSTEXPR_RET span() :
-            base_type(NULLPTR, 0) {}
-
-    ESTD_CPP_CONSTEXPR_RET span(pointer data, index_type count) :
-            base_type(data, count) {}
+    span() = default;
 
 #ifdef FEATURE_CPP_DEFAULT_TARGS
     // ExtendLocal needed because SFINAE function selection needs that
@@ -177,6 +172,9 @@ public:
     // Only works with dynamic extend mode
     template <estd::size_t N>
     span(element_type (&data)) : base_type(data, N) {}
+
+    span(pointer data, index_type count) :
+            base_type(data, count) {}
 #endif
 
     // most definitely a 'shallow clone'
