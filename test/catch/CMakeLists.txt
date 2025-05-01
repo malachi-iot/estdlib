@@ -11,6 +11,8 @@ include(../../tools/cmake/setvars.cmake)
 
 CPMAddPackage("gh:catchorg/Catch2@3.8.0")
 
+include(testrc.cmake)
+
 message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
 
 add_subdirectory(${ROOT_DIR} estd)
@@ -105,7 +107,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 
 estd_compile_options()
 
-target_link_libraries(${PROJECT_NAME} estd Catch2::Catch2WithMain)
+target_link_libraries(${PROJECT_NAME} estd testrc Catch2::Catch2WithMain)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
 list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
