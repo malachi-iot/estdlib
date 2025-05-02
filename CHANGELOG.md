@@ -1,5 +1,9 @@
 # v0.X.X - XXXXX25
 
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/100 string += accepts std::string_view
+
 ## Quality Updates & Bug Fixes
 
 * Fixed sneaky or vs xor bug in ESTD_FLAGS

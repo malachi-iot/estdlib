@@ -1,5 +1,9 @@
 #pragma once
 
+#if __cpp_lib_string_view
+#include <string_view>
+#endif
+
 #include "fwd/string.h"
 #include "layer1/string.h"
 #include "layer2/string.h"
@@ -8,6 +12,27 @@
 #include "string/operators.h"
 
 #include "dynamic_array.h"
+
+namespace estd { namespace internal {
+
+#if __cpp_lib_string_view
+// TODO: Consider upgrading this guy to work with estd things too, though may be superfluous
+template <class SV, class Traits>
+struct string_view_like
+{
+    using char_type = typename Traits::char_type;
+
+    static constexpr bool value =
+        is_convertible<
+            const SV&,
+            std::basic_string_view<char_type, Traits>>::value &
+        is_convertible<
+            const SV&,
+            const char_type*>::value == false;
+};
+#endif
+
+}}
 
 namespace estd { namespace detail {
 
@@ -191,9 +216,17 @@ public:
 #endif
     }
 
-    basic_string& operator+=(value_type c)
+    ESTD_CPP_CONSTEXPR(14) basic_string& operator+=(value_type c)
     {
         assert_append(base_type::push_back(c));
+        return *this;
+    }
+
+    // DEBT: A little too permissive, though is OK since append itself is stricter
+    template <class T>
+    inline ESTD_CPP_CONSTEXPR(14) basic_string& operator+=(T rhs)
+    {
+        append(rhs);
         return *this;
     }
 
@@ -227,10 +260,22 @@ public:
     }
 
     // DEBT: Helper can optimize this guy
-    basic_string& append(const_pointer s)
+    constexpr basic_string& append(const_pointer s)
     {
         return append(s, strlen(s));
     }
+
+#if __cpp_lib_string_view
+    template <class SV,
+        class Enabled = enable_if_t<internal::string_view_like<SV, traits_type>::value>>
+    ESTD_CPP_CONSTEXPR(14) basic_string& append(const SV& s)
+    {
+        // A bit of a gap here, we don't gauruntee a std::basic_string_view here,
+        // so the possibility exists that 's' doesn't have data() and size()
+        append(s.data(), s.size());
+        return *this;
+    }
+#endif
 };
 
 // DEBT: move this guy out to string/operators.h

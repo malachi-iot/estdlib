@@ -2,20 +2,13 @@
 
 #include "../feature/std.h"
 #include "../fwd/string.h"
+#include "../type_traits/is_convertible.h"
 
 #if FEATURE_STD_OSTREAM
 #include <ostream>
 #endif
 
 namespace estd { namespace detail {
-
-// DEBT: A little too permissive, though will work
-template <class Impl, class T>
-inline basic_string<Impl>& operator+=(basic_string<Impl>& lhs, T rhs)
-{
-    lhs.append(rhs);
-    return lhs;
-}
 
 // DEBT: Grab CharT right from Impl, this is a little too permissive
 template <typename CharT, ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>

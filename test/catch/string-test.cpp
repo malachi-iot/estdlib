@@ -4,7 +4,9 @@
 #include <estd/string.h>
 #include <estd/vector.h>
 #include <estd/charconv.h>
+
 #include <cstdlib>
+#include <string_view>
 
 #include "mem.h"
 
@@ -399,6 +401,10 @@ TEST_CASE("string tests")
         s1 = s2;
 
         REQUIRE(s1 == "Hello");
+
+        s1 += std::string_view(" to U");
+
+        REQUIRE(s1 == "Hello to U");
     }
     SECTION("indexer: layer1")
     {
