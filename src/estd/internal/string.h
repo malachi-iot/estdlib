@@ -161,6 +161,27 @@ public:
         return npos;
     }
 
+    // NOT READY YET
+    size_type find_last_of(const_pointer s, size_type pos, size_type count)
+    {
+        return npos;
+    }
+
+    size_type find_last_of(const_pointer s, size_type pos = npos)
+    {
+        size_type count = traits_type::length(s);
+        return npos;
+    }
+
+    template <class Impl2>
+    size_type find_last_of(const basic_string<Impl2>& s, size_type pos = npos)
+    {
+        const_pointer data = s.clock();
+        size_type r = find_last_of(data, pos, s.size());
+        s.cunlock();
+        return r;
+    }
+
     // --- writeable operations below
     // Be mindful that detail::basic_string is basic class of string_view too, so these are disabled in that
     // context

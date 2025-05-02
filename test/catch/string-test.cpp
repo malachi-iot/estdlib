@@ -551,6 +551,15 @@ TEST_CASE("string tests")
         REQUIRE(s.starts_with("te"));
         REQUIRE(!s.starts_with("st"));
     }
+    // NOT READY YET
+    SECTION("find_last_of")
+    {
+        // DEBT: May or may not keep layer3::const_string, but if we do, we ought to add
+        // a better ctor for this use case
+        layer3::const_string s(test_str2, sizeof(test_str2) - 1);
+
+        auto r = s.find_last_of("2u");
+    }
     SECTION("conversion")
     {
         SECTION("stol")

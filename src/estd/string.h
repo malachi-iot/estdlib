@@ -46,7 +46,7 @@ class const_string : public basic_string<const char, false>
     typedef base_t::size_type size_type;
 
 public:
-    const_string(const char* s, size_type len) :
+    constexpr const_string(const char* s, size_type len) :
         base_t(s, len, true) {}
 
 

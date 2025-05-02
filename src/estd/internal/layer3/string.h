@@ -38,7 +38,7 @@ protected:
 
     // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial
     // buffer size
-    basic_string(CharT* buffer, size_type buffer_size, bool) :
+    constexpr basic_string(CharT* buffer, size_type buffer_size, bool) :
         base_t(init_t(buffer, buffer_size))
     {
     }
