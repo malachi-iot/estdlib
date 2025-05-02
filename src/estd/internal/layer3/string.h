@@ -12,8 +12,8 @@ namespace estd { namespace layer3 {
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
          class Policy = conditional_t<null_terminated,
-                internal::null_terminated_string_policy<Traits, int16_t, estd::is_const<CharT>::value>,
-                internal::sized_string_policy<Traits, int16_t, estd::is_const<CharT>::value> >>
+                internal::null_terminated_string_policy<Traits, uint16_t, estd::is_const<CharT>::value>,
+                internal::sized_string_policy<Traits, uint16_t, estd::is_const<CharT>::value> >>
 class basic_string : public estd::internal::basic_string<
                 estd::layer3::allocator<CharT, typename Policy::size_type>,
                 Policy>
@@ -39,7 +39,7 @@ protected:
     // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial
     // buffer size
     constexpr basic_string(CharT* buffer, size_type buffer_size, bool) :
-        base_t(init_t(buffer, buffer_size))
+        base_type(init_t(buffer, buffer_size))
     {
     }
 
@@ -53,10 +53,10 @@ public:
     } */
 
     template <size_type N>
-    basic_string(CharT (&buffer) [N], size_type initial_size = -1) :
+    basic_string(CharT (&buffer) [N], size_type initial_size = base_type::npos) :
         base_t(init_t(buffer, N))
     {
-        if(initial_size == -1)
+        if(initial_size == base_type::npos)
             initial_size = strlen(buffer);
 
         // TODO: Enable for a string-mode version

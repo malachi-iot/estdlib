@@ -51,7 +51,7 @@ struct buffer_policy :
     policy_base,    // EXPERIMENTAL, not used directly
     experimental::is_const_tag_exp_base<constant_>
 {
-    typedef Size size_type;
+    using size_type = Size;
 
     static ESTD_CPP_CONSTEVAL bool is_constant() { return constant_; }
 };

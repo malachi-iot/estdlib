@@ -43,9 +43,10 @@ namespace layer3 {
 class const_string : public basic_string<const char, false>
 {
     typedef basic_string<const char, false> base_t;
-    typedef base_t::size_type size_type;
 
 public:
+    using typename base_t::size_type;
+
     constexpr const_string(const char* s, size_type len) :
         base_t(s, len, true) {}
 

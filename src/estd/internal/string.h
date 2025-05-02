@@ -170,12 +170,17 @@ public:
     /// @return
     size_type find_last_of(const_pointer s, size_type pos, size_type count) const
     {
+        if(pos == npos) pos = base_type::size();
+
         // if our length is less than requested string, we'll never match anyway
         // so abort
         if(pos < count) return npos;
-        const_pointer data = base_type::clock();
 
-        for(; pos >= 0; --pos)
+        pos -= count;
+
+        const_pointer data = base_type::clock() + pos;
+
+        for(; pos != npos; --pos, --data)
         {
             if(memcmp(s, data, count) == 0) return pos;
         }
@@ -188,6 +193,7 @@ public:
     size_type find_last_of(const_pointer s, size_type pos = npos) const
     {
         size_type count = traits_type::length(s);
+
         return find_last_of(s, pos, count);
     }
 

@@ -558,10 +558,9 @@ TEST_CASE("string tests")
     {
         // DEBT: May or may not keep layer3::const_string, but if we do, we ought to add
         // a better ctor for this use case
-        layer3::const_string s(test_str2, sizeof(test_str2) - 1);
+        layer3::const_string s(test_str2, strlen(test_str2));
 
-        // Hmm, somehow this guy is becoming signed
-        //static_assert(numeric_limits<layer3::const_string::size_type>::is_signed == false, "");
+        static_assert(numeric_limits<layer3::const_string::size_type>::is_signed == false, "");
 
         unsigned r = s.find_last_of("2u");
 
