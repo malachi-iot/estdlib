@@ -560,7 +560,12 @@ TEST_CASE("string tests")
         // a better ctor for this use case
         layer3::const_string s(test_str2, sizeof(test_str2) - 1);
 
-        int r = s.find_last_of("2u");
+        // Hmm, somehow this guy is becoming signed
+        //static_assert(numeric_limits<layer3::const_string::size_type>::is_signed == false, "");
+
+        unsigned r = s.find_last_of("2u");
+
+        //REQUIRE(r == 2);
     }
     SECTION("conversion")
     {

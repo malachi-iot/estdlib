@@ -55,12 +55,14 @@ namespace internal {
 template <class Impl>
 class dynamic_array : public allocated_array<Impl>
 {
-    typedef allocated_array<Impl> base_type;
+    using base_type = allocated_array<Impl>;
 
 protected:
     typedef dynamic_array_helper<Impl> helper;
 
 public:
+    using typename base_type::size_type;
+
     typedef typename base_type::allocator_type allocator_type;
     typedef typename base_type::allocator_traits allocator_traits;
     typedef typename base_type::impl_type impl_type;
@@ -74,7 +76,6 @@ public:
     typedef const value_type* const_pointer;
     //typedef typename allocator_traits::const_pointer const_pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
-    typedef typename base_type::size_type size_type;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
     typedef value_type& reference;

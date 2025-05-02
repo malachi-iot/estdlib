@@ -200,17 +200,17 @@ public:
 // len can == 0 in which case we're in unbounded mode
 // NOTE: uninitialized_array is handy to use for TBuffer to avoid value-init of all the elements
 template <
-        class T, size_t len, class TBuffer = T[len],
-        class TSize = typename internal::deduce_fixed_size_t<len>::size_type>
+        class T, size_t len, class Buffer = T[len],
+        class Size = typename internal::deduce_fixed_size_t<len>::size_type>
 struct single_fixedbuf_allocator : public
-        single_allocator_base<T, TBuffer, TSize>
+        single_allocator_base<T, Buffer, Size>
 {
-    typedef single_allocator_base<T, TBuffer, TSize> base_type;
+    using base_type = single_allocator_base<T, Buffer, Size>;
+    using typename base_type::size_type;
 
     typedef typename base_type::value_type value_type;
     typedef bool handle_type; // really I want it an empty struct, though now code expects a bool
     typedef handle_type handle_with_size;
-    typedef typename base_type::size_type size_type;
 
 public:
     // experimental tag reflecting that this memory block will never move
@@ -229,7 +229,7 @@ public:
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_allocator(const TBuffer& buffer) :
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_allocator(const Buffer& buffer) :
         base_type(buffer) {}
 
 
@@ -402,10 +402,10 @@ namespace layer3 {
 // malleable is a special edge case flag which indicates that initial buffer* can
 // move and size can be adjusted.  Generally speaking you don't want this, but
 // special cases like basic_string_view benefit from this adjustability
-template <class T, class TSize = std::size_t, bool malleable = false>
-struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize>
+template <class T, class Size = std::size_t, bool malleable = false>
+struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size>
 {
-    typedef estd::internal::single_fixedbuf_runtimesize_allocator<T, TSize> base_t;
+    typedef estd::internal::single_fixedbuf_runtimesize_allocator<T, Size> base_t;
     typedef base_t base_type;
     typedef typename base_t::handle_type handle_type;
     typedef typename base_t::handle_with_offset handle_with_offset;
@@ -418,7 +418,7 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, TSiz
     }
 #endif
 
-    template <TSize N>
+    template <Size N>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT allocator(T (&array) [N]) : base_type(array, N)
     {
 

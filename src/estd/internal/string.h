@@ -44,8 +44,9 @@ protected:
     using typename base_type::helper;
 
 public:
+    using typename base_type::size_type;
+
     typedef typename base_type::allocator_type  allocator_type;
-    typedef typename base_type::size_type size_type;
     typedef typename base_type::impl_type::policy_type policy_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename policy_type::char_traits traits_type;
@@ -176,7 +177,7 @@ public:
 
         for(; pos >= 0; --pos)
         {
-            //if(memcmp())
+            if(memcmp(s, data, count) == 0) return pos;
         }
 
         base_type::cunlock();
