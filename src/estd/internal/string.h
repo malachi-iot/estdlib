@@ -162,19 +162,36 @@ public:
     }
 
     // NOT READY YET
-    size_type find_last_of(const_pointer s, size_type pos, size_type count)
+    ///
+    /// @param s incoming string to find
+    /// @param pos last position in 'this' string to evaluate from
+    /// @param count length of incoming 's'
+    /// @return
+    size_type find_last_of(const_pointer s, size_type pos, size_type count) const
     {
+        // if our length is less than requested string, we'll never match anyway
+        // so abort
+        if(pos < count) return npos;
+        const_pointer data = base_type::clock();
+
+        for(; pos >= 0; --pos)
+        {
+            //if(memcmp())
+        }
+
+        base_type::cunlock();
+
         return npos;
     }
 
-    size_type find_last_of(const_pointer s, size_type pos = npos)
+    size_type find_last_of(const_pointer s, size_type pos = npos) const
     {
         size_type count = traits_type::length(s);
-        return npos;
+        return find_last_of(s, pos, count);
     }
 
     template <class Impl2>
-    size_type find_last_of(const basic_string<Impl2>& s, size_type pos = npos)
+    size_type find_last_of(const basic_string<Impl2>& s, size_type pos = npos) const
     {
         const_pointer data = s.clock();
         size_type r = find_last_of(data, pos, s.size());

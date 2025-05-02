@@ -402,9 +402,11 @@ TEST_CASE("string tests")
 
         REQUIRE(s1 == "Hello");
 
+#if __cpp_lib_string_view
         s1 += std::string_view(" to U");
 
         REQUIRE(s1 == "Hello to U");
+#endif
     }
     SECTION("indexer: layer1")
     {
@@ -558,7 +560,7 @@ TEST_CASE("string tests")
         // a better ctor for this use case
         layer3::const_string s(test_str2, sizeof(test_str2) - 1);
 
-        auto r = s.find_last_of("2u");
+        int r = s.find_last_of("2u");
     }
     SECTION("conversion")
     {
