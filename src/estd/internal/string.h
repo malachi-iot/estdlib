@@ -162,7 +162,34 @@ public:
         return npos;
     }
 
-    // NOT READY YET
+    size_type find_first_of(const_pointer s, size_type pos, size_type count) const
+    {
+        if (pos == npos)    pos = base_type::size();
+
+        // if our length is less than requested string, we'll never match anyway
+        // so abort
+        if(pos < count) return npos;
+
+        pos -= count;
+
+        const_pointer data = base_type::clock();
+        const_pointer end = data + pos + 1;
+
+        for(; data != end; ++data)
+        {
+            if(memcmp(s, data, count) == 0) return pos;
+        }
+
+        return npos;
+    }
+
+    size_type find_first_of(const_pointer s, size_type pos = npos) const
+    {
+        size_type count = traits_type::length(s);
+
+        return find_first_of(s, pos, count);
+    }
+
     ///
     /// @param s incoming string to find
     /// @param pos last position in 'this' string to evaluate from

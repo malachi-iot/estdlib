@@ -553,7 +553,14 @@ TEST_CASE("string tests")
         REQUIRE(s.starts_with("te"));
         REQUIRE(!s.starts_with("st"));
     }
-    // NOT READY YET
+    SECTION("find_first_of")
+    {
+        layer3::const_string s("Hello World");
+
+        unsigned r = s.find_first_of("World");
+
+        REQUIRE(r == 6);
+    }
     SECTION("find_last_of")
     {
         // DEBT: May or may not keep layer3::const_string, but if we do, we ought to add
@@ -564,7 +571,7 @@ TEST_CASE("string tests")
 
         unsigned r = s.find_last_of("2u");
 
-        //REQUIRE(r == 2);
+        REQUIRE(r == 2);
     }
     SECTION("conversion")
     {
