@@ -342,6 +342,25 @@ public:
         return helper::copy_to(*this, dest, count, pos);
     }
 
+    // UNUSED at this time.  Slightly annoyed at the possibility of 'owner' occupying
+    // extra stack space if optimizer doesn't flush it out
+    struct lock_guard
+    {
+        const_pointer const data;
+        const allocated_array* const owner;
+
+        constexpr explicit lock_guard(const allocated_array* owner) :
+            data{owner->clock()},
+            owner{owner}
+        {
+        }
+
+        ~lock_guard()
+        {
+            owner->cunlock();
+        }
+    };
+
     ///
     /// @param s incoming sequence to find
     /// @param pos first position in 'this' to evaluate from
@@ -381,7 +400,7 @@ public:
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
         const size_type sz = size();
-        if(pos > sz) pos = sz;
+        if(pos >= sz) pos = sz - 1;
 
         unsigned remainder = sz - pos;
 
@@ -419,22 +438,33 @@ public:
         return npos;
     }
 
-    // NOT READY YET
+    ESTD_CPP_CONSTEXPR(14) size_type find_first_of(
+        const_pointer s, size_type pos, size_type count, size_type npos) const
+    {
+        const_pointer data = clock();
+        const_pointer end = data + size();
+
+        const_pointer found = estd::find_first_of(data + pos, end, s, s + count);
+
+        cunlock();
+
+        return found == end ? npos : (found - data);
+    }
+
     ESTD_CPP_CONSTEXPR(14) size_type find_last_of(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
+        if(pos == npos) pos = size() - 1;   // DEBT: I think this line should go back up to string
 
         const_pointer data = clock();
         const_pointer rend = data - 1;
 
-        data += pos;
-
-        estd::internal::find_last_of(rend, data, s, s + count);
+        const_pointer found = estd::internal::find_last_of(
+            rend, data + pos, s, s + count);
 
         cunlock();
 
-        return npos;
+        return found == rend ? npos : (found - data);
     }
 
     template <class Impl2>

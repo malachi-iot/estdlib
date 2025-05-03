@@ -609,14 +609,40 @@ TEST_CASE("string tests")
     }
     SECTION("find_first_of")
     {
+        layer3::const_string s("Hello World");
+        auto npos = layer3::const_string::npos;
+        unsigned r;
 
+        r = s.find_first_of("lo");
+
+        REQUIRE(r == 2);
+
+        r = s.find_first_of("lo", 5, 2);
+
+        REQUIRE(r == 7);
+
+        r = s.find_first_of("lo", s.size() - 1);
+
+        REQUIRE(r == npos);
     }
     SECTION("find_last_of")
     {
         layer3::const_string s("Hello World");
+        layer3::const_string s2("lo");
         auto npos = layer3::const_string::npos;
+        unsigned r;
 
-        s.find_last_of("lo", s.size() - 1, 2, npos);
+        r = s.find_last_of("lo", 6, 2);
+
+        REQUIRE(r == 4);
+
+        r = s.find_last_of("lo");
+
+        REQUIRE(r == 9);
+
+        r = s.find_last_of(s2);
+
+        REQUIRE(r == 9);
     }
     SECTION("conversion")
     {

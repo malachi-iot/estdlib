@@ -45,17 +45,15 @@ protected:
 
 public:
     using typename base_type::size_type;
+    using typename base_type::value_type;
+    using typename base_type::pointer;
+    using typename base_type::const_pointer;
 
-    typedef typename base_type::allocator_type  allocator_type;
+    using typename base_type::allocator_type;
     typedef typename base_type::impl_type::policy_type policy_type;
-    typedef typename allocator_type::value_type value_type;
     typedef typename policy_type::char_traits traits_type;
-    typedef typename allocator_type::pointer pointer;
-    // DEBT: Get this from someone's traits
-    //typedef typename allocator_type::const_pointer const_pointer;
-    typedef const value_type* const_pointer;
 
-    static constexpr size_type npos = (size_type) -1;
+    static constexpr auto npos = (size_type) -1;
 
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
@@ -204,6 +202,50 @@ public:
     {
         const_pointer data = s.clock();
         size_type r = rfind(data, pos, s.size());
+        s.cunlock();
+        return r;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type find_first_of(
+        const_pointer s, size_type pos, size_type count) const
+    {
+        return base_type::find_first_of(s, pos, count, npos);
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type find_first_of(
+        const_pointer s, size_type pos = 0) const
+    {
+        return find_first_of(s, pos, traits_type::length(s));
+    }
+
+    template <class Impl2>
+    ESTD_CPP_CONSTEXPR(14) size_type find_first_of(const basic_string<Impl2>& s,
+        size_type pos = 0) const
+    {
+        const_pointer data = s.clock();
+        size_type r = find_first_of(data, pos, s.size());
+        s.cunlock();
+        return r;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type find_last_of(
+        const_pointer s, size_type pos, size_type count) const
+    {
+        return base_type::find_last_of(s, pos, count, npos);
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type find_last_of(
+        const_pointer s, size_type pos = npos) const
+    {
+        return find_last_of(s, pos, traits_type::length(s));
+    }
+
+    template <class Impl2>
+    ESTD_CPP_CONSTEXPR(14) size_type find_last_of(const basic_string<Impl2>& s,
+        size_type pos = npos) const
+    {
+        const_pointer data = s.clock();
+        size_type r = find_last_of(data, pos, s.size());
         s.cunlock();
         return r;
     }
