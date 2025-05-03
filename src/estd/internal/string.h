@@ -162,7 +162,7 @@ public:
         return npos;
     }
 
-    size_type find_first_of(const_pointer s, size_type pos, size_type count) const
+    ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos, size_type count) const
     {
         if (pos == npos)    pos = base_type::size();
 
@@ -180,14 +180,26 @@ public:
             if(memcmp(s, data, count) == 0) return pos;
         }
 
+        base_type::cunlock();
+
         return npos;
     }
 
-    size_type find_first_of(const_pointer s, size_type pos = npos) const
+    ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos = npos) const
     {
         size_type count = traits_type::length(s);
 
-        return find_first_of(s, pos, count);
+        return find(s, pos, count);
+    }
+
+    template <class Impl2>
+    ESTD_CPP_CONSTEXPR(14) size_type find(
+        const basic_string<Impl2>& s, size_type pos = npos) const
+    {
+        const_pointer data = s.clock();
+        size_type r = find(data, pos, s.size());
+        s.cunlock();
+        return r;
     }
 
     ///
@@ -195,7 +207,7 @@ public:
     /// @param pos last position in 'this' string to evaluate from
     /// @param count length of incoming 's'
     /// @return
-    size_type find_last_of(const_pointer s, size_type pos, size_type count) const
+    ESTD_CPP_CONSTEXPR(14) size_type rfind(const_pointer s, size_type pos, size_type count) const
     {
         if(pos == npos) pos = base_type::size();
 
@@ -217,18 +229,19 @@ public:
         return npos;
     }
 
-    size_type find_last_of(const_pointer s, size_type pos = npos) const
+    ESTD_CPP_CONSTEXPR(14) size_type rfind(const_pointer s, size_type pos = npos) const
     {
         size_type count = traits_type::length(s);
 
-        return find_last_of(s, pos, count);
+        return rfind(s, pos, count);
     }
 
     template <class Impl2>
-    size_type find_last_of(const basic_string<Impl2>& s, size_type pos = npos) const
+    ESTD_CPP_CONSTEXPR(14) size_type rfind(
+        const basic_string<Impl2>& s, size_type pos = npos) const
     {
         const_pointer data = s.clock();
-        size_type r = find_last_of(data, pos, s.size());
+        size_type r = rfind(data, pos, s.size());
         s.cunlock();
         return r;
     }

@@ -210,6 +210,29 @@ void reverse(BidirIt first, BidirIt last)
         iter_swap(first++, last);
 }
 
+
+// Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/find_first_of
+template <class InputIt, class ForwardIt, class BinaryPred>
+ESTD_CPP_CONSTEXPR(14) InputIt find_first_of(InputIt first, InputIt last,
+    ForwardIt s_first, ForwardIt s_last,
+    BinaryPred&& p)
+{
+    for (; first != last; ++first)
+        for (ForwardIt it = s_first; it != s_last; ++it)
+            if (p(*first, *it))
+                return first;
+    return last;
+}
+
+
+template <class InputIt, class ForwardIt>
+ESTD_CPP_CONSTEXPR(14) InputIt find_first_of(InputIt first, InputIt last,
+    ForwardIt s_first, ForwardIt s_last)
+{
+    return find_first_of(first, last, s_first, s_last,
+        [](decltype(*first) lhs, decltype(*s_first) rhs) { return lhs == rhs; });
+}
+
 }
 
 #include "internal/macro/pop.h"

@@ -6,6 +6,8 @@
 #include <estd/algorithm.h>
 #include <estd/vector.h>
 
+#include "test-data.h"
+
 struct test_class_1
 {
     estd::array<int, 10> values;
@@ -222,5 +224,15 @@ TEST_CASE("algorithm tests")
                 REQUIRE(heap.size() == 3);
             }
         }
+    }
+    SECTION("find_first_of")
+    {
+        int finding[] { 3, 5 };
+        const uint8_t* found = find_first_of(
+            test::octet_data, test::octet_data + sizeof(test::octet_data),
+            finding, finding + 2);
+
+        REQUIRE(found == &test::octet_data[2]);
+        REQUIRE(*found == 3);
     }
 }

@@ -48,15 +48,14 @@ public:
     //typedef typename allocator_traits::allocator_type allocator_type;
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
-    typedef typename allocator_traits::pointer pointer;
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
 
     using size_type = typename allocator_traits::size_type;
+    using value_type = typename allocator_traits::value_type;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
-
-    typedef typename allocator_type::value_type value_type;
-    typedef const value_type* const_pointer;
 
     typedef typename allocator_traits::allocator_valref allocator_valref;
 
@@ -80,12 +79,12 @@ public:
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
-    ESTD_CPP_CONSTEXPR(17) value_type* lock(size_type pos = 0, size_type count = 0)
+    constexpr pointer lock(size_type pos = 0, size_type count = 0)
     {
         return &m_impl.lock(pos, count);
     }
 
-    ESTD_CPP_CONSTEXPR(17) const value_type* clock(size_type pos = 0, size_type count = 0) const
+    constexpr const_pointer clock(size_type pos = 0, size_type count = 0) const
     {
         return &m_impl.clock(pos, count);
     }
