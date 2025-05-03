@@ -386,7 +386,7 @@ public:
         unsigned remainder = sz - pos;
 
         // if remaining characters including & after pos wouldn't fit 's'
-        // i.e. "Hello" finding "llo" at pos 4 ("lo" = remainder 1, count 3)
+        // i.e. "Hello" finding "llo" at pos 4 ("o" = remainder 1, count 3)
         if(remainder < count)
         {
             // Make sure there's enough room to move backwards for a useful
@@ -396,7 +396,7 @@ public:
 
             // skip over compares that can't succeed where pos is too close
             // to end
-            // i.e. "Hello" finding "llo" at pos 4 ("lo") moves back 1
+            // i.e. "Hello" finding "llo" at pos 4 ("o") moves back 2
             pos -= count - remainder;
         }
 
@@ -419,8 +419,9 @@ public:
         return npos;
     }
 
+    // NOT READY YET
     ESTD_CPP_CONSTEXPR(14) size_type find_last_of(
-        const_pointer s, size_type pos, size_type count, size_type npos)
+        const_pointer s, size_type pos, size_type count, size_type npos) const
     {
         if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
 
@@ -428,10 +429,16 @@ public:
         const_pointer rend = data - 1;
 
         data += pos;
+
+        estd::internal::find_last_of(rend, data, s, s + count);
+
+        cunlock();
+
+        return npos;
     }
 
-    template <class TForeignImpl>
-    bool operator ==(const allocated_array<TForeignImpl>& compare_to) const
+    template <class Impl2>
+    ESTD_CPP_CONSTEXPR(14) bool operator ==(const allocated_array<Impl2>& compare_to) const
     {
         size_type raw_size = size();
         size_type s_size = compare_to.size();

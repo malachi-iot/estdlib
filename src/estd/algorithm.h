@@ -211,6 +211,52 @@ void reverse(BidirIt first, BidirIt last)
 }
 
 
+namespace internal {
+
+struct equals_pred
+{
+    template <class L, class R>
+    constexpr bool operator()(L lhs, R rhs) const
+    {
+        return lhs == rhs;
+    }
+};
+
+// c++ spec omits this guy and it feels like that's very much on purpose.
+// tucking him away in internal for that reason
+///
+/// @tparam InputIt
+/// @tparam ForwardIt
+/// @tparam BinaryPred
+/// @param first equivalent to 'rend'
+/// @param last
+/// @param s_first
+/// @param s_last
+/// @param p
+/// @return
+template <class InputIt, class ForwardIt, class BinaryPred>
+ESTD_CPP_CONSTEXPR(14) InputIt find_last_of(InputIt first, InputIt last,
+    ForwardIt s_first, ForwardIt s_last,
+    BinaryPred&& p)
+{
+    for (; last != first; --last)
+        for (ForwardIt it = s_first; it != s_last; ++it)
+            if (p(*last, *it))
+                return last;
+    return first;
+}
+
+template <class InputIt, class ForwardIt>
+ESTD_CPP_CONSTEXPR(14) InputIt find_last_of(InputIt first, InputIt last,
+    ForwardIt s_first, ForwardIt s_last)
+{
+    return find_last_of(first, last, s_first, s_last, equals_pred{});
+}
+
+}
+
+
+
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/find_first_of
 template <class InputIt, class ForwardIt, class BinaryPred>
 ESTD_CPP_CONSTEXPR(14) InputIt find_first_of(InputIt first, InputIt last,

@@ -607,6 +607,17 @@ TEST_CASE("string tests")
 
         REQUIRE(r == 4);
     }
+    SECTION("find_first_of")
+    {
+
+    }
+    SECTION("find_last_of")
+    {
+        layer3::const_string s("Hello World");
+        auto npos = layer3::const_string::npos;
+
+        s.find_last_of("lo", s.size() - 1, 2, npos);
+    }
     SECTION("conversion")
     {
         SECTION("stol")
