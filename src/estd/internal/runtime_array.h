@@ -350,17 +350,10 @@ public:
     ESTD_CPP_CONSTEXPR(14) size_type find(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        // FIX: pos treatment is all wrong, we have to START searching from pos
-        if (pos == npos)    pos = size();   // DEBT: I think this line should go back up to string
-
-        // if our length is less than requested string, we'll never match anyway
-        // so abort
-        if(pos < count) return npos;
-
-        pos -= count;
-
         const_pointer data = clock();
-        const_pointer end = data + pos + 1;
+        const_pointer end = data + size();
+
+        data += pos;
 
         for(const_pointer i = data; i != end; ++i)
         {
@@ -385,7 +378,6 @@ public:
     ESTD_CPP_CONSTEXPR(14) size_type rfind(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        // FIX: "The search begins at pos" always
         if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
 
         // if our length is less than requested string, we'll never match anyway

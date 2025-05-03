@@ -168,7 +168,7 @@ public:
         return base_type::find(s, pos, count, npos);
     }
 
-    ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos = npos) const
+    ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos = 0) const
     {
         size_type count = traits_type::length(s);
 
@@ -177,7 +177,7 @@ public:
 
     template <class Impl2>
     ESTD_CPP_CONSTEXPR(14) size_type find(
-        const basic_string<Impl2>& s, size_type pos = npos) const
+        const basic_string<Impl2>& s, size_type pos = 0) const
     {
         const_pointer data = s.clock();
         size_type r = find(data, pos, s.size());
