@@ -342,6 +342,65 @@ public:
         return helper::copy_to(*this, dest, count, pos);
     }
 
+    ///
+    /// @param s incoming sequence to find
+    /// @param pos first position in 'this' to evaluate from
+    /// @param count length of incoming 's'
+    /// @return
+    ESTD_CPP_CONSTEXPR(14) size_type find(
+        const_pointer s, size_type pos, size_type count, size_type npos) const
+    {
+        if (pos == npos)    pos = size();
+
+        // if our length is less than requested string, we'll never match anyway
+        // so abort
+        if(pos < count) return npos;
+
+        pos -= count;
+
+        const_pointer data = clock();
+        const_pointer end = data + pos + 1;
+
+        for(; data != end; ++data)
+        {
+            if(memcmp(s, data, count) == 0) return pos;
+        }
+
+        cunlock();
+
+        return npos;
+    }
+
+
+    ///
+    /// @param s incoming sequence to find
+    /// @param pos last position in 'this' to evaluate from
+    /// @param count length of incoming 's'
+    /// @return
+    ESTD_CPP_CONSTEXPR(14) size_type rfind(
+        const_pointer s, size_type pos, size_type count, size_type npos) const
+    {
+        if(pos == npos) pos = size();
+
+        // if our length is less than requested string, we'll never match anyway
+        // so abort
+        if(pos < count) return npos;
+
+        pos -= count;
+
+        const_pointer data = clock() + pos;
+
+        for(; pos != npos; --pos, --data)
+        {
+            if(memcmp(s, data, count) == 0) return pos;
+        }
+
+        cunlock();
+
+        return npos;
+    }
+
+
     template <class TForeignImpl>
     bool operator ==(const allocated_array<TForeignImpl>& compare_to) const
     {

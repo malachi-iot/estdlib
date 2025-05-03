@@ -162,27 +162,10 @@ public:
         return npos;
     }
 
+
     ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos, size_type count) const
     {
-        if (pos == npos)    pos = base_type::size();
-
-        // if our length is less than requested string, we'll never match anyway
-        // so abort
-        if(pos < count) return npos;
-
-        pos -= count;
-
-        const_pointer data = base_type::clock();
-        const_pointer end = data + pos + 1;
-
-        for(; data != end; ++data)
-        {
-            if(memcmp(s, data, count) == 0) return pos;
-        }
-
-        base_type::cunlock();
-
-        return npos;
+        return base_type::find(s, pos, count, npos);
     }
 
     ESTD_CPP_CONSTEXPR(14) size_type find(const_pointer s, size_type pos = npos) const
@@ -202,31 +185,10 @@ public:
         return r;
     }
 
-    ///
-    /// @param s incoming string to find
-    /// @param pos last position in 'this' string to evaluate from
-    /// @param count length of incoming 's'
-    /// @return
-    ESTD_CPP_CONSTEXPR(14) size_type rfind(const_pointer s, size_type pos, size_type count) const
+    ESTD_CPP_CONSTEXPR(14) size_type rfind(
+        const_pointer s, size_type pos, size_type count) const
     {
-        if(pos == npos) pos = base_type::size();
-
-        // if our length is less than requested string, we'll never match anyway
-        // so abort
-        if(pos < count) return npos;
-
-        pos -= count;
-
-        const_pointer data = base_type::clock() + pos;
-
-        for(; pos != npos; --pos, --data)
-        {
-            if(memcmp(s, data, count) == 0) return pos;
-        }
-
-        base_type::cunlock();
-
-        return npos;
+        return base_type::rfind(s, pos, count, npos);
     }
 
     ESTD_CPP_CONSTEXPR(14) size_type rfind(const_pointer s, size_type pos = npos) const
