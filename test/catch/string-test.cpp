@@ -568,12 +568,18 @@ TEST_CASE("string tests")
         r = s.find(layer3::const_string("!"));
 
         REQUIRE(r == layer3::const_string::npos);
+
+        r = s.find("lo", 5);
+
+        REQUIRE(r == layer3::const_string::npos);
     }
     SECTION("rfind")
     {
         // DEBT: May or may not keep layer3::const_string, but if we do, we ought to add
         // a better ctor for this use case
         layer3::const_string s(test_str2, strlen(test_str2));
+        layer3::const_string s2("Hello World");
+        auto npos = layer3::const_string::npos;
 
         static_assert(numeric_limits<layer3::const_string::size_type>::is_signed == false, "");
 
@@ -584,6 +590,22 @@ TEST_CASE("string tests")
         r = s.rfind(layer3::const_string("u"));
 
         REQUIRE(r == 3);
+
+        r = s.rfind("2u", 1);
+
+        REQUIRE(r == npos);
+
+        r = s2.rfind("o");
+
+        REQUIRE(r == 7);
+
+        r = s2.rfind("o", 7);
+
+        REQUIRE(r == 7);
+
+        r = s2.rfind("o", 6);
+
+        REQUIRE(r == 4);
     }
     SECTION("conversion")
     {

@@ -346,6 +346,7 @@ public:
     /// @param s incoming sequence to find
     /// @param pos first position in 'this' to evaluate from
     /// @param count length of incoming 's'
+    /// @param npos value representing 'not found'
     /// @return
     ESTD_CPP_CONSTEXPR(14) size_type find(
         const_pointer s, size_type pos, size_type count, size_type npos) const
@@ -374,17 +375,30 @@ public:
     /// @param s incoming sequence to find
     /// @param pos last position in 'this' to evaluate from
     /// @param count length of incoming 's'
+    /// @param npos value representing 'not found'
     /// @return
     ESTD_CPP_CONSTEXPR(14) size_type rfind(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
+        const size_type sz = size();
+        if(pos > sz) pos = sz;
 
-        // if our length is less than requested string, we'll never match anyway
-        // so abort
-        if(pos < count) return npos;
+        unsigned remainder = sz - pos;
 
-        pos -= count;
+        // if remaining characters including & after pos wouldn't fit 's'
+        // i.e. "Hello" finding "llo" at pos 4 ("lo" = remainder 1, count 3)
+        if(remainder < count)
+        {
+            // Make sure there's enough room to move backwards for a useful
+            // comparison
+            // i.e. "Hello" finding "llo" at pos 4 (can we move back 2 to pos=2 reach a new remainder of 3?)
+            if(pos < count - remainder) return npos;
+
+            // skip over compares that can't succeed where pos is too close
+            // to end
+            // i.e. "Hello" finding "llo" at pos 4 ("lo") moves back 1
+            pos -= count - remainder;
+        }
 
         const_pointer data = clock();
         const_pointer rend = data - 1;
