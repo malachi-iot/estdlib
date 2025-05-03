@@ -1,8 +1,8 @@
-# v0.X.X - XXXXX25
+# v0.8.5 - 03MAY25
 
 ## Added Features
 
-* https://github.com/malachi-iot/estdlib/issues/100 string += accepts std::string_view
+* https://github.com/malachi-iot/estdlib/issues/100 string += accepts std::string_view, various find methods are now implemented
 
 ## Quality Updates & Bug Fixes
 

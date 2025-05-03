@@ -88,7 +88,7 @@ static void test_limits_float()
     using type = estd::numeric_limits<float>;
 
     TEST_ASSERT_TRUE(type::is_iec559);
-#elif FEATURE_ESTD_COMPILE_VERBOSITY > ESTD_LEVEL_NONE
+#elif FEATURE_ESTD_COMPILE_VERBOSITY >= ESTD_LEVEL_MEDIUM
 #warning Skipping IEC_559 test
 #endif
 }
@@ -113,4 +113,6 @@ void test_limits()
     RUN_TEST(test_limits_1);
     RUN_TEST(test_limits_least32);
     RUN_TEST(test_limits_least64);
+    RUN_TEST(test_limits_float);
+    RUN_TEST(test_limits_double);
 }
