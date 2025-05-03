@@ -350,7 +350,8 @@ public:
     ESTD_CPP_CONSTEXPR(14) size_type find(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        if (pos == npos)    pos = size();
+        // FIX: pos treatment is all wrong, we have to START searching from pos
+        if (pos == npos)    pos = size();   // DEBT: I think this line should go back up to string
 
         // if our length is less than requested string, we'll never match anyway
         // so abort
@@ -361,9 +362,13 @@ public:
         const_pointer data = clock();
         const_pointer end = data + pos + 1;
 
-        for(; data != end; ++data)
+        for(const_pointer i = data; i != end; ++i)
         {
-            if(memcmp(s, data, count) == 0) return pos;
+            if(memcmp(s, i, count) == 0)
+            {
+                cunlock();
+                return i - data;
+            }
         }
 
         cunlock();
@@ -380,7 +385,8 @@ public:
     ESTD_CPP_CONSTEXPR(14) size_type rfind(
         const_pointer s, size_type pos, size_type count, size_type npos) const
     {
-        if(pos == npos) pos = size();
+        // FIX: "The search begins at pos" always
+        if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
 
         // if our length is less than requested string, we'll never match anyway
         // so abort
@@ -388,11 +394,18 @@ public:
 
         pos -= count;
 
-        const_pointer data = clock() + pos;
+        const_pointer data = clock();
+        const_pointer rend = data - 1;
 
-        for(; pos != npos; --pos, --data)
+        data += pos;
+
+        for(; data != rend; --pos, --data)
         {
-            if(memcmp(s, data, count) == 0) return pos;
+            if(memcmp(s, data, count) == 0)
+            {
+                cunlock();
+                return pos;
+            }
         }
 
         cunlock();
@@ -400,6 +413,16 @@ public:
         return npos;
     }
 
+    ESTD_CPP_CONSTEXPR(14) size_type find_last_of(
+        const_pointer s, size_type pos, size_type count, size_type npos)
+    {
+        if(pos == npos) pos = size();   // DEBT: I think this line should go back up to string
+
+        const_pointer data = clock();
+        const_pointer rend = data - 1;
+
+        data += pos;
+    }
 
     template <class TForeignImpl>
     bool operator ==(const allocated_array<TForeignImpl>& compare_to) const

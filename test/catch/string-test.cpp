@@ -561,7 +561,13 @@ TEST_CASE("string tests")
 
         REQUIRE(r == 6);
 
-        r = s.find(layer3::const_string("World"));
+        r = s.find(layer3::const_string("lo"));
+
+        REQUIRE(r == 3);
+
+        r = s.find(layer3::const_string("!"));
+
+        REQUIRE(r == layer3::const_string::npos);
     }
     SECTION("rfind")
     {
