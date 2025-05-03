@@ -43,6 +43,12 @@ struct AlignmentTester3
 template <class T, unsigned sz>
 using uninitialized_array = estd::internal::uninitialized_array<T, sz>;
 
+template <class Array>
+struct specializer : bool_constant<false> {};
+
+template <class T, size_t N>
+struct specializer<array<T, N>> : bool_constant<true> {};
+
 TEST_CASE("array/vector tests")
 {
     SECTION("Array")
@@ -263,6 +269,11 @@ TEST_CASE("array/vector tests")
                 REQUIRE(v.empty());
             }
         }
+    }
+    SECTION("tmp")
+    {
+        static_assert(specializer<void>::value == false, "");
+        static_assert(specializer<array<int, 10>>::value, "");
     }
 }
 

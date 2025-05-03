@@ -43,9 +43,9 @@ struct allocator_buffer_traits<T[]>
 };
 
 template <class Base>
-struct allocator_buffer_traits<array_base2<Base>>
+struct allocator_buffer_traits<array<Base>>
 {
-    using handle_type = typename array_base2<Base>::pointer;
+    using handle_type = typename array<Base>::pointer;
 };
 
 
