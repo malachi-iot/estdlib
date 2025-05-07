@@ -351,7 +351,7 @@ public:
     }
 
     // DEBT: Helper can optimize this guy
-    constexpr basic_string& append(const_pointer s)
+    ESTD_CPP_CONSTEXPR(17) basic_string& append(const_pointer s)
     {
         return append(s, strlen(s));
     }

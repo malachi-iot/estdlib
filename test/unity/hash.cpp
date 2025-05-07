@@ -17,10 +17,16 @@ static void test_fnv1a_32()
     using fnv1a = internal::fnv_hash<uint32_t, internal::FNV_1A>;
     uint32_t h;
 
+#if ESP_PLATFORM
     h = fnv1a::hash(hello.begin(), hello.end());
     TEST_ASSERT_EQUAL(0x325D0001, h);
     h = fnv1a::hash(blob1.begin(), blob1.end());
     TEST_ASSERT_EQUAL(0x774dd18d, h);
+#else
+    const char* hello = "Hi!";
+    h = fnv1a::hash(hello, hello + 3);
+    TEST_ASSERT_EQUAL(0x325D0001, h);
+#endif
 }
 
 #ifdef ESP_IDF_TESTING

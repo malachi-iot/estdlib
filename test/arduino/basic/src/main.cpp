@@ -1,18 +1,10 @@
 #include <Arduino.h>
 
-#define TEST_ENABLE 1
-
 #include <estd/thread.h>
 #include <estd/type_traits.h>
 #include <estd/chrono.h>
-#if TEST_ENABLE
 #include <estd/string.h>
 #include <estd/iostream.h>
-#else
-#include <estd/internal/string.h>
-#include <estd/internal/layer1/string.h>
-#include <estd/internal/layer3/string.h>
-#endif
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 // 1/20/2020: No longer the case:
@@ -69,22 +61,5 @@ void loop()
 
     cout << (buffer += F(" world")) << '!' << estd::endl;
     cout << F("hi2u ") << count << estd::endl;
-#else
-    char array[64];
-    // DEBT: Seems we shouldn't have this much trouble making a raw layer3 string
-    //estd::layer3::basic_string<char, true> s1("hello", 5, 5);
-    //estd::layer3::basic_string<const char, true> s1(buffer);
-    using policy = estd::internal::null_terminated_string_policy<estd::char_traits<char>, uint16_t, true>;
-    (void) policy{};
-    using allocator = estd::layer3::allocator<char, uint16_t>;
-    (void) allocator{array};
-    using impl_type = estd::internal::impl::dynamic_array<allocator, policy>;
-    using type1 = estd::internal::allocated_array<impl_type>;
-
-    //type1 s1(array);
-    using allocator_type = typename impl_type::allocator_type;
-    (void) allocator_type{array};
-    // FIX: Mysteriously, type1::allocator_type can't resolve
-    using allocator_type = typename type1::allocator_type;
 #endif
 }
