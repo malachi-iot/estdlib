@@ -3,6 +3,7 @@
 #include "../fwd/string.h"
 #include "../fwd/string_view.h"
 #include "../../policy/string.h"
+#include "../../allocators/fixed.h"
 
 namespace estd { namespace layer3 {
 

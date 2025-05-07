@@ -13,6 +13,8 @@
 
 #include "dynamic_array.h"
 
+#include "macro/push.h"
+
 namespace estd { namespace internal {
 
 #if __cpp_lib_string_view
@@ -377,3 +379,5 @@ ESTD_CPP_CONSTEXPR_RET bool operator ==(
 }
 
 }}
+
+#include "macro/pop.h"

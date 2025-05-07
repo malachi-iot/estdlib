@@ -1,10 +1,15 @@
 #include <Arduino.h>
 
+#define TEST_ENABLE 0
+
 #include <estd/thread.h>
 #include <estd/type_traits.h>
 #include <estd/chrono.h>
-#include <estd/iostream.h>
+#if TEST_ENABLE
 #include <estd/string.h>
+#include <estd/iostream.h>
+#else
+#endif
 
 // NOTE: for 32u4, compile size is identical using TEST_CHRONO or not.  Nice!
 // 1/20/2020: No longer the case:
@@ -39,6 +44,7 @@ void setup()
 
 void loop() 
 {
+#if TEST_ENABLE
     estd::arduino_ostream cout(Serial);
 
 #ifdef TEST_CHRONO
@@ -60,4 +66,5 @@ void loop()
 
     cout << (buffer += F(" world")) << '!' << estd::endl;
     cout << F("hi2u ") << count << estd::endl;
+#endif
 }
