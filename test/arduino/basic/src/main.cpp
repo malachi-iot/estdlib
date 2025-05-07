@@ -1,14 +1,14 @@
 #include <Arduino.h>
 
-#define TEST_ENABLE 0
+#define TEST_ENABLE 1
 
 #include <estd/thread.h>
 #include <estd/type_traits.h>
 #include <estd/chrono.h>
 #if TEST_ENABLE
+#include <estd/string.h>
 #include <estd/iostream.h>
 #else
-//#include <estd/string.h>
 #include <estd/internal/string.h>
 #include <estd/internal/layer1/string.h>
 #include <estd/internal/layer3/string.h>
@@ -83,7 +83,8 @@ void loop()
 
     //type1 s1(array);
     using allocator_type = typename impl_type::allocator_type;
+    (void) allocator_type{array};
     // FIX: Mysteriously, type1::allocator_type can't resolve
-    //using allocator_type = typename type1::allocator_type;
+    using allocator_type = typename type1::allocator_type;
 #endif
 }

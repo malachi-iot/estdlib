@@ -243,16 +243,16 @@ public:
 // size_equals_capacity flag is just that, means the dynamic_array::size() is more or less a constant
 // fed by wherever capacity() comes from.  capacity() will vary on whether allocator itself tracks
 // allocated size or not (underlying size() call)
-template <class TAllocator, bool null_terminated, bool size_equals_capacity>
+template <class Allocator, bool null_terminated, bool size_equals_capacity>
 class dynamic_array_base :
         //public estd::internal::impl::allocated_array<TAllocator>,
-        public estd::handle_descriptor<TAllocator>,
-        dynamic_array_length<TAllocator, null_terminated, size_equals_capacity>
+        public estd::handle_descriptor<Allocator>,
+        dynamic_array_length<Allocator, null_terminated, size_equals_capacity>
 {
-    using base_type = estd::handle_descriptor<TAllocator>;
+    using base_type = estd::handle_descriptor<Allocator>;
     //typedef estd::internal::impl::allocated_array<TAllocator> base_type;
     typedef base_type base_t;
-    typedef dynamic_array_length<TAllocator, null_terminated, size_equals_capacity> length_helper_t;
+    typedef dynamic_array_length<Allocator, null_terminated, size_equals_capacity> length_helper_t;
 
 public:
     static CONSTEXPR bool uses_termination() { return null_terminated; }
@@ -418,13 +418,27 @@ struct dynamic_array : public
         is_nulltag_present<Policy>::value,
         is_consttag_present<Policy>::value>;
 
+    
+    // https://github.com/malachi-iot/estdlib/issues/104
+    // Bizzare, but even though base_type unambiguously specifies these two, we need to
+    // do it again here, otherwise AVR / GCC 7.3.0 has a heart attack
     using typename base_type::allocator_type;
+    using typename base_type::allocator_traits;
+
     using policy_type = Policy;
 
     ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
     ESTD_CPP_DEFAULT_CTOR(dynamic_array)
 };
+
+/*
+template <class Allocator, class Policy>
+using dynamic_array = dynamic_array_base<
+    remove_reference_t<Allocator>,
+    is_nulltag_present<Policy>::value,
+    is_consttag_present<Policy>::value>;    */
+
 #else
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback
 // TODO: #ifdef this out in some kind of strict mode
