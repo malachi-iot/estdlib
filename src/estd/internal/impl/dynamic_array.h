@@ -406,24 +406,24 @@ struct is_consttag_present : estd::false_type {};
 template<typename T>
 struct is_consttag_present<T, typename has_typedef<typename T::is_constant_tag_exp>::type> : estd::true_type {};
 
-template <class TAllocator, class TPolicy>
+template <class Allocator, class Policy>
 struct dynamic_array : public
         dynamic_array_base<
-            typename estd::remove_reference<TAllocator>::type,
-            is_nulltag_present<TPolicy>::value,
-            is_consttag_present<TPolicy>::value>
+            typename estd::remove_reference<Allocator>::type,
+            is_nulltag_present<Policy>::value,
+            is_consttag_present<Policy>::value>
 {
-    typedef dynamic_array_base<
-        typename estd::remove_reference<TAllocator>::type,
-        is_nulltag_present<TPolicy>::value,
-        is_consttag_present<TPolicy>::value> base_type;
-    typedef typename base_type::allocator_type allocator_type;
+    using base_type = dynamic_array_base<
+        typename estd::remove_reference<Allocator>::type,
+        is_nulltag_present<Policy>::value,
+        is_consttag_present<Policy>::value>;
+
+    using typename base_type::allocator_type;
+    using policy_type = Policy;
 
     ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
     ESTD_CPP_DEFAULT_CTOR(dynamic_array)
-
-    typedef TPolicy policy_type;
 };
 #else
 // General-case dynamic_array where we don't attempt to optimize anything.  This is a fullback

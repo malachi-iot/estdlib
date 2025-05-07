@@ -11,7 +11,7 @@ namespace estd { namespace layer3 {
 // Keep in mind though he supports a size 0 (infinite) for null terminated strings.  Also
 // he differs in that '=' does a deep copy
 template<class CharT, bool null_terminated = true,
-         class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
+         class Traits = estd::char_traits<estd::remove_const_t<CharT>>,
          class Policy = conditional_t<null_terminated,
                 internal::null_terminated_string_policy<Traits, uint16_t, estd::is_const<CharT>::value>,
                 internal::sized_string_policy<Traits, uint16_t, estd::is_const<CharT>::value> >>

@@ -272,13 +272,15 @@ public:
 // mainly for layer3:
 // runtime (but otherwise constant) size()
 // runtime (but otherwise constant) buffer*
-template <class T, class TSize = std::size_t>
-class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, TSize>
+template <class T, class Size = std::size_t>
+class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, Size>
 {
 public:
-    typedef single_allocator_base<T, T*, TSize> base_t;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::handle_type handle_type;
+    using base_type = single_allocator_base<T, T*, Size>;
+    using base_t = base_type;
+
+    using typename base_type::size_type;
+    using typename base_type::handle_type;
     typedef handle_type handle_with_size;
 
 private:
@@ -405,12 +407,13 @@ namespace layer3 {
 template <class T, class Size = std::size_t, bool malleable = false>
 struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size>
 {
-    typedef estd::internal::single_fixedbuf_runtimesize_allocator<T, Size> base_t;
-    typedef base_t base_type;
-    typedef typename base_t::handle_type handle_type;
-    typedef typename base_t::handle_with_offset handle_with_offset;
-    typedef typename base_t::size_type size_type;
-    typedef typename base_t::difference_type difference_type;
+    using base_type = estd::internal::single_fixedbuf_runtimesize_allocator<T, Size>;
+    using base_type::data;
+
+    using typename base_type::handle_type;
+    using typename base_type::handle_with_offset;
+    using typename base_type::size_type;
+    using typename base_type::difference_type;
 
 #ifdef __cpp_initializer_lists
     constexpr allocator(std::initializer_list<T> initlist) : base_type(initlist)
@@ -433,13 +436,13 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size
     // can adjust positively or negatively (operates like pointer math and/or handle_with_offset)
     void adjust_offset_exp(handle_type h, difference_type offset)
     {
-        base_t::buffer += offset;
-        base_t::set_size(base_t::size(h) - offset);
+        base_type::buffer += offset;
+        base_type::set_size(base_type::size(h) - offset);
     }
 
     void set_size_exp(handle_type h, size_type size)
     {
-        base_t::set_size(size);
+        base_type::set_size(size);
     }
 };
 
