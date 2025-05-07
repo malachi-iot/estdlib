@@ -1,5 +1,9 @@
 # v0.8.6 - #####25
 
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/104 Arduino fixups with string use
+
 # v0.8.5 - 03MAY25
 
 ## Added Features
