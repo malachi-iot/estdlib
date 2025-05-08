@@ -30,9 +30,9 @@ static void test_fnv1a_32()
 }
 
 #ifdef ESP_IDF_TESTING
-TEST_CASE("expected", "[expected]")
+TEST_CASE("hash", "[hash]")
 #else
-void test_expected()
+void test_hash()
 #endif
 {
     RUN_TEST(test_fnv1a_32);
