@@ -2,6 +2,7 @@
 
 #include "../../traits/allocator_traits.h"
 #include "../value_evaporator.h"
+#include "../../algorithm.h"
 
 // this is the low-level specialized handle_descriptor
 // which only tracks handle itself - the 'full' handle descriptor
@@ -16,12 +17,11 @@ template <class TAllocator, bool is_contiguous>
 struct contiguous_descriptor;
 
 
-// experimental, unused, untested, but simple and useful enough I think it will graduate quickly
 // no bounds checks are performed, as this is expected to be done by querying largest contiguous chunk size
-template <class TAllocator>
-struct contiguous_descriptor<TAllocator, true>
+template <class Allocator>
+struct contiguous_descriptor<Allocator, true>
 {
-    typedef typename remove_reference<TAllocator>::type allocator_type;
+    typedef typename remove_reference<Allocator>::type allocator_type;
     typedef typename estd::allocator_traits<allocator_type> allocator_traits;
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
     typedef typename allocator_traits::handle_type handle_type;
@@ -29,22 +29,22 @@ struct contiguous_descriptor<TAllocator, true>
     typedef typename allocator_type::value_type value_type;
 
     // copy outside buffer into this handle-based memory
-    static void copy_into(allocator_type& a, handle_type h, const value_type* source, size_type pos, size_type len)
+    ESTD_CPP_CONSTEXPR(14) static void copy_into(allocator_type& a, handle_type h, const value_type* source, size_type pos, size_type len)
     {
         value_type* dest = &allocator_traits::lock(a, h, pos, len);
 
-        while(len--) *dest++ = *source++;
+        copy_n(source, len, dest);
 
         allocator_traits::unlock(a, h);
     }
 
 
     // copy this handle-based memory to outside buffer
-    static void copy_from(const allocator_type& a, handle_type h, value_type* dest, size_type pos, size_type len)
+    ESTD_CPP_CONSTEXPR(14) static void copy_from(const allocator_type& a, handle_type h, value_type* dest, size_type pos, size_type len)
     {
         const value_type* source = &allocator_traits::clock(a, h, pos, len);
 
-        while(len--) *dest++ = *source++;
+        copy_n(source, len, dest);
 
         allocator_traits::cunlock(a, h);
     }

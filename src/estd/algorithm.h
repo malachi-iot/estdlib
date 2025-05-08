@@ -106,7 +106,7 @@ ESTD_CPP_CONSTEXPR(20) OutputIt copy(InputIt first, InputIt last,
 // has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
 // iterator unnecessarily?
 template <class InputIt, class Size, class OutputIt>
-ESTD_CPP_CONSTEXPR(20) OutputIt copy_n(InputIt first, Size count, OutputIt result)
+ESTD_CPP_CONSTEXPR(14) OutputIt copy_n(InputIt first, Size count, OutputIt result)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
     return std::copy_n(first, count, result);

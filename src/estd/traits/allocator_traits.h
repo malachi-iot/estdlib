@@ -142,32 +142,32 @@ struct locking_allocator_traits<TAllocator, true>
 
     typedef value_type&                         reference; // deprecated in C++17 but relevant for us due to lock/unlock
 
-    static reference lock(allocator_valref a, handle_type h, size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(14) static reference lock(allocator_valref a, handle_type h, size_type pos = 0, size_type count = 0)
     {
         return a.lock(h, pos, count);
     }
 
-    static reference lock(allocator_valref a, handle_with_offset h, size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(14) static reference lock(allocator_valref a, handle_with_offset h, size_type pos = 0, size_type count = 0)
     {
         return a.lock(h, pos, count);
     }
 
-    static const value_type& clock(const allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
+    constexpr static const value_type& clock(const allocator_type& a, handle_type h, size_type pos = 0, size_type count = 0)
     {
         return a.clock(h, pos, count);
     }
 
-    static const value_type& clock(const allocator_type& a, const handle_with_offset& h, size_type pos = 0)
+    constexpr static const value_type& clock(const allocator_type& a, const handle_with_offset& h, size_type pos = 0)
     {
         return a.clock(h, pos);
     }
 
-    static void unlock(allocator_type& a, handle_type h)
+    ESTD_CPP_CONSTEXPR(14) static void unlock(allocator_type& a, handle_type h)
     {
         a.unlock(h);
     }
 
-    static void cunlock(const allocator_type& a, handle_type h)
+    ESTD_CPP_CONSTEXPR(14) static void cunlock(const allocator_type& a, handle_type h)
     {
         a.cunlock(h);
     }

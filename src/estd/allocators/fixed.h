@@ -96,7 +96,7 @@ protected:
 
     // use this instead of direct buffer reference, for upcoming aligned_storage
     // compatibility
-    ESTD_CPP_CONSTEXPR(17) pointer data(size_type offset = 0)
+    ESTD_CPP_CONSTEXPR(14) pointer data(size_type offset = 0)
     {
         return static_cast<pointer>(&buffer[offset]);
     }
