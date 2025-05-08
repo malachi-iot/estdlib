@@ -18,18 +18,25 @@ class basic_string : public estd::internal::basic_string<
         StringPolicy>;
 
 public:
+    using typename base_type::const_pointer;
+    using typename base_type::size_type;
     using typename base_type::view_type;
     using base_type::data;
 
     basic_string() = default;
 
-    basic_string(const CharT* s)
+    basic_string(const_pointer s)        // NOLINT
     {
         base_type::operator =(s);
     }
 
+    basic_string(const_pointer s, size_type count)        // NOLINT
+    {
+        base_type::assign(s, count);
+    }
+
     template <class Impl>
-    basic_string(const estd::internal::allocated_array<Impl>& copy_from)
+    basic_string(const estd::internal::allocated_array<Impl>& copy_from)    // NOLINT
     {
         base_type::operator=(copy_from);
     }
@@ -49,7 +56,7 @@ public:
         return data();
     }
 
-    constexpr const CharT* c_str() const
+    constexpr const_pointer c_str() const
     {
 #if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");

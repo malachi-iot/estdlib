@@ -62,11 +62,11 @@ protected:
 
 public:
     using typename base_type::size_type;
+    using typename base_type::value_type;
 
     typedef typename base_type::allocator_type allocator_type;
     typedef typename base_type::allocator_traits allocator_traits;
     typedef typename base_type::impl_type impl_type;
-    typedef typename base_type::value_type value_type;
 
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
@@ -89,9 +89,9 @@ public:
     //typedef typename allocator_type::accessor accessor_experimental;
 
 protected:
-    impl_type& impl() { return base_type::m_impl; }
+    ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return base_type::m_impl; }
 
-    const impl_type& impl() const { return base_type::m_impl; }
+    constexpr const impl_type& impl() const { return base_type::m_impl; }
 
 public:
     // redeclared just for conveineince
@@ -146,7 +146,7 @@ protected:
     }
 
     // internal method for reassigning size, ensuring capacity is available
-    bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
+    ESTD_CPP_CONSTEXPR(14) bool ensure_total_size(size_type new_size, size_type pad = 0, bool shrink = false)
     {
         if(ensure_total_capacity(new_size, pad) == false)
             return false;
@@ -188,7 +188,7 @@ protected:
     // (standard version also inserts or removes characters if requested,
     //  this one ONLY replaces the entire buffer)
     // TODO: change to assign
-    void assign(const value_type* buf, size_type len)   // NOLINT
+    void assign(const_pointer buf, size_type len)   // NOLINT
     {
         ensure_total_size(len);
 
@@ -355,9 +355,9 @@ public:
         return base_type::size();
     }
 
-    size_type capacity() const { return impl().capacity(); }
+    constexpr size_type capacity() const { return impl().capacity(); }
 
-    bool resize(size_type count)
+    ESTD_CPP_CONSTEXPR(14) bool resize(size_type count)
     {
         return ensure_total_size(count);
     }
@@ -370,7 +370,7 @@ public:
     // we deviate from spec because we don't use exceptions, so a manual check for reserve failure is required
     // return true = successful reserve, false = fail
     // NOTE: This is kind of a lie, because reallocate will call abort() for fixed allocators
-    bool reserve(size_type new_cap)
+    ESTD_CPP_CONSTEXPR(14) bool reserve(size_type new_cap)
     {
         if(!impl().is_allocated())
             return impl().allocate(new_cap);

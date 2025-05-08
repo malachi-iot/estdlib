@@ -54,6 +54,12 @@ TEST_CASE("string tests")
         {
             layer1::string<32> s = "hi2u";
         }
+        SECTION("init from raw source")
+        {
+            layer1::string<32> s(test_str, strlen(test_str));
+
+            REQUIRE(s == test_str);
+        }
     }
     SECTION("layer 1 null terminated")
     {
