@@ -157,6 +157,17 @@ static void test_char_traits()
     TEST_ASSERT_GREATER_THAN(0, traits_type::compare(TEST_STR, TEST_STR2, 5));
 }
 
+template <ESTD_CPP_CONCEPT(estd::concepts::v1::impl::String) StringImpl>
+ESTD_CPP_CONSTEXPR(14) static void test_iterator(const estd::detail::basic_string<StringImpl>& v, const char* s)
+{
+    auto it = v.begin();
+    for(; it != v.end(); ++it, ++s)
+    {
+        TEST_ASSERT_EQUAL_CHAR(*s, *it);
+    }
+}
+
+
 // Verified with https://fnvhash.github.io/fnv-calculator-online/
 
 static void test_string_hash()
@@ -168,9 +179,14 @@ static void test_string_hash()
     // NOTE: This crashes
     //estd::layer1::string<32> s(TEST_STR);
 
-    // 08MAY25 MB FIX: Current theory for breakage is that parent detail::basic_string treats
-    // iterators a little too differently.
-    uint32_t hashed = hasher{}(s);
+    test_iterator(s, TEST_STR);
+    //return;
+
+    uint32_t hashed;
+
+    // 08MAY25 MB FIX: Current theory for breakage is simavr is soft stack overflowing due to underlying
+    // 32-bit calculation.  However, dedicaed hash test suffers no ill effects.
+    hashed = hasher{}(s);
 
     TEST_ASSERT_EQUAL_HEX32(0x4c0a9277, hashed);
 

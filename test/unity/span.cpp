@@ -3,6 +3,12 @@
 
 #include <estd/span.h>
 
+namespace test {
+
+char span_buf[32] { "ABC" };
+
+}
+
 using namespace test;
 
 static void test_span_1()
