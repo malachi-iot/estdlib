@@ -244,7 +244,7 @@ public:
         unlock();
     }
 
-    void copy_into(const value_type* source, size_type pos, size_type len)
+    ESTD_CPP_CONSTEXPR(14) void copy_into(const value_type* source, size_type pos, size_type len)
     {
         contiguous_base::copy_into(
                 base_t::get_allocator(),

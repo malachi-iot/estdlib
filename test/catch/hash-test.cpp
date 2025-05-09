@@ -78,7 +78,7 @@ TEST_CASE("hash")
 
         constexpr estd::layer2::const_string s = "hi2u";
 
-        unsigned hashed = estd::hash<estd::layer2::const_string>{}(s);
+        unsigned hashed = estd::hash<decltype(s)>{}(s);
 
         REQUIRE(hashed == 0x4c0a9277);
     }

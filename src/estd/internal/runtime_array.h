@@ -138,14 +138,14 @@ protected:
     // (standard version also inserts or removes characters if requested,
     //  this one ONLY replaces the entire buffer)
     // TODO: change to assign
-    void assign(const value_type* buf, size_type len)
+    ESTD_CPP_CONSTEXPR(14) void assign(const value_type* buf, size_type len)
     {
         m_impl.copy_into(buf, 0, len);
     }
 
 
-    template <class TForeignImpl>
-    ESTD_CPP_CONSTEXPR_RET bool starts_with(const allocated_array<TForeignImpl>& compare_to) const
+    template <class Impl2>
+    constexpr bool starts_with(const allocated_array<Impl2>& compare_to) const
     {
         return helper::starts_with(*this, compare_to);
     }

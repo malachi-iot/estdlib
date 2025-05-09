@@ -185,20 +185,19 @@ public:
         //return hd.size() > 0;
     }
 
-    size_type size(const handle_descriptor& hd) const
+    ESTD_CPP_CONSTEXPR(14) size_type size(const handle_descriptor& hd) const
     {
         const value_type* s = &hd.clock();
         const size_type max_size = hd.size();
-        typedef estd::char_traits<value_type> char_traits;
 
-        size_type sz = char_traits::length(s);
+        const size_type sz = estd::char_traits<value_type>::length(s);
 
         hd.cunlock();
 
         if(max_size != 0 && sz >= max_size)
         {
             // TODO: null terminated should always be less than allocated size, so this
-            // indicates a runtime-discovered error
+            // indicates a runtime-discovered error - do an assert or similar
         }
 
         return sz;
