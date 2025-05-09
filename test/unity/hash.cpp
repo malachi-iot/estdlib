@@ -5,6 +5,11 @@
 
 using namespace estd;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic error "-Wconversion"
+#pragma GCC diagnostic error "-Wsign-conversion"
+#pragma GCC diagnostic error "-Wextra"
+
 inline namespace R {
 #if ESP_PLATFORM
 ESP_BINARY(hello, "hello_txt")
@@ -38,3 +43,4 @@ void test_hash()
     RUN_TEST(test_fnv1a_32);
 }
 
+#pragma GCC diagnostic pop

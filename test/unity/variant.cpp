@@ -12,7 +12,7 @@ static void test_variant_storage_1()
 	vs_type::size_type index = 0;
 	vs_type vs;
 	const int val = 7;
-    const char* val2 = ::test::span_buf;
+    //const char* val2 = ::test::span_buf;
 	
 	vs.assign_or_init(&index, val); 
 
