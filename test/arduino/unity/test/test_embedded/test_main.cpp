@@ -64,6 +64,7 @@ void setup()
     test_cstddef();
     test_expected();
     test_functional();
+    test_hash();
     test_limits();
     test_locale();
     test_map();

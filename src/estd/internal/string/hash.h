@@ -23,6 +23,9 @@ struct string_hash
 template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) StringImpl>
 struct hash<detail::basic_string<StringImpl>> : internal::string_hash {};
 
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) StringImpl>
+struct hash<const detail::basic_string<StringImpl>> : internal::string_hash {};
+
 template <class Char, size_t N, bool null_terminated, class Traits>
 struct hash<layer1::basic_string<Char, N, null_terminated, Traits>> : internal::string_hash {};
 

@@ -50,6 +50,18 @@ void test_layer2_string()
 {
     // FIX: Causes exception on line 27
     _test_string_assignment<estd::layer2::const_string>();
+
+    constexpr estd::layer2::const_string s = TEST_STR;
+
+    TEST_ASSERT_EQUAL_CHAR('h', *s.begin());
+    auto it = s.begin();
+    for(; it != s.end(); ++it)
+    {
+
+    }
+
+    TEST_ASSERT_EQUAL(4, it - s.begin());
+    TEST_ASSERT_EQUAL_CHAR('u', *(it - 1));
 }
 
 
@@ -149,11 +161,25 @@ static void test_char_traits()
 
 static void test_string_hash()
 {
-    constexpr estd::layer2::const_string s = TEST_STR;
+    using hasher = estd::internal::string_hash;
 
-    unsigned hashed = estd::hash<decltype(s)>{}(s);
+    using type = estd::layer2::const_string;
+    constexpr type s = TEST_STR;
+    // NOTE: This crashes
+    //estd::layer1::string<32> s(TEST_STR);
 
-    TEST_ASSERT_EQUAL_UINT(0x4c0a9277, hashed);
+    // 08MAY25 MB FIX: Current theory for breakage is that parent detail::basic_string treats
+    // iterators a little too differently.
+    uint32_t hashed = hasher{}(s);
+
+    TEST_ASSERT_EQUAL_HEX32(0x4c0a9277, hashed);
+
+    //hashed = estd::hash<decltype(s)>{}(s);
+    hashed = estd::hash<type>{}(s);
+
+    // https://md5calc.com/hash/fnv1a32/hi2u
+
+    TEST_ASSERT_EQUAL_HEX32(0x4c0a9277, hashed);
 }
 
 #ifdef __AVR__

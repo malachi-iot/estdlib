@@ -20,4 +20,9 @@ Works on Rover (debian), errors out:
 
 ```
 
-on c131-debian
+on c131-debian.  Others [1] have experienced this
+Removing tool-simavr (`pio package uninstall`) and rebuilding seems to have fixed it.  I probably needed the underyling dependencies i.e. `apt install avr-libc`
+
+# References
+
+1. https://github.com/platformio/platform-atmelavr/issues/335
