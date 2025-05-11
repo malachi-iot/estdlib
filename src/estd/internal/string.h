@@ -256,6 +256,35 @@ public:
     // Be mindful that detail::basic_string is basic class of string_view too, so these are disabled in that
     // context
 
+    ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const_pointer s, size_type count)
+    {
+        base_type::raw_insert(index, s, s + count);
+
+        return *this;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const_pointer s)
+    {
+        return insert(index, s, traits_type::length(s));
+    }
+
+    template <class Impl2>
+    basic_string& insert(size_type index, const basic_string<Impl2>& str)
+    {
+        const_pointer src = str.clock();
+
+        base_type::raw_insert(index, src, src + str.size());
+
+        str.cunlock();
+
+        return *this;
+    }
+
+    // FIX: Need this online, otherwise we're obscuring things.  Some flavors of string don't inherit from
+    // a provider of this though
+    //using base_type::insert;
+
+
     basic_string& erase(size_type index = 0, size_type count = npos)
     {
         static_assert(base_type::policy_type::is_constant() == false, "This class is read only");

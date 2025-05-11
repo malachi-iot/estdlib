@@ -5,11 +5,12 @@
 namespace estd { namespace internal { namespace impl {
 
 
-template <class TAllocator, class Policy>
-struct allocated_array : estd::handle_descriptor<TAllocator>
+// Mainly a place to park policy_type
+template <class Allocator, class Policy>
+struct allocated_array : estd::handle_descriptor<Allocator>
 {
-    typedef estd::handle_descriptor<TAllocator> base_type;
-    typedef Policy policy_type;
+    using base_type = estd::handle_descriptor<Allocator>;
+    using policy_type = Policy;
 
     ESTD_CPP_DEFAULT_CTOR(allocated_array)
     ESTD_CPP_FORWARDING_CTOR(allocated_array)

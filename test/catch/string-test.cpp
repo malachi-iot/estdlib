@@ -762,6 +762,27 @@ TEST_CASE("string tests")
             REQUIRE(s.compare("123") == 0);
         }
     }
+    SECTION("insert")
+    {
+        estd::layer1::string<128> s{test_str};
+        estd::layer2::const_string s2(test_str2);
+
+        SECTION("other C-style string")
+        {
+            s.insert(0, "!0!");
+            REQUIRE(s == "!0!hello");
+        }
+        SECTION("other string (explicit size)")
+        {
+            s.insert(0, "abc!", 3);
+            REQUIRE(s == "abchello");
+        }
+        SECTION("other estd::string")
+        {
+            s.insert(0, s2);
+            REQUIRE(s == "hi2uhello");
+        }
+    }
 }
 
 #include "macro/pop.h"
