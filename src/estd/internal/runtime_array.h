@@ -241,7 +241,7 @@ public:
         return traditional_iterator{&v};
     }
 #else
-    typedef a_it iterator;
+    using iterator = a_it;
 
     iterator create_iterator(unsigned o = 0) const
     {

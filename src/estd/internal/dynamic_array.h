@@ -63,6 +63,10 @@ protected:
 public:
     using typename base_type::size_type;
     using typename base_type::value_type;
+    using typename base_type::iterator;
+
+    using base_type::lock;
+    using base_type::unlock;
 
     typedef typename base_type::allocator_type allocator_type;
     typedef typename base_type::allocator_traits allocator_traits;
@@ -81,7 +85,6 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef typename base_type::iterator iterator;
     typedef typename base_type::accessor accessor;
 
     // TODO: utilize SFINAE if we can
@@ -93,16 +96,6 @@ protected:
 
     constexpr const impl_type& impl() const { return base_type::m_impl; }
 
-public:
-    // redeclared just for conveineince
-    ESTD_CPP_CONSTEXPR(17) value_type* lock(size_type pos = 0, size_type count = 0)
-    {
-        return base_type::lock(pos, count);
-    }
-
-    ESTD_CPP_CONSTEXPR(17) void unlock() { return base_type::unlock(); }   // NOLINT
-
-protected:
     // Use this instead of 'success' ptr
     // If success, grew by requested value - returns the size we started with
     // If in error, returns how much was actually grown
@@ -210,6 +203,7 @@ protected:
     typename enable_if<
         is_move_constructible<T2>::value &&
         !is_move_assignable<T2>::value>::type
+    // Copies from first to last, in reverse order, using move constructor
     move_assist(pointer first, pointer last, pointer d_last)
     {
         while (first != last)
@@ -225,7 +219,7 @@ protected:
         && !is_trivial<T2>::value
 #endif
         >::type
-    copy_assist(pointer first, const_pointer last, pointer d_last)
+    copy_assist(const_pointer first, const_pointer last, pointer d_last)
     {
         copy_backward(first, last, d_last);
     }
@@ -242,11 +236,12 @@ protected:
 #endif
 
 #if !FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
+    // Copies from first to last to d_last, in reverse order, using copy constructor
     template <class T2 = value_type>
     typename enable_if<
         is_copy_constructible<T2>::value &&
         !is_copy_assignable<T2>::value>::type
-    copy_assist(pointer first, const_pointer last, pointer d_last)
+    copy_assist(const_pointer first, const_pointer last, pointer d_last)
     {
         while (first != last)
             new (--d_last) T2(*--last);
@@ -297,8 +292,22 @@ protected:
     }
 #endif
 
+    template <class InputIt>
+    void raw_insert(pointer data, const_pointer to_insert_pos, InputIt first, InputIt last)
+    {
+        const size_type sz = impl().size();
+        const size_type input_sz = last - first;
+        ensure_total_size(sz + input_sz);
 
-    void raw_insert(value_type* a, pointer to_insert_pos, const_pointer to_insert_value)
+        // Backwards copy, effectively moving content over starting at
+        // to_insert_pos to to_insert_pos + 1
+        copy_assist(to_insert_pos, (data + sz), (data + sz + input_sz));
+
+        estd::copy(first, last, const_cast<pointer>(to_insert_pos));
+    }
+
+
+    void raw_insert(value_type* data, const_pointer to_insert_pos, const_pointer to_insert_value)
     {
         // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
         // so later consider doing the insert operation at that level)
@@ -310,7 +319,9 @@ protected:
         //size_type remaining = sz - raw_typed_pos;
         //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
-        copy_assist(to_insert_pos, (a + sz), (a + sz + 1));
+        // Backwards copy, effectively moving content over starting at
+        // to_insert_pos to to_insert_pos + 1
+        copy_assist(to_insert_pos, (data + sz), (data + sz + 1));
 
         // DEBT: Might want to consider placement new here, or delegate that
         // copy responsibility off to copy_assist
@@ -616,7 +627,7 @@ public:
     }
 
 
-    typedef const iterator const_iterator;
+    using const_iterator = const iterator;
 
 
     // untested and unoptimized
@@ -698,6 +709,20 @@ public:
         return pos;
     }
 #endif
+
+    // https://github.com/malachi-iot/estdlib/issues/107
+    template <class InputIt>
+    iterator insert(const_iterator pos, InputIt first, InputIt last)
+    {
+        const_reference pos_item = pos.lock();
+
+        raw_insert(lock(), &pos_item, first, last);
+
+        unlock();
+        pos.unlock();
+
+        return pos;
+    }
 
     void shrink_to_fit()
     {

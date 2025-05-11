@@ -108,6 +108,11 @@ TEST_CASE("vector tests")
             REQUIRE(v[0] == 1);
             REQUIRE(v[1] == 3);
         }
+        SECTION("multiple")
+        {
+            // FIX: In fact, we've found a bug in our inserter - it's not resilient to true blue reallocs
+            //v.insert(i, test::octet_data, test::octet_data + sizeof(test::octet_data));
+        }
     }
     SECTION("layer1 vector")
     {

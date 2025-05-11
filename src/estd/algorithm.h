@@ -89,7 +89,7 @@ ForwardIt min_element(ForwardIt first, ForwardIt last,
 #endif
 
 template<class InputIt, class OutputIt>
-ESTD_CPP_CONSTEXPR(20) OutputIt copy(InputIt first, InputIt last,
+ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
               OutputIt d_first)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
@@ -120,7 +120,7 @@ ESTD_CPP_CONSTEXPR(14) OutputIt copy_n(InputIt first, Size count, OutputIt resul
 
 
 template<class InputIt, class OutputIt>
-inline OutputIt copy_backward(InputIt first, InputIt last,
+ESTD_CPP_CONSTEXPR(14) inline OutputIt copy_backward(InputIt first, InputIt last,
               OutputIt d_last)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT
@@ -135,7 +135,7 @@ inline OutputIt copy_backward(InputIt first, InputIt last,
 
 #if __cpp_rvalue_references
 template<class InputIt, class OutputIt>
-inline OutputIt move_backward(InputIt first, InputIt last,
+ESTD_CPP_CONSTEXPR(14) inline OutputIt move_backward(InputIt first, InputIt last,
               OutputIt d_last)
 {
 #if FEATURE_ESTD_ALGORITHM_OPT

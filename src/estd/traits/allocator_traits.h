@@ -177,7 +177,7 @@ struct locking_allocator_traits<TAllocator, true>
     // Non standard, for scenarios in which a consumer specifically wants to treat
     // a handle region as a container of T.  For locking types, they MUST provide
     // an iterator type
-    typedef typename allocator_type::iterator iterator;
+    using iterator = typename allocator_type::iterator;
 
     static CONSTEXPR allocator_locking_preference::_ locking_preference =
         allocator_locking_preference::standard;

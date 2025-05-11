@@ -62,9 +62,10 @@ public:
     typedef typename accessor::locked_type locked_type;
     typedef typename accessor::const_locked_type const_locked_type;
 
-    locked_type lock() { return current.lock(); }
-    const_locked_type lock() const { return current.clock(); }
-    void unlock() { current.unlock(); }
+    ESTD_CPP_CONSTEXPR(17) locked_type lock() { return current.lock(); }
+    constexpr const_locked_type lock() const { return current.clock(); }
+    ESTD_CPP_CONSTEXPR(14) void unlock() { current.unlock(); }
+    ESTD_CPP_CONSTEXPR(14) void unlock() const { current.cunlock(); }
 
 
     ESTD_CPP_CONSTEXPR_RET EXPLICIT locking_iterator(const accessor& a) :
