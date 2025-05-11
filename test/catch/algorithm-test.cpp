@@ -60,7 +60,7 @@ TEST_CASE("algorithm tests")
     }
     SECTION("copy_backward")
     {
-        array<unsigned, 10> a{ 0, 1, 2, 3, 4, 5 };
+        array<unsigned, 10> a{ 0, 1, 2, 3, 4, 5, 0, 0, 0, 0 };
 
         copy_backward(a.begin() + 1, a.end() - 1, a.end());
 
