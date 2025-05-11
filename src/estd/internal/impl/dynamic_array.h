@@ -307,7 +307,7 @@ public:
         //length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
     }
 
-    bool empty() const
+    constexpr bool empty() const
     {
         return length_helper_t::empty(*this);
         //return length_helper_t::empty(base_t::get_allocator(), base_t::handle());

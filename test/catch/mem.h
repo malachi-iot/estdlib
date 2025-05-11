@@ -5,6 +5,8 @@
 #include <estd/internal/container/iterator.h>
 #include <cstddef> // for ptrdiff_t
 
+// 11MAY25 DEBT: Promote this/merge to an actual production piece of code.  Motivation being I wasted an
+// hour debugging my own janky test code today (realloc was broken)
 // reference allocator for inbuilt mechanisms.  basically a crummy test-only
 // version of std new_allocator
 template <class T>
@@ -160,7 +162,7 @@ public:
 
     handle_type reallocate(handle_type h, size_t size)
     {
-        return (pointer) realloc(h, size);
+        return (pointer) realloc(h, size * sizeof(value_type));
     }
 
 

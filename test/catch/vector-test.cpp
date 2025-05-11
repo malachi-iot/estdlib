@@ -110,8 +110,14 @@ TEST_CASE("vector tests")
         }
         SECTION("multiple")
         {
-            // FIX: Even with realloc repair, this still crashes.  Mysterious
-            //v.insert(i, test::octet_data, test::octet_data + sizeof(test::octet_data));
+            constexpr unsigned sz = sizeof(test::octet_data);
+            //static_assert(sz == 9);
+            v.insert(i, test::octet_data, test::octet_data + sz);
+
+            REQUIRE(v[1] == 1);
+            REQUIRE(v[2] == 2);
+            REQUIRE((int)v[sz] == sz);
+            REQUIRE((int)v[1 + sz] == 2);
         }
     }
     SECTION("layer1 vector")

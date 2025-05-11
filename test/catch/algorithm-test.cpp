@@ -68,6 +68,10 @@ TEST_CASE("algorithm tests")
         REQUIRE(a[1] == 1);
         REQUIRE(a[2] == 1);
         REQUIRE(a[3] == 2);
+        REQUIRE(a[4] == 3);
+        REQUIRE(a[5] == 4);
+        REQUIRE(a[6] == 5);
+        REQUIRE(a[7] == 0);
     }
     SECTION("heap")
     {
