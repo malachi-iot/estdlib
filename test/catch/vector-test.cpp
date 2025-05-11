@@ -110,7 +110,7 @@ TEST_CASE("vector tests")
         }
         SECTION("multiple")
         {
-            // FIX: In fact, we've found a bug in our inserter - it's not resilient to true blue reallocs
+            // FIX: Even with realloc repair, this still crashes.  Mysterious
             //v.insert(i, test::octet_data, test::octet_data + sizeof(test::octet_data));
         }
     }

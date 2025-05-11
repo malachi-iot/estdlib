@@ -65,6 +65,7 @@ public:
     using typename base_type::value_type;
     using typename base_type::iterator;
 
+    using base_type::cbegin;
     using base_type::lock;
     using base_type::unlock;
 
@@ -213,7 +214,7 @@ protected:
 #endif
 
     template <class T2 = value_type>
-    typename enable_if<
+    ESTD_CPP_CONSTEXPR(14) typename enable_if<
         is_copy_assignable<T2>::value
 #if FEATURE_ESTD_DYNAMIC_ARRAY_MEMMOVE
         && !is_trivial<T2>::value
@@ -238,7 +239,7 @@ protected:
 #if !FEATURE_ESTD_DYNAMIC_ARRAY_STRICT_ASSIGNMENT
     // Copies from first to last to d_last, in reverse order, using copy constructor
     template <class T2 = value_type>
-    typename enable_if<
+    ESTD_CPP_CONSTEXPR(14) typename enable_if<
         is_copy_constructible<T2>::value &&
         !is_copy_assignable<T2>::value>::type
     copy_assist(const_pointer first, const_pointer last, pointer d_last)
@@ -273,7 +274,7 @@ protected:
 
 
 #ifdef __cpp_rvalue_references
-    void raw_insert(value_type* a, value_type* to_insert_pos, value_type&& to_insert_value)
+    void raw_insert(unsigned to_insert_pos, value_type&& to_insert_value)
     {
         grow(1);
 
@@ -284,48 +285,56 @@ protected:
         //size_type remaining = size() - raw_typed_pos;
         //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
 
-        move_assist(to_insert_pos, (a + sz - 1), (a + sz));
+        pointer data = lock();
+
+        move_assist(data + to_insert_pos, data + sz - 1, data + sz);
 
         // Placement new makes sense here since to_insert_pos is now considered
         // uninitialized/undefined
-        new (to_insert_pos) value_type(std::move(to_insert_value));
+        new (data + to_insert_pos) value_type(std::move(to_insert_value));
+
+        unlock();
     }
 #endif
 
     template <class InputIt>
-    void raw_insert(pointer data, const_pointer to_insert_pos, InputIt first, InputIt last)
+    bool raw_insert(unsigned to_insert_pos, InputIt first, InputIt last)
     {
         const size_type sz = impl().size();
         const size_type input_sz = last - first;
-        ensure_total_size(sz + input_sz);
+        if(ensure_total_size(sz + input_sz) == false) return false;
+
+        pointer data = lock();
 
         // Backwards copy, effectively moving content over starting at
         // to_insert_pos to to_insert_pos + 1
-        copy_assist(to_insert_pos, (data + sz), (data + sz + input_sz));
+        copy_assist(data + to_insert_pos,
+            data + sz,
+            data + sz + input_sz);
 
-        estd::copy(first, last, const_cast<pointer>(to_insert_pos));
+        estd::copy(first, last, data + to_insert_pos);
+
+        unlock();
+        return true;
     }
 
 
-    void raw_insert(value_type* data, const_pointer to_insert_pos, const_pointer to_insert_value)
+    void raw_insert(unsigned to_insert_pos, const_pointer to_insert_value)
     {
         // NOTE: may not be very efficient (underlying allocator may need to realloc/copy etc.
         // so later consider doing the insert operation at that level)
         const size_type sz = impl().size();
         ensure_total_size(sz + 1);
 
-        // NOTE: Keeping around to use for optimization of trivial cases
-        //size_type raw_typed_pos = to_insert_pos - a;
-        //size_type remaining = sz - raw_typed_pos;
-        //memmove(to_insert_pos + 1, to_insert_pos, remaining * sizeof(value_type));
+        pointer data = lock();
 
         // Backwards copy, effectively moving content over starting at
         // to_insert_pos to to_insert_pos + 1
-        copy_assist(to_insert_pos, (data + sz), (data + sz + 1));
+        copy_assist(data + to_insert_pos, data + sz, data + sz + 1);
 
-        // DEBT: Might want to consider placement new here, or delegate that
-        // copy responsibility off to copy_assist
-        new (to_insert_pos) value_type(to_insert_value);
+        new (data + to_insert_pos) value_type(to_insert_value);
+
+        unlock();
     }
 
     template <class TForeignImpl>
@@ -672,16 +681,7 @@ public:
     // const_iterator here
     iterator insert(iterator pos, const_reference value)
     {
-        pointer a = lock();
-
-        reference pos_item = pos.lock();
-
-        // all very raw array dependent
-        raw_insert(a, &pos_item, &value);
-
-        pos.unlock();
-
-        unlock();
+        raw_insert(pos - cbegin(), &value);
 
         return pos;
     }
@@ -689,22 +689,7 @@ public:
 #if __cpp_rvalue_references
     iterator insert(iterator pos, value_type&& value)
     {
-        pointer a = lock();
-
-#if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
-        reference pos_item = *pos;
-#else
-        reference pos_item = pos.lock();
-#endif
-
-        // all very raw array dependent
-        raw_insert(a, &pos_item, std::move(value));
-
-#if !FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
-        pos.unlock();
-#endif
-
-        unlock();
+        raw_insert(pos - cbegin(), std::move(value));
 
         return pos;
     }
@@ -714,12 +699,7 @@ public:
     template <class InputIt>
     iterator insert(const_iterator pos, InputIt first, InputIt last)
     {
-        const_reference pos_item = pos.lock();
-
-        raw_insert(lock(), &pos_item, first, last);
-
-        unlock();
-        pos.unlock();
+        raw_insert(pos - cbegin(), first, last);
 
         return pos;
     }

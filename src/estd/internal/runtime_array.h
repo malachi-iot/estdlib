@@ -256,7 +256,7 @@ public:
         return create_iterator();
     }
 
-    const_iterator cbegin() const
+    constexpr const_iterator cbegin() const
     {
         return create_iterator();
     }
@@ -276,7 +276,7 @@ public:
     }
 
 
-    const_iterator cend() const
+    constexpr const_iterator cend() const
     {
         return create_iterator(size());
         /*
