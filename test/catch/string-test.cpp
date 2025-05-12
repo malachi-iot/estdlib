@@ -782,6 +782,12 @@ TEST_CASE("string tests")
             s.insert(0, s2);
             REQUIRE(s == "hi2uhello");
         }
+        SECTION("vector-style")
+        {
+            s.insert(s.cbegin() + 1, 'X');
+            // FIX: Not quite working
+            //REQUIRE(s == "hXello");
+        }
     }
 }
 

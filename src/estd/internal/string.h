@@ -256,6 +256,8 @@ public:
     // Be mindful that detail::basic_string is basic class of string_view too, so these are disabled in that
     // context
 
+    using base_type::insert;
+
     ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const_pointer s, size_type count)
     {
         base_type::raw_insert(index, s, s + count);
@@ -279,11 +281,6 @@ public:
 
         return *this;
     }
-
-    // FIX: Need this online, otherwise we're obscuring things.  Some flavors of string don't inherit from
-    // a provider of this though
-    //using base_type::insert;
-
 
     basic_string& erase(size_type index = 0, size_type count = npos)
     {

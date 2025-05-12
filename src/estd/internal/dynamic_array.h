@@ -714,17 +714,17 @@ public:
 // works too, but it's nice to eliminate all that clutter for scenarios (string_view)
 // which don't need it
 template <class Allocator, class Policy>
-#if !UNUSED
 struct dynamic_array<impl::allocated_array<Allocator, Policy> > :
     allocated_array<impl::allocated_array<Allocator, Policy> >
 {
-    typedef allocated_array<impl::allocated_array<Allocator, Policy> > base_type;
+    using base_type = allocated_array<impl::allocated_array<Allocator, Policy> >;
+
+    // DEBT: Dummy to satisfy basic_string's base_type::insert.  Harmless, just a little
+    // confusing
+    void insert();
 
     ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 };
-#else
-using dynamic_array = allocated_array<impl::allocated_array<Allocator, Policy>>;
-#endif
 
 }
 
