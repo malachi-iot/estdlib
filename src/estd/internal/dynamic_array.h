@@ -276,9 +276,11 @@ protected:
 #ifdef __cpp_rvalue_references
     void raw_insert(unsigned to_insert_pos, value_type&& to_insert_value)
     {
-        grow(1);
+        // DEBT: Sneaky detail is growing null-terminated strings doesn't reflect in size.
+        // we need a more elegant provision than what we do here
+        const size_type sz = size() + 1;
 
-        const size_type sz = size();
+        grow(1);
 
         // NOTE: Keeping around to use for optimization of trivial cases
         //size_type raw_typed_pos = to_insert_pos - a;

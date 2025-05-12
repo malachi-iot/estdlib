@@ -786,7 +786,7 @@ TEST_CASE("string tests")
         {
             s.insert(s.cbegin() + 1, 'X');
             // FIX: Not quite working
-            //REQUIRE(s == "hXello");
+            REQUIRE(s == "hXello");
         }
     }
 }
