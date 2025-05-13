@@ -70,6 +70,9 @@ struct traditional_accessor : locking_accessor<impl::traditional_accessor<T> >
 };
 
 
+/*
+ * 13MAY25 MB - These seem like an awful idea.  Commenting out. Maybe my memory will jog
+ * why these were needed.  Technically a breaking change
 // DEBT: Move this up to locking_accessor area
 template <class T>
 traditional_accessor<T> operator-(const traditional_accessor<T>& lhs, const T& rhs)
@@ -82,6 +85,7 @@ bool operator==(const T& lhs, const traditional_accessor<T>& rhs)
 {
     return lhs == rhs.clock();
 }
+*/
 
 
 }}
