@@ -52,7 +52,7 @@ public:
     using typename base_type::const_pointer;
 
     using typename base_type::allocator_type;
-    typedef typename base_type::impl_type::policy_type policy_type;
+    using policy_type = typename base_type::impl_type::policy_type;
     typedef typename policy_type::char_traits traits_type;
 
     static constexpr auto npos = (size_type) -1;
@@ -258,8 +258,16 @@ public:
 
     using base_type::insert;
 
+    static ESTD_CPP_CONSTEVAL bool assert_mutable()
+    {
+        static_assert(policy_type::is_constant() == false, "This class is read only");
+        return policy_type::is_constant();
+    }
+
     ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const_pointer s, size_type count)
     {
+        assert_mutable();
+
         base_type::raw_insert(index, s, s + count);
 
         return *this;
@@ -273,6 +281,8 @@ public:
     template <class Impl2>
     basic_string& insert(size_type index, const basic_string<Impl2>& str)
     {
+        assert_mutable();
+
         const_pointer src = str.clock();
 
         base_type::raw_insert(index, src, src + str.size());
@@ -284,7 +294,7 @@ public:
 
     basic_string& erase(size_type index = 0, size_type count = npos)
     {
-        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+        assert_mutable();
 
         size_type size_minus_index = base_type::size() - index;
         // NOTE: A bit tricky, if we don't use helper size_minus_index, template
@@ -300,7 +310,7 @@ public:
     template <class Impl2>
     basic_string& operator=(const internal::allocated_array<Impl2>& copy_from)   // NOLINT
     {
-        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+        assert_mutable();
 
         base_type::assign(copy_from);
         return *this;
@@ -308,7 +318,7 @@ public:
 
     basic_string& operator=(const_pointer s)
     {
-        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+        assert_mutable();
 
         // DEBT: This can be optimized
         base_type::assign(s, strlen(s));
@@ -319,7 +329,7 @@ public:
     template <class AppendResult>
     static void assert_append(AppendResult) //typename base_type::append_result r)
     {
-        static_assert(base_type::policy_type::is_constant() == false, "This class is read only");
+        assert_mutable();
 
 #if FEATURE_ESTD_DYNAMIC_ARRAY_BOUNDS_CHECK
         if(r.has_value() == false)

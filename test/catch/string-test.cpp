@@ -785,7 +785,6 @@ TEST_CASE("string tests")
         SECTION("vector-style")
         {
             s.insert(s.cbegin() + 1, 'X');
-            // FIX: Not quite working
             REQUIRE(s == "hXello");
         }
     }

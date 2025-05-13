@@ -124,6 +124,24 @@ TEST_CASE("string_view")
     {
         constexpr string_view sv("test", 4);
     }
+    SECTION("insert")
+    {
+        string_view s("test");
+
+        SECTION("prohibidabo")
+        {
+            // Correctly fails compilation
+            //s.insert(1, "X");
+        }
+        SECTION("into a string")
+        {
+            estd::layer1::string<128, false> to("hello");
+
+            to.insert(0, s);
+
+            REQUIRE(to == "testhello");
+        }
+    }
 }
 
 
