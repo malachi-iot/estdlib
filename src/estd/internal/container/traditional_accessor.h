@@ -15,7 +15,7 @@ namespace impl {
 template <class T>
 struct traditional_accessor
 {
-    ESTD_CPP_STD_VALUE_TYPE(T);
+    ESTD_CPP_STD_VALUE_TYPE(T)
 
 private:
     pointer p;
@@ -26,9 +26,9 @@ public:
     typedef reference locked_type;
     typedef const_reference const_locked_type;
 
-    template <class TAllocator>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(TAllocator& a,
-        const typename allocator_traits<TAllocator>::handle_with_offset& h) :
+    template <class Allocator>
+    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(Allocator& a,
+        const typename allocator_traits<Allocator>::handle_with_offset& h) :
         p(&a.lock(h))
     {
     }
@@ -36,12 +36,12 @@ public:
     ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(reference v) :
         p(&v) {}
 
-    offset_type offset() { return p; }
-    const_offset_type offset() const { return p; }
+    ESTD_CPP_CONSTEXPR(17) offset_type offset() { return p; }
+    constexpr const_offset_type offset() const { return p; }
 
-    reference lock() { return *p; }
-    const_reference lock() const { return *p; }
-    static void unlock() {}
+    ESTD_CPP_CONSTEXPR(17) reference lock() { return *p; }
+    constexpr const_reference lock() const { return *p; }
+    static ESTD_CPP_CONSTEVAL void unlock() {}
 };
 
 }

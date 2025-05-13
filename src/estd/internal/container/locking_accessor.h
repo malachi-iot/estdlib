@@ -33,13 +33,13 @@ public:
     //ESTD_CPP_CONSTEXPR_RET EXPLICIT locking_accessor(reference r) : impl_(r) {}
     ESTD_CPP_FORWARDING_CTOR_MEMBER(locking_accessor, impl_)
 
-    offset_type h_exp() { return impl_.offset(); }
-    const_offset_type h_exp() const { return impl_.offset(); }
+    ESTD_CPP_CONSTEXPR(17) offset_type h_exp() { return impl_.offset(); }
+    constexpr const_offset_type h_exp() const { return impl_.offset(); }
 
-    locked_type lock() { return impl_.lock(); }
-    const_locked_type clock() const { return impl_.lock(); }
-    void unlock() { return impl_.unlock(); }
-    void cunlock() const { return impl_.unlock(); }
+    ESTD_CPP_CONSTEXPR(17) locked_type lock() { return impl_.lock(); }
+    constexpr const_locked_type clock() const { return impl_.lock(); }
+    constexpr void unlock() { return impl_.unlock(); }
+    constexpr void cunlock() const { return impl_.unlock(); }
 
     // DEBT: Needs filtering
     // DEBT: Leaves unlocked!
@@ -57,14 +57,14 @@ public:
         return *this;
     }
 
-    bool operator==(const_reference& compare_to) const
+    ESTD_CPP_CONSTEXPR(14) bool operator==(const_reference& compare_to) const
     {
         bool r = clock() == compare_to;
         cunlock();
         return r;
     }
 
-    bool operator!=(const_reference& compare_to) const
+    ESTD_CPP_CONSTEXPR(14) bool operator!=(const_reference& compare_to) const
     {
         bool r = clock() != compare_to;
         cunlock();
