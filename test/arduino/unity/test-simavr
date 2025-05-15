@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# As per README.md
+pio test -e simavr --without-uploading
