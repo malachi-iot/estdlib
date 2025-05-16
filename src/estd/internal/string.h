@@ -103,7 +103,7 @@ public:
     constexpr size_type length() const { return base_type::size(); }
 
     template <class Impl2>
-    int compare(const internal::allocated_array<Impl2>& a) const
+    ESTD_CPP_CONSTEXPR(14) int compare(const internal::allocated_array<Impl2>& a) const
     {
         // NOTE: Underlying compare never pays attention to null termination,
         // so we are safe comparing against a non-string here
@@ -115,27 +115,20 @@ public:
     }
 
     // compare to a C-style string
-    int compare(const_pointer s) const
+    constexpr int compare(const_pointer s) const
     {
         return compare(s, strlen(s));
     }
 
+    using base_type::starts_with;
 
     // compare to a C-style string
-    bool starts_with(const_pointer compare_to) const
+    constexpr bool starts_with(const_pointer compare_to) const
     {
         return helper::starts_with(*this, compare_to);
     }
 
 
-
-    // Keeping this as I expect to eventually need a string/char traits aware
-    // version of the character-by-character comparison
-    template <class Impl2>
-    bool starts_with(const internal::allocated_array<Impl2>& compare_to) const  // NOLINT
-    {
-        return base_type::starts_with(compare_to);
-    }
 
     size_type find(value_type ch, size_type pos = 0) const
     {
@@ -258,10 +251,10 @@ public:
 
     using base_type::insert;
 
-    static ESTD_CPP_CONSTEVAL bool assert_mutable()
+    static constexpr bool assert_mutable()
     {
         static_assert(policy_type::is_constant() == false, "This class is read only");
-        return policy_type::is_constant();
+        return {};
     }
 
     ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const_pointer s, size_type count)
