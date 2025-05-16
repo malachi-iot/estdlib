@@ -1,8 +1,15 @@
-# v0.8.6 - #####25
+# v0.8.6 - 16MAY25
+
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/106 added pointer+len constructor
+* https://github.com/malachi-iot/estdlib/issues/107 additional string `insert` operations
 
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/104 Arduino fixups with string use
+* https://github.com/malachi-iot/estdlib/issues/105 repair wrong datatype in hash
+* https://github.com/malachi-iot/estdlib/issues/108 low-level accessor cleanup
 
 # v0.8.5 - 03MAY25
 
