@@ -19,6 +19,14 @@ Items marked for removal are called "sparse".  In broad terms, an item is in one
 * null = null key_type. meta content (gc flag = 0)
 * sparse = null key_type. meta content (gc flag = 1)
 
+### sparse mode
+
+Primary purpose is as a placeholder in a bucket so that null entries
+don't interrupt discovery of active entries
+
+This way a bucket can effectively have a bunch of empty slots from prior
+deletions without needing to move the active entry to the front of the bucket.
+
 # Structures
 
 ## control_type
