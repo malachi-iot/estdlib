@@ -27,6 +27,11 @@ struct less<pair<Key, test::retry_item>*>
 
 }
 
+struct buf_item
+{
+    char buf[0];
+};
+
 TEST_CASE("unordered")
 {
     SECTION("unordered_map")
@@ -156,6 +161,20 @@ TEST_CASE("unordered")
 
             it1 = map.begin();
             REQUIRE(it1 == map.end());
+        }
+    }
+    SECTION("unordered_map: edge cases")
+    {
+        SECTION("more complicated item")
+        {
+            using clock = std::chrono::steady_clock;
+            using time_point = typename clock::time_point;
+            using item_type = test::retry_item_base<time_point, buf_item>;
+            //test::retry_tracker<int, item_type> tracker;
+            // https://github.com/malachi-iot/estdlib/issues/110 - reproduced
+            //estd::layer1::unordered_map<int, item_type, 10> map;
+
+            //map.try_emplace(1, 0);
         }
     }
     SECTION("unordered_set")

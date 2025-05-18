@@ -57,9 +57,9 @@ template <class Key, class T, class Hash, class KeyEqual, class Nullable>
 struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
 {
     using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
+    using typename base_type::mapped_type;
     using traits = unordered_map_traits;
     using nullable = Nullable;
-    using mapped_type = typename traits::mapped_type;
     using base_type::key_eq;
 
     // Mainly used for unordered_map since it has an unused area when key is null

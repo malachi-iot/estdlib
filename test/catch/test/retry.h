@@ -7,11 +7,16 @@
 
 namespace estd { namespace test {
 
-struct retry_item
+template <typename TimeStamp, class Impl = monostate>
+struct retry_item_base : Impl
 {
-    int timestamp_;
+    TimeStamp timestamp_;
     bool ack_received_{false};
+
+    explicit constexpr retry_item_base(TimeStamp timestamp) : timestamp_{timestamp}  {}
 };
+
+using retry_item = retry_item_base<int>;
 
 template <class Key, class T = retry_item, size_t N = 10>
 class retry_tracker
