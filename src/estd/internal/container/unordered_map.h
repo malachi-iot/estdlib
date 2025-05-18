@@ -130,7 +130,7 @@ private:
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(control_pointer it = container_.begin(); it != container_.cend() && it < pos; ++it)
+        for(control_pointer it = container_.begin() + n; it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_null_or_sparse(*it))

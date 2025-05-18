@@ -4,6 +4,8 @@
 #include "../../../utility.h"
 #include "../../platform.h"
 
+#include "../../macro/push.h"
+
 namespace estd {
 
 namespace internal {
@@ -63,8 +65,19 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     using nullable = Nullable;
     using base_type::key_eq;
 
+    static constexpr unsigned align_key_value = alignof(key_type);
+    static constexpr unsigned align_mapped_value = alignof(mapped_type);
+
+    // ensure mapped_values with pointers etc. don't cozy up too closely
+    // to key_value (normal struct composition i.e. pair does this, but we in effect
+    // bypass that with our byte storage trick)
+    // DEBT: crude application with align_key_value.  clang complained about a minimum of 2,
+    // unknown exactly how it arrived at that number.
+    static constexpr unsigned align_value = align_mapped_value > align_key_value ?
+        align_mapped_value : align_key_value;
+
     // Mainly used for unordered_map since it has an unused area when key is null
-    union alignas(mapped_type) meta
+    union alignas(align_value) meta
     {
         byte storage[sizeof(mapped_type)];
 
@@ -161,3 +174,5 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
 }
 
 }
+
+#include "../../macro/pop.h"
