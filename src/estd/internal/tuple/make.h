@@ -11,7 +11,7 @@ namespace estd {
 template <class T, class ...Args>
 constexpr T make_from_tuple(tuple<Args...>&& t) noexcept
 {
-    return apply([](Args&&...args)
+    return estd::apply([](Args&&...args)
     {
         return T(std::forward<Args>(args)...);
     }, std::forward<tuple<Args...>>(t));
