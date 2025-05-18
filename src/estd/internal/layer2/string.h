@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../fwd/string.h"
 #include "../fwd/string_view.h"
 #include "../../policy/string.h"
 
@@ -132,11 +133,6 @@ public:
     }
 };
 
-
-#ifdef __cpp_alias_templates
-template <size_t N = 0, bool null_terminated = true>
-using string = basic_string<char, N, null_terminated>;
-#endif
 
 using const_string = basic_string<const char, 0>;
 

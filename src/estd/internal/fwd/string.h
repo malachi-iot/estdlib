@@ -140,6 +140,9 @@ template<class Char, size_t N, bool null_terminated = true,
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
 class basic_string;
 
+template <size_t N = 0, bool null_terminated = true>
+using string = basic_string<char, N, null_terminated>;
+
 }
 
 }
