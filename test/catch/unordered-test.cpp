@@ -1,5 +1,7 @@
 #include <catch2/catch_all.hpp>
 
+#include <chrono>
+
 #include <estd/functional.h>
 #include <estd/string.h>
 #include <estd/unordered_set.h>
@@ -167,14 +169,14 @@ TEST_CASE("unordered")
     {
         SECTION("more complicated item")
         {
-            using clock = std::chrono::steady_clock;
+            using namespace std::chrono;
+            using clock = steady_clock;
             using time_point = typename clock::time_point;
-            using item_type = test::retry_item_base<time_point, buf_item>;
-            //test::retry_tracker<int, item_type> tracker;
+            using item_type = test::retry_item_base<time_point>;
             // https://github.com/malachi-iot/estdlib/issues/110 - reproduced
-            //estd::layer1::unordered_map<int, item_type, 10> map;
+            estd::layer1::unordered_map<int, item_type, 10> map;
 
-            //map.try_emplace(1, 0);
+            map.try_emplace(1, time_point(seconds(1)));
         }
     }
     SECTION("unordered_set")

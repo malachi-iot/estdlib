@@ -7,6 +7,8 @@
 #include "../array.h"
 #include "unordered/base.h"
 
+#include "../macro/push.h"
+
 namespace estd {
 
 namespace internal {
@@ -66,6 +68,10 @@ public:
     // Check that our casting wizardry doesn't get us into too much trouble
     static_assert(sizeof(typename base_type::meta) == sizeof(typename value_type::second_type),
             "size mismatch between meta and exposed value_type");
+    static_assert(sizeof(control_type::first) == sizeof(value_type::first),
+        "size mismatch between key of control_type and value_type");
+    static_assert(offsetof(control_type, second) == offsetof(value_type, second),
+            "mapped_type position mismatch between control_type and value_type");
     static_assert(sizeof(control_type) == sizeof(value_type),
             "size mismatch between meta and exposed value_type");
 
@@ -213,8 +219,8 @@ public:
                 ret.first->first = key;
             else
                 new (ret.first) value_type(piecewise_construct_t{},
-                    forward_as_tuple(key),
-                    forward_as_tuple(std::forward<Args>(args)...));
+                    estd::forward_as_tuple(key),
+                    estd::forward_as_tuple(std::forward<Args>(args)...));
         }
 
         return wrap_result(ret);
@@ -374,3 +380,5 @@ public:
 }
 
 }
+
+#include "../macro/pop.h"

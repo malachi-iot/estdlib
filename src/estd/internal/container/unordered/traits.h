@@ -58,12 +58,13 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
 {
     using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
     using typename base_type::mapped_type;
+    using typename base_type::key_type;
     using traits = unordered_map_traits;
     using nullable = Nullable;
     using base_type::key_eq;
 
     // Mainly used for unordered_map since it has an unused area when key is null
-    union meta
+    union alignas(mapped_type) meta
     {
         byte storage[sizeof(mapped_type)];
 
@@ -81,8 +82,8 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
         mapped_type& mapped() { return * (mapped_type*) storage; }
     };
 
-    using control_type = pair<typename traits::key_type, meta>;
-    using value_type = pair<const typename traits::key_type, mapped_type>;
+    using control_type = pair<key_type, meta>;
+    using value_type = pair<const key_type, mapped_type>;
 
     /// @brief Checks for null OR sparse
     /// @param v

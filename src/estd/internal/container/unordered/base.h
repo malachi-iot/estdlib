@@ -4,6 +4,8 @@
 #include "traits.h"
 #include "../../platform.h"
 
+#include "../../macro/push.h"
+
 namespace estd {
 
 namespace internal {
@@ -141,7 +143,9 @@ protected:
     template <class K, class Control>
     static constexpr bool key_eq(const K& k, const Control& c)
     {
-        return key_eq()(k, traits::key(c));
+        // DEBT: changing conventional meaning of key_eq feels slightly sloppy and it also
+        // seems to confuse GCC 7.x (need base_type explicitly here)
+        return base_type::key_eq()(k, traits::key(c));
     }
 
     ///
@@ -487,3 +491,5 @@ public:
 }
 
 }
+
+#include "../../macro/pop.h"

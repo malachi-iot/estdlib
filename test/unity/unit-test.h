@@ -39,6 +39,7 @@ void test_string();
 void test_thread();
 void test_tuple();
 void test_type_traits();
+void test_unordered();
 void test_variadic();
 void test_variant();
 
