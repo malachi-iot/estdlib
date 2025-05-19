@@ -85,8 +85,10 @@ public:
     };
 
     // The more collisions and/or duplicates you expect, the bigger this wants to be.
-    // Idea being if you have two buckets near each other of only size 1, you'll never
-    // have room to insert a collision/duplicate
+    // Idea being if you have two buckets near each other of only size 1, you'll not
+    // have room to insert a collision/duplicate in that bucket - and end up in a linear
+    // probe overflow (which isn't the end of the world, really)
+    // DEBT: Make depth adjustable via traits/impl
     static constexpr unsigned bucket_depth = 4;
 
     ESTD_CPP_ATTR_NODISCARD

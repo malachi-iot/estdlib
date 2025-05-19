@@ -347,13 +347,19 @@ public:
         control->second.bucket = n;
     }
 
+    // equivelant to erase with iterator, but merely takes direct value_type*
+    void erase_ll(pointer pos)
+    {
+        erase_ll({ cast_control(pos), index(traits::key(*pos)) });
+    }
+
     // https://en.cppreference.com/w/cpp/container/unordered_map/erase
     // NOTE: example implies internal ordering of unordered_map is predictable, which
     // on one hand feels reasonable, but on the other seems to conflict with the notion
     // that we are officially unordered.
     iterator erase(iterator pos)
     {
-        erase_ll({ cast_control(pos.value()), index(traits::key(*pos)) });
+        erase_ll(pos.value());
 
         return { this, skip_null(pos.value() + 1) };
     }
