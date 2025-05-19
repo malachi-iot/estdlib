@@ -142,7 +142,8 @@ private:
                 {
                     // moving out of the bucket terminates the GC operation, no null slot found
                     // NOTE: we could make an extended mode which just reaches on forever, linear probing doesn't
-                    // prohibit that at all
+                    // prohibit that at all - it's just crossing into a new bucket now we have to do some extra checks.
+                    // a prune_sparse_ll may make that easier
                     if(control->second.bucket != n) return pos;
                 }
 
@@ -152,6 +153,35 @@ private:
         }
 
         return pos;
+    }
+
+#if UNIT_TESTING
+public:
+#endif
+    // for every trailing marked_for_gc (doesn't have an active slot after him) turn to null
+    // UNTESTED
+    void prune_sparse_ll(control_pointer pos)
+    {
+        control_pointer start = pos;
+        const size_t n = pos->second.bucket;
+
+        // get to end of identified bucket, skipping past sparse and active bucket items
+        // DEBT: Be careful of index(0)
+        for(;(is_sparse(*pos, n) || index(pos->first) == n) && pos != container_.cend(); ++pos)
+        {
+        }
+
+        if(pos == start) return;        // found null right away, which is end of bucket
+
+        --pos;
+        --start;
+
+        for(; pos != start; --pos)
+        {
+            if(!is_sparse(*pos, n)) return;
+
+            gc_sparse_ll(pos);
+        }
     }
 
 public:
@@ -284,18 +314,21 @@ public:
         return { this, (pointer) gc_active_ll(cast_control(pos.value())) };
     }
 
-    // Demotes this sparse 'pos' to completely deleted 'null'
-    void gc_sparse_ll(pointer pos)
+    void gc_sparse_ll(control_pointer control)
     {
         //const key_type& key = pos->first;
         //const size_type n = index(key);
 
-        assert(is_null_or_sparse(*pos));
-
-        control_pointer control = cast_control(pos);
+        assert(is_null_or_sparse(*control));
 
         //control->second.bucket = npos();
         control->second.marked_for_gc = false;
+    }
+
+    // Demotes this sparse 'pos' to completely deleted 'null'
+    void gc_sparse_ll(pointer pos)
+    {
+        gc_sparse_ll(cast_control(pos));
     }
 
     // Conforms to spec in that:
