@@ -164,7 +164,7 @@ protected:
 
         control_pointer it = &container_[n];
 
-        // Move over occupied spots.  Sparse also counts as occupied
+        // Move over occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
         for(;traits::is_null_or_sparse(*it) == false || traits::is_sparse(*it, n); ++it)
         {
@@ -289,8 +289,14 @@ protected:
             // If we reach end of entire set, indicate we are at the end
             if(it_ == it.it_)   return true;
 
+            // If we encounter a sparse within this bucket, we expect to skip over him
+            // so this is not the end
+            if(traits::is_sparse(*it_, n_)) return false;
+
             // If we reach a null slot, then that's the end of the bucket
             if(parent_->is_null_or_sparse(*it_)) return true;
+
+            // Reaching here means we have an active slot
 
             // if n_ doesn't match current key hash, we have reached the end
             // of this bucket
@@ -302,9 +308,15 @@ protected:
             // If we reach end of entire set, indicate we are NOT NOT at the end
             if(it_ == it.it_)   return false;
 
+            // If we encounter a sparse within this bucket, we expect to skip over him
+            // so this is NOT the end
+            if(traits::is_sparse(*it_, n_)) return true;
+
             // If we reach a null slot, that's the end of the bucket - so we fail
             // to assert it's not the end (return false)
             if(parent_->is_null_or_sparse(*it_)) return false;
+
+            // Reaching here means we have an active slot
 
             // if n_ matches current key hash, we haven't yet reached the
             // end of this bucket
