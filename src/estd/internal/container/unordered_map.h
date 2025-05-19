@@ -137,20 +137,17 @@ private:
             {
                 control_pointer control = it;
 
-                // if sparse, it's not a swap candidate
+                // if sparse, double check we're in the same bucket still
                 if(control->second.marked_for_gc)
                 {
-                    // make sure we're in the same bucket
                     // moving out of the bucket terminates the GC operation, no null slot found
+                    // NOTE: we could make an extended mode which just reaches on forever, linear probing doesn't
+                    // prohibit that at all
                     if(control->second.bucket != n) return pos;
                 }
-                // if regular null (not sparse) and we are physically before active
-                // item 'pos', do a swap and exit
-                else
-                {
-                    it->swap(*pos);
-                    return it;
-                }
+
+                it->swap(*pos);
+                return it;
             }
         }
 

@@ -36,9 +36,13 @@ struct buf_item
 
 TEST_CASE("unordered")
 {
+    using map_type = estd::layer1::unordered_map<int, layer1::string<32>, 16>;
+    using iter = typename map_type::iterator;
+    using pair = estd::pair<iter, bool>;
+
     SECTION("unordered_map")
     {
-        using type = estd::layer1::unordered_map<int, layer1::string<32>, 16>;
+        using type = map_type;
         //using value_type = typename type::value_type;
         using iter = typename type::iterator;
         //using const_iter = typename type::const_iterator;
@@ -132,18 +136,21 @@ TEST_CASE("unordered")
         }
         SECTION("erase and gc (distinct steps)")
         {
-            // DEBT: Would try emplace but that one doesn't permit dups
-            r2 = map.insert({2, "hello1.1"}, true);
-            REQUIRE(r2.second);
-            iter p1 = map.find(2);
-            REQUIRE(p1->second == "hello1");
-            map.erase(p1);
-            // DEBT: insert itself needs to pass back iter
-            p1 = map.gc_active(r2.first);
-            REQUIRE(p1->second == "hello1.1");
-            map.erase(p1);
-            //p1 = map.gc_active_ll(p1);
-            REQUIRE(map.count(2) == 0);
+            SECTION("duplicate")
+            {
+                // DEBT: Would try emplace but that one doesn't permit dups
+                r2 = map.insert({2, "hello1.1"}, true);
+                REQUIRE(r2.second);
+                iter p1 = map.find(2);
+                REQUIRE(p1->second == "hello1");
+                map.erase(p1);
+                // DEBT: insert itself needs to pass back iter
+                p1 = map.gc_active(r2.first);
+                REQUIRE(p1->second == "hello1.1");
+                map.erase(p1);
+                //p1 = map.gc_active_ll(p1);
+                REQUIRE(map.count(2) == 0);
+            }
         }
         SECTION("clear")
         {
@@ -165,6 +172,38 @@ TEST_CASE("unordered")
             REQUIRE(it1 == map.end());
         }
     }
+    SECTION("unordered_map: aggressive gc")
+    {
+        map_type map;
+        pair r = map.insert({1, "hello1"});
+        REQUIRE(r.second);
+        r = map.insert({2, "hello2"});
+        REQUIRE(r.second);
+        r = map.insert({3, "hello3"});
+        REQUIRE(r.second);
+        r = map.insert({4, "hello4"});
+        REQUIRE(r.second);
+        r = map.insert({5, "hello5"});
+        REQUIRE(r.second);
+        r = map.insert({6, "hello6"});
+        REQUIRE(r.second);
+        REQUIRE(map.size() == 6);
+
+        unsigned count = map.bucket_size(0);
+        REQUIRE(count == 1);
+        count = map.bucket_size(map_type::bucket_depth);
+        REQUIRE(count == 2);
+        count = map.bucket_size(map_type::bucket_depth * 2);
+        REQUIRE(count == 2);
+        count = map.bucket_size(map_type::bucket_depth * 3);
+        REQUIRE(count == 1);
+
+        int r1 = map.erase(2);
+        REQUIRE(r1 == 1);
+        REQUIRE(map.size() == 5);
+        count = map.bucket_size(map_type::bucket_depth * 2);
+        REQUIRE(count == 2);
+    }
     SECTION("unordered_map: edge cases")
     {
         SECTION("more complicated item")
@@ -182,7 +221,7 @@ TEST_CASE("unordered")
     SECTION("unordered_set")
     {
         using type = estd::layer1::unordered_set<int, 10>;
-        using rtype = pair<type::iterator, bool>;
+        using rtype = estd::pair<type::iterator, bool>;
 
         type value;
 
