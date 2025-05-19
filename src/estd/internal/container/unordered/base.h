@@ -67,6 +67,14 @@ protected:
         return skip_null(it, cast(container_.cend()));
     }
 
+    template <class Control>
+    ESTD_CPP_CONSTEXPR(14) Control skip_sparse(Control p, unsigned n) const
+    {
+        for(; traits::is_sparse(*p, n) && p != container_.cend(); ++p)    {}
+
+        return p;
+    }
+
 
 public:
     using size_type = unsigned;
@@ -166,7 +174,7 @@ protected:
 
         // Move over occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
-        for(;traits::is_null_or_sparse(*it) == false || traits::is_sparse(*it, n); ++it)
+        for(;traits::is_null_or_sparse(*it) == false; ++it)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
@@ -474,19 +482,20 @@ public:
         return { this, cast(container_.cend()) };
     }
 
+    // FIX: These guys need to skip over sparse
     local_iterator begin(size_type n)
     {
-        return { this, n, &container_[n] };
+        return { this, n, skip_sparse(&container_[n], n) };
     }
 
     constexpr const_local_iterator begin(size_type n) const
     {
-        return { this, n, &container_[n] };
+        return { this, n, skip_sparse(&container_[n], n) };
     }
 
     constexpr const_local_iterator cbegin(size_type n) const
     {
-        return { this, n, &container_[n] };
+        return { this, n, skip_sparse(&container_[n], n) };
     }
 
     constexpr end_local_iterator end(size_type) const

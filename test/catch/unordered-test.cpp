@@ -198,11 +198,27 @@ TEST_CASE("unordered")
         count = map.bucket_size(map_type::bucket_depth * 3);
         REQUIRE(count == 1);
 
+        // Erase key#2 which is bucket index 2 (x4 = 8)
         int r1 = map.erase(2);
         REQUIRE(r1 == 1);
         REQUIRE(map.size() == 5);
+
+        count = map.bucket_size(0);
+        REQUIRE(count == 1);
+        count = map.bucket_size(map_type::bucket_depth * 1);
+        REQUIRE(count == 2);
+        count = map.bucket_size(map_type::bucket_depth * 2);
+        REQUIRE(count == 1);
+        count = map.bucket_size(map_type::bucket_depth * 3);
+        REQUIRE(count == 1);
+
+        r = map.insert({2, "hello2.1"});
+        REQUIRE(r.second);
+        REQUIRE(map.size() == 6);
         count = map.bucket_size(map_type::bucket_depth * 2);
         REQUIRE(count == 2);
+
+        REQUIRE(map[2] == "hello2.1");
     }
     SECTION("unordered_map: edge cases")
     {
