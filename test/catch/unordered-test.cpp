@@ -219,6 +219,12 @@ TEST_CASE("unordered")
         REQUIRE(count == 2);
 
         REQUIRE(map[2] == "hello2.1");
+        r1 = map.erase(2);
+        REQUIRE(r1 == 1);
+        REQUIRE(map.size() == 5);
+        r1 = map.erase(6);
+        REQUIRE(r1 == 1);
+        REQUIRE(map.size() == 4);
     }
     SECTION("unordered_map: edge cases")
     {
