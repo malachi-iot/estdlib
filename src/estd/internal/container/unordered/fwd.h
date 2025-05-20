@@ -12,7 +12,9 @@ namespace estd { namespace internal {
 template <class T>
 struct nullable_traits;
 
-template <class Key, class T, class Hash = hash<Key>, class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>
+template <class Key,
+    class T, class Hash = hash<Key>,
+    class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>
 struct unordered_map_traits;
 
 template <class Key, class Hash = hash<Key>, class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>
@@ -50,3 +52,7 @@ using unordered_set = internal::unordered_set<
 }
 
 }
+
+#ifndef ESTD_UNORDERED_MAP_BUCKET_SIZE
+#define ESTD_UNORDERED_MAP_BUCKET_SIZE 4
+#endif

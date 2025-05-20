@@ -89,7 +89,7 @@ public:
     // have room to insert a collision/duplicate in that bucket - and end up in a linear
     // probe overflow (which isn't the end of the world, really)
     // DEBT: Make depth adjustable via traits/impl
-    static constexpr unsigned bucket_depth = 4;
+    static constexpr unsigned bucket_depth = ESTD_UNORDERED_MAP_BUCKET_SIZE;
 
     ESTD_CPP_ATTR_NODISCARD
     constexpr size_type max_size() const { return container_.max_size(); }
