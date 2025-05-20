@@ -107,6 +107,14 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
         return nullable{}.is_null(v.first);
     }
 
+    /// @brief Checks for null and NOT sparse
+    /// @param v
+    /// @return false if active item or null AND sparse
+    template <class K, class T2>
+    static constexpr bool is_null_not_sparse(const pair<K, T2>& v)
+    {
+        return is_null_or_sparse(v) ? v.second.marked_for_gc == false : false;
+    }
 
     /// Determines if this ref is sparse - bucket must match also
     /// @param v

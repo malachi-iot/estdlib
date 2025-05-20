@@ -22,7 +22,7 @@ struct less<pair<Key, test::retry_item>*>
 
     bool operator()(const_reference lhs, const_reference rhs) const
     {
-        // NOTE: Doing a 'more' here for convenience
+        // NOTE: Doing a 'greater' here for convenience
         return lhs->second.timestamp_ > rhs->second.timestamp_;
     }
 };

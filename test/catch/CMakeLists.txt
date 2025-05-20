@@ -21,11 +21,15 @@ add_subdirectory(${ROOT_DIR} estd)
 message(DEBUG "c++${CMAKE_CXX_STANDARD} / required=${CMAKE_CXX_STANDARD_REQUIRED}")
 
 set(EXTRA_FILES
-    ${ROOT_DIR}/README.md
-    ${ROOT_DIR}/CHANGELOG.md
-    ${ROOT_DIR}/docs/Variadic.md
-    ${ROOT_DIR}/docs/Units.md
+    README.md
+    CHANGELOG.md
+    docs/container/dynamic_array.md
+    docs/container/unordered_map.md
+    docs/Variadic.md
+    docs/Units.md
 )
+
+list(TRANSFORM EXTRA_FILES PREPEND ${ROOT_DIR}/)
 
 add_executable(${PROJECT_NAME} ${EXTRA_FILES})
 

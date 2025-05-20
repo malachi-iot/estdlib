@@ -20,6 +20,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type = unordered_base<Container, Traits>;
     using base_type::index;
     using base_type::match;
+    using base_type::is_null_not_sparse;
     using base_type::is_null_or_sparse;
     using base_type::container_;
     using base_type::is_sparse;
@@ -84,7 +85,7 @@ private:
     template <class K, class T2>
     static constexpr bool is_null(const pair<K, T2>& v, size_type)
     {
-        return is_null_or_spase(v) && cast_control(&v)->marked_for_gc == false;
+        return is_null_or_sparse(v) && cast_control(&v.second)->marked_for_gc == false;
     }
 
     static constexpr control_pointer cast_control(pointer pos)
@@ -158,6 +159,21 @@ private:
 #if UNIT_TESTING
 public:
 #endif
+    //
+    ///
+    /// @brief prune_sparse_ll null out trailing sparse entries, moving backward
+    /// @param start DEBT: rename - this is end point
+    /// @param pos where to begin nulling from
+    /// @param n
+    ///
+    void prune_sparse_ll(control_pointer start, control_pointer pos, size_type n)
+    {
+        --start;
+
+        for(; is_sparse(*pos, n) && pos != start; --pos)
+            gc_sparse_ll(pos);
+    }
+
     // for every trailing marked_for_gc (doesn't have an active slot after him) turn to null
     // UNTESTED
     void prune_sparse_ll(control_pointer pos)
@@ -173,15 +189,7 @@ public:
 
         if(pos == start) return;        // found null right away, which is end of bucket
 
-        --pos;
-        --start;
-
-        for(; pos != start; --pos)
-        {
-            if(!is_sparse(*pos, n)) return;
-
-            gc_sparse_ll(pos);
-        }
+        prune_sparse_ll(start, --pos, n);
     }
 
 public:
@@ -323,6 +331,8 @@ public:
 
         //control->second.bucket = npos();
         control->second.marked_for_gc = false;
+
+        //prune_sparse_ll(control_pointer);
     }
 
     // Demotes this sparse 'pos' to completely deleted 'null'
@@ -334,17 +344,33 @@ public:
     // Conforms to spec in that:
     // "References and iterators to the erased elements are invalidated.
     //  Other iterators and references are not invalidated. "
-    void erase_ll(find_result<control_pointer> pos)
+    void erase_ll(find_result<control_pointer> pos, bool auto_prune = true)
     {
         const size_type n = pos.second;
         control_pointer control = pos.first;
 
         destruct(control);
 
-        // "mark and sweep" erase rather than erase (and swap) immediately in place.
-        // More inline with spec, namely doesn't disrupt other iterators
-        control->second.marked_for_gc = 1;
-        control->second.bucket = n;
+        const_control_pointer next = control + 1;
+
+        // If no further bucket entries, do prune
+        // that means:
+        // - if we're at the end
+        // - if next entry is an active item in a different bucket
+        // - if next entry is a null entry
+        // then we are clear to null out trailing sparse entries
+        if(auto_prune && (next == container_.cend() || is_null_not_sparse(*next)))
+        {
+            control_pointer start = container_.begin() + n;
+            prune_sparse_ll(start, control, n);
+        }
+        else
+        {
+            // "mark and sweep" erase rather than erase (and swap) immediately in place.
+            // More inline with spec, namely doesn't disrupt other iterators
+            control->second.marked_for_gc = 1;
+            control->second.bucket = n;
+        }
     }
 
     // equivelant to erase with iterator, but merely takes direct value_type*

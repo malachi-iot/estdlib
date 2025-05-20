@@ -4,7 +4,15 @@ Document v0.1
 
 # Scope
 
+This document descibes behavior of `unordered_map` and `unordered_set`
+
 # Architecture
+
+## Key Nullability
+
+Items are indicated as null or active by way of its key.
+
+BEWARE: This can cause problems if your key needs to be "0".  See `unordered_traits` Nullability
 
 ## Garbage Collection
 
@@ -19,10 +27,15 @@ Items marked for removal are called "sparse".  In broad terms, an item is in one
 * null = null key_type. meta content (gc flag = 0)
 * sparse = null key_type. meta content (gc flag = 1)
 
-### sparse mode
+### null item
 
-Primary purpose is as a placeholder in a bucket so that null entries
-don't interrupt discovery of active entries
+Null entries are fair game for allocation of an active item
+AND designate no further searching for items in this bucket is needed.
+
+### sparse item
+
+Sparse entries are a placeholder to 'extend' a bucket forward.  This way null entries
+don't interrupt discovery of active entries.
 
 This way a bucket can effectively have a bunch of empty slots from prior
 deletions without needing to move the active entry to the front of the bucket.
@@ -37,6 +50,13 @@ When key is null meta is in gc/metadata mode
 When key is not null, meta is in storage mode
 
 This type is designed to be 1:1 castable with `value_type`
+
+## find_result
+
+Alias for `pair<control_pointer, size_type>`
+
+Where `size_type` id particular `index()`, or npos if
+not found.
 
 ## key_type
 
