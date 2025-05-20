@@ -361,9 +361,10 @@ public:
         // then we are clear to null out trailing sparse entries
         if(auto_prune && (next == container_.cend() || is_null_not_sparse(*next)))
         {
-            // FIX: Not working yet because destruct above nulls out key
+            // DEBT: Working, needs cleanup
+            gc_sparse_ll(control);
             control_pointer start = container_.begin() + n;
-            prune_sparse_ll(start, control, n);
+            prune_sparse_ll(start, control - 1, n);
         }
         else
         {
