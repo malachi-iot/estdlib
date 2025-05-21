@@ -22,7 +22,7 @@ class unordered_set : public unordered_base<Container, Traits>
     using base_type::container_;
     using typename base_type::insert_result;
     using base_type::insert_precheck;
-    using base_type::skip_null;
+    using base_type::skip_empty;
     using base_type::npos;
     using base_type::index;
     using base_type::find_ll;

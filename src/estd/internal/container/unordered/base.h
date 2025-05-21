@@ -76,7 +76,7 @@ protected:
     // 'It' must be control_pointer or const_control_pointer
     // DEBT: Get rid of 'It2'
     template <class It, class It2>
-    static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
+    static ESTD_CPP_CONSTEXPR(14) It skip_empty(It it, It2 end)
     {
         for(; traits::is_empty(*it) && it != end; ++it)   {}
 
@@ -84,9 +84,9 @@ protected:
     }
 
     template <class It>
-    ESTD_CPP_CONSTEXPR(14) It skip_null(It it) const
+    ESTD_CPP_CONSTEXPR(14) It skip_empty(It it) const
     {
-        return skip_null(it, cast(container_.cend()));
+        return skip_empty(it, cast(container_.cend()));
     }
 
     template <class Control>
@@ -246,7 +246,7 @@ protected:
         {
             ++it_;
 
-            it_ = parent_->skip_null(it_);
+            it_ = parent_->skip_empty(it_);
 
             return *this;
         }
@@ -486,12 +486,12 @@ public:
 
     iterator begin()
     {
-        return { this, skip_null(cast(container_.begin())) };
+        return { this, skip_empty(cast(container_.begin())) };
     }
 
     constexpr const_iterator begin() const
     {
-        return { this, skip_null(cast(container_.cbegin())) };
+        return { this, skip_empty(cast(container_.cbegin())) };
     }
 
     // DEBT: can probably use a hard type like end_iterator (optimization) though

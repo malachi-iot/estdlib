@@ -22,7 +22,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::match;
     using base_type::container_;
     using base_type::is_sparse;
-    using base_type::skip_null;
+    using base_type::skip_empty;
     using base_type::cast;
     using base_type::insert_precheck;
     using traits = Traits;
@@ -384,7 +384,7 @@ public:
     {
         erase_ll(pos.value());
 
-        return { this, skip_null(pos.value() + 1) };
+        return { this, skip_empty(pos.value() + 1) };
     }
 
     void erase_and_gc(iterator pos)
