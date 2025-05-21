@@ -4,7 +4,7 @@ Document v0.1
 
 # Scope
 
-This document descibes behavior of `unordered_map` and `unordered_set`
+This document descibes behavior of `unordered_map`
 
 # Architecture
 

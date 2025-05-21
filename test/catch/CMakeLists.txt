@@ -23,8 +23,10 @@ message(DEBUG "c++${CMAKE_CXX_STANDARD} / required=${CMAKE_CXX_STANDARD_REQUIRED
 set(EXTRA_FILES
     README.md
     CHANGELOG.md
+    docs/container/allocated_array.md
     docs/container/dynamic_array.md
     docs/container/unordered_map.md
+    docs/container/unordered_set.md
     docs/Variadic.md
     docs/Units.md
 )

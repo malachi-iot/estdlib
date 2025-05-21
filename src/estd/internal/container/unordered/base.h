@@ -537,6 +537,26 @@ public:
     }
 };
 
+// UNTESTED for unodered_map
+template <class Container, class Traits>
+ESTD_CPP_CONSTEXPR(14) bool operator==(const unordered_base<Container, Traits>& lhs,
+    const unordered_base<Container, Traits>& rhs)
+{
+    using traits = Traits;
+    using it = typename unordered_base<Container, Traits>::const_iterator;
+
+    // DEBT: Not optimal, since we have to iterate inside size() to make this determination
+    if(lhs.size() != rhs.size())    return false;
+
+    for(it l = lhs.begin(), r = rhs.begin(); l != lhs.cend(); ++l, ++r)
+    {
+        if(traits::key(*l) != traits::key(*r)) return false;
+    }
+
+    return true;
+}
+
+
 }
 
 }

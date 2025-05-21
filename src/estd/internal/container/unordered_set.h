@@ -22,7 +22,6 @@ class unordered_set : public unordered_base<Container, Traits>
     using base_type::container_;
     using typename base_type::insert_result;
     using base_type::insert_precheck;
-    using base_type::skip_empty;
     using base_type::npos;
     using base_type::index;
     using base_type::find_ll;
@@ -50,15 +49,6 @@ public:
 
         return { { this, ret.first }, ret.second };
     }
-
-    /*
-    iterator erase(iterator pos)
-    {
-        erase_ll({ cast_control(pos.value()), index(*pos) });
-
-        return { this, skip_null(pos.value() + 1) };
-    }
-     */
 
     size_type erase(const key_type& key)
     {

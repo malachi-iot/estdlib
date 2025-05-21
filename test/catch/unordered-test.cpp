@@ -302,6 +302,17 @@ TEST_CASE("unordered")
         REQUIRE(value.contains(6));
 
         REQUIRE(value.size() == 1);
+
+        SECTION("compare")
+        {
+            type value2;
+
+            value2.insert(6);
+
+            bool r = value == value2;
+
+            REQUIRE(r);
+        }
     }
     SECTION("synthetic retry")
     {
