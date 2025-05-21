@@ -159,7 +159,7 @@ protected:
         const size_type n = bucket(key);
         for(const_local_iterator it = begin(n); it != end(n); ++it)
         {
-            if(key_eq(key, *it))
+            if(key_eq_c(key, *it))
             {
                 // monostate means no real return type
                 if constexpr(!is_same<R, monostate>::value)
@@ -172,12 +172,16 @@ protected:
         return std::forward<R>(r);
     }
 
+    ///
+    /// @brief key_eq_c do key_eq on lhs key and rhs control_type
+    /// @param k
+    /// @param c
+    /// @return
+    ///
     template <class K, class Control>
-    static constexpr bool key_eq(const K& k, const Control& c)
+    static constexpr bool key_eq_c(const K& k, const Control& c)
     {
-        // DEBT: changing conventional meaning of key_eq feels slightly sloppy and it also
-        // seems to confuse GCC 7.x (need base_type explicitly here)
-        return base_type::key_eq()(k, traits::key(c));
+        return key_eq()(k, traits::key(c));
     }
 
     ///
@@ -206,7 +210,7 @@ protected:
                 return { nullptr, false };
             else if(!permit_duplicates)
             {
-                if(key_eq(key, *it))
+                if(key_eq_c(key, *it))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
             }
@@ -396,7 +400,7 @@ protected:
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq(x, *it))    return { it.control(), n };
+            if(key_eq_c(x, *it))    return { it.control(), n };
 
         return { container_.cend(), npos() };
     }
@@ -407,7 +411,7 @@ protected:
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
-            if(key_eq(x, *it))    return { it.control(), n };
+            if(key_eq_c(x, *it))    return { it.control(), n };
 
         return { container_.end(), npos() };
     }
