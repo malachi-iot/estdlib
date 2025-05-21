@@ -77,17 +77,6 @@ public:
             "size mismatch between meta and exposed value_type");
 
 private:
-    /// Checks for null but NOT sparse
-    /// @param v
-    /// @param n
-    /// @return
-    /// DEBT: Passing in size_type n seems optional since we have our gc flag
-    template <class K, class T2>
-    static constexpr bool is_null(const pair<K, T2>& v, size_type)
-    {
-        return is_null_or_sparse(v) && cast_control(&v.second)->marked_for_gc == false;
-    }
-
     static constexpr control_pointer cast_control(pointer pos)
     {
         return reinterpret_cast<control_pointer>(pos);
@@ -362,9 +351,9 @@ public:
         // then we are clear to null out trailing sparse entries
         if(auto_prune && (next == container_.cend() || is_null_not_sparse(*next)))
         {
-            // DEBT: Working, needs cleanup
-            gc_sparse_ll(control);
+            gc_sparse_ll(control);      // nullify this entry
             control_pointer start = container_.begin() + n;
+            // nullify previous entries down to 'start'
             prune_sparse_ll(start, control - 1, n);
         }
         else

@@ -175,6 +175,7 @@ TEST_CASE("unordered")
     SECTION("unordered_map: aggressive gc")
     {
         constexpr unsigned depth = map_type::bucket_depth;
+        using cp = map_type::const_control_pointer;
 
         map_type map;
         pair r = map.insert({1, "hello1"});
@@ -228,16 +229,31 @@ TEST_CASE("unordered")
         REQUIRE(r1 == 1);
         REQUIRE(map.size() == 4);
 
+        SECTION("not-null check")
+        {
+            // we expect prune to operate after last erase and really null out
+            // this bucket
+            map_type::const_local_iterator it = map.cbegin(depth * 1);
+            cp it1 = it.it_;
+
+            REQUIRE(!map.is_empty(*it1));
+            ++it1;
+            REQUIRE(!map.is_empty(*it1));
+        }
         SECTION("null check")
         {
             // we expect prune to operate after last erase and really null out
             // this bucket
-            using cp = map_type::const_control_pointer;
             map_type::const_local_iterator it = map.cbegin(depth * 2);
             cp it1 = it.it_;
             REQUIRE(map.is_null_not_sparse(*it1));
             ++it1;
             REQUIRE(map.is_null_not_sparse(*it1));
+        }
+        SECTION("misc")
+        {
+            // DEBT: put elsewhere
+            static_assert(internal::has_destructor<int>::value == false, "");
         }
     }
     SECTION("unordered_map: edge cases")

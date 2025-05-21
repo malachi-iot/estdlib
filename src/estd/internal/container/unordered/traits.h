@@ -112,6 +112,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     /// @brief Checks for null and NOT sparse
     /// @param v
     /// @return false if active item or null AND sparse
+    /// @remarks probably going to change this to 'is_null'
     template <class K, class T2>
     static constexpr bool is_null_not_sparse(const pair<K, T2>& v)
     {

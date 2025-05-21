@@ -10,6 +10,17 @@ namespace estd {
 
 namespace internal {
 
+template<typename T, typename = void>
+struct has_destructor : false_type {};
+
+template<typename T>
+struct has_destructor<T,
+    // Nifty idea, but doesn't seem to work as expected (I presume that void_t is too permissive
+    // here)
+    //void_t<decltype(std::declval<T&>().~T())>>
+    enable_if_t<is_class<T>::value || is_union<T>::value>>
+    : true_type {};
+
 template <class Container, class Traits>
 class unordered_base : public Traits
 {
@@ -34,9 +45,23 @@ protected:
 
     Container container_;
 
+    template <class T, class Enable = enable_if_t<has_destructor<T>::value>>
+    static void destruct_ll(T& t, bool = {})
+    {
+        t.~T();
+    }
+
+    template <class T, class Enable = enable_if_t<!has_destructor<T>::value>>
+    static void destruct_ll(T& t, int = {})
+    {
+    }
+
     // runs destructor + nulls out key
     static void destruct(control_pointer v)
     {
+        //using kt = typename base_type::key_type;
+        //v->first.~kt();
+        //destruct_ll(v->first);
         traits::mapped(*v).~mapped_type();
         base_type::set_null(v);
     }
