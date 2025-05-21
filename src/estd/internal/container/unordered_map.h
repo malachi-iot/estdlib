@@ -98,6 +98,11 @@ public:
     using typename base_type::const_local_iterator;
 
 private:
+    static void destruct(control_pointer v)
+    {
+        base_type::destruct_ll(v->first);
+        base_type::destruct(v);
+    }
 
     // For insert/emplace operations specifically
     constexpr pair<iterator, bool> wrap_result(insert_result r) const

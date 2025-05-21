@@ -46,23 +46,20 @@ protected:
     Container container_;
 
     template <class T, class Enable = enable_if_t<has_destructor<T>::value>>
-    static void destruct_ll(T& t, bool = {})
+    static ESTD_CPP_CONSTEXPR(14) void destruct_ll(T& t)
     {
         t.~T();
     }
 
     template <class T, class Enable = enable_if_t<!has_destructor<T>::value>>
-    static void destruct_ll(T& t, int = {})
+    static ESTD_CPP_CONSTEVAL void destruct_ll(T& t, int = {})
     {
     }
 
-    // runs destructor + nulls out key
+    // runs destructor + nulls out key - does NOT run key destructor
     static void destruct(control_pointer v)
     {
-        //using kt = typename base_type::key_type;
-        //v->first.~kt();
-        //destruct_ll(v->first);
-        traits::mapped(*v).~mapped_type();
+        destruct_ll(traits::mapped(*v));
         base_type::set_null(v);
     }
 
