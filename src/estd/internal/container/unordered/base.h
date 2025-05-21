@@ -56,7 +56,7 @@ protected:
     template <class It, class It2>
     static ESTD_CPP_CONSTEXPR(14) It skip_null(It it, It2 end)
     {
-        for(; traits::is_null_or_sparse(*it) && it != end; ++it)   {}
+        for(; traits::is_empty(*it) && it != end; ++it)   {}
 
         return it;
     }
@@ -176,7 +176,7 @@ protected:
 
         // Move over occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
-        for(;traits::is_null_or_sparse(*it) == false; ++it)
+        for(;traits::is_empty(*it) == false; ++it)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
@@ -304,7 +304,7 @@ protected:
             if(traits::is_sparse(*it_, n_)) return false;
 
             // If we reach a null slot, then that's the end of the bucket
-            if(parent_->is_null_or_sparse(*it_)) return true;
+            if(parent_->is_empty(*it_)) return true;
 
             // Reaching here means we have an active slot
 
@@ -324,7 +324,7 @@ protected:
 
             // If we reach a null slot, that's the end of the bucket - so we fail
             // to assert it's not the end (return false)
-            if(parent_->is_null_or_sparse(*it_)) return false;
+            if(parent_->is_empty(*it_)) return false;
 
             // Reaching here means we have an active slot
 
@@ -401,7 +401,7 @@ protected:
 
         // No housekeeping if next guy is null (sparse is OK, but
         // not yet accounted for here)
-        if (base_type::is_null_or_sparse(*pos))
+        if (base_type::is_empty(*pos))
             return;
 
         // Quick-deduce our bucket#
@@ -433,7 +433,7 @@ public:
     ESTD_CPP_CONSTEXPR(14) bool empty() const   // NOLINT
     {
         for(const control_type& v : container_)
-            if(traits::is_null_or_sparse(v) == false) return false;
+            if(traits::is_empty(v) == false) return false;
 
         return true;
     }
@@ -444,7 +444,7 @@ public:
         size_type sz = 0;
 
         for(const control_type& v : container_)
-            if(traits::is_null_or_sparse(v) == false)  ++sz;
+            if(traits::is_empty(v) == false)  ++sz;
 
         return sz;
     }

@@ -89,6 +89,8 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
             uint16_t bucket : 6;
         };
 
+        uint16_t raw;
+
         //operator mapped_type& () { return * (mapped_type*) storage; }
         //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
 
@@ -102,7 +104,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     /// @param v
     /// @return
     template <class K, class T2>
-    static constexpr bool is_null_or_sparse(const pair<K, T2>& v)
+    static constexpr bool is_empty(const pair<K, T2>& v)
     {
         return nullable{}.is_null(v.first);
     }
@@ -113,7 +115,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     template <class K, class T2>
     static constexpr bool is_null_not_sparse(const pair<K, T2>& v)
     {
-        return is_null_or_sparse(v) ? v.second.marked_for_gc == false : false;
+        return is_empty(v) ? v.second.marked_for_gc == false : false;
     }
 
     /// Determines if this ref is sparse - bucket must match also
@@ -122,7 +124,7 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     /// @return
     static constexpr bool is_sparse(const control_type& v, unsigned n)
     {
-        return is_null_or_sparse(v) &&
+        return is_empty(v) &&
             v.second.marked_for_gc &&
             v.second.bucket == n;
     }
@@ -164,7 +166,7 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
         nullable{}.set(v);
     }
 
-    static constexpr bool is_null_or_sparse(const value_type& v)
+    static constexpr bool is_empty(const value_type& v)
     {
         return nullable{}.is_null(v);
     }

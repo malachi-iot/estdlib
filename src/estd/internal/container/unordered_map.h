@@ -20,8 +20,6 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type = unordered_base<Container, Traits>;
     using base_type::index;
     using base_type::match;
-    using base_type::is_null_not_sparse;
-    using base_type::is_null_or_sparse;
     using base_type::container_;
     using base_type::is_sparse;
     using base_type::skip_null;
@@ -44,6 +42,8 @@ public:
     using typename base_type::insert_result;
 
 public:
+    using base_type::is_null_not_sparse;
+    using base_type::is_empty;
     using base_type::find_ll;
     using base_type::bucket_depth;
     using base_type::begin;
@@ -134,7 +134,7 @@ private:
         for(control_pointer it = container_.begin() + n; it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
-            if(is_null_or_sparse(*it))
+            if(is_empty(*it))
             {
                 control_pointer control = it;
 
@@ -322,12 +322,13 @@ public:
         return { this, (pointer) gc_active_ll(cast_control(pos.value())) };
     }
 
+    // Demotes this sparse 'pos' to completely deleted 'null'
     void gc_sparse_ll(control_pointer control)
     {
         //const key_type& key = pos->first;
         //const size_type n = index(key);
 
-        assert(is_null_or_sparse(*control));
+        assert(is_empty(*control));
 
         //control->second.bucket = npos();
         control->second.marked_for_gc = false;

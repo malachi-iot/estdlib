@@ -27,6 +27,8 @@ Items marked for removal are called "sparse".  In broad terms, an item is in one
 * null = null key_type. meta content (gc flag = 0)
 * sparse = null key_type. meta content (gc flag = 1)
 
+An "empty" item is null or sparse
+
 ### null item
 
 Null entries are fair game for allocation of an active item
