@@ -278,16 +278,20 @@ TEST_CASE("unordered")
     }
     SECTION("unordered_map: layer2")
     {
-        using type = layer2::unordered_map<int, layer2::const_string, 16>;
+        // layer2::const_string as convenient as it is, doesn't like assigning new pointer =
+        // and I think I prefer that restriction.  So, using string view instead
+        // DEBT: estd::string_view explodes, figure out why
+        using type = layer2::unordered_map<int, std::string_view, 16>;
         using control_type = typename type::control_type;
         control_type backing[16];
 
         type map1(backing);
 
-        /*
         map1[1] = "hi2u";
         REQUIRE(map1[1] == "hi2u");
-        REQUIRE(map1.size() == 1); */
+        REQUIRE(map1.size() == 1);
+
+        // TODO: Peer direct into 'backing' and make sure #1 is present
     }
     SECTION("unordered_map: edge cases")
     {

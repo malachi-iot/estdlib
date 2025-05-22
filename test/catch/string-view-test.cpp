@@ -142,6 +142,14 @@ TEST_CASE("string_view")
             REQUIRE(to == "testhello");
         }
     }
+    SECTION("defaults & assignment")
+    {
+        string_view s;
+
+        s = "hello";
+
+        REQUIRE(s == "hello");
+    }
 }
 
 

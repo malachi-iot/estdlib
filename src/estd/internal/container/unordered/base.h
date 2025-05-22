@@ -116,7 +116,7 @@ public:
     static constexpr unsigned bucket_depth = ESTD_UNORDERED_MAP_BUCKET_SIZE;
 
     ESTD_CPP_ATTR_NODISCARD
-    constexpr size_type max_size() const { return container_.max_size(); }
+    constexpr size_type max_size() const { return container_.size(); }
 
     ESTD_CPP_ATTR_NODISCARD
     constexpr size_type max_bucket_count() const
