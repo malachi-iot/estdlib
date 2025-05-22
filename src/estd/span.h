@@ -31,34 +31,36 @@ struct span_base
     ESTD_CPP_STD_VALUE_TYPE(T)
 
     typedef estd::size_t size_type;
-    typedef value_type* iterator;
+    using iterator = pointer;
+    using const_iterator = const_pointer;
 
 protected:
     T* const data_;
 
-    ESTD_CPP_CONSTEXPR_RET span_base(pointer data = NULLPTR) : data_(data) {}
+    constexpr span_base(pointer data = nullptr) : data_(data) {}
 
 public:
     template <estd::size_t count>
-    ESTD_CPP_CONSTEXPR_RET span<T, count> first() const
+    constexpr span<T, count> first() const
     {
         return data_;
     }
 
-    ESTD_CPP_CONSTEXPR_RET span<T> first(size_type count) const
+    constexpr span<T> first(size_type count) const
     {
         return span<T>(data_, count);
     }
 
-    ESTD_CPP_CONSTEXPR_RET pointer data() const { return data_; }
-    ESTD_CPP_CONSTEXPR_RET iterator begin() const { return data_; }
+    constexpr pointer data() const { return data_; }
+    constexpr iterator begin() const { return data_; }
+    constexpr const_iterator cbegin() const { return data_; }
 
-    ESTD_CPP_CONSTEXPR_RET const_reference operator[](size_type idx) const
+    constexpr const_reference operator[](size_type idx) const
     {
         return data_[idx];
     }
 
-    reference operator[](size_type idx)
+    ESTD_CPP_CONSTEXPR(14) reference operator[](size_type idx)
     {
         return data_[idx];
     }
@@ -83,7 +85,7 @@ struct span : span_base<T>
 template <class T>
 struct span<T, detail::dynamic_extent::value> : span_base<T>
 {
-    typedef span_base<T> base_type;
+    using base_type = span_base<T>;
 
     typedef typename base_type::size_type size_type;
     typedef typename base_type::pointer pointer;
@@ -91,18 +93,18 @@ struct span<T, detail::dynamic_extent::value> : span_base<T>
 
     const size_type size_;
 
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return size_; }
+    constexpr size_type size() const { return size_; }
 
-    ESTD_CPP_CONSTEXPR_RET span() : size_{0}    {}
-    ESTD_CPP_CONSTEXPR_RET span(pointer data, size_type size) : base_type(data),
+    constexpr span() : size_{0}    {}
+    constexpr span(pointer data, size_type size) : base_type(data),
         size_(size) {}
 
-    ESTD_CPP_CONSTEXPR_RET span(const span& copy_from) :
+    constexpr span(const span& copy_from) :
         base_type(copy_from.data()), size_(copy_from.size())
     {}
 
     template <int N2>
-    ESTD_CPP_CONSTEXPR_RET span(element_type (&data) [N2]) :
+    constexpr span(element_type (&data) [N2]) :
         base_type(data), size_(N2)
     {}
 };
@@ -112,30 +114,35 @@ struct span<T, detail::dynamic_extent::value> : span_base<T>
 template <class T, estd::size_t Extent>
 class span : public internal::span<T, Extent>
 {
-    typedef span<T, Extent> this_type;
-    typedef internal::span<T, Extent> base_type;
+    using this_type = span<T, Extent>;
+    using base_type = internal::span<T, Extent>;
 
     static CONSTEXPR bool is_dynamic = Extent == detail::dynamic_extent::value;
 
 public:
-    static CONSTEXPR ptrdiff_t extent = Extent;
+    using typename base_type::size_type;
+    using typename base_type::pointer;
+    using typename base_type::iterator;
+    using typename base_type::const_iterator;
+    using base_type::size;
+
+    using index_type = size_type;
+
+    static constexpr ptrdiff_t extent = Extent;
 
     typedef T element_type;
-    typedef T* pointer;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::size_type index_type;
     typedef typename estd::remove_cv<T>::type value_type;
-    typedef typename base_type::iterator iterator;
 
     ESTD_CPP_CONSTEXPR_RET index_type size_bytes() const
-    { return base_type::size() * sizeof(element_type); }
+    { return size() * sizeof(element_type); }
 
-    ESTD_CPP_CONSTEXPR_RET bool empty() const NOEXCEPT
+    constexpr bool empty() const NOEXCEPT
     {
-        return base_type::size() == 0;
+        return size() == 0;
     }
 
-    ESTD_CPP_CONSTEXPR_RET iterator end() const { return base_type::data_ + base_type::size(); }
+    constexpr iterator end() const { return base_type::data_ + size(); }
+    constexpr const_iterator cend() const { return base_type::data_ + size(); }
 
     // DEBT:
     // "This overload participates in overload resolution only if extent == 0 || extent == std::dynamic_extent."

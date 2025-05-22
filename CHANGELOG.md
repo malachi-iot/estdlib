@@ -1,3 +1,11 @@
+# v0.8.7 - ?????25
+
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/112 built out `docs/container/unordered_map.md`
+
+## Quality Updates & Bug Fixes
+
 # v0.8.6 - 16MAY25
 
 ## Added Features
