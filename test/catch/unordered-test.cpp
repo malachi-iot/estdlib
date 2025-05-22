@@ -278,7 +278,16 @@ TEST_CASE("unordered")
     }
     SECTION("unordered_map: layer2")
     {
+        using type = layer2::unordered_map<int, layer2::const_string, 16>;
+        using control_type = typename type::control_type;
+        control_type backing[16];
 
+        type map1(backing);
+
+        /*
+        map1[1] = "hi2u";
+        REQUIRE(map1[1] == "hi2u");
+        REQUIRE(map1.size() == 1); */
     }
     SECTION("unordered_map: edge cases")
     {

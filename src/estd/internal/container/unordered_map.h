@@ -187,6 +187,11 @@ public:
     }
 
 public:
+    template <class ...Args>
+    constexpr unordered_map(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
+
     ESTD_CPP_CONSTEXPR(14) void clear()
     {
         for(control_type& v : container_)   destruct(&v);

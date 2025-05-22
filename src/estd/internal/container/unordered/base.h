@@ -37,7 +37,9 @@ public:
     ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type);
 
 protected:
-    ESTD_CPP_CONSTEXPR(14) unordered_base()
+    template <class ...Args>
+    ESTD_CPP_CONSTEXPR(14) unordered_base(Args&&...args) :
+        container_{std::forward<Args>(args)...}
     {
         // DEBT: Feels clunky
         for(control_type& v : container_)   base_type::set_null(&v);

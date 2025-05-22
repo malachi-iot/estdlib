@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../../span.h"
 #include "../../fwd/functional.h"
 #include "../../fwd/utility.h"
 
@@ -52,6 +53,20 @@ using unordered_set = internal::unordered_set<
 }
 
 namespace layer2 {
+
+// NOTE: Not ready - almost works, but span lacks:
+// - max_size by spec, so that will be a little tricky
+// - cend, cbegin - that will be easy
+template <class Key, class T, unsigned N,
+    class Hash = hash<Key>,
+    class Nullable = internal::nullable_traits<Key>,
+    class KeyEqual = equal_to<Key>,
+    class Traits = internal::unordered_map_traits<Key, T, Hash, KeyEqual, Nullable>>
+using unordered_map = internal::unordered_map<
+    //estd::layer2::allocator<typename Traits::control_type, N>,
+    //estd::layer2::array<typename Traits::control_type, N>,
+    estd::span<typename Traits::control_type, N>,
+    Traits>;
 
 }
 
