@@ -4,6 +4,8 @@
 #include "../../../utility.h"
 #include "../../platform.h"
 
+#include "swap.h"
+
 #include "../../macro/push.h"
 
 namespace estd {
