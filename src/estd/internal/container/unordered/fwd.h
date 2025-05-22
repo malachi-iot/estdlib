@@ -51,6 +51,10 @@ using unordered_set = internal::unordered_set<
 
 }
 
+namespace layer2 {
+
+}
+
 }
 
 #ifndef ESTD_UNORDERED_MAP_BUCKET_SIZE

@@ -129,6 +129,8 @@ TEST_CASE("unordered")
         SECTION("operator[] assignment")
         {
             map[5] = "hello4";
+            map.contains(5);
+            REQUIRE(map[5] == "hello4");
         }
         SECTION("try_emplace")
         {
@@ -152,6 +154,13 @@ TEST_CASE("unordered")
                 REQUIRE(map.count(2) == 0);
             }
         }
+        SECTION("insert_or_assign")
+        {
+            map.insert_or_assign(10, "hi#10");
+            REQUIRE(map[10] == "hi#10");
+            map.insert_or_assign(10, "hi#10.1");
+            REQUIRE(map[10] == "hi#10.1");
+        }
         SECTION("clear")
         {
             // https://en.cppreference.com/w/cpp/container/unordered_map/clear
@@ -170,6 +179,17 @@ TEST_CASE("unordered")
 
             it1 = map.begin();
             REQUIRE(it1 == map.end());
+        }
+        SECTION("equality")
+        {
+            map_type map1, map2;
+
+            map1[1] = "hi1.1";
+            map2.try_emplace(1, "hi2.1");
+            map1.insert_or_assign(2, "hi1.2");
+            map2.insert({ 2, "hi2.2" });
+
+            REQUIRE(map1 == map2);
         }
     }
     SECTION("unordered_map: aggressive gc")
@@ -256,6 +276,10 @@ TEST_CASE("unordered")
             static_assert(internal::has_destructor<int>::value == false, "");
         }
     }
+    SECTION("unordered_map: layer2")
+    {
+
+    }
     SECTION("unordered_map: edge cases")
     {
         SECTION("more complicated item")
@@ -268,6 +292,12 @@ TEST_CASE("unordered")
             estd::layer1::unordered_map<int, item_type, 10> map;
 
             map.try_emplace(1, time_point(seconds(1)));
+        }
+        SECTION("estd::optional key")
+        {
+            //using key_type = estd::layer1::optional<uint16_t, 0xFFFF>;
+
+            //using type = estd::layer1::unordered_map<key_type, layer1::string<16>, 8>;
         }
     }
     SECTION("unordered_set")

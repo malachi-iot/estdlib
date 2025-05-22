@@ -284,13 +284,14 @@ public:
     template <class K, class M>
     pair<iterator, bool> insert_or_assign(const K& k, M&& obj)
     {
-        find_result<pointer> found = find_ll(k);
+        find_result<control_pointer> found = find_ll(k);
 
         if(found.second != npos())
         {
-            reference p = found->first;
-            new (&p.second) mapped_type(std::forward<M>(obj));
-            return { { this, &p }, true };
+            control_pointer cp = found.first;
+            mapped_type& p = cp->second.mapped();
+            new (&p) mapped_type(std::forward<M>(obj));
+            return { { this, cast(cp) }, true };
         }
         else
         {
