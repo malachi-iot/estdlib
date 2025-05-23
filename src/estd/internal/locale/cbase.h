@@ -116,7 +116,7 @@ struct cbase_utf_base : cbase_casing_base<policy>,
     typedef const estd::layer1::optional<int_type, -1> optional_type;
 #endif
 
-    inline static CONSTEXPR int_type eol() { return optional_type::null_value(); }
+    inline static CONSTEXPR int_type eol() { return optional_type::null_value; }
 
     static inline CONSTEXPR unsigned base() { return b; }
 

@@ -26,7 +26,7 @@ struct less
 template <class T>
 struct greater
 {
-    ESTD_CPP_CONSTEXPR_RET bool operator()(const T& lhs, const T& rhs) const
+    constexpr bool operator()(const T& lhs, const T& rhs) const
     {
         return lhs > rhs;
     }
@@ -35,7 +35,7 @@ struct greater
 template <class T>
 struct equal_to
 {
-    ESTD_CPP_CONSTEXPR_RET bool operator()(const T& lhs, const T& rhs) const
+    constexpr bool operator()(const T& lhs, const T& rhs) const
     {
         return lhs == rhs;
     }

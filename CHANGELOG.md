@@ -3,8 +3,11 @@
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/112 built out `docs/container/unordered_map.md`
+* `estd::optional` now plays nicely with `hash` and has better `==` support
 
 ## Quality Updates & Bug Fixes
+
+* breaking change: minor update turns `estd::layer1::optional::null_value` from function to value
 
 # v0.8.6 - 16MAY25
 

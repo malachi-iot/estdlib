@@ -15,7 +15,7 @@ struct optional_default_value;
 
 }
 
-template <class T, class TBase = internal::optional_base<T> >
+template <class T, class Base = internal::optional_base<T> >
 class optional;
 
 }

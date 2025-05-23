@@ -308,9 +308,15 @@ TEST_CASE("unordered")
         }
         SECTION("estd::optional key")
         {
-            //using key_type = estd::layer1::optional<uint16_t, 0xFFFF>;
+            using key_type = estd::layer1::optional<uint16_t, 0xFFFF>;
 
-            //using type = estd::layer1::unordered_map<key_type, layer1::string<16>, 8>;
+            using type = estd::layer1::unordered_map<key_type, layer1::string<16>, 8>;
+
+            type map;
+
+            map[0] = "Hello";
+
+            REQUIRE(map.size() == 1);
         }
     }
     SECTION("unordered_set")

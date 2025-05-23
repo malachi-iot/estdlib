@@ -303,7 +303,7 @@ public:
 #endif
     void reset() { base_type::value(null_value_); }
 
-    static ESTD_CPP_CONSTEXPR_RET value_type null_value() { return null_value_; }
+    static constexpr value_type null_value = null_value_;
 };
 
 

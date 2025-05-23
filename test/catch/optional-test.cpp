@@ -140,7 +140,7 @@ TEST_CASE("optional")
 
         REQUIRE(v == 5);
 
-        REQUIRE(val.null_value() == -1);
+        REQUIRE(val.null_value == -1);
 
         SECTION("conversion to traditional")
         {
@@ -219,7 +219,7 @@ TEST_CASE("optional")
             REQUIRE(v2 == Unregister);
         }
     }
-    SECTION("comparisons")
+    SECTION("comparisons / equality")
     {
         SECTION("int")
         {
@@ -240,7 +240,7 @@ TEST_CASE("optional")
         }
         SECTION("layer1: int")
         {
-            estd::layer1::optional<int> val;
+            estd::layer1::optional<int> val, val3;
 
             suite(val, 4);
 
@@ -260,8 +260,9 @@ TEST_CASE("optional")
             val2 = 0;
             val = val2;
 
-            // layer1 flavor means 0 == null
+            // layer1 flavor in this configuration means 0 == null
             REQUIRE(!val);
+            REQUIRE(val == val3);
 
             try
             {
@@ -272,6 +273,13 @@ TEST_CASE("optional")
             catch(const bad_optional_access&)
             {
 
+            }
+
+            SECTION("unusual value")
+            {
+                layer1::optional<int16_t, 0x1000> o;
+
+                REQUIRE(*o == 0x1000);
             }
         }
         SECTION("layer1: bool")
@@ -424,9 +432,10 @@ TEST_CASE("optional")
         using type = layer1::optional<uint16_t, 0xFFFF>;
         using hash = estd::hash<type>;
 
-        type v(5);
+        type v1, v2(5);
 
-        // REQUIRE(hash{}(v) == 5);
+        REQUIRE(hash{}(v1) == type::null_value);
+        REQUIRE(hash{}(v2) == 5);
     }
     SECTION("internal")
     {
