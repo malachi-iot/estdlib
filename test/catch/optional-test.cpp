@@ -419,6 +419,15 @@ TEST_CASE("optional")
         REQUIRE(is_lvalue_reference<type2_1>::value);
         REQUIRE(!is_lvalue_reference<type2_2>::value);
     }
+    SECTION("hash")
+    {
+        using type = layer1::optional<uint16_t, 0xFFFF>;
+        using hash = estd::hash<type>;
+
+        type v(5);
+
+        // REQUIRE(hash{}(v) == 5);
+    }
     SECTION("internal")
     {
         // Tucked away in internal namespace is a full bitwise flavor of optional.  So far this is

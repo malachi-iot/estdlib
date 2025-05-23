@@ -11,6 +11,8 @@
 #include "memory.h"
 
 #include "internal/feature/optional.h"
+#include "internal/fwd/functional.h"
+#include "internal/functional/hash.h"
 #include "internal/optional.h"
 
 namespace estd {
@@ -47,12 +49,12 @@ class bad_optional_access : public std::exception {};
 #endif
 
 // with some guidance from https://www.bfilipek.com/2018/05/using-optional.html#intro
-template <class T, class TBase>
+template <class T, class Base>
 class optional :
         public internal::optional_tag_base,
-        public TBase
+        public Base
 {
-    typedef TBase base_type;
+    using base_type = Base;
 
 #if __cpp_rvalue_references
     /// if current value exists and is not trivial, destroy it
@@ -453,5 +455,15 @@ ESTD_CPP_CONSTEXPR_RET bool operator>=(const optional<T, TBase>& opt, const U& v
     return opt && *opt >= value;
 }
 
+template <class T, class Base, typename Precision>
+struct hash<optional<T, Base>, Precision>
+{
+    constexpr Precision operator()(const optional<T, Base>& v) const
+    {
+        using underlying = hash<T>;
+
+        return v ? underlying{}(*v) : 0;
+    }
+};
 
 }

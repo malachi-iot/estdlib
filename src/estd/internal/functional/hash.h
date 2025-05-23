@@ -168,6 +168,12 @@ struct fnv_hash<uint32_t>
 };
  */
 
+template <class T, class Precision>
+struct hash_base
+{
+
+};
+
 }
 
 // NOTE: Somewhat experimental, just whipping something up
