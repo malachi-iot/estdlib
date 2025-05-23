@@ -455,10 +455,10 @@ ESTD_CPP_CONSTEXPR_RET bool operator>=(const optional<T, TBase>& opt, const U& v
     return opt && *opt >= value;
 }
 
-template <class T, class Base, typename Precision>
-struct hash<optional<T, Base>, Precision>
+template <class T, class Base>
+struct hash<optional<T, Base>>
 {
-    constexpr Precision operator()(const optional<T, Base>& v) const
+    constexpr size_t operator()(const optional<T, Base>& v) const
     {
         using underlying = hash<T>;
 

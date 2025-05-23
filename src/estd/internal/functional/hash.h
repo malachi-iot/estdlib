@@ -3,6 +3,7 @@
 #include "../platform.h"
 #include "../fwd/functional.h"
 #include "../../cstdint.h"
+#include "../raw/type_traits.h"
 
 namespace estd {
 
@@ -168,25 +169,22 @@ struct fnv_hash<uint32_t>
 };
  */
 
-template <class T, class Precision>
-struct hash_base
+// DEBT: A little too permissive, but probably OK.  Should only do arithmetic, enum and pointer as per
+// https://en.cppreference.com/w/cpp/utility/hash
+template <class T, class Enabled = enable_if_t<is_integral<T>::value>>
+struct hash_integral
 {
-
+    constexpr size_t operator()(const T& v) const
+    {
+        return static_cast<size_t>(v);
+    }
 };
 
 }
 
-// NOTE: Somewhat experimental, just whipping something up
-
-template <>
-struct hash<int>
-{
-    using precision = unsigned;
-
-    constexpr precision operator()(const int& v) const
-    {
-        return (precision) v;
-    }
-};
+// DEBT: A little too permissive, spec indicates we only should specialize the particular arithmetic
+// ones, etc. where this attempts (but will fail) to be more broad
+template <class T>
+struct hash : internal::hash_integral<T> {};
 
 }
