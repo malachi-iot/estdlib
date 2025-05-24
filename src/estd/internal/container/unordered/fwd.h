@@ -7,6 +7,7 @@
 // DEBT: Use fwd here if we can (maybe not though)
 #include "../../array.h"
 
+#include "features.h"
 
 namespace estd { namespace internal {
 
@@ -75,7 +76,3 @@ using unordered_set = internal::unordered_set<
 }
 
 }
-
-#ifndef ESTD_UNORDERED_MAP_BUCKET_SIZE
-#define ESTD_UNORDERED_MAP_BUCKET_SIZE 4
-#endif

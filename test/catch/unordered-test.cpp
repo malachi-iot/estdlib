@@ -38,13 +38,13 @@ TEST_CASE("unordered")
 {
     using map_type = estd::layer1::unordered_map<int, layer1::string<32>, 16>;
     using iter = typename map_type::iterator;
+    using const_iter = typename map_type::const_iterator;
     using pair = estd::pair<iter, bool>;
 
     SECTION("unordered_map")
     {
         using type = map_type;
         //using value_type = typename type::value_type;
-        using iter = typename type::iterator;
         //using const_iter = typename type::const_iterator;
         using iterl = typename type::local_iterator;
         using const_iterl = typename type::const_local_iterator ;
@@ -317,6 +317,18 @@ TEST_CASE("unordered")
             map[0] = "Hello";
 
             REQUIRE(map.size() == 1);
+        }
+        SECTION("null key (invalid)")
+        {
+            map_type map;
+
+            pair r = map.try_emplace(0, "That's a big no can do");
+
+            REQUIRE(r.second == false);
+
+            const_iter ci1 = map.find(0);
+
+            REQUIRE(ci1 == map.cend());
         }
     }
     SECTION("unordered_set")

@@ -47,7 +47,7 @@ public:
     using key_type = Key;
     using hasher = Hash;
     using key_equal = KeyEqual;
-    using nullable = nullable_traits<Key>;
+    using nullable = Nullable;
 
     //hasher& hash_function() { return *this; }
     //constexpr const hasher& hash_function() const { return *this; }

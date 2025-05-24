@@ -32,6 +32,7 @@ public:
     using base_type::key_eq;
     using typename base_type::mapped_type;
     using typename base_type::control_type;
+    using typename base_type::nullable;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
     ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type);
@@ -179,7 +180,7 @@ protected:
     /// @param k
     /// @param c
     /// @return
-    ///
+    /// @remarks behavior undefined when key is null
     template <class K, class Control>
     static constexpr bool key_eq_c(const K& k, const Control& c)
     {
@@ -196,6 +197,10 @@ protected:
     template <class K>
     insert_result insert_precheck(const K& key, bool permit_duplicates)
     {
+#if ESTD_UNORDERED_MAP_STRICT
+        if(nullable::is_null(key))  return { nullptr, false };
+#endif
+
         const size_type n = index(key);
 
         // linear probing
@@ -247,6 +252,13 @@ protected:
         {}
 
         iterator_base(const iterator_base&) = default;
+
+        // Assist to enable iterator_base to comfortably demote to const_iterator_base
+        template <class It2>
+        constexpr iterator_base(const iterator_base<It2, Parent>& copy_from) :
+            parent_{copy_from.parent_},
+            it_{copy_from.it_}
+        {}
 
         this_type& operator++()
         {
@@ -390,7 +402,8 @@ protected:
         }
     };
 
-    static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
+    // represents invalid bucket
+    static constexpr size_type npos = numeric_limits<size_type>::max();
 
     // pointer and bucket
     template <class Pointer>
@@ -399,23 +412,29 @@ protected:
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<const_control_pointer> find_ll(const K& x) const
     {
+#if ESTD_UNORDERED_MAP_STRICT
+        if(nullable::is_null(x))  return { container_.cend(), npos };
+#endif
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq_c(x, *it))    return { it.control(), n };
 
-        return { container_.cend(), npos() };
+        return { container_.cend(), npos };
     }
 
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<control_pointer> find_ll(const K& x)
     {
+#if ESTD_UNORDERED_MAP_STRICT
+        if(nullable::is_null(x))  return { container_.end(), npos };
+#endif
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq_c(x, *it))    return { it.control(), n };
 
-        return { container_.end(), npos() };
+        return { container_.end(), npos };
     }
 
     // deviates from std in that other iterators part of this bucket could be invalidated
@@ -455,7 +474,7 @@ public:
     template <class K>
     constexpr bool contains(const K& key) const
     {
-        return find_ll(key).second != npos();
+        return find_ll(key).second != npos;
     }
 
     ESTD_CPP_CONSTEXPR(14) bool empty() const   // NOLINT
@@ -512,8 +531,7 @@ public:
         return { this, cast(container_.cend()) };
     }
 
-    // FIX: These guys need to skip over sparse
-    local_iterator begin(size_type n)
+    ESTD_CPP_CONSTEXPR(17) local_iterator begin(size_type n)
     {
         return { this, n, skip_sparse(&container_[n], n) };
     }

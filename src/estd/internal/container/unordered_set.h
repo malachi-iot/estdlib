@@ -54,7 +54,7 @@ public:
     {
         find_result<control_pointer> found = find_ll(key);
 
-        if(found.second == npos()) return 0;
+        if(found.second == npos) return 0;
 
         base_type::erase_and_gc_ll(found.first);
         return 1;
