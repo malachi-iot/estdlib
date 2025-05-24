@@ -8,3 +8,7 @@
 #ifndef FEATURE_ESTD_STRING_DEFAULT_VALUE_INIT
 #define FEATURE_ESTD_STRING_DEFAULT_VALUE_INIT 1
 #endif
+
+// DEBT: Needs better doc
+// Only applies to shifted_string usage in to_string at the moment
+#define FEATURE_ESTD_TO_STRING_OPT 1

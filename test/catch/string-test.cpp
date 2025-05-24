@@ -1,6 +1,3 @@
-// DEBT Force enabling this, temporarily
-#define FEATURE_ESTD_TO_STRING_OPT 1
-
 #include <estd/string.h>
 #include <estd/vector.h>
 #include <estd/charconv.h>

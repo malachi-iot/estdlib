@@ -4,6 +4,7 @@
 
 #include <estd/functional.h>
 #include <estd/string.h>
+#include <estd/string_view.h>
 #include <estd/unordered_set.h>
 #include <estd/unordered_map.h>
 
@@ -281,7 +282,7 @@ TEST_CASE("unordered")
         // layer2::const_string as convenient as it is, doesn't like assigning new pointer =
         // and I think I prefer that restriction.  So, using string view instead
         // DEBT: estd::string_view explodes, figure out why
-        using type = layer2::unordered_map<int, std::string_view, 16>;
+        using type = layer2::unordered_map<int, estd::string_view, 16>;
         using control_type = typename type::control_type;
         control_type backing[16];
 
@@ -290,8 +291,6 @@ TEST_CASE("unordered")
         map1[1] = "hi2u";
         REQUIRE(map1[1] == "hi2u");
         REQUIRE(map1.size() == 1);
-
-        // TODO: Peer direct into 'backing' and make sure #1 is present
     }
     SECTION("unordered_map: edge cases")
     {

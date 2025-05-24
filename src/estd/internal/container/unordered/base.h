@@ -22,8 +22,19 @@ struct has_destructor<T,
     enable_if_t<is_class<T>::value || is_union<T>::value>>
     : true_type {};
 
+// To help ease c++11's nerves
+struct unordered_base_constants
+{
+    using size_type = unsigned;
+
+    static constexpr size_type npos = numeric_limits<size_type>::max();
+};
+
+constexpr unsigned unordered_base_constants::npos;
+
 template <class Container, class Traits>
-class unordered_base : public Traits
+class unordered_base : public Traits,
+    public unordered_base_constants
 {
     using this_type = unordered_base;
     using base_type = Traits;
@@ -103,8 +114,6 @@ protected:
 
 
 public:
-    using size_type = unsigned;
-
     struct end_local_iterator
     {
         const_control_pointer it_;
@@ -404,8 +413,6 @@ protected:
     };
 
     // represents invalid bucket
-    static constexpr size_type npos = numeric_limits<size_type>::max();
-
     // pointer and bucket
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
