@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "swap.h"
 #include "traits.h"
 #include "../../platform.h"
 
@@ -458,7 +459,7 @@ protected:
         // Decrement to position on actual last one in bucket
         --pos;
 
-        swap(*pos, *start);
+        traits::swap(*pos, *start);
     }
 
 public:

@@ -14,6 +14,9 @@ namespace estd { namespace internal {
 template <class T>
 struct nullable_traits;
 
+template <class Key, class Mapped, class Nullable>
+struct unordered_map_traits_control;
+
 template <class Key,
     class T, class Hash = hash<Key>,
     class KeyEqual = equal_to<Key>, class Nullable = nullable_traits<Key>>

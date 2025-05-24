@@ -142,7 +142,8 @@ private:
                     if(control->second.bucket != n) return pos;
                 }
 
-                it->swap(*pos);
+                //it->swap(*pos);
+                traits::swap(*it, *pos);
                 return it;
             }
         }

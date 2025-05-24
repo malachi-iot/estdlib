@@ -4,8 +4,6 @@
 #include "../../../utility.h"
 #include "../../platform.h"
 
-#include "swap.h"
-
 #include "../../macro/push.h"
 
 namespace estd {
@@ -56,16 +54,12 @@ public:
     static constexpr key_equal key_eq() { return {}; }
 };
 
-
-template <class Key, class T, class Hash, class KeyEqual, class Nullable>
-struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
+template <class Key, class Mapped, class Nullable>
+struct unordered_map_traits_control
 {
-    using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
-    using typename base_type::mapped_type;
-    using typename base_type::key_type;
-    using traits = unordered_map_traits;
     using nullable = Nullable;
-    using base_type::key_eq;
+    using key_type = Key;
+    using mapped_type = Mapped;
 
     static constexpr unsigned align_key_value = alignof(key_type);
     static constexpr unsigned align_mapped_value = alignof(mapped_type);
@@ -75,7 +69,8 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
     // bypass that with our byte storage trick)
     // DEBT: crude application with align_key_value.  clang complained about a minimum of 2,
     // unknown exactly how it arrived at that number.
-    static constexpr unsigned align_value = align_mapped_value > align_key_value ?
+    static constexpr unsigned align_value =
+        align_mapped_value > align_key_value ?
         align_mapped_value : align_key_value;
 
     // Mainly used for unordered_map since it has an unused area when key is null
@@ -96,10 +91,35 @@ struct unordered_map_traits : unordered_traits<Key, T, Hash, KeyEqual, Nullable>
         //operator mapped_type& () { return * (mapped_type*) storage; }
         //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
 
-        mapped_type& mapped() { return * (mapped_type*) storage; }
+        ESTD_CPP_CONSTEXPR(14) mapped_type& mapped() { return * (mapped_type*) storage; }
+        constexpr const mapped_type& mapped() const { return * (const mapped_type*) storage; }
     };
 
     using control_type = pair<key_type, meta>;
+
+    // DEBT: Couldn't dial in specialization, so doing this as a method
+    static ESTD_CPP_CONSTEXPR(14) void swap(control_type& lhs, control_type& rhs)
+    {
+        estd::swap(lhs.first, rhs.first);
+        // DEBT: We'll be swapping destructed ones too.  Perhaps that would be better suited as a std::move?
+        estd::swap(lhs.second.mapped(), rhs.second.mapped());
+    }
+};
+
+
+template <class Key, class T, class Hash, class KeyEqual, class Nullable>
+struct unordered_map_traits :
+    unordered_map_traits_control<Key, T, Nullable>,
+    unordered_traits<Key, T, Hash, KeyEqual, Nullable>
+{
+    using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
+    using typename base_type::mapped_type;
+    using typename base_type::key_type;
+    using typename unordered_map_traits_control<Key, T, Nullable>::control_type;
+    using traits = unordered_map_traits;
+    using nullable = Nullable;
+    using base_type::key_eq;
+
     using value_type = pair<const key_type, mapped_type>;
 
     /// @brief Checks for null OR sparse
@@ -180,6 +200,12 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
     static constexpr const Key& key(const control_type& v) { return v; }
     static constexpr mapped_type& mapped(control_type& v) { return v; }
     static constexpr const mapped_type& mapped(const control_type& v) { return v; }
+
+    // DEBT: I tried to specialize this guy but failed, so we have this shim here instead
+    static void swap(control_type& lhs, control_type& rhs)
+    {
+        estd::swap(lhs, rhs);
+    }
 };
 
 
