@@ -37,60 +37,6 @@ struct is_const_tag_exp_base<true> { typedef void is_constant_tag_exp; };
 
 }
 
-// 09APR25 MB - Just upgraded this from experimental -> internal namespace
-// was also going to move to policy/string.h but still debating if these guys
-// should live in internal or detail namespace ultimately.  If in 'detail' namespace
-// policy/string.h makes sense.  If keeping in internal, perhaps internal/policy/string.h
-// would be better.  Or, perhaps, an estd::policy namespace ought to be considered
-namespace internal {
-
-// explicit constant specified here because:
-// - char_traits by convention doesn't specify const
-// - even if it did, this policy applies to non string allocated arrays too
-template <class Size, bool constant_>
-struct buffer_policy :
-    policy_base,    // EXPERIMENTAL, not used directly
-    experimental::is_const_tag_exp_base<constant_>
-{
-    using size_type = Size;
-
-    static ESTD_CPP_CONSTEVAL bool is_constant() { return constant_; }
-};
-
-// DEBT: Refactor string_policy to take a null_terminated flag directly, then specialize
-template <class CharTraits, class Size, string_options o>
-struct string_policy : buffer_policy<Size, o & string_options::constant>
-{
-    using char_traits = CharTraits;
-};
-
-// Denotes a string whose size is tracked via traditional C null termination
-template <class CharTraits, class Size = size_t, bool constant = false>
-struct null_terminated_string_policy : string_policy<CharTraits, Size, constant ? string_options::constant : string_options::none>
-{
-    typedef void is_null_terminated_exp_tag;
-#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-    static CONSTEXPR bool is_null_terminated() { return true; }
-#endif
-
-    static CONSTEXPR bool is_null_termination(const char& value) { return value == 0; }
-};
-
-
-// Denotes a string whose buffer size is tracked at runtime via an integer
-template <class CharTraits, class Size, bool constant>
-struct sized_string_policy  : string_policy<CharTraits, Size, constant ? string_options::constant : string_options::none>
-{
-    // NOTE: As of this writing, this tag is not used
-    typedef void is_explicitly_sized_tag_exp;
-
-#ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
-    static CONSTEXPR bool is_null_terminated() { return false; }
-#endif
-};
-
-}
-
 // TODO: Consider moving this out into an impl/string.h
 namespace internal { namespace impl {
 

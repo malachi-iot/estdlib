@@ -9,6 +9,7 @@
 #include "../new.h"
 
 #include "../expected.h"
+#include "../policy/string.h"
 #include "feature/dynamic_array.h"
 
 namespace estd {

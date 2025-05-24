@@ -108,7 +108,7 @@ enum class string_options
 
 ESTD_FLAGS(string_options)
 
-template <class CharTraits, class Size, string_options o>
+template <class CharTraits, class Size, string_options o, class Enabled = void>
 struct string_policy;
 
 template <class CharTraits, class Size, bool constant>

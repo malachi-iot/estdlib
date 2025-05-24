@@ -7,7 +7,7 @@
 #include "memory.h"
 #include "allocators/fixed.h"
 #include "traits/char_traits.h"
-#include "traits/string.h"
+#include "policy/string.h"
 #include "internal/string.h"
 #include "internal/layer1/string.h"
 #include "internal/layer2/string.h"
