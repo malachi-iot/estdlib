@@ -2,6 +2,7 @@
 
 #include "../internal/platform.h"
 #include "../policy/base.h"
+#include "../internal/fwd/string.h"
 
 namespace estd {
 
@@ -57,15 +58,15 @@ struct buffer_policy :
 };
 
 // DEBT: Refactor string_policy to take a null_terminated flag directly, then specialize
-template <class CharTraits, class Size, bool constant = false>
-struct string_policy : buffer_policy<Size, constant>
+template <class CharTraits, class Size, string_options o>
+struct string_policy : buffer_policy<Size, o & string_options::constant>
 {
     using char_traits = CharTraits;
 };
 
 // Denotes a string whose size is tracked via traditional C null termination
 template <class CharTraits, class Size = size_t, bool constant = false>
-struct null_terminated_string_policy : string_policy<CharTraits, Size, constant>
+struct null_terminated_string_policy : string_policy<CharTraits, Size, constant ? string_options::constant : string_options::none>
 {
     typedef void is_null_terminated_exp_tag;
 #ifndef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
@@ -77,8 +78,8 @@ struct null_terminated_string_policy : string_policy<CharTraits, Size, constant>
 
 
 // Denotes a string whose buffer size is tracked at runtime via an integer
-template <class CharTraits, class Size = size_t, bool constant = false>
-struct sized_string_policy  : string_policy<CharTraits, Size, constant>
+template <class CharTraits, class Size, bool constant>
+struct sized_string_policy  : string_policy<CharTraits, Size, constant ? string_options::constant : string_options::none>
 {
     // NOTE: As of this writing, this tag is not used
     typedef void is_explicitly_sized_tag_exp;

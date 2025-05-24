@@ -1,5 +1,6 @@
 #include "../../allocators/fixed.h"
 #include "../fwd/string_view.h"
+#include "../fwd/string.h"
 #include "../string.h"
 
 #pragma once

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "dynamic_array.h"
-#include "../../policy/string.h"
 #include "../../traits/char_traits.h"
 #include "../raw/type_traits.h"
 #include "../feature/std.h"
 #include "../feature/string.h"
+#include "../../flags.h"
 
 #if FEATURE_STD_OSTREAM
 #include <iosfwd>
@@ -98,11 +98,30 @@ inline std::basic_ostream<Char, Traits>& operator<<(
 
 namespace internal {
 
+enum class string_options
+{
+    none                = 0x00,
+    null_terminated     = 0x01,             // when not set, string is explicitly sized or compile-time size known
+    constant            = 0x02,
+    uninitialized       = 0x04,
+};
+
+ESTD_FLAGS(string_options)
+
+template <class CharTraits, class Size, string_options o>
+struct string_policy;
+
+template <class CharTraits, class Size, bool constant>
+struct null_terminated_string_policy;
+
+template <class CharTraits, class Size = size_t, bool constant = false>
+struct sized_string_policy;
+
 // DEBT: Clumsy
 // We're using std::char_traits (aliased) when available, which doesn't handle const char
 // so that's why we pass in Char in addition to Traits
-template <class Char, class Traits, bool null_terminated>
-using string_policy_helper = conditional_t<null_terminated,
+template <class Char, class Traits, string_options options>
+using string_policy_helper = conditional_t<options & string_options::null_terminated,
         null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
         sized_string_policy<Traits, int16_t, is_const<Char>::value>>;
 
@@ -126,7 +145,9 @@ using basic_string = internal::basic_string<Allocator, StringPolicy>;
 namespace layer1 {
 
 template<class Char, size_t N, bool null_terminated = true, class Traits = estd::char_traits<Char>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy =
+        internal::string_policy_helper<Char, Traits,
+            null_terminated ? internal::string_options::null_terminated : internal::string_options::none>>
 class basic_string;
 
 template <size_t N, bool null_terminated = true>
@@ -138,7 +159,10 @@ namespace layer2 {
 
 template<class Char, size_t N, bool null_terminated = true,
     class Traits = estd::char_traits<typename remove_const<Char>::type>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::string_policy_helper<Char, Traits, null_terminated>>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy =
+        internal::string_policy_helper<Char, Traits,
+            null_terminated ? internal::string_options::null_terminated : internal::string_options::none>>
+
 class basic_string;
 
 template <size_t N = 0, bool null_terminated = true>

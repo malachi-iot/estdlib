@@ -156,6 +156,13 @@ TEST_CASE("string tests")
 
                 REQUIRE(l1s == "hello 2u");
             }
+            SECTION("initialize from C str")
+            {
+                char s1[64] = "hi2u";
+                layer2::string<64> s2(s1);
+
+                REQUIRE(s2 == s1);
+            }
             SECTION("constexpr")
             {
                 // DEBT: Works -- however, we prefer to make a layer1::basic_string_view for this case
