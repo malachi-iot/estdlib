@@ -108,22 +108,17 @@ enum class string_options
 
 ESTD_FLAGS(string_options)
 
-template <class CharTraits, class Size, string_options o, class Enabled = void>
+template <class CharTraits, string_options o, class Size = size_t, class Enabled = void>
 struct string_policy;
-
-template <class CharTraits, class Size, bool constant>
-struct null_terminated_string_policy;
-
-template <class CharTraits, class Size = size_t, bool constant = false>
-struct sized_string_policy;
 
 // DEBT: Clumsy
 // We're using std::char_traits (aliased) when available, which doesn't handle const char
 // so that's why we pass in Char in addition to Traits
-template <class Char, class Traits, string_options options>
-using string_policy_helper = conditional_t<options & string_options::null_terminated,
-        null_terminated_string_policy<Traits, int16_t, is_const<Char>::value>,
-        sized_string_policy<Traits, int16_t, is_const<Char>::value>>;
+template <class Char, class Traits, string_options options, typename Size = size_t>
+using string_policy_helper =
+    string_policy<Traits,
+        options | (is_const<Char>::value ? string_options::constant : string_options::none),
+        Size>;
 
 // Favor using detail::basic_string, but there are edge cases where
 // Allocator/Policy is more convenient
@@ -138,7 +133,8 @@ template<
     class CharT,
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
     class Allocator = std::allocator<CharT>,
-    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy = internal::sized_string_policy<Traits>>
+    ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy =
+        internal::string_policy_helper<CharT, Traits, internal::string_options::none>>
 using basic_string = internal::basic_string<Allocator, StringPolicy>;
 #endif
 

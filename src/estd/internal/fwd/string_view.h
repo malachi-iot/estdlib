@@ -18,7 +18,7 @@ class basic_string_view;
 // a special 'view' policy which is mostly const, but permits changes to size/pointer
 template <class Char,
     class Traits = estd::char_traits<remove_const_t<Char>>,
-    class Policy = internal::sized_string_policy<Traits, size_t, true>>
+    class Policy = internal::string_policy_helper<Char, Traits, internal::string_options::constant>>
 using basic_string_view = detail::basic_string_view<Policy>;
 
 #if __cpp_concepts

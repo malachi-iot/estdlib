@@ -13,9 +13,9 @@ namespace estd { namespace layer3 {
 // he differs in that '=' does a deep copy
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<estd::remove_const_t<CharT>>,
-         class Policy = conditional_t<null_terminated,
-                internal::null_terminated_string_policy<Traits, uint16_t, estd::is_const<CharT>::value>,
-                internal::sized_string_policy<Traits, uint16_t, estd::is_const<CharT>::value> >>
+         class Policy = internal::string_policy_helper<CharT, Traits,
+            null_terminated ? internal::string_options::null_terminated : internal::string_options::none,
+            uint16_t>>
 class basic_string : public estd::internal::basic_string<
                 estd::layer3::allocator<CharT, typename Policy::size_type>,
                 Policy>
