@@ -151,7 +151,7 @@ protected:
     }
 
 public:
-    ESTD_CPP_DEFAULT_CTOR(allocated_array)
+    constexpr allocated_array() = default;
 
     template <class THelperParam>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT allocated_array(const THelperParam& p) :

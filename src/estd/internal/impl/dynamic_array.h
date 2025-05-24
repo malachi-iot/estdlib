@@ -6,16 +6,17 @@
 #include "../fwd/dynamic_array.h"
 #include "../../traits/char_traits.h"
 #include "../../policy/base.h"
+#include "../fwd/optional.h"
 
 namespace estd { namespace internal { namespace impl {
 
 
 // null terminated
-template <class TAllocator>
-struct dynamic_array_length<TAllocator, true, false>
+template <class Allocator>
+struct dynamic_array_length<Allocator, true, false>
 {
-    typedef estd::handle_descriptor<TAllocator> handle_descriptor;
-    typedef typename estd::remove_reference<TAllocator>::type allocator_type;
+    typedef estd::handle_descriptor<Allocator> handle_descriptor;
+    typedef typename estd::remove_reference<Allocator>::type allocator_type;
     typedef typename allocator_type::size_type size_type;
     typedef typename allocator_type::value_type value_type;
     typedef typename allocator_type::handle_type handle_type;
@@ -39,7 +40,7 @@ struct dynamic_array_length<TAllocator, true, false>
         return is_terminator;
     }
 
-    size_type size(const TAllocator& a, const handle_type& h) const
+    size_type size(const Allocator& a, const handle_type& h) const
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         // specialization required if we aren't null terminated (to track size variable)
@@ -69,7 +70,7 @@ struct dynamic_array_length<TAllocator, true, false>
 
     // +++ temporary
     // semi-brute forces size by stuffing a null terminator at the specified spot
-    void size(TAllocator& a, const handle_type& h, size_type len)
+    void size(Allocator& a, const handle_type& h, size_type len)
     {
         /*
         if(len > base_t::capacity())
@@ -81,7 +82,7 @@ struct dynamic_array_length<TAllocator, true, false>
         a.unlock(h);
     }
 
-    void size(handle_descriptor& hd, size_type len)
+    ESTD_CPP_CONSTEXPR(17) void size(handle_descriptor& hd, size_type len)
     {
         /*
         if(len > base_t::capacity())
@@ -301,7 +302,7 @@ public:
     }
 
     // adjust 'used' (not ALLOCATED) size
-    void size(size_type n)
+    ESTD_CPP_CONSTEXPR(17) void size(size_type n)
     {
         length_helper_t::size(*this, n);
         //length_helper_t::size(base_t::get_allocator(), base_t::handle(), n);
@@ -313,7 +314,8 @@ public:
         //return length_helper_t::empty(base_t::get_allocator(), base_t::handle());
     }
 
-    dynamic_array_base()
+    // nullopt_t is prep for string_options::uninitialized
+    ESTD_CPP_CONSTEXPR(17) dynamic_array_base(nullopt_t = nullopt_t{0})
     {
         // FIX: A little sloppy, brute forcing to 0 here because null-terminated
         // specialization doesn't have all the data it needs to do this
@@ -321,8 +323,9 @@ public:
         size(0);
     }
 
-    template <class TAllocatorParameter>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array_base(TAllocatorParameter& p) : base_t(p)
+    // 24MAY25 DEBT: Put in the in_place_t treatment
+    template <class ...Args>
+    constexpr explicit dynamic_array_base(Args&&...args) : base_t(std::forward<Args>(args)...)
     {
         // FIX: More sloppy, it's possible TAllocatorParameter has the sizing data in it
         // so we do NOT do size here
@@ -428,7 +431,7 @@ struct dynamic_array : public
 
     ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
-    ESTD_CPP_DEFAULT_CTOR(dynamic_array)
+    constexpr dynamic_array() = default;
 };
 
 /*

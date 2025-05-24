@@ -106,23 +106,21 @@ protected:
         return static_cast<const_pointer>(&buffer[offset]);
     }
 
-    ESTD_CPP_DEFAULT_CTOR(single_allocator_base)
+    constexpr single_allocator_base() = default;
 
-#if __cpp_variadic_templates
     template <typename ...T2>
     constexpr explicit single_allocator_base(estd::in_place_t, T2&&...ts) :
         buffer{std::forward<T2>(ts)...}
     {
 
     }
-#endif
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_allocator_base(const Buffer& buffer) : buffer(buffer) {}
+    constexpr explicit single_allocator_base(const Buffer& buffer) : buffer(buffer) {}
 
 public:
-    static CONSTEXPR handle_type invalid() { return false; }
+    static ESTD_CPP_CONSTEVAL handle_type invalid() { return false; }
     // 'valid()' handle call only applicable for singlular-allocator scenarios
-    static CONSTEXPR handle_type valid() { return true; }
+    static ESTD_CPP_CONSTEVAL handle_type valid() { return true; }
 
     // technically we ARE locking since we have to convert the dummy 'bool' handle
     // to a pointer

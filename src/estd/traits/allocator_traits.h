@@ -172,7 +172,7 @@ struct locking_allocator_traits<TAllocator, true>
         a.cunlock(h);
     }
 
-    static CONSTEXPR handle_type invalid() { return allocator_type::invalid(); }
+    static constexpr handle_type invalid() { return allocator_type::invalid(); }
 
     // Non standard, for scenarios in which a consumer specifically wants to treat
     // a handle region as a container of T.  For locking types, they MUST provide

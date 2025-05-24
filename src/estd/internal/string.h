@@ -95,7 +95,7 @@ protected:
     // ---
 
 public:
-    basic_string() = default;
+    constexpr basic_string() = default;
 
     constexpr size_type length() const { return base_type::size(); }
 

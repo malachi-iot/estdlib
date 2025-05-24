@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../traits/string.h"
+#include "base.h"
 
 // 24MAY25 MB - Just about ready to be a 'detail' rather than 'internal', just playing it
 // conservatively for now.  Perhaps estd::policy namespace ought to be considered

@@ -16,21 +16,6 @@
 
 namespace estd {
 
-struct nullopt_t {
-#ifdef __cpp_constexpr
-    explicit constexpr
-#endif
-    nullopt_t(int) {}
-
-#if !defined(FEATURE_CPP_INLINE_VARIABLES) && !defined(FEATURE_CPP_INLINE_STATIC)
-    /// \brief in the case where we can't easily make a global 'nullopt',
-    /// make a provision for more easily creating a nullopt_t on the fly
-    ///
-    nullopt_t() {}
-#endif
-};
-
-
 // DEBT: Pretty sure this won't work with c++03.  If it does, document that
 #ifdef FEATURE_CPP_INLINE_VARIABLES
 inline

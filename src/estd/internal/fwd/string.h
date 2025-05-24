@@ -101,9 +101,9 @@ namespace internal {
 enum class string_options
 {
     none                = 0x00,
-    null_terminated     = 0x01,             // when not set, string is explicitly sized or compile-time size known
+    null_terminated     = 0x01,             ///< when not set, string is explicitly sized or compile-time size known
     constant            = 0x02,
-    uninitialized       = 0x04,
+    uninitialized       = 0x04,             ///< normal behavior initializes to 0-length.  Enable this for pure uninitialized (=default all the way) NOT READY YET
 };
 
 ESTD_FLAGS(string_options)
@@ -111,10 +111,9 @@ ESTD_FLAGS(string_options)
 template <class CharTraits, string_options o, class Size = size_t, class Enabled = void>
 struct string_policy;
 
-// DEBT: Clumsy
 // We're using std::char_traits (aliased) when available, which doesn't handle const char
-// so that's why we pass in Char in addition to Traits
-template <class Char, class Traits, string_options options, typename Size = size_t>
+// so that's why we pass in Char in addition to Traits.  Then, string_options::constant is deduced
+template <class Char, class Traits, string_options options = string_options::none, typename Size = size_t>
 using string_policy_helper =
     string_policy<Traits,
         options | (is_const<Char>::value ? string_options::constant : string_options::none),
@@ -134,7 +133,7 @@ template<
     class Traits = estd::char_traits<typename estd::remove_const<CharT>::type >,
     class Allocator = std::allocator<CharT>,
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy =
-        internal::string_policy_helper<CharT, Traits, internal::string_options::none>>
+        internal::string_policy_helper<CharT, Traits>>
 using basic_string = internal::basic_string<Allocator, StringPolicy>;
 #endif
 

@@ -25,7 +25,7 @@ public:
     using typename base_type::view_type;
     using base_type::data;
 
-    basic_string() = default;
+    constexpr basic_string() = default;
 
     basic_string(const_pointer s)        // NOLINT
     {

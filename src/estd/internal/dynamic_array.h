@@ -354,7 +354,7 @@ protected:
     } */
 
 public:
-    ESTD_CPP_DEFAULT_CTOR(dynamic_array)
+    constexpr dynamic_array() = default;
 
     ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(allocator_type& t) :
         base_type(t) {}
