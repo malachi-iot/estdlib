@@ -5,6 +5,7 @@
 #include "../../traits/char_traits.h"
 #include "../raw/type_traits.h"
 #include "../feature/std.h"
+#include "../feature/string.h"
 
 #if FEATURE_STD_OSTREAM
 #include <iosfwd>

@@ -6,6 +6,8 @@
 
 #include "../../macro/push.h"
 
+#include "fwd.h"
+
 namespace estd {
 
 namespace internal {
@@ -22,9 +24,6 @@ struct nullable_traits
     {
         return value == T{};
     }
-
-    // DEBT: Don't want to use this, just helpful for init and erase
-    static constexpr T get_null() { return T(); }
 
     ESTD_CPP_CONSTEXPR(17) static void set(T* value)
     {
@@ -202,7 +201,7 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullabl
     static constexpr const mapped_type& mapped(const control_type& v) { return v; }
 
     // DEBT: I tried to specialize this guy but failed, so we have this shim here instead
-    static void swap(control_type& lhs, control_type& rhs)
+    static ESTD_CPP_CONSTEXPR(14) void swap(control_type& lhs, control_type& rhs)
     {
         estd::swap(lhs, rhs);
     }

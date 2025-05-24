@@ -3,6 +3,7 @@
 #include "../fwd/string.h"
 #include "../fwd/string_view.h"
 #include "../../policy/string.h"
+#include "../string.h"
 
 // TODO: refactor layer2 & layer3 to utilize a handle and not a CharT*
 namespace estd { namespace layer2 {
