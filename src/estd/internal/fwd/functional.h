@@ -12,6 +12,9 @@ template <class T = void>
 struct equal_to;
 
 template <class T = void>
+struct not_equal_to;
+
+template <class T = void>
 struct less;
 
 template <class T = void>

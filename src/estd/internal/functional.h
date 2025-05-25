@@ -7,6 +7,7 @@
 
 #include "fwd/functional.h"
 #include "impl/functional.h"
+#include "raw/functional.h"
 #include "functional/hash.h"
 #include "functional/function_traits.h"
 #include "../type_traits.h"
@@ -17,7 +18,7 @@ namespace estd {
 template <class T>
 struct less
 {
-    ESTD_CPP_CONSTEXPR_RET bool operator()(const T& lhs, const T& rhs) const
+    constexpr bool operator()(const T& lhs, const T& rhs) const
     {
         return lhs < rhs;
     }
@@ -40,6 +41,37 @@ struct equal_to
         return lhs == rhs;
     }
 };
+
+template <>
+struct equal_to<void>
+{
+    template <typename LHS, typename RHS>
+    constexpr bool operator()(const LHS& lhs, const RHS& rhs) const
+    {
+        return lhs == rhs;
+    }
+};
+
+
+template <class T>
+struct not_equal_to
+{
+    constexpr bool operator()(const T& lhs, const T& rhs) const
+    {
+        return lhs != rhs;
+    }
+};
+
+template <>
+struct not_equal_to<void>
+{
+    template <typename LHS, typename RHS>
+    constexpr bool operator()(const LHS& lhs, const RHS& rhs) const
+    {
+        return lhs != rhs;
+    }
+};
+
 
 namespace experimental {
 

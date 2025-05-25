@@ -294,6 +294,8 @@ TEST_CASE("array/vector tests")
         bool r = a1 == a2;
 
         REQUIRE(r);
+
+        r = estd::equal_to<>{}(a1, a2);
     }
 }
 

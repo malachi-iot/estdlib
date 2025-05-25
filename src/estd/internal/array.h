@@ -106,6 +106,21 @@ protected:
 #endif
 };
 
+
+
+template <class Impl1, class Impl2>
+constexpr bool operator==(const array<Impl1>& lhs, const array<Impl2>& rhs)
+{
+    return lhs.size() == rhs.size() ? equal(lhs.begin(), lhs.end(), rhs.begin()) : false;
+}
+
+template <class Impl1, class Impl2>
+constexpr bool operator!=(const array<Impl1>& lhs, const array<Impl2>& rhs)
+{
+    return lhs.size() == rhs.size() ? !equal(lhs.begin(), lhs.end(), rhs.begin()) : true;
+}
+
+
 }
 
 template <class Impl>
@@ -181,21 +196,5 @@ struct allocator_traits<internal::layer1_allocator<T, N> >
 {
 
 };
-
-template <class Impl1, class Impl2>
-constexpr bool operator==(
-    const internal::array<Impl1>& lhs,
-    const internal::array<Impl2>& rhs)
-{
-    return lhs.size() == rhs.size() ? equal(lhs.begin(), lhs.end(), rhs.begin()) : false;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator!=(
-    const internal::array<Impl1>& lhs,
-    const internal::array<Impl2>& rhs)
-{
-    return lhs.size() == rhs.size() ? !equal(lhs.begin(), lhs.end(), rhs.begin()) : true;
-}
 
 }

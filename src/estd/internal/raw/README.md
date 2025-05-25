@@ -1,6 +1,6 @@
-# Implementations
+# Minimal dependency implementations
 
-Called *raw* instead of *implementation* do disambiguate from nearby `impl`
+Called *raw* instead of *implementation* to disambiguate from nearby `impl`
 folder
 
 Do not include these explicitly unless you know what you're doing
@@ -15,4 +15,4 @@ since it would #pragma filter it away
 
 ## TODO: Consider `#include "platform.h"` in each
 
-So that tooltips etc resolve more.  #pragmas will keep it safe 
+So that tooltips etc resolve more.  #pragmas will keep it safe
