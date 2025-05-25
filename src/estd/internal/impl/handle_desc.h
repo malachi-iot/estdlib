@@ -138,14 +138,14 @@ public:
 protected:
     void handle(const handle_type& h) { base_t::value(h); }
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(const handle_type& h) : base_t(h) {}
+    constexpr explicit handle_descriptor(const handle_type& h) : base_t(h) {}
 
     value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
     {
         return allocator_traits::lock(a, handle(), pos, len);
     }
 
-    const value_type& clock(const allocator_type& a, size_type pos = 0, size_type len = 0) const
+    constexpr const value_type& clock(const allocator_type& a, size_type pos = 0, size_type len = 0) const
     {
         return allocator_traits::clock(a, handle(), pos, len);
     }

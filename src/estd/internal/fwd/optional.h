@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../feature/cpp.h"
+#include "../macro/c++/const.h"
 
 namespace estd {
 
@@ -22,7 +23,7 @@ class optional;
 
 struct nullopt_t
 {
-    explicit constexpr nullopt_t(int) {}
+    explicit ESTD_CPP_CONSTEVAL nullopt_t(int) {}
 
 #if !defined(FEATURE_CPP_INLINE_VARIABLES) && !defined(FEATURE_CPP_INLINE_STATIC)
     /// \brief in the case where we can't easily make a global 'nullopt',

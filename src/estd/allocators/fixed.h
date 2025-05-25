@@ -205,12 +205,17 @@ struct single_fixedbuf_allocator : public
 {
     using base_type = single_allocator_base<T, Buffer, Size>;
     using typename base_type::size_type;
+    using typename base_type::value_type;
 
-    typedef typename base_type::value_type value_type;
     typedef bool handle_type; // really I want it an empty struct, though now code expects a bool
     typedef handle_type handle_with_size;
 
+    using o = allocator_options;
+
 public:
+    static constexpr allocator_options options =
+        o::singular | o::sized | o::stateful | o::const_size;
+
     // experimental tag reflecting that this memory block will never move
     typedef void is_pinned_tag_exp;
 
@@ -227,7 +232,7 @@ public:
 
     // FIX: something bizzare is happening here and base_t is ending
     // up as map_base during debug session
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_allocator(const Buffer& buffer) :
+    constexpr explicit single_fixedbuf_allocator(const Buffer& buffer) :
         base_type(buffer) {}
 
 
@@ -273,9 +278,12 @@ public:
 template <class T, class Size = std::size_t>
 class single_fixedbuf_runtimesize_allocator : public single_allocator_base<T, T*, Size>
 {
+    using o = allocator_options;
+
 public:
+    static constexpr allocator_options options = o::singular | o::sized | o::stateful;
+
     using base_type = single_allocator_base<T, T*, Size>;
-    using base_t = base_type;
 
     using typename base_type::size_type;
     using typename base_type::handle_type;
@@ -294,7 +302,7 @@ protected:
     }
 
     ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
-        base_t(buffer),
+        base_type(buffer),
         m_buffer_size(size)
     {
 
@@ -309,8 +317,8 @@ public:
         ESTD_CPP_CONSTEXPR_RET InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
     };
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_runtimesize_allocator(const InitParam& p)
-        : base_t(p.buffer), m_buffer_size(p.size)
+    constexpr explicit single_fixedbuf_runtimesize_allocator(const InitParam& p)
+        : base_type(p.buffer), m_buffer_size(p.size)
     {}
 
     size_type size(handle_with_size h) const { return m_buffer_size; }

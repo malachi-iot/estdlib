@@ -14,11 +14,33 @@
 #include "../internal/container/traditional_accessor.h"
 #include "../internal/container/iterator.h"
 
+#include "../flags.h"
+
 #include "fwd.h"
 
 namespace estd {
 
 namespace internal {
+
+// Not ready yet
+enum class allocator_options
+{
+    none            = 0x00,
+    /// is this a stateful (instance) allocator or a global (singleton-style) allocator
+    stateful        = 0x01,
+    /// does this allocator track size of the allocated item (false = we manually track it in handles)
+    sized           = 0x02,
+    /// standard allocator behavior is to be able to allocate multiple items.  a singular allocator can only allocate one item
+    singular        = 0x04,
+    /// locks don't always provide entire range
+    noncontiguous   = 0x08,
+    /// all allocators provide locking API, this indicates whether one MUST or MAY use that API.
+    locking         = 0x10,
+    /// Is allocator's size a compile time constant (i.e. layer3 this is false)
+    const_size      = 0x20,
+};
+
+ESTD_FLAGS(allocator_options)
 
 #ifdef UNUSED_CODE
 // lifted directly from https://jguegant.github.io/blogs/tech/sfinae-introduction.html
