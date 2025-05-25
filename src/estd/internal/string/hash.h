@@ -12,9 +12,9 @@ namespace internal {
 struct string_hash
 {
     template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) StringImpl>
-    ESTD_CPP_CONSTEXPR(14) uint32_t operator()(const detail::basic_string<StringImpl>& v) const
+    ESTD_CPP_CONSTEXPR(14) size_t operator()(const detail::basic_string<StringImpl>& v) const
     {
-        return fnv_hash<uint32_t>::hash(v.begin(), v.end());
+        return container_hash<uint32_t>{}(v);
     }
 };
 

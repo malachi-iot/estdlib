@@ -172,11 +172,24 @@ struct fnv_hash<uint32_t>
 // DEBT: A little too permissive, but probably OK.  Should only do arithmetic, enum and pointer as per
 // https://en.cppreference.com/w/cpp/utility/hash
 template <class T, class Enabled = enable_if_t<is_integral<T>::value>>
-struct hash_integral
+struct integral_hash
 {
     constexpr size_t operator()(const T& v) const
     {
         return static_cast<size_t>(v);
+    }
+};
+
+
+template <typename Precision = uint32_t>
+struct container_hash
+{
+    // TODO: Put a 'concept' in here.  Not quite debt since this is 'internal' namespace *and*
+    // the name of the struct is container_hash
+    template <class Container>
+    constexpr size_t operator()(const Container& c) const
+    {
+        return fnv_hash<Precision>::hash(c.begin(), c.end());
     }
 };
 
@@ -185,6 +198,6 @@ struct hash_integral
 // DEBT: A little too permissive, spec indicates we only should specialize the particular arithmetic
 // ones, etc. where this attempts (but will fail) to be more broad
 template <class T>
-struct hash : internal::hash_integral<T> {};
+struct hash : internal::integral_hash<T> {};
 
 }
