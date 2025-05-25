@@ -96,10 +96,10 @@ protected:
         return data() + pos;
     }
 
-    ESTD_CPP_DEFAULT_CTOR(traditional_array)
+    constexpr traditional_array() = default;
 
 #ifdef __cpp_initializer_lists
-    inline traditional_array(::std::initializer_list<value_type> init)
+    inline ESTD_CPP_CONSTEXPR(17) traditional_array(::std::initializer_list<value_type> init)
     {
         estd::copy(init.begin(), init.end(), data());
     }

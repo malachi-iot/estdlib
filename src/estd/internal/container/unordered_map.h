@@ -35,7 +35,7 @@ public:
 #endif
 
     // DEBT: Key SHOULD be value-initializable at this time.
-    using control_type = typename base_type::control_type;
+    using typename base_type::control_type;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
     using typename base_type::end_local_iterator;
@@ -54,13 +54,9 @@ public:
     using typename base_type::key_type;
     using typename base_type::mapped_type;
     using typename base_type::nullable;
-
-    using value_type = estd::pair<const key_type, mapped_type>;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    using pointer = value_type*;
-    using const_pointer = const value_type*;
     using typename base_type::size_type;
+
+    ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type)
 
     static constexpr size_type npos() { return numeric_limits<size_type>::max(); }
 

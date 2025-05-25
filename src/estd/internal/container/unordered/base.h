@@ -47,7 +47,7 @@ public:
     using typename base_type::nullable;
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
-    ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type);
+    ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type)
 
 protected:
     template <class ...Args>
