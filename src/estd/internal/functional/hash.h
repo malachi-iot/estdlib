@@ -181,6 +181,7 @@ struct integral_hash
 };
 
 
+// 'Container' must be composed of 8-bit values
 template <typename Precision = uint32_t>
 struct container_hash
 {

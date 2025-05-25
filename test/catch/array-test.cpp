@@ -275,6 +275,15 @@ TEST_CASE("array/vector tests")
         static_assert(specializer<void>::value == false, "");
         static_assert(specializer<array<int, 10>>::value, "");
     }
+    SECTION("hash")
+    {
+        // https://fnvhash.github.io/fnv-calculator-online/
+
+        const array<uint8_t, 10> a { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        size_t h = internal::container_hash<uint32_t>{}(a);
+
+        REQUIRE(h == 0x2f854072);
+    }
 }
 
 #include "macro/pop.h"
