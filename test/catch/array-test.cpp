@@ -284,6 +284,17 @@ TEST_CASE("array/vector tests")
 
         REQUIRE(h == 0x2f854072);
     }
+    SECTION("value initialized")
+    {
+        const array<uint8_t, 4> a1{}, a2{};
+
+        REQUIRE(a1[0] == 0);
+        REQUIRE(a1[3] == 0);
+
+        bool r = a1 == a2;
+
+        REQUIRE(r);
+    }
 }
 
 #include "macro/pop.h"

@@ -4,6 +4,7 @@
 
 * https://github.com/malachi-iot/estdlib/issues/112 built out `docs/container/unordered_map.md`
 * `estd::optional` now plays nicely with `hash` and has better `==` support
+* `estd::array` now has `operator==`
 
 ## Quality Updates & Bug Fixes
 
