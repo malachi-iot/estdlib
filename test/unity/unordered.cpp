@@ -1,12 +1,30 @@
 #include "unit-test.h"
+#include "../catch/test/retry.h"
 
 #include <estd/array.h>
+#include <estd/string.h>
 #include <estd/unordered_map.h>
 #include <estd/unordered_set.h>
 
 using namespace estd;
 
-static void test_unordered_map()
+// TODO: Recreates offsetof() complaint, we can hone in now
+static void test_unordered_map_retry()
+{
+    //using key_type = estd::array<uint8_t, 6>;
+    //using mapped_type = estd::array<uint8_t, 10>;
+
+    using retry_item = test::retry_item_base<int, estd::array<uint8_t, 10>>;
+
+    //test::retry_tracker<layer1::string<32>, retry_item> tracker;
+    using map_type = estd::layer1::unordered_map<unsigned, retry_item, 10>;
+
+    [[maybe_unused]]
+    map_type map;
+}
+
+
+static void test_unordered_map_basic()
 {
     using key_type = estd::array<uint8_t, 6>;
     using mapped_type = estd::array<uint8_t, 10>;
@@ -44,6 +62,7 @@ TEST_CASE("unordered map/set tests", "[unordered]")
 void test_unordered()
 #endif
 {
-    RUN_TEST(test_unordered_map);
+    RUN_TEST(test_unordered_map_basic);
+    RUN_TEST(test_unordered_map_retry);
     RUN_TEST(test_unordered_set);
 }
