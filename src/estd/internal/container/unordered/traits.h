@@ -175,17 +175,24 @@ struct unordered_map_traits :
 private:
     // Check that our casting wizardry doesn't get us into too much trouble
     static_assert(sizeof(meta) == sizeof(typename value_type::second_type),
-                  "size mismatch between meta and exposed value_type");
+        "size mismatch between meta and exposed value_type");
     static_assert(sizeof(control_type::first) == sizeof(value_type::first),
-                  "size mismatch between key of control_type and value_type");
-    // evidently "value_type" does not conform to standard layout due to leading const K.
-    // making a fake-ish one which given our other safeguards is good enough
-    using assert_only_value_type = estd::pair<key_type, mapped_type>;
-    static_assert(offsetof(control_type, second) == offsetof(assert_only_value_type, second),
-                  //static_assert(offsetof(control_type, second) == offsetof(value_type, second),
-                  "mapped_type position mismatch between control_type and value_type");
+        "size mismatch between key of control_type and value_type");
+
+#if __GNUC__
+    // since this is purely a sanity check at compile time, kludge around this edge case since GCC does technically
+    // support the check
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+    // evidently "value_type" does not conform to standard layout due to leading const K.  Furthermore,
+    // if either are an inherited class it breaks offset of also.
+    static_assert(offsetof(control_type, second) == offsetof(value_type, second),
+        "mapped_type position mismatch between control_type and value_type");
+#pragma GCC diagnostic pop
+#endif
+
     static_assert(sizeof(control_type) == sizeof(value_type),
-                  "size mismatch between meta and exposed value_type");
+        "size mismatch between meta and exposed value_type");
 };
 
 

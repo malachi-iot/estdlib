@@ -8,13 +8,19 @@
 
 using namespace estd;
 
+struct synthetic
+{
+    int val;
+};
+
 // TODO: Recreates offsetof() complaint, we can hone in now
 static void test_unordered_map_retry()
 {
     //using key_type = estd::array<uint8_t, 6>;
     //using mapped_type = estd::array<uint8_t, 10>;
+    using mapped_type = synthetic;
 
-    using retry_item = test::retry_item_base<int, estd::array<uint8_t, 10>>;
+    using retry_item = test::retry_item_base<int, mapped_type>;
 
     //test::retry_tracker<layer1::string<32>, retry_item> tracker;
     using map_type = estd::layer1::unordered_map<unsigned, retry_item, 10>;
