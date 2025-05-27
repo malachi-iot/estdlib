@@ -38,6 +38,15 @@ struct AlignmentTester3
 };
 #pragma pack(pop)
 
+#ifdef __GNUC__
+struct PackTester1
+{
+    uint16_t mid;
+    array<uint8_t, 6> mac;
+
+}   __attribute__((packed));
+#endif
+
 }}
 
 template <class T, unsigned sz>
@@ -269,6 +278,17 @@ TEST_CASE("array/vector tests")
                 REQUIRE(v.empty());
             }
         }
+    }
+    SECTION("packed")
+    {
+#if __GNUC__
+        [[maybe_unused]]
+        test::PackTester1 pt{0, { 0, 1, 2, 3, 4, 5, 6 }};
+
+        // Despite https://github.com/malachi-iot/estdlib/issues/116 this still packs.  That's not
+        // good enough though.
+        static_assert(sizeof(pt) == 8);
+#endif
     }
     SECTION("tmp")
     {
