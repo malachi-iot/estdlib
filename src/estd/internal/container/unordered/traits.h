@@ -115,6 +115,7 @@ struct unordered_map_traits :
     using typename base_type::mapped_type;
     using typename base_type::key_type;
     using typename unordered_map_traits_control<Key, T, Nullable>::control_type;
+    using typename unordered_map_traits_control<Key, T, Nullable>::meta;
     using traits = unordered_map_traits;
     using nullable = Nullable;
     using base_type::key_eq;
@@ -170,6 +171,21 @@ struct unordered_map_traits :
     {
         nullable{}.set(&v->first);
     }
+
+private:
+    // Check that our casting wizardry doesn't get us into too much trouble
+    static_assert(sizeof(meta) == sizeof(typename value_type::second_type),
+                  "size mismatch between meta and exposed value_type");
+    static_assert(sizeof(control_type::first) == sizeof(value_type::first),
+                  "size mismatch between key of control_type and value_type");
+    // evidently "value_type" does not conform to standard layout due to leading const K.
+    // making a fake-ish one which given our other safeguards is good enough
+    using assert_only_value_type = estd::pair<key_type, mapped_type>;
+    static_assert(offsetof(control_type, second) == offsetof(assert_only_value_type, second),
+                  //static_assert(offsetof(control_type, second) == offsetof(value_type, second),
+                  "mapped_type position mismatch between control_type and value_type");
+    static_assert(sizeof(control_type) == sizeof(value_type),
+                  "size mismatch between meta and exposed value_type");
 };
 
 
