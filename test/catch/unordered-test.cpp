@@ -374,6 +374,21 @@ TEST_CASE("unordered")
             REQUIRE(r);
         }
     }
+    SECTION("basics")
+    {
+        using map_type = estd::layer1::unordered_map<int, float, 10>;
+        using const_iter = typename map_type::const_iterator;
+        map_type map;
+
+        SECTION("const things")
+        {
+            const_iter it = map.find(1);
+
+            bool b = it->second == 0;
+
+            REQUIRE(b);
+        }
+    }
     SECTION("synthetic retry")
     {
         // synthetic (but representative, possibly reference) use case of transport retry logic

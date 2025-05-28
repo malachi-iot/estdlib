@@ -243,20 +243,21 @@ protected:
 
 
     // semi-smart, can skip null spots
-    template <class It, class Parent>
+    template <class Pointer, class Parent>
     class iterator_base
     {
         using parent_type = Parent;
         using this_type = iterator_base;
+        using pointer = Pointer;        // will be 'value_type*' or 'const value_type*'
 
         const parent_type* parent_;
-        It it_;
+        Pointer it_;
 
         template <class OtherIt, class Parent2>
         friend class iterator_base;
 
     public:
-        constexpr iterator_base(const parent_type* parent, It it) :
+        constexpr iterator_base(const parent_type* parent, Pointer it) :
             parent_{parent},
             it_{it}
         {}
@@ -301,12 +302,12 @@ protected:
             return it_ != other.it_;
         }
 
-        constexpr bool operator==(const It& other) const
+        constexpr bool operator==(const_pointer& other) const
         {
             return it_ == other;
         }
 
-        constexpr bool operator!=(const It& other) const
+        constexpr bool operator!=(const_pointer& other) const
         {
             return it_ != other;
         }
