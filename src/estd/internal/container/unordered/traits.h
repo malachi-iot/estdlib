@@ -32,7 +32,11 @@ struct nullable_traits
 };
 
 
-template <class Key, class T, class Hash, class KeyEqual, class Nullable>
+template <class Key, class T, class Hash, class KeyEqual
+#if ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE
+    , class Nullable
+#endif
+    >
 class unordered_traits :
     // NOTE: Although EBO is interesting, spec suggests they aren't relevant here
     // i.e. https://en.cppreference.com/w/cpp/container/unordered_map/hash_function
@@ -44,7 +48,11 @@ public:
     using key_type = Key;
     using hasher = Hash;
     using key_equal = KeyEqual;
+#if ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE
     using nullable = Nullable;
+#else
+    using nullable = internal::nullable_traits<Key>;
+#endif
 
     //hasher& hash_function() { return *this; }
     //constexpr const hasher& hash_function() const { return *this; }
@@ -53,10 +61,9 @@ public:
     static constexpr key_equal key_eq() { return {}; }
 };
 
-template <class Key, class Mapped, class Nullable>
+template <class Key, class Mapped>
 struct unordered_map_traits_control
 {
-    using nullable = Nullable;
     using key_type = Key;
     using mapped_type = Mapped;
 
@@ -106,18 +113,22 @@ struct unordered_map_traits_control
 };
 
 
-template <class Key, class T, class Hash, class KeyEqual, class Nullable>
+template <class Key, class T, class Hash, class KeyEqual
+#if ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE
+    , class Nullable
+#endif
+    >
 struct unordered_map_traits :
-    unordered_map_traits_control<Key, T, Nullable>,
-    unordered_traits<Key, T, Hash, KeyEqual, Nullable>
+    unordered_map_traits_control<Key, T>,
+    unordered_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>
 {
-    using base_type = unordered_traits<Key, T, Hash, KeyEqual, Nullable>;
+    using base_type = unordered_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>;
     using typename base_type::mapped_type;
     using typename base_type::key_type;
-    using typename unordered_map_traits_control<Key, T, Nullable>::control_type;
-    using typename unordered_map_traits_control<Key, T, Nullable>::meta;
+    using typename base_type::nullable;
+    using typename unordered_map_traits_control<Key, T>::control_type;
+    using typename unordered_map_traits_control<Key, T>::meta;
     using traits = unordered_map_traits;
-    using nullable = Nullable;
     using base_type::key_eq;
 
     using value_type = pair<const key_type, mapped_type>;
@@ -196,10 +207,14 @@ private:
 };
 
 
-template <class Key, class Hash, class KeyEqual, class Nullable>
-struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual, Nullable>
+template <class Key, class Hash, class KeyEqual
+#if ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE
+    , class Nullable
+#endif
+    >
+struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>
 {
-    using base_type = unordered_traits<Key, Key, Hash, KeyEqual, Nullable>;
+    using base_type = unordered_traits<Key, Key, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>;
     using typename base_type::nullable;
 
     using value_type = Key;
