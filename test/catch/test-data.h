@@ -1,5 +1,6 @@
 #pragma once
 
+#include <estd/array.h>
 #include <estd/new.h>
 
 #include <estd/cstdint.h>
@@ -158,7 +159,6 @@ struct provider_test : TBase
 
     provider_test(int v) : value_provider (v) {}
 };
-
 
 }}
 

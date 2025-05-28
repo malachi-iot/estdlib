@@ -287,7 +287,7 @@ TEST_CASE("array/vector tests")
 
         // Despite https://github.com/malachi-iot/estdlib/issues/116 this still packs.  That's not
         // good enough though.
-        static_assert(sizeof(pt) == 8);
+        static_assert(sizeof(pt) == 8, "");
 #endif
     }
     SECTION("tmp")

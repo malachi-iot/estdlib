@@ -76,11 +76,11 @@ protected:
 template <class T, size_t N>
 struct traditional_array : array_base_size<N>
 {
-    typedef array_base_size<N> base_type;
+    using base_type = array_base_size<N>;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 
-    typedef typename base_type::size_type size_type;
+    using typename base_type::size_type;
 
     T data_[N];
 
@@ -165,17 +165,25 @@ struct array : Impl
         estd::fill_n(begin(), base_type::size(), value);
     }
 
+    constexpr array() = default;
     ESTD_CPP_FORWARDING_CTOR(array)
     ESTD_CPP_FORWARDING_CTOR_LIST(value_type, array)
 
-};
+#if __GNUC__
+// Accomodates https://github.com/malachi-iot/estdlib/issues/116 since we aren't POD due to constructor
+// treatment.
+}  __attribute__((packed));
+#else
+}
+#endif
 
+/*
 // EXPERIMENTAL
 template <class T, unsigned N>
 struct layer1_allocator
 {
     array_base2<impl::uninitialized_array<T, N> > storage;
-};
+};  */
 
 // Just like regular std::array except T constructor is not called
 // NOTE: We flow through with Base and fall back to regular estd::array if dealing
@@ -190,11 +198,12 @@ using uninitialized_array = conditional_t<
 
 }
 
+/*
 // EXPERIMENTAL
 template <class T, unsigned N>
 struct allocator_traits<internal::layer1_allocator<T, N> >
 {
 
-};
+};  */
 
 }

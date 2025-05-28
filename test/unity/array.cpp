@@ -2,6 +2,16 @@
 
 #include <estd/array.h>
 
+#ifdef __GNUC__
+struct PackTester1
+{
+    uint16_t mid;
+    estd::array<uint8_t, 6> mac;
+
+}   __attribute__((packed));
+#endif
+
+
 static void test_layer1_array()
 {
     estd::array<int, 10> a;

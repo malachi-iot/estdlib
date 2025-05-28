@@ -24,7 +24,7 @@ struct traditional_array;
 
 }
 
-template<class T, size_t N, typename Size = typename internal::deduce_fixed_size_t<N>::size_type>
+template<class T, size_t N>
 using array = internal::array<internal::impl::traditional_array<T, N> >;
 
 
