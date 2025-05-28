@@ -287,14 +287,10 @@ protected:
         ESTD_CPP_CONSTEXPR(14) value_type& operator*() { return *it_; }
 
         constexpr const_pointer operator->() const { return it_; }
-        pointer operator->() { return it_; }
+        ESTD_CPP_CONSTEXPR(14) pointer operator->() { return it_; }
 
-        // DEBT: temporary as we transition container_
-        pointer value() { return it_; }
-        constexpr const_pointer value() const { return it_; }
-
-        template <class OtherIt>
-        constexpr bool operator==(const iterator_base<OtherIt, Parent>& other) const
+        template <class Value2>
+        constexpr bool operator==(const iterator_base<Value2, Parent>& other) const
         {
             return it_ == other.it_;
         }

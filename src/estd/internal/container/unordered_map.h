@@ -306,7 +306,7 @@ public:
 
     iterator gc_active(iterator pos)
     {
-        return { this, (pointer) gc_active_ll(cast_control(pos.value())) };
+        return { this, (pointer) gc_active_ll(cast_control(estd::addressof(*pos))) };
     }
 
     // Demotes this sparse 'pos' to completely deleted 'null'
@@ -375,14 +375,16 @@ public:
     // that we are officially unordered.
     iterator erase(iterator pos)
     {
-        erase_ll(pos.value());
+        pointer p = estd::addressof(*pos);
 
-        return { this, skip_empty(pos.value() + 1) };
+        erase_ll(p);
+
+        return { this, skip_empty(p + 1) };
     }
 
     void erase_and_gc(iterator pos)
     {
-        base_type::erase_and_gc_ll(cast_control(pos.value()));
+        base_type::erase_and_gc_ll(cast_control(estd::addressof(*pos)));
     }
 
     void erase_and_gc(local_iterator pos)

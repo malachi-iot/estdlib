@@ -9,6 +9,7 @@
 ## Quality Updates & Bug Fixes
 
 * breaking change: minor update turns `estd::layer1::optional::null_value` from function to value
+* `unordered_map` receiving many behind the scenes improvements
 
 # v0.8.6 - 16MAY25
 

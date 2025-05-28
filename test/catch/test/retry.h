@@ -41,7 +41,7 @@ public:
 
         if(r.second == false) return;
 
-        queue_.emplace(r.first.value());
+        queue_.emplace(estd::addressof(*r.first));
     }
 
     // TBD
