@@ -14,5 +14,5 @@
 // by default because it increases error log bulk and is rarely needed
 // (i.e. estd::optional or specialization covers most edge cases)
 #ifndef ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE
-#define ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE 1
+#define ESTD_UNORDERED_MAP_EXPLICIT_NULLABLE 0
 #endif
