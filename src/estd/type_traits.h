@@ -114,6 +114,7 @@ template< class T >
 using decay_t = typename decay<T>::type;
 #endif
 
+// Shamelessly lifted from https://en.cppreference.com/w/cpp/memory/addressof.html
 template< class T >
 T* addressof(T& arg)
 {
@@ -121,6 +122,8 @@ T* addressof(T& arg)
                &const_cast<char&>(
                   reinterpret_cast<const volatile char&>(arg)));
 }
+
+template<class T> const T* addressof(const T&&) = delete;
 
 }
 

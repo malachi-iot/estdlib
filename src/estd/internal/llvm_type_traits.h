@@ -8,10 +8,6 @@
 
 namespace estd {
 
-#if !defined(_LIBCPP_CXX03_LANG) && defined(FEATURE_CPP_MOVESEMANTIC)
-template <class _Tp> _Tp* addressof(const _Tp&&) noexcept = delete;
-#endif
-
 template <class _Tp> struct alignment_of
     : public integral_constant<size_t, __alignof__(_Tp)> {};
 

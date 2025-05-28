@@ -243,21 +243,24 @@ protected:
 
 
     // semi-smart, can skip null spots
-    template <class Pointer, class Parent>
+    template <class Value, class Parent>
     class iterator_base
     {
         using parent_type = Parent;
         using this_type = iterator_base;
-        using pointer = Pointer;        // will be 'value_type*' or 'const value_type*'
+
+        // these two may or may not be const
+        using value_type = Value;
+        using pointer = value_type*;
 
         const parent_type* parent_;
-        Pointer it_;
+        pointer it_;
 
         template <class OtherIt, class Parent2>
         friend class iterator_base;
 
     public:
-        constexpr iterator_base(const parent_type* parent, Pointer it) :
+        constexpr iterator_base(const parent_type* parent, pointer it) :
             parent_{parent},
             it_{it}
         {}
@@ -265,8 +268,8 @@ protected:
         iterator_base(const iterator_base&) = default;
 
         // Assist to enable iterator_base to comfortably demote to const_iterator_base
-        template <class It2>
-        constexpr iterator_base(const iterator_base<It2, Parent>& copy_from) :
+        template <class Value2>
+        constexpr iterator_base(const iterator_base<Value2, Parent>& copy_from) :
             parent_{copy_from.parent_},
             it_{copy_from.it_}
         {}
@@ -281,9 +284,9 @@ protected:
         }
 
         constexpr const_reference operator*() const { return *it_; }
+        ESTD_CPP_CONSTEXPR(14) value_type& operator*() { return *it_; }
 
         constexpr const_pointer operator->() const { return it_; }
-
         pointer operator->() { return it_; }
 
         // DEBT: temporary as we transition container_
@@ -296,8 +299,8 @@ protected:
             return it_ == other.it_;
         }
 
-        template <class OtherIt>
-        constexpr bool operator!=(const iterator_base<OtherIt, Parent>& other) const
+        template <class Value2>
+        constexpr bool operator!=(const iterator_base<Value2, Parent>& other) const
         {
             return it_ != other.it_;
         }
@@ -513,8 +516,8 @@ public:
         return index(key);
     }
 
-    using iterator = iterator_base<pointer, this_type>;
-    using const_iterator = iterator_base<const_pointer, this_type>;
+    using iterator = iterator_base<value_type, this_type>;
+    using const_iterator = iterator_base<const value_type, this_type>;
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
 
