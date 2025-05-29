@@ -8,11 +8,16 @@ This document descibes behavior of `unordered_map`
 
 # Architecture
 
+A feature of `unordered_map` architecture is despite `erase` or `insert` operations,
+pointers to existing items *remain stable* by default.  Outlined here is how that operates,
+though those details are largely opaque to the programmer.
+
 ## Key Nullability
 
-Items are indicated as null or active by way of its key.
+Items are indicated as null or active by way of its key.  This can cause problems if your key needs to be "0".  In that scenario you have two options:
 
-BEWARE: This can cause problems if your key needs to be "0".  See `unordered_traits` Nullability
+* Activate `Nullability` capability
+* Leverage `estd::optional` for your keys
 
 ## Garbage Collection
 
@@ -74,6 +79,8 @@ Alias for `pair<const key_type, mapped_type>`
 
 # API
 
+Described here are API deviating from `std::unordered_map`
+
 ## erase_ll
 
 Takes as input `find_result`
@@ -88,11 +95,15 @@ Returns a `pair<control_pointer, n>` aka `find_result`
 
 ## gc_active
 
+"Garbage Collect Active Item"
+
 Distantly similar to a `std::realloc`
 
 Moves the given iterator to a null entry elsewhere.  Importantly, the iterator is otherwise the same, active data.  Merely its location has moved to accomodate garbage collection of other entries.
 
 ## gc_sparse_ll
+
+"Garbage Collect Sparse Item (low level)"
 
 Demotes this sparse 'pos' to completely deleted 'null'
 

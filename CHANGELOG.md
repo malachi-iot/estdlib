@@ -10,6 +10,7 @@
 
 * breaking change: minor update turns `estd::layer1::optional::null_value` from function to value
 * `unordered_map` receiving many behind the scenes improvements
+* `estd::array` plays nicer with packed structs
 
 # v0.8.6 - 16MAY25
 
