@@ -162,6 +162,7 @@ TEST_CASE("string_view")
 
         REQUIRE(s.ends_with('o'));
         REQUIRE(s.ends_with("llo"));
+        REQUIRE(s.ends_with(string_view("ello")));
     }
 }
 

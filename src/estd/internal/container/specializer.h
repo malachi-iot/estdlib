@@ -156,6 +156,24 @@ struct dynamic_array_helper<Impl, enable_if_t<
         return r;
     }
 
+
+    template <class Impl2>
+    static bool ends_with(const array& a, const allocated_array<Impl2>& compare_to)
+    {
+        const_pointer s = a.clock();
+
+        // DEBT: Try not to presume rhs/compare_to is lockable
+        const_pointer t = compare_to.clock();
+
+        bool r = ends_with_n(s, t, a.size(), compare_to.size());
+
+        a.cunlock();
+        compare_to.cunlock();
+
+        return r;
+    }
+
+
     // copy from us to outside dest/other
     static size_type copy_to(const array& a,
         typename estd::remove_const<value_type>::type* dest,

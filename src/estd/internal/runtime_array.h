@@ -54,6 +54,7 @@ public:
     using value_type = typename allocator_traits::value_type;
     using pointer = value_type*;
     using const_pointer = const value_type*;
+    using const_reference = const value_type&;
 
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
@@ -149,6 +150,33 @@ protected:
     {
         return helper::starts_with(*this, compare_to);
     }
+
+    ESTD_CPP_CONSTEXPR(14) bool starts_with(const_reference ch) const
+    {
+        const bool r = *clock(0, 1) == ch;
+
+        cunlock();
+
+        return r;
+    }
+
+
+    template <class Impl2>
+    constexpr bool ends_with(const allocated_array<Impl2>& compare_to) const
+    {
+        return helper::ends_with(*this, compare_to);
+    }
+
+
+    ESTD_CPP_CONSTEXPR(14) bool ends_with(const_reference ch) const
+    {
+        const bool r = *clock(size() - 1, 1) == ch;
+
+        cunlock();
+
+        return r;
+    }
+
 
 public:
     constexpr allocated_array() = default;

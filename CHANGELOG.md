@@ -3,6 +3,7 @@
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/112 built out `docs/container/unordered_map.md`
+* https://github.com/malachi-iot/estdlib/issues/117 added string `ends_with`
 * `estd::optional` now plays nicely with `hash` and has better `==` support
 * `estd::array` now has `operator==`
 
