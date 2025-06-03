@@ -133,7 +133,7 @@ protected:
     typedef value_evaporator<handle_type, !is_singular, bool, true> base_t;
 
 public:
-    handle_type handle() const { return base_t::value(); }
+    constexpr handle_type handle() const { return base_t::value(); }
 
 protected:
     void handle(const handle_type& h) { base_t::value(h); }

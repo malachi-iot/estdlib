@@ -150,6 +150,18 @@ TEST_CASE("string_view")
 
         REQUIRE(s == "hello");
     }
+    SECTION("starts_with")
+    {
+        string_view s = "hello";
+
+        REQUIRE(s.starts_with('h'));
+    }
+    SECTION("ends_with")
+    {
+        string_view s = "hello";
+
+        REQUIRE(s.ends_with('o'));
+    }
 }
 
 

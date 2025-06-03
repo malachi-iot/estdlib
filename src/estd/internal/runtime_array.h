@@ -221,7 +221,7 @@ public:
 
     typedef pointer traditional_iterator;
 
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return m_impl.size(); }
+    constexpr size_type size() const { return m_impl.size(); }
 
     allocator_valref get_allocator() const
     {

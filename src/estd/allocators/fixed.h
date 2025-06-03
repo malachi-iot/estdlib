@@ -321,11 +321,11 @@ public:
         : base_type(p.buffer), m_buffer_size(p.size)
     {}
 
-    size_type size(handle_with_size h) const { return m_buffer_size; }
+    constexpr size_type size(handle_with_size h) const { return m_buffer_size; }
 
     // FIX: This does *NOT* belong here, only a helper should do this
     // null_teriminated flag in the allocator is merely a trait
-    size_type max_size() const
+    constexpr size_type max_size() const
     {
         return m_buffer_size;
         //return m_buffer_size - (null_terminated ? 1 : 0);

@@ -125,7 +125,23 @@ public:
         return helper::starts_with(*this, compare_to);
     }
 
+    ESTD_CPP_CONSTEXPR(14) bool starts_with(value_type ch) const
+    {
+        const bool r = *base_type::clock(0, 1) == ch;
 
+        base_type::cunlock();
+
+        return r;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) bool ends_with(value_type ch) const
+    {
+        const bool r = *base_type::clock(base_type::size() - 1, 1) == ch;
+
+        base_type::cunlock();
+
+        return r;
+    }
 
     size_type find(value_type ch, size_type pos = 0) const
     {

@@ -101,7 +101,7 @@ public:
 
     ESTD_CPP_FORWARDING_CTOR(handle_descriptor_base)
 
-    ESTD_CPP_CONSTEXPR_RET size_type size() const
+    constexpr size_type size() const
     {
         return base_type::get_allocator().size(base_type::handle());
     }

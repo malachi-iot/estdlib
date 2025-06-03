@@ -1,12 +1,14 @@
 #pragma once
 
+#include "../macro/c++/const.h"
+
 namespace estd { namespace internal {
 
 // Compare two containers, returning:
 // - true if rhs is completely found
 // - false if rhs is not found or lhs ends before determination is made
 template <typename It1, typename It2>
-bool starts_with_n(It1 lhs, It2 rhs, int count_lhs, int count_rhs)
+inline ESTD_CPP_CONSTEXPR(14) bool starts_with_n(It1 lhs, It2 rhs, int count_lhs, int count_rhs)
 {
     // DEBT: Using signed int here is fiddly, since incoming count likely won't be signed
 
@@ -23,7 +25,7 @@ bool starts_with_n(It1 lhs, It2 rhs, int count_lhs, int count_rhs)
 
 // Compare two strings, assumes rhs is null terminated
 template <typename It1, typename It2>
-bool starts_with_n(It1 lhs, It2 rhs, int count)
+inline ESTD_CPP_CONSTEXPR(14) bool starts_with_n(It1 lhs, It2 rhs, int count)
 {
     // DEBT: Using signed int here is fiddly, since incoming count likely won't be signed
 
@@ -40,7 +42,7 @@ bool starts_with_n(It1 lhs, It2 rhs, int count)
 // Both are null-terminated here
 // DEBT: Make bounded version
 template <typename It1, typename It2>
-bool starts_with(It1 lhs, It2 rhs)
+inline ESTD_CPP_CONSTEXPR(14) bool starts_with(It1 lhs, It2 rhs)
 {
     for(;;)
     {
