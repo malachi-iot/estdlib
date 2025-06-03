@@ -161,6 +161,7 @@ TEST_CASE("string_view")
         string_view s = "hello";
 
         REQUIRE(s.ends_with('o'));
+        REQUIRE(s.ends_with("llo"));
     }
 }
 

@@ -5,6 +5,7 @@
 #include "../../traits/allocator_traits.h"
 #include "../../algorithm.h"
 
+#include "ends_with.h"
 #include "starts_with.h"
 
 #include <string.h>     // for access to memcpy NOLINT
@@ -212,11 +213,25 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // rhs = null terminated C string
     template <class InputIt>
-    static bool starts_with(const array& lhs, InputIt rhs)
+    ESTD_CPP_CONSTEXPR(17) static bool starts_with(const array& lhs, InputIt rhs)
     {
         const_pointer s = lhs.clock();
 
         bool r = starts_with_n(s, rhs, lhs.size());
+
+        lhs.cunlock();
+
+        return r;
+    }
+
+
+    // rhs = null terminated C string
+    template <class InputIt>
+    ESTD_CPP_CONSTEXPR(17) static bool ends_with(const array& lhs, InputIt rhs)
+    {
+        const_pointer s = lhs.clock();
+
+        bool r = ends_with_n(s, rhs, lhs.size(), strlen(rhs));
 
         lhs.cunlock();
 

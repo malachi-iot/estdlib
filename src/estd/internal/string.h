@@ -134,6 +134,12 @@ public:
         return r;
     }
 
+    // compare to a C-style string
+    constexpr bool ends_with(const_pointer compare_to) const
+    {
+        return helper::ends_with(*this, compare_to);
+    }
+
     ESTD_CPP_CONSTEXPR(14) bool ends_with(value_type ch) const
     {
         const bool r = *base_type::clock(base_type::size() - 1, 1) == ch;
