@@ -17,18 +17,19 @@ These tests are all for variants of Espressif ESP32
 | 31JUL23 | chrono   | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.1     | Pass   |
 | 02MAR24 | chrono   | Seeed Xiao           | ESP32S3        | v5.1.3   | Pass   |
 | 22FEB25 | chrono   | QEMU                 | ESP32          | v5.3.2   | Pass   |
+| 30JUL25 | chrono   | QEMU                 | ESP32          | v5.4.2   | Pass   |
 | 22JUL25 | chrono   | QEMU                 | ESP32          | v5.5     | Pass   |
 | 07DEC22 | ios      | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 02JAN23 | ios      | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0     | Pass   | 
 | 20JUL23 | ios      | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
 | 19DEC23 | ios      | WaveShare C6-DevKit  | ESP32C6        | v5.1.2   | Pass   |
 | 02MAR24 | ios      | Seeed Xiao           | ESP32S3        | v5.1.3   | Pass   |
-| 09ARP25 | ios      | QEMU                 | ESP32          | v5.4.1   | Pass   |
+| 30JUL25 | ios      | QEMU                 | ESP32          | v5.4.2   | Pass   |
 | 22FEB25 | ios      | QEMU                 | ESP32S3        | v5.3.2   | Pass   |
 | 07DEC22 | timer    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 15JUN23 | timer    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0.2   | Pass   |
 | 21JUL25 | unity    | QEMU                 | ESP32          | v5.4.2   | Pass   |
-| 27JUL25 | unity    | QEMU                 | ESP32          | v5.5     | Pass   |
+| 30JUL25 | unity    | QEMU                 | ESP32          | v5.5     | Pass   |
 | 21JUL25 | unity    | QEMU                 | ESP32S3        | v5.4.2   | Pass   |
 | 07DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 03JAN23 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.0     | Pass   |

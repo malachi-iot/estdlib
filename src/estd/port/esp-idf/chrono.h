@@ -1,7 +1,11 @@
 #pragma once
 
 #include <esp_timer.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+#include <esp_rtc_time.h>
+#else
 #include <rtc.h>
+#endif
 
 #include "../../internal/chrono/duration.h"
 #include "../../internal/chrono/time_point.h"

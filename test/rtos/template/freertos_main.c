@@ -24,21 +24,10 @@
 
 #include <estd/port/identify_platform.h>
 
-// higher versions of esp-idf are (more) api compatible between ESP32 and ESP8266
-
-// If need be, we can access IDF-VER ala https://github.com/espressif/ESP8266_RTOS_SDK/blob/master/make/project.mk
-// OK above was a bit of a pipe dream, since C preprocessor isn't powerful enough to decompose it well
-// so instead we rebuild ourselves with special version_finder.mk
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
 #include "esp_wifi.h"
-#include "esp_event_loop.h"
+#include "esp_event.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#else
-#include "esp_misc.h"
-#include "esp_sta.h"
-#include "esp_system.h"
-#endif
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -62,22 +51,13 @@ void got_ip_event();
  * Parameters   : system event
  * Returns      : none
  *******************************************************************************/
-#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
-void wifi_event_handler_cb(System_Event_t * event)
-#elif ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_644
-void wifi_event_handler_cb(system_event_t * event)
-#else
 esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
-#endif
 {
     static const char *TAG = "wifi event";
 
     if (event != NULL) 
     {
     switch (event->event_id) {
-#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
-        case EVENT_STAMODE_GOT_IP:
-#else
         case SYSTEM_EVENT_STA_GOT_IP:
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
         case SYSTEM_EVENT_ETH_GOT_IP:
@@ -89,15 +69,11 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
             // arrives here
             ESP_LOGI(TAG, "got ip:%s",
                  ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
-#endif
+
             printf("free heap size %d line %d \n", 
-#if ESTD_IDF_VER <= ESTD_IDF_VER_2_0_0_444
-                system_get_free_heap_size(), 
-#else
                 // NOTE: Not even sure if this is the right substitute
                 // but it looks right
                 esp_get_free_heap_size(),
-#endif
                 __LINE__);
 
 #if ESTD_IDF_VER >= ESTD_IDF_VER_3_0_0
@@ -105,7 +81,6 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
 #endif
             break;
 
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
         case SYSTEM_EVENT_STA_START:
             ESP_LOGI(TAG, "STA_START");
             esp_wifi_connect();
@@ -122,21 +97,14 @@ esp_err_t wifi_event_handler_cb(void* context, system_event_t * event)
             esp_wifi_connect();
             break;
 
-#endif
 
         default:
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
             ESP_LOGI(TAG, "Servicing event: %d", event->event_id);
-#endif
             break;
 
     }
     }
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
     return ESP_OK;
-#else
-    return;
-#endif
 }
 
 
@@ -160,9 +128,7 @@ void wifi_config(void *pvParameters)
 
     ESP_LOGI(TAG, "wifi_config startup");
 
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
     tcpip_adapter_init();
-#endif
 
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -252,13 +218,6 @@ uint32_t user_rf_cal_sector_set(void)
 #define CONFIG_TESTTASK_STACKSIZE 2048
 #endif
 
-/******************************************************************************
- * FunctionName : user_init
- * Description  : entry of user application, init user function here
- * Parameters   : none
- * Returns      : none
- *******************************************************************************/
-#if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_644
 void app_main(void)
 {
     static const char *TAG = "app_main";
@@ -275,12 +234,6 @@ void app_main(void)
 
     // TODO: Show SDK version here maybe
     ESP_LOGI(TAG, "Startup");
-
-#else
-void user_init(void)
-{
-    printf("SDK version:%s\n", system_get_sdk_version());
-#endif
 
 #ifdef CONFIG_WIFI_SSID
 #if ESTD_IDF_VER >= ESTD_IDF_VER_2_0_0_740
