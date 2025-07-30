@@ -372,19 +372,10 @@ public:
     };
 };
 
-// DEBT: Move this to 'impl' namespace
-template <class TImpl, class F>
-inline typename TImpl::template model<F> make_model_impl(F&& f)
+template <class Signature, detail::impl::fn_options o = detail::impl::FN_DEFAULT, class F>
+constexpr typename detail::impl::function_default<Signature, o>::template model<F> make_function_model(F&& f)
 {
-    return typename TImpl::template model<F>(std::move(f));
-}
-
-// DEBT: Hard wired to detail::impl::function_default.  Probably OK as long as we
-// maintain a separate explicit impl flavor
-template <class TSignature, class F>
-inline typename detail::impl::function_default<TSignature>::template model<F> make_model(F&& f)
-{
-    return make_model_impl<detail::impl::function_default<TSignature> >(std::move(f));
+    return typename detail::impl::function_default<Signature, o>::template model<F>(std::forward<F>(f));
 }
 
 // Helper for inline/layer1 flavor

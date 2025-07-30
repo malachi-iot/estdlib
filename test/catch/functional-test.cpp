@@ -769,6 +769,16 @@ TEST_CASE("functional")
 
         REQUIRE(value == 5);
     }
+    SECTION("freestanding helpers")
+    {
+        int value = 0;
+
+        auto f1 = estd::internal::make_function_model<void()>([&] { ++value; });
+
+        f1();
+
+        REQUIRE(value == 1);
+    }
     // DEBT: Revise nomenclature and move to organized location alongside
     // similar unit tests
     SECTION("trivial (movable)")

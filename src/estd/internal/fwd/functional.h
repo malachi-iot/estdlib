@@ -27,8 +27,8 @@ namespace detail {
 
 namespace impl {
 
-template <typename F>
-using function_default = function_fnptr2<F>;
+template <typename F, impl::fn_options o = impl::FN_DEFAULT>
+using function_default = function_fnptr2<F, o>;
 
 }
 
