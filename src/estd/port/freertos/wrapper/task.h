@@ -79,6 +79,20 @@ public:
     }
 #endif
 
+#if INCLUDE_uxTaskPriorityGet
+    UBaseType_t priorty_get() const
+    {
+        return uxTaskPriorityGet(t);
+    }
+#endif
+
+#if INCLUDE_vTaskPrioritySet
+    void priority_set(UBaseType_t newPriority) const
+    {
+        vTaskPrioritySet(t, newPriority);
+    }
+#endif
+
     const char* name() const
     {
         return pcTaskGetName(t);
