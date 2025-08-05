@@ -33,11 +33,6 @@ public:
     }
 
     // DEBT: Filter these out by ESTD_OS_FREERTOS version stamp 10.4.x
-    BaseType_t notify_give(UBaseType_t indexToNotify) const
-    {
-        return xTaskNotifyGiveIndexed(t, indexToNotify);
-    }
-
     void notify_give_from_isr(BaseType_t* higherPriorityTaskWoken = NULLPTR) const
     {
         vTaskNotifyGiveFromISR(t, higherPriorityTaskWoken);
@@ -53,6 +48,25 @@ public:
     {
         return xTaskNotifyFromISR(t, ulValue, eAction, higherPriorityTaskWoken);
     }
+
+#if ESTD_OS_FREERTOS >= ESTD_BUILD_SEMVER(10, 4, 0)
+    BaseType_t notify_give(UBaseType_t indexToNotify) const
+    {
+        return xTaskNotifyGiveIndexed(t, indexToNotify);
+    }
+
+    BaseType_t notify(UBaseType_t indexToNotify, uint32_t ulValue, eNotifyAction eAction) const
+    {
+        return xTaskNotifyIndexed(t, indexToNotify, ulValue, eAction);
+    }
+
+    BaseType_t notify_from_isr(UBaseType_t indexToNotify, uint32_t ulValue,
+        eNotifyAction eAction, BaseType_t* higherPriorityTaskWoken = NULLPTR) const
+    {
+        return xTaskNotifyIndexedFromISR(t, indexToNotify, ulValue, eAction,
+            higherPriorityTaskWoken);
+    }
+#endif
 
     uint32_t notify_value_clear(uint32_t bitsToClear) const
     {
