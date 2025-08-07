@@ -1,4 +1,4 @@
-CPMAddPackage("gh:vector-of-bool/cmrc#2.0.1")
+CPMAddPackage("gh:vector-of-bool/cmrc#952ffddba731fc110bd50409e8d2b8a06abbd237")
 
 cmrc_add_resource_library(TESTRC resources/hello.txt ALIAS testrc)
 
