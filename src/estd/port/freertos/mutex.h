@@ -11,7 +11,7 @@ namespace internal {
 class mutex_base : public semaphore_base
 {
 protected:
-    mutex_base(SemaphoreHandle_t s) :
+    constexpr mutex_base(SemaphoreHandle_t s) :
         semaphore_base(s) {}
 
 public:

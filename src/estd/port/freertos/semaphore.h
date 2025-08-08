@@ -18,7 +18,7 @@ protected:
 
     const wrapper::semaphore s;
 
-    semaphore_base(SemaphoreHandle_t s) :
+    constexpr semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
 
     ~semaphore_base()
@@ -55,7 +55,7 @@ public:
 class semaphore : public semaphore_base
 {
 protected:
-    semaphore(SemaphoreHandle_t s) : semaphore_base(s) {}
+    constexpr semaphore(SemaphoreHandle_t s) : semaphore_base(s) {}
 
 public:
     void acquire()
