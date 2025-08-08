@@ -9,8 +9,8 @@ namespace estd { namespace internal {
 template <class Impl>
 struct locking_accessor
 {
-    typedef Impl impl_type;
-    typedef locking_accessor this_type;
+    using impl_type = Impl;
+    using this_type = locking_accessor;
 
     ESTD_CPP_STD_VALUE_TYPE(typename impl_type::value_type)
 
@@ -36,19 +36,19 @@ public:
 
     ESTD_CPP_CONSTEXPR(14) locked_type lock() { return impl_.lock(); }
     constexpr const_locked_type clock() const { return impl_.lock(); }
-    ESTD_CPP_CONSTEXPR(14) void unlock() { return impl_.unlock(); }
-    ESTD_CPP_CONSTEXPR(14) void cunlock() const { return impl_.unlock(); }
+    ESTD_CPP_CONSTEXPR(14) void unlock() { impl_.unlock(); }
+    ESTD_CPP_CONSTEXPR(14) void cunlock() const { impl_.unlock(); }
 
     // Remember, we are an accessor not an iterator, so 'reference' is appropriate
     // here rather than 'pointer'
     // DEBT: Needs filtering
     // DEBT: Leaves unlocked!
     ESTD_CPP_CONSTEXPR(14) reference operator->() { return lock(); }
-    ESTD_CPP_CONSTEXPR(14) const_reference operator->() const { return clock(); }
+    constexpr const_reference operator->() const { return clock(); }
 
     // DEBT: Leaves unlocked!
     operator locked_type() { return lock(); }
-    explicit operator const_locked_type() const { return lock(); }
+    constexpr operator const_locked_type() const { return clock(); }
 
     this_type& operator=(const value_type& copy_from)
     {

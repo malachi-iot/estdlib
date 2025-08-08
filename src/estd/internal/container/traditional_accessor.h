@@ -27,19 +27,19 @@ public:
     typedef const_reference const_locked_type;
 
     template <class Allocator>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(Allocator& a,
+    constexpr explicit traditional_accessor(Allocator& a,
         const typename allocator_traits<Allocator>::handle_with_offset& h) :
         p(&a.lock(h))
     {
     }
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT traditional_accessor(reference v) :
+    constexpr explicit traditional_accessor(reference v) :
         p(&v) {}
 
-    ESTD_CPP_CONSTEXPR(17) offset_type offset() { return p; }
+    ESTD_CPP_CONSTEXPR(14) offset_type offset() { return p; }
     constexpr const_offset_type offset() const { return p; }
 
-    ESTD_CPP_CONSTEXPR(17) reference lock() { return *p; }
+    ESTD_CPP_CONSTEXPR(14) reference lock() { return *p; }
     constexpr const_reference lock() const { return *p; }
     static ESTD_CPP_CONSTEXPR(14) void unlock() {}
 };

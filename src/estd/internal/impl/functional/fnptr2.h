@@ -122,7 +122,7 @@ struct function_fnptr2<Result(Args...), o>
 #endif
 
         //template <typename U>
-        constexpr explicit model(F&& u) :
+        ESTD_CPP_CONSTEXPR(14) explicit model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
             f(std::forward<F>(u))
         {
