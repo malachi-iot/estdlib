@@ -20,21 +20,23 @@ struct test;
 //struct test<flags1::opt1> {};
 
 template <flags1 f>
-struct test<f, enable_if_t<(f & flags1::opt1).value()>>
+//struct test<f, enable_if_t<(f & flags1::opt1).operator bool()>>
+//struct test<f, enable_if_t<bool(f & flags1::opt1)>>
+struct test<f, enable_if_t<f & flags1::opt1>>
 {
-
+    static constexpr flags1 flags = f;
 };
 
 template <flags1 f>
 struct test<f, enable_if_t<f & flags1::opt2>>
 {
-
+    static constexpr flags1 flags = f;
 };
 
 template <flags1 f>
 struct test<f, enable_if_t<f & (flags1::opt2 | flags1::opt3)>>
 {
-
+    static constexpr flags1 flags = f;
 };
 
 
@@ -47,4 +49,6 @@ void setup()
 void loop()
 {
     test<flags1::opt1> t1;
+
+    static_assert(decltype(t1)::flags == flags1::opt1);
 }
