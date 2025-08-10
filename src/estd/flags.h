@@ -44,6 +44,8 @@ public:
 
     constexpr operator bool() const { return value_ != value_type{}; }
 
+    constexpr bool operator ()() const { return value_ != value_type{}; }
+
     constexpr value_type value() const { return value_; }
 
     // Putting these all as members instead of freestanding operators for easy access to int_type
@@ -91,6 +93,37 @@ constexpr bool operator!=(const flags<Enum>& lhs, const flags<Enum>& rhs)
 
 
 }}}
+
+namespace estd {
+
+//template <typename Enum, Enum e, class T = void>
+//struct if_flagged;
+
+//template <typename Enum, Enum e, class T>
+//struct if_flagged<detail::flags<Enum>, e, T> : enable_if<bool(e), T>  {};
+
+namespace detail {
+
+template <typename Enum>
+constexpr bool is_set(const detail::flags<Enum>& f)
+{
+    return f.operator bool();
+}
+
+}
+
+}
+
+#if UNUSED
+// Early GCC (5.x) seems to auto convert 'Enum v' to auto-fail SFINAE on non-type template value
+// conversion no matter what.  In other words, no version of enable_if when fed detail::flags<Enum>
+// ever passes SFINAE so enable_if is always false
+#define ESTD_FLAGS_ENABLE_IF(Enum)  \
+template <Enum v>   \
+struct Enum ## _enable_if : estd::enable_if<estd::internal::flagged(v)>    {};   \
+template <Enum v>   \
+using Enum ## _enable_if_t = typename Enum ## _enable_if<v>::type;
+#endif
 
 
 // Auto-promotes 'Enum' to flags<Enum> during these operations

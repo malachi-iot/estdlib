@@ -12,6 +12,7 @@ enum class flags1
 };
 
 ESTD_FLAGS(flags1)
+//ESTD_FLAGS_ENABLE_IF(flags1)
 
 template <flags1 f, class Enabled = void>
 struct test;
@@ -22,7 +23,13 @@ struct test;
 template <flags1 f>
 //struct test<f, enable_if_t<(f & flags1::opt1).operator bool()>>
 //struct test<f, enable_if_t<bool(f & flags1::opt1)>>
-struct test<f, enable_if_t<f & flags1::opt1>>
+//struct test<f, if_flagged<f & flags1::opt1>>
+//struct test<f, enable_if_t<f & flags1::opt1>>
+struct test<f, enable_if_t<is_set(f & flags1::opt1)>>
+//struct test<f, typename enable_if<internal::flagged(f & flags1::opt1)>::type>
+//struct test<f, typename flags1_enable_if<f & flags1::opt1>::type>
+//struct test<f, enable_if_t<true>>
+//struct test<f, enable_if_t<(f & flags1::opt1)()>>
 {
     static constexpr flags1 flags = f;
 };
