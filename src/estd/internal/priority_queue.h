@@ -84,9 +84,9 @@ public:
         compare_provider_type(compare)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET bool empty() const { return c.empty(); }
+    constexpr bool empty() const { return c.empty(); }
 
-    ESTD_CPP_CONSTEXPR_RET size_type size() const { return c.size(); }
+    constexpr size_type size() const { return c.size(); }
 
     // DEBT: Consider returning a const reference here instead, since returned
     // value is expected to be used and discarded rather quickly.  So theoretically
@@ -156,7 +156,7 @@ public:
 
     // EXPERIMENTAL
     container_type& container() { return c; }
-    const container_type& container() const { return c; }
+    constexpr const container_type& container() const { return c; }
 
     // https://www.geeksforgeeks.org/insertion-and-deletion-in-heaps/
     // DEBT: Not optimized, but passes tests
@@ -209,7 +209,7 @@ class priority_queue :
 public:
     ESTD_CPP_DEFAULT_CTOR(priority_queue)
 
-    EXPLICIT priority_queue(const Compare& compare) : base_type(compare)
+    explicit constexpr priority_queue(const Compare& compare) : base_type(compare)
     {
 
     }
