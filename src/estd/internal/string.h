@@ -338,8 +338,10 @@ public:
         {
 #if __cpp_exceptions
             throw std::length_error("Could not allocate enough memory");
-#else
+#elif FEATURE_STD
             std::abort();
+#else
+            abort();
 #endif
         }
 #endif

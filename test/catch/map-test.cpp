@@ -11,10 +11,10 @@ TEST_CASE("map-test")
 {
     SECTION("layer 1 map")
     {
+#ifdef FEATURE_ESTD_LEGACY_ARRAY
         typedef layer1::map<int, int, 4> map_t;
         estd::array<map_t::value_type, 4> buf;
 
-#ifdef FEATURE_ESTD_LEGACY_ARRAY
         buf[0].first = 0;
         buf[1].first = 0;
         buf[2].first = 0;

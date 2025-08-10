@@ -51,7 +51,7 @@ public:
 
 protected:
     template <class ...Args>
-    ESTD_CPP_CONSTEXPR(14) unordered_base(Args&&...args) :
+    ESTD_CPP_CONSTEXPR(14) explicit unordered_base(Args&&...args) :
         container_{std::forward<Args>(args)...}
     {
         // DEBT: Feels clunky

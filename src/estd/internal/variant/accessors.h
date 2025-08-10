@@ -36,7 +36,12 @@ void assert_index_matches(const variant<Types...>& v)
     if(v.index() != index) throw bad_variant_access();
 #else
     // NOTE: Not tested yet
-    if(v.index() != index) std::abort();
+    if(v.index() != index)
+#if FEATURE_STD
+        std::abort();
+#else
+        abort();
+#endif
 #endif
 }
 

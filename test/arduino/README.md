@@ -5,7 +5,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | Project     |   Date  | Vendor    | Platform      | Result   | Notes |
 | ----------- | ------- | --------- | ------------- | -------- | -----
 | basic       | 27JUN23 | Microchip | ARM SAMD21 m0 | Partial  | Nearly passes[^2]
-| basic       | 07MAY25 | Microchip | AVR 32u4      | Compiles |
+| basic       | 10AUG25 | Microchip | AVR 32u4      | Fail     | Many compilation erros crept in since May
 | basic       | 25FEB24 | Microchip | AVR 32u4 3.3v | Pass     |
 | basic       | 07MAY25 | Microchip | AVR Attiny    | Compiles |
 | basic       | 20JUL23 | Microchip | ARM SAM m4    | Pass     |
