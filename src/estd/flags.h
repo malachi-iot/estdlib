@@ -42,9 +42,14 @@ public:
 
     constexpr operator value_type() const { return value_; }
 
+#if __GNUC_PREREQ(7,3)
     constexpr operator bool() const { return value_ != value_type{}; }
+#endif
 
-    constexpr bool operator ()() const { return value_ != value_type{}; }
+    constexpr bool is_set() const { return value_ != value_type{}; }
+
+    // EXPERIMENTAL - works, but clumsy
+    //constexpr bool operator ()() const { return value_ != value_type{}; }
 
     constexpr value_type value() const { return value_; }
 
@@ -107,7 +112,7 @@ namespace detail {
 template <typename Enum>
 constexpr bool is_set(const detail::flags<Enum>& f)
 {
-    return f.operator bool();
+    return f.is_set();
 }
 
 }
@@ -136,4 +141,16 @@ constexpr estd::detail::v1::flags<Enum> operator|(Enum lhs, Enum rhs)    \
 { return estd::detail::v1::flags<Enum>(lhs) | rhs; }     \
 constexpr estd::detail::v1::flags<Enum> operator&(Enum lhs, Enum rhs)    \
 { return estd::detail::v1::flags<Enum>(lhs) & rhs; }
+
+
+// I recall we started with this guy.  Won't auto convert to bool and ADL is pretty sloppy
+#define ESTD_FLAGS_EXP(Enum)    \
+constexpr Enum operator~(Enum v)    \
+{ return Enum(~int(v)); }     \
+constexpr Enum operator^(Enum lhs, Enum rhs)    \
+{ return Enum(int(lhs) ^ int(rhs)); }     \
+constexpr Enum operator|(Enum lhs, Enum rhs)    \
+{ return Enum(int(lhs) | int(rhs)); }     \
+constexpr Enum operator&(Enum lhs, Enum rhs)    \
+{ return Enum(int(lhs) & int(rhs)); }
 

@@ -23,8 +23,8 @@ struct buffer_policy :
 // Denotes a string whose size is tracked via traditional C null termination
 template <class CharTraits, string_options o, class Size>
 struct string_policy<CharTraits, o, Size,
-    estd::enable_if_t<o & string_options::null_terminated>> :
-    buffer_policy<Size, o & string_options::constant>
+    enable_if_t<is_set(o & string_options::null_terminated)>> :
+    buffer_policy<Size, is_set(o & string_options::constant)>
 {
     typedef void is_null_terminated_exp_tag;
 
@@ -36,8 +36,8 @@ struct string_policy<CharTraits, o, Size,
 // Denotes a string whose buffer size is tracked at runtime via an integer
 template <class CharTraits, string_options o, class Size>
 struct string_policy<CharTraits, o, Size,
-    estd::enable_if_t<!(o & string_options::null_terminated)>> :
-    buffer_policy<Size, o & string_options::constant>
+    estd::enable_if_t<!is_set(o & string_options::null_terminated)>> :
+    buffer_policy<Size, is_set(o & string_options::constant)>
 {
     using char_traits = CharTraits;
 
