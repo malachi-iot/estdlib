@@ -5,7 +5,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | Project     |   Date  | Vendor    | Platform      | Result   | Notes |
 | ----------- | ------- | --------- | ------------- | -------- | -----
 | basic       | 27JUN23 | Microchip | ARM SAMD21 m0 | Partial  | Nearly passes[^2]
-| basic       | 10AUG25 | Microchip | AVR 32u4      | Fail     | Many compilation erros crept in since May
+| basic       | 11AUG25 | simavr    | AVR 32u4      | Pass     |
 | basic       | 25FEB24 | Microchip | AVR 32u4 3.3v | Pass     |
 | basic       | 07MAY25 | Microchip | AVR Attiny    | Compiles |
 | basic       | 20JUL23 | Microchip | ARM SAM m4    | Pass     |
@@ -16,6 +16,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | from_chars  | 09MAR24 | Microchip | ATtiny        | Compiles |
 | from_chars  | 08MAY25 | simavr    | AVR 328p      | Compiles |
 | istream     | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass   | [^3]
+| locale      | 11AUG25 | simavr    | AVR 328p      | Pass     |
 | ostream     | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
 | ostream     | 16NOV23 | Microchip | AVR 32u4      | Pass     |
 | ostream     | 07MAY25 | Microchip | AVR 32u4      | Compiles |

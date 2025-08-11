@@ -12,6 +12,7 @@
 //            attiny85 compiles 32 bytes larger :(
 // 29JUN23:   Back again! same size!
 #define TEST_CHRONO
+#define TEST_ENABLE 1
 
 using namespace estd::chrono;
 using namespace estd::chrono_literals;

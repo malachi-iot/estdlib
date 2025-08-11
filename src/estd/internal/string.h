@@ -75,7 +75,7 @@ public:
     // DEBT: It's OK putting this guy here, but he's a helper, not an official thing.  Would be
     // better if we consolidated a 'capabilities' area with RFC flavor
     static constexpr bool is_locking =
-        allocator_type::options & estd::internal::allocator_options::locking;
+        is_set(allocator_type::options & estd::internal::allocator_options::locking);
 
     ESTD_CPP_CONSTEXPR(14) pointer data()
     {
