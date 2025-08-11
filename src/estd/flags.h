@@ -109,10 +109,20 @@ namespace estd {
 
 namespace detail {
 
+// These exist properly c++ compliant.  In particular, constexpr-time
+// user-defined conversion is UB.  That said, CLang and GCC newer than ~7
+// support it.
+
 template <typename Enum>
 constexpr bool is_set(const detail::flags<Enum>& f)
 {
     return f.is_set();
+}
+
+template <typename Enum>
+constexpr Enum to_enum(const detail::flags<Enum>& f)
+{
+    return f.value();
 }
 
 }

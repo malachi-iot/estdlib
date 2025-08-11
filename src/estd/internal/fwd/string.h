@@ -116,7 +116,7 @@ struct string_policy;
 template <class Char, class Traits, string_options options = string_options::none, typename Size = size_t>
 using string_policy_helper =
     string_policy<Traits,
-        options | (is_const<Char>::value ? string_options::constant : string_options::none),
+        to_enum(options | (is_const<Char>::value ? string_options::constant : string_options::none)),
         Size>;
 
 // Favor using detail::basic_string, but there are edge cases where
