@@ -15,6 +15,7 @@ Invoke just basic compliation for Arduino targets to ensure it indeed works
 | from_chars  | 20APR22 | Espressif | ESP32S        | Pass   |
 | from_chars  | 09MAR24 | Microchip | ATtiny        | Compiles |
 | from_chars  | 08MAY25 | simavr    | AVR 328p      | Compiles |
+| functional  | 11AUG25 | simavr    | AVR 328p      | Pass     |
 | istream     | 28JUN23 | Microchip | ARM SAMD21 m0 | Pass   | [^3]
 | locale      | 11AUG25 | simavr    | AVR 328p      | Pass     |
 | ostream     | 27JUN23 | Microchip | ARM SAMD21 m0 | Pass     |
