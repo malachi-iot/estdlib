@@ -1,3 +1,11 @@
+# v0.X.X - XXXXX25
+
+## Quality Updates & Bug Fixes
+
+* Misc cleanup of esp-idf & FreeRTOS things
+* https://github.com/malachi-iot/estdlib/issues/139 fix `function_default` signature glitch
+* https://github.com/malachi-iot/estdlib/issues/140 AVR/UB fixups for ESTD_FLAGS
+
 # v0.8.9 - 29JUL25
 
 ## Added Features
