@@ -51,6 +51,7 @@ else()
         c++03-test.cpp
         charconv-test.cpp
         chrono-test.cpp
+        cmath-test.cpp
         cstddef-test.cpp
         dynamic-array-test.cpp
         flags-test.cpp
