@@ -13,7 +13,10 @@ void setup()
 void loop()
 {
     static float counter;
-    cout << F("sim(") << ++counter << F(")");
+
+    counter += 0.01;
+
+    cout << F("sin(") << counter << F(")=") << estd::sin(counter);
     cout << estd::endl;
 
     delay(1000);

@@ -19,56 +19,59 @@ public:
     // do make these any values we wish, but
     // https://en.cppreference.com/w/cpp/locale/num_get/get strongly implies that 'dec'
     // is expected to be zero
-    static CONSTEXPR fmtflags dec = 0x01;
-    static CONSTEXPR fmtflags hex = 0x02;
+    static constexpr fmtflags dec = 0x01;
+    static constexpr fmtflags hex = 0x02;
 #if FEATURE_ESTD_OSTREAM_OCTAL
-    static CONSTEXPR fmtflags oct = 0x03;
+    static constexpr fmtflags oct = 0x03;
 #endif
-    static CONSTEXPR fmtflags basefield = dec | hex;
+    static constexpr fmtflags basefield = dec | hex;
     // Not supported yet
-    static CONSTEXPR fmtflags uppercase = 0x04;
+    static constexpr fmtflags uppercase = 0x04;
 
     // NOTE: "Has no effect on input"
     // https://en.cppreference.com/w/cpp/io/manip/left
     // But to optimize it into basic_ostream_base would almost definitely break
     // compatibility
-    static CONSTEXPR fmtflags left = 0x08;
-    static CONSTEXPR fmtflags right = 0x10;
-    static CONSTEXPR fmtflags adjustfield = left | right;
+    static constexpr fmtflags left = 0x08;
+    static constexpr fmtflags right = 0x10;
+    static constexpr fmtflags adjustfield = left | right;
 
-    static CONSTEXPR fmtflags boolalpha = 0x20;
-    static CONSTEXPR fmtflags unitbuf = 0x40;
+    static constexpr fmtflags boolalpha = 0x20;
+    static constexpr fmtflags unitbuf = 0x40;
 
     // TODO: Not yet used, right now we are generally hardcoded to skipws = on
-    static CONSTEXPR fmtflags skipws = 0x80;
+    static constexpr fmtflags skipws = 0x80;
 
+#if FEATURE_ESTD_OSTREAM_FLOAT
+    // 13AUG25 MB Not ready yet
+#endif
 
     typedef uint8_t openmode;
 
-    static CONSTEXPR openmode app = 0x01;
-    static CONSTEXPR openmode binary = 0x02;
-    static CONSTEXPR openmode in = 0x04;
-    static CONSTEXPR openmode out = 0x08;
+    static constexpr openmode app = 0x01;
+    static constexpr openmode binary = 0x02;
+    static constexpr openmode in = 0x04;
+    static constexpr openmode out = 0x08;
 
     typedef uint8_t iostate;
 
     // DEBT: Try making these enum if we can, primarily to auto deduce
     // bit field size
 
-    static CONSTEXPR iostate goodbit = 0x00;
-    static CONSTEXPR iostate badbit = 0x01;
-    static CONSTEXPR iostate failbit = 0x02;
-    static CONSTEXPR iostate eofbit = 0x04;
+    static constexpr iostate goodbit = 0x00;
+    static constexpr iostate badbit = 0x01;
+    static constexpr iostate failbit = 0x02;
+    static constexpr iostate eofbit = 0x04;
 
     // Non standard, experimental.  Reflects that we are in a wait state
     // to see if there is any more data.  Maps to 'showmanyc' value of 0.
-    static CONSTEXPR iostate nodatabit = 0x08;
+    static constexpr iostate nodatabit = 0x08;
 
     typedef uint8_t seekdir;
 
-    static CONSTEXPR seekdir beg = 0x00;
-    static CONSTEXPR seekdir end = 0x01;
-    static CONSTEXPR seekdir cur = 0x02;
+    static constexpr seekdir beg = 0x00;
+    static constexpr seekdir end = 0x01;
+    static constexpr seekdir cur = 0x02;
 
 private:
     struct state
@@ -124,6 +127,13 @@ public:
         streamsize old_width = width();
         state_.width_ = new_width;
         return old_width;
+    }
+
+    constexpr streamsize precision() const
+    {
+        // Until FEATURE_ESTD_OSTREAM_FLOAT, we hardcode to 6 as per default
+        // https://en.cppreference.com/w/cpp/io/basic_ios/init.html
+        return 6;
     }
 
 

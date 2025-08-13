@@ -21,4 +21,9 @@
 #define FEATURE_ESTD_OSTREAM_OCTAL 1
 #endif
 
+// Track ostream.precision() and fixed/scientific/etc formats
+#ifndef FEATURE_ESTD_OSTREAM_FLOAT
+#define FEATURE_ESTD_OSTREAM_FLOAT 0
+#endif
+
 

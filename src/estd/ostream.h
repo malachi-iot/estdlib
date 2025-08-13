@@ -74,11 +74,12 @@ operator <<(basic_ostream<TStreambuf, TBase>& out, T v)
     char temp[32];
 #if FEATURE_STD_CHARCONV
     const std::chars_format format{std::chars_format::fixed};
-    const std::to_chars_result r = std::to_chars(temp, temp + 32, v, format);
+    const std::to_chars_result r = std::to_chars(temp, temp + 32, v, format,
+        out.precision());
 
     out.write(temp, r.ptr - temp);
 #elif __AVR__
-    out << dtostrf(v, 5, 2, temp);
+    out << dtostrf(v, out.width(), out.precision(), temp);
 #else
     static_assert(!is_floating_point<T>::value, "Not yet supported");
 #endif

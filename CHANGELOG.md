@@ -1,5 +1,9 @@
 # v0.X.X - XXXXX25
 
+## Added Features
+
+* For c++17 or AVR environments, ostream now has limited float/double support.
+
 ## Quality Updates & Bug Fixes
 
 * Misc cleanup of esp-idf & FreeRTOS things
