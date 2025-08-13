@@ -12,7 +12,7 @@ void setup()
 
 void loop()
 {
-    static unsigned counter;
+    static float counter;
     cout << F("sim(") << ++counter << F(")");
     cout << estd::endl;
 

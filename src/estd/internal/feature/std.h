@@ -40,6 +40,10 @@
 #define FEATURE_STD_TYPE_TRAITS 1
 #endif  // end C++11
 
+#if __cplusplus >= 201703L
+#define FEATURE_STD_CHARCONV 1
+#endif
+
 #define FEATURE_STD_ITERATOR 1
 #define FEATURE_STD_MEMORY 1
 #define FEATURE_STD_OSTREAM 1

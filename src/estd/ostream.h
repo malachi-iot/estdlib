@@ -29,6 +29,14 @@
 #include "internal/ostream_basic_string.hpp"
 #include "port/ostream.h"
 
+#if FEATURE_STD
+#include <charconv>
+#elif __AVR__
+// https://www.nongnu.org/avr-libc/user-manual/group__avr__stdlib.html
+// for dtostrf
+#include <stdlib.h>
+#endif
+
 namespace estd {
 
 namespace detail {
@@ -57,9 +65,23 @@ typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStr
 
 template <class TStreambuf, class TBase, typename T>
 typename enable_if<is_floating_point<T>::value, basic_ostream<TStreambuf, TBase>&>::type
-operator <<(basic_ostream<TStreambuf, TBase>& out, T)
+operator <<(basic_ostream<TStreambuf, TBase>& out, T v)
 {
+    // DEBT: Crude floating point conversions.  Really we need fully fledged
+    // num_put as per https://github.com/malachi-iot/estdlib/issues/23
+    // DEBT: In the meantime, we can probably heed more width/precision flags
+    // supplied by ostream itself for both formatting as well as overrun protection
+    char temp[32];
+#if FEATURE_STD_CHARCONV
+    const std::chars_format format{std::chars_format::fixed};
+    const std::to_chars_result r = std::to_chars(temp, temp + 32, v, format);
+
+    out.write(temp, r.ptr - temp);
+#elif __AVR__
+    out << dtostrf(v, 5, 2, temp);
+#else
     static_assert(!is_floating_point<T>::value, "Not yet supported");
+#endif
     return out;
 }
 
@@ -94,6 +116,8 @@ inline basic_ostream<TStreambuf>& operator<<(basic_ostream<TStreambuf>& out, voi
 #ifdef ESP_OPEN_RTOS
     __utoa((uint32_t)addr, buffer, 16);
 #elif defined(FEATURE_STD_INTTYPES) || defined(__ADSPBLACKFIN__)
+    // DEBT: Really don't like relying on snprintf and seems like rendering a pointer is
+    // really just a hex int -> string conversion
     snprintf(buffer, sizeof(buffer), "%" PRIXPTR, (uintptr_t)addr);
 #else
 #error Not implemented

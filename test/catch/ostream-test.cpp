@@ -65,6 +65,16 @@ TEST_CASE("ostream")
 
         //REQUIRE(out.rdbuf()->str() == "true");
     }
+#if FEATURE_STD_CHARCONV
+    SECTION("output float")
+    {
+        float v = 7.1;
+
+        out << v;
+
+        REQUIRE(out.rdbuf()->str() == "7.1");
+    }
+#endif
     SECTION("formatting")
     {
         SECTION("fill")
