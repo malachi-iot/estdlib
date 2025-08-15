@@ -30,7 +30,7 @@ namespace estd {
 namespace internal {
 
 template <typename Char, unsigned b, cbase_policies>
-struct cbase_utf_base;
+struct cbase_ascii_base;
 
 template <typename Char>
 struct cbase_set {};
@@ -95,13 +95,12 @@ struct cbase_set<char>
 
 
 template <typename Char, unsigned b, cbase_policies policy>
-struct cbase_utf_base : cbase_casing_base<policy>,
+struct cbase_ascii_base : cbase_casing_base<policy>,
     cbase_set<Char>
 {
     using base_type = cbase_casing_base<policy>;
     using char_type = Char;
-
-    typedef int16_t int_type;
+    using int_type =  int16_t;
 
     //typedef int_type optional_type;
     //inline static CONSTEXPR int_type eol() { return -1; }
@@ -116,26 +115,26 @@ struct cbase_utf_base : cbase_casing_base<policy>,
     typedef const estd::layer1::optional<int_type, -1> optional_type;
 #endif
 
-    inline static CONSTEXPR int_type eol() { return optional_type::null_value; }
+    inline static constexpr int_type eol() { return optional_type::null_value; }
 
-    static inline CONSTEXPR unsigned base() { return b; }
+    static inline constexpr unsigned base() { return b; }
 
-    ESTD_CPP_FORWARDING_CTOR(cbase_utf_base)
+    ESTD_CPP_FORWARDING_CTOR(cbase_ascii_base)
 };
 
 template <typename Char, cbase_policies policy, unsigned b>
-struct cbase_utf<Char, b, policy, estd::internal::Range<b <= 10> > :
-    cbase_utf_base<Char, b, CBASE_POLICY_CASE_LOWER>    // hard code to lower since doesn't matter without hex
+struct cbase_ascii<Char, b, policy, estd::internal::Range<b <= 10> > :
+    cbase_ascii_base<Char, b, CBASE_POLICY_CASE_LOWER>    // hard code to lower since doesn't matter without hex
 {
-    typedef cbase_utf_base<Char, b, CBASE_POLICY_CASE_LOWER> base_type;
-    typedef typename base_type::int_type int_type;
-    typedef Char char_type;
+    using base_type = cbase_ascii_base<Char, b, CBASE_POLICY_CASE_LOWER>;
+    using typename base_type::int_type;
+    using typename base_type::char_type;
 
-    ESTD_CPP_FORWARDING_CTOR(cbase_utf)
+    ESTD_CPP_FORWARDING_CTOR(cbase_ascii)
 
 
     // adapted from GNUC
-    static ESTD_CPP_CONSTEXPR_RET bool is_in_base(char_type c, const unsigned _base = b)
+    static constexpr bool is_in_base(char_type c, const unsigned _base = b)
     {
         return '0' <= c && c <= ('0' + (char_type)(_base - 1));
     }
@@ -144,7 +143,7 @@ struct cbase_utf<Char, b, policy, estd::internal::Range<b <= 10> > :
     /// \param c
     /// \return Character value of 0-9 converted from char to int.  Any other character value
     /// results in an int_type either < 0 or > 10
-    static ESTD_CPP_CONSTEXPR_RET int_type from_char_raw(char_type c)
+    static constexpr int_type from_char_raw(char_type c)
     {
         return c - '0';
     }
@@ -165,22 +164,22 @@ struct cbase_utf<Char, b, policy, estd::internal::Range<b <= 10> > :
 };
 
 
-// DEBT: In fact, really we have only two cbase_utfs - a base 10 one and a base 36 one.
+// DEBT: In fact, really we have only two cbase_asciis - a base 10 one and a base 36 one.
 // On one level, this range is almost overly fancy and showing off when we could merely
 // have specialized on b directly.
 // On the other hand, there is a convenience here in that consumers knowing at compile time
 // what base they are using can auto-feed 'base' to things like 'from_chars_integer'.
 template <typename Char, cbase_policies policy, unsigned b>
-struct cbase_utf<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
-    cbase_utf_base<Char, b, policy>
+struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
+    cbase_ascii_base<Char, b, policy>
 {
-    typedef cbase_utf_base<Char, b, policy> base_type;
+    typedef cbase_ascii_base<Char, b, policy> base_type;
     typedef typename base_type::int_type int_type;
     typedef Char char_type;
 
-    ESTD_CPP_FORWARDING_CTOR(cbase_utf)
+    ESTD_CPP_FORWARDING_CTOR(cbase_ascii)
 
-    static ESTD_CPP_CONSTEXPR_RET bool isupper(char_type c, const unsigned _base = b)
+    static constexpr bool isupper(char_type c, const unsigned _base = b)
     {
         return 'A' <= c && c <= ('A' + char_type(_base - 11));
     }
@@ -191,12 +190,12 @@ struct cbase_utf<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
         return isupper(c & ~0x20, _base);
     }
 
-    static ESTD_CPP_CONSTEXPR_RET bool islower(char_type c, const unsigned _base = b)
+    static constexpr bool islower(char_type c, const unsigned _base = b)
     {
         return 'a' <= c && c <= ('a' + char_type(_base - 11));
     }
 
-    static inline CONSTEXPR bool is_in_base(char_type c, const unsigned _base = b)
+    static constexpr bool is_in_base(char_type c, const unsigned _base = b)
     {
         // DEBT: We really want to consider ctype's isdigit here
         return estd::internal::ascii_isdigit(c) ||
@@ -250,7 +249,7 @@ struct cbase<Char, b, internal::locale<lc, encoding>,
         encoding == internal::encodings::ASCII ||
         encoding == internal::encodings::UTF8 ||
         encoding == internal::encodings::UTF16>::type> :
-    cbase_utf<Char, b, CBASE_POLICY_CASE_LOWER>
+    cbase_ascii<Char, b, CBASE_POLICY_CASE_LOWER>
 {
     // EXPERIMENTAL
     using locale_type = internal::locale<lc, encoding>;

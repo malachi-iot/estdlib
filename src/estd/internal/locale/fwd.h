@@ -38,7 +38,7 @@ enum cbase_policies : unsigned
 using cbase_casing = cbase_policies;
 
 template <typename Char, unsigned b, cbase_policies policy, typename = estd::internal::Range<true> >
-struct cbase_utf;
+struct cbase_ascii;
 
 template <typename Char, unsigned b, class Locale, typename Enabled = void>
 struct cbase;

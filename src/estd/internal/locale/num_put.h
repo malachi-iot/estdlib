@@ -76,7 +76,7 @@ public:
                 first, last, value, internal::base_provider<>(base),
                 // NOTE: lowercase policy doesn't matter and is just a placeholder
                 // for base10 and lower
-                cbase_utf<char_type, 10, CBASE_POLICY_CASE_LOWER>{});
+                cbase_ascii<char_type, 10, CBASE_POLICY_CASE_LOWER>{});
         }
         else
         {
@@ -84,7 +84,7 @@ public:
 
             return internal::to_chars_integer_opt(
                 first, last, value, internal::base_provider<>(base),
-                cbase_utf<char_type, 36,
+                cbase_ascii<char_type, 36,
                     cbase_policies(policy & cbase_policies::CBASE_POLICY_CASE_MASK)>(
                     uppercase ? CBASE_POLICY_CASE_UPPER : CBASE_POLICY_CASE_LOWER));
         }
