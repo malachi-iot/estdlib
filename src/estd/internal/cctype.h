@@ -14,10 +14,11 @@ constexpr bool ascii_islower(Char ch)
     return 'a' <= ch && ch <= 'z';
 }
 
+// base MUST be <= 10 (hex support elsewhere in cbase)
 template <class Char>
-constexpr bool ascii_isdigit(Char ch)
+constexpr bool ascii_isdigit(Char ch, unsigned base = 10)
 {
-    return '0' <= ch && ch <= '9';
+    return '0' <= ch && ch <= Char('0' + base - 1);
 }
 
 // Presumes incoming value is a letter (upper or lower)

@@ -22,11 +22,7 @@ inline
 #elif defined(FEATURE_CPP_INLINE_STATIC)
 static
 #endif
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-CONSTEXPR nullopt_t nullopt{0};
-#else
-CONSTEXPR nullopt_t nullopt(0);
-#endif
+constexpr nullopt_t nullopt{0};
 
 #if __cpp_exceptions
 class bad_optional_access : public std::exception {};

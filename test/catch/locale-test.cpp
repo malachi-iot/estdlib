@@ -518,6 +518,7 @@ TEST_CASE("locale")
             REQUIRE(facet.from_char('.').has_value() == false);
 
             REQUIRE(facet.is_in_base('F') == true);
+            REQUIRE(facet.is_in_base('f') == true);
             REQUIRE(facet.is_in_base('G') == false);
         }
     }

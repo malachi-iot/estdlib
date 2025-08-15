@@ -132,11 +132,9 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<b <= 10> > :
 
     ESTD_CPP_FORWARDING_CTOR(cbase_ascii)
 
-
-    // adapted from GNUC
     static constexpr bool is_in_base(char_type c, const unsigned _base = b)
     {
-        return '0' <= c && c <= ('0' + (char_type)(_base - 1));
+        return ascii_isdigit(c, _base);
     }
 
     /// No bounds checking performed on conversion.
@@ -148,12 +146,12 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<b <= 10> > :
         return c - '0';
     }
 
-    static ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v)
+    static constexpr char_type to_char(int_type v)
     {
         return '0' + v;
     }
 
-    static ESTD_CPP_CONSTEXPR_RET typename base_type::optional_type
+    static constexpr typename base_type::optional_type
     from_char(char_type c, const int _base = b)
     {
         return is_in_base(c, _base) ?
@@ -173,9 +171,9 @@ template <typename Char, cbase_policies policy, unsigned b>
 struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> > :
     cbase_ascii_base<Char, b, policy>
 {
-    typedef cbase_ascii_base<Char, b, policy> base_type;
-    typedef typename base_type::int_type int_type;
-    typedef Char char_type;
+    using base_type = cbase_ascii_base<Char, b, policy>;
+    using typename base_type::int_type;
+    using typename base_type::char_type;
 
     ESTD_CPP_FORWARDING_CTOR(cbase_ascii)
 
@@ -184,7 +182,6 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
         return 'A' <= c && c <= ('A' + char_type(_base - 11));
     }
 
-    // upper or lower - untested
     static constexpr bool isalpha(char_type c, const unsigned _base)
     {
         return isupper(c & ~0x20, _base);
@@ -195,18 +192,15 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
         return 'a' <= c && c <= ('a' + char_type(_base - 11));
     }
 
+    // DEBT: Consider renaming this to 'isdigit'
     static constexpr bool is_in_base(char_type c, const unsigned _base = b)
     {
-        // DEBT: We really want to consider ctype's isdigit here
-        return estd::internal::ascii_isdigit(c) ||
-               isupper(c, _base) ||
-               islower(c, _base);
+        return estd::internal::ascii_isdigit(c) || isalpha(c, _base);
     }
 
-    static inline typename base_type::optional_type
+    static inline ESTD_CPP_CONSTEXPR(14) typename base_type::optional_type
     from_char(estd::remove_const_t<char_type> c, const unsigned short _base = b)
     {
-        // DEBT: We really want to consider ctype's isdigit, toupper and islower here
         if (estd::internal::ascii_isdigit(c)) return c - '0';
 
         c &= ~0x20;     // Turns lowercase to upper
@@ -215,10 +209,10 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
 
         //if (islower(c, _base)) return c - 'a' + 10;
 
-        return estd::nullopt;
+        return nullopt;
     }
 
-    static inline int_type from_char_raw(char_type c)
+    static inline ESTD_CPP_CONSTEXPR(14) int_type from_char_raw(char_type c)
     {
         if (c <= '9')
             return c - '0';
@@ -228,7 +222,7 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
             return c - 'a' + 10;
     }
 
-    ESTD_CPP_CONSTEXPR_RET char_type to_char(int_type v) const
+    constexpr char_type to_char(int_type v) const
     {
 #if FEATURE_ESTD_CBASE_ARRAY
         return base_type::lset[v];
@@ -241,6 +235,8 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
 };
 
 
+// DEBT: Doesn't fully account for UTF8 behaviors
+// https://github.com/malachi-iot/estdlib/issues/142
 template <typename Char, unsigned b,
     internal::locale_code::values lc,
     internal::encodings::values encoding>
@@ -255,12 +251,12 @@ struct cbase<Char, b, internal::locale<lc, encoding>,
     using locale_type = internal::locale<lc, encoding>;
 };
 
-template <class TChar, unsigned b, class TLocale>
-struct use_facet_helper<estd::cbase<TChar, b, void>, TLocale>
+template <class Char, unsigned b, class Locale>
+struct use_facet_helper<estd::cbase<Char, b, void>, Locale>
 {
-    typedef estd::cbase<TChar, b, TLocale> facet_type;
+    typedef estd::cbase<Char, b, Locale> facet_type;
 
-    inline static facet_type use_facet(TLocale)
+    constexpr static facet_type use_facet(Locale)
     {
         return facet_type();
     }
