@@ -9,7 +9,9 @@ namespace estd {
 
 namespace internal {
 
-using default_locale = locale<internal::locale_code::en_US, encodings::UTF8>;
+// aka "C" locale, "classic" locale
+// See https://pubs.opengroup.org/onlinepubs/009604499/basedefs/xbd_chap07.html
+using default_locale = locale<internal::locale_code::en_US, encodings::ASCII>;
 
 template <class Streambuf,
     // DEBT: Deviation, I think std defaults to 'C'/ ASCII ("classic" locale) but

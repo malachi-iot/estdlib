@@ -184,7 +184,7 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
 
     static constexpr bool isalpha(char_type c, const unsigned _base)
     {
-        return isupper(c & ~0x20, _base);
+        return isupper(ascii_toupper(c), _base);
     }
 
     static constexpr bool islower(char_type c, const unsigned _base = b)
@@ -192,7 +192,9 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
         return 'a' <= c && c <= ('a' + char_type(_base - 11));
     }
 
-    // DEBT: Consider renaming this to 'isdigit'
+    // Not calling this 'isdigit' because for hex, c++ calls this 'isxdigit' and
+    // that would diminish the consistency we enjoy between this cbase<16> and
+    // cbase<10>
     static constexpr bool is_in_base(char_type c, const unsigned _base = b)
     {
         return estd::internal::ascii_isdigit(c) || isalpha(c, _base);

@@ -44,6 +44,7 @@ public:
     static constexpr bool isspace(char_type ch) { return internal::ascii_isspace(ch); }
     static constexpr bool isupper(char_type ch) { return internal::ascii_isupper(ch); }
     static constexpr bool islower(char_type ch) { return internal::ascii_islower(ch); }
+    static constexpr bool isdigit(char_type ch) { return internal::ascii_isdigit(ch); }
 
     static constexpr char_type toupper(char_type ch)
     {
@@ -100,7 +101,7 @@ public:
         }
         else if(m & base_type::digit)
         {
-            if(estd::cbase<char_type, 10, locale_type>::is_in_base(ch))
+            if(base_type::isdigit(ch))
                 return true;
         }
         if(m & base_type::upper)
