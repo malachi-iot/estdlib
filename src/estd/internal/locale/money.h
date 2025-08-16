@@ -6,6 +6,37 @@
 
 namespace estd {
 
+namespace internal {
+
+// DEBT: Make an 'ascii' base class for moneypunct
+// https://github.com/malachi-iot/estdlib/issues/142
+
+template <class Char, bool international>
+struct ascii_moneypunct;
+
+
+template<>
+struct ascii_moneypunct<char, false>
+{
+
+};
+
+
+template<>
+struct ascii_moneypunct<char, true>
+{
+
+};
+
+
+template <class Char, class Locale, class Enabled = void>
+struct moneypunct
+{
+
+};
+
+}
+
 template <>
 struct moneypunct<char, false, internal::locale<internal::locale_code::en_US, internal::encodings::UTF8> >
 {
@@ -26,12 +57,12 @@ struct moneypunct<char, true, internal::locale<internal::locale_code::en_US, int
 
 namespace internal {
 
-template <class TChar, bool international, class TLocale>
-struct use_facet_helper<moneypunct<TChar, international, void>, TLocale>
+template <class Char, bool international, class Locale>
+struct use_facet_helper<estd::moneypunct<Char, international, void>, Locale>
 {
-    typedef moneypunct<TChar, international, TLocale> facet_type;
+    using facet_type = estd::moneypunct<Char, international, Locale>;
 
-    inline static facet_type use_facet(TLocale)
+    constexpr static facet_type use_facet(Locale)
     {
         return facet_type();
     }

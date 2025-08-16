@@ -15,23 +15,23 @@ struct locale_id
 // locale_names generally correspond to what we see in Debian
 
 template <locale_code::values locale_code, internal::encodings::values encoding>
-ESTD_CPP_CONSTEXPR_RET const char* locale_name();
+ESTD_CPP_CONSTEVAL const char* locale_name();
 
 template <>
-ESTD_CPP_CONSTEXPR_RET const char* locale_name<locale_code::en_US, internal::encodings::UTF8>()
+ESTD_CPP_CONSTEVAL const char* locale_name<locale_code::en_US, internal::encodings::UTF8>()
 {
     return "en_US.UTF-8";
 };
 
 
 template <>
-ESTD_CPP_CONSTEXPR_RET const char* locale_name<locale_code::en_US, internal::encodings::ASCII>()
+ESTD_CPP_CONSTEVAL const char* locale_name<locale_code::en_US, internal::encodings::ASCII>()
 {
     return "en_US";
 };
 
 template <>
-ESTD_CPP_CONSTEXPR_RET const char* locale_name<locale_code::C, internal::encodings::ASCII>()
+ESTD_CPP_CONSTEVAL const char* locale_name<locale_code::C, internal::encodings::ASCII>()
 {
     return "C";
 };
