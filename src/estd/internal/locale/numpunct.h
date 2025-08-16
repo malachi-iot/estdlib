@@ -14,29 +14,14 @@ namespace internal {
 
 
 template <typename Char>
-struct numpunct_base;
-
-template <>
-struct numpunct_base<char>
+struct classic_numpunct
 {
-    typedef char char_type;
+    using char_type = Char;
 
-    static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
-    static estd::layer2::const_string grouping() { return ""; }
-    static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
+    static ESTD_CPP_CONSTEVAL char_type thousands_sep() { return ','; }
+    static constexpr estd::layer2::const_string grouping() { return ""; }
+    static ESTD_CPP_CONSTEVAL char_type decimal_point() { return '.'; }
 };
-
-// DEBT: Can probably consolidate this in a non-specialized way with regular char version
-template <>
-struct numpunct_base<wchar_t>
-{
-    typedef wchar_t char_type;
-
-    static ESTD_CPP_CONSTEXPR_RET char_type thousands_sep() { return ','; }
-    //static estd::layer2::const_string grouping() { return ""; }
-    static ESTD_CPP_CONSTEXPR_RET char_type decimal_point() { return '.'; }
-};
-
 
 //template <locale_code::values lc, internal::encodings::values encoding>
 template <class Locale>
@@ -59,26 +44,25 @@ struct numpunct<char,
         internal::is_compatible_with_classic_locale<Locale>::value>
 
         ::type> :
-    internal::numpunct_base<char>
+    internal::classic_numpunct<char>
 {
-    typedef estd::layer2::const_string string_type;
+    using string_type = estd::layer2::const_string;
 
-    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return "true"; }
-    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return "false"; }
+    static constexpr string_type truename() { return "true"; }
+    static constexpr string_type falsename() { return "false"; }
 };
 
 
 template <class Locale>
 struct numpunct<wchar_t, Locale,
-    typename estd::enable_if<
-        internal::is_compatible_with_classic_locale<Locale>::value>
-    ::type> :
-    internal::numpunct_base<wchar_t>
+    estd::enable_if_t<
+        internal::is_compatible_with_classic_locale<Locale>::value>> :
+    classic_numpunct<wchar_t>
 {
-    typedef layer2::basic_string<const wchar_t, 0> string_type;
+    using string_type = layer2::basic_string<const wchar_t, 0>;
 
-    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return L"true"; }
-    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return L"false"; }
+    static constexpr string_type truename() { return L"true"; }
+    static constexpr string_type falsename() { return L"false"; }
 };
 
 
@@ -86,18 +70,18 @@ template <internal::encodings::values encoding>
 struct numpunct<char,
     internal::locale<internal::locale_code::fr_FR, encoding>,
     typename internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
-    numpunct_base<char>
+    classic_numpunct<char>
 {
-    typedef estd::layer2::const_string string_type;
+    using string_type = estd::layer2::const_string;
 
-    static ESTD_CPP_CONSTEXPR_RET string_type truename() { return "vrai"; }
-    static ESTD_CPP_CONSTEXPR_RET string_type falsename() { return "faux"; }
+    static constexpr string_type truename() { return "vrai"; }
+    static constexpr string_type falsename() { return "faux"; }
 };
 
 }
 
 
-// All this wrapping is done to hide the 'TEnabled' template portion.
+// All this wrapping is done to hide the 'Enabled' template portion.
 // This comes in handy when doing custom specializations, one can avoid specifying
 // that extra 3rd template parameter.
 template <typename Char, class Locale>

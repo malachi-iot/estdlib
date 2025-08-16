@@ -1,8 +1,10 @@
 #pragma once
 
+#include <estd/string.h>
+
 #include "fwd.h"
 #include "facet.h"
-#include <estd/string.h>
+#include "numpunct.h"
 
 namespace estd {
 
@@ -25,12 +27,13 @@ struct ascii_us_moneypunct<char, true>
 };
 
 
+// DEBT: Consider pulling in internal::classic_numpunct
 template <class Char, bool international, class Locale>
 struct moneypunct<Char, international, Locale,
     enable_if_t<is_compatible_with_classic_locale<Locale>::value>> :
-    ascii_us_moneypunct<Char, international>
+    ascii_us_moneypunct<Char, international>,
+    classic_numpunct<Char>
 {
-    static constexpr Char decimal_point() { return '.'; }
 };
 
 template <class Char, bool international, class Locale>

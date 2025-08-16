@@ -9,6 +9,7 @@
 * Misc cleanup of esp-idf & FreeRTOS things
 * https://github.com/malachi-iot/estdlib/issues/139 fix `function_default` signature glitch
 * https://github.com/malachi-iot/estdlib/issues/140 AVR/UB fixups for ESTD_FLAGS
+* https://github.com/malachi-iot/estdlib/issues/142 scrubbing UTF8 -> ASCII
 
 # v0.8.9 - 29JUL25
 
