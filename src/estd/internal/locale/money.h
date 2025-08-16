@@ -8,54 +8,30 @@ namespace estd {
 
 namespace internal {
 
-// DEBT: Make an 'ascii' base class for moneypunct
-// https://github.com/malachi-iot/estdlib/issues/142
-
 template <class Char, bool international>
-struct ascii_moneypunct;
+struct ascii_us_moneypunct;
+
+template<>
+struct ascii_us_moneypunct<char, false>
+{
+    static constexpr estd::layer2::const_string curr_symbol() { return "$"; }
+};
 
 
 template<>
-struct ascii_moneypunct<char, false>
+struct ascii_us_moneypunct<char, true>
 {
-
+    static constexpr estd::layer2::const_string curr_symbol() { return "USD "; }
 };
 
 
-template<>
-struct ascii_moneypunct<char, true>
+template <class Char, bool international, class Locale>
+struct moneypunct<Char, international, Locale,
+    enable_if_t<is_compatible_with_classic_locale<Locale>::value>> :
+    ascii_us_moneypunct<Char, international>
 {
-
+    static constexpr Char decimal_point() { return '.'; }
 };
-
-
-template <class Char, class Locale, class Enabled = void>
-struct moneypunct
-{
-
-};
-
-}
-
-template <>
-struct moneypunct<char, false, internal::locale<internal::locale_code::en_US, internal::encodings::UTF8> >
-{
-    static char decimal_point() { return '.'; }
-
-    static estd::layer2::const_string curr_symbol() { return "$"; }
-};
-
-
-template <>
-struct moneypunct<char, true, internal::locale<internal::locale_code::en_US, internal::encodings::UTF8> >
-{
-    static char decimal_point() { return '.'; }
-
-    static estd::layer2::const_string curr_symbol() { return "USD "; }
-};
-
-
-namespace internal {
 
 template <class Char, bool international, class Locale>
 struct use_facet_helper<estd::moneypunct<Char, international, void>, Locale>

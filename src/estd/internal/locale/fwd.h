@@ -52,6 +52,9 @@ struct locale;
 template <typename Char, class Locale, class Enabled = void>
 struct numpunct;
 
+template <class Char, bool international, class Locale, class Enabled = void>
+struct moneypunct;
+
 }
 
 namespace iterated {
@@ -64,8 +67,6 @@ struct num_get;
 template <typename Char, unsigned b, class Locale = void>
 using cbase = internal::cbase<Char, b, Locale>;
 
-
-
 template <typename Char, class Locale = void>
 class ctype;
 
@@ -73,7 +74,7 @@ template <class Char, class Locale = void>
 struct numpunct;
 
 template <class Char, bool international = false, class Locale = void>
-struct moneypunct;
+using moneypunct = internal::moneypunct<Char, international, Locale>;
 
 
 }
