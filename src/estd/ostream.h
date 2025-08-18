@@ -87,9 +87,9 @@ operator <<(basic_ostream<TStreambuf, TBase>& out, T v)
 }
 
 
-template <class TStreambuf, class TBase>
-inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, TBase>& out,
-    typename TBase::char_type ch)
+template <class Streambuf, class Base>
+inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
+    typename Base::char_type ch)
 {
 #if FEATURE_ESTD_OSTREAM_SETW
     const streamsize pad = out.width();
@@ -100,6 +100,21 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 
     return out.put(ch);
 }
+
+
+template <class Streambuf, class Base>
+inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
+    bool v)
+{
+    // DEBT: Very crude.  Needs bounds check, width/padding, and maybe locale
+    layer1::string<16> s;
+    num_put<char, char*> n;
+
+    *n.put(s.data(), out, ' ', v) = 0;
+
+    return out << s;
+}
+
 
 // Somehow, blackfin has the PRIXPTR and friends even though it doesn't have
 // inttypes.h or cinttypes.  

@@ -60,10 +60,11 @@ TEST_CASE("ostream")
     {
         const bool v = true;
 
-        // Not ready yet
-        //out << v;
+        out.flags(ios_base::boolalpha);
 
-        //REQUIRE(out.rdbuf()->str() == "true");
+        out << v;
+
+        REQUIRE(out.rdbuf()->str() == "true");
     }
 #if FEATURE_STD_CHARCONV
     SECTION("output float")

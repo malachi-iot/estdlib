@@ -151,13 +151,13 @@ public:
     fmtflags unsetf(fmtflags flags)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ &= ~flags; return prior; }
 
-    ESTD_CPP_CONSTEXPR_RET fmtflags flags() const
+    constexpr fmtflags flags() const
     { return state_.fmtfl_; }
 
     fmtflags flags(fmtflags fmtfl)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ = fmtfl; return prior; }
 
-    ESTD_CPP_CONSTEXPR_RET iostate rdstate() const
+    constexpr iostate rdstate() const
     { return state_.iostate_; }
 
     void clear(iostate state = goodbit)

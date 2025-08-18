@@ -2,7 +2,7 @@
 
 ## Added Features
 
-* For c++17 or AVR environments, ostream now has limited float/double support.
+* https://github.com/malachi-iot/estdlib/issues/23 For c++17 or AVR environments, ostream now has limited float/double support.
 
 ## Quality Updates & Bug Fixes
 
