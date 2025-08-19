@@ -542,6 +542,27 @@ TEST_CASE("string tests")
 
             REQUIRE(s == "The value is 999999999999999");
         }*/
+#if FEATURE_STD_CHARCONV
+        SECTION("float")
+        {
+            float v = 123.456;
+
+            SECTION("indirect")
+            {
+                //s += to_string(v);
+
+                //REQUIRE(s == "The value is 123.456001");
+            }
+            SECTION("direct")
+            {
+                layer1::string<32> s2;
+
+                to_string(s2, v);
+
+                REQUIRE(s2 == "123.456001");
+            }
+        }
+#endif
     }
     SECTION("find")
     {

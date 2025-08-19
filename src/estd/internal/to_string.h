@@ -7,6 +7,10 @@
 #include "../charconv.h"
 #include "impl/allocated_array.h"
 
+#if FEATURE_STD_CHARCONV
+#include <charconv>
+#endif
+
 // not doing #include <stdio.h> because all its putc/putchar macros get things
 // confused
 #if defined(__GNU_LIBRARY__)
@@ -23,7 +27,8 @@ int sprintf ( char * str, const char * format, ... );
 namespace estd {
 
 // non standard overloads in case you've already got the string
-// you'd like to populate.  Assumes you want null termination.  Also
+// you'd like to populate.
+// DEBT: Assumes you want null termination.  Also
 // assumes max_size is sensible, which may not be the cast with layer2
 // strings
 template <class T, class Impl>
@@ -39,6 +44,30 @@ to_string(estd::internal::allocated_array<Impl>& s, const T& value)
     *result.ptr = 0;
 
     s.unlock();
+}
+
+
+// non standard overloads in case you've already got the string
+// you'd like to populate.
+template <class T, size_t N>
+estd::enable_if_t<!estd::numeric_limits<T>::is_integer>
+to_string(estd::layer1::string<N>& s, const T& value)
+{
+    char* raw = s.data();
+    // DEBT: Just grabbed arbitrary value for this
+    static constexpr unsigned precision = 6;
+
+#if FEATURE_STD_CHARCONV
+    constexpr std::chars_format format{std::chars_format::fixed};
+    const std::to_chars_result r = std::to_chars(raw, raw + N - 1, value, format,
+        precision);
+
+    *r.ptr = 0;
+#elif __AVR__
+    dtostrf(value, 6, precision, raw);
+#else
+    static_assert(!is_floating_point<T>::value, "Not yet supported");
+#endif
 }
 
 
@@ -112,23 +141,5 @@ inline layer1::string<N> to_string(const T& value)
 }
 #endif
 #endif
-
-namespace experimental {
-
-template <>
-struct string_convert_traits<char, int16_t>
-{
-    static CONSTEXPR uint8_t max_size() { return 5; }
-
-    template <class TImpl>
-    static void to_string(estd::internal::allocated_array<TImpl>& s, int16_t value)
-    {
-        estd::internal::toString(s.lock(), value);
-        s.unlock();
-    }
-};
-
-
-}
 
 }

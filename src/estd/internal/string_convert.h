@@ -18,13 +18,6 @@
 
 namespace estd {
 
-namespace experimental {
-
-template <class TChar, class T>
-struct string_convert_traits;
-
-}
-
 namespace internal {
 
 template<class T> T fromString(const char* input);
