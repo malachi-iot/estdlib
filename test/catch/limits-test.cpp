@@ -212,10 +212,12 @@ TEST_CASE("limits & common_type tests")
     {
         constexpr unsigned v = numeric_limits<int16_t>::length<10>::value;
         constexpr unsigned v2 = numeric_limits<int16_t>::length<16>::value;
+        constexpr unsigned v3 = numeric_limits<uint32_t>::length<10>::value;
 
         REQUIRE(v == 6);
         // DEBT: Probably should be 4, but we overallocate in case of negative hex
         REQUIRE(v2 == 5);
+        REQUIRE(v3 == 10);
     }
     SECTION("sign reversal")
     {

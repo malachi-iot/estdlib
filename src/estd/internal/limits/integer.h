@@ -18,16 +18,16 @@ struct uint_limits;
 template <class T, bool is_signed_>
 struct integer_limits : signed_traits<T, is_signed_>
 {
-    static CONSTEXPR bool is_specialized = true;
+    static constexpr bool is_specialized = true;
 
     // non-standard, how many bits in this T
-    static CONSTEXPR unsigned bits = (sizeof(T) * CHAR_BIT);
+    static constexpr unsigned bits = (sizeof(T) * CHAR_BIT);
 
-    static CONSTEXPR bool is_integer = true;
-    static CONSTEXPR bool is_signed = is_signed_;
-    static CONSTEXPR int digits = bits - (is_signed ? 1 : 0);
-    static CONSTEXPR bool is_iec559 = false;
-    static CONSTEXPR unsigned radix = 2;
+    static constexpr bool is_integer = true;
+    static constexpr bool is_signed = is_signed_;
+    static constexpr int digits = bits - (is_signed ? 1 : 0);
+    static constexpr bool is_iec559 = false;
+    static constexpr unsigned radix = 2;
 
     /// Retrieves maximum length a string of this int, accounting for
     /// base representation
@@ -35,12 +35,12 @@ struct integer_limits : signed_traits<T, is_signed_>
     /// DEBT: Only base 10 minus sign SHOULD be considered, but char conversion code doesn't
     /// filter out the notion of negative hex, for example.  That really does need to be sorted out,
     /// but in the meantime we overallocate here to avoid a stack corruption
-    /// \tparam base supported values: 8, 10, 16
+    /// @param base supported values: 8, 10, 16
     template <unsigned base>
-    struct length :
+    using length =
         integral_constant<unsigned, uint_strlen<base, bits>::value +
                                     //((is_signed && base == 10) ? 1 : 0)> {};
-                                    (is_signed ? 1 : 0)> {};
+                                    (is_signed ? 1 : 0)>;
 };
 
 template <>

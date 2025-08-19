@@ -25,13 +25,11 @@ template<class T, T v>
 struct integral_constant
 {
     static constexpr T value = v;
-    typedef T value_type;
+    using value_type = T;
     using type = integral_constant; // using injected-class-name
 
-    ESTD_CPP_CONSTEXPR_RET operator value_type() const NOEXCEPT { return value; }
-#ifdef __cpp_constexpr
-    constexpr value_type operator()() const noexcept { return value; } //since c++14
-#endif
+    constexpr operator value_type() const NOEXCEPT { return value; }
+    constexpr value_type operator()() const noexcept { return value; }
 };
 
 // After c++11 this is deprecated, c++ and before it's (technically) required
