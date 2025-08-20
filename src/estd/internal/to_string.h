@@ -6,6 +6,7 @@
 #include "string_convert.h"
 #include "../charconv.h"
 #include "impl/allocated_array.h"
+#include "string/to_string.h"
 
 #if FEATURE_STD_CHARCONV
 #include <charconv>
@@ -26,7 +27,7 @@ int sprintf ( char * str, const char * format, ... );
 
 namespace estd {
 
-// non standard overloads in case you've already got the string
+// +++ non standard overloads in case you've already got the string
 // you'd like to populate.
 // DEBT: Assumes you want null termination.  Also
 // assumes max_size is sensible, which may not be the cast with layer2
@@ -46,30 +47,21 @@ to_string(estd::internal::allocated_array<Impl>& s, const T& value)
     s.unlock();
 }
 
-
-// non standard overloads in case you've already got the string
-// you'd like to populate.
 template <class T, size_t N>
 estd::enable_if_t<!estd::numeric_limits<T>::is_integer>
 to_string(estd::layer1::string<N>& s, const T& value)
 {
-    char* raw = s.data();
-    // DEBT: Just grabbed arbitrary value for this
-    static constexpr unsigned precision = 6;
-
-#if FEATURE_STD_CHARCONV
-    constexpr std::chars_format format{std::chars_format::fixed};
-    const std::to_chars_result r = std::to_chars(raw, raw + N - 1, value, format,
-        precision);
-
-    *r.ptr = 0;
-#elif __AVR__
-    dtostrf(value, 6, precision, raw);
-#else
-    static_assert(!is_floating_point<T>::value, "Not yet supported");
-#endif
+    internal::to_string_float(s, value);
 }
 
+template <class T, size_t N>
+enable_if_t<!estd::numeric_limits<T>::is_integer>
+to_string(layer2::string<N>& s, const T& value)
+{
+    internal::to_string_float(s, value);
+}
+
+// --- non standard overloads
 
 // DEBT: This works pretty well, I'm just getting nervous about TInt letting too many things flow
 // in - so hiding it in internal, which due to ADL won't help a whole lot

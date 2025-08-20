@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "string/to_string.h"
+
 #ifdef ESTD_ARDUINO
 #include <Arduino.h>
 #else
