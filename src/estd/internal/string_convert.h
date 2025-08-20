@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "../limits.h"
 #include "string/to_string.h"
 
 #ifdef ESTD_ARDUINO
@@ -64,60 +65,13 @@ template<> inline unsigned short fromString(const char* input)
 
 namespace legacy {
 
-// DEBT: Time to rework this whole maxStringLength arrangement.
-// 1.  Its silent failures cause problems.  Unsupported types should generate compile time
-//     errors, not a '0'
-// 2.  The whole specialization on int32 etc not working  for some CPUs is confusing and crusty.  Get to
-//     the bottom of that
-
 // EXCLUDES null termination but room for a - sign
-// a value of 0 indicates type not supported
 template <class T>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength() { return 0; }
-
-// DEBT: Unsure why exactly on some platforms int/int32_t seem to overlap and others
-// don't.  Pertains to ESTD_ARCH_BITNESS checks below
-
-
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<char>() { return 1; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint8_t>() { return 3; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int8_t>() { return 4; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint16_t>() { return 5; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int16_t>() { return 6; }
-
-// On 32-bit Raspbian we need to exclude this
-#if !(ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32 && INT32_MAX == INT_MAX)
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint32_t>() { return 10; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int32_t>() { return 11; }
-#endif
-
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<uint64_t>() { return 21; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int64_t>() { return 20; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<float>() { return 32; }
-template <>
-ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<double>() { return 64; }
-
-#if ESTD_MCU_ARM && ESTD_ARCH_BITNESS == 32 && INT32_MAX == INT_MAX
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<unsigned>() { return 11; }
-#endif
-
-// https://github.com/brucehoult/riscv-meta/blob/master/doc/src/rv128.md
-// https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf
-#if __riscv
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<int>() { return 11; }
-template<> ESTD_CPP_CONSTEXPR_RET uint8_t maxStringLength<unsigned>() { return 10; }
-#endif
+ESTD_CPP_ATTR_DEPRECATED("Use numeric_limits::length instead")
+ESTD_CPP_CONSTEVAL uint8_t maxStringLength()
+{
+    return numeric_limits<T>::template length<10>::value;
+}
 
 }
 
@@ -129,7 +83,18 @@ extern const char TYPENAME_INT[];
 extern const char TYPENAME_CHARPTR[];
 
 template<class T> PGM_P validateString(const char* input);
-template<class T, class TChar> char* toString(TChar* output, T input);
+
+// 20AUG25 MB Not well tested, and to be removed by 01OCT25
+template<class T, class Char>
+ESTD_CPP_ATTR_DEPRECATED("Use to_string instead")
+char* toString(Char* output, T input)
+{
+    estd::layer2::basic_string<Char, 0> s(output);
+
+    to_string(output, input);
+
+    return output;
+}
 
 template<class T> PGM_P getTypeName();
 
