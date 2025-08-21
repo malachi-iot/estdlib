@@ -19,7 +19,7 @@ struct test1
 
 
 template <synthetic_flags f>
-struct test1<f, estd::enable_if_t<f & SN_DOUBLE>>
+struct test1<f, estd::enable_if_t<is_set(f & SN_DOUBLE)>>
 {
     static constexpr synthetic_flags flags = f;
     static constexpr bool is_const = f & SN_CONST;
@@ -30,7 +30,7 @@ template <synthetic_flags f>
 void assert_double(test1<f>)
 {
     // C++14 is sensitive to non-constexpr linking, so test that too
-    if(!(test1<f>::flags & SN_DOUBLE))
+    if(!is_set(test1<f>::flags & SN_DOUBLE))
     {
         CATCH_ERROR("Shouldn't get here");
     }

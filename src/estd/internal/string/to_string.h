@@ -28,6 +28,8 @@ void to_string_float(detail::basic_string<Impl>& s, const T& value)
 #elif __AVR__
     dtostrf(value, 6, precision, raw);
 #else
+    (void)raw;
+    (void)precision;
     static_assert(!is_floating_point<T>::value, "Not yet supported");
 #endif
 

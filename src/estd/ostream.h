@@ -63,14 +63,12 @@ typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStr
     return out_int_helper(out, value);
 }
 
-template <class TStreambuf, class TBase, typename T>
-typename enable_if<is_floating_point<T>::value, basic_ostream<TStreambuf, TBase>&>::type
-operator <<(basic_ostream<TStreambuf, TBase>& out, T v)
+template <class Streambuf, class Base, typename T>
+enable_if_t<is_floating_point<T>::value, basic_ostream<Streambuf, Base>&>
+operator <<(basic_ostream<Streambuf, Base>& out, T v)
 {
     // DEBT: Crude floating point conversions.  Really we need fully fledged
     // num_put as per https://github.com/malachi-iot/estdlib/issues/23
-    // DEBT: In the meantime, we can probably heed more width/precision flags
-    // supplied by ostream itself for both formatting as well as overrun protection
     char temp[32];
 #if FEATURE_STD_CHARCONV
     const std::chars_format format{std::chars_format::fixed};
@@ -81,6 +79,7 @@ operator <<(basic_ostream<TStreambuf, TBase>& out, T v)
 #elif __AVR__
     out << dtostrf(v, out.width(), out.precision(), temp);
 #else
+    (void)temp;
     static_assert(!is_floating_point<T>::value, "Not yet supported");
 #endif
     return out;
