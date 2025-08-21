@@ -37,7 +37,7 @@ private:
         // incoming by way of str.
         // Documentation [1] indicates to favor the latter
         template <unsigned base, class IncomingLocale, class T>
-        static iter_type get_signed_number(iter_type i, iter_type end,
+        static ESTD_CPP_CONSTEXPR(14) iter_type get_signed_number(iter_type i, iter_type end,
             ios_base::iostate& err, IncomingLocale l, T& v)
         {
             iterated::num_get<base, char_type, IncomingLocale> n(l);
@@ -74,9 +74,21 @@ private:
             return i;
         }
 
+        template <class IncomingLocale, typename Float>
+        static constexpr enable_if_t<is_floating_point<Float>::value, iter_type>
+        get(iter_type in, iter_type end,
+            const ios_base::fmtflags,
+            ios_base::iostate& err,
+            IncomingLocale l,
+            Float& v)
+        {
+            return get_signed_number<10>(in, end, err, l, v);
+        }
+
 
         template <class IncomingLocale, typename T>
-        static inline iter_type get(iter_type in, iter_type end,
+        static inline enable_if_t<!is_floating_point<T>::value, iter_type>
+        get(iter_type in, iter_type end,
             const ios_base::fmtflags basefield,
             ios_base::iostate& err,
             IncomingLocale l,
@@ -259,13 +271,13 @@ private:
 public:
     // NOTE: Non standard call.  locale is picked up from locale_type (use_facet)
     template <typename T>
-    inline iter_type get(iter_type in, iter_type end, ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
+    inline constexpr iter_type get(iter_type in, iter_type end, ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
     {
         return localizer::get(in, end, basefield, err, locale_type{}, v);
     }
 
     template <typename T, class Streambuf, class Base>
-    iter_type get(iter_type in, iter_type end,
+    constexpr iter_type get(iter_type in, iter_type end,
         const estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
     {
         return istream_localizer<Streambuf, Base>::get(in, end, str, err, v,

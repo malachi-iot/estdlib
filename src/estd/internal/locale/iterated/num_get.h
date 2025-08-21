@@ -19,6 +19,7 @@
 #include "../cbase.h"
 #include "../numpunct.h"
 #include "../fwd.h"
+#include "../../raise_and_add.h"
 #include "../../ios_base.h"
 #include "../../chooser.h"
 #include "../../feature/num_get.h"
@@ -82,7 +83,7 @@ struct num_get
     // #1 'true_type' means this is an integer
     // #2 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    ESTD_CPP_CONSTEXPR_RET static bool raise_and_add(int_type n, T& v, true_type, true_type)
+    constexpr static bool raise_and_add(int_type n, T& v, true_type, true_type)
     {
         return positive ?
            estd::internal::raise_and_add(v, base, n) :
@@ -92,7 +93,7 @@ struct num_get
     // 'false_type' means this is a float or double
     // 'true_type' means this is the signed flavor
     template <bool positive, typename T>
-    bool raise_and_add(int_type n, T& v, false_type, true_type)
+    ESTD_CPP_CONSTEXPR(14) bool raise_and_add(int_type n, T& v, false_type, true_type)
     {
 #if __cpp_static_assert
         static_assert(base == 10, "Only base 10 supported for floating point");
@@ -121,7 +122,7 @@ struct num_get
     /// @param v
     /// @return false if 'c' is generally parseable as part of a number, true otherwise
     template <bool positive, typename T>
-    bool nominal(char_type c, ios_base::iostate& err, T& v)
+    ESTD_CPP_CONSTEXPR(14) bool nominal(char_type c, ios_base::iostate& err, T& v)
     {
         typedef estd::bool_constant<numeric_limits<T>::is_integer> is_integer;
         optional_type n = cbase_type::from_char(c);
@@ -208,7 +209,7 @@ struct num_get
         bool autoinit = true,
 #endif
         typename T>
-    bool get(char_type c, ios_base::iostate& err, T& v)
+    ESTD_CPP_CONSTEXPR(14) bool get(char_type c, ios_base::iostate& err, T& v)
     {
         switch(state_.state_)
         {

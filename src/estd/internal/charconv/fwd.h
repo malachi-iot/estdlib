@@ -14,6 +14,10 @@ struct from_chars_result;
 template <class CharIt>
 struct to_chars_result;
 
+// This is of the "opt" variety, where last character truly is at 'last'
+template <unsigned b, class Int, class CharIt>
+constexpr enable_if_t<estd::numeric_limits<Int>::is_integer, to_chars_result<CharIt> >
+to_chars(CharIt first, CharIt last, Int value);
 
 }
 

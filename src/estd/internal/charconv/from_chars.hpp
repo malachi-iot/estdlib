@@ -2,10 +2,12 @@
 
 //#include "../cctype.h"
 #include "../locale/ctype.h"
+#include "../locale/num_get.h"
 #include "../raise_and_add.h"
 
 #include "features.h"
 #include "result.h"
+#include "estd/system_error.h"
 
 namespace estd { namespace internal {
 
@@ -117,6 +119,19 @@ ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_integer(Char
     value = estd::is_signed<T>::value && negate ? -local_value : local_value;
 
     return result_type{last,estd::errc(0)};
+}
+
+// DEBT: Still needs 'std::chars_format' parameter
+// DEBT: Rework to take CharIt
+template <class Char, class Float>
+ESTD_CPP_CONSTEXPR(14) estd::from_chars_result from_chars_float(const Char* first, const Char* last, Float& value)
+{
+    num_get<Char, const Char*, classic_locale_type> n;
+    ios_base::iostate iostate{};
+    const Char* out = n.get(first, last, {}, iostate, value);
+
+    // DEBT: Time for errc to become a true blue enum class I think
+    return { out, iostate == 0 ? estd::errc{} : errc::invalid_argument };
 }
 
 }}

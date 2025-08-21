@@ -196,6 +196,18 @@ TEST_CASE("charconv")
                 REQUIRE(result.ec == 0);
                 REQUIRE(value == 1234);
             }
+            SECTION("float")
+            {
+                const char s[] = "123.456";
+                float value;
+
+                estd::from_chars_result result =
+                    estd::from_chars(s, &s[0] + sizeof(s), value);
+
+                REQUIRE(result.ec == 0);
+                REQUIRE_THAT(value, Catch::Matchers::WithinAbs(123.456, 0.00001));
+                //REQUIRE(result.ptr == &s[0] + sizeof(s));
+            }
         }
         SECTION("sto")
         {
