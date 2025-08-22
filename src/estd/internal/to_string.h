@@ -117,7 +117,7 @@ inline internal::shifted_string<char, N> to_string(const T& value)
 // "normal" behavior
 #ifdef FEATURE_CPP_DEFAULT_TARGS
 // NOTE: Counting on return value optimization to eliminate the copy of 's'
-// We do + 1 because remember maxStringLength does not account for NULL termination
+// We do + 1 because remember numeric_limits::length does not account for NULL termination
 // and string class itself specifies buffer size in raw form, meaning if NULL termination
 // is desired, be sure to include than in your size - (and, awkwardly, if no NULL termination
 // is desired, then you get that extra spot and size is tracked in additional variables)

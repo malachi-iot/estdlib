@@ -20,11 +20,6 @@
 
 namespace estd { namespace internal {
 
-// experimental and not good
-// maxStringLength needs a clue to not inspect a type for length so that
-// we don't get 'not implemented' problems with SFINAE
-struct no_max_string_length_tag {};
-
 // base class for any 'allocated' array, even ones using a fixed allocator
 // which pushes the boundaries of what allocated even really means
 // importantly, this allocated_array doesn't provide for growing/shrinking the array,
@@ -32,11 +27,10 @@ struct no_max_string_length_tag {};
 // dynamic array for that
 // Impl is usually some flavor of estd::internal::impl::dynamic_array
 template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) Impl>
-class allocated_array :
+class allocated_array
 #ifdef ARDUINO
-    public print_handler_tag,
+    : public print_handler_tag
 #endif
-    public no_max_string_length_tag
 {
 public:
     using impl_type = Impl;

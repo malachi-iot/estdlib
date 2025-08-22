@@ -23,46 +23,6 @@ namespace estd {
 
 namespace internal {
 
-template<class T> T fromString(const char* input);
-
-template<> inline unsigned char fromString(const char* input)
-{
-    // TODO: use strtol and friends if available, atoi is deprecated
-    return (unsigned char) atoi(input);
-}
-
-template<> inline int fromString(const char* input)
-{
-    // TODO: use strtol and friends if available, atoi is deprecated
-    return atoi(input);
-}
-
-template<> inline float fromString(const char* input)
-{
-    return atof(input);
-}
-
-template<> inline unsigned long fromString(const char* input)
-{
-    return strtoul(input, NULL, 10);
-}
-
-template<> inline const char* fromString(const char* input)
-{
-    return input;
-}
-
-template<> inline char fromString(const char* input)
-{
-    return input[0];
-}
-
-template<> inline unsigned short fromString(const char* input)
-{
-    return (unsigned short) strtoul(input, NULL, 10);
-}
-
-
 namespace legacy {
 
 // EXCLUDES null termination but room for a - sign
@@ -87,7 +47,7 @@ template<class T> PGM_P validateString(const char* input);
 // 20AUG25 MB Not well tested, and to be removed by 01OCT25
 template<class T, class Char>
 ESTD_CPP_ATTR_DEPRECATED("Use to_string instead")
-char* toString(Char* output, T input)
+Char* toString(Char* output, T input)
 {
     estd::layer2::basic_string<Char, 0> s(output);
 
@@ -117,5 +77,12 @@ template<> inline PGM_P validateString<unsigned char>(const char* input)
 {
     return validateString<int>(input);
 }
+
+// DEBT: Crudely removing these if not really arduino.  Instead a gcc macro push
+// ought to be used
+#ifndef ESTD_ARDUINO
+#undef PGM_P
+#undef PROGMEM
+#endif
 
 }}
