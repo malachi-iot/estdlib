@@ -70,7 +70,7 @@ struct num_get
     // 'true_type' means this is an integer
     // 'false_type' means this is the unsigned flavor
     template <bool positive, typename T>
-    inline static bool raise_and_add(int_type n, T& v, true_type, false_type)
+    ESTD_CPP_CONSTEXPR(14) inline static bool raise_and_add(int_type n, T& v, true_type, false_type)
     {
         // Undefined/bad state.  Same as 'default' case switch
         // DEBT: Logging this and other internal failures would be nice.  Can't do a static assert

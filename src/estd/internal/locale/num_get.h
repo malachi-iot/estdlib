@@ -271,14 +271,14 @@ private:
 public:
     // NOTE: Non standard call.  locale is picked up from locale_type (use_facet)
     template <typename T>
-    inline constexpr iter_type get(iter_type in, iter_type end, ios_base::fmtflags basefield, ios_base::iostate& err, T& v) const
+    static inline constexpr iter_type get(iter_type in, iter_type end, ios_base::fmtflags basefield, ios_base::iostate& err, T& v)
     {
         return localizer::get(in, end, basefield, err, locale_type{}, v);
     }
 
     template <typename T, class Streambuf, class Base>
-    constexpr iter_type get(iter_type in, iter_type end,
-        const estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v) const
+    static constexpr iter_type get(iter_type in, iter_type end,
+        const estd::detail::basic_istream<Streambuf, Base>& str, ios_base::iostate& err, T& v)
     {
         return istream_localizer<Streambuf, Base>::get(in, end, str, err, v,
            is_integral<T>(), is_signed<T>());

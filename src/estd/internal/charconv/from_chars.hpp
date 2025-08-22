@@ -122,13 +122,14 @@ ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_integer(Char
 }
 
 // DEBT: Still needs 'std::chars_format' parameter
-// DEBT: Rework to take CharIt
-template <class Char, class Float>
-ESTD_CPP_CONSTEXPR(14) estd::from_chars_result from_chars_float(const Char* first, const Char* last, Float& value)
+template <class CharIt, class Float>
+ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_float(
+    CharIt first, CharIt last, Float& value)
 {
-    num_get<Char, const Char*, classic_locale_type> n;
+    using char_type = typename iterator_traits<CharIt>::value_type;
+    using type = num_get<char_type, CharIt, classic_locale_type>;
     ios_base::iostate iostate{};
-    const Char* out = n.get(first, last, {}, iostate, value);
+    CharIt out = type::get(first, last, {}, iostate, value);
 
     // DEBT: Time for errc to become a true blue enum class I think
     return { out, iostate == 0 ? estd::errc{} : errc::invalid_argument };
