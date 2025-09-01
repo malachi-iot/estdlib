@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../array.h"
-
+#include "../../atomic.h"
 
 namespace estd { namespace internal {
 
