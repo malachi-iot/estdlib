@@ -37,14 +37,16 @@ struct dequeue_policy
     {
         constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
-            || is_trivial<T>::value
+            || estd::is_trivial<T>::value
 #endif
             ;
 
         using uninitialized_array = internal::array<impl::uninitialized_array<T, N>>;
 
+        // NOTE: Wanted to use raw array - for that, gymnastics are required to get at begin/end
+        // with iterator sensibilities though.
         using container_type = conditional_t<is_trivial,
-            T[N],
+            estd::array<T, N>,
             uninitialized_array>;
 
         using iterator_type = conditional_t<is_trivial,
@@ -62,8 +64,50 @@ class circular_queue_container_base
 protected:
     using array_policy = typename Policy::template array<T, N>;
     using container_type = typename array_policy::container_type;
+    using iterator = typename array_policy::iterator_type;
+    using const_iterator = typename array_policy::const_iterator_type;
 
     container_type array_;
+
+    // front aka head aka 'leftmost' part of array,
+    //   where items are traditionally retrieved
+    // back aka tail aka 'rightmost' part of array,
+    //   where items are traditionally added
+    iterator front_, back_;
+
+    // called when i is incremented, evaluates if i reaches rollover point
+    // and if so points it back at the beginning
+    void evaluate_rollover(const_iterator* i) const
+    {
+        if(*i == array_.end())
+            *i = array_.begin();
+    }
+
+    // called when i is decremented, opposite of rollover check
+    // returns true when a rollover is detected.  Returns whether
+    // we rolled over to help with decrement
+    bool evaluate_rollunder(const_iterator* i) const
+    {
+        if(*i != array_.begin()) return false;
+
+        *i = array_.end();
+        return true;
+    }
+
+    // have to do these increment/decrements out here because array iterator itself
+    // wouldn't handle rollovers/rollunders
+    void decrement(const_iterator* i) const
+    {
+        // doing i-- after because we don't have a 'before begin' iterator
+        evaluate_rollunder(i);
+        --(*i);
+    }
+
+    void increment(const_iterator* i) const
+    {
+        ++(*i);
+        evaluate_rollover(i);
+    }
 };
 
 template <class T, unsigned N, class Policy, class Enabled = void>
@@ -97,9 +141,9 @@ class circular_queue : public circular_queue_base<T, N, Policy>
 {
     using base_type = circular_queue_base<T, N, Policy>;
     using typename base_type::array_policy;
+    using typename base_type::container_type;
 
-    using container_type = typename array_policy::container_type;
-    using iterator_type = typename array_policy::iterator_type;
+    using iterator = typename array_policy::iterator_type;
 
 public:
 };

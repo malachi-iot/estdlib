@@ -132,6 +132,7 @@ struct array : Impl
 
     using typename base_type::pointer;
     using typename base_type::const_pointer;
+
     typedef pointer iterator;
     typedef const_pointer const_iterator;
     typedef typename base_type::value_type value_type;
