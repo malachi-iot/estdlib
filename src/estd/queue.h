@@ -73,6 +73,37 @@ struct aligned_storage_array_policy
 
 }
 
+
+namespace internal {
+
+enum class queue_options
+{
+    sentinel    = 0x0001,
+    bare        = 0x0002,
+    flagged     = 0x0003,
+    counter     = 0x0004,
+    mask        = 0x0007,
+
+    atomic      = 0x0008,
+    trivial     = 0x0010,
+};
+
+ESTD_FLAGS(queue_options)
+
+template <queue_options o>
+struct dequeue_policy
+{
+    // consolidate and use map nullable things.  Note I get the feeling there's already a std mechanism for that
+    using nullable = void;
+
+    template <class T, unsigned N>
+    using container_type = conditional_t<is_set(o & queue_options::trivial),
+        T[N],
+        internal::array<impl::uninitialized_array<T, N>>>;
+};
+
+}
+
 namespace layer1 {
 
 // NOTE: Since layer1 is always a fixed size, this is hard wired as a
