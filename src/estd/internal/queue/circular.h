@@ -62,6 +62,8 @@ template <class T, unsigned N, class Policy>
 class circular_queue_container_base
 {
 protected:
+    constexpr static bool atomic = Policy::atomic;
+
     using array_policy = typename Policy::template array<T, N>;
     using container_type = typename array_policy::container_type;
     using iterator = typename array_policy::iterator_type;
@@ -118,7 +120,7 @@ protected:
 
 
 template <class T, unsigned N, class Policy>
-class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_options::flagged>> :
+class circular_queue_base<T, N, Policy, enable_if_t<Policy::atomic == queue_options::flagged>> :
     public circular_queue_container_base<T, N, Policy>
 {
 protected:
@@ -126,6 +128,23 @@ protected:
 
 };
 
+
+#if FEATURE_STD_ATOMIC
+template <class T, unsigned N, class Policy>
+class circular_queue_base<
+    T, N, Policy, enable_if_t<
+        (Policy::type == queue_options::bare || Policy::type == queue_options::sentinel) &&
+        Policy::atomic>> :
+    public circular_queue_container_base<T, N, Policy>
+{
+    using base_type = circular_queue_container_base<T, N, Policy>;
+    using typename base_type::iterator;
+    using typename base_type::const_iterator;
+
+protected:
+    std::atomic<iterator> front_, back_;
+};
+#endif
 
 template <class T, unsigned N, class Policy>
 class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_options::counter>> :
@@ -142,10 +161,25 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using base_type = circular_queue_base<T, N, Policy>;
     using typename base_type::array_policy;
     using typename base_type::container_type;
+    using typename base_type::iterator;
 
-    using iterator = typename array_policy::iterator_type;
+    using const_reference = const T&;
+
+    using base_type::front_;
+    using base_type::back_;
 
 public:
+    bool push_back(const_reference value)
+    {
+        *back_++ = value;
+        //m_empty = false;
+
+        base_type::evaluate_rollover(back_);
+
+        return true;
+    }
+
+
 };
 
 
