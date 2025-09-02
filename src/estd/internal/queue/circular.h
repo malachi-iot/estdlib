@@ -50,10 +50,10 @@ struct dequeue_policy
             uninitialized_array>;
 
         using iterator_type = conditional_t<is_trivial,
-            T*, typename uninitialized_array::iterator_type>;
+            T*, typename uninitialized_array::iterator>;
 
         using const_iterator_type = conditional_t<is_trivial,
-            const T*, typename uninitialized_array::const_iterator_type>;
+            const T*, typename uninitialized_array::const_iterator>;
     };
 };
 
@@ -79,7 +79,7 @@ protected:
 
     // called when i is incremented, evaluates if i reaches rollover point
     // and if so points it back at the beginning
-    void evaluate_rollover(const_iterator* i) const
+    void evaluate_rollover(iterator* i)
     {
         if(*i == array_.end())
             *i = array_.begin();
@@ -88,7 +88,7 @@ protected:
     // called when i is decremented, opposite of rollover check
     // returns true when a rollover is detected.  Returns whether
     // we rolled over to help with decrement
-    bool evaluate_rollunder(const_iterator* i) const
+    bool evaluate_rollunder(iterator* i) const
     {
         if(*i != array_.begin()) return false;
 
@@ -110,6 +110,8 @@ protected:
         ++(*i);
         evaluate_rollover(i);
     }
+
+    static ESTD_CPP_CONSTEVAL bool increment_counter() { return{}; }
 };
 
 template <class T, unsigned N, class Policy, class Enabled = void>
@@ -126,6 +128,10 @@ class circular_queue_base<T, N, Policy, enable_if_t<Policy::atomic == queue_opti
 protected:
     bool empty_{true};
 
+    ESTD_CPP_CONSTEXPR(14) void increment_counter()
+    {
+        empty_ = false;
+    }
 };
 
 
@@ -152,6 +158,11 @@ class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_option
 {
 protected:
     unsigned counter_{};
+
+    ESTD_CPP_CONSTEXPR(14) void increment_counter()
+    {
+        ++counter_;
+    }
 };
 
 
@@ -163,23 +174,66 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using typename base_type::container_type;
     using typename base_type::iterator;
 
-    using const_reference = const T&;
+    ESTD_CPP_STD_VALUE_TYPE(T)
 
     using base_type::front_;
     using base_type::back_;
 
+    template <bool forward>
+    class iterator_base
+    {
+        circular_queue& parent_;
+        iterator current_;
+
+        void plus()
+        {
+            if (forward)
+                parent_.increment(&current_);
+            else
+                parent_.decrement(&current_);
+        }
+
+    public:
+        constexpr explicit iterator_base(circular_queue& parent) : parent_{parent}
+        {
+
+        }
+    };
+
 public:
+    reference front()
+    {
+        return *front_;
+    }
+
+    reference back()
+    {
+        return *back_;
+    }
+
     bool push_back(const_reference value)
     {
-        *back_++ = value;
         //m_empty = false;
+        base_type::increment_counter();
 
-        base_type::evaluate_rollover(back_);
+        ++back_;
+        base_type::evaluate_rollover(&back_);
+        *back_ = value;
 
         return true;
     }
 
 
+    void pop_front()
+    {
+        front().~value_type();
+
+        ++front_;
+
+        base_type::evaluate_rollover(&front_);
+
+        //if(front_ == back_) m_empty = true;
+    }
 };
 
 

@@ -221,4 +221,13 @@ TEST_CASE("queue-test")
 
         REQUIRE(queue.size() == 0);
     }
+    SECTION("temp")
+    {
+        estd::internal::circular_queue<Dummy, 4> q1;
+
+        Dummy d1;
+
+        //q1.push_back(d1);
+        //q1.pop_front();
+    }
 }
