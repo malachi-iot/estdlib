@@ -223,11 +223,20 @@ TEST_CASE("queue-test")
     }
     SECTION("temp")
     {
-        estd::internal::circular_queue<Dummy, 4> q1;
+        using queue_type = estd::internal::circular_queue<Dummy, 4>;
+        queue_type q1;
 
-        Dummy d1;
+        Dummy d1(7, "Hi 7");
 
-        //q1.push_back(d1);
-        //q1.pop_front();
+        q1.push_back(d1);
+        q1.emplace_back(8, "Hi 8");
+
+        queue_type::iterator it1 = q1.begin();
+
+        REQUIRE(q1.front() == d1);
+
+        q1.pop_front();
+
+        REQUIRE(q1.front().val1 == 8);
     }
 }

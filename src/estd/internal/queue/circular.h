@@ -75,11 +75,16 @@ protected:
     //   where items are traditionally retrieved
     // back aka tail aka 'rightmost' part of array,
     //   where items are traditionally added
+    // Although we are somewhat ambidextrous, the paradigm is:
+    // front = first = begin, back = last = end with [begin...end) so
+    // we tune accordingly with back_ always sitting one past end
     iterator front_, back_;
 
     // called when i is incremented, evaluates if i reaches rollover point
     // and if so points it back at the beginning
-    void evaluate_rollover(iterator* i)
+    // DEBT: const all this up.  const** is super tricky in this instance
+    template <class ItPtr>
+    void evaluate_rollover(ItPtr i)
     {
         if(*i == array_.end())
             *i = array_.begin();
@@ -88,7 +93,8 @@ protected:
     // called when i is decremented, opposite of rollover check
     // returns true when a rollover is detected.  Returns whether
     // we rolled over to help with decrement
-    bool evaluate_rollunder(iterator* i) const
+    template <class ItPtr>
+    bool evaluate_rollunder(ItPtr i)
     {
         if(*i != array_.begin()) return false;
 
@@ -98,14 +104,18 @@ protected:
 
     // have to do these increment/decrements out here because array iterator itself
     // wouldn't handle rollovers/rollunders
-    void decrement(const_iterator* i) const
+    // DEBT: const all this up.  const** is super tricky in this instance
+    template <class ItPtr>
+    void decrement(ItPtr i)
     {
         // doing i-- after because we don't have a 'before begin' iterator
         evaluate_rollunder(i);
         --(*i);
     }
 
-    void increment(const_iterator* i) const
+    // DEBT: const all this up.  const** is super tricky in this instance
+    template <class ItPtr>
+    void increment(ItPtr i)
     {
         ++(*i);
         evaluate_rollover(i);
@@ -172,10 +182,10 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using base_type = circular_queue_base<T, N, Policy>;
     using typename base_type::array_policy;
     using typename base_type::container_type;
-    using typename base_type::iterator;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 
+    using base_type::array_;
     using base_type::front_;
     using base_type::back_;
 
@@ -183,24 +193,58 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     class iterator_base
     {
         circular_queue& parent_;
-        iterator current_;
+        base_type::iterator current_;
 
-        void plus()
+    public:
+        constexpr explicit iterator_base(
+            circular_queue& parent,
+            base_type::iterator current) :
+            parent_{parent},
+            current_{current}
         {
-            if (forward)
+
+        }
+
+        iterator_base& operator++()
+        {
+            ESTD_CPP_IF_CONSTEXPR (forward)
                 parent_.increment(&current_);
             else
                 parent_.decrement(&current_);
+
+            return *this;
         }
 
-    public:
-        constexpr explicit iterator_base(circular_queue& parent) : parent_{parent}
+        iterator_base& operator--()
         {
+            ESTD_CPP_IF_CONSTEXPR (forward)
+                parent_.decrement(&current_);
+            else
+                parent_.increment(&current_);
 
+            return *this;
         }
     };
 
 public:
+    circular_queue()
+    {
+        front_ = back_ = &array_[0];
+    }
+
+    using iterator = iterator_base<true>;
+    using reverse_iterator = iterator_base<false>;
+
+    iterator begin()
+    {
+        return iterator{*this, front_};
+    }
+
+    iterator end()
+    {
+        return iterator{*this, back_};
+    }
+
     reference front()
     {
         return *front_;
@@ -208,19 +252,37 @@ public:
 
     reference back()
     {
-        return *back_;
+        pointer i = back_;
+
+        base_type::decrement(&i);
+
+        return *i;
+    }
+
+    pointer push_back_begin() { return back_; }
+    void push_back_end()
+    {
+        ++back_;
+
+        base_type::increment_counter();
+        base_type::evaluate_rollover(&back_);
     }
 
     bool push_back(const_reference value)
     {
+        *back_++ = value;
         //m_empty = false;
         base_type::increment_counter();
-
-        ++back_;
         base_type::evaluate_rollover(&back_);
-        *back_ = value;
 
         return true;
+    }
+
+    template <class ...Args>
+    void emplace_back(Args&&...args)
+    {
+        new (back_) value_type(std::forward<Args>(args)...);
+        push_back_end();
     }
 
 
