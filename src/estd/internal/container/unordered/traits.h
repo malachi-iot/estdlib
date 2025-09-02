@@ -25,7 +25,7 @@ struct nullable_traits
         return value == T{};
     }
 
-    ESTD_CPP_CONSTEXPR(17) static void set(T* value)
+    ESTD_CPP_CONSTEXPR(14) static void set(T* value)
     {
         *value = T{};
     }

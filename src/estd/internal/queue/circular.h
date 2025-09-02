@@ -1,7 +1,10 @@
 #pragma once
 
+// DEBT: Consider moving this to container/queue/
+
 #include "../../array.h"
 #include "../../atomic.h"
+#include "../container/unordered/traits.h"
 
 namespace estd { namespace internal {
 
@@ -26,15 +29,15 @@ ESTD_FLAGS(queue_options)
 template <queue_options o>
 struct dequeue_policy
 {
-    // consolidate and use map nullable things.  Note I get the feeling there's already a std mechanism for that
-    using nullable = void;
-
     static constexpr queue_options type = o & queue_options::mask;
     static constexpr bool atomic = o & queue_options::atomic;
 
     template <class T, unsigned N>
     struct array
     {
+        // DEBT: A bit clumsy with 'T' specified here
+        using nullable = nullable_traits<T>;
+
         constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
             || estd::is_trivial<T>::value
