@@ -193,12 +193,12 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     class iterator_base
     {
         circular_queue& parent_;
-        base_type::iterator current_;
+        pointer current_;
 
     public:
         constexpr explicit iterator_base(
             circular_queue& parent,
-            base_type::iterator current) :
+            pointer current) :
             parent_{parent},
             current_{current}
         {
@@ -278,6 +278,14 @@ public:
         return true;
     }
 
+    void push_front(const_reference value)
+    {
+        base_type::decrement(&front_);
+
+        *front_ = value;
+    }
+
+
     template <class ...Args>
     void emplace_back(Args&&...args)
     {
@@ -295,6 +303,11 @@ public:
         base_type::evaluate_rollover(&front_);
 
         //if(front_ == back_) m_empty = true;
+    }
+
+    void pop_back()
+    {
+        back().~value_type();
     }
 };
 
