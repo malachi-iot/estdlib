@@ -221,22 +221,57 @@ TEST_CASE("queue-test")
 
         REQUIRE(queue.size() == 0);
     }
-    SECTION("temp")
+    SECTION("circular")
     {
-        using queue_type = estd::internal::circular_queue<Dummy, 4>;
-        queue_type q1;
+        Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
 
-        Dummy d1(7, "Hi 7");
+        using options = internal::queue_options;
 
-        q1.push_back(d1);
-        q1.emplace_back(8, "Hi 8");
+        SECTION("default")
+        {
+            using queue_type = estd::internal::circular_queue<Dummy, 4>;
+            queue_type q1;
 
-        queue_type::iterator it1 = q1.begin();
+            REQUIRE(q1.size() == 0);
 
-        REQUIRE(q1.front() == d1);
+            q1.push_back(d1);
+            q1.emplace_back(8, "Hi 8");
 
-        q1.pop_front();
+            REQUIRE(q1.size() == 2);
 
-        REQUIRE(q1.front().val1 == 8);
+            SECTION("test1")
+            {
+                queue_type::iterator it1 = q1.begin();
+
+                REQUIRE(q1.front() == d1);
+                REQUIRE(*it1++ == d1);
+                // DEBT: Not quite sure if stock iterator will do this
+                REQUIRE(it1->val1 == 8);
+
+                q1.pop_front();
+
+                REQUIRE(q1.front().val1 == 8);
+            }
+            SECTION("test2")
+            {
+                q1.push_back(d3);
+                REQUIRE(q1.size() == 3);
+                q1.emplace_back(10, "Hi 10");
+                // rollover+overwrite
+                q1.emplace_back(11, "Hi 11");
+                //unsigned sz = q1.size();
+                //REQUIRE(q1.size() == 4);
+            }
+        }
+        SECTION("atomic")
+        {
+            using queue_type = estd::internal::circular_queue<Dummy, 4,
+                internal::dequeue_policy<options::atomic | options::bare>>;
+
+            queue_type q1;
+
+            q1.push_back(d1);
+            q1.emplace_back(8, "Hi 8");
+        }
     }
 }

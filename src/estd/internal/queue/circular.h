@@ -66,11 +66,21 @@ class circular_queue_container_base
 {
 protected:
     constexpr static bool atomic = Policy::atomic;
+    //constexpr static bool atomic = true;
 
     using array_policy = typename Policy::template array<T, N>;
     using container_type = typename array_policy::container_type;
+#if FEATURE_STD_ATOMIC
+    using iterator = conditional_t<atomic,
+        std::atomic<typename array_policy::iterator_type>,
+        typename array_policy::iterator_type>;
+    using const_iterator = conditional_t<atomic,
+        std::atomic<typename array_policy::const_iterator_type>,
+        typename array_policy::const_iterator_type>;
+#else
     using iterator = typename array_policy::iterator_type;
     using const_iterator = typename array_policy::const_iterator_type;
+#endif
 
     container_type array_;
 
@@ -125,6 +135,18 @@ protected:
     }
 
     static ESTD_CPP_CONSTEVAL bool increment_counter() { return{}; }
+    static ESTD_CPP_CONSTEVAL bool decrement_counter() { return{}; }
+
+public:
+    // DEBT: Need to handle sentinel flavor too - in fact, accidentally depends on it
+    // DEBT: Troubled in other unidentified ways...
+    size_t size() const
+    {
+        if(front_ > back_)
+            return N - (front_ - back_);
+        else
+            return back_ - front_;
+    }
 };
 
 template <class T, unsigned N, class Policy, class Enabled = void>
@@ -145,10 +167,12 @@ protected:
     {
         empty_ = false;
     }
+
+    constexpr bool empty() const { return empty_; }
 };
 
 
-#if FEATURE_STD_ATOMIC
+#if FEATURE_STD_ATOMIC_UNUSED
 template <class T, unsigned N, class Policy>
 class circular_queue_base<
     T, N, Policy, enable_if_t<
@@ -172,10 +196,17 @@ class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_option
 protected:
     unsigned counter_{};
 
+    ESTD_CPP_CONSTEXPR(14) void decrement_counter()
+    {
+        --counter_;
+    }
+
     ESTD_CPP_CONSTEXPR(14) void increment_counter()
     {
         ++counter_;
     }
+
+    constexpr bool empty() const { return counter_ == 0; }
 };
 
 
@@ -191,6 +222,9 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using base_type::array_;
     using base_type::front_;
     using base_type::back_;
+
+    using base_type::increment;
+    using base_type::decrement;
 
     template <bool forward>
     class iterator_base
@@ -218,6 +252,13 @@ class circular_queue : public circular_queue_base<T, N, Policy>
             return *this;
         }
 
+        iterator_base operator++(int)
+        {
+            iterator_base temp = *this;
+            operator++();
+            return temp;
+        }
+
         iterator_base& operator--()
         {
             ESTD_CPP_IF_CONSTEXPR (forward)
@@ -227,6 +268,11 @@ class circular_queue : public circular_queue_base<T, N, Policy>
 
             return *this;
         }
+
+        reference operator*() { return *current_; }
+        constexpr const_reference operator*() const { return *current_; }
+
+        const_pointer operator->() const { return current_; }
     };
 
 public:
@@ -299,10 +345,11 @@ public:
 
     void pop_front()
     {
-        front().~value_type();
+        front_->~value_type();
 
         ++front_;
 
+        base_type::decrement_counter();
         base_type::evaluate_rollover(&front_);
 
         //if(front_ == back_) m_empty = true;
@@ -310,7 +357,10 @@ public:
 
     void pop_back()
     {
-        back().~value_type();
+        base_type::decrement_counter();
+        decrement(&back_);
+
+        back_->~value_type();
     }
 };
 
