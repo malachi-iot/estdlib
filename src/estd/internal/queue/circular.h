@@ -6,6 +6,9 @@
 #include "../../atomic.h"
 #include "../container/unordered/traits.h"
 
+// Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f/view?usp=sharing
+// DEBT: Above link is clunky... make it more directly go to diagrams
+
 namespace estd { namespace internal {
 
 enum class queue_options
@@ -88,9 +91,11 @@ protected:
     //   where items are traditionally retrieved
     // back aka tail aka 'rightmost' part of array,
     //   where items are traditionally added
+    // https://softwareengineering.stackexchange.com/questions/144477/on-a-queue-which-end-is-the-head
     // Although we are somewhat ambidextrous, the paradigm is:
     // front = first = begin, back = last = end with [begin...end) so
-    // we tune accordingly with back_ always sitting one past end
+    // we tune accordingly with back_ always as the first empty slot
+    // past the occupied slot
     iterator front_, back_;
 
     // called when i is incremented, evaluates if i reaches rollover point
@@ -232,6 +237,8 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using base_type::increment;
     using base_type::decrement;
 
+    static constexpr queue_options type = Policy::type;
+
     template <bool forward>
     class iterator_base
     {
@@ -314,13 +321,25 @@ public:
     pointer push_back_begin() { return back_; }
     void push_back_end()
     {
+        /*
+        if(type != queue_options::sentinel)
+        {
+            if(back_ == front_)
+                increment(&front_);
+            else
+                base_type::increment_counter();
+        }   */
+
         increment(&back_);
 
-        // NOTE: Not quite atomic, right ... ?  Also I think this implies sentinel mode
-        if (back_ == front_)
-            ++front_;
-        else
-            base_type::increment_counter();
+        // NOTE: Not quite atomic, right ... ?
+        if(type == queue_options::sentinel)
+        {
+            if(back_ == front_)
+                increment(&front_);
+            else
+                base_type::increment_counter();
+        }
     }
 
     bool push_back(const_reference value)
