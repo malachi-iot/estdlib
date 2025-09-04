@@ -137,6 +137,12 @@ protected:
     static ESTD_CPP_CONSTEVAL bool increment_counter() { return{}; }
     static ESTD_CPP_CONSTEVAL bool decrement_counter() { return{}; }
 
+    constexpr circular_queue_container_base() :
+        front_{&array_[0]},
+        back_{&array_[0]}
+    {
+    }
+
 public:
     // DEBT: Need to handle sentinel flavor too - in fact, accidentally depends on it
     // DEBT: Troubled in other unidentified ways...
@@ -276,10 +282,7 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     };
 
 public:
-    circular_queue()
-    {
-        front_ = back_ = &array_[0];
-    }
+    constexpr circular_queue() = default;
 
     using iterator = iterator_base<true>;
     using reverse_iterator = iterator_base<false>;
@@ -303,7 +306,7 @@ public:
     {
         pointer i = back_;
 
-        base_type::decrement(&i);
+        decrement(&i);
 
         return *i;
     }
@@ -311,18 +314,20 @@ public:
     pointer push_back_begin() { return back_; }
     void push_back_end()
     {
-        ++back_;
+        increment(&back_);
 
-        base_type::increment_counter();
-        base_type::evaluate_rollover(&back_);
+        // NOTE: Not quite atomic, right ... ?  Also I think this implies sentinel mode
+        if (back_ == front_)
+            ++front_;
+        else
+            base_type::increment_counter();
     }
 
     bool push_back(const_reference value)
     {
-        *back_++ = value;
-        //m_empty = false;
-        base_type::increment_counter();
-        base_type::evaluate_rollover(&back_);
+        *back_ = value;
+
+        push_back_end();
 
         return true;
     }
@@ -347,10 +352,8 @@ public:
     {
         front_->~value_type();
 
-        ++front_;
-
+        increment(&front_);
         base_type::decrement_counter();
-        base_type::evaluate_rollover(&front_);
 
         //if(front_ == back_) m_empty = true;
     }
