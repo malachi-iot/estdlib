@@ -7,6 +7,24 @@
 using namespace estd;
 using namespace estd::test;
 
+template <class Queue>
+void circular_queue_test(Queue& q1)
+{
+    const Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
+
+    REQUIRE(q1.empty());
+    q1.push_back(d1);
+    q1.emplace_back(8, "Hi 8");
+    REQUIRE(!q1.empty());
+    REQUIRE(q1.size() == 2);
+    REQUIRE(q1.front() == d1);
+    q1.pop_front();
+    REQUIRE(!q1.empty());
+    REQUIRE(q1.size() == 1);
+    REQUIRE(q1.front().val1 == 8);
+    q1.pop_front();
+    REQUIRE(q1.empty());
+}
 
 TEST_CASE("queue-test")
 {
@@ -263,6 +281,24 @@ TEST_CASE("queue-test")
                 //REQUIRE(q1.size() == 4);
             }
         }
+        SECTION("flagged")
+        {
+            using queue_type = estd::internal::circular_queue<Dummy, 4,
+                internal::dequeue_policy<options::flagged>>;
+
+            static_assert(queue_type::type == options::flagged);
+
+            queue_type q1;
+
+            //circular_queue_test(q1);
+        }
+        SECTION("sentinel")
+        {
+            estd::internal::circular_queue<Dummy, 4,
+                internal::dequeue_policy<options::sentinel>> q1;
+
+            circular_queue_test(q1);
+        }
         SECTION("atomic | bare")
         {
             using queue_type = estd::internal::circular_queue<Dummy, 4,
@@ -280,18 +316,7 @@ TEST_CASE("queue-test")
 
             queue_type q1;
 
-            REQUIRE(q1.empty());
-            q1.push_back(d1);
-            q1.emplace_back(8, "Hi 8");
-            REQUIRE(!q1.empty());
-            REQUIRE(q1.size() == 2);
-            REQUIRE(q1.front() == d1);
-            q1.pop_front();
-            REQUIRE(!q1.empty());
-            REQUIRE(q1.size() == 1);
-            REQUIRE(q1.front().val1 == 8);
-            q1.pop_front();
-            REQUIRE(q1.empty());
+            circular_queue_test(q1);
         }
     }
 }

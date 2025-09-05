@@ -63,6 +63,11 @@ struct dequeue_policy
     };
 };
 
+// EXPERIMENTAL, not ready yet
+template <class T, unsigned N, queue_options o>
+struct layer1_dequeue_policy {};
+
+
 
 template <class T, unsigned N, class Policy>
 class circular_queue_container_base
@@ -175,7 +180,7 @@ protected:
 
 
 template <class T, unsigned N, class Policy>
-class circular_queue_base<T, N, Policy, enable_if_t<Policy::atomic == queue_options::flagged>> :
+class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_options::flagged>> :
     public circular_queue_container_base<T, N, Policy>
 {
     using base_type = circular_queue_container_base<T, N, Policy>;
@@ -194,6 +199,7 @@ protected:
         empty_ = base_type::back_ == base_type::front_;
     }
 
+public:
     constexpr bool empty() const { return empty_; }
 };
 
@@ -252,8 +258,6 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     using base_type::increment;
     using base_type::decrement;
 
-    static constexpr queue_options type = Policy::type;
-
     template <bool forward>
     class iterator_base
     {
@@ -307,6 +311,8 @@ class circular_queue : public circular_queue_base<T, N, Policy>
     };
 
 public:
+    using base_type::type;
+
     constexpr circular_queue() = default;
 
     using iterator = iterator_base<true>;
