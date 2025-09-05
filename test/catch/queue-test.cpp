@@ -290,7 +290,7 @@ TEST_CASE("queue-test")
 
             queue_type q1;
 
-            //circular_queue_test(q1);
+            circular_queue_test(q1);
         }
         SECTION("sentinel")
         {

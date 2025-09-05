@@ -77,18 +77,18 @@ protected:
     constexpr static queue_options type = Policy::type;
     //constexpr static bool atomic = true;
 
-    using array_policy = typename Policy::template array<T, N>;
-    using container_type = typename array_policy::container_type;
+    using container_policy = typename Policy::template array<T, N>;
+    using container_type = typename container_policy::container_type;
 #if FEATURE_STD_ATOMIC
     using iterator = conditional_t<atomic,
-        std::atomic<typename array_policy::iterator_type>,
-        typename array_policy::iterator_type>;
+        std::atomic<typename container_policy::iterator_type>,
+        typename container_policy::iterator_type>;
     using const_iterator = conditional_t<atomic,
-        std::atomic<typename array_policy::const_iterator_type>,
-        typename array_policy::const_iterator_type>;
+        std::atomic<typename container_policy::const_iterator_type>,
+        typename container_policy::const_iterator_type>;
 #else
-    using iterator = typename array_policy::iterator_type;
-    using const_iterator = typename array_policy::const_iterator_type;
+    using iterator = typename container_policy::iterator_type;
+    using const_iterator = typename container_policy::const_iterator_type;
 #endif
 
     container_type array_;
@@ -170,6 +170,16 @@ public:
         // DEBT: Assumes sentinel mode
         return front_ == back_;
     }
+
+    T& front()
+    {
+        return *front_;
+    }
+
+    constexpr const T& front() const
+    {
+        return *front_;
+    }
 };
 
 template <class T, unsigned N, class Policy, class Enabled = void>
@@ -246,7 +256,7 @@ template <class T, unsigned N, class Policy = dequeue_policy<queue_options::defa
 class circular_queue : public circular_queue_base<T, N, Policy>
 {
     using base_type = circular_queue_base<T, N, Policy>;
-    using typename base_type::array_policy;
+    using typename base_type::container_policy;
     using typename base_type::container_type;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
@@ -334,11 +344,6 @@ public:
         return iterator{*this, back_};
     }
 
-    reference front()
-    {
-        return *front_;
-    }
-
     reference back()
     {
         pointer i = back_;
@@ -374,6 +379,9 @@ public:
             else
                 base_type::increment_counter();
         }
+        else
+            // FIX: Need to do rollover check
+            base_type::increment_counter();
     }
 
     bool push_back(const_reference value)
