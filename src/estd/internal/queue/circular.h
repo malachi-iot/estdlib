@@ -6,7 +6,7 @@
 #include "../../atomic.h"
 #include "../container/unordered/traits.h"
 
-// Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f/view?usp=sharing
+// Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
 // DEBT: Above link is clunky... make it more directly go to diagrams
 
 namespace estd { namespace internal {
@@ -69,6 +69,7 @@ class circular_queue_container_base
 {
 protected:
     constexpr static bool atomic = Policy::atomic;
+    constexpr static queue_options type = Policy::type;
     //constexpr static bool atomic = true;
 
     using array_policy = typename Policy::template array<T, N>;
@@ -158,6 +159,12 @@ public:
         else
             return back_ - front_;
     }
+
+    bool empty() const
+    {
+        // DEBT: Assumes sentinel mode
+        return front_ == back_;
+    }
 };
 
 template <class T, unsigned N, class Policy, class Enabled = void>
@@ -171,12 +178,20 @@ template <class T, unsigned N, class Policy>
 class circular_queue_base<T, N, Policy, enable_if_t<Policy::atomic == queue_options::flagged>> :
     public circular_queue_container_base<T, N, Policy>
 {
+    using base_type = circular_queue_container_base<T, N, Policy>;
+
 protected:
     bool empty_{true};
 
     ESTD_CPP_CONSTEXPR(14) void increment_counter()
     {
         empty_ = false;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) void decrement_counter()
+    {
+        // Untested
+        empty_ = base_type::back_ == base_type::front_;
     }
 
     constexpr bool empty() const { return empty_; }
@@ -245,6 +260,9 @@ class circular_queue : public circular_queue_base<T, N, Policy>
         circular_queue& parent_;
         pointer current_;
 
+        void bump(true_type) { parent_.increment(current_); }
+        void bump(false_type) { parent_.decrement(current_); }
+
     public:
         constexpr explicit iterator_base(
             circular_queue& parent,
@@ -293,6 +311,7 @@ public:
 
     using iterator = iterator_base<true>;
     using reverse_iterator = iterator_base<false>;
+    using const_iterator = const iterator;
 
     iterator begin()
     {
@@ -300,6 +319,11 @@ public:
     }
 
     iterator end()
+    {
+        return iterator{*this, back_};
+    }
+
+    constexpr const_iterator end() const
     {
         return iterator{*this, back_};
     }
@@ -336,7 +360,11 @@ public:
         if(type == queue_options::sentinel)
         {
             if(back_ == front_)
+            {
+                // rollover
+                (*back_).~value_type();
                 increment(&front_);
+            }
             else
                 base_type::increment_counter();
         }
@@ -351,9 +379,28 @@ public:
         return true;
     }
 
+    pointer push_front_begin()
+    {
+        decrement(&front_);
+
+        if(type == queue_options::sentinel)
+        {
+            if(front_ == back_)
+            {
+                // rollunder
+                (*front_).~value_type();
+                decrement(&back_);
+            }
+            else
+                base_type::increment_counter();
+        }
+
+        return front_;
+    }
+
     void push_front(const_reference value)
     {
-        base_type::decrement(&front_);
+        push_front_begin();
 
         *front_ = value;
     }
@@ -369,12 +416,10 @@ public:
 
     void pop_front()
     {
-        front_->~value_type();
+        (*front_).~value_type();
 
         increment(&front_);
         base_type::decrement_counter();
-
-        //if(front_ == back_) m_empty = true;
     }
 
     void pop_back()
@@ -382,7 +427,7 @@ public:
         base_type::decrement_counter();
         decrement(&back_);
 
-        back_->~value_type();
+        (*back_).~value_type();
     }
 };
 

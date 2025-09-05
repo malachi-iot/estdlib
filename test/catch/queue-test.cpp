@@ -263,7 +263,7 @@ TEST_CASE("queue-test")
                 //REQUIRE(q1.size() == 4);
             }
         }
-        SECTION("atomic")
+        SECTION("atomic | bare")
         {
             using queue_type = estd::internal::circular_queue<Dummy, 4,
                 internal::dequeue_policy<options::atomic | options::bare>>;
@@ -272,6 +272,26 @@ TEST_CASE("queue-test")
 
             q1.push_back(d1);
             q1.emplace_back(8, "Hi 8");
+        }
+        SECTION("atomic | sentinel")
+        {
+            using queue_type = estd::internal::circular_queue<Dummy, 4,
+                internal::dequeue_policy<options::atomic | options::sentinel>>;
+
+            queue_type q1;
+
+            REQUIRE(q1.empty());
+            q1.push_back(d1);
+            q1.emplace_back(8, "Hi 8");
+            REQUIRE(!q1.empty());
+            REQUIRE(q1.size() == 2);
+            REQUIRE(q1.front() == d1);
+            q1.pop_front();
+            REQUIRE(!q1.empty());
+            REQUIRE(q1.size() == 1);
+            REQUIRE(q1.front().val1 == 8);
+            q1.pop_front();
+            REQUIRE(q1.empty());
         }
     }
 }
