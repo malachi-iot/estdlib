@@ -37,7 +37,7 @@ template <class T, queue_options o, class Nullable = nullable_traits<T>>
 struct circular_policy
 {
     static constexpr queue_options type = o & queue_options::mask;
-    static constexpr bool atomic = o & queue_options::atomic;
+    static constexpr bool atomic = is_set(o & queue_options::atomic);
     constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
         || estd::is_trivial<T>::value
@@ -296,7 +296,7 @@ class circular_queue : public circular_queue_base<Policy>
     using base_type::increment;
     using base_type::decrement;
 
-    static constexpr bool no_rollover = Policy::options & queue_options::no_rollover;
+    static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
 
     template <bool forward>
     class iterator_base
