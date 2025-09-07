@@ -29,47 +29,45 @@ enum class queue_options
 
 ESTD_FLAGS(queue_options)
 
-template <queue_options o>
-struct dequeue_policy
+
+template <class T, queue_options o, class Nullable = nullable_traits<T>>
+struct circular_policy
 {
     static constexpr queue_options type = o & queue_options::mask;
     static constexpr bool atomic = o & queue_options::atomic;
-
-    template <class T, unsigned N>
-    struct array
-    {
-        // DEBT: A bit clumsy with 'T' specified here
-        using nullable = nullable_traits<T>;
-
-        constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
+    constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
-            || estd::is_trivial<T>::value
+        || estd::is_trivial<T>::value
 #endif
-            ;
+        ;
 
-        using uninitialized_array = internal::array<impl::uninitialized_array<T, N>>;
-
-        // NOTE: Wanted to use raw array - for that, gymnastics are required to get at begin/end
-        // with iterator sensibilities though.
-        using container_type = conditional_t<is_trivial,
-            estd::array<T, N>,
-            uninitialized_array>;
-
-        using iterator_type = conditional_t<is_trivial,
-            T*, typename uninitialized_array::iterator>;
-
-        using const_iterator_type = conditional_t<is_trivial,
-            const T*, typename uninitialized_array::const_iterator>;
-    };
+    using nullable = Nullable;
 };
 
-// EXPERIMENTAL, not ready yet
 template <class T, unsigned N, queue_options o>
-struct layer1_dequeue_policy {};
+struct array_circular_policy : circular_policy<T, o>
+{
+    using base_type = circular_policy<T, o>;
+    using base_type::is_trivial;
+
+    using uninitialized_array = internal::array<impl::uninitialized_array<T, N>>;
+
+    // NOTE: Wanted to use raw array - for that, gymnastics are required to get at begin/end
+    // with iterator sensibilities though.
+    using container_type = conditional_t<is_trivial,
+        estd::array<T, N>,
+        uninitialized_array>;
+
+    using iterator_type = conditional_t<is_trivial,
+        T*, typename uninitialized_array::iterator>;
+
+    using const_iterator_type = conditional_t<is_trivial,
+        const T*, typename uninitialized_array::const_iterator>;
+};
 
 
 
-template <class T, unsigned N, class Policy>
+template <class Policy>
 class circular_queue_container_base
 {
 protected:
@@ -77,8 +75,9 @@ protected:
     constexpr static queue_options type = Policy::type;
     //constexpr static bool atomic = true;
 
-    using container_policy = typename Policy::template array<T, N>;
+    using container_policy = Policy;
     using container_type = typename container_policy::container_type;
+    using value_type = typename container_type::value_type;
 #if FEATURE_STD_ATOMIC
     using iterator = conditional_t<atomic,
         std::atomic<typename container_policy::iterator_type>,
@@ -160,7 +159,7 @@ public:
     size_t size() const
     {
         if(front_ > back_)
-            return N - (front_ - back_);
+            return array_.max_size() - (front_ - back_);
         else
             return back_ - front_;
     }
@@ -171,29 +170,29 @@ public:
         return front_ == back_;
     }
 
-    T& front()
+    value_type& front()
     {
         return *front_;
     }
 
-    constexpr const T& front() const
+    constexpr const value_type& front() const
     {
         return *front_;
     }
 };
 
-template <class T, unsigned N, class Policy, class Enabled = void>
-class circular_queue_base : public circular_queue_container_base<T, N, Policy>
+template <class Policy, class Enabled = void>
+class circular_queue_base : public circular_queue_container_base<Policy>
 {
 protected:
 };
 
 
-template <class T, unsigned N, class Policy>
-class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_options::flagged>> :
-    public circular_queue_container_base<T, N, Policy>
+template <class Policy>
+class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::flagged>> :
+    public circular_queue_container_base<Policy>
 {
-    using base_type = circular_queue_container_base<T, N, Policy>;
+    using base_type = circular_queue_container_base<Policy>;
 
 protected:
     bool empty_{true};
@@ -231,9 +230,9 @@ protected:
 };
 #endif
 
-template <class T, unsigned N, class Policy>
-class circular_queue_base<T, N, Policy, enable_if_t<Policy::type == queue_options::counter>> :
-    public circular_queue_container_base<T, N, Policy>
+template <class Policy>
+class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::counter>> :
+    public circular_queue_container_base<Policy>
 {
 protected:
     unsigned counter_{};
@@ -252,14 +251,14 @@ protected:
 };
 
 
-template <class T, unsigned N, class Policy = dequeue_policy<queue_options::default_opt>>
-class circular_queue : public circular_queue_base<T, N, Policy>
+template <class Policy>
+class circular_queue : public circular_queue_base<Policy>
 {
-    using base_type = circular_queue_base<T, N, Policy>;
+    using base_type = circular_queue_base<Policy>;
     using typename base_type::container_policy;
     using typename base_type::container_type;
 
-    ESTD_CPP_STD_VALUE_TYPE(T)
+    ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
 
     using base_type::array_;
     using base_type::front_;

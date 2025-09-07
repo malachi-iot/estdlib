@@ -26,6 +26,9 @@ void circular_queue_test(Queue& q1)
     REQUIRE(q1.empty());
 }
 
+template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
+using layer1_circular = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
+
 TEST_CASE("queue-test")
 {
     SECTION("Basic layer1 queue")
@@ -247,7 +250,7 @@ TEST_CASE("queue-test")
 
         SECTION("default")
         {
-            using queue_type = estd::internal::circular_queue<Dummy, 4>;
+            using queue_type = layer1_circular<Dummy, 4>;
             queue_type q1;
 
             REQUIRE(q1.size() == 0);
@@ -283,8 +286,7 @@ TEST_CASE("queue-test")
         }
         SECTION("flagged")
         {
-            using queue_type = estd::internal::circular_queue<Dummy, 4,
-                internal::dequeue_policy<options::flagged>>;
+            using queue_type = layer1_circular<Dummy, 4, options::flagged>;
 
             static_assert(queue_type::type == options::flagged);
 
@@ -294,15 +296,14 @@ TEST_CASE("queue-test")
         }
         SECTION("sentinel")
         {
-            estd::internal::circular_queue<Dummy, 4,
-                internal::dequeue_policy<options::sentinel>> q1;
+            using queue_type = layer1_circular<Dummy, 4, options::sentinel>;
+            queue_type q1;
 
             circular_queue_test(q1);
         }
         SECTION("atomic | bare")
         {
-            using queue_type = estd::internal::circular_queue<Dummy, 4,
-                internal::dequeue_policy<options::atomic | options::bare>>;
+            using queue_type = layer1_circular<Dummy, 4, options::sentinel | options::bare>;
 
             queue_type q1;
 
@@ -311,8 +312,7 @@ TEST_CASE("queue-test")
         }
         SECTION("atomic | sentinel")
         {
-            using queue_type = estd::internal::circular_queue<Dummy, 4,
-                internal::dequeue_policy<options::atomic | options::sentinel>>;
+            using queue_type = layer1_circular<Dummy, 4, options::sentinel | options::atomic>;
 
             queue_type q1;
 
