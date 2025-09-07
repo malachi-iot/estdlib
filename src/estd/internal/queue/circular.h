@@ -4,6 +4,7 @@
 
 #include "../../array.h"
 #include "../../atomic.h"
+#include "../../span.h"
 #include "../container/unordered/traits.h"
 
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
@@ -65,6 +66,13 @@ struct array_circular_policy : circular_policy<T, o>
         const T*, typename uninitialized_array::const_iterator>;
 };
 
+template <class T, unsigned N, queue_options o>
+struct span_circular_policy : circular_policy<T, o>
+{
+    using container_type = span<T, N>;
+    using iterator_type = typename container_type::iterator;
+    using const_iterator_type = typename container_type::const_iterator;
+};
 
 
 template <class Policy>
@@ -144,8 +152,8 @@ protected:
         evaluate_rollover(i);
     }
 
-    static ESTD_CPP_CONSTEVAL bool increment_counter() { return{}; }
-    static ESTD_CPP_CONSTEVAL bool decrement_counter() { return{}; }
+    static ESTD_CPP_CONSTEVAL bool increment_size() { return{}; }
+    static ESTD_CPP_CONSTEVAL bool decrement_size() { return{}; }
 
     constexpr circular_queue_container_base() :
         front_{&array_[0]},
@@ -154,6 +162,8 @@ protected:
     }
 
 public:
+    constexpr size_t max_size() const { return array_.max_size(); }
+
     // DEBT: Need to handle sentinel flavor too - in fact, accidentally depends on it
     // DEBT: Troubled in other unidentified ways...
     size_t size() const
@@ -164,7 +174,7 @@ public:
             return back_ - front_;
     }
 
-    bool empty() const
+    constexpr bool empty() const
     {
         // DEBT: Assumes sentinel mode
         return front_ == back_;
@@ -195,14 +205,18 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::fla
     using base_type = circular_queue_container_base<Policy>;
 
 protected:
+    using base_type::array_;
+    using base_type::front_;
+    using base_type::back_;
+
     bool empty_{true};
 
-    ESTD_CPP_CONSTEXPR(14) void increment_counter()
+    ESTD_CPP_CONSTEXPR(14) void increment_size()
     {
         empty_ = false;
     }
 
-    ESTD_CPP_CONSTEXPR(14) void decrement_counter()
+    ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
         // Untested
         empty_ = base_type::back_ == base_type::front_;
@@ -210,6 +224,16 @@ protected:
 
 public:
     constexpr bool empty() const { return empty_; }
+
+    size_t size() const
+    {
+        if(empty_) return 0;
+
+        if(front_ >= back_)
+            return array_.max_size() - (front_ - back_);
+        else
+            return back_ - front_;
+    }
 };
 
 
@@ -235,19 +259,21 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::cou
     public circular_queue_container_base<Policy>
 {
 protected:
-    unsigned counter_{};
+    unsigned size_{};
 
-    ESTD_CPP_CONSTEXPR(14) void decrement_counter()
+    ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
-        --counter_;
+        --size_;
     }
 
-    ESTD_CPP_CONSTEXPR(14) void increment_counter()
+    ESTD_CPP_CONSTEXPR(14) void increment_size()
     {
-        ++counter_;
+        ++size_;
     }
 
-    constexpr bool empty() const { return counter_ == 0; }
+public:
+    constexpr bool empty() const { return size_ == 0; }
+    constexpr unsigned size() const { return size_; }
 };
 
 
@@ -321,6 +347,7 @@ class circular_queue : public circular_queue_base<Policy>
 
 public:
     using base_type::type;
+    using base_type::empty;
 
     constexpr circular_queue() = default;
 
@@ -355,14 +382,18 @@ public:
     pointer push_back_begin() { return back_; }
     void push_back_end()
     {
-        /*
         if(type != queue_options::sentinel)
         {
-            if(back_ == front_)
+            const bool full = !empty() && back_ == front_;
+            if(full)
+            {
+                // rollover
+                (*back_).~value_type();
                 increment(&front_);
+            }
             else
-                base_type::increment_counter();
-        }   */
+                base_type::increment_size();
+        }
 
         increment(&back_);
 
@@ -376,11 +407,8 @@ public:
                 increment(&front_);
             }
             else
-                base_type::increment_counter();
+                base_type::increment_size();
         }
-        else
-            // FIX: Need to do rollover check
-            base_type::increment_counter();
     }
 
     bool push_back(const_reference value)
@@ -394,6 +422,20 @@ public:
 
     pointer push_front_begin()
     {
+        if(type != queue_options::sentinel)
+        {
+            // UNTESTED
+            const bool full = !empty() && back_ == front_;
+            if(full)
+            {
+                // rollunder
+                (*front_).~value_type();
+                decrement(&back_);
+            }
+            else
+                base_type::increment_size();
+        }
+
         decrement(&front_);
 
         if(type == queue_options::sentinel)
@@ -405,7 +447,7 @@ public:
                 decrement(&back_);
             }
             else
-                base_type::increment_counter();
+                base_type::increment_size();
         }
 
         return front_;
@@ -416,6 +458,12 @@ public:
         push_front_begin();
 
         *front_ = value;
+    }
+
+    template <class ...Args>
+    void emplace_front(Args&&...args)
+    {
+        new (push_front_begin()) value_type(std::forward<Args>(args)...);
     }
 
 
@@ -432,12 +480,12 @@ public:
         (*front_).~value_type();
 
         increment(&front_);
-        base_type::decrement_counter();
+        base_type::decrement_size();
     }
 
     void pop_back()
     {
-        base_type::decrement_counter();
+        base_type::decrement_size();
         decrement(&back_);
 
         (*back_).~value_type();

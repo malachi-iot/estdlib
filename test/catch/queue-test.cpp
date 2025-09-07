@@ -294,6 +294,12 @@ TEST_CASE("queue-test")
 
             circular_queue_test(q1);
         }
+        SECTION("counter")
+        {
+            layer1_circular<Dummy, 4, options::counter> q1;
+
+            circular_queue_test(q1);
+        }
         SECTION("sentinel")
         {
             using queue_type = layer1_circular<Dummy, 4, options::sentinel>;
