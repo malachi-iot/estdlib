@@ -24,6 +24,8 @@ enum class queue_options
 
     // force trivial behavior i.e. calls default constructor
     trivial     = 0x0010,
+    // reject-on-full mode (needed for full lock-free behavior)
+    no_rollover = 0x0020,
 
     default_opt = flagged
 };
@@ -43,6 +45,7 @@ struct circular_policy
         ;
 
     using nullable = Nullable;
+    static constexpr queue_options options = o;
 };
 
 template <class T, unsigned N, queue_options o>
@@ -293,6 +296,8 @@ class circular_queue : public circular_queue_base<Policy>
     using base_type::increment;
     using base_type::decrement;
 
+    static constexpr bool no_rollover = Policy::options & queue_options::no_rollover;
+
     template <bool forward>
     class iterator_base
     {
@@ -380,13 +385,15 @@ public:
     }
 
     pointer push_back_begin() { return back_; }
-    void push_back_end()
+    bool push_back_end()
     {
         if(type != queue_options::sentinel)
         {
             const bool full = !empty() && back_ == front_;
             if(full)
             {
+                if(no_rollover) return false;
+
                 // rollover
                 (*back_).~value_type();
                 increment(&front_);
@@ -402,6 +409,8 @@ public:
         {
             if(back_ == front_)
             {
+                if(no_rollover) return false;
+
                 // rollover
                 (*back_).~value_type();
                 increment(&front_);
@@ -409,6 +418,8 @@ public:
             else
                 base_type::increment_size();
         }
+
+        return true;
     }
 
     bool push_back(const_reference value)
@@ -428,6 +439,8 @@ public:
             const bool full = !empty() && back_ == front_;
             if(full)
             {
+                if(no_rollover) return nullptr;
+
                 // rollunder
                 (*front_).~value_type();
                 decrement(&back_);
@@ -442,6 +455,8 @@ public:
         {
             if(front_ == back_)
             {
+                if(no_rollover) return nullptr;
+
                 // rollunder
                 (*front_).~value_type();
                 decrement(&back_);
