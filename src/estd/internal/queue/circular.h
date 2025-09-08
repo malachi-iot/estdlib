@@ -167,16 +167,6 @@ protected:
 public:
     constexpr size_t max_size() const { return array_.max_size(); }
 
-    // DEBT: Need to handle sentinel flavor too - in fact, accidentally depends on it
-    // DEBT: Troubled in other unidentified ways...
-    size_t size() const
-    {
-        if(front_ > back_)
-            return array_.max_size() - (front_ - back_);
-        else
-            return back_ - front_;
-    }
-
     constexpr bool empty() const
     {
         // DEBT: Assumes sentinel mode
@@ -198,6 +188,29 @@ template <class Policy, class Enabled = void>
 class circular_queue_base : public circular_queue_container_base<Policy>
 {
 protected:
+};
+
+
+
+template <class Policy>
+class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::sentinel>> :
+    public circular_queue_container_base<Policy>
+{
+    using base_type = circular_queue_container_base<Policy>;
+
+protected:
+    using base_type::back_;
+    using base_type::front_;
+    using base_type::array_;
+
+public:
+    size_t size() const
+    {
+        if(front_ > back_)
+            return array_.max_size() - (front_ - back_);
+        else
+            return back_ - front_;
+    }
 };
 
 
@@ -384,15 +397,14 @@ public:
         return *i;
     }
 
-    pointer push_back_begin() { return back_; }
-    bool push_back_end()
+    pointer push_back_begin()
     {
         if(type != queue_options::sentinel)
         {
             const bool full = !empty() && back_ == front_;
             if(full)
             {
-                if(no_rollover) return false;
+                if(no_rollover) return nullptr;
 
                 // rollover
                 (*back_).~value_type();
@@ -402,33 +414,41 @@ public:
                 base_type::increment_size();
         }
 
-        increment(&back_);
+        return back_;
+    }
 
-        // NOTE: Not quite atomic, right ... ?
+    bool push_back_end()
+    {
+        pointer back = back_;
+
+        increment(&back);
+
         if(type == queue_options::sentinel)
         {
-            if(back_ == front_)
+            if(back == front_)
             {
                 if(no_rollover) return false;
 
                 // rollover
-                (*back_).~value_type();
+                (*back).~value_type();
                 increment(&front_);
             }
             else
                 base_type::increment_size();
         }
+
+        back_ = back;
 
         return true;
     }
 
     bool push_back(const_reference value)
     {
-        *back_ = value;
+        pointer back = push_back_begin();
 
-        push_back_end();
+        *back = value;
 
-        return true;
+        return push_back_end();
     }
 
     pointer push_front_begin()
@@ -449,23 +469,25 @@ public:
                 base_type::increment_size();
         }
 
-        decrement(&front_);
+        pointer front = front_;
+
+        decrement(&front);
 
         if(type == queue_options::sentinel)
         {
-            if(front_ == back_)
+            if(front == back_)
             {
                 if(no_rollover) return nullptr;
 
                 // rollunder
-                (*front_).~value_type();
+                (*front).~value_type();
                 decrement(&back_);
             }
             else
                 base_type::increment_size();
         }
 
-        return front_;
+        return front_ = front;
     }
 
     void push_front(const_reference value)
@@ -483,10 +505,13 @@ public:
 
 
     template <class ...Args>
-    void emplace_back(Args&&...args)
+    bool emplace_back(Args&&...args)
     {
-        new (back_) value_type(std::forward<Args>(args)...);
-        push_back_end();
+        pointer back = push_back_begin();
+
+        new (back) value_type(std::forward<Args>(args)...);
+
+        return push_back_end();
     }
 
 
