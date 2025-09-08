@@ -90,6 +90,9 @@ protected:
     using container_type = typename container_policy::container_type;
     using value_type = typename container_type::value_type;
 #if FEATURE_STD_ATOMIC
+    // 08SEP25 MB DEBT: std::atomic defaults to memory_order_seq_cst, when for us it's likely
+    // memory_order_acquire/memory_order_release is faster and sufficient.
+    // As per https://codesignal.com/learn/courses/lock-free-concurrent-data-structures/lessons/an-introduction-to-memory-ordering-and-atomic-operations
     using iterator = conditional_t<atomic,
         std::atomic<typename container_policy::iterator_type>,
         typename container_policy::iterator_type>;
@@ -221,11 +224,18 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::fla
     using base_type = circular_queue_container_base<Policy>;
 
 protected:
+    using base_type::atomic;
     using base_type::array_;
     using base_type::front_;
     using base_type::back_;
 
-    bool empty_{true};
+#if FEATURE_STD_ATOMIC
+    using bool_type = conditional_t<atomic, std::atomic_flag, bool>;
+#else
+    using bool_type = bool;
+#endif
+
+    bool_type empty_{true};
 
     ESTD_CPP_CONSTEXPR(14) void increment_size()
     {
@@ -234,7 +244,6 @@ protected:
 
     ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
-        // Untested
         empty_ = base_type::back_ == base_type::front_;
     }
 
@@ -274,8 +283,18 @@ template <class Policy>
 class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::counter>> :
     public circular_queue_container_base<Policy>
 {
+    using base_type = circular_queue_container_base<Policy>;
+
 protected:
-    unsigned size_{};
+    using base_type::atomic;
+
+#if FEATURE_STD_ATOMIC
+    using counter_type = conditional_t<atomic, std::atomic<unsigned>, unsigned>;
+#else
+    using counter_type = unsigned;
+#endif
+
+    counter_type size_{};
 
     ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
@@ -423,6 +442,8 @@ public:
 
         increment(&back);
 
+        // Careful, we're detecting a rollover *after* we do a "*back =" - that's consequential
+        // in 'no_rollover' mode (but not in others)
         if(type == queue_options::sentinel)
         {
             if(back == front_)
@@ -442,13 +463,24 @@ public:
         return true;
     }
 
-    bool push_back(const_reference value)
+    // Useful for 'no_rollover' mode
+    template <class F>
+    bool push_back_op(F&& f)
     {
         pointer back = push_back_begin();
 
-        *back = value;
+        if(back == nullptr) return false;
 
-        return push_back_end();
+        if(push_back_end() == false) return false;
+
+        f(back);
+        return true;
+    }
+
+
+    bool push_back(const_reference value)
+    {
+        return push_back_op([value](pointer back){ *back = value;});
     }
 
     pointer push_front_begin()
@@ -490,6 +522,12 @@ public:
         return front_ = front;
     }
 
+    template <class F>
+    bool push_front_op(F&&)
+    {
+        return false;
+    }
+
     void push_front(const_reference value)
     {
         push_front_begin();
@@ -507,11 +545,10 @@ public:
     template <class ...Args>
     bool emplace_back(Args&&...args)
     {
-        pointer back = push_back_begin();
-
-        new (back) value_type(std::forward<Args>(args)...);
-
-        return push_back_end();
+        return push_back_op([&args...](pointer back)
+        {
+            new (back) value_type(std::forward<Args>(args)...);
+        });
     }
 
 
