@@ -337,6 +337,7 @@ class circular_queue : public circular_queue_base<Policy>
 
     static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
     static constexpr bool strict = is_set(Policy::options & queue_options::strict);
+    static constexpr bool is_trivial = Policy::is_trivial;
 
     template <bool forward>
     class iterator_base
@@ -387,7 +388,17 @@ class circular_queue : public circular_queue_base<Policy>
         reference operator*() { return *current_; }
         constexpr const_reference operator*() const { return *current_; }
 
-        const_pointer operator->() const { return current_; }
+        constexpr const_pointer operator->() const { return current_; }
+
+        constexpr bool operator==(const iterator_base& other) const
+        {
+            return current_ == other.current_;
+        }
+
+        constexpr bool operator!=(const iterator_base& other) const
+        {
+            return current_ != other.current_;
+        }
     };
 
     void rollover(pointer back)
@@ -402,11 +413,21 @@ class circular_queue : public circular_queue_base<Policy>
         decrement(&back_);
     }
 
+    void destruct()
+    {
+        if(is_trivial == false)
+        {
+            for(iterator i = begin(); i != end(); ++i)
+                i->~value_type();
+        }
+    }
+
 public:
     using base_type::type;
     using base_type::empty;
 
     constexpr circular_queue() = default;
+    ~circular_queue() { destruct(); }
 
     using iterator = iterator_base<true>;
     using reverse_iterator = iterator_base<false>;
@@ -558,10 +579,17 @@ public:
 
     void pop_back()
     {
-        decrement_size();
         decrement(&back_);
+        decrement_size();       // 'flagged' mode seems to want this after decrement
 
         (*back_).~value_type();
+    }
+
+    void clear()
+    {
+        destruct();
+
+        front_ = back_ = &array_[0];
     }
 };
 

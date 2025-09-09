@@ -309,9 +309,27 @@ TEST_CASE("queue-test")
 
             static_assert(queue_type::type == options::flagged);
 
-            queue_type q1;
+            queue_type q1, q2;
 
             circular_queue_test(q1);
+
+            for(unsigned i = 0; i < q2.max_size(); ++i)
+                q2.emplace_back(i, "synthetic");
+
+            REQUIRE(q2.size() == 4);
+
+            REQUIRE(q2.back().val1 == 3);
+            q2.pop_back();
+            REQUIRE(q2.empty() == false);
+            q2.pop_back();
+            REQUIRE(q2.empty() == false);
+            q2.pop_back();
+            REQUIRE(q2.empty() == false);
+            q2.pop_back();
+            REQUIRE(q2.empty());
+
+            q1.clear();
+            q2.clear();
         }
         SECTION("counter")
         {
