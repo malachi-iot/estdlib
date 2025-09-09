@@ -24,6 +24,25 @@ void circular_queue_test(Queue& q1)
     REQUIRE(q1.front().val1 == 8);
     q1.pop_front();
     REQUIRE(q1.empty());
+
+    bool r;
+
+    for(unsigned i = 0; i < q1.max_size(); ++i)
+    {
+        const Dummy d(static_cast<int>(i), "synthetic");
+        INFO(i);
+        // Just to make debugging easier
+        //bool r = q1.emplace_back(i, "synthetic");
+        r = q1.push_back(d);
+        REQUIRE(r);
+    }
+
+    REQUIRE(q1.empty() == false);
+    REQUIRE(q1.back().val1 == 3);
+    q1.pop_back();
+    // FIX: flagged mode reports empty here
+    //REQUIRE(q1.empty() == false);
+    //REQUIRE(q1.back().val1 == 2);
 }
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>

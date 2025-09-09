@@ -26,6 +26,11 @@ enum class queue_options
     trivial     = 0x0010,
     // reject-on-full mode (needed for full lock-free behavior)
     no_rollover = 0x0020,
+    // EXPERIMENTAL - inhibit would-be exceptions/invalid condition checks
+    // similar to c++26 contracts as per
+    // https://en.cppreference.com/w/cpp/container/deque/pop_back.html
+    // https://en.cppreference.com/w/cpp/language/contracts.html
+    strict      = 0x0040,
 
     default_opt = flagged
 };
@@ -244,7 +249,7 @@ protected:
 
     ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
-        empty_ = base_type::back_ == base_type::front_;
+        empty_ = back_ == front_;
     }
 
 public:
@@ -327,8 +332,11 @@ class circular_queue : public circular_queue_base<Policy>
 
     using base_type::increment;
     using base_type::decrement;
+    using base_type::increment_size;
+    using base_type::decrement_size;
 
     static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
+    static constexpr bool strict = is_set(Policy::options & queue_options::strict);
 
     template <bool forward>
     class iterator_base
@@ -382,6 +390,18 @@ class circular_queue : public circular_queue_base<Policy>
         const_pointer operator->() const { return current_; }
     };
 
+    void rollover(pointer back)
+    {
+        (*back).~value_type();
+        increment(&front_);
+    }
+
+    void rollunder(pointer front)
+    {
+        (*front).~value_type();
+        decrement(&back_);
+    }
+
 public:
     using base_type::type;
     using base_type::empty;
@@ -416,64 +436,43 @@ public:
         return *i;
     }
 
-    pointer push_back_begin()
-    {
-        if(type != queue_options::sentinel)
-        {
-            const bool full = !empty() && back_ == front_;
-            if(full)
-            {
-                if(no_rollover) return nullptr;
-
-                // rollover
-                (*back_).~value_type();
-                increment(&front_);
-            }
-            else
-                base_type::increment_size();
-        }
-
-        return back_;
-    }
-
-    bool push_back_end()
+    // Useful for 'no_rollover' mode
+    template <class F>
+    bool push_back_op(F&& f)
     {
         pointer back = back_;
 
+        if(type != queue_options::sentinel)
+        {
+            const bool full = !empty() && back == front_;
+            if(full)
+            {
+                if(no_rollover) return false;
+
+                rollover(back);
+            }
+            else
+                increment_size();
+        }
+
+        pointer dest = back;
         increment(&back);
 
-        // Careful, we're detecting a rollover *after* we do a "*back =" - that's consequential
-        // in 'no_rollover' mode (but not in others)
         if(type == queue_options::sentinel)
         {
             if(back == front_)
             {
                 if(no_rollover) return false;
 
-                // rollover
-                (*back).~value_type();
-                increment(&front_);
+                rollover(back);
             }
             else
-                base_type::increment_size();
+                increment_size();
         }
 
+        f(dest);
         back_ = back;
 
-        return true;
-    }
-
-    // Useful for 'no_rollover' mode
-    template <class F>
-    bool push_back_op(F&& f)
-    {
-        pointer back = push_back_begin();
-
-        if(back == nullptr) return false;
-
-        if(push_back_end() == false) return false;
-
-        f(back);
         return true;
     }
 
@@ -485,23 +484,21 @@ public:
 
     pointer push_front_begin()
     {
+        pointer front = front_;
+
         if(type != queue_options::sentinel)
         {
             // UNTESTED
-            const bool full = !empty() && back_ == front_;
+            const bool full = !empty() && back_ == front;
             if(full)
             {
                 if(no_rollover) return nullptr;
 
-                // rollunder
-                (*front_).~value_type();
-                decrement(&back_);
+                rollunder(front);
             }
             else
-                base_type::increment_size();
+                increment_size();
         }
-
-        pointer front = front_;
 
         decrement(&front);
 
@@ -511,28 +508,27 @@ public:
             {
                 if(no_rollover) return nullptr;
 
-                // rollunder
-                (*front).~value_type();
-                decrement(&back_);
+                rollunder(front);
             }
             else
-                base_type::increment_size();
+                increment_size();
         }
 
         return front_ = front;
     }
 
     template <class F>
-    bool push_front_op(F&&)
+    bool push_front_op(F&& f)
     {
-        return false;
+        pointer dest = push_front_begin();
+        if(dest == nullptr) return false;
+        f(dest);
+        return true;
     }
 
     void push_front(const_reference value)
     {
-        push_front_begin();
-
-        *front_ = value;
+        *push_front_begin() = value;
     }
 
     template <class ...Args>
@@ -557,12 +553,12 @@ public:
         (*front_).~value_type();
 
         increment(&front_);
-        base_type::decrement_size();
+        decrement_size();
     }
 
     void pop_back()
     {
-        base_type::decrement_size();
+        decrement_size();
         decrement(&back_);
 
         (*back_).~value_type();
