@@ -7,8 +7,8 @@
 using namespace estd;
 using namespace estd::test;
 
-template <class Queue>
-void circular_queue_test(Queue& q1)
+template <class Policy>
+void circular_queue_test(internal::circular_queue<Policy>& q1)
 {
     const Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
 
@@ -43,6 +43,30 @@ void circular_queue_test(Queue& q1)
     // FIX: flagged mode reports empty here
     //REQUIRE(q1.empty() == false);
     //REQUIRE(q1.back().val1 == 2);
+}
+
+template <class Policy>
+void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
+{
+    int N = q.max_size();
+    int i;
+
+    for(i = 0; i < N; ++i)
+        q.emplace_back(i, "synthetic");
+
+    bool r = q.emplace_back(N, "rolled over");
+    REQUIRE(r);
+
+    i = 1;
+
+    for(const Dummy& d : q)
+    {
+        INFO(i);
+        REQUIRE(d.val1 == i);
+        ++i;
+    }
+
+    REQUIRE(i == 5);
 }
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
@@ -330,6 +354,8 @@ TEST_CASE("queue-test")
 
             q1.clear();
             q2.clear();
+
+            circular_queue_rollover_test(q1);
         }
         SECTION("counter")
         {

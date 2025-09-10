@@ -344,27 +344,36 @@ class circular_queue : public circular_queue_base<Policy>
     {
         circular_queue& parent_;
         pointer current_;
+        // DEBT: Sentinel flavor does not need pos_ - flagged/counter version does
+        unsigned pos_;
 
-        void bump(true_type) { parent_.increment(current_); }
-        void bump(false_type) { parent_.decrement(current_); }
+        void bump(true_type)
+        {
+            ++pos_;
+            parent_.increment(&current_);
+        }
+
+        void bump(false_type)
+        {
+            --pos_;
+            parent_.decrement(&current_);
+        }
 
     public:
         constexpr explicit iterator_base(
             circular_queue& parent,
-            pointer current) :
+            pointer current,
+            size_t pos) :
             parent_{parent},
-            current_{current}
+            current_{current},
+            pos_{static_cast<unsigned>(pos)}
         {
 
         }
 
         iterator_base& operator++()
         {
-            ESTD_CPP_IF_CONSTEXPR (forward)
-                parent_.increment(&current_);
-            else
-                parent_.decrement(&current_);
-
+            bump(bool_constant<forward>{});
             return *this;
         }
 
@@ -377,11 +386,7 @@ class circular_queue : public circular_queue_base<Policy>
 
         iterator_base& operator--()
         {
-            ESTD_CPP_IF_CONSTEXPR (forward)
-                parent_.decrement(&current_);
-            else
-                parent_.increment(&current_);
-
+            bump(bool_constant<!forward>{});
             return *this;
         }
 
@@ -392,12 +397,14 @@ class circular_queue : public circular_queue_base<Policy>
 
         constexpr bool operator==(const iterator_base& other) const
         {
-            return current_ == other.current_;
+            return pos_ == other.pos_;
+            //return current_ == other.current_;
         }
 
         constexpr bool operator!=(const iterator_base& other) const
         {
-            return current_ != other.current_;
+            return pos_ != other.pos_;
+            //return current_ != other.current_;
         }
     };
 
@@ -425,6 +432,7 @@ class circular_queue : public circular_queue_base<Policy>
 public:
     using base_type::type;
     using base_type::empty;
+    using base_type::size;
 
     constexpr circular_queue() = default;
     ~circular_queue() { destruct(); }
@@ -432,21 +440,39 @@ public:
     using iterator = iterator_base<true>;
     using reverse_iterator = iterator_base<false>;
     using const_iterator = const iterator;
+    using const_reverse_iterator = const reverse_iterator;
 
     iterator begin()
     {
-        return iterator{*this, front_};
+        return iterator{*this, front_, 0};
+    }
+
+    reverse_iterator rbegin()
+    {
+        // UNTESTED, feels like it needs work
+        pointer back = back_;
+        decrement(&back);
+        return reverse_iterator{*this, back, size()};
     }
 
     iterator end()
     {
-        return iterator{*this, back_};
+        return iterator{*this, back_, size()};
     }
 
     constexpr const_iterator end() const
     {
-        return iterator{*this, back_};
+        return const_iterator{*this, back_, size()};
     }
+
+    reverse_iterator rend()
+    {
+        // UNTESTED, feels like it needs work
+        pointer front = front_;
+        decrement(&front);
+        return reverse_iterator{*this, front, 0};
+    }
+
 
     reference back()
     {
@@ -457,7 +483,6 @@ public:
         return *i;
     }
 
-    // Useful for 'no_rollover' mode
     template <class F>
     bool push_back_op(F&& f)
     {
