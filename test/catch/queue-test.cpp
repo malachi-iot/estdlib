@@ -48,7 +48,7 @@ void circular_queue_test(internal::circular_queue<Policy>& q1)
 template <class Policy>
 void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
 {
-    int N = q.max_size();
+    const int N = q.max_size();
     int i;
 
     for(i = 0; i < N; ++i)
@@ -59,6 +59,8 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
 
     i = 1;
 
+    // TODO: Detect sentinel mode and adjust size down by one.  Perhaps max_size can reflect that too?
+
     for(const Dummy& d : q)
     {
         INFO(i);
@@ -66,7 +68,27 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
         ++i;
     }
 
-    REQUIRE(i == 5);
+    REQUIRE(i == N + 1);
+}
+
+template <class Policy>
+void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
+{
+    const int N = q.max_size();
+    int i;
+
+    for(i = 0; i < N; ++i)
+        q.emplace_back(i, "synthetic");
+
+    --i;
+
+    const auto end = q.rend();
+
+    for(auto it = q.rbegin(); it != end; --i, ++it)
+    {
+        INFO(i);
+        REQUIRE(it->val1 == i);
+    }
 }
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
@@ -356,12 +378,21 @@ TEST_CASE("queue-test")
             q2.clear();
 
             circular_queue_rollover_test(q1);
+
+            q1.clear();
+
+            circular_queue_reverse_test(q1);
         }
         SECTION("counter")
         {
             layer1_circular<Dummy, 4, options::counter> q1;
 
             circular_queue_test(q1);
+
+            q1.clear();
+
+            // FIX: flagged & sentinel should behave the same but don't
+            //circular_queue_rollover_test(q1);
         }
         SECTION("sentinel")
         {

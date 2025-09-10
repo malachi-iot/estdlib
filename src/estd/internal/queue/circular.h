@@ -344,7 +344,9 @@ class circular_queue : public circular_queue_base<Policy>
     {
         circular_queue& parent_;
         pointer current_;
-        // DEBT: Sentinel flavor does not need pos_ - flagged/counter version does
+
+        // In reverse mode, pos is +1 offset so as to not need signed for -1 rend position
+        // DEBT: Sentinel flavor does not need pos_ - flagged/counter version does, optimize that
         unsigned pos_;
 
         void bump(true_type)
@@ -393,6 +395,7 @@ class circular_queue : public circular_queue_base<Policy>
         reference operator*() { return *current_; }
         constexpr const_reference operator*() const { return *current_; }
 
+        pointer operator->() { return current_; }
         constexpr const_pointer operator->() const { return current_; }
 
         constexpr bool operator==(const iterator_base& other) const
@@ -449,7 +452,6 @@ public:
 
     reverse_iterator rbegin()
     {
-        // UNTESTED, feels like it needs work
         pointer back = back_;
         decrement(&back);
         return reverse_iterator{*this, back, size()};
@@ -467,7 +469,6 @@ public:
 
     reverse_iterator rend()
     {
-        // UNTESTED, feels like it needs work
         pointer front = front_;
         decrement(&front);
         return reverse_iterator{*this, front, 0};
