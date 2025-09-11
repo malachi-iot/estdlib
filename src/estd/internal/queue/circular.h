@@ -53,7 +53,7 @@ struct circular_policy
     static constexpr queue_options options = o;
 };
 
-template <class T, unsigned N, queue_options o>
+template <class T, size_t N, queue_options o>
 struct array_circular_policy : circular_policy<T, o>
 {
     using base_type = circular_policy<T, o>;
@@ -74,10 +74,10 @@ struct array_circular_policy : circular_policy<T, o>
         const T*, typename uninitialized_array::const_iterator>;
 };
 
-template <class T, unsigned N, queue_options o>
+template <class T, size_t N, queue_options o>
 struct span_circular_policy : circular_policy<T, o>
 {
-    using container_type = span<T, N>;
+    using container_type = estd::span<T, N>;
     using iterator_type = typename container_type::iterator;
     using const_iterator_type = typename container_type::const_iterator;
 };
@@ -166,7 +166,9 @@ protected:
     static ESTD_CPP_CONSTEVAL bool increment_size() { return{}; }
     static ESTD_CPP_CONSTEVAL bool decrement_size() { return{}; }
 
-    constexpr circular_queue_container_base() :
+    template <class ...Args>
+    constexpr explicit circular_queue_container_base(Args&&...args) :
+        array_(std::forward<Args>(args)...),
         front_{&array_[0]},
         back_{&array_[0]}
     {
@@ -191,7 +193,7 @@ public:
 
     constexpr size_type max_size() const
     {
-        return array_.max_size() - (type == queue_options::sentinel ? 1 : 0);
+        return array_.size() - (type == queue_options::sentinel ? 1 : 0);
     }
 
     value_type& front()
@@ -229,6 +231,13 @@ protected:
     using base_type::front_;
     using base_type::array_;
 
+    constexpr circular_queue_base() = default;
+
+    template <class ...Args>
+    constexpr explicit circular_queue_base(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
+
 public:
     using typename base_type::size_type;
 
@@ -240,7 +249,7 @@ public:
     size_type size() const
     {
         if(front_ > back_)
-            return array_.max_size() - (front_ - back_);
+            return array_.size() - (front_ - back_);
         else
             return back_ - front_;
     }
@@ -278,6 +287,13 @@ protected:
     {
         empty_ = back_ == front_;
     }
+
+    constexpr circular_queue_base() = default;
+
+    template <class ...Args>
+    constexpr explicit circular_queue_base(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
 
 public:
     constexpr bool empty() const { return empty_; }
@@ -340,6 +356,13 @@ protected:
     {
         ++size_;
     }
+
+    constexpr circular_queue_base() = default;
+
+    template <class ...Args>
+    constexpr explicit circular_queue_base(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
 
 public:
     using typename base_type::size_type;
@@ -469,7 +492,7 @@ public:
         decrement(&back_);
     }
 
-    void destruct()
+    ESTD_CPP_CONSTEXPR(14) void destruct()
     {
         if(is_trivial == false)
         {
@@ -483,7 +506,15 @@ public:
     using base_type::empty;
     using base_type::size;
 
+    // Args... flavor handles this mostly, but nice to have for debugging simplicity
+    // and the occasional implicit construction.
     constexpr circular_queue() = default;
+
+    template <class ...Args>
+    constexpr explicit circular_queue(Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
+
     ~circular_queue() { destruct(); }
 
     using iterator = iterator_base<true>;
@@ -657,7 +688,7 @@ public:
         (*back_).~value_type();
     }
 
-    void clear()
+    ESTD_CPP_CONSTEXPR(14) void clear()
     {
         destruct();
 

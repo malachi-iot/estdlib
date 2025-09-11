@@ -76,9 +76,9 @@ struct span : span_base<T>
     typedef typename base_type::pointer pointer;
     typedef T element_type;
 
-    static ESTD_CPP_CONSTEXPR_RET size_type size() { return N; }
+    static constexpr size_type size() { return N; }
 
-    ESTD_CPP_CONSTEXPR_RET span(pointer data) : base_type(data) {}
+    constexpr span(pointer data) : base_type(data) {}
 };
 
 // Runtime size

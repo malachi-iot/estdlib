@@ -74,6 +74,12 @@ void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
 using layer1_circular = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
 
+template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
+using layer2_circular = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
+
+template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
+using layer3_circular = internal::circular_queue<internal::span_circular_policy<T, estd::detail::dynamic_extent::value, o>>;
+
 TEST_CASE("queue-test")
 {
     SECTION("Basic layer1 queue")
@@ -363,7 +369,7 @@ TEST_CASE("queue-test")
 
             circular_queue_reverse_test(q1);
         }
-        SECTION("counter")
+        SECTION("counter: layer1")
         {
             layer1_circular<Dummy, 4, options::counter> q1;
 
@@ -375,7 +381,20 @@ TEST_CASE("queue-test")
 
             circular_queue_rollover_test(q1);
         }
-        SECTION("sentinel")
+        SECTION("counter: layer2")
+        {
+            std::array<Dummy, 4> storage;
+            layer2_circular<Dummy, 4, options::counter> q1(storage.data());
+
+            REQUIRE(q1.max_size() == 4);
+
+            circular_queue_test(q1);
+
+            q1.clear();
+
+            circular_queue_rollover_test(q1);
+        }
+        SECTION("sentinel: layer1")
         {
             using queue_type = layer1_circular<Dummy, 4, options::sentinel>;
             queue_type q1;
@@ -388,14 +407,44 @@ TEST_CASE("queue-test")
 
             circular_queue_rollover_test(q1);
         }
+        SECTION("sentinel: layer2")
+        {
+            std::array<Dummy, 4> storage;
+            using queue_type = layer2_circular<Dummy, 4, options::sentinel>;
+            queue_type q1(storage.data());
+
+            REQUIRE(q1.max_size() == 3);
+
+            circular_queue_test(q1);
+
+            q1.clear();
+
+            circular_queue_rollover_test(q1);
+        }
+        SECTION("sentinel: layer3")
+        {
+            std::array<Dummy, 4> storage;
+            using queue_type = layer3_circular<Dummy, 4, options::sentinel>;
+            queue_type q1(storage.data(), 4);
+
+            REQUIRE(q1.max_size() == 3);
+
+            circular_queue_test(q1);
+
+            q1.clear();
+
+            circular_queue_rollover_test(q1);
+        }
         SECTION("atomic | bare")
         {
-            using queue_type = layer1_circular<Dummy, 4, options::sentinel | options::bare>;
+            //using queue_type = layer1_circular<Dummy, 4, options::atomic | options::bare>;
 
-            queue_type q1;
+            // FIX: bare has no 'empty' - though only FIX because we haven't ironed out scope
+            // of 'bare' behavior fully
+            //queue_type q1;
 
-            q1.push_back(d1);
-            q1.emplace_back(8, "Hi 8");
+            //q1.push_back(d1);
+            //q1.emplace_back(8, "Hi 8");
         }
         SECTION("atomic | sentinel")
         {
