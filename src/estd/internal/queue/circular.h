@@ -172,13 +172,26 @@ protected:
     {
     }
 
-public:
-    constexpr size_t max_size() const { return array_.max_size(); }
-
-    constexpr bool empty() const
+    class pos_iterator_base
     {
-        // DEBT: Assumes sentinel mode
-        return front_ == back_;
+    protected:
+        static ESTD_CPP_CONSTEVAL bool bump_up() { return{}; }
+        static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
+    };
+
+    class iterator_base
+    {
+    protected:
+        static ESTD_CPP_CONSTEVAL bool bump_up() { return{}; }
+        static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
+    };
+
+public:
+    using size_type = unsigned;
+
+    constexpr size_type max_size() const
+    {
+        return array_.max_size() - (type == queue_options::sentinel ? 1 : 0);
     }
 
     value_type& front()
@@ -193,7 +206,12 @@ public:
 };
 
 template <class Policy, class Enabled = void>
-class circular_queue_base : public circular_queue_container_base<Policy>
+class circular_queue_base;
+
+
+template <class Policy>
+class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::bare>> :
+    public circular_queue_container_base<Policy>
 {
 protected:
 };
@@ -212,7 +230,14 @@ protected:
     using base_type::array_;
 
 public:
-    size_t size() const
+    using typename base_type::size_type;
+
+    constexpr bool empty() const
+    {
+        return front_ == back_;
+    }
+
+    size_type size() const
     {
         if(front_ > back_)
             return array_.max_size() - (front_ - back_);
@@ -234,6 +259,8 @@ protected:
     using base_type::front_;
     using base_type::back_;
 
+    using iterator_base = typename base_type::pos_iterator_base;
+
 #if FEATURE_STD_ATOMIC
     using bool_type = conditional_t<atomic, std::atomic_flag, bool>;
 #else
@@ -254,8 +281,9 @@ protected:
 
 public:
     constexpr bool empty() const { return empty_; }
+    using typename base_type::size_type;
 
-    size_t size() const
+    size_type size() const
     {
         if(empty_) return 0;
 
@@ -293,6 +321,8 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::cou
 protected:
     using base_type::atomic;
 
+    using iterator_base = typename base_type::pos_iterator_base;
+
 #if FEATURE_STD_ATOMIC
     using counter_type = conditional_t<atomic, std::atomic<unsigned>, unsigned>;
 #else
@@ -312,8 +342,10 @@ protected:
     }
 
 public:
+    using typename base_type::size_type;
+
     constexpr bool empty() const { return size_ == 0; }
-    constexpr unsigned size() const { return size_; }
+    constexpr size_type size() const { return size_; }
 };
 
 
@@ -324,6 +356,9 @@ class circular_queue : public circular_queue_base<Policy>
     using typename base_type::container_policy;
     using typename base_type::container_type;
 
+#if UNIT_TESTING
+public:
+#endif
     ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
 
     using base_type::array_;
@@ -340,7 +375,7 @@ class circular_queue : public circular_queue_base<Policy>
     static constexpr bool is_trivial = Policy::is_trivial;
 
     template <bool forward>
-    class iterator_base
+    class iterator_base : public base_type::iterator_base
     {
         circular_queue& parent_;
         pointer current_;
@@ -351,12 +386,16 @@ class circular_queue : public circular_queue_base<Policy>
 
         void bump(true_type)
         {
+            base_type::iterator_base::bump_up();
+
             ++pos_;
             parent_.increment(&current_);
         }
 
         void bump(false_type)
         {
+            base_type::iterator_base::bump_down();
+
             --pos_;
             parent_.decrement(&current_);
         }
@@ -373,7 +412,7 @@ class circular_queue : public circular_queue_base<Policy>
 
         }
 
-        iterator_base& operator++()
+        ESTD_CPP_CONSTEXPR(14) iterator_base& operator++()
         {
             bump(bool_constant<forward>{});
             return *this;
@@ -386,10 +425,17 @@ class circular_queue : public circular_queue_base<Policy>
             return temp;
         }
 
-        iterator_base& operator--()
+        ESTD_CPP_CONSTEXPR(14) iterator_base& operator--()
         {
             bump(bool_constant<!forward>{});
             return *this;
+        }
+
+        iterator_base operator--(int)
+        {
+            iterator_base temp = *this;
+            operator--();
+            return temp;
         }
 
         reference operator*() { return *current_; }

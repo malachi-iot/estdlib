@@ -11,6 +11,7 @@ template <class Policy>
 void circular_queue_test(internal::circular_queue<Policy>& q1)
 {
     const Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
+    //const unsigned N = q1.max_size();
 
     REQUIRE(q1.empty());
     q1.push_back(d1);
@@ -24,25 +25,6 @@ void circular_queue_test(internal::circular_queue<Policy>& q1)
     REQUIRE(q1.front().val1 == 8);
     q1.pop_front();
     REQUIRE(q1.empty());
-
-    bool r;
-
-    for(unsigned i = 0; i < q1.max_size(); ++i)
-    {
-        const Dummy d(static_cast<int>(i), "synthetic");
-        INFO(i);
-        // Just to make debugging easier
-        //bool r = q1.emplace_back(i, "synthetic");
-        r = q1.push_back(d);
-        REQUIRE(r);
-    }
-
-    REQUIRE(q1.empty() == false);
-    REQUIRE(q1.back().val1 == 3);
-    q1.pop_back();
-    // FIX: flagged mode reports empty here
-    //REQUIRE(q1.empty() == false);
-    //REQUIRE(q1.back().val1 == 2);
 }
 
 template <class Policy>
@@ -58,8 +40,6 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
     REQUIRE(r);
 
     i = 1;
-
-    // TODO: Detect sentinel mode and adjust size down by one.  Perhaps max_size can reflect that too?
 
     for(const Dummy& d : q)
     {
@@ -387,19 +367,26 @@ TEST_CASE("queue-test")
         {
             layer1_circular<Dummy, 4, options::counter> q1;
 
+            REQUIRE(q1.max_size() == 4);
+
             circular_queue_test(q1);
 
             q1.clear();
 
-            // FIX: flagged & sentinel should behave the same but don't
-            //circular_queue_rollover_test(q1);
+            circular_queue_rollover_test(q1);
         }
         SECTION("sentinel")
         {
             using queue_type = layer1_circular<Dummy, 4, options::sentinel>;
             queue_type q1;
 
+            REQUIRE(q1.max_size() == 3);
+
             circular_queue_test(q1);
+
+            q1.clear();
+
+            circular_queue_rollover_test(q1);
         }
         SECTION("atomic | bare")
         {
@@ -417,6 +404,10 @@ TEST_CASE("queue-test")
             queue_type q1;
 
             circular_queue_test(q1);
+
+            q1.clear();
+
+            circular_queue_rollover_test(q1);
         }
     }
 }
