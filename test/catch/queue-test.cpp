@@ -80,6 +80,9 @@ using layer2_circular = internal::circular_queue<internal::span_circular_policy<
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
 using layer3_circular = internal::circular_queue<internal::span_circular_policy<T, estd::detail::dynamic_extent::value, o>>;
 
+// TODO: Explore idea that bumping retrieval/front *FIRST* before appender/back *MIGHT* be
+// atomic
+
 TEST_CASE("queue-test")
 {
     SECTION("Basic layer1 queue")

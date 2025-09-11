@@ -6,6 +6,7 @@
 #include "../../atomic.h"
 #include "../../span.h"
 #include "../container/unordered/traits.h"
+#include "fwd.h"
 
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
 // DEBT: Above link is clunky... make it more directly go to diagrams
@@ -14,8 +15,8 @@ namespace estd { namespace internal {
 
 enum class queue_options
 {
-    sentinel    = 0x0001,
-    bare        = 0x0002,
+    bare        = 0x0001,   ///< No knowledge of empty, full, count or rollover
+    sentinel    = 0x0002,
     flagged     = 0x0003,
     counter     = 0x0004,
     mask        = 0x0007,
@@ -90,6 +91,7 @@ protected:
     constexpr static bool atomic = Policy::atomic;
     constexpr static queue_options type = Policy::type;
     //constexpr static bool atomic = true;
+    static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
 
     using container_policy = Policy;
     using container_type = typename container_policy::container_type;
@@ -215,6 +217,10 @@ template <class Policy>
 class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::bare>> :
     public circular_queue_container_base<Policy>
 {
+    using base_type = circular_queue_container_base<Policy>;
+
+    static_assert(base_type::no_rollover == false, "Bare does not support no_rollover");
+
 protected:
 };
 
@@ -392,8 +398,8 @@ public:
     using base_type::decrement;
     using base_type::increment_size;
     using base_type::decrement_size;
+    using base_type::no_rollover;
 
-    static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
     static constexpr bool strict = is_set(Policy::options & queue_options::strict);
     static constexpr bool is_trivial = Policy::is_trivial;
 
