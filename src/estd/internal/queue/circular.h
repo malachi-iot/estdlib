@@ -11,6 +11,8 @@
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
 // DEBT: Above link is clunky... make it more directly go to diagrams
 
+// We are tuned for Single Producer Single Consumer (SPSC) model
+
 namespace estd { namespace internal {
 
 enum class queue_options
@@ -81,6 +83,16 @@ struct span_circular_policy : circular_policy<T, o>
     using container_type = estd::span<T, N>;
     using iterator_type = typename container_type::iterator;
     using const_iterator_type = typename container_type::const_iterator;
+};
+
+struct circular_mutex_noop
+{
+    static constexpr bool lock_front() { return true; }
+    static constexpr bool unlock_front() { return {}; }
+    static constexpr bool lock_back() { return true; }
+    static constexpr bool unlock_back() { return {}; }
+    static constexpr bool lock_count() { return true; }
+    static constexpr bool unlock_count() { return {}; }
 };
 
 
@@ -189,21 +201,6 @@ protected:
         static ESTD_CPP_CONSTEVAL bool bump_up() { return{}; }
         static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
     };
-
-    enum mutex_types
-    {
-        MUTEX_FRONT,
-        MUTEX_BACK,
-        MUTEX_COUNTER,
-        MUTEX_FLAG = MUTEX_COUNTER
-    };
-
-    // Noop for the time being
-    template <mutex_types>
-    static ESTD_CPP_CONSTEVAL bool lock() { return {}; }
-
-    template <mutex_types>
-    static ESTD_CPP_CONSTEVAL bool unlock() { return {}; }
 
 public:
     using size_type = unsigned;
@@ -584,22 +581,36 @@ public:
         return *i;
     }
 
-    template <class F>
-    bool push_back_op(F&& f)
+    template <class F, class Mutex = circular_mutex_noop>
+    bool push_back_op(F&& f, Mutex mutex = {})
     {
+        // back doesn't need a lock since we implicitly own it as the caller doing the push
+        // (SPSC) - this means that MT simultaneous push to front and back is undefined
+
         pointer back = back_;
 
         if(type != queue_options::sentinel)
         {
+            mutex.lock_front();
+            mutex.lock_count();
+
             const bool full = !empty() && back == front_;
             if(full)
             {
-                if(no_rollover) return false;
+                if(no_rollover)
+                {
+                    mutex.unlock_count();
+                    mutex.unlock_front();
+                    return false;
+                }
 
                 rollover(back);
             }
             else
                 increment_size();
+
+            mutex.unlock_count();
+            mutex.unlock_front();
         }
 
         pointer dest = back;
@@ -607,14 +618,20 @@ public:
 
         if(type == queue_options::sentinel)
         {
+            mutex.lock_front();
+
             if(back == front_)
             {
-                if(no_rollover) return false;
+                if(no_rollover)
+                {
+                    mutex.unlock_front();
+                    return false;
+                }
 
                 rollover(back);
             }
-            else
-                increment_size();
+
+            mutex.unlock_front();
         }
 
         f(dest);
@@ -624,12 +641,14 @@ public:
     }
 
 
-    bool push_back(const_reference value)
+    template <class Mutex = circular_mutex_noop>
+    bool push_back(const_reference value, Mutex mutex = {})
     {
-        return push_back_op([value](pointer back){ *back = value;});
+        return push_back_op([value](pointer back){ *back = value;}, std::forward<Mutex>(mutex));
     }
 
-    pointer push_front_begin()
+    template <class Mutex = circular_mutex_noop>
+    pointer push_front_begin(Mutex mutex = {})
     {
         pointer front = front_;
 
@@ -695,20 +714,34 @@ public:
     }
 
 
-    void pop_front()
+    template <class Mutex = circular_mutex_noop>
+    void pop_front(Mutex mutex = {})
     {
+        mutex.lock_front();
+        mutex.lock_count();
+
         (*front_).~value_type();
 
         increment(&front_);
         decrement_size();
+
+        mutex.unlock_count();
+        mutex.unlock_front();
     }
 
-    void pop_back()
+    template <class Mutex = circular_mutex_noop>
+    void pop_back(Mutex mutex = {})
     {
+        mutex.lock_back();
+        mutex.lock_count();
+
         decrement(&back_);
         decrement_size();       // 'flagged' mode seems to want this after decrement
 
         (*back_).~value_type();
+
+        mutex.unlock_count();
+        mutex.unlock_back();
     }
 
     ESTD_CPP_CONSTEXPR(14) void clear()
