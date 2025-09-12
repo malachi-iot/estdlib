@@ -190,6 +190,21 @@ protected:
         static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
     };
 
+    enum mutex_types
+    {
+        MUTEX_FRONT,
+        MUTEX_BACK,
+        MUTEX_COUNTER,
+        MUTEX_FLAG = MUTEX_COUNTER
+    };
+
+    // Noop for the time being
+    template <mutex_types>
+    static ESTD_CPP_CONSTEVAL bool lock() { return {}; }
+
+    template <mutex_types>
+    static ESTD_CPP_CONSTEVAL bool unlock() { return {}; }
+
 public:
     using size_type = unsigned;
 
@@ -310,7 +325,7 @@ public:
         if(empty_) return 0;
 
         if(front_ >= back_)
-            return array_.max_size() - (front_ - back_);
+            return array_.size() - (front_ - back_);
         else
             return back_ - front_;
     }
@@ -488,14 +503,16 @@ public:
 
     void rollover(pointer back)
     {
-        (*back).~value_type();
+        // bump front first so that retrieval theoretically has less opportunity to see destructed
+        // back
         increment(&front_);
+        (*back).~value_type();
     }
 
     void rollunder(pointer front)
     {
-        (*front).~value_type();
         decrement(&back_);
+        (*front).~value_type();
     }
 
     ESTD_CPP_CONSTEXPR(14) void destruct()

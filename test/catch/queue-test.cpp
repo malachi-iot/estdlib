@@ -71,6 +71,17 @@ void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
     }
 }
 
+
+template <class Policy>
+void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
+{
+    circular_queue_test(q1);
+    q1.clear();
+    circular_queue_rollover_test(q1);
+    q1.clear();
+    circular_queue_reverse_test(q1);
+}
+
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
 using layer1_circular = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
 
@@ -79,9 +90,6 @@ using layer2_circular = internal::circular_queue<internal::span_circular_policy<
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
 using layer3_circular = internal::circular_queue<internal::span_circular_policy<T, estd::detail::dynamic_extent::value, o>>;
-
-// TODO: Explore idea that bumping retrieval/front *FIRST* before appender/back *MIGHT* be
-// atomic
 
 TEST_CASE("queue-test")
 {
@@ -366,11 +374,7 @@ TEST_CASE("queue-test")
             q1.clear();
             q2.clear();
 
-            circular_queue_rollover_test(q1);
-
-            q1.clear();
-
-            circular_queue_reverse_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("counter: layer1")
         {
@@ -378,11 +382,7 @@ TEST_CASE("queue-test")
 
             REQUIRE(q1.max_size() == 4);
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("counter: layer2")
         {
@@ -391,11 +391,7 @@ TEST_CASE("queue-test")
 
             REQUIRE(q1.max_size() == 4);
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("sentinel: layer1")
         {
@@ -404,11 +400,7 @@ TEST_CASE("queue-test")
 
             REQUIRE(q1.max_size() == 3);
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("sentinel: layer2")
         {
@@ -418,11 +410,7 @@ TEST_CASE("queue-test")
 
             REQUIRE(q1.max_size() == 3);
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("sentinel: layer3")
         {
@@ -432,11 +420,7 @@ TEST_CASE("queue-test")
 
             REQUIRE(q1.max_size() == 3);
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
         SECTION("atomic | bare")
         {
@@ -455,11 +439,7 @@ TEST_CASE("queue-test")
 
             queue_type q1;
 
-            circular_queue_test(q1);
-
-            q1.clear();
-
-            circular_queue_rollover_test(q1);
+            circular_queue_test_suite(q1);
         }
     }
 }
