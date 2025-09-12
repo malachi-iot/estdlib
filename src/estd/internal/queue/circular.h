@@ -1,12 +1,8 @@
 #pragma once
 
-// DEBT: Consider moving this to container/queue/
-
-#include "../../array.h"
-#include "../../atomic.h"
-#include "../../span.h"
-#include "../container/unordered/traits.h"
-#include "fwd.h"
+#include "circular/fwd.h"
+#include "circular/mutex.h"
+#include "circular/policy.h"
 
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
 // DEBT: Above link is clunky... make it more directly go to diagrams
@@ -15,85 +11,6 @@
 
 namespace estd { namespace internal {
 
-enum class queue_options
-{
-    bare        = 0x0001,   ///< No knowledge of empty, full, count or rollover
-    sentinel    = 0x0002,
-    flagged     = 0x0003,
-    counter     = 0x0004,
-    mask        = 0x0007,
-
-    atomic      = 0x0008,
-
-    // force trivial behavior i.e. calls default constructor
-    trivial     = 0x0010,
-    // reject-on-full mode (needed for full lock-free behavior)
-    no_rollover = 0x0020,
-    // EXPERIMENTAL - inhibit would-be exceptions/invalid condition checks
-    // similar to c++26 contracts as per
-    // https://en.cppreference.com/w/cpp/container/deque/pop_back.html
-    // https://en.cppreference.com/w/cpp/language/contracts.html
-    strict      = 0x0040,
-
-    default_opt = flagged
-};
-
-ESTD_FLAGS(queue_options)
-
-
-template <class T, queue_options o, class Nullable = nullable_traits<T>>
-struct circular_policy
-{
-    static constexpr queue_options type = o & queue_options::mask;
-    static constexpr bool atomic = is_set(o & queue_options::atomic);
-    constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
-#if FEATURE_ESTD_IS_TRIVIAL
-        || estd::is_trivial<T>::value
-#endif
-        ;
-
-    using nullable = Nullable;
-    static constexpr queue_options options = o;
-};
-
-template <class T, size_t N, queue_options o>
-struct array_circular_policy : circular_policy<T, o>
-{
-    using base_type = circular_policy<T, o>;
-    using base_type::is_trivial;
-
-    using uninitialized_array = internal::array<impl::uninitialized_array<T, N>>;
-
-    // NOTE: Wanted to use raw array - for that, gymnastics are required to get at begin/end
-    // with iterator sensibilities though.
-    using container_type = conditional_t<is_trivial,
-        estd::array<T, N>,
-        uninitialized_array>;
-
-    using iterator_type = conditional_t<is_trivial,
-        T*, typename uninitialized_array::iterator>;
-
-    using const_iterator_type = conditional_t<is_trivial,
-        const T*, typename uninitialized_array::const_iterator>;
-};
-
-template <class T, size_t N, queue_options o>
-struct span_circular_policy : circular_policy<T, o>
-{
-    using container_type = estd::span<T, N>;
-    using iterator_type = typename container_type::iterator;
-    using const_iterator_type = typename container_type::const_iterator;
-};
-
-struct circular_mutex_noop
-{
-    static constexpr bool lock_front() { return true; }
-    static constexpr bool unlock_front() { return {}; }
-    static constexpr bool lock_back() { return true; }
-    static constexpr bool unlock_back() { return {}; }
-    static constexpr bool lock_count() { return true; }
-    static constexpr bool unlock_count() { return {}; }
-};
 
 
 template <class Policy>
