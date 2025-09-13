@@ -25,6 +25,7 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::bar
     static_assert(base_type::no_rollover == false, "Bare does not support no_rollover");
 
 protected:
+    static bool ESTD_CPP_CONSTEVAL clear_size() { return{}; }
 };
 
 
@@ -46,6 +47,8 @@ protected:
     constexpr explicit circular_queue_base(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
+
+    static bool ESTD_CPP_CONSTEVAL clear_size() { return{}; }
 
 public:
     using typename base_type::size_type;
@@ -95,6 +98,11 @@ protected:
     ESTD_CPP_CONSTEXPR(14) void decrement_size()
     {
         empty_ = back_ == front_;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) void clear_size()
+    {
+        empty_ = true;
     }
 
     constexpr circular_queue_base() = default;
@@ -172,6 +180,11 @@ protected:
     constexpr explicit circular_queue_base(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
+
+    ESTD_CPP_CONSTEXPR(14) void clear_size()
+    {
+        size_ = 0;
+    }
 
 public:
     using typename base_type::size_type;
@@ -380,9 +393,11 @@ public:
 
         pointer back = back_;
 
+        // DEBT: Euphemism for pure atomic mode.  Needs refinement
+        if(!no_rollover) mutex.lock_front();
+
         if(type != queue_options::sentinel)
         {
-            mutex.lock_front();
             mutex.lock_count();
 
             const bool full = !empty() && back == front_;
@@ -391,7 +406,6 @@ public:
                 if(no_rollover)
                 {
                     mutex.unlock_count();
-                    mutex.unlock_front();
                     return false;
                 }
 
@@ -401,7 +415,6 @@ public:
                 increment_size();
 
             mutex.unlock_count();
-            mutex.unlock_front();
         }
 
         pointer dest = back;
@@ -409,24 +422,21 @@ public:
 
         if(type == queue_options::sentinel)
         {
-            mutex.lock_front();
-
             if(back == front_)
             {
                 if(no_rollover)
                 {
-                    mutex.unlock_front();
                     return false;
                 }
 
                 rollover(back);
             }
-
-            mutex.unlock_front();
         }
 
         f(dest);
         back_ = back;
+
+        if(!no_rollover) mutex.unlock_front();
 
         return true;
     }
@@ -441,20 +451,32 @@ public:
     template <class Mutex = circular_mutex_noop>
     pointer push_front_begin(Mutex mutex = {})
     {
+        // front doesn't need a lock since we implicitly own it as the caller doing the push
+        // (SPSC) - this means that MT simultaneous push to front and back is undefined
+
         pointer front = front_;
+
+        // DEBT: Euphemism for pure atomic mode.  Needs refinement
+        if(!no_rollover) mutex.lock_back();
 
         if(type != queue_options::sentinel)
         {
+            mutex.lock_count();
             // UNTESTED
             const bool full = !empty() && back_ == front;
             if(full)
             {
-                if(no_rollover) return nullptr;
+                if(no_rollover)
+                {
+                    mutex.unlock_count();
+                    return nullptr;
+                }
 
                 rollunder(front);
             }
             else
                 increment_size();
+            mutex.unlock_count();
         }
 
         decrement(&front);
@@ -471,27 +493,31 @@ public:
                 increment_size();
         }
 
+        if(!no_rollover) mutex.unlock_back();
+
         return front_ = front;
     }
 
     template <class F>
-    bool push_front_op(F&& f)
+    pointer push_front_op(F&& f)
     {
         pointer dest = push_front_begin();
-        if(dest == nullptr) return false;
+        if(dest == nullptr) return nullptr;
         f(dest);
-        return true;
+        return dest;
     }
 
-    void push_front(const_reference value)
+    pointer push_front(const_reference value)
     {
-        *push_front_begin() = value;
+        return push_front_op([&value](pointer dest) { *dest = value;});
     }
 
     template <class ...Args>
-    void emplace_front(Args&&...args)
+    pointer emplace_front(Args&&...args)
     {
-        new (push_front_begin()) value_type(std::forward<Args>(args)...);
+        pointer dest = push_front_begin();
+        if(dest == nullptr) return nullptr;
+        return new (dest) value_type(std::forward<Args>(args)...);
     }
 
 
@@ -535,11 +561,17 @@ public:
         mutex.unlock_back();
     }
 
-    ESTD_CPP_CONSTEXPR(14) void clear()
+    template <class Mutex = circular_mutex_noop>
+    ESTD_CPP_CONSTEXPR(14) void clear(Mutex mutex = {})
     {
+        mutex.lock_front();
+        mutex.lock_back();
         destruct();
 
         front_ = back_ = &array_[0];
+        base_type::clear_size();
+        mutex.unlock_front();
+        mutex.unlock_back();
     }
 };
 
