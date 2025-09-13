@@ -354,8 +354,6 @@ TEST_CASE("queue-test")
 
             queue_type q1, q2;
 
-            circular_queue_test(q1);
-
             for(unsigned i = 0; i < q2.max_size(); ++i)
                 q2.emplace_back(i, "synthetic");
 

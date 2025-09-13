@@ -3,6 +3,9 @@
 #include "circular/mutex.h"
 #include "circular/policy.h"
 #include "circular/base.h"
+#include "circular/counter.h"
+#include "circular/flagged.h"
+#include "circular/sentinel.h"
 
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
 // DEBT: Above link is clunky... make it more directly go to diagrams
