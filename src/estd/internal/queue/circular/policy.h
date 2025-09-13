@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../../../array.h"
-#include "../../../atomic.h"
 #include "../../../span.h"
 #include "../../container/unordered/traits.h"
+
+#include "enum.h"
 
 namespace estd { namespace internal {
 
