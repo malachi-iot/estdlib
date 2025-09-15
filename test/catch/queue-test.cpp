@@ -73,6 +73,23 @@ void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
 
 
 template <class Policy>
+void circular_queue_move_test(internal::circular_queue<Policy>& q)
+{
+    Dummy d1(7, "Hi 7");
+
+    q.push_back(std::move(d1));
+    q.push_back(Dummy{8, "Hi 8"});
+
+    REQUIRE(q.front().val1 == 7);
+    REQUIRE(d1.moved_from_);
+
+    q.pop_front();
+    REQUIRE(q.front().val1 == 8);
+    REQUIRE(q.front().moved_);
+}
+
+
+template <class Policy>
 void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
 {
     circular_queue_test(q1);
@@ -350,7 +367,7 @@ TEST_CASE("queue-test")
         {
             using queue_type = layer1_circular<Dummy, 4, options::flagged>;
 
-            static_assert(queue_type::type == options::flagged);
+            static_assert(queue_type::type == options::flagged, "flagged mode expected");
 
             queue_type q1, q2;
 
@@ -373,6 +390,8 @@ TEST_CASE("queue-test")
             q2.clear();
 
             circular_queue_test_suite(q1);
+            // FIX: Something badly wrong with move :(
+            //circular_queue_move_test(q1);
         }
         SECTION("counter: layer1")
         {

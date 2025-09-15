@@ -19,6 +19,7 @@ struct Dummy
     int* inc_on_destruct = nullptr;
     const bool moved_ = false;      ///< This object was made from a move
     const bool copied_ = false;     ///< This object was made via a copy
+    bool moved_from_ = false;       ///< This object was the source of a move
 
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() = default;
@@ -34,6 +35,7 @@ struct Dummy
         moved_{true}
     {
         move_from.inc_on_destruct = nullptr;
+        move_from.moved_from_ = true;
     }
 
     Dummy(const Dummy& copy_from) :

@@ -448,7 +448,18 @@ public:
     template <class Mutex = circular_mutex_noop>
     bool push_back(const_reference value, Mutex mutex = {})
     {
-        return push_back_op([value](pointer back){ *back = value;}, std::forward<Mutex>(mutex));
+        return push_back_op([&value](pointer back){ *back = value;}, std::forward<Mutex>(mutex));
+    }
+
+    template <class Mutex = circular_mutex_noop>
+    bool push_back(value_type&& value, Mutex mutex = {})
+    {
+        return push_back_op([&value](pointer back)
+        {
+            // DEBT: Look into whether std::queue and friends do an = or a new here
+            new (back) value_type(std::move(value));
+            //*back = std::move(value);
+        }, std::forward<Mutex>(mutex));
     }
 
     template <class Mutex = circular_mutex_noop>
@@ -501,18 +512,22 @@ public:
         return front_ = front;
     }
 
-    template <class F>
-    pointer push_front_op(F&& f)
+    template <class F, class Mutex = circular_mutex_noop>
+    pointer push_front_op(F&& f, Mutex mutex = {})
     {
-        pointer dest = push_front_begin();
+        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
         if(dest == nullptr) return nullptr;
         f(dest);
         return dest;
     }
 
-    pointer push_front(const_reference value)
+    template <class Mutex = circular_mutex_noop>
+    pointer push_front(const_reference value, Mutex mutex = {})
     {
-        return push_front_op([&value](pointer dest) { *dest = value;});
+        return push_front_op([&value](pointer dest)
+        {
+            *dest = value;
+        }, std::forward<Mutex>(mutex));
     }
 
     template <class ...Args>
