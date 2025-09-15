@@ -52,7 +52,7 @@ protected:
     // and if so points it back at the beginning
     // DEBT: const all this up.  const** is super tricky in this instance
     template <class ItPtr>
-    void evaluate_rollover(ItPtr i)
+    ESTD_CPP_CONSTEXPR(14) void evaluate_rollover(ItPtr i)
     {
         if(*i == array_.end())
             *i = array_.begin();
@@ -62,7 +62,7 @@ protected:
     // returns true when a rollover is detected.  Returns whether
     // we rolled over to help with decrement
     template <class ItPtr>
-    bool evaluate_rollunder(ItPtr i)
+    ESTD_CPP_CONSTEXPR(14) bool evaluate_rollunder(ItPtr i)
     {
         if(*i != array_.begin()) return false;
 
@@ -74,7 +74,7 @@ protected:
     // wouldn't handle rollovers/rollunders
     // DEBT: const all this up.  const** is super tricky in this instance
     template <class ItPtr>
-    void decrement(ItPtr i)
+    ESTD_CPP_CONSTEXPR(14) void decrement(ItPtr i)
     {
         // doing i-- after because we don't have a 'before begin' iterator
         evaluate_rollunder(i);
@@ -83,7 +83,7 @@ protected:
 
     // DEBT: const all this up.  const** is super tricky in this instance
     template <class ItPtr>
-    void increment(ItPtr i)
+    ESTD_CPP_CONSTEXPR(14) void increment(ItPtr i)
     {
         ++(*i);
         evaluate_rollover(i);
