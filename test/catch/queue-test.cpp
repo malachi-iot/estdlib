@@ -80,23 +80,35 @@ void circular_queue_move_test(internal::circular_queue<Policy>& q)
     q.push_back(std::move(d1));
     q.push_back(Dummy{8, "Hi 8"});
 
+    REQUIRE(q.front().moved_);
     REQUIRE(q.front().val1 == 7);
     REQUIRE(d1.moved_from_);
 
     q.pop_front();
     REQUIRE(q.front().val1 == 8);
     REQUIRE(q.front().moved_);
+
+    new (&d1) Dummy(77, "Hi 77");
+
+    q.push_front(std::move(d1));
+
+    REQUIRE(q.size() == 2);
+    REQUIRE(d1.moved_from_);
+    REQUIRE(q.front().val1 == 77);
 }
 
 
 template <class Policy>
 void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
 {
+    q1.clear();
     circular_queue_test(q1);
     q1.clear();
     circular_queue_rollover_test(q1);
     q1.clear();
     circular_queue_reverse_test(q1);
+    q1.clear();
+    circular_queue_move_test(q1);
 }
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
@@ -386,12 +398,9 @@ TEST_CASE("queue-test")
             q2.pop_back();
             REQUIRE(q2.empty());
 
-            q1.clear();
             q2.clear();
 
             circular_queue_test_suite(q1);
-            // FIX: Something badly wrong with move :(
-            //circular_queue_move_test(q1);
         }
         SECTION("counter: layer1")
         {

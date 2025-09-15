@@ -15,10 +15,6 @@
 namespace estd { namespace internal {
 
 
-template <class Policy, class Enabled = void>
-class circular_queue_base;
-
-
 template <class Policy>
 class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::bare>> :
     public circular_queue_container_base<Policy>
@@ -33,102 +29,6 @@ protected:
 
 
 
-template <class Policy>
-class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::sentinel>> :
-    public circular_queue_container_base<Policy>
-{
-    using base_type = circular_queue_container_base<Policy>;
-
-protected:
-    using base_type::back_;
-    using base_type::front_;
-    using base_type::array_;
-
-    constexpr circular_queue_base() = default;
-
-    template <class ...Args>
-    constexpr explicit circular_queue_base(Args&&...args) :
-        base_type(std::forward<Args>(args)...)
-    {}
-
-    static bool ESTD_CPP_CONSTEVAL clear_size() { return{}; }
-
-public:
-    using typename base_type::size_type;
-
-    constexpr bool empty() const
-    {
-        return front_ == back_;
-    }
-
-    size_type size() const
-    {
-        if(front_ > back_)
-            return array_.size() - (front_ - back_);
-        else
-            return back_ - front_;
-    }
-};
-
-
-template <class Policy>
-class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::flagged>> :
-    public circular_queue_container_base<Policy>
-{
-    using base_type = circular_queue_container_base<Policy>;
-
-protected:
-    using base_type::atomic;
-    using base_type::array_;
-    using base_type::front_;
-    using base_type::back_;
-
-    using iterator_base = typename base_type::pos_iterator_base;
-
-#if FEATURE_STD_ATOMIC
-    using bool_type = conditional_t<atomic, std::atomic_flag, bool>;
-#else
-    using bool_type = bool;
-#endif
-
-    bool_type empty_{true};
-
-    ESTD_CPP_CONSTEXPR(14) void increment_size()
-    {
-        empty_ = false;
-    }
-
-    ESTD_CPP_CONSTEXPR(14) void decrement_size()
-    {
-        empty_ = back_ == front_;
-    }
-
-    ESTD_CPP_CONSTEXPR(14) void clear_size()
-    {
-        empty_ = true;
-    }
-
-    constexpr circular_queue_base() = default;
-
-    template <class ...Args>
-    constexpr explicit circular_queue_base(Args&&...args) :
-        base_type(std::forward<Args>(args)...)
-    {}
-
-public:
-    constexpr bool empty() const { return empty_; }
-    using typename base_type::size_type;
-
-    size_type size() const
-    {
-        if(empty_) return 0;
-
-        if(front_ >= back_)
-            return array_.size() - (front_ - back_);
-        else
-            return back_ - front_;
-    }
-};
 
 
 #if FEATURE_STD_ATOMIC_UNUSED
@@ -148,54 +48,6 @@ protected:
 };
 #endif
 
-template <class Policy>
-class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::counter>> :
-    public circular_queue_container_base<Policy>
-{
-    using base_type = circular_queue_container_base<Policy>;
-
-protected:
-    using base_type::atomic;
-
-    using iterator_base = typename base_type::pos_iterator_base;
-
-#if FEATURE_STD_ATOMIC
-    using counter_type = conditional_t<atomic, std::atomic<unsigned>, unsigned>;
-#else
-    using counter_type = unsigned;
-#endif
-
-    counter_type size_{};
-
-    ESTD_CPP_CONSTEXPR(14) void decrement_size()
-    {
-        --size_;
-    }
-
-    ESTD_CPP_CONSTEXPR(14) void increment_size()
-    {
-        ++size_;
-    }
-
-    constexpr circular_queue_base() = default;
-
-    template <class ...Args>
-    constexpr explicit circular_queue_base(Args&&...args) :
-        base_type(std::forward<Args>(args)...)
-    {}
-
-    ESTD_CPP_CONSTEXPR(14) void clear_size()
-    {
-        size_ = 0;
-    }
-
-public:
-    using typename base_type::size_type;
-
-    constexpr bool empty() const { return size_ == 0; }
-    constexpr size_type size() const { return size_; }
-};
-
 
 template <class Policy>
 class circular_queue : public circular_queue_base<Policy>
@@ -203,6 +55,9 @@ class circular_queue : public circular_queue_base<Policy>
     using base_type = circular_queue_base<Policy>;
     using typename base_type::container_policy;
     using typename base_type::container_type;
+
+    // DEBT: Consider using allocator_traits::construct as per
+    // https://eel.is/c++draft/container.requirements.general
 
 #if UNIT_TESTING
 public:
@@ -436,10 +291,10 @@ public:
             }
         }
 
+        if(!no_rollover) mutex.unlock_front();
+
         f(dest);
         back_ = back;
-
-        if(!no_rollover) mutex.unlock_front();
 
         return true;
     }
@@ -448,7 +303,10 @@ public:
     template <class Mutex = circular_mutex_noop>
     bool push_back(const_reference value, Mutex mutex = {})
     {
-        return push_back_op([&value](pointer back){ *back = value;}, std::forward<Mutex>(mutex));
+        return push_back_op([&value](pointer back)
+        {
+            new (back) value_type(value);
+        }, std::forward<Mutex>(mutex));
     }
 
     template <class Mutex = circular_mutex_noop>
@@ -476,7 +334,6 @@ public:
         if(type != queue_options::sentinel)
         {
             mutex.lock_count();
-            // UNTESTED
             const bool full = !empty() && back_ == front;
             if(full)
             {
@@ -524,10 +381,18 @@ public:
     template <class Mutex = circular_mutex_noop>
     pointer push_front(const_reference value, Mutex mutex = {})
     {
-        return push_front_op([&value](pointer dest)
-        {
-            *dest = value;
-        }, std::forward<Mutex>(mutex));
+        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
+        if(dest == nullptr) return nullptr;
+        return new (dest) value_type(value);
+    }
+
+
+    template <class Mutex = circular_mutex_noop>
+    pointer push_front(value_type&& value, Mutex mutex = {})
+    {
+        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
+        if(dest == nullptr) return nullptr;
+        return new (dest) value_type(std::move(value));
     }
 
     template <class ...Args>
