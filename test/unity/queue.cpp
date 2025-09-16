@@ -93,6 +93,25 @@ static void test_freertos_queue()
 }
 #endif
 
+static void test_layer1_circular_queue()
+{
+    layer1::circular_queue<test::Dummy, 4> q1;
+
+    q1.emplace_back(7, "hello 7");
+    q1.emplace_back(8, "hello 8");
+
+    TEST_ASSERT_TRUE(q1.size() == 2);
+    TEST_ASSERT_EQUAL_INT(7, q1.front().val1);
+
+    q1.pop_front();
+
+    TEST_ASSERT_TRUE(q1.size() == 1);
+    TEST_ASSERT_EQUAL_INT(8, q1.front().val1);
+
+    q1.pop_front();
+    TEST_ASSERT_TRUE(q1.empty());
+}
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("queue tests", "[queue]")
 #else
@@ -105,4 +124,5 @@ void test_queue()
 #ifdef ESTD_OS_FREERTOS
     RUN_TEST(test_freertos_queue);
 #endif
+    RUN_TEST(test_layer1_circular_queue);
 }

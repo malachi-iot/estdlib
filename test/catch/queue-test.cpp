@@ -49,6 +49,14 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
     }
 
     REQUIRE(i == N + 1);
+
+    for(i = 0; i < N; ++i)
+    {
+        INFO(i);
+        REQUIRE(q.empty() == false);
+        q.pop_back();
+    }
+    REQUIRE(q.empty());
 }
 
 template <class Policy>
@@ -110,9 +118,6 @@ void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
     q1.clear();
     circular_queue_move_test(q1);
 }
-
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using layer1_circular = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
 
 template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
 using layer2_circular = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
@@ -341,7 +346,7 @@ TEST_CASE("queue-test")
 
         SECTION("default")
         {
-            using queue_type = layer1_circular<Dummy, 4>;
+            using queue_type = layer1::circular_queue<Dummy, 4>;
             queue_type q1;
 
             REQUIRE(q1.size() == 0);
@@ -377,7 +382,7 @@ TEST_CASE("queue-test")
         }
         SECTION("flagged")
         {
-            using queue_type = layer1_circular<Dummy, 4, options::flagged>;
+            using queue_type = layer1::circular_queue<Dummy, 4, options::flagged>;
 
             static_assert(queue_type::type == options::flagged, "flagged mode expected");
 
@@ -389,14 +394,6 @@ TEST_CASE("queue-test")
             REQUIRE(q2.size() == 4);
 
             REQUIRE(q2.back().val1 == 3);
-            q2.pop_back();
-            REQUIRE(q2.empty() == false);
-            q2.pop_back();
-            REQUIRE(q2.empty() == false);
-            q2.pop_back();
-            REQUIRE(q2.empty() == false);
-            q2.pop_back();
-            REQUIRE(q2.empty());
 
             q2.clear();
 
@@ -404,7 +401,7 @@ TEST_CASE("queue-test")
         }
         SECTION("counter: layer1")
         {
-            layer1_circular<Dummy, 4, options::counter> q1;
+            layer1::circular_queue<Dummy, 4, options::counter> q1;
 
             REQUIRE(q1.max_size() == 4);
 
@@ -421,7 +418,7 @@ TEST_CASE("queue-test")
         }
         SECTION("sentinel: layer1")
         {
-            using queue_type = layer1_circular<Dummy, 4, options::sentinel>;
+            using queue_type = layer1::circular_queue<Dummy, 4, options::sentinel>;
             queue_type q1;
 
             REQUIRE(q1.max_size() == 3);
@@ -461,7 +458,7 @@ TEST_CASE("queue-test")
         }
         SECTION("atomic | sentinel")
         {
-            using queue_type = layer1_circular<Dummy, 4, options::sentinel | options::atomic>;
+            using queue_type = layer1::circular_queue<Dummy, 4, options::sentinel | options::atomic>;
 
             queue_type q1;
 
