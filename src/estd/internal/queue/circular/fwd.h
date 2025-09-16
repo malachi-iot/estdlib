@@ -1,6 +1,7 @@
 #pragma once
 
 //#include "../../container/unordered/fwd.h"
+#include "enum.h"
 
 namespace estd { namespace internal {
 
@@ -23,24 +24,26 @@ struct span_circular_policy;
 
 namespace estd {
 
+using ring_options = internal::queue_options;
+
 namespace layer1 {
 
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using circular_queue = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
+template <class T, unsigned N, internal::queue_options o = ring_options::default_opt>
+using ring = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
 
 }
 
 namespace layer2 {
 
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using circular_queue = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
+template <class T, unsigned N, internal::queue_options o = ring_options::default_opt>
+using ring = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
 
 }
 
 namespace layer3 {
 
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using circular_queue = internal::circular_queue<internal::span_circular_policy<T, detail::dynamic_extent::value, o>>;
+template <class T, unsigned N, internal::queue_options o = ring_options::default_opt>
+using ring = internal::circular_queue<internal::span_circular_policy<T, detail::dynamic_extent::value, o>>;
 
 }
 

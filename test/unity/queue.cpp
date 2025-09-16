@@ -95,7 +95,7 @@ static void test_freertos_queue()
 
 static void test_layer1_circular_queue()
 {
-    layer1::circular_queue<test::Dummy, 4> q1;
+    layer1::ring<test::Dummy, 4> q1;
 
     q1.emplace_back(7, "hello 7");
     q1.emplace_back(8, "hello 8");

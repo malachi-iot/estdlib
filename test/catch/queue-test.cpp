@@ -7,28 +7,28 @@
 using namespace estd;
 using namespace estd::test;
 
-template <class Policy>
-void circular_queue_test(internal::circular_queue<Policy>& q1)
+template <class Policy, class Mutex = internal::circular_mutex_noop>
+void circular_queue_test(internal::circular_queue<Policy>& q1, Mutex&& mutex = {})
 {
     const Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
     //const unsigned N = q1.max_size();
 
     REQUIRE(q1.empty());
-    q1.push_back(d1);
+    q1.push_back(d1, std::forward<Mutex>(mutex));
     q1.emplace_back(8, "Hi 8");
     REQUIRE(!q1.empty());
     REQUIRE(q1.size() == 2);
     REQUIRE(q1.front() == d1);
-    q1.pop_front();
+    q1.pop_front(std::forward<Mutex>(mutex));
     REQUIRE(!q1.empty());
     REQUIRE(q1.size() == 1);
     REQUIRE(q1.front().val1 == 8);
-    q1.pop_front();
+    q1.pop_front(std::forward<Mutex>(mutex));
     REQUIRE(q1.empty());
 }
 
-template <class Policy>
-void circular_queue_rollover_test(internal::circular_queue<Policy>& q)
+template <class Policy, class Mutex = internal::circular_mutex_noop>
+void circular_queue_rollover_test(internal::circular_queue<Policy>& q, Mutex&& mutex = {})
 {
     const int N = q.max_size();
     int i;
@@ -106,11 +106,11 @@ void circular_queue_move_test(internal::circular_queue<Policy>& q)
 }
 
 
-template <class Policy>
-void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
+template <class Policy, class Mutex = internal::circular_mutex_noop>
+void circular_queue_test_suite(internal::circular_queue<Policy>& q1, Mutex&& mutex = {})
 {
     q1.clear();
-    circular_queue_test(q1);
+    circular_queue_test(q1, internal::circular_mutex_synthetic{});
     q1.clear();
     circular_queue_rollover_test(q1);
     q1.clear();
@@ -118,12 +118,6 @@ void circular_queue_test_suite(internal::circular_queue<Policy>& q1)
     q1.clear();
     circular_queue_move_test(q1);
 }
-
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using layer2_circular = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
-
-template <class T, unsigned N, internal::queue_options o = internal::queue_options::default_opt>
-using layer3_circular = internal::circular_queue<internal::span_circular_policy<T, estd::detail::dynamic_extent::value, o>>;
 
 TEST_CASE("queue-test")
 {
@@ -342,11 +336,11 @@ TEST_CASE("queue-test")
     {
         Dummy d1(7, "Hi 7"), d3(9, "Hi 9");
 
-        using options = internal::queue_options;
+        using options = ring_options;
 
         SECTION("default")
         {
-            using queue_type = layer1::circular_queue<Dummy, 4>;
+            using queue_type = layer1::ring<Dummy, 4>;
             queue_type q1;
 
             REQUIRE(q1.size() == 0);
@@ -382,7 +376,7 @@ TEST_CASE("queue-test")
         }
         SECTION("flagged")
         {
-            using queue_type = layer1::circular_queue<Dummy, 4, options::flagged>;
+            using queue_type = layer1::ring<Dummy, 4, options::flagged>;
 
             static_assert(queue_type::type == options::flagged, "flagged mode expected");
 
@@ -401,7 +395,7 @@ TEST_CASE("queue-test")
         }
         SECTION("counter: layer1")
         {
-            layer1::circular_queue<Dummy, 4, options::counter> q1;
+            layer1::ring<Dummy, 4, options::counter> q1;
 
             REQUIRE(q1.max_size() == 4);
 
@@ -410,7 +404,7 @@ TEST_CASE("queue-test")
         SECTION("counter: layer2")
         {
             std::array<Dummy, 4> storage;
-            layer2_circular<Dummy, 4, options::counter> q1(storage.data());
+            layer2::ring<Dummy, 4, options::counter> q1(storage.data());
 
             REQUIRE(q1.max_size() == 4);
 
@@ -418,7 +412,7 @@ TEST_CASE("queue-test")
         }
         SECTION("sentinel: layer1")
         {
-            using queue_type = layer1::circular_queue<Dummy, 4, options::sentinel>;
+            using queue_type = layer1::ring<Dummy, 4, options::sentinel>;
             queue_type q1;
 
             REQUIRE(q1.max_size() == 3);
@@ -428,7 +422,7 @@ TEST_CASE("queue-test")
         SECTION("sentinel: layer2")
         {
             std::array<Dummy, 4> storage;
-            using queue_type = layer2_circular<Dummy, 4, options::sentinel>;
+            using queue_type = layer2::ring<Dummy, 4, options::sentinel>;
             queue_type q1(storage.data());
 
             REQUIRE(q1.max_size() == 3);
@@ -438,7 +432,7 @@ TEST_CASE("queue-test")
         SECTION("sentinel: layer3")
         {
             std::array<Dummy, 4> storage;
-            using queue_type = layer3_circular<Dummy, 4, options::sentinel>;
+            using queue_type = layer3::ring<Dummy, 4, options::sentinel>;
             queue_type q1(storage.data(), 4);
 
             REQUIRE(q1.max_size() == 3);
@@ -458,7 +452,7 @@ TEST_CASE("queue-test")
         }
         SECTION("atomic | sentinel")
         {
-            using queue_type = layer1::circular_queue<Dummy, 4, options::sentinel | options::atomic>;
+            using queue_type = layer1::ring<Dummy, 4, options::sentinel | options::atomic>;
 
             queue_type q1;
 
