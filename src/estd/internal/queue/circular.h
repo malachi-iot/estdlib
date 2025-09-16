@@ -244,7 +244,7 @@ public:
     }
 
     template <class F, class Mutex = circular_mutex_noop>
-    bool push_back_op(F&& f, Mutex mutex = {})
+    bool push_back_op(F&& f, Mutex&& mutex = {})
     {
         // back doesn't need a lock since we implicitly own it as the caller doing the push
         // (SPSC) - this means that MT simultaneous push to front and back is undefined
@@ -301,7 +301,7 @@ public:
 
 
     template <class Mutex = circular_mutex_noop>
-    bool push_back(const_reference value, Mutex mutex = {})
+    bool push_back(const_reference value, Mutex&& mutex = {})
     {
         return push_back_op([&value](pointer back)
         {
@@ -310,7 +310,7 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    bool push_back(value_type&& value, Mutex mutex = {})
+    bool push_back(value_type&& value, Mutex&& mutex = {})
     {
         return push_back_op([&value](pointer back)
         {
@@ -321,7 +321,7 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    pointer push_front_begin(Mutex mutex = {})
+    pointer push_front_begin(Mutex&& mutex = {})
     {
         // front doesn't need a lock since we implicitly own it as the caller doing the push
         // (SPSC) - this means that MT simultaneous push to front and back is undefined
@@ -370,7 +370,7 @@ public:
     }
 
     template <class F, class Mutex = circular_mutex_noop>
-    pointer push_front_op(F&& f, Mutex mutex = {})
+    pointer push_front_op(F&& f, Mutex&& mutex = {})
     {
         pointer dest = push_front_begin(std::forward<Mutex>(mutex));
         if(dest == nullptr) return nullptr;
@@ -379,7 +379,7 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    pointer push_front(const_reference value, Mutex mutex = {})
+    pointer push_front(const_reference value, Mutex&& mutex = {})
     {
         pointer dest = push_front_begin(std::forward<Mutex>(mutex));
         if(dest == nullptr) return nullptr;
@@ -388,7 +388,7 @@ public:
 
 
     template <class Mutex = circular_mutex_noop>
-    pointer push_front(value_type&& value, Mutex mutex = {})
+    pointer push_front(value_type&& value, Mutex&& mutex = {})
     {
         pointer dest = push_front_begin(std::forward<Mutex>(mutex));
         if(dest == nullptr) return nullptr;
@@ -403,6 +403,14 @@ public:
         return new (dest) value_type(std::forward<Args>(args)...);
     }
 
+    // EXPERIMENTAL naming
+    template <class Mutex, class ...Args>
+    pointer emplace_front_mutex(Mutex&& mutex, Args&&...args)
+    {
+        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
+        if(dest == nullptr) return nullptr;
+        return new (dest) value_type(std::forward<Args>(args)...);
+    }
 
     template <class ...Args>
     bool emplace_back(Args&&...args)
@@ -413,19 +421,29 @@ public:
         });
     }
 
+    // EXPERIMENTAL naming
+    template <class Mutex, class ...Args>
+    bool emplace_back_mutex(Mutex&& mutex, Args&&...args)
+    {
+        return push_back_op([&args...](pointer back)
+        {
+            new (back) value_type(std::forward<Args>(args)...);
+        }, std::forward<Mutex>(mutex));
+    }
+
 
     template <class Mutex = circular_mutex_noop>
-    void pop_front(Mutex mutex = {})
+    void pop_front(Mutex&& mutex = {})
     {
         mutex.lock_front();
-        mutex.lock_count();
+        if(type != queue_options::sentinel) mutex.lock_count();
 
         (*front_).~value_type();
 
         increment(&front_);
         decrement_size();
 
-        mutex.unlock_count();
+        if(type != queue_options::sentinel) mutex.unlock_count();
         mutex.unlock_front();
     }
 
@@ -433,20 +451,21 @@ public:
     void pop_back(Mutex mutex = {})
     {
         mutex.lock_back();
-        mutex.lock_count();
+        if(type != queue_options::sentinel) mutex.lock_count();
 
         decrement(&back_);
         decrement_size();       // 'flagged' mode seems to want this after decrement
 
         (*back_).~value_type();
 
-        mutex.unlock_count();
+        if(type != queue_options::sentinel) mutex.unlock_count();
         mutex.unlock_back();
     }
 
     template <class Mutex = circular_mutex_noop>
-    ESTD_CPP_CONSTEXPR(14) void clear(Mutex mutex = {})
+    ESTD_CPP_CONSTEXPR(14) void clear(Mutex&& mutex = {})
     {
+        // DEBT: Do we need to lock_count here?  If no, document why not
         mutex.lock_front();
         mutex.lock_back();
         destruct();

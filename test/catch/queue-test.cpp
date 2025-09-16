@@ -34,9 +34,9 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q, Mutex&& m
     int i;
 
     for(i = 0; i < N; ++i)
-        q.emplace_back(i, "synthetic");
+        q.emplace_back_mutex(std::forward<Mutex>(mutex), i, "synthetic");
 
-    bool r = q.emplace_back(N, "rolled over");
+    bool r = q.emplace_back_mutex(std::forward<Mutex>(mutex), N, "rolled over");
     REQUIRE(r);
 
     i = 1;
@@ -59,14 +59,14 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q, Mutex&& m
     REQUIRE(q.empty());
 }
 
-template <class Policy>
-void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
+template <class Policy, class Mutex = internal::circular_mutex_noop>
+void circular_queue_reverse_test(internal::circular_queue<Policy>& q, Mutex&& mutex = {})
 {
     const int N = q.max_size();
     int i;
 
     for(i = 0; i < N; ++i)
-        q.emplace_back(i, "synthetic");
+        q.emplace_back_mutex(std::forward<Mutex>(mutex), i, "synthetic");
 
     --i;
 
@@ -80,25 +80,25 @@ void circular_queue_reverse_test(internal::circular_queue<Policy>& q)
 }
 
 
-template <class Policy>
-void circular_queue_move_test(internal::circular_queue<Policy>& q)
+template <class Policy, class Mutex = internal::circular_mutex_noop>
+void circular_queue_move_test(internal::circular_queue<Policy>& q, Mutex&& mutex = {})
 {
     Dummy d1(7, "Hi 7");
 
-    q.push_back(std::move(d1));
-    q.push_back(Dummy{8, "Hi 8"});
+    q.push_back(std::move(d1), std::forward<Mutex>(mutex));
+    q.push_back(Dummy{8, "Hi 8"}, std::forward<Mutex>(mutex));
 
     REQUIRE(q.front().moved_);
     REQUIRE(q.front().val1 == 7);
     REQUIRE(d1.moved_from_);
 
-    q.pop_front();
+    q.pop_front(std::forward<Mutex>(mutex));
     REQUIRE(q.front().val1 == 8);
     REQUIRE(q.front().moved_);
 
     new (&d1) Dummy(77, "Hi 77");
 
-    q.push_front(std::move(d1));
+    q.push_front(std::move(d1), std::forward<Mutex>(mutex));
 
     REQUIRE(q.size() == 2);
     REQUIRE(d1.moved_from_);
@@ -110,13 +110,13 @@ template <class Policy, class Mutex = internal::circular_mutex_noop>
 void circular_queue_test_suite(internal::circular_queue<Policy>& q1, Mutex&& mutex = {})
 {
     q1.clear();
-    circular_queue_test(q1, internal::circular_mutex_synthetic{});
+    circular_queue_test(q1, std::forward<Mutex>(mutex));
     q1.clear();
-    circular_queue_rollover_test(q1);
+    circular_queue_rollover_test(q1, std::forward<Mutex>(mutex));
     q1.clear();
-    circular_queue_reverse_test(q1);
+    circular_queue_reverse_test(q1, std::forward<Mutex>(mutex));
     q1.clear();
-    circular_queue_move_test(q1);
+    circular_queue_move_test(q1, std::forward<Mutex>(mutex));
 }
 
 TEST_CASE("queue-test")
@@ -418,6 +418,16 @@ TEST_CASE("queue-test")
             REQUIRE(q1.max_size() == 3);
 
             circular_queue_test_suite(q1);
+
+            SECTION("mutex things")
+            {
+                internal::circular_mutex_synthetic mutex;
+                circular_queue_test_suite(q1, mutex);
+                circular_queue_test_suite(q1, internal::circular_mutex_std{});
+
+                REQUIRE(mutex.front_ == 13);
+                REQUIRE(mutex.count_ == 0);     // Sentinel needs no count/flag
+            }
         }
         SECTION("sentinel: layer2")
         {

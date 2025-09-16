@@ -95,21 +95,23 @@ static void test_freertos_queue()
 
 static void test_layer1_circular_queue()
 {
+    internal::circular_mutex_synthetic mutex;
     layer1::ring<test::Dummy, 4> q1;
 
-    q1.emplace_back(7, "hello 7");
-    q1.emplace_back(8, "hello 8");
+    q1.emplace_back_mutex(mutex, 7, "hello 7");
+    q1.emplace_back_mutex(mutex, 8, "hello 8");
 
     TEST_ASSERT_TRUE(q1.size() == 2);
     TEST_ASSERT_EQUAL_INT(7, q1.front().val1);
 
-    q1.pop_front();
+    q1.pop_front(mutex);
 
     TEST_ASSERT_TRUE(q1.size() == 1);
     TEST_ASSERT_EQUAL_INT(8, q1.front().val1);
 
-    q1.pop_front();
+    q1.pop_front(mutex);
     TEST_ASSERT_TRUE(q1.empty());
+    TEST_ASSERT_EQUAL_INT(4, mutex.front_);
 }
 
 #ifdef ESP_IDF_TESTING
