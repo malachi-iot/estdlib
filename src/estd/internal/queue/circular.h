@@ -243,8 +243,8 @@ public:
         return *i;
     }
 
-    template <class F, class Mutex = circular_mutex_noop>
-    bool push_back_op(F&& f, Mutex&& mutex = {})
+    template <class Mutex = circular_mutex_noop>
+    pointer push_back_begin(Mutex&& mutex = {})
     {
         // back doesn't need a lock since we implicitly own it as the caller doing the push
         // (SPSC) - this means that MT simultaneous push to front and back is undefined
@@ -264,7 +264,7 @@ public:
                 if(no_rollover)
                 {
                     mutex.unlock_count();
-                    return false;
+                    return nullptr;
                 }
 
                 rollover(back);
@@ -282,10 +282,7 @@ public:
         {
             if(back == front_)
             {
-                if(no_rollover)
-                {
-                    return false;
-                }
+                if(no_rollover) return nullptr;
 
                 rollover(back);
             }
@@ -293,12 +290,19 @@ public:
 
         if(!no_rollover) mutex.unlock_front();
 
-        f(dest);
         back_ = back;
 
-        return true;
+        return dest;
     }
 
+    template <class F, class Mutex = circular_mutex_noop>
+    pointer push_back_op(F&& f, Mutex&& mutex = {})
+    {
+        pointer dest = push_back_begin(std::forward<Mutex>(mutex));
+        if(dest == nullptr) return nullptr;
+        f(dest);
+        return dest;
+    }
 
     template <class Mutex = circular_mutex_noop>
     bool push_back(const_reference value, Mutex&& mutex = {})
@@ -314,9 +318,7 @@ public:
     {
         return push_back_op([&value](pointer back)
         {
-            // DEBT: Look into whether std::queue and friends do an = or a new here
             new (back) value_type(std::move(value));
-            //*back = std::move(value);
         }, std::forward<Mutex>(mutex));
     }
 
