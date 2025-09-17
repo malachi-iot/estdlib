@@ -50,6 +50,9 @@
 #define FEATURE_CPP_CONSTEXPR_METHOD
 #define FEATURE_CPP_DEDUCTION_GUIDES
 #define FEATURE_CPP_INLINE_VARIABLES    // whether freestanding/static variables can be declared inline
+#elif __cpp_constexpr && __GNUC__
+// TODO: Spin up FEATURE_CPP_INLINE_VARIABLES here too, since GCC supports it down to C++11
+// See https://github.com/malachi-iot/estdlib/issues/148
 #endif
 
 #elif defined(__GXX_EXPERIMENTAL_CXX0X__)
