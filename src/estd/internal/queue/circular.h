@@ -150,6 +150,7 @@ public:
     // Args... flavor handles this mostly, but nice to have for debugging simplicity
     // and the occasional implicit construction.
     constexpr circular_queue() = default;
+    constexpr circular_queue(const circular_queue&) = default;
 
     template <class ...Args>
     constexpr explicit circular_queue(Args&&...args) :

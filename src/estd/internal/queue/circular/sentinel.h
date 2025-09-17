@@ -9,6 +9,7 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::sen
     public circular_queue_container_base<Policy>
 {
     using base_type = circular_queue_container_base<Policy>;
+    using this_type = circular_queue_base;
 
 protected:
     using base_type::back_;
@@ -16,6 +17,7 @@ protected:
     using base_type::array_;
 
     constexpr circular_queue_base() = default;
+    constexpr circular_queue_base(const this_type&) = default;
 
     template <class ...Args>
     constexpr explicit circular_queue_base(Args&&...args) :

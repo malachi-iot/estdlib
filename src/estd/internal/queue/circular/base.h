@@ -96,8 +96,15 @@ protected:
     static ESTD_CPP_CONSTEVAL bool increment_size() { return{}; }
     static ESTD_CPP_CONSTEVAL bool decrement_size() { return{}; }
 
+    constexpr circular_queue_container_base() :
+        front_{&array_[0]},
+        back_{&array_[0]}
+    {}
+
+    constexpr circular_queue_container_base(const this_type&) = default;
+
     template <class ...Args>
-    constexpr explicit circular_queue_container_base(Args&&...args) :
+    constexpr explicit circular_queue_container_base(in_place_t, Args&&...args) :
         array_(std::forward<Args>(args)...),
         front_{&array_[0]},
         back_{&array_[0]}

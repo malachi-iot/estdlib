@@ -404,7 +404,7 @@ TEST_CASE("queue-test")
         SECTION("counter: layer2")
         {
             std::array<Dummy, 4> storage;
-            layer2::ring<Dummy, 4, options::counter> q1(storage.data());
+            layer2::ring<Dummy, 4, options::counter> q1(in_place_t{}, storage.data());
 
             REQUIRE(q1.max_size() == 4);
 
@@ -433,17 +433,19 @@ TEST_CASE("queue-test")
         {
             std::array<Dummy, 4> storage;
             using queue_type = layer2::ring<Dummy, 4, options::sentinel>;
-            queue_type q1(storage.data());
+            queue_type q1(in_place_t{}, storage.data());
 
             REQUIRE(q1.max_size() == 3);
 
             circular_queue_test_suite(q1);
+
+            queue_type copied(q1);
         }
         SECTION("sentinel: layer3")
         {
             std::array<Dummy, 4> storage;
             using queue_type = layer3::ring<Dummy, 4, options::sentinel>;
-            queue_type q1(storage.data(), 4);
+            queue_type q1(in_place_t{}, storage.data(), 4);
 
             REQUIRE(q1.max_size() == 3);
 
