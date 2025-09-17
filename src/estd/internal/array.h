@@ -130,12 +130,13 @@ struct array : Impl
     using base_type::data;
     using base_type::max_size;
 
+    using typename base_type::value_type;
     using typename base_type::pointer;
     using typename base_type::const_pointer;
 
-    typedef pointer iterator;
-    typedef const_pointer const_iterator;
-    typedef typename base_type::value_type value_type;
+    using iterator = pointer;
+    using const_iterator = const_pointer;
+
     typedef typename base_type::reference reference;
     typedef const typename base_type::value_type& const_reference;
     typedef typename base_type::size_type size_type;

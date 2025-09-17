@@ -13,7 +13,7 @@ class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::cou
 protected:
     using base_type::atomic;
 
-    using iterator_base = typename base_type::pos_iterator_base;
+    using iterator = typename base_type::pos_iterator;
 
 #if FEATURE_STD_ATOMIC
     using counter_type = conditional_t<atomic, std::atomic<unsigned>, unsigned>;

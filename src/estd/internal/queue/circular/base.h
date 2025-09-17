@@ -11,6 +11,8 @@ namespace estd { namespace internal {
 template <class Policy>
 class circular_queue_container_base
 {
+    using this_type = circular_queue_container_base;
+
 protected:
     constexpr static bool atomic = Policy::atomic;
     constexpr static queue_options type = Policy::type;
@@ -19,21 +21,22 @@ protected:
 
     using container_policy = Policy;
     using container_type = typename container_policy::container_type;
+
     ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
 
 #if FEATURE_STD_ATOMIC
     // 08SEP25 MB DEBT: std::atomic defaults to memory_order_seq_cst, when for us it's likely
     // memory_order_acquire/memory_order_release is faster and sufficient.
     // As per https://codesignal.com/learn/courses/lock-free-concurrent-data-structures/lessons/an-introduction-to-memory-ordering-and-atomic-operations
-    using iterator = conditional_t<atomic,
+    using container_it = conditional_t<atomic,
         std::atomic<typename container_policy::iterator_type>,
         typename container_policy::iterator_type>;
-    using const_iterator = conditional_t<atomic,
+    using const_container_it = conditional_t<atomic,
         std::atomic<typename container_policy::const_iterator_type>,
         typename container_policy::const_iterator_type>;
 #else
-    using iterator = typename container_policy::iterator_type;
-    using const_iterator = typename container_policy::const_iterator_type;
+    using container_it = typename container_policy::iterator_type;
+    using const_container_it = typename container_policy::const_iterator_type;
 #endif
 
     container_type array_;
@@ -47,7 +50,7 @@ protected:
     // front = first = begin, back = last = end with [begin...end) so
     // we tune accordingly with back_ always as the first empty slot
     // past the occupied slot
-    iterator front_, back_;
+    container_it front_, back_;
 
     // called when i is incremented, evaluates if i reaches rollover point
     // and if so points it back at the beginning
@@ -101,8 +104,10 @@ protected:
     {
     }
 
-    class iterator_base
+    class iterator
     {
+        using this_type = iterator;
+
     protected:
         using parent_type = circular_queue_container_base;
 
@@ -119,7 +124,7 @@ protected:
         parent_type& parent_;
         pointer current_;
 
-        constexpr explicit iterator_base(parent_type& parent, pointer current, size_t = 0) :
+        constexpr explicit iterator(parent_type& parent, pointer current, size_t = 0) :
             parent_{parent},
             current_{current}
         {}
@@ -131,40 +136,40 @@ protected:
         pointer operator->() { return current_; }
         constexpr const_pointer operator->() const { return current_; }
 
-        constexpr bool operator==(const iterator_base& other) const
+        constexpr bool operator==(const this_type& other) const
         {
             return current_ == other.current_;
         }
 
-        constexpr bool operator!=(const iterator_base& other) const
+        constexpr bool operator!=(const this_type& other) const
         {
             return current_ != other.current_;
         }
     };
 
-    class pos_iterator_base : public iterator_base
+    class pos_iterator : public iterator
     {
         // In reverse mode, pos is +1 offset so as to not need signed for -1 rend position
         unsigned pos_;
-        using this_type = pos_iterator_base;
+        using this_type = pos_iterator;
 
     protected:
         using parent_type = circular_queue_container_base;
 
         ESTD_CPP_CONSTEXPR(14) void bump(true_type)
         {
-            iterator_base::bump(true_type{});
+            iterator::bump(true_type{});
             ++pos_;
         }
 
         ESTD_CPP_CONSTEXPR(14) void bump(false_type)
         {
-            iterator_base::bump(false_type{});
+            iterator::bump(false_type{});
             --pos_;
         }
 
-        constexpr explicit pos_iterator_base(parent_type& parent, pointer current, size_t pos) :
-            iterator_base(parent, current),
+        constexpr explicit pos_iterator(parent_type& parent, pointer current, size_t pos) :
+            iterator(parent, current),
             pos_{static_cast<unsigned>(pos)}
         {}
 
@@ -188,7 +193,7 @@ public:
         return array_.size() - (type == queue_options::sentinel ? 1 : 0);
     }
 
-    value_type& front()
+    ESTD_CPP_CONSTEXPR(14) value_type& front()
     {
         return *front_;
     }

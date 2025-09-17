@@ -78,16 +78,16 @@ public:
     static constexpr bool is_trivial = Policy::is_trivial;
 
     template <bool forward>
-    class iterator_base : public base_type::iterator_base
+    class iterator_base : public base_type::iterator
     {
-        using base_type::iterator_base::bump;
+        using base_type::iterator::bump;
 
     public:
         constexpr explicit iterator_base(
             circular_queue& parent,
             pointer current,
             size_t pos) :
-            base_type::iterator_base(parent, current, pos)
+            base_type::iterator(parent, current, pos)
         {
 
         }
@@ -98,7 +98,7 @@ public:
             return *this;
         }
 
-        iterator_base operator++(int)
+        ESTD_CPP_CONSTEXPR(14) iterator_base operator++(int)
         {
             iterator_base temp = *this;
             operator++();
@@ -111,7 +111,7 @@ public:
             return *this;
         }
 
-        iterator_base operator--(int)
+        ESTD_CPP_CONSTEXPR(14) iterator_base operator--(int)
         {
             iterator_base temp = *this;
             operator--();
@@ -168,6 +168,16 @@ public:
         return iterator{*this, front_, 0};
     }
 
+    constexpr const_iterator begin() const
+    {
+        return const_iterator{*this, front_, 0};
+    }
+
+    constexpr const_iterator cbegin() const
+    {
+        return const_iterator{*this, front_, 0};
+    }
+
     reverse_iterator rbegin()
     {
         pointer back = back_;
@@ -181,6 +191,11 @@ public:
     }
 
     constexpr const_iterator end() const
+    {
+        return const_iterator{*this, back_, size()};
+    }
+
+    constexpr const_iterator cend() const
     {
         return const_iterator{*this, back_, size()};
     }

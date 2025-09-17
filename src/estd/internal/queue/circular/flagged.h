@@ -16,7 +16,7 @@ protected:
     using base_type::front_;
     using base_type::back_;
 
-    using iterator_base = typename base_type::pos_iterator_base;
+    using iterator = typename base_type::pos_iterator;
 
 #if FEATURE_STD_ATOMIC
     using bool_type = conditional_t<atomic, std::atomic_flag, bool>;
