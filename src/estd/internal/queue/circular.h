@@ -80,15 +80,7 @@ public:
     template <bool forward>
     class iterator_base : public base_type::iterator_base
     {
-        ESTD_CPP_CONSTEXPR(14) void bump(true_type)
-        {
-            base_type::iterator_base::bump_up();
-        }
-
-        ESTD_CPP_CONSTEXPR(14) void bump(false_type)
-        {
-            base_type::iterator_base::bump_down();
-        }
+        using base_type::iterator_base::bump;
 
     public:
         constexpr explicit iterator_base(

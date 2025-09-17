@@ -37,6 +37,8 @@ struct array_circular_policy : circular_policy<T, o>
         estd::array<T, N>,
         uninitialized_array>;
 
+    // DEBT: I don't think we need to switch this out.  What's the penalty for always
+    // using T*?
     using iterator_type = conditional_t<is_trivial,
         T*, typename uninitialized_array::iterator>;
 

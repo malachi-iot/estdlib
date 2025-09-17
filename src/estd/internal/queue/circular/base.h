@@ -106,12 +106,12 @@ protected:
     protected:
         using parent_type = circular_queue_container_base;
 
-        ESTD_CPP_CONSTEXPR(14) void bump_up()
+        ESTD_CPP_CONSTEXPR(14) void bump(true_type)
         {
             parent_.increment(&current_);
         }
 
-        ESTD_CPP_CONSTEXPR(14) void bump_down()
+        ESTD_CPP_CONSTEXPR(14) void bump(false_type)
         {
             parent_.decrement(&current_);
         }
@@ -151,15 +151,15 @@ protected:
     protected:
         using parent_type = circular_queue_container_base;
 
-        ESTD_CPP_CONSTEXPR(14) void bump_up()
+        ESTD_CPP_CONSTEXPR(14) void bump(true_type)
         {
-            iterator_base::bump_up();
+            iterator_base::bump(true_type{});
             ++pos_;
         }
 
-        ESTD_CPP_CONSTEXPR(14) void bump_down()
+        ESTD_CPP_CONSTEXPR(14) void bump(false_type)
         {
-            iterator_base::bump_down();
+            iterator_base::bump(false_type{});
             --pos_;
         }
 
