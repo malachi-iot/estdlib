@@ -80,27 +80,14 @@ public:
     template <bool forward>
     class iterator_base : public base_type::iterator_base
     {
-        circular_queue& parent_;
-        pointer current_;
-
-        // In reverse mode, pos is +1 offset so as to not need signed for -1 rend position
-        // DEBT: Sentinel flavor does not need pos_ - flagged/counter version does, optimize that
-        unsigned pos_;
-
-        void bump(true_type)
+        ESTD_CPP_CONSTEXPR(14) void bump(true_type)
         {
             base_type::iterator_base::bump_up();
-
-            ++pos_;
-            parent_.increment(&current_);
         }
 
-        void bump(false_type)
+        ESTD_CPP_CONSTEXPR(14) void bump(false_type)
         {
             base_type::iterator_base::bump_down();
-
-            --pos_;
-            parent_.decrement(&current_);
         }
 
     public:
@@ -108,9 +95,7 @@ public:
             circular_queue& parent,
             pointer current,
             size_t pos) :
-            parent_{parent},
-            current_{current},
-            pos_{static_cast<unsigned>(pos)}
+            base_type::iterator_base(parent, current, pos)
         {
 
         }
@@ -139,24 +124,6 @@ public:
             iterator_base temp = *this;
             operator--();
             return temp;
-        }
-
-        reference operator*() { return *current_; }
-        constexpr const_reference operator*() const { return *current_; }
-
-        pointer operator->() { return current_; }
-        constexpr const_pointer operator->() const { return current_; }
-
-        constexpr bool operator==(const iterator_base& other) const
-        {
-            return pos_ == other.pos_;
-            //return current_ == other.current_;
-        }
-
-        constexpr bool operator!=(const iterator_base& other) const
-        {
-            return pos_ != other.pos_;
-            //return current_ != other.current_;
         }
     };
 

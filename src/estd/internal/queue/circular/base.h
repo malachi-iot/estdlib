@@ -19,7 +19,8 @@ protected:
 
     using container_policy = Policy;
     using container_type = typename container_policy::container_type;
-    using value_type = typename container_type::value_type;
+    ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
+
 #if FEATURE_STD_ATOMIC
     // 08SEP25 MB DEBT: std::atomic defaults to memory_order_seq_cst, when for us it's likely
     // memory_order_acquire/memory_order_release is faster and sufficient.
@@ -100,18 +101,83 @@ protected:
     {
     }
 
-    class pos_iterator_base
-    {
-    protected:
-        static ESTD_CPP_CONSTEVAL bool bump_up() { return{}; }
-        static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
-    };
-
     class iterator_base
     {
     protected:
-        static ESTD_CPP_CONSTEVAL bool bump_up() { return{}; }
-        static ESTD_CPP_CONSTEVAL bool bump_down() { return{}; }
+        using parent_type = circular_queue_container_base;
+
+        ESTD_CPP_CONSTEXPR(14) void bump_up()
+        {
+            parent_.increment(&current_);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) void bump_down()
+        {
+            parent_.decrement(&current_);
+        }
+
+        parent_type& parent_;
+        pointer current_;
+
+        constexpr explicit iterator_base(parent_type& parent, pointer current, size_t = 0) :
+            parent_{parent},
+            current_{current}
+        {}
+
+    public:
+        reference operator*() { return *current_; }
+        constexpr const_reference operator*() const { return *current_; }
+
+        pointer operator->() { return current_; }
+        constexpr const_pointer operator->() const { return current_; }
+
+        constexpr bool operator==(const iterator_base& other) const
+        {
+            return current_ == other.current_;
+        }
+
+        constexpr bool operator!=(const iterator_base& other) const
+        {
+            return current_ != other.current_;
+        }
+    };
+
+    class pos_iterator_base : public iterator_base
+    {
+        // In reverse mode, pos is +1 offset so as to not need signed for -1 rend position
+        unsigned pos_;
+        using this_type = pos_iterator_base;
+
+    protected:
+        using parent_type = circular_queue_container_base;
+
+        ESTD_CPP_CONSTEXPR(14) void bump_up()
+        {
+            iterator_base::bump_up();
+            ++pos_;
+        }
+
+        ESTD_CPP_CONSTEXPR(14) void bump_down()
+        {
+            iterator_base::bump_down();
+            --pos_;
+        }
+
+        constexpr explicit pos_iterator_base(parent_type& parent, pointer current, size_t pos) :
+            iterator_base(parent, current),
+            pos_{static_cast<unsigned>(pos)}
+        {}
+
+    public:
+        constexpr bool operator==(const this_type& other) const
+        {
+            return pos_ == other.pos_;
+        }
+
+        constexpr bool operator!=(const this_type& other) const
+        {
+            return pos_ != other.pos_;
+        }
     };
 
 public:
