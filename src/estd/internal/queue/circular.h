@@ -147,14 +147,15 @@ public:
     using base_type::empty;
     using base_type::size;
 
-    // Args... flavor handles this mostly, but nice to have for debugging simplicity
-    // and the occasional implicit construction.
     constexpr circular_queue() = default;
     constexpr circular_queue(const circular_queue&) = default;
+    // 17SEP25 No move needed at this time - prepared for future more exotic
+    // allocated containers.
+    constexpr circular_queue(circular_queue&&) = default;
 
     template <class ...Args>
-    constexpr explicit circular_queue(Args&&...args) :
-        base_type(std::forward<Args>(args)...)
+    constexpr explicit circular_queue(in_place_t, Args&&...args) :
+        base_type(in_place_t{}, std::forward<Args>(args)...)
     {}
 
     ~circular_queue() { destruct(); }

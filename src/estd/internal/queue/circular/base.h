@@ -102,6 +102,7 @@ protected:
     {}
 
     constexpr circular_queue_container_base(const this_type&) = default;
+    constexpr circular_queue_container_base(this_type&&) = default;
 
     template <class ...Args>
     constexpr explicit circular_queue_container_base(in_place_t, Args&&...args) :

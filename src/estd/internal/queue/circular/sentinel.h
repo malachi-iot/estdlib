@@ -17,7 +17,6 @@ protected:
     using base_type::array_;
 
     constexpr circular_queue_base() = default;
-    constexpr circular_queue_base(const this_type&) = default;
 
     template <class ...Args>
     constexpr explicit circular_queue_base(Args&&...args) :
