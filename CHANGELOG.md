@@ -3,7 +3,7 @@
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/23 For c++17 or AVR environments, ostream now has limited float/double support.
-* https://github.com/malachi-iot/estdlib/issues/144 rework queue, adding `circular_queue`
+* https://github.com/malachi-iot/estdlib/issues/144 rework queue, adding new ring buffer
 
 ## Quality Updates & Bug Fixes
 
@@ -15,7 +15,7 @@
 
 ## Known Issues and Limitations
 
-* New `circular_queue` lacks insert and erase operations
+* New ring buffer lacks insert and erase operations
 
 # v0.8.9 - 29JUL25
 
