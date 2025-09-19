@@ -51,12 +51,15 @@ struct array_circular_policy : circular_policy<T, o>
 
     using const_iterator_type = conditional_t<is_trivial,
         const T*, typename uninitialized_array::const_iterator>;    */
+
+    static constexpr bool fixed_size = true;
 };
 
 template <class T, size_t N, queue_options o>
 struct span_circular_policy : circular_policy<T, o>
 {
     using container_type = estd::span<T, N>;
+    static constexpr bool fixed_size = N != detail::dynamic_extent::value;
 };
 
 

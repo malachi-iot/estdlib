@@ -39,6 +39,9 @@ void circular_queue_rollover_test(internal::circular_queue<Policy>& q, Mutex&& m
     bool r = q.emplace_back_mutex(std::forward<Mutex>(mutex), N, "rolled over");
     REQUIRE(r);
 
+    REQUIRE(q[0].val1 == 1);
+    REQUIRE(q[N - 1].val1 == N);
+
     i = 1;
 
     for(const Dummy& d : q)
@@ -388,6 +391,16 @@ TEST_CASE("queue-test")
             REQUIRE(q2.size() == 4);
 
             REQUIRE(q2.back().val1 == 3);
+
+            // Force rollover
+            q2.emplace_back(1000, "dummy");
+
+            REQUIRE(q2.normalize_pos(0) == 1);
+            REQUIRE(q2.normalize_pos(2) == 3);
+            REQUIRE(q2.normalize_pos(3) == 0);
+
+            REQUIRE(q2[2].val1 == 3);
+            REQUIRE(q2[3].val1 == 1000);
 
             q2.clear();
 

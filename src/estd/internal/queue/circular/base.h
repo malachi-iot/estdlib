@@ -14,10 +14,11 @@ class circular_queue_container_base
     using this_type = circular_queue_container_base;
 
 protected:
-    constexpr static bool atomic = Policy::atomic;
-    constexpr static queue_options type = Policy::type;
+    static constexpr bool atomic = Policy::atomic;
+    static constexpr queue_options type = Policy::type;
     //constexpr static bool atomic = true;
     static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
+    static constexpr bool strict = is_set(Policy::options & queue_options::strict);
 
     using container_policy = Policy;
     using container_type = typename container_policy::container_type;
@@ -95,6 +96,27 @@ protected:
 
     static ESTD_CPP_CONSTEVAL bool increment_size() { return{}; }
     static ESTD_CPP_CONSTEVAL bool decrement_size() { return{}; }
+
+#if UNIT_TESTING
+public:
+#endif
+    ESTD_CPP_CONSTEXPR(14) unsigned normalize_pos(unsigned pos)
+    {
+        const unsigned front_idx = front_ - &array_[0];
+
+        // DEBT: When size() is power of 2, do bitwise modulo optimization ala
+        // https://asawicki.info/news_1433_bit_tricks_with_modulo
+        // Note that constexpr of 'array_.size()' probably spurs this compile
+        // time optimization, so it's debatable how important explicitly doing
+        // it really is.
+
+        pos += front_idx;
+        pos %= array_.size();
+
+        if(strict)  assert(pos < max_size());
+
+        return pos;
+    }
 
     constexpr circular_queue_container_base() :
         front_{&array_[0]},
@@ -201,14 +223,24 @@ public:
         return array_.size() - (type == queue_options::sentinel ? 1 : 0);
     }
 
-    ESTD_CPP_CONSTEXPR(14) value_type& front()
+    ESTD_CPP_CONSTEXPR(14) reference front()
     {
         return *front_;
     }
 
-    constexpr const value_type& front() const
+    constexpr const_reference front() const
     {
         return *front_;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) reference operator[](size_type pos)
+    {
+        return array_[normalize_pos(pos)];
+    }
+
+    constexpr const_reference operator[](size_type pos) const
+    {
+        return array_[normalize_pos(pos)];
     }
 };
 

@@ -68,13 +68,14 @@ public:
     using base_type::front_;
     using base_type::back_;
 
+    using base_type::strict;
+
     using base_type::increment;
     using base_type::decrement;
     using base_type::increment_size;
     using base_type::decrement_size;
     using base_type::no_rollover;
 
-    static constexpr bool strict = is_set(Policy::options & queue_options::strict);
     static constexpr bool is_trivial = Policy::is_trivial;
 
     template <bool forward>
