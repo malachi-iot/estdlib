@@ -267,6 +267,9 @@ public:
 
         if(!no_rollover) mutex.unlock_front();
 
+        // FIX: Needs attention.  Even though we own back, it's conceivable someone
+        // could empty front rapidly enough to hit back before we actually init
+        // the content of back.  So we need to revert _begin back to _op
         back_ = back;
 
         return dest;
@@ -344,6 +347,10 @@ public:
         }
 
         if(!no_rollover) mutex.unlock_back();
+
+        // FIX: Similar to push_back_begin, it's conceivable here someone
+        // could pop_back rapidly enough to bonk into front_ and we haven't
+        // yet initialized front_ content
 
         return front_ = front;
     }
