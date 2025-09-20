@@ -386,7 +386,7 @@ TEST_CASE("queue-test")
             using queue_type = layer1::ring<char[32], 4>;
             queue_type q;
             int counter = 0;
-            auto op = [&](char (*&v)[32])
+            auto op = [&](char (*v)[32])
             {
                 // NOTE: Old clumsy (but effective) syntax to empty-init string.
                 // layer2 strings are designed to pick up existing strings like
@@ -497,6 +497,13 @@ TEST_CASE("queue-test")
             REQUIRE(q1.max_size() == 3);
 
             circular_queue_test_suite(q1);
+        }
+        SECTION("packed: layer1")
+        {
+            // Not ready yet
+            //using queue_type = layer1::ring<Dummy, 4, options::packed>;
+
+            //queue_type q1;
         }
         SECTION("atomic | bare")
         {

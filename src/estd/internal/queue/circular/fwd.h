@@ -9,7 +9,7 @@ template <class Policy>
 class circular_queue;
 
 template <class Policy, class Enabled = void>
-class circular_queue_base;
+class circular_queue_impl;
 
 //template <class T, queue_options o, class Nullable = nullable_traits<T>>
 //struct circular_policy;

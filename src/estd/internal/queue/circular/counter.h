@@ -5,7 +5,7 @@
 namespace estd { namespace internal {
 
 template <class Policy>
-class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::counter>> :
+class circular_queue_impl<Policy, enable_if_t<Policy::type == queue_options::counter>> :
     public circular_queue_container_base<Policy>
 {
     using base_type = circular_queue_container_base<Policy>;
@@ -33,10 +33,10 @@ protected:
         ++size_;
     }
 
-    constexpr circular_queue_base() = default;
+    constexpr circular_queue_impl() = default;
 
     template <class ...Args>
-    constexpr explicit circular_queue_base(Args&&...args) :
+    constexpr explicit circular_queue_impl(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
 

@@ -8,6 +8,8 @@
 
 namespace estd { namespace internal {
 
+// DEBT: Split out the 'container' part of this base from the front/back tracking,
+// namely in support of 'packed' and *maybe* 'bare'
 template <class Policy>
 class circular_queue_container_base
 {
@@ -214,6 +216,11 @@ public:
             return pos_ != other.pos_;
         }
     };
+
+    ESTD_CPP_CONSTEXPR(14) void clear()
+    {
+        front_ = back_ = &array_[0];
+    }
 
 public:
     using size_type = unsigned;

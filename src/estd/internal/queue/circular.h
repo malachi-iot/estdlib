@@ -16,8 +16,9 @@
 namespace estd { namespace internal {
 
 
+// DEBT: Move him to his own spot
 template <class Policy>
-class circular_queue_base<Policy, enable_if_t<Policy::type == queue_options::bare>> :
+class circular_queue_impl<Policy, enable_if_t<Policy::type == queue_options::bare>> :
     public circular_queue_container_base<Policy>
 {
     using base_type = circular_queue_container_base<Policy>;
@@ -51,10 +52,9 @@ protected:
 
 
 template <class Policy>
-class circular_queue : public circular_queue_base<Policy>
+class circular_queue : public circular_queue_impl<Policy>
 {
-    using base_type = circular_queue_base<Policy>;
-    using typename base_type::container_policy;
+    using base_type = circular_queue_impl<Policy>;
     using typename base_type::container_type;
 
     // DEBT: Consider using allocator_traits::construct as per
@@ -65,7 +65,6 @@ public:
 #endif
     ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
 
-    using base_type::array_;
     using base_type::front_;
     using base_type::back_;
 
@@ -454,7 +453,7 @@ public:
         mutex.lock_back();
         destroy(bool_constant<is_trivial>{});
 
-        front_ = back_ = &array_[0];
+        base_type::clear();
         base_type::clear_size();
         mutex.unlock_front();
         mutex.unlock_back();
