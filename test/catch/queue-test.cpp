@@ -1,7 +1,11 @@
 #include <catch2/catch_all.hpp>
 
-#include <estd/queue.h>
 #include <queue>
+
+#include <estd/queue.h>
+#include <estd/string.h>
+#include <estd/string_view.h>
+
 #include "test-data.h"
 
 using namespace estd;
@@ -376,6 +380,36 @@ TEST_CASE("queue-test")
                 //unsigned sz = q1.size();
                 //REQUIRE(q1.size() == 4);
             }
+        }
+        SECTION("default: array element")
+        {
+            using queue_type = layer1::ring<char[32], 4>;
+            queue_type q;
+            int counter = 0;
+            auto op = [&](char (*&v)[32])
+            {
+                // NOTE: Old clumsy (but effective) syntax to empty-init string.
+                // layer2 strings are designed to pick up existing strings like
+                // a string_view does, thus the confusion.  Really a kind of
+                // in_place_non_init_t or something might be better
+                layer2::string<32> s(*v, 0);
+
+                s += '#';
+                s += to_string(++counter);
+            };
+
+            q.push_back_op(op);
+            q.push_back_op(op);
+
+            string_view s1 = q.front();
+
+            REQUIRE(s1 == "#1");
+
+            q.pop_front();
+
+            s1 = q.front();
+
+            REQUIRE(s1 == "#2");
         }
         SECTION("flagged")
         {

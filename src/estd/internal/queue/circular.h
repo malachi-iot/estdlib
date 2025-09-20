@@ -120,27 +120,38 @@ public:
         }
     };
 
-    void rollover(pointer back)
+    static constexpr bool destroy(pointer, true_type /* is_trivial */) { return {}; }
+    static ESTD_CPP_CONSTEXPR(14) bool destroy(pointer v, false_type /* is_trivial */)
+    {
+        (*v).~value_type();
+        return {};
+    }
+
+    static constexpr bool destroy(pointer v)
+    {
+        return destroy(v, bool_constant<is_trivial>{});
+    }
+
+    ESTD_CPP_CONSTEXPR(14) void rollover(pointer back)
     {
         // bump front first so that retrieval theoretically has less opportunity to see destructed
         // back
         increment(&front_);
-        (*back).~value_type();
+        destroy(back, bool_constant<is_trivial>{});
     }
 
-    void rollunder(pointer front)
+    ESTD_CPP_CONSTEXPR(14) void rollunder(pointer front)
     {
         decrement(&back_);
-        (*front).~value_type();
+        destroy(front, bool_constant<is_trivial>{});
     }
 
-    ESTD_CPP_CONSTEXPR(14) void destruct()
+    static constexpr bool destroy(true_type /* is_trivial */) { return {}; }
+
+    ESTD_CPP_CONSTEXPR(14) void destroy(false_type /* is_trivial */)
     {
-        if(is_trivial == false)
-        {
-            for(iterator i = begin(); i != end(); ++i)
-                i->~value_type();
-        }
+        for(iterator i = begin(); i != end(); ++i)
+            i->~value_type();
     }
 
 public:
@@ -159,7 +170,7 @@ public:
         base_type(in_place_t{}, std::forward<Args>(args)...)
     {}
 
-    ~circular_queue() { destruct(); }
+    ~circular_queue() { destroy(bool_constant<is_trivial>{}); }
 
     using iterator = iterator_base<true>;
     using reverse_iterator = iterator_base<false>;
@@ -410,7 +421,7 @@ public:
         mutex.lock_front();
         if(type != queue_options::sentinel) mutex.lock_count();
 
-        (*front_).~value_type();
+        destroy(front_);
 
         increment(&front_);
         decrement_size();
@@ -428,7 +439,7 @@ public:
         decrement(&back_);
         decrement_size();       // 'flagged' mode seems to want this after decrement
 
-        (*back_).~value_type();
+        destroy(back_);
 
         if(type != queue_options::sentinel) mutex.unlock_count();
         mutex.unlock_back();
@@ -440,7 +451,7 @@ public:
         // DEBT: Do we need to lock_count here?  If no, document why not
         mutex.lock_front();
         mutex.lock_back();
-        destruct();
+        destroy(bool_constant<is_trivial>{});
 
         front_ = back_ = &array_[0];
         base_type::clear_size();
