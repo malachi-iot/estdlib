@@ -10,11 +10,14 @@ enum class queue_options
     sentinel    = 0x0002,
     flagged     = 0x0003,
     counter     = 0x0004,
+    packed      = 0x0005,   ///< EXPERIMENTAL: flavor of 'flagged' with front, back and empty in a packed word
     mask        = 0x0007,
 
     atomic      = 0x0008,
 
-    // force trivial behavior i.e. calls default constructor
+    // EXPERIMENTAL
+    // force trivial behavior i.e. implicitly calls default constructor, skips destructor
+    // you almost definitely don't want this.  Just here for AVR GCC glitch experimentation
     trivial     = 0x0010,
     // reject-on-full mode (needed for full lock-free behavior)
     no_rollover = 0x0020,

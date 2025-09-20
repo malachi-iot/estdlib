@@ -5,6 +5,7 @@
 #include "circular/base.h"
 #include "circular/counter.h"
 #include "circular/flagged.h"
+#include "circular/packed.h"
 #include "circular/sentinel.h"
 
 // Diagrams at https://drive.google.com/file/d/10WeFACvoEOZzTeRIDI_unXnSP5WJqY9f
