@@ -3,6 +3,22 @@
 //#include "../../container/unordered/fwd.h"
 #include "enum.h"
 
+#if __cpp_lib_concepts
+#include <concepts>
+#endif
+
+#if __cpp_concepts
+namespace estd::concepts { inline namespace v1 {
+
+template  <class T>
+concept CircularQueuePolicy = requires
+{
+    T::type;
+};
+
+}}
+#endif
+
 namespace estd { namespace internal {
 
 template <class Policy>
