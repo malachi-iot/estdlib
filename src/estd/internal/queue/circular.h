@@ -220,8 +220,8 @@ public:
         return *i;
     }
 
-    template <class Mutex = circular_mutex_noop>
-    pointer push_back_begin(Mutex&& mutex = {})
+    template <class F,class Mutex = circular_mutex_noop>
+    pointer push_back_op(F&& f, Mutex&& mutex = {})
     {
         // back doesn't need a lock since we implicitly own it as the caller doing the push
         // (SPSC) - this means that MT simultaneous push to front and back is undefined
@@ -267,20 +267,12 @@ public:
 
         if(!no_rollover) mutex.unlock_front();
 
-        // FIX: Needs attention.  Even though we own back, it's conceivable someone
-        // could empty front rapidly enough to hit back before we actually init
-        // the content of back.  So we need to revert _begin back to _op
+        // initializes *back_ just before revealing that it's
+        // available
+        f(dest);
+
         back_ = back;
 
-        return dest;
-    }
-
-    template <class F, class Mutex = circular_mutex_noop>
-    pointer push_back_op(F&& f, Mutex&& mutex = {})
-    {
-        pointer dest = push_back_begin(std::forward<Mutex>(mutex));
-        if(dest == nullptr) return nullptr;
-        f(dest);
         return dest;
     }
 
@@ -302,8 +294,8 @@ public:
         }, std::forward<Mutex>(mutex));
     }
 
-    template <class Mutex = circular_mutex_noop>
-    pointer push_front_begin(Mutex&& mutex = {})
+    template <class F, class Mutex = circular_mutex_noop>
+    pointer push_front_op(F&& f, Mutex&& mutex = {})
     {
         // front doesn't need a lock since we implicitly own it as the caller doing the push
         // (SPSC) - this means that MT simultaneous push to front and back is undefined
@@ -348,54 +340,48 @@ public:
 
         if(!no_rollover) mutex.unlock_back();
 
-        // FIX: Similar to push_back_begin, it's conceivable here someone
-        // could pop_back rapidly enough to bonk into front_ and we haven't
-        // yet initialized front_ content
+        // Initialize *front before revealing it as available
+        f(front);
 
         return front_ = front;
-    }
-
-    template <class F, class Mutex = circular_mutex_noop>
-    pointer push_front_op(F&& f, Mutex&& mutex = {})
-    {
-        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
-        if(dest == nullptr) return nullptr;
-        f(dest);
-        return dest;
     }
 
     template <class Mutex = circular_mutex_noop>
     pointer push_front(const_reference value, Mutex&& mutex = {})
     {
-        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
-        if(dest == nullptr) return nullptr;
-        return new (dest) value_type(value);
+        return push_front_op([&value](pointer front)
+        {
+            return new (front) value_type(value);
+        }, std::forward<Mutex>(mutex));
     }
 
 
     template <class Mutex = circular_mutex_noop>
     pointer push_front(value_type&& value, Mutex&& mutex = {})
     {
-        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
-        if(dest == nullptr) return nullptr;
-        return new (dest) value_type(std::move(value));
+        return push_front_op([&value](pointer front)
+        {
+            return new (front) value_type(std::move(value));
+        }, std::forward<Mutex>(mutex));
     }
 
     template <class ...Args>
     pointer emplace_front(Args&&...args)
     {
-        pointer dest = push_front_begin();
-        if(dest == nullptr) return nullptr;
-        return new (dest) value_type(std::forward<Args>(args)...);
+        return push_front_op([&args...](pointer front)
+        {
+            return new (front) value_type(std::forward<Args>(args)...);
+        });
     }
 
     // EXPERIMENTAL naming
     template <class Mutex, class ...Args>
     pointer emplace_front_mutex(Mutex&& mutex, Args&&...args)
     {
-        pointer dest = push_front_begin(std::forward<Mutex>(mutex));
-        if(dest == nullptr) return nullptr;
-        return new (dest) value_type(std::forward<Args>(args)...);
+        return push_front_op([&args...](pointer front)
+        {
+            return new (front) value_type(std::forward<Args>(args)...);
+        }, std::forward<Mutex>(mutex));
     }
 
     template <class ...Args>
