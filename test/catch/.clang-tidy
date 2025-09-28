@@ -1,0 +1,33 @@
+# Nice try but no banana - CLion defaults to .clang-tidy being the ONLY tidy indicator,
+# regardless
+#InheritParentConfig: true
+
+#Checks: '*,-misc-random-seed'
+
+Checks: >-
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  -*-avoid-c-arrays,
+  -cert-msc51-cpp,
+  -misc-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -misc-random-seed,
+  -modernize-avoid-macro,
+  -modernize-macro-to-constexpr,
+  -modernize-use-trailing-return-type,
+  -readability-*,
+
+
+WarningsAsErrors: ''   # promote warnings if you like: 'bugprone-*,clang-analyzer-*'
+HeaderFilterRegex: ''  # restrict analysis to your project headers
+FormatStyle: none
+CheckOptions: {}

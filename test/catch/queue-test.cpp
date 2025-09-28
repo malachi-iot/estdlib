@@ -116,12 +116,12 @@ void circular_queue_move_test(internal::circular_queue<Policy>& q, Mutex&& mutex
 template <class Policy, class Mutex>
 void circular_queue_bulk_test(internal::circular_queue<Policy>& q1, Mutex&& mutex)
 {
-    // Always seed to the (default) same thing, thus ensuring idential inputs &
+    // Always seed to the (default) same thing, thus ensuring identical inputs &
     // outputs
     std::default_random_engine e1, e2;
 
     // Prime things
-    q1.push_back(Dummy(e1(), ""), std::forward<Mutex>(mutex));
+    q1.push_back(Dummy(static_cast<int>(e1()), ""), std::forward<Mutex>(mutex));
 
     for(int i = 0; i < 100; ++i)
     {
@@ -129,7 +129,7 @@ void circular_queue_bulk_test(internal::circular_queue<Policy>& q1, Mutex&& mute
         unsigned v = q1.front().val1;
         q1.pop_front(std::forward<Mutex>(mutex));
         REQUIRE(v == e2());
-        q1.push_back(Dummy(e1(), ""), std::forward<Mutex>(mutex));
+        q1.push_back(Dummy(static_cast<int>(e1()), ""), std::forward<Mutex>(mutex));
     }
 }
 
