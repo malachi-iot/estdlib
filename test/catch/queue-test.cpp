@@ -1,6 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <queue>
+#include <random>
 
 #include <estd/queue.h>
 #include <estd/string.h>
@@ -112,6 +113,26 @@ void circular_queue_move_test(internal::circular_queue<Policy>& q, Mutex&& mutex
     REQUIRE(q.front().val1 == 77);
 }
 
+template <class Policy, class Mutex>
+void circular_queue_bulk_test(internal::circular_queue<Policy>& q1, Mutex&& mutex)
+{
+    // Always seed to the (default) same thing, thus ensuring idential inputs &
+    // outputs
+    std::default_random_engine e1, e2;
+
+    // Prime things
+    q1.push_back(Dummy(e1(), ""), std::forward<Mutex>(mutex));
+
+    for(int i = 0; i < 100; ++i)
+    {
+        CAPTURE(i);
+        unsigned v = q1.front().val1;
+        q1.pop_front(std::forward<Mutex>(mutex));
+        REQUIRE(v == e2());
+        q1.push_back(Dummy(e1(), ""), std::forward<Mutex>(mutex));
+    }
+}
+
 
 template <class Policy, class Mutex = internal::circular_mutex_noop>
 void circular_queue_test_suite(internal::circular_queue<Policy>& q1, Mutex&& mutex = {})
@@ -124,6 +145,8 @@ void circular_queue_test_suite(internal::circular_queue<Policy>& q1, Mutex&& mut
     circular_queue_reverse_test(q1, std::forward<Mutex>(mutex));
     q1.clear();
     circular_queue_move_test(q1, std::forward<Mutex>(mutex));
+    q1.clear();
+    circular_queue_bulk_test(q1, std::forward<Mutex>(mutex));
 }
 
 TEST_CASE("queue-test")
@@ -472,7 +495,7 @@ TEST_CASE("queue-test")
                 circular_queue_test_suite(q1, mutex);
                 circular_queue_test_suite(q1, internal::circular_mutex_std{});
 
-                REQUIRE(mutex.front_ == 13);
+                REQUIRE(mutex.front_ == 214);
                 REQUIRE(mutex.count_ == 0);     // Sentinel needs no count/flag
             }
         }
