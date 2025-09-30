@@ -177,6 +177,9 @@ public:
     using const_iterator = const iterator;
     using const_reverse_iterator = const reverse_iterator;
 
+    // DEBT: Just for compatibility with legacy::deque
+    using forward_iterator = iterator;
+
     iterator begin()
     {
         return iterator{*this, front_, 0};
@@ -416,8 +419,10 @@ public:
 
 
     template <class Mutex = circular_mutex_noop>
-    void pop_front(Mutex&& mutex = {})
+    bool pop_front(Mutex&& mutex = {})
     {
+        ESTD_CPP_IF_CONSTEXPR(strict && empty()) return false;
+
         mutex.lock_front();
         if(type != queue_options::sentinel) mutex.lock_count();
 
@@ -428,6 +433,7 @@ public:
 
         if(type != queue_options::sentinel) mutex.unlock_count();
         mutex.unlock_front();
+        return true;
     }
 
     template <class Mutex = circular_mutex_noop>
