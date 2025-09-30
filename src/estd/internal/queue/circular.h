@@ -50,6 +50,8 @@ protected:
 };
 #endif
 
+// FIX: Whoops, continued to misplace things under queue when it ought to be deque.
+// circular_queue can skate by that.  But we need to fix it generally
 
 template <class Policy>
 class circular_queue : public circular_queue_impl<Policy>
@@ -68,6 +70,7 @@ public:
     using base_type::front_;
     using base_type::back_;
 
+    using base_type::contracted;
     using base_type::strict;
 
     using base_type::increment;
@@ -291,7 +294,7 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    bool push_back(const_reference value, Mutex&& mutex = {})
+    pointer push_back(const_reference value, Mutex&& mutex = {})
     {
         return push_back_op([&value](pointer back)
         {
@@ -300,7 +303,7 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    bool push_back(value_type&& value, Mutex&& mutex = {})
+    pointer push_back(value_type&& value, Mutex&& mutex = {})
     {
         return push_back_op([&value](pointer back)
         {
@@ -422,6 +425,7 @@ public:
     bool pop_front(Mutex&& mutex = {})
     {
         ESTD_CPP_IF_CONSTEXPR(strict && empty()) return false;
+        ESTD_CPP_IF_CONSTEXPR(contracted) assert(!empty());
 
         mutex.lock_front();
         if(type != queue_options::sentinel) mutex.lock_count();
@@ -437,8 +441,11 @@ public:
     }
 
     template <class Mutex = circular_mutex_noop>
-    void pop_back(Mutex mutex = {})
+    bool pop_back(Mutex mutex = {})
     {
+        ESTD_CPP_IF_CONSTEXPR(strict && empty()) return false;
+        ESTD_CPP_IF_CONSTEXPR(contracted) assert(!empty());
+
         mutex.lock_back();
         if(type != queue_options::sentinel) mutex.lock_count();
 
@@ -449,6 +456,7 @@ public:
 
         if(type != queue_options::sentinel) mutex.unlock_count();
         mutex.unlock_back();
+        return true;
     }
 
     template <class Mutex = circular_mutex_noop>

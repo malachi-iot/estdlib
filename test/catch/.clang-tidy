@@ -4,6 +4,11 @@
 
 #Checks: '*,-misc-random-seed'
 
+# Sorry folks, I like:
+# - protected member variables
+# - #define statements
+# - two variable defines on one line
+
 Checks: >-
   bugprone-*,
   clang-analyzer-*,
@@ -17,6 +22,7 @@ Checks: >-
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-pro-type-union-access,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-pro-bounds-constant-array-index,

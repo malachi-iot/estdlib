@@ -21,6 +21,7 @@ protected:
     //constexpr static bool atomic = true;
     static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);
     static constexpr bool strict = is_set(Policy::options & queue_options::strict);
+    static constexpr bool contracted = is_set(Policy::options & queue_options::contract);
 
     using container_policy = Policy;
     using container_type = typename container_policy::container_type;
@@ -115,7 +116,7 @@ public:
         pos += front_idx;
         pos %= array_.size();
 
-        if(strict)  assert(pos < max_size());
+        if(contracted)  assert(pos < max_size());
 
         return pos;
     }
