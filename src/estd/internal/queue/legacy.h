@@ -1,5 +1,7 @@
 #pragma once
 
+#include "circular/fwd.h"
+
 namespace estd {
 
 namespace experimental {

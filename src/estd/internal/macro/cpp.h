@@ -17,3 +17,11 @@
     typedef value_type* pointer;                \
     typedef const value_type* const_pointer;
 
+// https://en.cppreference.com/w/cpp/language/rule_of_three.html
+#define ESTD_CPP_RULE_OF_5(T)           \
+    T(const T&) = default;              \
+    T(T&&) = default;                   \
+    ~T() = default;                     \
+    T& operator=(const T&) = default;   \
+    T& operator=(T&&) = default;
+

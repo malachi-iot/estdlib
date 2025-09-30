@@ -302,10 +302,13 @@ TEST_CASE("queue-test")
 
         SECTION("manual")
         {
+            // DEBT: Bring this back for GH#144 mode
+#if FEATURE_ESTD_GH144 == 0
             iterator i(queue, &queue.front());
 
             REQUIRE(*i++ == 1);
             REQUIRE(*i++ == 2);
+#endif
         }
         SECTION("ranged 1")
         {

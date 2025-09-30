@@ -399,7 +399,7 @@ public:
     }
 
     template <class ...Args>
-    bool emplace_back(Args&&...args)
+    pointer emplace_back(Args&&...args)
     {
         return push_back_op([&args...](pointer back)
         {
@@ -409,7 +409,7 @@ public:
 
     // EXPERIMENTAL naming
     template <class Mutex, class ...Args>
-    bool emplace_back_mutex(Mutex&& mutex, Args&&...args)
+    pointer emplace_back_mutex(Mutex&& mutex, Args&&...args)
     {
         return push_back_op([&args...](pointer back)
         {

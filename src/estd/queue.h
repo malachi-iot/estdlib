@@ -61,33 +61,27 @@ public:
 
     const_reference back() const { return c.back(); }
 
-#ifdef FEATURE_CPP_VARIADIC
     // emplaces at the back, as per spec
-    template <class ...TArgs>
-    reference emplace(TArgs&&... args)
+    template <class ...Args>
+    reference emplace(Args&&... args)
     {
-        return c.emplace_back(std::forward<TArgs>(args)...);
-    }
+#if FEATURE_ESTD_GH144
+        return *c.emplace_back(std::forward<Args>(args)...);
+#else
+        return c.emplace_back(std::forward<Args>(args)...);
 #endif
+    }
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
     bool push(value_type&& value)
     {
         return c.push_back(std::move(value));
     }
-#endif
 };
 
 namespace layer1 {
 
 template <class T, size_t size>
-#ifdef FEATURE_CPP_ALIASTEMPLATE
 using queue = estd::queue<T, layer1::deque<T, size> >;
-#else
-class queue : public estd::queue<T, layer1::deque<T, size> >
-{
-};
-#endif
 
 }
 
