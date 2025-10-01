@@ -8,6 +8,7 @@
 # - protected member variables
 # - #define statements
 # - two variable defines on one line
+# - const member variables, even if it makes assignment operator harder
 
 Checks: >-
   bugprone-*,
@@ -19,6 +20,7 @@ Checks: >-
   -*-avoid-c-arrays,
   -cert-msc51-cpp,
   -misc-non-private-member-variables-in-classes,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-macro-usage,

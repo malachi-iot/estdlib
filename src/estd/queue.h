@@ -5,22 +5,12 @@
 #include "functional.h"
 #include "internal/deduce_fixed_size.h"
 #include "internal/priority_queue.h"
-#include "internal/queue/circular.h"
-#include "internal/queue/legacy.h"
+#include "deque.h"
 
 // deviates from C++ standard queue in that a bool is returned to indicate
 // if push/pop succeeds
 
 namespace estd {
-
-#if FEATURE_ESTD_GH144
-namespace layer1 {
-
-template <class T, size_t N>
-using deque = ring<T, N>;
-
-}
-#endif
 
 // http://en.cppreference.com/w/cpp/container/queue
 // we might do just as well using std::queue here, it's mainly the containers which do all the magic

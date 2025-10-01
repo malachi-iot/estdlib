@@ -53,6 +53,7 @@ else()
         chrono-test.cpp
         cmath-test.cpp
         cstddef-test.cpp
+        deque-test.cpp
         dynamic-array-test.cpp
         flags-test.cpp
         experimental/memory-pool1-test.cpp
