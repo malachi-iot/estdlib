@@ -70,7 +70,7 @@ public:
     using base_type::front_;
     using base_type::back_;
 
-    using base_type::contracted;
+    using base_type::hardened;
     using base_type::strict;
 
     using base_type::increment;
@@ -425,7 +425,7 @@ public:
     bool pop_front(Mutex&& mutex = {})
     {
         ESTD_CPP_IF_CONSTEXPR(strict && empty()) return false;
-        ESTD_CPP_IF_CONSTEXPR(contracted) assert(!empty());
+        ESTD_CPP_IF_CONSTEXPR(hardened) assert(!empty());
 
         mutex.lock_front();
         if(type != queue_options::sentinel) mutex.lock_count();
@@ -444,7 +444,7 @@ public:
     bool pop_back(Mutex mutex = {})
     {
         ESTD_CPP_IF_CONSTEXPR(strict && empty()) return false;
-        ESTD_CPP_IF_CONSTEXPR(contracted) assert(!empty());
+        ESTD_CPP_IF_CONSTEXPR(hardened) assert(!empty());
 
         mutex.lock_back();
         if(type != queue_options::sentinel) mutex.lock_count();

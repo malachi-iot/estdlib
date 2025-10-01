@@ -21,14 +21,14 @@ enum class queue_options
     trivial     = 0x0010,
     // reject-on-full mode (needed for full lock-free behavior)
     no_rollover = 0x0020,
-    // EXPERIMENTAL - do true/false bounds checks instead of would-be exceptions/invalid condition checks
-    // similar to c++26 contracts as per
-    // https://en.cppreference.com/w/cpp/container/deque/pop_back.html
-    // https://en.cppreference.com/w/cpp/language/contracts.html
+    // do true/false bounds checks instead of would-be exceptions/invalid condition checks
+    // similar to c++26 contracts.  Don't love "strict" name but it will do
     strict      = 0x0040,
     // do asserts as per above c++26 contracts
-    // strict AND contract cannot coexist, specify one or the other
-    contract    = 0x0080,
+    // https://en.cppreference.com/w/cpp/container/deque/pop_back.html
+    // https://en.cppreference.com/w/cpp/language/contracts.html
+    // strict AND hardened cannot coexist, specify one or the other
+    hardened    = 0x0080,
 
     default_opt = flagged
 };

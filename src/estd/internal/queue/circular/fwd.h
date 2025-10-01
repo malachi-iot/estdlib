@@ -65,7 +65,9 @@ using ring = internal::circular_queue<internal::span_circular_policy<T, detail::
 
 }
 
+// DEBT: Tossing in feature flag in this spot not ideal
+
 #ifndef FEATURE_ESTD_GH144
 // Nearly there, just need to sort out strict vs contract behavior
-//#define FEATURE_ESTD_GH144 1
+#define FEATURE_ESTD_GH144 1
 #endif
