@@ -71,7 +71,7 @@ public:
 namespace layer1 {
 
 template <class T, size_t size>
-using queue = estd::queue<T, layer1::deque<T, size> >;
+using queue = estd::queue<T, deque<T, size> >;
 
 }
 

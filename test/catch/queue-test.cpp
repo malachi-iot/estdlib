@@ -15,7 +15,7 @@ TEST_CASE("queue-test")
 {
     SECTION("Basic layer1 queue")
     {
-        queue<int, layer1::deque<int, 4 > > queue;
+        layer1::queue<int, 4> queue;
 
         queue.push(3);
 
@@ -34,7 +34,7 @@ TEST_CASE("queue-test")
     }
     SECTION("Rollover layer1 queue")
     {
-        queue<int, layer1::deque<int, 4 > > queue;
+        layer1::queue<int, 4> queue;
 
         queue.push(1);
         queue.push(2);
@@ -167,10 +167,12 @@ TEST_CASE("queue-test")
             // DEBT: Bring this back for GH#144 mode
 #if FEATURE_ESTD_GH144 == 0
             iterator i(queue, &queue.front());
+#else
+            iterator i(queue, &queue.front(), 0);
+#endif
 
             REQUIRE(*i++ == 1);
             REQUIRE(*i++ == 2);
-#endif
         }
         SECTION("ranged 1")
         {
