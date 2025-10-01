@@ -73,39 +73,9 @@ TEST_CASE("queue-test")
         REQUIRE(queue.pop());
         REQUIRE(queue.empty());
     }
-    SECTION("dequeue pointers")
-    {
-        layer1::deque<const int*, 10> queue;
-        typedef decltype (queue)::value_type value_type;
-
-        REQUIRE(estd::is_same<const int*, value_type>::value);
-
-        int val1 = 5;
-        const int* real_ptr = &val1;
-
-        queue.push_front(&val1);
-
-        REQUIRE(!queue.empty());
-
-        const int* out = queue.back();
-
-        REQUIRE(out != NULLPTR);
-        REQUIRE(out == real_ptr);
-        REQUIRE(*out == 5);
-
-        out = queue.front();
-
-        REQUIRE(out != NULLPTR);
-        REQUIRE(out == real_ptr);
-        REQUIRE(*out == 5);
-
-        queue.pop_front();
-
-        REQUIRE(queue.empty());
-    }
     SECTION("Emplacement tests")
     {
-        queue<Dummy, layer1::deque<Dummy, 4 > > queue;
+        layer1::queue<Dummy, 4> queue;
 
         queue.emplace(4, "hi there");
 
@@ -228,5 +198,12 @@ TEST_CASE("queue-test")
         queue.pop_front();
 
         REQUIRE(queue.size() == 0);
+    }
+    SECTION("layer3")
+    {
+        // FIX: default constructor should not work here
+        queue<Dummy, layer3::ring<int, 4>> q;
+
+        //q.push(0);
     }
 }

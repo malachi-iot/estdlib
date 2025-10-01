@@ -20,15 +20,16 @@ class queue
     Container c;
 
 public:
-#ifdef FEATURE_CPP_MOVESEMANTIC
-    constexpr queue(queue&& move_from) : c(std::move(move_from.c)) {}
+    queue() = default;
+    ESTD_CPP_RULE_OF_5(queue)
 
-    queue() {}
-#endif
-    
-    typedef typename Container::value_type value_type;
-    typedef typename Container::const_reference const_reference;
-    typedef typename Container::reference reference;
+    template<class... Args>
+    constexpr explicit queue(in_place_t, Args&&... args) :
+        c(std::forward<Args>(args)...)
+    {}
+
+    ESTD_CPP_STD_VALUE_TYPE(typename Container::value_type)
+
     typedef typename Container::size_type size_type;
     typedef Container container_type;
 

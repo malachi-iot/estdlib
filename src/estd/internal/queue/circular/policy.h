@@ -8,9 +8,7 @@
 
 namespace estd { namespace internal {
 
-// 17SEP25 MB NOTE: I don't think we need nullable.  If it hasn't occurred why we
-// might actually need this guy by 30SEP25, remove him.
-template <class T, queue_options o, class Nullable = nullable_traits<T>>
+template <class T, queue_options o>
 struct circular_policy
 {
     static constexpr queue_options type = o & queue_options::mask;
@@ -21,7 +19,6 @@ struct circular_policy
 #endif
         ;
 
-    using nullable = Nullable;
     static constexpr queue_options options = o;
 
     // Default iterator types - policy may override
