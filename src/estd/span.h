@@ -223,19 +223,18 @@ public:
 typedef span<const uint8_t> const_buffer;
 typedef span<uint8_t> mutable_buffer;
 
-template <class T, estd::size_t N, estd::size_t  S>
-span<const byte, S> as_bytes(span<T, N> s) NOEXCEPT;
-
 template <class T>
-ESTD_CPP_CONSTEXPR_RET span<const byte, detail::dynamic_extent::value> as_bytes(span<T, detail::dynamic_extent::value> s) NOEXCEPT
+constexpr span<const byte> as_bytes(span<T> s) NOEXCEPT
 {
+    // NOLINTNEXTLINE
     return span<const byte, detail::dynamic_extent::value>(reinterpret_cast<const byte*>(s.data()), s.size_bytes());
 }
 
 
 template <class T, estd::size_t  N>
-ESTD_CPP_CONSTEXPR_RET span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) NOEXCEPT
+constexpr span<const byte, N * sizeof(T)> as_bytes(span<T, N> s) NOEXCEPT
 {
+    // NOLINTNEXTLINE
     return span<const byte, N * sizeof(T)>(reinterpret_cast<const byte*>(s.data()));
 }
 

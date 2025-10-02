@@ -62,10 +62,13 @@ class circular_queue : public circular_queue_impl<Policy>
     // DEBT: Consider using allocator_traits::construct as per
     // https://eel.is/c++draft/container.requirements.general
 
+public:
+    ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
+
+private:
 #if UNIT_TESTING
 public:
 #endif
-    ESTD_CPP_STD_VALUE_TYPE(typename container_type::value_type)
 
     using base_type::front_;
     using base_type::back_;
