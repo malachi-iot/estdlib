@@ -168,6 +168,8 @@ public:
     // allocated containers.
     constexpr circular_queue(circular_queue&&) = default;
 
+    ESTD_CPP_DEFAULT_ASSIGNMENT(circular_queue)
+
     template <class ...Args>
     constexpr explicit circular_queue(in_place_t, Args&&...args) :
         base_type(in_place_t{}, std::forward<Args>(args)...)

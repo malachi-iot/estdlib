@@ -2,6 +2,7 @@
 
 #include "c++/attr.h"
 
+// Obsolete, pre c++11 no longer supported so don't use this macro
 // NOTE: Only applies to empty constructor.  You're on your own for the "more complex" varieties
 #ifdef FEATURE_CPP_DEFAULT_CTOR
 #define ESTD_CPP_DEFAULT_CTOR(class_name)   constexpr class_name() = default;
@@ -17,11 +18,18 @@
     typedef value_type* pointer;                \
     typedef const value_type* const_pointer;
 
-// https://en.cppreference.com/w/cpp/language/rule_of_three.html
-#define ESTD_CPP_RULE_OF_5(T)           \
-    T(const T&) = default;              \
-    T(T&&) = default;                   \
-    ~T() = default;                     \
+
+#define ESTD_CPP_DEFAULT_COPY_CTOR(T)  \
+    T(const T&) = default;   \
+    T(T&&) = default;
+
+#define ESTD_CPP_DEFAULT_ASSIGNMENT(T)  \
     T& operator=(const T&) = default;   \
     T& operator=(T&&) = default;
+
+// https://en.cppreference.com/w/cpp/language/rule_of_three.html
+#define ESTD_CPP_DEFAULT_RULE_OF_5(T)   \
+    ESTD_CPP_DEFAULT_COPY_CTOR(T)       \
+    ~T() = default;                     \
+    ESTD_CPP_DEFAULT_ASSIGNMENT(T)
 

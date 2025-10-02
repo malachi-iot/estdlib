@@ -7,6 +7,10 @@
 #include "type_traits.h"
 #include "cstddef.h"
 
+#ifdef FEATURE_STD_ARRAY
+#include <array>
+#endif
+
 namespace estd {
 
 namespace detail {
@@ -116,6 +120,7 @@ class span : public internal::span<T, Extent>
 {
     using this_type = span<T, Extent>;
     using base_type = internal::span<T, Extent>;
+    using base_type::data_;
 
     static CONSTEXPR bool is_dynamic = Extent == detail::dynamic_extent::value;
 
@@ -141,12 +146,19 @@ public:
         return size() == 0;
     }
 
-    constexpr iterator end() const { return base_type::data_ + size(); }
-    constexpr const_iterator cend() const { return base_type::data_ + size(); }
+    constexpr iterator end() const { return data_ + size(); }
+    constexpr const_iterator cend() const { return data_ + size(); }
 
     // DEBT:
     // "This overload participates in overload resolution only if extent == 0 || extent == std::dynamic_extent."
     span() = default;
+
+#ifdef FEATURE_STD_ARRAY
+    template <estd::size_t N, estd::size_t ExtentLocal = Extent,
+        class ExtentOnly = enable_if_t<ExtentLocal == detail::dynamic_extent::value ||
+            ExtentLocal == N>>
+    constexpr span(std::array<T, N>& array) : base_type(array.data(), N) {}
+#endif
 
 #ifdef FEATURE_CPP_DEFAULT_TARGS
     // ExtendLocal needed because SFINAE function selection needs that
@@ -195,16 +207,14 @@ public:
 
     span& operator=(const span& copy_from)
     {
-        return * new (this) span(copy_from);
+        return * new (this) span(copy_from);    // NOLINT
     }
 
     span<element_type> subspan(size_type offset, size_type count = detail::dynamic_extent())
     {
-        if(count == detail::dynamic_extent::value) count = base_type::size();
+        if(count == detail::dynamic_extent::value) count = size();
 
-        pointer data = base_type::data();
-
-        return span<element_type>(data + offset, count);
+        return span<element_type>(data_ + offset, count);
     }
 };
 

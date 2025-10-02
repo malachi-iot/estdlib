@@ -201,9 +201,24 @@ TEST_CASE("queue-test")
     }
     SECTION("layer3")
     {
-        // FIX: default constructor should not work here
-        queue<Dummy, layer3::ring<int, 4>> q;
+        int storage[4] {};
+        span<int, 4> s(storage);
+        using queue_type = queue<Dummy, layer3::ring<int, ring_options::sentinel>>;
 
-        //q.push(0);
+        // NOTE: Default constructor does work here but you probably
+        // don't want it.  Only way to use queue instantiated that way
+        // is to reassign it
+        queue_type q;
+
+        q = queue_type{in_place_t{}, s};
+
+        q.push(1);
+        q.push(2);
+
+        REQUIRE(q.front() == 1);
+
+        q.pop();
+
+        REQUIRE(q.size() == 1);
     }
 }

@@ -336,8 +336,8 @@ TEST_CASE("deque-test")
         SECTION("sentinel: layer3")
         {
             std::array<Dummy, 4> storage;
-            using queue_type = layer3::ring<Dummy, 4, options::sentinel>;
-            queue_type q1(in_place_t{}, storage.data(), 4);
+            using queue_type = layer3::ring<Dummy, options::sentinel>;
+            queue_type q1(in_place_t{}, storage);
 
             REQUIRE(q1.max_size() == 3);
 

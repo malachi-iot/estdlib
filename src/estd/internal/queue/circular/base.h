@@ -128,7 +128,7 @@ public:
         back_{&array_[0]}
     {}
 
-    ESTD_CPP_RULE_OF_5(circular_queue_container_base)
+    ESTD_CPP_DEFAULT_RULE_OF_5(circular_queue_container_base)
 
     template <class ...Args>
     constexpr explicit circular_queue_container_base(in_place_t, Args&&...args) :

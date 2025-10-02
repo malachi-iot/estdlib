@@ -21,11 +21,11 @@ class queue
 
 public:
     queue() = default;
-    ESTD_CPP_RULE_OF_5(queue)
+    ESTD_CPP_DEFAULT_RULE_OF_5(queue)
 
     template<class... Args>
     constexpr explicit queue(in_place_t, Args&&... args) :
-        c(std::forward<Args>(args)...)
+        c(in_place_t{}, std::forward<Args>(args)...)
     {}
 
     ESTD_CPP_STD_VALUE_TYPE(typename Container::value_type)
