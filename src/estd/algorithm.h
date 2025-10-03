@@ -51,7 +51,10 @@ inline ESTD_CPP_CONSTEXPR(14) void fill(ForwardIt first, ForwardIt last, const T
 
 // https://en.cppreference.com/w/cpp/algorithm/equal
 template<class InputIt1, class InputIt2>
-ESTD_CPP_CONSTEXPR(17) bool equal(InputIt1 first1, InputIt1 last1,
+#if !__clang__
+ESTD_CPP_CONSTEXPR(17)
+#endif
+bool equal(InputIt1 first1, InputIt1 last1,
            InputIt2 first2)
 {
     for (; first1 != last1; ++first1, ++first2) {

@@ -105,7 +105,7 @@ protected:
 #if UNIT_TESTING
 public:
 #endif
-    ESTD_CPP_CONSTEXPR(14) unsigned normalize_pos(unsigned pos) const
+    unsigned normalize_pos(unsigned pos) const
     {
         const unsigned front_idx = front_ - &array_[0];
 
