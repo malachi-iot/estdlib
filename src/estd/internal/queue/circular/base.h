@@ -10,13 +10,13 @@ namespace estd { namespace internal {
 
 // DEBT: Split out the 'container' part of this base from the front/back tracking,
 // namely in support of 'packed' and *maybe* 'bare'
-template <class Policy>
+template <ESTD_CPP_CONCEPT(concepts::v1::CircularQueuePolicy) Policy>
 class circular_queue_container_base
 {
     using this_type = circular_queue_container_base;
 
 protected:
-    static constexpr bool atomic = Policy::atomic;
+    static constexpr bool atomic = is_set(Policy::options & queue_options::atomic);
     static constexpr queue_options type = Policy::type;
     //constexpr static bool atomic = true;
     static constexpr bool no_rollover = is_set(Policy::options & queue_options::no_rollover);

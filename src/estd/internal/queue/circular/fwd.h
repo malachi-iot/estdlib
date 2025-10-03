@@ -1,22 +1,28 @@
 #pragma once
 
-//#include "../../container/unordered/fwd.h"
 #include "enum.h"
+#include "../../feature/queue.h"
+#include "../../container/fwd.h"
 
 #if __cpp_lib_concepts
 #include <concepts>
 #endif
 
 #if __cpp_concepts
-namespace estd::concepts { inline namespace v1 {
+namespace estd::concepts::inline v1 {
 
 template  <class T>
 concept CircularQueuePolicy = requires
 {
     T::type;
+    typename T::container_type;
+    requires IndexedContainer<typename T::container_type>;
+#if __cpp_lib_concepts
+    { T::options } -> std::convertible_to<internal::queue_options>;
+#endif
 };
 
-}}
+}
 #endif
 
 namespace estd { namespace internal {
@@ -26,9 +32,6 @@ class circular_queue;
 
 template <class Policy, class Enabled = void>
 class circular_queue_impl;
-
-//template <class T, queue_options o, class Nullable = nullable_traits<T>>
-//struct circular_policy;
 
 template <class T, size_t N, queue_options o>
 struct array_circular_policy;
@@ -64,10 +67,3 @@ using ring = internal::circular_queue<internal::span_circular_policy<T, detail::
 }
 
 }
-
-// DEBT: Tossing in feature flag in this spot not ideal
-
-#ifndef FEATURE_ESTD_GH144
-// Nearly there, just need to sort out strict vs contract behavior
-#define FEATURE_ESTD_GH144 1
-#endif

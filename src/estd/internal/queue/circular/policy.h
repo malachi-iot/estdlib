@@ -12,7 +12,6 @@ template <class T, queue_options o>
 struct circular_policy
 {
     static constexpr queue_options type = o & queue_options::mask;
-    static constexpr bool atomic = is_set(o & queue_options::atomic);
     constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
         || estd::is_trivial<T>::value

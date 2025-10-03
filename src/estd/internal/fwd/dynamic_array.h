@@ -11,6 +11,8 @@ namespace estd {
 #if __cpp_concepts
 namespace concepts { inline namespace v1 {
 
+// DEBT: Consolidate with ../container/fwd.h concepts
+
 namespace impl {
 
 template <class T>
