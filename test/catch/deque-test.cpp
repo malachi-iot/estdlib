@@ -156,7 +156,7 @@ TEST_CASE("deque-test")
         SECTION("pointers")
         {
             layer1::deque<const int*, 10> queue;
-            typedef decltype (queue)::value_type value_type;
+            using value_type = decltype (queue)::value_type;
 
             REQUIRE(estd::is_same<const int*, value_type>::value);
 
@@ -371,10 +371,15 @@ TEST_CASE("deque-test")
         }
         SECTION("no_rollover")
         {
-            using queue_type = layer1::ring<Dummy, 4,
+            using queue_type = layer1::ring<int, 4,
                 options::sentinel | options::no_rollover | options::strict>;
 
             queue_type q1;
+
+            q1.push_back(0);
+            q1.push_back(1);
+            REQUIRE(q1.push_back(2));
+            REQUIRE(q1.push_back(3) == nullptr);
         }
     }
 }

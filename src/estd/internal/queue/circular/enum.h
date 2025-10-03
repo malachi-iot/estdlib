@@ -4,7 +4,7 @@
 
 namespace estd { namespace internal {
 
-enum class queue_options
+enum class queue_options    // NOLINT(*-enum-size)
 {
     bare        = 0x0001,   ///< No knowledge of empty, full, count or rollover
     sentinel    = 0x0002,
@@ -13,6 +13,8 @@ enum class queue_options
     packed      = 0x0005,   ///< EXPERIMENTAL: flavor of 'flagged' with front, back and empty in a packed word
     mask        = 0x0007,
 
+    /// Utilize std::atomic.  Note that no_rollover must also be specified
+    /// for optimal atomic operation
     atomic      = 0x0008,
 
     // EXPERIMENTAL
@@ -24,7 +26,7 @@ enum class queue_options
     // do true/false bounds checks instead of would-be exceptions/invalid condition checks
     // similar to c++26 contracts.  Don't love "strict" name but it will do
     strict      = 0x0040,
-    // do asserts as per above c++26 contracts
+    // do asserts as per c++26 contracts:
     // https://en.cppreference.com/w/cpp/container/deque/pop_back.html
     // https://en.cppreference.com/w/cpp/language/contracts.html
     // strict AND hardened cannot coexist, specify one or the other
