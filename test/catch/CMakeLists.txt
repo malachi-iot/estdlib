@@ -9,11 +9,18 @@ set(FEATURE_ESTD_COMPILE_VERBOSITY 3 CACHE STRING
 
 include(../../tools/cmake/setvars.cmake)
 
-CPMAddPackage("gh:catchorg/Catch2@3.9.0")
+CPMAddPackage("gh:catchorg/Catch2@3.11.0")
 
 include(testrc.cmake)
 
 message(DEBUG "Source dir of Catch2 = ${Catch2_SOURCE_DIR}")
+
+# Clang in c++20 mode hates it when we use GCC's stdlib, this overrides that in theory
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND UNIX AND NOT APPLE)
+    # Doesn't really help, #include paths still route to GCC
+    #add_compile_options(-stdlib=libc++)
+    #add_link_options(-stdlib=libc++)
+endif()
 
 # Not dogfooding top-level CMakeLists, that makes CLion lose its mind
 add_subdirectory(${ROOT_DIR}/src estd)
