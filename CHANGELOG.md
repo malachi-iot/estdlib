@@ -1,9 +1,9 @@
-# v0.X.X - XXXXX25
+# v0.8.10 - XXXXX25
 
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/23 For c++17 or AVR environments, ostream now has limited float/double support.
-* https://github.com/malachi-iot/estdlib/issues/144 rework queue, adding new ring buffer
+* https://github.com/malachi-iot/estdlib/issues/144 reworked deque, refactored ring buffer
 
 ## Quality Updates & Bug Fixes
 
