@@ -50,9 +50,6 @@ protected:
 };
 #endif
 
-// FIX: Whoops, continued to misplace things under queue when it ought to be deque.
-// circular_queue can skate by that.  But we need to fix it generally
-
 template <class Policy>
 class circular_queue : public circular_queue_impl<Policy>
 {
@@ -263,6 +260,7 @@ public:
                 if(no_rollover)
                 {
                     mutex.unlock_count();
+                    ESTD_CPP_IF_CONSTEXPR(hardened) abort();
                     return nullptr;
                 }
 
@@ -281,7 +279,11 @@ public:
         {
             if(back == front_)
             {
-                if(no_rollover) return nullptr;
+                if(no_rollover)
+                {
+                    ESTD_CPP_IF_CONSTEXPR(hardened) abort();
+                    return nullptr;
+                }
 
                 rollover(back);
             }
@@ -336,6 +338,7 @@ public:
                 if(no_rollover)
                 {
                     mutex.unlock_count();
+                    ESTD_CPP_IF_CONSTEXPR(hardened) abort();
                     return nullptr;
                 }
 
@@ -352,7 +355,11 @@ public:
         {
             if(front == back_)
             {
-                if(no_rollover) return nullptr;
+                if(no_rollover)
+                {
+                    ESTD_CPP_IF_CONSTEXPR(hardened) abort();
+                    return nullptr;
+                }
 
                 rollunder(front);
             }
