@@ -86,17 +86,17 @@ struct streambuf_base
 #endif
 
 protected:
-    static ESTD_CPP_CONSTEVAL int sync() { return 0; }
+    static constexpr int sync() { return 0; }
 
     // 0 = "unsure if there are characters available in the associated sequence".
-    static ESTD_CPP_CONSTEVAL streamsize showmanyc() { return 0; }
+    static constexpr streamsize showmanyc() { return 0; }
 
-    static ESTD_CPP_CONSTEVAL pos_type seekpos(pos_type, ios_base::openmode)
+    static constexpr pos_type seekpos(pos_type, ios_base::openmode)
     {
         return pos_type(off_type(-1));
     };
 
-    static ESTD_CPP_CONSTEVAL pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
+    static constexpr pos_type seekoff(off_type, ios_base::seekdir, ios_base::openmode)
     {
         return pos_type(off_type(-1));
     };

@@ -106,12 +106,12 @@ public:
         return copied;
     }
 
-    static ESTD_CPP_CONSTEVAL time_point min() noexcept
+    static constexpr time_point min() noexcept
     {
         return time_point(duration::min());
     }
 
-    static ESTD_CPP_CONSTEVAL time_point max() noexcept
+    static constexpr time_point max() noexcept
     {
         return time_point(duration::max());
     }

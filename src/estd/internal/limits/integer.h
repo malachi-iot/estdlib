@@ -47,8 +47,8 @@ template <>
 struct int_limits<8> : integer_limits<int8_t, true>
 {
     static constexpr int digits10 = 2;
-    static ESTD_CPP_CONSTEVAL int8_t min() { return INT8_MIN; }
-    static ESTD_CPP_CONSTEVAL int8_t max() { return INT8_MAX; }
+    static constexpr int8_t min() { return INT8_MIN; }
+    static constexpr int8_t max() { return INT8_MAX; }
 
     typedef uint8_t unsigned_type;
 };
@@ -57,8 +57,8 @@ template <>
 struct uint_limits<8> : integer_limits<uint8_t, false>
 {
     static constexpr int digits10 = 2;
-    static ESTD_CPP_CONSTEVAL uint8_t min() { return 0; }
-    static ESTD_CPP_CONSTEVAL uint8_t max() { return UINT8_MAX; }
+    static constexpr uint8_t min() { return 0; }
+    static constexpr uint8_t max() { return UINT8_MAX; }
 
     typedef int8_t signed_type;
 };
@@ -67,8 +67,8 @@ template <>
 struct int_limits<16> : integer_limits<int16_t, true>
 {
     static constexpr int digits10 = 4;
-    static ESTD_CPP_CONSTEVAL int16_t min() { return INT16_MIN; }
-    static ESTD_CPP_CONSTEVAL int16_t max() { return INT16_MAX; }
+    static constexpr int16_t min() { return INT16_MIN; }
+    static constexpr int16_t max() { return INT16_MAX; }
 
     typedef uint16_t unsigned_type;
 };
@@ -77,8 +77,8 @@ template <>
 struct uint_limits<16> : integer_limits<uint16_t, false>
 {
     static constexpr int digits10 = 4;
-    static ESTD_CPP_CONSTEVAL uint16_t min() { return 0; }
-    static ESTD_CPP_CONSTEVAL uint16_t max() { return UINT16_MAX; }
+    static constexpr uint16_t min() { return 0; }
+    static constexpr uint16_t max() { return UINT16_MAX; }
 
     typedef int16_t signed_type;
 };
@@ -87,8 +87,8 @@ template <>
 struct int_limits<32> : integer_limits<int32_t, true>
 {
     static constexpr int digits10 = 9;
-    static ESTD_CPP_CONSTEVAL int32_t min() { return INT32_MIN; }
-    static ESTD_CPP_CONSTEVAL int32_t max() { return INT32_MAX; }
+    static constexpr int32_t min() { return INT32_MIN; }
+    static constexpr int32_t max() { return INT32_MAX; }
 
     typedef uint32_t unsigned_type;
 };
@@ -97,8 +97,8 @@ template <>
 struct uint_limits<32> : integer_limits<uint32_t, false>
 {
     static constexpr int digits10 = 9;
-    static ESTD_CPP_CONSTEVAL uint32_t min() { return 0; }
-    static ESTD_CPP_CONSTEVAL uint32_t max() { return UINT32_MAX; }
+    static constexpr uint32_t min() { return 0; }
+    static constexpr uint32_t max() { return UINT32_MAX; }
 
     typedef int32_t signed_type;
 };
@@ -107,8 +107,8 @@ template <>
 struct int_limits<64> : integer_limits<int64_t, true>
 {
     static constexpr int digits10 = 18;
-    static ESTD_CPP_CONSTEVAL int64_t min() { return INT64_MIN; }
-    static ESTD_CPP_CONSTEVAL int64_t max() { return INT64_MAX; }
+    static constexpr int64_t min() { return INT64_MIN; }
+    static constexpr int64_t max() { return INT64_MAX; }
 
     typedef uint64_t unsigned_type;
 };
@@ -117,8 +117,8 @@ template <>
 struct uint_limits<64> :  integer_limits<uint64_t, false>
 {
     static constexpr int digits10 = 19;
-    static ESTD_CPP_CONSTEVAL uint64_t min() { return 0; }
-    static ESTD_CPP_CONSTEVAL uint64_t max() { return UINT64_MAX; }
+    static constexpr uint64_t min() { return 0; }
+    static constexpr uint64_t max() { return UINT64_MAX; }
 
     typedef int64_t signed_type;
 };
@@ -134,9 +134,9 @@ template <>
 struct int_limits<128> :  integer_limits<__int128, true>
 {
     static CONSTEXPR int digits10 = 19; // FIX: this is wrong, represents 64-bit size
-    static ESTD_CPP_CONSTEVAL uint64_t min() { return 0; }
+    static constexpr uint64_t min() { return 0; }
     // FIX: the following is just an approximation for now
-    static ESTD_CPP_CONSTEVAL __int128 max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
+    static constexpr __int128 max() { return UINT64_MAX * ((UINT64_MAX) / 2); }
 };
 #endif
 

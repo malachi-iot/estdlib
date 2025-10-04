@@ -18,9 +18,9 @@ struct classic_numpunct
 {
     using char_type = Char;
 
-    static ESTD_CPP_CONSTEVAL char_type thousands_sep() { return ','; }
+    static constexpr char_type thousands_sep() { return ','; }
     static constexpr estd::layer2::const_string grouping() { return ""; }
-    static ESTD_CPP_CONSTEVAL char_type decimal_point() { return '.'; }
+    static constexpr char_type decimal_point() { return '.'; }
 };
 
 //template <locale_code::values lc, internal::encodings::values encoding>

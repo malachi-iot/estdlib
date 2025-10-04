@@ -99,8 +99,8 @@ protected:
         evaluate_rollover(i);
     }
 
-    static ESTD_CPP_CONSTEVAL bool increment_size() { return{}; }
-    static ESTD_CPP_CONSTEVAL bool decrement_size() { return{}; }
+    static constexpr bool increment_size() { return{}; }
+    static constexpr bool decrement_size() { return{}; }
 
 #if UNIT_TESTING
 public:

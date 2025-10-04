@@ -20,6 +20,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND UNIX AND NOT APPLE)
     # Doesn't really help, #include paths still route to GCC
     #add_compile_options(-stdlib=libc++)
     #add_link_options(-stdlib=libc++)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # Not dogfooding top-level CMakeLists, that makes CLion lose its mind

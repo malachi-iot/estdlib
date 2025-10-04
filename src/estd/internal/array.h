@@ -19,9 +19,9 @@ struct array_base_size
 {
     typedef Size size_type;
 
-    static ESTD_CPP_CONSTEVAL bool empty() { return N == 0; }
-    static ESTD_CPP_CONSTEVAL size_type size() { return N; }
-    static ESTD_CPP_CONSTEVAL size_type max_size() { return N; }
+    static constexpr bool empty() { return N == 0; }
+    static constexpr size_type size() { return N; }
+    static constexpr size_type max_size() { return N; }
 };
 
 

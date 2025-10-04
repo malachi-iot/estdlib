@@ -26,7 +26,7 @@ class circular_queue_impl<Policy, enable_if_t<Policy::type == queue_options::bar
     static_assert(base_type::no_rollover == false, "Bare does not support no_rollover");
 
 protected:
-    static bool ESTD_CPP_CONSTEVAL clear_size() { return{}; }
+    static bool constexpr clear_size() { return{}; }
 };
 
 

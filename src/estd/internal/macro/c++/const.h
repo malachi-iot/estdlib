@@ -43,6 +43,7 @@
 #endif
 
 // DEBT: Perhaps we can merely call this CONSTEVAL
+// DEBT: May need to phase this out, see https://github.com/malachi-iot/estdlib/issues/150
 #if __cpp_consteval
 #define ESTD_CPP_CONSTEVAL consteval
 #else

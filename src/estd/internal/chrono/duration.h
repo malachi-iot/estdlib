@@ -22,9 +22,9 @@ struct seconds_tag {};
 template <class Rep>
 struct duration_values
 {
-    static ESTD_CPP_CONSTEVAL Rep zero() { return Rep(0); }
-    static ESTD_CPP_CONSTEVAL Rep min() { return estd::numeric_limits<Rep>::min(); }
-    static ESTD_CPP_CONSTEVAL Rep max() { return estd::numeric_limits<Rep>::max(); }
+    static constexpr Rep zero() { return Rep(0); }
+    static constexpr Rep min() { return estd::numeric_limits<Rep>::min(); }
+    static constexpr Rep max() { return estd::numeric_limits<Rep>::max(); }
 };
 
 }
@@ -105,9 +105,9 @@ public:
 
     constexpr duration operator+() const { return *this; }
 
-    static ESTD_CPP_CONSTEVAL duration min() { return duration(duration_values::min()); }
-    static ESTD_CPP_CONSTEVAL duration max() { return duration(duration_values::max()); }
-    static ESTD_CPP_CONSTEVAL duration zero() { return duration(duration_values::zero()); }
+    static constexpr duration min() { return duration(duration_values::min()); }
+    static constexpr duration max() { return duration(duration_values::max()); }
+    static constexpr duration zero() { return duration(duration_values::zero()); }
 };
 #endif
 

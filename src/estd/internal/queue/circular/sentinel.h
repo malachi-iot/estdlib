@@ -23,7 +23,7 @@ protected:
         base_type(std::forward<Args>(args)...)
     {}
 
-    static bool ESTD_CPP_CONSTEVAL clear_size() { return{}; }
+    static bool constexpr clear_size() { return{}; }
 
 public:
     using typename base_type::size_type;
