@@ -12,6 +12,7 @@
 * https://github.com/malachi-iot/estdlib/issues/140 AVR/UB fixups for ESTD_FLAGS
 * https://github.com/malachi-iot/estdlib/issues/142 scrubbing UTF8 -> ASCII
 * https://github.com/malachi-iot/estdlib/issues/143 removing legacy toString/fromString
+* https://github.com/malachi-iot/estdlib/issues/150 repairing consteval misapplication
 
 ## Known Issues and Limitations
 
