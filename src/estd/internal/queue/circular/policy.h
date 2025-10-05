@@ -8,10 +8,21 @@
 
 namespace estd { namespace internal {
 
+// DEBT: This guy needs some documentation
+constexpr queue_options type_resolver(queue_options o, queue_options type)
+{
+    return type == queue_options::none ?
+        (is_set(o & queue_options::atomic) ?
+            queue_options::sentinel : queue_options::flagged) :
+            type;
+
+}
+
 template <class T, queue_options o>
 struct circular_policy
 {
-    static constexpr queue_options type = o & queue_options::mask;
+    static constexpr queue_options type = type_resolver(o, o & queue_options::mask);
+
     constexpr static bool is_trivial = is_set(o & queue_options::trivial) || is_integral<T>::value
 #if FEATURE_ESTD_IS_TRIVIAL
         || estd::is_trivial<T>::value

@@ -6,6 +6,7 @@ namespace estd { namespace internal {
 
 enum class queue_options    // NOLINT(*-enum-size)
 {
+    none        = 0x0000,
     bare        = 0x0001,   ///< No knowledge of empty, full, count or rollover
     sentinel    = 0x0002,
     flagged     = 0x0003,
@@ -32,7 +33,7 @@ enum class queue_options    // NOLINT(*-enum-size)
     // strict AND hardened cannot coexist, specify one or the other
     hardened    = 0x0080,
 
-    default_opt = flagged
+    default_opt = none
 };
 
 ESTD_FLAGS(queue_options)

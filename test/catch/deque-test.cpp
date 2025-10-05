@@ -1,6 +1,5 @@
 #include <catch2/catch_all.hpp>
 
-#include <queue>
 #include <random>
 
 #include <estd/deque.h>
@@ -371,15 +370,28 @@ TEST_CASE("deque-test")
         }
         SECTION("no_rollover")
         {
-            using queue_type = layer1::ring<int, 4,
-                options::sentinel | options::no_rollover | options::strict>;
+            SECTION("atomic")
+            {
+                using queue_type = layer1::ring<
+                    int, 4,
+                    options::no_rollover | options::atomic>;
 
-            queue_type q1;
+                queue_type q1;
 
-            q1.push_back(0);
-            q1.push_back(1);
-            REQUIRE(q1.push_back(2));
-            REQUIRE(q1.push_back(3) == nullptr);
+            }
+            SECTION("sentinel")
+            {
+                using queue_type = layer1::ring<
+                    int, 4,
+                    options::sentinel | options::no_rollover | options::strict>;
+
+                queue_type q1;
+
+                q1.push_back(0);
+                q1.push_back(1);
+                REQUIRE(q1.push_back(2));
+                REQUIRE(q1.push_back(3) == nullptr);
+            }
         }
     }
 }

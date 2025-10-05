@@ -5,7 +5,9 @@
 namespace estd { namespace internal {
 
 template <class Policy>
-class circular_queue_impl<Policy, enable_if_t<Policy::type == queue_options::sentinel>> :
+class circular_queue_impl<
+    Policy,
+    enable_if_t<Policy::type == queue_options::sentinel>> :
     public circular_queue_container_base<Policy>
 {
     using base_type = circular_queue_container_base<Policy>;
