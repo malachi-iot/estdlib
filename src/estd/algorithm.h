@@ -12,8 +12,6 @@
 
 #ifdef FEATURE_STD_ALGORITHM
 #include <algorithm>
-#else
-#undef FEATURE_ESTD_ALGORITHM_OPT
 #endif
 
 namespace estd {
@@ -21,33 +19,34 @@ namespace estd {
 // NOTE: Aliasing these out as best we can because std copy/fill operations may have some nice
 // optimizations depending on your environment
 
+#if FEATURE_ESTD_ALGORITHM_OPT
+using std::copy;
+using std::copy_n;
+using std::fill;
+using std::fill_n;
+#endif
+
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
+#if FEATURE_ESTD_ALGORITHM_OPT == 0
 template<class OutputIt, class Size, class T>
 inline ESTD_CPP_CONSTEXPR(14) OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
-    return std::fill_n(first, count, value);
-#else
     for (; count != 0; --count)
     {
         *first++ = value;
     }
     return first;
-#endif
 }
 
 template< class ForwardIt, class T >
 inline ESTD_CPP_CONSTEXPR(14) void fill(ForwardIt first, ForwardIt last, const T& value)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
-    std::fill(first, last, value);
-#else
     for (; first != last; ++first)
     {
         *first = value;
     }
-#endif
 }
+#endif
 
 // https://en.cppreference.com/w/cpp/algorithm/equal
 template<class InputIt1, class InputIt2>
@@ -63,10 +62,7 @@ ESTD_CPP_CONSTEXPR(14) bool equal(InputIt1 first1, InputIt1 last1,
 }
 
 template<class ForwardIt, class Compare>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-ForwardIt min_element(ForwardIt first, ForwardIt last,
+ESTD_CPP_CONSTEXPR(14) ForwardIt min_element(ForwardIt first, ForwardIt last,
                       Compare comp)
 {
     if (first == last) return last;
@@ -83,23 +79,15 @@ ForwardIt min_element(ForwardIt first, ForwardIt last,
 
 
 
-// DEBT: use overall macro push/pop here
-#ifdef ESTD_MIN_SAVER
-#define min ESTD_MIN_SAVER
-#endif
-
+#if FEATURE_ESTD_ALGORITHM_OPT == 0
 template<class InputIt, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
               OutputIt d_first)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
-    return std::copy(first, last, d_first);
-#else
     while (first != last) {
         *d_first++ = *first++;
     }
     return d_first;
-#endif
 }
 
 // https://en.cppreference.com/w/cpp/algorithm/copy_n
@@ -108,16 +96,12 @@ ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
 template <class InputIt, class Size, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) OutputIt copy_n(InputIt first, Size count, OutputIt result)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
-    return std::copy_n(first, count, result);
-#else
     while(count--)
         *result++ = *first++;
 
     return result;
-#endif
 }
-
+#endif
 
 template<class InputIt, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) inline OutputIt copy_backward(InputIt first, InputIt last,
