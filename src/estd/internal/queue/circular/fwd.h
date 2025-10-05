@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enum.h"
+#include "../../../span.h"
 #include "../../feature/queue.h"
 #include "../../container/fwd.h"
 
@@ -47,21 +48,21 @@ using ring_options = internal::queue_options;
 
 namespace layer1 {
 
-template <class T, unsigned N, internal::queue_options o = ring_options::default_opt>
+template <class T, unsigned N, internal::queue_options o = ring_options::none>
 using ring = internal::circular_queue<internal::array_circular_policy<T, N, o>>;
 
 }
 
 namespace layer2 {
 
-template <class T, unsigned N, internal::queue_options o = ring_options::default_opt>
+template <class T, unsigned N, internal::queue_options o = ring_options::none>
 using ring = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
 
 }
 
 namespace layer3 {
 
-template <class T, internal::queue_options o = ring_options::default_opt>
+template <class T, internal::queue_options o = ring_options::none>
 using ring = internal::circular_queue<internal::span_circular_policy<T, detail::dynamic_extent::value, o>>;
 
 }

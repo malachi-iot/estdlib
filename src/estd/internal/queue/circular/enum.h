@@ -6,7 +6,8 @@ namespace estd { namespace internal {
 
 enum class queue_options    // NOLINT(*-enum-size)
 {
-    none        = 0x0000,
+    none        = 0x0000,   ///< See 'type_resolver'
+
     bare        = 0x0001,   ///< No knowledge of empty, full, count or rollover
     sentinel    = 0x0002,
     flagged     = 0x0003,
@@ -32,8 +33,6 @@ enum class queue_options    // NOLINT(*-enum-size)
     // https://en.cppreference.com/w/cpp/language/contracts.html
     // strict AND hardened cannot coexist, specify one or the other
     hardened    = 0x0080,
-
-    default_opt = none
 };
 
 ESTD_FLAGS(queue_options)
