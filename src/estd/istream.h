@@ -133,7 +133,7 @@ using ispanstream = basic_ispanstream<char>;
 // EXPERIMENTAL
 // Seems unhappy since it's a perfect forward Args&& situation and can't directly match
 // 'span' as a parameter
-#if __cpp_deduction_guides
+#if __cpp_deduction_guides && !__clang__
 template <class Char, size_t Extent>
 basic_istream(span<Char, Extent>) -> basic_ispanstream<Char, estd::char_traits<Char>, Extent>;
 #endif
