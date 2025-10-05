@@ -19,21 +19,12 @@
 #include <inttypes.h>
 #endif
 
+// DEBT: Ancient code, needing clean.  Don't want to wipe it out, still interesting
+// move it to embr
+
 namespace estd {
 
 namespace internal {
-
-namespace legacy {
-
-// EXCLUDES null termination but room for a - sign
-template <class T>
-ESTD_CPP_ATTR_DEPRECATED("Use numeric_limits::length instead")
-ESTD_CPP_CONSTEVAL uint8_t maxStringLength()
-{
-    return numeric_limits<T>::template length<10>::value;
-}
-
-}
 
 extern const char VALIDATE_NULLSTR_ERROR[];
 extern const char VALIDATE_STRTOOLONG_ERROR[];
@@ -43,18 +34,6 @@ extern const char TYPENAME_INT[];
 extern const char TYPENAME_CHARPTR[];
 
 template<class T> PGM_P validateString(const char* input);
-
-// 20AUG25 MB Not well tested, and to be removed by 01OCT25
-template<class T, class Char>
-ESTD_CPP_ATTR_DEPRECATED("Use to_string instead")
-Char* toString(Char* output, T input)
-{
-    estd::layer2::basic_string<Char, 0> s(output);
-
-    to_string(output, input);
-
-    return output;
-}
 
 template<class T> PGM_P getTypeName();
 

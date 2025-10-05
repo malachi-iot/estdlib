@@ -776,16 +776,6 @@ TEST_CASE("string tests")
     }
     SECTION("internal")
     {
-        using namespace estd::internal::legacy;
-
-        // 20AUG25 MB Remove this legacy test by 01SEP25 since maxStringLength itself
-        // is deprecated
-        SECTION("maxStringLength (legacy)")
-        {
-            REQUIRE(maxStringLength<uint8_t>() == 3);
-            REQUIRE(maxStringLength<int8_t>() == 4);
-            //REQUIRE(maxStringLength<float>() == 32);
-        }
         SECTION("shifted string")
         {
             estd::layer1::string<32> copy;
