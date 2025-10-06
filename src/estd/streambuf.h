@@ -34,15 +34,16 @@ class streambuf :
     using this_type = streambuf;
 
 public:
-    using typename base_type::char_type;
     using typename base_type::traits_type;
+    // GCC 7.x can't do base_type::char_type here
+    using char_type = typename traits_type::char_type;
 
-    typedef Impl impl_type;
-    typedef Policy policy_type;
+    using impl_type = Impl;
+    using policy_type = Policy;
 
-    typedef typename traits_type::int_type int_type;
-    typedef typename traits_type::pos_type pos_type;
-    typedef typename traits_type::off_type off_type;
+    using int_type = typename traits_type::int_type;
+    using pos_type = typename traits_type::pos_type;
+    using off_type = typename traits_type::off_type;
 
     using nonconst_char_type = remove_const_t<char_type>;
 

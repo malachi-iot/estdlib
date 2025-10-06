@@ -8,7 +8,7 @@
 
 using namespace estd;
 
-typedef experimental::istringstream<64> istream_type;
+using istream_type = layer1::istringstream<64>;
 
 static void test_use_facet()
 {
@@ -79,9 +79,9 @@ static void test_num_get_alt()
 
 static void test_num_get_istream1()
 {
-    typedef istream_type::streambuf_type streambuf_type;
+    using streambuf_type = typename istream_type::streambuf_type;
     istream_type istream(input);
-    typedef istreambuf_iterator<streambuf_type> iterator_type;
+    using iterator_type = istreambuf_iterator<streambuf_type>;
 
     num_get<char, iterator_type, istream_type::locale_type> facet = 
         use_facet<num_get<char, iterator_type> >(istream.getloc());

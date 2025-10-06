@@ -123,13 +123,15 @@ struct unordered_map_traits :
     unordered_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>
 {
     using base_type = unordered_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>;
-    using typename base_type::mapped_type;
-    using typename base_type::key_type;
     using typename base_type::nullable;
     using typename unordered_map_traits_control<Key, T>::control_type;
     using typename unordered_map_traits_control<Key, T>::meta;
     using traits = unordered_map_traits;
     using base_type::key_eq;
+
+    // GCC 7.x can't use shorthand using here
+    using mapped_type = typename base_type::mapped_type;
+    using key_type = typename base_type::key_type;
 
     using value_type = pair<const key_type, mapped_type>;
 
