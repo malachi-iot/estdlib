@@ -1,15 +1,14 @@
 #pragma once
 
 #include "base.h"
-#include "../../fwd/string.h"
+//#include "../../fwd/string.h"
+#include "../../layer1/string.h"
 
 // Ironic, we have to put the true-blue pseudo-double-buffer that streambuf represents into a distinct
 // 'buffer' area
 
 namespace estd { namespace internal { namespace impl {
 
-#if __cplusplus >= 201103L
-// This class has nothing specific inhibiting c++03 compat, I am just saving time.
 // Hard wired to layer1 string. a span version of this would be nice too
 // DEBT: It's likely we can combine this with existing span buf and stringbuf to have a noop-Streambuf
 // in them
@@ -20,7 +19,7 @@ class out_buffered_stringbuf : public wrapped_streambuf_base<Streambuf>
 
     static constexpr int len_ = len;
 
-    // TODO: Make this a string type we pass in somehow
+    // DEBT: Make this a string type we pass in somehow
     estd::layer1::string<len_, false> buf_;
 
     //constexpr
@@ -105,7 +104,5 @@ public:
         return overflow(ch);
     }
 };
-
-#endif
 
 }}}

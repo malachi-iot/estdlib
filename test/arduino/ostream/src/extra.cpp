@@ -1,1 +1,2 @@
-//#include <estd/internal/impl/streambuf/buffer.h>
+// Just to test compilation
+#include <estd/internal/impl/streambuf/buffer.h>

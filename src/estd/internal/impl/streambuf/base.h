@@ -2,6 +2,7 @@
 
 #include "fwd.h"
 
+#include "../../ios_base.h"
 #include "../../feature/streambuf.h"
 #include "../../../policy/rfc.h"
 
