@@ -122,7 +122,10 @@ struct function_fnptr2<Result(Args...), o>
 #endif
 
         //template <typename U>
-        ESTD_CPP_CONSTEXPR(14) explicit model(F&& u) :
+#if !__GNUC__ || __clang__ || __GNUC__ > 8
+        ESTD_CPP_CONSTEXPR(14)
+#endif
+        explicit model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
             f(std::forward<F>(u))
         {
