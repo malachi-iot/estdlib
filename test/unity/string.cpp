@@ -6,10 +6,10 @@
 #define TEST_STR "hi2u"
 #define TEST_STR2 "hi2me"
 
-template <class TString>
+template <class String>
 void _test_string_assignment()
 {
-    TString s = TEST_STR;
+    String s = TEST_STR;
 
     TEST_ASSERT_EQUAL(sizeof(TEST_STR) - 1, s.size());
 
@@ -23,10 +23,10 @@ void _test_string_assignment()
 }
 
 
-template <class TString>
+template <class String>
 static void test_string_concat()
 {
-    TString s;
+    String s;
 
     s += TEST_STR;
     s += ':';
@@ -69,6 +69,10 @@ void test_layer3_string()
 {
     // TODO: "No suitable constructor exists to convert const char*""
     //_test_string_assignment<estd::layer3::const_string>();
+    char backing[] { "hi2u" };
+    estd::layer3::string s(backing);
+
+    TEST_ASSERT_EQUAL(4, s.size());
 }
 
 

@@ -119,7 +119,7 @@ public:
 
 
 // defaults to null-terminated variety
-typedef basic_string<char> string;
+using string = basic_string<char>;
 
 
 
