@@ -5,9 +5,11 @@
 #pragma push_macro("max")
 #pragma push_macro("min")
 #pragma push_macro("round")
+#pragma push_macro("word")
 #undef _abs
 #undef abs
 #undef max
 #undef min
 #undef round
+#undef word
 #endif
