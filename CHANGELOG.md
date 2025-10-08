@@ -1,4 +1,4 @@
-# v0.8.10 - XXXXX25
+# v0.8.10 - 08OCT25
 
 ## Added Features
 
@@ -13,6 +13,7 @@
 * https://github.com/malachi-iot/estdlib/issues/142 scrubbing UTF8 -> ASCII
 * https://github.com/malachi-iot/estdlib/issues/143 removing legacy toString/fromString
 * https://github.com/malachi-iot/estdlib/issues/150 repairing consteval misapplication
+* https://github.com/malachi-iot/estdlib/issues/152 AVR misc reparations
 
 ## Known Issues and Limitations
 
