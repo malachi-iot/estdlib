@@ -172,11 +172,24 @@ public:
 
     function& operator =(const function&) = default;
 
-    // NOTE: Removed separate && version since it was an ambiguous overload, and
-    // std::function only has this kind of signature anyway
+    // Deviating from std::function who does Args...args to avoid possible copy
+    // risk.
     // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
-    inline Result operator()(Args... args)
+    template <class ...Args2>
+    constexpr Result operator()(Args2&&... args) const
     {
+        static_assert(sizeof...(Args2) == sizeof...(Args),
+            "Wrong number of arguments");
+
+        // Exact type match check: prevents implicit conversions
+        static_assert(
+            estd::conjunction<
+                estd::is_same<estd::decay_t<Args2>,
+                             estd::decay_t<Args>>...
+            >::value,
+            "Call argument types do not exactly match signature"
+        );
+
         // a little complicated.  Some guidance from:
         // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
         // the first portion m->* indicates that a method function pointer call is happening

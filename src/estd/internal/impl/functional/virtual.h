@@ -15,7 +15,7 @@ struct function_virtual<Result(Args...), o>
 
     struct model_base
     {
-        virtual Result operator()(Args...args) = 0;
+        virtual Result operator()(Args&&...args) = 0;
         virtual ~model_base() = default;
 #if FEATURE_ESTD_GH135
         virtual void copy_to(model_base*) = 0;
@@ -38,7 +38,7 @@ struct function_virtual<Result(Args...), o>
 
         F f;
 
-        Result operator()(Args...args) override
+        Result operator()(Args&&...args) override
         {
             return f(std::forward<Args>(args)...);
         }
@@ -67,7 +67,7 @@ struct function_virtual<Result(Args...), o>
 
         T* const object_;
 
-        Result operator()(Args...args) override
+        Result operator()(Args&&...args) override
         {
             return (object_->*f)(std::forward<Args>(args)...);
         }

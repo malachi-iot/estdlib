@@ -369,7 +369,7 @@ TEST_CASE("functional")
 
                 struct model : _fb::model_base
                 {
-                    void operator()(int v) override
+                    void operator()(int&& v) override
                     {
                         counter += v;
                     }
