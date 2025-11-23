@@ -163,15 +163,15 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
 namespace detail { inline namespace v1 {
 
 /// Lower-level version of function which is hands-off for memory management
-template <typename TResult, typename... TArgs, class TImpl>
-class function<TResult(TArgs...), TImpl> : public internal::function_base_tag
+template <typename Result, typename... Args, class Impl>
+class function<Result(Args...), Impl> : public internal::function_base_tag
 {
 protected:
-    typedef TImpl impl_type;
+    using impl_type = Impl;
 
     // DEBT: Don't really like model_base and model as public, but may be necessary
 public:
-    typedef typename impl_type::model_base model_base;
+    using model_base = typename impl_type::model_base;
 
     // NOTE: c++17 CTAD may be required for this to really be useful
     // https://en.cppreference.com/w/cpp/language/class_template_argument_deduction
@@ -201,7 +201,7 @@ public:
     // NOTE: Removed separate && version since it was an ambiguous overload, and
     // std::function only has this kind of signature anyway
     // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
-    inline TResult operator()(TArgs... args)
+    inline Result operator()(Args... args)
     {
         // a little complicated.  Some guidance from:
         // https://stackoverflow.com/questions/2402579/function-pointer-to-member-function
@@ -212,14 +212,14 @@ public:
 
         // DEBT: Prefer lower overhead of above mess, but while we diagnose ESP32 failures
         // let's make our lives easier
-        return (*m)(std::forward<TArgs>(args)...);
+        return (*m)(std::forward<Args>(args)...);
     }
 
-    explicit operator bool() const NOEXCEPT { return m != NULLPTR; }
+    explicit operator bool() const noexcept { return m != nullptr; }
 
     // See above 'model' CTAD comments
     template <typename F>
-    inline static model<F> make_model(F&& f)
+    constexpr static model<F> make_model(F&& f)
     {
         return model<F>(std::forward<F>(f));
     }
@@ -229,7 +229,7 @@ public:
 
     // EXPERIMENTAL
     template <template <template <class, impl::fn_options> class, typename F, class ...TArgs2> class TProvided, class ...TArgs2>
-    using imbue = TProvided<detail::impl::function_fnptr1, TResult(TArgs...), TArgs2...>;
+    using imbue = TProvided<detail::impl::function_fnptr1, Result(Args...), TArgs2...>;
 
 #if FEATURE_ESTD_GH135
     // EXPERIMENTAL

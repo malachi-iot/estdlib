@@ -157,6 +157,7 @@ struct function_fnptr2<Result(Args...), o>
             return f(std::forward<Args>(args)...);
         }
 
+        // DEBT: Bring this guy to Args&&
         static Result exec(void* _this, Args...args)
         {
             F& f = ((model*)_this)->f;

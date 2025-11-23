@@ -25,7 +25,7 @@
 
 #define ESTD_CPP_DEFAULT_ASSIGNMENT(T)  \
     T& operator=(const T&) = default;   \
-    T& operator=(T&&) = default;
+    T& operator=(T&&) noexcept = default;
 
 // https://en.cppreference.com/w/cpp/language/rule_of_three.html
 #define ESTD_CPP_DEFAULT_RULE_OF_5(T)   \

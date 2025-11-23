@@ -814,10 +814,42 @@ TEST_CASE("functional")
 
             REQUIRE(dummy.val1 == 12);
         }
+        SECTION("fnptr2: test::Functor")
+        {
+            using fb = detail::v2::function<void(int), detail::impl::function_fnptr2>;
+            using model_base = fb::model_base;
+            int inc_on_destruct{};
+
+            {
+                test::Functor f(0, "test::Functor", &inc_on_destruct);
+
+                // TODO: In theory we can do a copyable one too
+                //fb::make_model(f);
+                auto m1 = fb::make_model(std::move(f));
+
+                REQUIRE(f.moved_from_);
+
+                fb fb1(&m1);
+
+                fb1(5);
+
+                REQUIRE(m1.f.moved_);
+                REQUIRE(m1.f.val1 == 5);
+
+                byte raw[sizeof(m1)];
+
+                //fb1.move_to((model_base*)raw);
+
+                //fb fb2((model_base*)raw);
+            }
+
+            REQUIRE(inc_on_destruct == 1);
+            REQUIRE(inc_on_destruct == 1);
+        }
         SECTION("virtual")
         {
             using fb = detail::v2::function<void(int), detail::impl::function_virtual>;
-            using model_base = typename fb::model_base;
+            using model_base = fb::model_base;
             using fv = internal::function_view<void(int), detail::impl::function_virtual>;
 
             auto m1 = fb::make_model([=](int v)
@@ -854,6 +886,12 @@ TEST_CASE("functional")
             fb3(5);
 
             REQUIRE(dummy.val1 == 17);
+        }
+        SECTION("virtual: test::Functor")
+        {
+            using fb = detail::v2::function<void(int), detail::impl::function_virtual>;
+            using model_base = fb::model_base;
+
         }
     }
 #endif

@@ -83,6 +83,23 @@ struct Dummy
 
 struct ChildOfDummy : Dummy {};
 
+struct Functor : Dummy
+{
+    using base_type = Dummy;
+
+    int call_count_ = 0;
+
+    Functor() = default;
+    ESTD_CPP_FORWARDING_CTOR(Functor)
+    ESTD_CPP_DEFAULT_RULE_OF_5(Functor)
+
+    void operator()(int v = 0)
+    {
+        ++call_count_;
+        val1 += v;
+    }
+};
+
 
 struct NonCopyable
 {
