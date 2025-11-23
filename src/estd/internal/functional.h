@@ -244,6 +244,12 @@ public:
     {
         m->copy_to(dest);
     }
+
+    // EXPERIMENTAL
+    void destruct()
+    {
+        m->destruct();
+    }
 #endif
 };
 

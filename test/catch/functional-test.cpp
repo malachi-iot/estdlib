@@ -838,12 +838,15 @@ TEST_CASE("functional")
 
                 byte raw[sizeof(m1)];
 
-                //fb1.move_to((model_base*)raw);
+                fb1.move_to((model_base*)raw);
 
-                //fb fb2((model_base*)raw);
+                fb fb2((model_base*)raw);
+
+                // DEBT: Still in experimental phase, though ground-up logic is sound.
+                // Memory lifecycle of model/model_base is confusing (largely non-owning)
+                fb2.destruct();
             }
 
-            REQUIRE(inc_on_destruct == 1);
             REQUIRE(inc_on_destruct == 1);
         }
         SECTION("virtual")
@@ -891,7 +894,30 @@ TEST_CASE("functional")
         {
             using fb = detail::v2::function<void(int), detail::impl::function_virtual>;
             using model_base = fb::model_base;
+            int inc_on_destruct{};
 
+            {
+                test::Functor f(0, "test::Functor", &inc_on_destruct);
+
+                auto m1 = fb::make_model(std::move(f));
+
+                fb fb1(&m1);
+
+                fb1(5);
+
+                REQUIRE(m1.f.moved_);
+                REQUIRE(m1.f.val1 == 5);
+
+                byte raw[sizeof(m1)];
+
+                fb1.move_to((model_base*)raw);
+
+                fb fb2((model_base*)raw);
+
+                //fb2.destruct();
+            }
+
+            //REQUIRE(inc_on_destruct == 1);
         }
     }
 #endif

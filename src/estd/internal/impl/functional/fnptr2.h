@@ -32,7 +32,7 @@ struct function_fnptr2<Result(Args...), o>
         // DEBT: Make this optional and default to off
 
         // mode, model in, model out
-        typedef void (*utility_type)(modes, void*, void*);
+        using utility_type = void (*)(modes, void*, void*);
         utility_type u_{};
     };
 
@@ -42,8 +42,8 @@ struct function_fnptr2<Result(Args...), o>
         monostate,
         utility_base>
     {
-        typedef Result (*function_type)(void*, Args...);
-        typedef void (*deleter_type)();
+        using function_type = Result (*)(void*, Args...);
+        using deleter_type = void (*)();
 
         const function_type _f;
 #if GITHUB_ISSUE_39_EXP
@@ -92,6 +92,11 @@ struct function_fnptr2<Result(Args...), o>
         {
             utility_base::u_(MOVE, this, dest);
         }
+
+        void destruct()
+        {
+            utility_base::u_(DELETE, this, nullptr);
+        }
 #endif
     };
 
@@ -116,6 +121,7 @@ struct function_fnptr2<Result(Args...), o>
                     break;
 
                 case DELETE:
+                    this_->~model();
                     break;
             }
         }
