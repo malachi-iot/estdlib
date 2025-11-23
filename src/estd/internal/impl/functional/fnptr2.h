@@ -121,7 +121,7 @@ struct function_fnptr2<Result(Args...), o>
             switch(mode)
             {
                 case COPY:
-                    //new (dest) model(this_->f);
+                    new (dest) model(this_->f);
                     break;
 
                 case MOVE:
@@ -142,6 +142,17 @@ struct function_fnptr2<Result(Args...), o>
         explicit model(F&& u) :
             base_type(static_cast<typename base_type::function_type>(&model::exec)),
             f(std::forward<F>(u))
+        {
+#if FEATURE_ESTD_GH135
+            base_type::u_ = utility;
+#endif
+        }
+
+#if __clang__ || __GNUC__ > 8
+#endif
+        explicit model(const F& u) :
+            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            f(u)
         {
 #if FEATURE_ESTD_GH135
             base_type::u_ = utility;

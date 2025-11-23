@@ -836,20 +836,37 @@ TEST_CASE("functional")
                 REQUIRE(m1.f.moved_);
                 REQUIRE(m1.f.val1 == 5);
 
-                byte raw[sizeof(m1)];
+                byte raw2[sizeof(m1)], raw3[sizeof(m1)];
+                auto model2 = (decltype(m1)*) raw2;
+                auto model3 = (decltype(m1)*) raw3;
+                model_base* mb2 = model2;
+                model_base* mb3 = model3;
 
-                fb1.move_to((model_base*)raw);
+                fb1.move_to(mb2);
 
-                fb fb2((model_base*)raw);
+                fb fb2(mb2);
+
+                fb2(5);
+                REQUIRE(model2->f.call_count_ == 2);
+                REQUIRE(model2->f.val1 == 10);
+
+                fb2.copy_to(mb3);
+
+                fb fb3(mb3);
+
+                fb3(5);
+                REQUIRE(model3->f.call_count_ == 3);
+                REQUIRE(model3->f.val1 == 15);
 
                 // DEBT: Still in experimental phase, though ground-up logic is sound.
                 // Memory lifecycle of model/model_base is confusing (largely non-owning)
                 // NOTE: Just became aware of std::function_ref (c++23) - that is an inspiring idea,
                 // feels like an overlap
                 fb2.destroy();
+                fb3.destroy();
             }
 
-            REQUIRE(inc_on_destruct == 1);
+            REQUIRE(inc_on_destruct == 2);
         }
         SECTION("virtual")
         {

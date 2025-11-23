@@ -93,7 +93,6 @@ public:
     value_type& value() { return *(T*)&_value; }
     const value_type& value() const { return *(T*)&_value; }
 
-#if defined(FEATURE_CPP_VARIADIC) && defined(FEATURE_CPP_MOVESEMANTIC)
     template <class ...TArgs>
     value_type& construct(TArgs&&...args)
     {
@@ -101,27 +100,6 @@ public:
         new (loc) value_type(std::forward<TArgs>(args)...);
         return value();
     }
-#else
-    value_type& construct()
-    {
-        new (&_value) value_type();
-        return value();
-    }
-
-    template <class TParam1>
-    value_type& construct(TParam1 p1)
-    {
-        new (&_value) value_type(p1);
-        return value();
-    }
-
-    template <class TParam1, class TParam2>
-    value_type& construct(TParam1 p1, TParam2 p2)
-    {
-        new (&_value) value_type(p1, p2);
-        return value();
-    }
-#endif
 
     void destroy()
     {
@@ -140,8 +118,6 @@ public:
 };
 #endif
 
-#if __cpp_variadic_templates && __cpp_decltype
-
 template <typename F, F f>
 struct function_ptr_traits;
 
@@ -154,11 +130,8 @@ struct function_ptr_traits<R (T::*)(Args...), f> :
     typedef T this_type;
 };
 
-#endif
 
 }
-
-#if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
 
 namespace detail { inline namespace v1 {
 
@@ -224,6 +197,12 @@ public:
         return model<F>(std::forward<F>(f));
     }
 
+    template <typename F>
+    constexpr static model<F> make_model(const F& f)
+    {
+        return model<F>(f);
+    }
+
     // EXPERIMENTAL
     const model_base* getm() const { return m; }
 
@@ -233,16 +212,18 @@ public:
 
 #if FEATURE_ESTD_GH135
     // EXPERIMENTAL
-    void move_to(model_base* dest)
+    function move_to(model_base* dest)
     {
         m->move_to(dest);
         m = nullptr;
+        return { dest };
     }
 
     // EXPERIMENTAL
-    void copy_to(model_base* dest)
+    function copy_to(model_base* dest)
     {
         m->copy_to(dest);
+        return { dest };
     }
 
     // EXPERIMENTAL
@@ -416,6 +397,6 @@ public:
 
 }
 
-#endif
+
 
 }
