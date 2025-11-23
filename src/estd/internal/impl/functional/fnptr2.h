@@ -50,10 +50,14 @@ struct function_fnptr2<Result(Args...), o>
         monostate,
         utility_base>
     {
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        using function_type = Result (*)(void*, Args&&...);
+#else
         using function_type = Result (*)(void*, Args...);
+#endif
         using deleter_type = void (*)();
 
-        const function_type _f;
+        const function_type f_;
 #if GITHUB_ISSUE_39_EXP
         const deleter_type _d;
 #endif
@@ -61,7 +65,7 @@ struct function_fnptr2<Result(Args...), o>
         constexpr explicit model_base(
             function_type f,
             deleter_type d = nullptr) :
-            _f(f)
+            f_(f)
 #if GITHUB_ISSUE_39_EXP
             ,
             _d{d}
@@ -73,7 +77,7 @@ struct function_fnptr2<Result(Args...), o>
         // doesn't initialize _f
         //concept_fnptr2(concept_fnptr2&& move_from) = default;
         constexpr model_base(model_base&& move_from) noexcept:
-            _f(std::move(move_from._f))
+            f_(std::move(move_from.f_))
 #if GITHUB_ISSUE_39_EXP
             ,
             _d{std::move(move_from._d)}
@@ -82,12 +86,12 @@ struct function_fnptr2<Result(Args...), o>
 
         inline Result _exec(Args&&...args)
         {
-            return _f(this, std::forward<Args>(args)...);
+            return f_(this, std::forward<Args>(args)...);
         }
 
         inline Result operator()(Args&&...args)
         {
-            return _f(this, std::forward<Args>(args)...);
+            return f_(this, std::forward<Args>(args)...);
         }
 
 #if FEATURE_ESTD_GH135
@@ -159,14 +163,6 @@ struct function_fnptr2<Result(Args...), o>
 #endif
         }
 
-        /*
-        model_fnptr2(const model_fnptr2& copy_from) = default;
-        //model_fnptr2(model_fnptr2&& move_from) = default;
-        model_fnptr2(model_fnptr2&& move_from) :
-            base_type(std::move(move_from)),
-            f(std::move(move_from.f))
-        {} */
-
         F f;
 
         /*
@@ -182,8 +178,11 @@ struct function_fnptr2<Result(Args...), o>
             return f(std::forward<Args>(args)...);
         }
 
-        // DEBT: Bring this guy to Args&&
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args&&...args)
+#else
         ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args...args)
+#endif
         {
             F& f = ((model*)_this)->f;
 
@@ -208,8 +207,11 @@ struct function_fnptr2<Result(Args...), o>
             return (object_->*f)(std::forward<Args>(args)...);
         }
 
-        // DEBT: Use rvalue here
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        static Result exec(void* this_, Args&&...args)
+#else
         static Result exec(void* this_, Args...args)
+#endif
         {
             return (*((method_model*)this_))(std::forward<Args>(args)...);
         }
@@ -222,7 +224,11 @@ struct function_fnptr2_opt<Result(Args...)>
 {
     struct model_base
     {
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        typedef Result (*function_type)(void*, Args&&...);
+#else
         typedef Result (*function_type)(void*, Args...);
+#endif
 
         const function_type f;
 
@@ -251,7 +257,11 @@ struct function_fnptr2_opt<Result(Args...)>
 
         F f;
 
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        static void exec(void* this_, Args&&...args)
+#else
         static void exec(void* this_, Args...args)
+#endif
         {
             F& f = ((model_void*)this_)->f;
             f(std::forward<Args>(args)...);
@@ -275,7 +285,7 @@ struct function_fnptr2_opt<Result(Args...)>
 
         F f;
 
-        static Result exec(void* this_, Args...args)
+        static Result exec(void* this_, Args&&...args)
         {
             F& f = ((model_nonvoid*)this_)->f;
             Result r = f(std::forward<Args>(args)...);

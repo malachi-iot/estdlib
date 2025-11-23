@@ -43,4 +43,21 @@ struct function_virtual;
 #define FEATURE_ESTD_GH135 1
 #endif
 
+// EXPERIMENTAL
+// 23NOV25 MB - Does actually work.  I am concerned that extra references
+// in place of copies may actually be *more* overhead.  Idea would be to detect
+// whether we want regular Args..., Args&&... or a container to pass args around.
+// That's a deep dive optimization.  Probably worth it at some point, but not
+// today
+#ifndef FEATURE_ESTD_FUNCTION_RVALUE
+#define FEATURE_ESTD_FUNCTION_RVALUE 0
+#endif
+
 }}}
+
+namespace estd { namespace internal {
+
+template <class R, class ...Args>
+struct function_verify_args_match;
+
+}}

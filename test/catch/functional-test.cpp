@@ -369,7 +369,11 @@ TEST_CASE("functional")
 
                 struct model : _fb::model_base
                 {
+#if FEATURE_ESTD_FUNCTION_RVALUE
                     void operator()(int&& v) override
+#else
+                    void operator()(int v) override
+#endif
                     {
                         counter += v;
                     }
@@ -451,7 +455,11 @@ TEST_CASE("functional")
                         model() : base_type(&_exec)
                         {}
 
+#if FEATURE_ESTD_FUNCTION_RVALUE
+                        static void _exec(void* _this, int&& v)
+#else
                         static void _exec(void* _this, int v)
+#endif
                         {
                             ((model*)_this)->counter += v;
                         }

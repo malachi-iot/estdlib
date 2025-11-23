@@ -172,12 +172,22 @@ public:
 
     function& operator =(const function&) = default;
 
+#if FEATURE_ESTD_FUNCTION_RVALUE
     // Deviating from std::function who does Args...args to avoid possible copy
     // risk.
     // https://en.cppreference.com/w/cpp/utility/functional/function/operator()
     template <class ...Args2>
     constexpr Result operator()(Args2&&... args) const
     {
+        // DEBT: There's an implicit overhead with Args&& in that once we
+        // reach the function pointer boundary, we NEVER copy.  In template land
+        // that's OK, but in function pointer land it means the creation of a reference
+        // when we might not have needed one
+        // DEBT: Doubling up as we test how effective these asserts are
+        static_assert(
+            internal::function_verify_args_match<Result, Args...>::template match<Args2...>::value,
+            "");
+
         static_assert(sizeof...(Args2) == sizeof...(Args),
             "Wrong number of arguments");
 
@@ -201,6 +211,12 @@ public:
         // let's make our lives easier
         return (*m)(std::forward<Args>(args)...);
     }
+#else
+    constexpr Result operator()(Args... args) const
+    {
+        return (*m)(std::forward<Args>(args)...);
+    }
+#endif
 
     explicit operator bool() const noexcept { return m != nullptr; }
 
@@ -251,6 +267,28 @@ public:
 }}
 
 namespace internal {
+
+template <class R, class ...Args>
+struct function_verify_args_match
+{
+    template <class ...Args2>
+    struct match
+    {
+        static_assert(sizeof...(Args2) == sizeof...(Args),
+            "Wrong number of arguments");
+
+        // Exact type match check: prevents implicit conversions
+        static_assert(
+            estd::conjunction<
+                estd::is_same<estd::decay_t<Args2>,
+                             estd::decay_t<Args>>...
+            >::value,
+            "Call argument types do not exactly match signature"
+        );
+
+        static constexpr bool value = true;
+    };
+};
 
 // DEBT: Might be better named as 'method', except that could be somewhat ambiguous
 template <typename Result, typename... Args, template <class, detail::impl::fn_options> class Impl>
