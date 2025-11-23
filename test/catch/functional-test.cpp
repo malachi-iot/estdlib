@@ -28,10 +28,6 @@ int do_something_inspector(F&& f, Args&&...args)
 
 using namespace estd;
 
-// temporarily switching this on or off here as I build out experimental pre C++03 tuple
-#ifdef FEATURE_CPP_VARIADIC
-
-
 void forwarder_func(int val, estd::detail::function<void(int)> f)
 {
     f(val);
@@ -794,7 +790,7 @@ TEST_CASE("functional")
         SECTION("fnptr2")
         {
             using fb = detail::v2::function<void(int), detail::impl::function_fnptr2>;
-            using model_base = typename fb::model_base;
+            using model_base = fb::model_base;
 
             auto m1 = fb::make_model([=](int v)
             {
@@ -862,7 +858,5 @@ TEST_CASE("functional")
     }
 #endif
 }
-
-#endif
 
 #include "macro/pop.h"
