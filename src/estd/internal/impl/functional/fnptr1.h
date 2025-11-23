@@ -2,7 +2,8 @@
 
 #include "fwd.h"
 
-#if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
+// 23NOV25 MB DEBT: No dtor/utility assist here.  Would be a FIX but
+// so far we far prefer fnptr2 and virtual
 
 // Arduino compatibility
 #pragma push_macro("F")
@@ -34,32 +35,8 @@ struct function_fnptr1<Result(Args...)>
         typedef void (model_base::*deleter2_type)();  // EXPERIMENTAL
 
         const function_type f;
-#if GITHUB_ISSUE_39_EXP
-        const deleter2_type d;
-#endif
 
-#if GITHUB_ISSUE_39_EXP
-        constexpr explicit model_base(function_type f) : f(f), d{nullptr} {}
-        constexpr explicit model_base(function_type f, deleter2_type d) :
-            f(f), d{d}
-        {}
-
-        constexpr model_base(const model_base& copy_from) = default;
-        // just like concept_fnptr2, default move constructor somehow
-        // results in make_inline2 leaving f uninitialized
-        //concept_fnptr1(concept_fnptr1&& move_from) = default;
-        constexpr model_base(model_base&& move_from) noexcept:
-            f(move_from.f),
-            d(move_from.d)
-        {}
-
-        ~model_base()
-        {
-            if(d)   (this->*d)();
-        }
-#else
         constexpr explicit model_base(function_type f) : f(f) {}
-#endif
 
         // Calls 'exec' down in model, typically
         inline Result operator()(Args&&...args)
@@ -77,25 +54,13 @@ struct function_fnptr1<Result(Args...)>
         //template <typename U>
         constexpr explicit model(F&& u) :
             base_type(
-#if GITHUB_ISSUE_39_EXP
-                static_cast<typename base_type::function_type>(&model::exec),
-                static_cast<typename base_type::deleter2_type>(&model::dtor)),
-#else
                 // casts Result (model<F>::*)(Args...) -> Result (model_base::*)(Args...)
                 static_cast<typename base_type::function_type>(&model::exec)),
-#endif
             f(std::forward<F>(u))
         {
         }
 
         F f;
-
-#if GITHUB_ISSUE_39_EXP
-        void dtor()
-        {
-            f.~F();
-        }
-#endif
 
         // DEBT: Use rvalue here
         Result exec(Args...args)
@@ -164,4 +129,3 @@ struct function_fnptr1_opt<Result(Args...)>
 
 #pragma pop_macro("F")
 
-#endif

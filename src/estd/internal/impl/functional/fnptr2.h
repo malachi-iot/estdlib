@@ -4,8 +4,6 @@
 
 #include "fwd.h"
 
-#if defined(__cpp_variadic_templates) && defined(__cpp_rvalue_references)
-
 // Arduino compatibility
 #pragma push_macro("F")
 #undef F
@@ -26,15 +24,19 @@ struct function_fnptr2<Result(Args...), o>
 #endif
 
     static constexpr fn_options options = o;
+    // DEBT: Make this optional and default to off
     static constexpr bool has_utility = true; //o & fn_options::FN_COPY;
+    using utility_type = void (*)(modes, void*, void*);
+
+    struct no_utility_base
+    {
+        ESTD_CPP_DEFAULT_RULE_OF_5(no_utility_base)
+        constexpr explicit no_utility_base(utility_type) {}
+    };
 
     struct utility_base
     {
-        // DEBT: Make this optional and default to off
-
-        // mode, model in, model out
-        using utility_type = void (*)(modes, void*, void*);
-        utility_type u_{};
+        utility_type u_;
 
         /*
          * FIX: Causes a recursion stack overflow
@@ -42,46 +44,43 @@ struct function_fnptr2<Result(Args...), o>
         {
             if(u_)  u_(DELETE, this, nullptr);
         }   */
+
+        ESTD_CPP_DEFAULT_RULE_OF_5(utility_base)
+        constexpr explicit utility_base(utility_type u) :
+            u_{u}
+        {}
     };
+
+    using model_utility_base = conditional_t<has_utility,
+        utility_base,
+        no_utility_base>;
 
     // this is a slightly less fancy more brute force approach to try to diagnose esp32
     // woes
-    struct model_base : conditional_t<has_utility == false,
-        monostate,
-        utility_base>
+    struct model_base : model_utility_base
     {
+        using base_type = model_utility_base;
+
 #if FEATURE_ESTD_FUNCTION_RVALUE
         using function_type = Result (*)(void*, Args&&...);
 #else
         using function_type = Result (*)(void*, Args...);
 #endif
-        using deleter_type = void (*)();
 
         const function_type f_;
-#if GITHUB_ISSUE_39_EXP
-        const deleter_type _d;
-#endif
 
         constexpr explicit model_base(
             function_type f,
-            deleter_type d = nullptr) :
+            utility_type u) :
+            base_type(u),
             f_(f)
-#if GITHUB_ISSUE_39_EXP
-            ,
-            _d{d}
-#endif
         {}
 
         model_base(const model_base& copy_from) = default;
-        // DEBT: For some reason ESP32's default move constructor
-        // doesn't initialize _f
-        //concept_fnptr2(concept_fnptr2&& move_from) = default;
-        constexpr model_base(model_base&& move_from) noexcept:
+
+        constexpr model_base(model_base&& move_from) noexcept :
+            base_type(std::move(move_from)),
             f_(std::move(move_from.f_))
-#if GITHUB_ISSUE_39_EXP
-            ,
-            _d{std::move(move_from._d)}
-#endif
         {}
 
         inline Result _exec(Args&&...args)
@@ -144,23 +143,21 @@ struct function_fnptr2<Result(Args...), o>
         ESTD_CPP_CONSTEXPR(14)
 #endif
         explicit model(F&& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            base_type(
+                static_cast<typename base_type::function_type>(&model::exec),
+                utility),
             f(std::forward<F>(u))
         {
-#if FEATURE_ESTD_GH135
-            base_type::u_ = utility;
-#endif
         }
 
 #if __clang__ || __GNUC__ > 8
 #endif
         explicit model(const F& u) :
-            base_type(static_cast<typename base_type::function_type>(&model::exec)),
+            base_type(
+                static_cast<typename base_type::function_type>(&model::exec),
+                utility),
             f(u)
         {
-#if FEATURE_ESTD_GH135
-            base_type::u_ = utility;
-#endif
         }
 
         F f;
@@ -184,9 +181,7 @@ struct function_fnptr2<Result(Args...), o>
         ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args...args)
 #endif
         {
-            F& f = ((model*)_this)->f;
-
-            return f(std::forward<Args>(args)...);
+            return ((model*)_this)->operator()(std::forward<Args>(args)...);
         }
     };
 
@@ -196,7 +191,9 @@ struct function_fnptr2<Result(Args...), o>
     struct method_model : model_base
     {
         constexpr explicit method_model(T* t) :
-            model_base(static_cast<typename model_base::function_type>(&method_model::exec)),
+            model_base(
+                static_cast<typename model_base::function_type>(&method_model::exec),
+                nullptr),
             object_{t}
         {}
 
@@ -304,4 +301,3 @@ struct function_fnptr2_opt<Result(Args...)>
 
 #pragma pop_macro("F")
 
-#endif

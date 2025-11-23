@@ -35,10 +35,10 @@ struct function_fnptr2_opt;
 template <typename F, fn_options = FN_DEFAULT>
 struct function_virtual;
 
-// 21JUL25 MB In progress, coming along:
+// 23NOV25 MB In progress, coming along:
 // 1. fnptr1 no #135 implementation
-// 2. fnptr2 #135 implementation, needs testing and refinement
-// 3. virtual #135 implementation, needs testing
+// 2. fnptr2 #135 implementation, passes basic testing
+// 3. virtual #135 implementation, passes basic testing
 #ifndef FEATURE_ESTD_GH135
 #define FEATURE_ESTD_GH135 1
 #endif

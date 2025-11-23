@@ -452,7 +452,7 @@ TEST_CASE("functional")
 
                         int counter = 0;
 
-                        model() : base_type(&_exec)
+                        model() : base_type(&_exec, nullptr)
                         {}
 
 #if FEATURE_ESTD_FUNCTION_RVALUE
