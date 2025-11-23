@@ -26,6 +26,7 @@ struct function_fnptr2<Result(Args...), o>
 #endif
 
     static constexpr fn_options options = o;
+    static constexpr bool has_utility = true; //o & fn_options::FN_COPY;
 
     struct utility_base
     {
@@ -34,11 +35,18 @@ struct function_fnptr2<Result(Args...), o>
         // mode, model in, model out
         using utility_type = void (*)(modes, void*, void*);
         utility_type u_{};
+
+        /*
+         * FIX: Causes a recursion stack overflow
+        ~utility_base()
+        {
+            if(u_)  u_(DELETE, this, nullptr);
+        }   */
     };
 
     // this is a slightly less fancy more brute force approach to try to diagnose esp32
     // woes
-    struct model_base : conditional_t<false,
+    struct model_base : conditional_t<has_utility == false,
         monostate,
         utility_base>
     {
@@ -93,7 +101,7 @@ struct function_fnptr2<Result(Args...), o>
             utility_base::u_(MOVE, this, dest);
         }
 
-        void destruct()
+        void destroy()
         {
             utility_base::u_(DELETE, this, nullptr);
         }

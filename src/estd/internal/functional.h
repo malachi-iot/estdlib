@@ -246,9 +246,9 @@ public:
     }
 
     // EXPERIMENTAL
-    void destruct()
+    void destroy()
     {
-        m->destruct();
+        m->destroy();
     }
 #endif
 };

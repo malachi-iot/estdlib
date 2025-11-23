@@ -20,6 +20,7 @@ struct function_virtual<Result(Args...), o>
 #if FEATURE_ESTD_GH135
         virtual void copy_to(model_base*) = 0;
         virtual void move_to(model_base*) = 0;
+        void destroy() { this->~model_base(); }
 #endif
     };
 

@@ -844,7 +844,9 @@ TEST_CASE("functional")
 
                 // DEBT: Still in experimental phase, though ground-up logic is sound.
                 // Memory lifecycle of model/model_base is confusing (largely non-owning)
-                fb2.destruct();
+                // NOTE: Just became aware of std::function_ref (c++23) - that is an inspiring idea,
+                // feels like an overlap
+                fb2.destroy();
             }
 
             REQUIRE(inc_on_destruct == 1);
@@ -914,10 +916,10 @@ TEST_CASE("functional")
 
                 fb fb2((model_base*)raw);
 
-                //fb2.destruct();
+                fb2.destroy();
             }
 
-            //REQUIRE(inc_on_destruct == 1);
+            REQUIRE(inc_on_destruct == 1);
         }
     }
 #endif
