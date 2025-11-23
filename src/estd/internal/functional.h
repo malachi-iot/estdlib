@@ -165,9 +165,10 @@ public:
 
     function(const function& copy_from) = default;
 
-    // NOTE: If we decide to add nullability to function_base, then a move constructor
-    // makes sense
-    function(function&& move_from) = delete;
+    function(function&& move_from) noexcept : m{move_from.m}
+    {
+        move_from.m = nullptr;
+    }
 
     function& operator =(const function&) = default;
 

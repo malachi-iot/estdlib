@@ -177,13 +177,13 @@ struct function_fnptr2<Result(Args...), o>
 
         // TODO: Consolidate different models down to a model_base since they
         // all need this exec function
-        Result operator()(Args&&...args)
+        ESTD_CPP_CONSTEXPR(14) Result operator()(Args&&...args)
         {
             return f(std::forward<Args>(args)...);
         }
 
         // DEBT: Bring this guy to Args&&
-        static Result exec(void* _this, Args...args)
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args...args)
         {
             F& f = ((model*)_this)->f;
 
