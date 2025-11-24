@@ -400,7 +400,7 @@ TEST_CASE("functional")
 
                 REQUIRE(m.counter == 5);
             }
-            SECTION("fnptr1 (default)")
+            SECTION("fnptr1")
             {
                 using _fb = detail::v2::function<void(int), detail::impl::function_fnptr1>;
                 int value = 0;
@@ -415,7 +415,7 @@ TEST_CASE("functional")
 
                 REQUIRE(value == 5);
             }
-            SECTION("fnptr2")
+            SECTION("fnptr2 (default)")
             {
                 typedef estd::detail::function<void(int),
                     estd::detail::impl::function_fnptr2<void(

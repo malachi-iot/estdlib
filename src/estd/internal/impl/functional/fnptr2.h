@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../type_traits.h"
+#include "../../rtto.h"
 
 #include "fwd.h"
 
@@ -10,23 +11,12 @@
 
 namespace estd { namespace detail { namespace impl {
 
-
 template <typename Result, typename... Args, fn_options o>
-struct function_fnptr2<Result(Args...), o>
+struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 {
-#if FEATURE_ESTD_GH135
-    enum modes
-    {
-        COPY,
-        MOVE,
-        DELETE
-    };
-#endif
-
     static constexpr fn_options options = o;
     // DEBT: Make this optional and default to off
     static constexpr bool has_utility = true; //o & fn_options::FN_COPY;
-    using utility_type = void (*)(modes, void*, void*);
 
     struct no_utility_base
     {
@@ -34,32 +24,15 @@ struct function_fnptr2<Result(Args...), o>
         constexpr explicit no_utility_base(utility_type) {}
     };
 
-    struct utility_base
-    {
-        utility_type u_;
-
-        /*
-         * FIX: Causes a recursion stack overflow
-        ~utility_base()
-        {
-            if(u_)  u_(DELETE, this, nullptr);
-        }   */
-
-        ESTD_CPP_DEFAULT_RULE_OF_5(utility_base)
-        constexpr explicit utility_base(utility_type u) :
-            u_{u}
-        {}
-    };
-
-    using model_utility_base = conditional_t<has_utility,
+    using model_rtto_base = conditional_t<has_utility,
         utility_base,
         no_utility_base>;
 
     // this is a slightly less fancy more brute force approach to try to diagnose esp32
     // woes
-    struct model_base : model_utility_base
+    struct model_base : model_rtto_base
     {
-        using base_type = model_utility_base;
+        using base_type = model_rtto_base;
 
 #if FEATURE_ESTD_FUNCTION_RVALUE
         using function_type = Result (*)(void*, Args&&...);
@@ -92,51 +65,13 @@ struct function_fnptr2<Result(Args...), o>
         {
             return f_(this, std::forward<Args>(args)...);
         }
-
-#if FEATURE_ESTD_GH135
-        void copy_to(model_base* dest)
-        {
-            utility_base::u_(COPY, this, dest);
-        }
-
-        void move_to(model_base* dest)
-        {
-            utility_base::u_(MOVE, this, dest);
-        }
-
-        void destroy()
-        {
-            utility_base::u_(DELETE, this, nullptr);
-        }
-#endif
     };
 
     template <typename F>
     struct model : model_base
     {
         using base_type = model_base;
-
-#if FEATURE_ESTD_GH135
-        static void utility(modes mode, void* src, void* dest)
-        {
-            auto this_ = static_cast<model*>(src);
-
-            switch(mode)
-            {
-                case COPY:
-                    new (dest) model(this_->f);
-                    break;
-
-                case MOVE:
-                    new (dest) model(std::move(this_->f));
-                    break;
-
-                case DELETE:
-                    this_->~model();
-                    break;
-            }
-        }
-#endif
+        using rtto = internal::rtto<model>;
 
         //template <typename U>
 #if !__GNUC__ || __clang__ || __GNUC__ > 8
@@ -145,7 +80,7 @@ struct function_fnptr2<Result(Args...), o>
         explicit model(F&& u) :
             base_type(
                 static_cast<typename base_type::function_type>(&model::exec),
-                utility),
+                rtto::utility),
             f(std::forward<F>(u))
         {
         }
@@ -155,10 +90,12 @@ struct function_fnptr2<Result(Args...), o>
         explicit model(const F& u) :
             base_type(
                 static_cast<typename base_type::function_type>(&model::exec),
-                utility),
+                rtto::utility),
             f(u)
         {
         }
+
+        ESTD_CPP_DEFAULT_RULE_OF_5(model);
 
         F f;
 
