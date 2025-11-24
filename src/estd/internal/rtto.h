@@ -77,10 +77,19 @@ struct rtto_base
     public:
         virtual ~virtual_base() = default;
 
-        virtual int copy_to(void*) = 0;
-        virtual int move_to(void*) = 0;
+        virtual int copy_to(void*, int = 0) = 0;
+        virtual int move_to(void*, int = 0) = 0;
 
         void destroy() { this->~virtual_base(); }
+    };
+
+    // UNFINISHED, EXPERIMENTAL
+    // Seems a fully polymorphic approach *may* be superior to the function ptr dispatch
+    // method.  Sussing that out
+    class virt
+    {
+        virtual int copy_to(void* src, void* dst) = 0;
+        virtual int move_to(void* src, void* dst) = 0;
     };
 };
 
@@ -97,6 +106,8 @@ struct rtto : rtto_base
     using is_move_constructible = std::is_move_constructible<value_type>;
     using is_trivially_constructible = std::is_trivially_constructible<value_type>;
     using is_constructible = std::is_default_constructible<value_type>;
+
+    static constexpr int value_sz = sizeof(value_type);
 
     static inline int copy(pointer from, void* to, std::true_type)
     {
@@ -118,28 +129,37 @@ struct rtto : rtto_base
 
     static ESTD_CPP_CONSTEVAL int copy(void*, void*, std::false_type) { return EINVAL; }
     static ESTD_CPP_CONSTEVAL int move(void*, void*, std::false_type) { return EINVAL; }
-    static ESTD_CPP_CONSTEVAL int create(void* storage, std::false_type) { return EINVAL; }
+    static ESTD_CPP_CONSTEVAL int create(void*, std::false_type) { return EINVAL; }
+
+    constexpr static bool size_ok(int sz)
+    {
+        return sz == 0 || sz >= value_sz;
+    }
+
+    static inline int move(pointer from, void *to, int sz)
+    {
+        if(!size_ok(sz)) return ENOMEM;
+
+        return move(from, to, is_move_constructible{});
+    }
 
     static int utility(modes mode, void* p0, int p1, void* p2)
     {
         auto this_ = static_cast<pointer>(p0);
 
-        constexpr int value_sz = sizeof(value_type);
-
         switch(mode)
         {
             case COPY:
-                if(p1 && p1 < value_sz) return ENOMEM;
+                if(!size_ok(p1)) return ENOMEM;
                 // FIX: estd flavor isn't resolving down to estd::true_type/estd::false_type
                 //return copy(this_, p2, estd::is_copy_constructible<value_type>{});
                 return copy(this_, p2, is_copy_constructible{});
 
             case MOVE:
-                if(p1 && p1 < value_sz) return ENOMEM;
-                return move(this_, p2, is_move_constructible{});
+                return move(this_, p2, p1);
 
             case MOVE_AND_DESTROY:
-                if(p1 && p1 < value_sz) return ENOMEM;
+                if(!size_ok(p1)) return ENOMEM;
                 if(move(this_, p2, is_move_constructible{}) != 0) return EINVAL;
                 ESTD_CPP_ATTR_FALLTHROUGH;
 
@@ -164,6 +184,25 @@ struct rtto : rtto_base
 
         return 0;
     }
+
+    // UNFINISHED, EXPERIMENTAL
+    // Seems a fully polymorphic approach *may* be superior to the function ptr dispatch
+    // method.  Sussing that out
+    // While convenient, we do sling the 'this' pointer around for only indirect gains.
+    // Possibly an inefficiency as compared to fnptr
+    class virt : public rtto_base::virt
+    {
+    public:
+        int copy_to(void* src, void* dest) override
+        {
+            return copy(src, dest, is_constructible{});
+        }
+
+        int move_to(void* src, void* dest) override
+        {
+            return move(src, dest, is_constructible{});
+        }
+    };
 };
 
 

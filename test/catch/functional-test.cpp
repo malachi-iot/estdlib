@@ -381,12 +381,12 @@ TEST_CASE("functional")
                     int counter = 0;
 
 #if FEATURE_ESTD_GH135
-                    int copy_to(void* dest) override
+                    int copy_to(void* dest, int) override
                     {
                         return ENOSYS;
                     }
 
-                    int move_to(void* dest) override
+                    int move_to(void* dest, int) override
                     {
                         return ENOSYS;
                     }
@@ -814,9 +814,7 @@ TEST_CASE("functional")
 
             estd::byte raw2[sizeof(m1)], raw3[sizeof(m1)];
 
-            fb1.move_to((model_base*)raw2);
-
-            fb fb2((model_base*) raw2);
+            fb fb2 = fb1.move_to(raw2, sizeof(raw2));
 
             fb2(5);
 
@@ -897,7 +895,7 @@ TEST_CASE("functional")
 
             //fv1.function()(5);
 
-            fb fb2 = fb1.move_to((model_base*) raw2);
+            fb fb2 = fb1.move_to(raw2);
 
             fb2(5);
 

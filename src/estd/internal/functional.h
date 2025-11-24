@@ -242,11 +242,12 @@ public:
 
 #if FEATURE_ESTD_GH135
     // EXPERIMENTAL
-    function move_to(model_base* dest)
+    function move_to(void* dest, int sz = 0)
     {
-        assert(m->move_to(dest) == 0);
+        assert(m->move_to(dest, sz) == 0);
         m = nullptr;
-        return { dest };
+        // We trust that move_to does in fact construct a model_base
+        return { static_cast<model_base*>(dest) };
     }
 
     // EXPERIMENTAL

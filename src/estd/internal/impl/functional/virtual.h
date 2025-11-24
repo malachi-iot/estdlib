@@ -54,14 +54,14 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         }
 
 #if FEATURE_ESTD_GH135
-        int copy_to(void* dest) override
+        int copy_to(void* dest, int sz) override
         {
             return rtto::copy(this, dest, std::true_type{});
         }
 
-        int move_to(void* dest) override
+        int move_to(void* dest, int sz) override
         {
-            return rtto::move(this, dest, std::true_type{});
+            return rtto::move(this, dest, sz);
         }
 #endif
     };
@@ -87,12 +87,12 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         }
 
 #if FEATURE_ESTD_GH135
-        int copy_to(void* dest) override
+        int copy_to(void* dest, int sz) override
         {
             return ENOSYS;
         }
 
-        int move_to(void* dest) override
+        int move_to(void* dest, int sz) override
         {
             return ENOSYS;
         }
