@@ -56,7 +56,7 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
 #if FEATURE_ESTD_GH135
         int copy_to(void* dest, int sz) override
         {
-            return rtto::copy(this, dest, std::true_type{});
+            return rtto::copy(this, dest, sz);
         }
 
         int move_to(void* dest, int sz) override

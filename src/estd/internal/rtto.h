@@ -88,12 +88,16 @@ struct rtto_base
     // method.  Sussing that out
     class virt
     {
-        virtual int copy_to(void* src, void* dst) = 0;
-        virtual int move_to(void* src, void* dst) = 0;
+        virtual int copy_to(void* src, void* dst) const = 0;
+        virtual int move_to(void* src, void* dst) const = 0;
+        virtual void destroy(void*) const = 0;
+        virtual int size() const = 0;
     };
 };
 
 
+// TODO: Look into https://en.cppreference.com/w/cpp/memory/polymorphic_allocator.html to
+// see if there's any overlap.  So far it doesn't seem so
 template <class T, class Traits = void>
 struct rtto : rtto_base
 {
@@ -136,6 +140,13 @@ struct rtto : rtto_base
         return sz == 0 || sz >= value_sz;
     }
 
+    static inline int copy(pointer from, void *to, int sz)
+    {
+        if(!size_ok(sz)) return ENOMEM;
+
+        return copy(from, to, is_copy_constructible{});
+    }
+
     static inline int move(pointer from, void *to, int sz)
     {
         if(!size_ok(sz)) return ENOMEM;
@@ -150,17 +161,15 @@ struct rtto : rtto_base
         switch(mode)
         {
             case COPY:
-                if(!size_ok(p1)) return ENOMEM;
                 // FIX: estd flavor isn't resolving down to estd::true_type/estd::false_type
                 //return copy(this_, p2, estd::is_copy_constructible<value_type>{});
-                return copy(this_, p2, is_copy_constructible{});
+                return copy(this_, p2, p1);
 
             case MOVE:
                 return move(this_, p2, p1);
 
             case MOVE_AND_DESTROY:
-                if(!size_ok(p1)) return ENOMEM;
-                if(move(this_, p2, is_move_constructible{}) != 0) return EINVAL;
+                if(int rc = move(this_, p2, p1) != 0) return rc;
                 ESTD_CPP_ATTR_FALLTHROUGH;
 
             case DELETE:
@@ -193,15 +202,22 @@ struct rtto : rtto_base
     class virt : public rtto_base::virt
     {
     public:
-        int copy_to(void* src, void* dest) override
+        int copy_to(void* src, void* dest) const override
         {
             return copy(src, dest, is_constructible{});
         }
 
-        int move_to(void* src, void* dest) override
+        int move_to(void* src, void* dest) const override
         {
             return move(src, dest, is_constructible{});
         }
+
+        void destroy(void*) const override
+        {
+            // TBD
+        }
+
+        int size() const override { return value_sz; }
     };
 };
 
