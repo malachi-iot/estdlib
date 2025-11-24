@@ -244,7 +244,7 @@ public:
     // EXPERIMENTAL
     function move_to(model_base* dest)
     {
-        m->move_to(dest);
+        assert(m->move_to(dest) == 0);
         m = nullptr;
         return { dest };
     }
@@ -252,7 +252,7 @@ public:
     // EXPERIMENTAL
     function copy_to(model_base* dest)
     {
-        m->copy_to(dest);
+        assert(m->copy_to(dest) == 0);
         return { dest };
     }
 

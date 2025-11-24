@@ -381,14 +381,14 @@ TEST_CASE("functional")
                     int counter = 0;
 
 #if FEATURE_ESTD_GH135
-                    void copy_to(model_base* dest) override
+                    int copy_to(void* dest) override
                     {
-
+                        return ENOSYS;
                     }
 
-                    void move_to(model_base* dest) override
+                    int move_to(void* dest) override
                     {
-
+                        return ENOSYS;
                     }
 #endif
                 };

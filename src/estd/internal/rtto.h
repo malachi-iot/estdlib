@@ -71,6 +71,17 @@ struct rtto_base
             return u_(SIZE, nullptr, 0, nullptr);
         }
     };
+
+    class virtual_base
+    {
+    public:
+        virtual ~virtual_base() = default;
+
+        virtual int copy_to(void*) = 0;
+        virtual int move_to(void*) = 0;
+
+        void destroy() { this->~virtual_base(); }
+    };
 };
 
 
@@ -81,9 +92,21 @@ struct rtto : rtto_base
     using pointer = T*;
     using traits = Traits;
 
+    // DEBT: Switch these to estd variety for AVR compability
+    using is_copy_constructible = std::is_copy_constructible<value_type>;
+    using is_move_constructible = std::is_move_constructible<value_type>;
+    using is_trivially_constructible = std::is_trivially_constructible<value_type>;
+    using is_constructible = std::is_default_constructible<value_type>;
+
     static inline int copy(pointer from, void* to, std::true_type)
     {
         new (to) value_type(*from);
+        return 0;
+    }
+
+    static inline int move(pointer from, void* to, std::true_type)
+    {
+        new (to) value_type(std::move(*from));
         return 0;
     }
 
@@ -94,25 +117,30 @@ struct rtto : rtto_base
     }
 
     static ESTD_CPP_CONSTEVAL int copy(void*, void*, std::false_type) { return EINVAL; }
+    static ESTD_CPP_CONSTEVAL int move(void*, void*, std::false_type) { return EINVAL; }
     static ESTD_CPP_CONSTEVAL int create(void* storage, std::false_type) { return EINVAL; }
 
     static int utility(modes mode, void* p0, int p1, void* p2)
     {
         auto this_ = static_cast<pointer>(p0);
 
+        constexpr int value_sz = sizeof(value_type);
+
         switch(mode)
         {
             case COPY:
+                if(p1 && p1 < value_sz) return ENOMEM;
                 // FIX: estd flavor isn't resolving down to estd::true_type/estd::false_type
-                //return copy(this_, p2, std::is_copy_constructible<value_type>{});
-                return copy(this_, p2, std::true_type{});
+                //return copy(this_, p2, estd::is_copy_constructible<value_type>{});
+                return copy(this_, p2, is_copy_constructible{});
 
             case MOVE:
-                new (p2) value_type(std::move(*this_));
-                break;
+                if(p1 && p1 < value_sz) return ENOMEM;
+                return move(this_, p2, is_move_constructible{});
 
             case MOVE_AND_DESTROY:
-                new (p2) value_type(std::move(*this_));
+                if(p1 && p1 < value_sz) return ENOMEM;
+                if(move(this_, p2, is_move_constructible{}) != 0) return EINVAL;
                 ESTD_CPP_ATTR_FALLTHROUGH;
 
             case DELETE:
@@ -126,7 +154,7 @@ struct rtto : rtto_base
             // EXPERIMENTAL
             case CREATE:
                 // FIX: estd is_trivially_constructible falls apart here
-                return create(p0, std::is_trivially_constructible<value_type>{});
+                return create(p0, is_constructible{});
                 //return create(p0, bool_constant<false>{});
 #endif
 

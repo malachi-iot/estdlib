@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../new.h"
+#include "../../rtto.h"
 
 #include "fwd.h"
 
@@ -9,11 +10,11 @@
 namespace estd { namespace detail { namespace impl {
 
 template <typename Result, typename... Args, fn_options o>
-struct function_virtual<Result(Args...), o>
+struct function_virtual<Result(Args...), o> : internal::rtto_base
 {
     static constexpr fn_options options = o;
 
-    struct model_base
+    struct model_base : rtto_base::virtual_base
     {
 #if FEATURE_ESTD_FUNCTION_RVALUE
         virtual Result operator()(Args&&...args) = 0;
@@ -22,15 +23,14 @@ struct function_virtual<Result(Args...), o>
 #endif
         virtual ~model_base() = default;
 #if FEATURE_ESTD_GH135
-        virtual void copy_to(model_base*) = 0;
-        virtual void move_to(model_base*) = 0;
-        void destroy() { this->~model_base(); }
 #endif
     };
 
     template <class F>
     struct model : model_base
     {
+        using rtto = internal::rtto<model>;
+
         constexpr explicit model(const F& u) :
             f(u)
         {}
@@ -39,6 +39,8 @@ struct function_virtual<Result(Args...), o>
             f(std::forward<F>(u))
         {
         }
+
+        ESTD_CPP_DEFAULT_RULE_OF_5(model)
 
         F f;
 
@@ -52,14 +54,14 @@ struct function_virtual<Result(Args...), o>
         }
 
 #if FEATURE_ESTD_GH135
-        void copy_to(model_base* dest) override
+        int copy_to(void* dest) override
         {
-            new (dest) model(f);
+            return rtto::copy(this, dest, std::true_type{});
         }
 
-        void move_to(model_base* dest) override
+        int move_to(void* dest) override
         {
-            new (dest) model(std::move(f));
+            return rtto::move(this, dest, std::true_type{});
         }
 #endif
     };
@@ -85,14 +87,14 @@ struct function_virtual<Result(Args...), o>
         }
 
 #if FEATURE_ESTD_GH135
-        void copy_to(model_base* dest) override
+        int copy_to(void* dest) override
         {
-
+            return ENOSYS;
         }
 
-        void move_to(model_base* dest) override
+        int move_to(void* dest) override
         {
-
+            return ENOSYS;
         }
 #endif
     };
