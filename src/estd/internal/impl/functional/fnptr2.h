@@ -25,7 +25,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
     };
 
     using model_rtto_base = conditional_t<has_utility,
-        utility_base,
+        base,
         no_utility_base>;
 
     // this is a slightly less fancy more brute force approach to try to diagnose esp32

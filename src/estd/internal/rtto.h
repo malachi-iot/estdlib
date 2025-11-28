@@ -5,6 +5,11 @@
 #include "type_traits.h"
 #include "utility.h"
 
+// EXPERIMENTAL still and occupies ROM space even when not used
+#ifndef FEATURE_ESTD_RTTO_GET_METADATA
+#define FEATURE_ESTD_RTTO_GET_METADATA 0
+#endif
+
 namespace estd { namespace internal {
 
 struct rtto_base
@@ -26,8 +31,19 @@ struct rtto_base
 
     using utility_type = int (*)(modes, void*, int, void*);
 
-    class utility_base
+
+    // EXPERIMENTAL
+    struct metadata
     {
+        const int value_sz;
+        bool copyable : 1;
+        bool moveable : 1;
+    };
+
+    class base
+    {
+        using this_type = base;
+
         utility_type u_;
 
         /*
@@ -38,8 +54,8 @@ struct rtto_base
         }   */
 
     public:
-        ESTD_CPP_DEFAULT_RULE_OF_5(utility_base)
-        constexpr explicit utility_base(utility_type u) :
+        ESTD_CPP_DEFAULT_RULE_OF_5(base)
+        constexpr explicit base(utility_type u) :
             u_{u}
         {}
 
@@ -51,7 +67,7 @@ struct rtto_base
 
         int copy_to(void* dest, int sz = 0) const
         {
-            return u_(COPY, const_cast<utility_base*>(this), sz, dest);
+            return u_(COPY, const_cast<this_type*>(this), sz, dest);
         }
 
         int move_to(void* dest, int sz = 0)
@@ -72,6 +88,11 @@ struct rtto_base
         int size() const
         {
             return u_(SIZE, nullptr, 0, nullptr);
+        }
+
+        int get_metadata(const metadata** out)
+        {
+            return u_(GET_METADATA, nullptr, 0, out);
         }
     };
 
@@ -95,14 +116,6 @@ struct rtto_base
         virtual int move_to(void* src, void* dst) const = 0;
         virtual void destroy(void*) const = 0;
         virtual int size() const = 0;
-    };
-
-    // EXPERIMENTAL
-    struct metadata
-    {
-        const int value_sz;
-        bool copyable : 1;
-        bool moveable : 1;
     };
 };
 
@@ -201,6 +214,7 @@ struct rtto : rtto_base
                 //return create(p0, bool_constant<false>{});
 #endif
 
+#if FEATURE_ESTD_RTTO_GET_METADATA
             // EXPERIMENTAL
             case GET_METADATA:
             {
@@ -212,6 +226,7 @@ struct rtto : rtto_base
                 *dest = &mdata;
                 break;
             }
+#endif
 
             default:
                 return ENOSYS;
