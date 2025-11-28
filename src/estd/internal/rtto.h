@@ -18,7 +18,10 @@ struct rtto_base
         SIZE,
 
         // EXPERIMENTAL
-        CREATE
+        CREATE,
+
+        // EXPERIMENTAL
+        GET_METADATA,
     };
 
     using utility_type = int (*)(modes, void*, int, void*);
@@ -93,6 +96,14 @@ struct rtto_base
         virtual void destroy(void*) const = 0;
         virtual int size() const = 0;
     };
+
+    // EXPERIMENTAL
+    struct metadata
+    {
+        const int value_sz;
+        bool copyable : 1;
+        bool moveable : 1;
+    };
 };
 
 
@@ -112,6 +123,9 @@ struct rtto : rtto_base
     using is_constructible = std::is_default_constructible<value_type>;
 
     static constexpr int value_sz = sizeof(value_type);
+
+    // EXPERIMENTAL
+    //static constexpr metadata mdata{value_sz};
 
     static inline int copy(pointer from, void* to, std::true_type)
     {
@@ -186,6 +200,18 @@ struct rtto : rtto_base
                 return create(p0, is_constructible{});
                 //return create(p0, bool_constant<false>{});
 #endif
+
+            // EXPERIMENTAL
+            case GET_METADATA:
+            {
+                // DEBT: Incorrect convention because Qt Creator loses it's f***in mind here
+                static constexpr const metadata mdata{
+                    value_sz, is_copy_constructible::value, is_move_constructible::value
+                };
+                auto dest = static_cast<const metadata**>(p2);
+                *dest = &mdata;
+                break;
+            }
 
             default:
                 return ENOSYS;
