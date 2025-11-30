@@ -12,7 +12,7 @@
 
 namespace estd { namespace internal {
 
-struct rtto_base
+struct rtto_modes
 {
     enum modes
     {
@@ -22,16 +22,42 @@ struct rtto_base
         DELETE,
         SIZE,
 
-        // EXPERIMENTAL
+        // +++ EXPERIMENTAL
         CREATE,
-
-        // EXPERIMENTAL
         GET_METADATA,
+        COPY_AND_SWAP,
+        // --- EXPERIMENTAL
     };
 
     using utility_type = int (*)(modes, void*, int, void*);
+};
 
 
+
+constexpr int copy_to(rtto_modes::utility_type u, void* src, void* dest, int sz = 0)
+{
+    return u(rtto_modes::COPY, src, sz, dest);
+}
+
+constexpr int move_to(rtto_modes::utility_type u, void* src, void* dest, int sz = 0)
+{
+    return u(rtto_modes::MOVE, src, sz, dest);
+}
+
+constexpr int move_to_and_destroy(rtto_modes::utility_type u, void* src, void* dest, int sz = 0)
+{
+    return u(rtto_modes::MOVE_AND_DESTROY, src, sz, dest);
+}
+
+inline ESTD_CPP_CONSTEXPR(14) void destroy(rtto_modes::utility_type u, void* src)
+{
+    u(rtto_modes::DELETE, src, 0, nullptr);
+}
+
+
+
+struct rtto_base : rtto_modes
+{
     // EXPERIMENTAL
     struct metadata
     {
@@ -65,24 +91,24 @@ struct rtto_base
             return u_(CREATE, this, sz, 0);
         }
 
-        int copy_to(void* dest, int sz = 0) const
+        constexpr int copy_to(void* dest, int sz = 0) const
         {
-            return u_(COPY, const_cast<this_type*>(this), sz, dest);
+            return internal::copy_to(u_, const_cast<this_type*>(this), dest, sz);
         }
 
-        int move_to(void* dest, int sz = 0)
+        ESTD_CPP_CONSTEXPR(14) int move_to(void* dest, int sz = 0)
         {
-            return u_(MOVE, this, sz, dest);
+            return internal::move_to(u_, this, dest, sz);
         }
 
-        int move_to_and_destroy(void* dest, int sz = 0)
+        ESTD_CPP_CONSTEXPR(14) int move_to_and_destroy(void* dest, int sz = 0)
         {
-            return u_(MOVE_AND_DESTROY, this, sz, dest);
+            return internal::move_to_and_destroy(u_, this, dest, sz);
         }
 
-        void destroy()
+        ESTD_CPP_CONSTEXPR(14) void destroy()
         {
-            u_(DELETE, this, 0, nullptr);
+            internal::destroy(u_, this);
         }
 
         int size() const
@@ -227,6 +253,12 @@ struct rtto : rtto_base
                 break;
             }
 #endif
+
+            // EXPERIMENTAL
+            case COPY_AND_SWAP:
+            {
+                break;
+            }
 
             default:
                 return ENOSYS;

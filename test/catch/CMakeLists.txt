@@ -94,6 +94,7 @@ else()
         string-test.cpp
         string-view-test.cpp
         ratio-test.cpp
+        rtto-test.cpp
         test-data.h
         type-traits-test.cpp
         tuple-test.cpp

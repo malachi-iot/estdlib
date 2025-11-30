@@ -31,5 +31,8 @@
         "bitset": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/test/catch",
-    "idf.portWin": "COM3"
+    "idf.portWin": "COM3",
+    "search.exclude": {
+        "test/arduino/unity/lib/**": true,
+    }
 }
