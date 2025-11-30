@@ -26,6 +26,7 @@ struct rtto_modes
         CREATE,
         GET_METADATA,
         COPY_AND_SWAP,
+        MOVE_AND_SWAP,
         // --- EXPERIMENTAL
     };
 
@@ -52,6 +53,11 @@ constexpr int move_to_and_destroy(rtto_modes::utility_type u, void* src, void* d
 inline ESTD_CPP_CONSTEXPR(14) void destroy(rtto_modes::utility_type u, void* src)
 {
     u(rtto_modes::DELETE, src, 0, nullptr);
+}
+
+constexpr int size(const rtto_modes::utility_type u)
+{
+    return u(rtto_modes::SIZE, nullptr, 0, nullptr);
 }
 
 
@@ -88,7 +94,7 @@ struct rtto_base : rtto_modes
         // EXPERIMENTAL
         int create(void* dest, int sz = 0)
         {
-            return u_(CREATE, this, sz, 0);
+            return u_(CREATE, this, sz, nullptr);
         }
 
         constexpr int copy_to(void* dest, int sz = 0) const
@@ -111,12 +117,12 @@ struct rtto_base : rtto_modes
             internal::destroy(u_, this);
         }
 
-        int size() const
+        constexpr int size() const
         {
-            return u_(SIZE, nullptr, 0, nullptr);
+            return internal::size(u_);
         }
 
-        int get_metadata(const metadata** out)
+        int get_metadata(const metadata** out) const
         {
             return u_(GET_METADATA, nullptr, 0, out);
         }
@@ -160,6 +166,7 @@ struct rtto : rtto_base
     using is_move_constructible = std::is_move_constructible<value_type>;
     using is_trivially_constructible = std::is_trivially_constructible<value_type>;
     using is_constructible = std::is_default_constructible<value_type>;
+    using is_swappable = std::false_type;
 
     static constexpr int value_sz = sizeof(value_type);
 
@@ -184,9 +191,25 @@ struct rtto : rtto_base
         return 0;
     }
 
+    // EXPERIMENTAL
+    // I'm told this is a well-established paradigm to use instead of a placement-new-for-copy-assignment
+    // which helps overcome:
+    // - overlapping/to==this conditions
+    // - lifecycle concerns (TBD can't remember)
+    // - virtual method maint (TBD can't remember)
+    static ESTD_CPP_CONSTEXPR(14) int copy_and_swap(pointer from, void* to, std::true_type)
+    {
+        // DEBT: Account for alignment/padding
+        value_type temp(*from);
+
+        swap(temp, *(pointer)to);
+        return 0;
+    }
+
     static constexpr int copy(void*, void*, std::false_type) { return EINVAL; }
     static constexpr int move(void*, void*, std::false_type) { return EINVAL; }
     static constexpr int create(void*, std::false_type) { return EINVAL; }
+    static constexpr int copy_and_swap(pointer from, void* to, std::false_type) { return EINVAL; }
 
     constexpr static bool size_ok(int sz)
     {
@@ -256,9 +279,7 @@ struct rtto : rtto_base
 
             // EXPERIMENTAL
             case COPY_AND_SWAP:
-            {
-                break;
-            }
+                return copy_and_swap(this_, p2, is_swappable{});
 
             default:
                 return ENOSYS;
