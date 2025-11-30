@@ -20,6 +20,7 @@ struct Dummy
     const bool moved_ = false;      ///< This object was made from a move
     const bool copied_ = false;     ///< This object was made via a copy
     bool moved_from_ = false;       ///< This object was the source of a move
+    bool destroyed_ = false;        ///< Set when destroyed, somewhat UB to read this so watch out
 
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() = default;
@@ -49,6 +50,7 @@ struct Dummy
 
     ~Dummy()
     {
+        destroyed_ = true;
         const char* val3 = value2;
         if(inc_on_destruct)
             ++*inc_on_destruct;

@@ -126,7 +126,7 @@ template <bool trivial, class ...Types>
 struct variant_storage_base : variant_storage_tag
 {
     using size_type = std::size_t;
-    typedef variant_storage_base<trivial, Types...> this_type;
+    using this_type = variant_storage_base<trivial, Types...>;
     using types = variadic::types<Types...>;
 
     struct index_visitor
@@ -200,8 +200,8 @@ struct variant_storage_base : variant_storage_tag
             std::forward<TArgs>(args)...);
     }
 
-    template <class TEval>
-    using selector = variadic::v1::selector<TEval, Types...>;
+    template <class Eval>
+    using selector = variadic::v1::selector<Eval, Types...>;
 
     template <class T>
     using ensure_type_t = typename ensure_type<T, Types...>::type;
@@ -244,7 +244,7 @@ struct variant_storage_base : variant_storage_tag
         {
             if(index != I) return false;
 
-            v.emplace<I>(internal::get<I>(copy_from));
+            v.template emplace<I>(internal::get<I>(copy_from));
             return true;
         }
 
@@ -297,13 +297,13 @@ public:
     template <size_t index>
     pointer_at_index<index> get()
     {
-        return (pointer_at_index<index>) storage.raw;
+        return (pointer_at_index<index>) storage.raw;       // NOLINT
     }
 
     template <size_t index>
     constexpr const_pointer_at_index<index> get() const
     {
-        return (const_pointer_at_index<index>) storage.raw;
+        return (const_pointer_at_index<index>) storage.raw; // NOLINT
     }
 
     template <size_t index>
@@ -318,18 +318,17 @@ public:
         return visit_index(index, destroyer_functor{}) != -1;
     }
 
-    template <class T, class ...TArgs>
-    //constexpr
-    ensure_pointer<T> emplace(TArgs&&...args)
+    template <class T, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) ensure_pointer<T> emplace(Args&&...args)
     {
-        return new (storage.raw) T(std::forward<TArgs>(args)...);
+        return new (storage.raw) T(std::forward<Args>(args)...);
     }
 
-    template <size_t I, class ...TArgs>
-    pointer_at_index<I> emplace(TArgs&&...args)
+    template <size_t I, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) pointer_at_index<I> emplace(Args&&...args)
     {
-        typedef type_at_index<I> T_i;
-        return emplace<T_i>(std::forward<TArgs>(args)...);
+        using T_i = type_at_index<I>;
+        return emplace<T_i>(std::forward<Args>(args)...);
     }
 
 
@@ -591,12 +590,14 @@ public:
     // NOLINTBEGIN
 
     pointer get() { return base_type::template get<0>(); }
-    const_pointer get() const { return base_type::template get<0>(); }
+    constexpr const_pointer get() const { return base_type::template get<0>(); }
 
-    template <class ...TArgs>
-    pointer emplace(TArgs&&...args)
+    constexpr const_pointer operator->() const { return get(); }
+
+    template <class ...Args>
+    pointer emplace(Args&&...args)
     {
-        return base_type::template emplace<0>(std::forward<TArgs>(args)...);
+        return base_type::template emplace<0>(std::forward<Args>(args)...);
     }
 
     void destroy() { return base_type::template destroy<0>(); }

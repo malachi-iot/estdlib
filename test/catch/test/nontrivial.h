@@ -63,6 +63,7 @@ struct NonTrivial
 
     ~NonTrivial()
     {
+        // NOTE: Remember, technically it's UB if you read this guy I think
         destroyed_ = true;
 #if FEATURE_STD_FUNCTIONAL
         if(on_dtor) on_dtor();

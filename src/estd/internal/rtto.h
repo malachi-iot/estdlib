@@ -166,27 +166,27 @@ struct rtto : rtto_base
     // EXPERIMENTAL
     //static constexpr metadata mdata{value_sz};
 
-    static inline int copy(pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int copy(pointer from, void* to, std::true_type)
     {
         new (to) value_type(*from);
         return 0;
     }
 
-    static inline int move(pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int move(pointer from, void* to, std::true_type)
     {
         new (to) value_type(std::move(*from));
         return 0;
     }
 
-    static inline int create(void* storage, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int create(void* storage, std::true_type)
     {
         new (storage) value_type;
         return 0;
     }
 
-    static ESTD_CPP_CONSTEVAL int copy(void*, void*, std::false_type) { return EINVAL; }
-    static ESTD_CPP_CONSTEVAL int move(void*, void*, std::false_type) { return EINVAL; }
-    static ESTD_CPP_CONSTEVAL int create(void*, std::false_type) { return EINVAL; }
+    static constexpr int copy(void*, void*, std::false_type) { return EINVAL; }
+    static constexpr int move(void*, void*, std::false_type) { return EINVAL; }
+    static constexpr int create(void*, std::false_type) { return EINVAL; }
 
     constexpr static bool size_ok(int sz)
     {
