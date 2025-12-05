@@ -34,6 +34,7 @@ class duration :
     public estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>
 {
     using base_type = estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>;
+    using base_type::rep_;
 
 protected:
     template <class Rep2, class Period2>
@@ -77,22 +78,28 @@ public:
     }
 #endif
 
-    duration& operator+=(const duration& d)
+    ESTD_CPP_CONSTEXPR(17) duration& operator+=(const duration& d)
     {
-        base_type::rep_ += d.count();
+        rep_ += d.count();
         return *this;
     }
 
 
-    duration& operator-=(const duration& d)
+    ESTD_CPP_CONSTEXPR(17) duration& operator-=(const duration& d)
     {
-        base_type::rep_ -= d.count();
+        rep_ -= d.count();
         return *this;
     }
 
-    duration& operator*=(const rep& r)
+    ESTD_CPP_CONSTEXPR(17) duration& operator*=(const rep& r)
     {
-        base_type::rep_ *= r;
+        rep_ *= r;
+        return *this;
+    }
+
+    ESTD_CPP_CONSTEXPR(17) duration& operator/=(const rep& r)
+    {
+        rep_ /= r;
         return *this;
     }
 
@@ -100,7 +107,7 @@ public:
     {
         static_assert (numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
 
-        return duration(-base_type::rep_);
+        return duration(-rep_);
     }
 
     constexpr duration operator+() const { return *this; }

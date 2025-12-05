@@ -32,6 +32,19 @@ constexpr operator+( const duration<Rep1,Period1>& lhs,
     return CT(CT(lhs).count() + CT(rhs).count());
 }
 
+// In test where lhs is milliseconds and rhs is seconds, rhs doesn't auto promote to milliseconds correctly
+#if NOT_READY
+template<class Rep1, class Period1, class Rep2, class Period2>
+common_type_t<duration<Rep1, Period1>, duration<Rep2, Period2>>
+constexpr operator/(const duration<Rep1,Period1>& lhs,
+    const duration<Rep2,Period2>& rhs )
+{
+    using CT = common_type_t<duration<Rep1, Period1>, duration<Rep2, Period2>>;
+
+    return CT(CT(lhs).count() / CT(rhs).count());
+}
+#endif
+
 
 template< class Rep1, class Period, class Rep2>
 duration<typename estd::common_type<Rep1,Rep2>::type, Period>
@@ -46,6 +59,16 @@ constexpr operator*( const duration<Rep1,Period>& lhs,
 }
 
 
+template< class Rep1, class Period, class Rep2>
+duration<common_type_t<Rep1, Rep2>, Period>
+constexpr operator/(const duration<Rep1,Period>& lhs, const Rep2& rhs)
+{
+    using CT = duration<common_type_t<Rep1, Rep2>, Period>;
+
+    return CT(lhs.count() / rhs);
+}
+
+// +++ DEBT: Refactor these out to rely only on unit_base ones, if we can
 
 template <class Rep1, class Period1, class Rep2, class Period2>
 constexpr bool operator>(const duration<Rep1, Period1>& lhs,
@@ -102,6 +125,8 @@ constexpr bool operator!=(const duration<Rep1, Period1>& lhs,
 
     return CT(lhs).count() != CT(rhs).count();
 }
+
+// ---
 
 
 template< class C, class D1, class D2 >

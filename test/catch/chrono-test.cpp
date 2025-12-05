@@ -7,10 +7,10 @@ class fake_clock
 public:
     int ticks;
 
-    typedef estd::chrono::internal::milli_rep rep;
-    typedef estd::ratio<1, 15> period; // each 'fake' tick is 1/15 of a second
-    typedef estd::chrono::duration<rep, period> duration;
-    typedef estd::chrono::time_point<fake_clock> time_point;
+    using rep = estd::chrono::internal::milli_rep;
+    using period = estd::ratio<1, 15>; // each 'fake' tick is 1/15 of a second
+    using duration = estd::chrono::duration<rep, period>;
+    using time_point = estd::chrono::time_point<fake_clock>;
 
     time_point now()
     {
@@ -363,6 +363,20 @@ TEST_CASE("chrono tests")
         auto d = m - s;
 
         REQUIRE(d.count() == 110);
+    }
+    SECTION("division")
+    {
+        using namespace estd::chrono;
+
+        seconds s(10);
+
+        milliseconds s2 = s / 2;
+
+        REQUIRE(s2 == milliseconds(5000));
+
+        //s2 = s / s2;
+
+        //REQUIRE(s2 == seconds(2));
     }
 #if FEATURE_ESTD_CHRONO_LITERALS
     SECTION("literals")

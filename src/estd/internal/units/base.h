@@ -108,6 +108,8 @@ struct unit_traits
 // DEBT: Consolidate this with chrono if we can.  Specifically, I don't want disperate
 // scalar bases intermingling with one another, so we need some kind of type lockout/forced
 // conversion
+// TODO: Look into CRTP https://en.cppreference.com/w/cpp/language/crtp.html to
+// aid with member operator implementation (https://github.com/malachi-iot/estdlib/issues/156 )
 ///
 /// @tparam Rep core unit size of underlying count/ticks
 /// @tparam Period scaling ratio
