@@ -49,6 +49,9 @@ constexpr auto operator -(
 }
 
 
+// TODO: Add operator* and operator-.  They work well enough BUT we may not want to return
+// the same CT in those cases
+
 
 template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
 constexpr bool operator>(

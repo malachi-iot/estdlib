@@ -374,6 +374,7 @@ TEST_CASE("chrono tests")
 
         REQUIRE(s2 == milliseconds(5000));
 
+        // FIX: Needs attention
         //s2 = s / s2;
 
         //REQUIRE(s2 == seconds(2));
