@@ -12,6 +12,23 @@
 
 namespace estd { namespace internal {
 
+template <class T>
+struct rtto_traits
+{
+    using value_type = T;
+
+    // DEBT: Switch these to estd variety for AVR compability
+    using is_copy_constructible = std::is_copy_constructible<value_type>;
+    using is_move_constructible = std::is_move_constructible<value_type>;
+    using is_trivially_constructible = std::is_trivially_constructible<value_type>;
+    using is_constructible = std::is_default_constructible<value_type>;
+#if __cpp_lib_is_swappable
+    using is_swappable = std::is_swappable<value_type>;
+#else
+    using is_swappable = std::false_type;
+#endif
+};
+
 struct rtto_modes
 {
     enum modes
@@ -35,9 +52,9 @@ struct rtto_modes
 
 
 
-constexpr int copy_to(rtto_modes::utility_type u, void* src, void* dest, int sz = 0)
+constexpr int copy_to(rtto_modes::utility_type u, const void* src, void* dest, int sz = 0)
 {
-    return u(rtto_modes::COPY, src, sz, dest);
+    return u(rtto_modes::COPY, const_cast<void*>(src), sz, dest);
 }
 
 constexpr int move_to(rtto_modes::utility_type u, void* src, void* dest, int sz = 0)
@@ -76,6 +93,7 @@ struct rtto_base : rtto_modes
     {
         using this_type = base;
 
+    protected:
         utility_type u_;
 
         /*
@@ -92,7 +110,7 @@ struct rtto_base : rtto_modes
         {}
 
         // EXPERIMENTAL
-        int create(void* dest, int sz = 0)
+        int create(int sz = 0)
         {
             return u_(CREATE, this, sz, nullptr);
         }
@@ -128,6 +146,48 @@ struct rtto_base : rtto_modes
         }
     };
 
+
+    // Edge case where someone who is NOT target type wants to help with target operations
+    template <class Storage>
+    class proxy : public base
+    {
+        using base_type = base;
+
+        Storage storage_;
+
+    public:
+        ESTD_CPP_FORWARDING_CTOR(proxy)
+
+        // EXPERIMENTAL
+        int create(int sz = 0)
+        {
+            return u_(CREATE, storage_, sz, nullptr);
+        }
+
+        constexpr int copy_to(void* dest, int sz = 0) const
+        {
+            return internal::copy_to(u_, storage_, dest, sz);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) int move_to(void* dest, int sz = 0)
+        {
+            return internal::move_to(u_, storage_, dest, sz);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) int move_to_and_destroy(void* dest, int sz = 0)
+        {
+            return internal::move_to_and_destroy(u_, storage_, dest, sz);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) void destroy()
+        {
+            internal::destroy(u_, storage_);
+        }
+
+        // DEBT: Some form of stronger typing would be better
+        void* storage() { return storage_; }
+    };
+
     class virtual_base
     {
     public:
@@ -154,19 +214,19 @@ struct rtto_base : rtto_modes
 
 // TODO: Look into https://en.cppreference.com/w/cpp/memory/polymorphic_allocator.html to
 // see if there's any overlap.  So far it doesn't seem so
-template <class T, class Traits = void>
-struct rtto : rtto_base
+template <class T, class Traits = rtto_traits<T>>
+struct rtto :
+    rtto_base,
+    Traits
 {
     using value_type = T;
     using pointer = T*;
     using traits = Traits;
-
-    // DEBT: Switch these to estd variety for AVR compability
-    using is_copy_constructible = std::is_copy_constructible<value_type>;
-    using is_move_constructible = std::is_move_constructible<value_type>;
-    using is_trivially_constructible = std::is_trivially_constructible<value_type>;
-    using is_constructible = std::is_default_constructible<value_type>;
-    using is_swappable = std::false_type;
+    using typename traits::is_copy_constructible;
+    using typename traits::is_move_constructible;
+    using typename traits::is_trivially_constructible;
+    using typename traits::is_constructible;
+    using typename traits::is_swappable;
 
     static constexpr int value_sz = sizeof(value_type);
 

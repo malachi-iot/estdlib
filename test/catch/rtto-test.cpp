@@ -68,6 +68,23 @@ TEST_CASE("rtto", "Runtime Type Operations")
 
         REQUIRE(s1->destroyed_);
     }
+    SECTION("Proxy")
+    {
+        using type = test::NonTrivial;
+        //using storage = internal::instance_storage<type>;
+
+        using rtto = internal::rtto<type>;
+        using proxy = internal::rtto_base::proxy<char[]>;
+
+        char storage[128] {};
+        auto p = (proxy*) storage;
+        new (storage) proxy(rtto::utility);
+        p->create();
+        auto v = (type*) storage;
+
+        // Almost there
+        //REQUIRE(v->initialized_);
+    }
 }
 
 #include "macro/pop.h"
