@@ -5,6 +5,8 @@
 #include "concepts.h"
 #include "common_type.h"
 #include "fwd.h"
+#include "traits.h"
+#include "projectors.h"
 
 #include "../macro/push.h"
 
@@ -86,25 +88,6 @@ struct compound_unit_helper
     using type = unit_base<rep, period, tag_type>;
 };
 
-// EXPERIMENTAL
-template <class Unit>
-struct unit_traits
-{
-    using value_type = typename Unit::rep;
-    using limits = estd::numeric_limits<value_type>;
-
-    static constexpr value_type min()
-    {
-        return limits::min();
-    }
-
-    static constexpr value_type max()
-    {
-        return limits::max();
-    }
-};
-
-
 // DEBT: Consolidate this with chrono if we can.  Specifically, I don't want disperate
 // scalar bases intermingling with one another, so we need some kind of type lockout/forced
 // conversion
@@ -124,7 +107,7 @@ class unit_base :
 protected:
     Rep rep_;
 
-    using traits_type = unit_traits<unit_base>;
+    using traits_type = unit_traits_old<unit_base>;
 
 #if UNIT_TESTING
 public:

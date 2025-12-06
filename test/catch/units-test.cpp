@@ -5,6 +5,8 @@
 #include <estd/internal/units/ostream.h>
 #include <estd/internal/units/percent.h>
 #include <estd/internal/units/operators.hpp>
+#include <estd/internal/units/mixins.h>
+
 #include <estd/sstream.h>
 #include <estd/type_traits.h>
 

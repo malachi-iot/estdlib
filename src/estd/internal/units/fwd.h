@@ -7,7 +7,7 @@
 
 namespace estd { namespace internal { namespace units {
 
-template <class>
+template <class Tag>
 struct traits;
 
 template <typename Int, Int sub>
