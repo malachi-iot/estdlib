@@ -21,6 +21,7 @@ struct Dummy
     const bool copied_ = false;     ///< This object was made via a copy
     bool moved_from_ = false;       ///< This object was the source of a move
     bool destroyed_ = false;        ///< Set when destroyed, somewhat UB to read this so watch out
+    bool initialized_ = true;
 
     // because underlying struct is an array for layer1::queue, darnit
     Dummy() = default;

@@ -89,6 +89,8 @@ struct rtto_base : rtto_modes
         bool moveable : 1;
     };
 
+    // Use case is where derived class wants to report its RTTO to anyone consuming it.
+    // Primary case, designed initially for estd::function to have sensible destroy operations
     class base
     {
         using this_type = base;
@@ -148,15 +150,24 @@ struct rtto_base : rtto_modes
 
 
     // Edge case where someone who is NOT target type wants to help with target operations
-    template <class Storage>
+    template <class Storage = char[]>
     class proxy : public base
     {
         using base_type = base;
 
+    protected:
         Storage storage_;
 
     public:
-        ESTD_CPP_FORWARDING_CTOR(proxy)
+        explicit constexpr proxy(utility_type u) :
+            base_type(u)
+        {}
+
+        template <class ...Args>
+        constexpr proxy(utility_type u, Args&&...args) :
+            base_type(u),
+            storage_{std::forward<Args>(args)...}
+        {}
 
         // EXPERIMENTAL
         int create(int sz = 0)
@@ -184,8 +195,8 @@ struct rtto_base : rtto_modes
             internal::destroy(u_, storage_);
         }
 
-        // DEBT: Some form of stronger typing would be better
-        void* storage() { return storage_; }
+        template <class T = void*>
+        ESTD_CPP_CONSTEXPR(14) T storage() { return reinterpret_cast<T>(storage_); }
     };
 
     class virtual_base
@@ -221,6 +232,7 @@ struct rtto :
 {
     using value_type = T;
     using pointer = T*;
+    using const_pointer = const T*;
     using traits = Traits;
     using typename traits::is_copy_constructible;
     using typename traits::is_move_constructible;
@@ -233,7 +245,7 @@ struct rtto :
     // EXPERIMENTAL
     //static constexpr metadata mdata{value_sz};
 
-    static ESTD_CPP_CONSTEXPR(14) int copy(pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int copy(const_pointer from, void* to, std::true_type)
     {
         new (to) value_type(*from);
         return 0;
@@ -257,8 +269,9 @@ struct rtto :
     // - overlapping/to==this conditions
     // - lifecycle concerns (TBD can't remember)
     // - virtual method maint (TBD can't remember)
-    static ESTD_CPP_CONSTEXPR(14) int copy_and_swap(pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int copy_and_swap(const_pointer from, void* to, std::true_type)
     {
+        // DEBT: Make sure this sucker isn't too big for comfort
         // DEBT: Account for alignment/padding
         value_type temp(*from);
 
@@ -276,7 +289,7 @@ struct rtto :
         return sz == 0 || sz >= value_sz;
     }
 
-    static inline int copy(pointer from, void *to, int sz)
+    static inline int copy(const_pointer from, void *to, int sz)
     {
         if(!size_ok(sz)) return ENOMEM;
 

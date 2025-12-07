@@ -1,6 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <estd/internal/rtto.h>
+#include <estd/span.h>
 #include <estd/variant.h>
 
 #include "test-data.h"
@@ -70,20 +71,49 @@ TEST_CASE("rtto", "Runtime Type Operations")
     }
     SECTION("Proxy")
     {
-        using type = test::NonTrivial;
+        using type = test::Dummy;
         //using storage = internal::instance_storage<type>;
 
         using rtto = internal::rtto<type>;
-        using proxy = internal::rtto_base::proxy<char[]>;
+        alignas(void*) char storage[128] {};
 
-        char storage[128] {};
-        auto p = (proxy*) storage;
-        new (storage) proxy(rtto::utility);
-        p->create();
-        auto v = (type*) storage;
+        SECTION("inline (layer1 style)")
+        {
+            using proxy = internal::rtto_base::proxy<char[]>;
 
-        // Almost there
-        //REQUIRE(v->initialized_);
+            auto p = (proxy*) storage;  // NOLINT
+            new (storage) proxy(rtto::utility);
+            int r = p->create();
+            auto v = p->storage<type*>();
+
+            REQUIRE(r == 0);
+            REQUIRE(v->initialized_);
+        }
+        SECTION("pointer (layer2 style)")
+        {
+            using proxy = internal::rtto_base::proxy<char*>;
+
+            proxy p(rtto::utility, storage);
+
+            auto v = p.storage<type*>();
+
+            REQUIRE(v->initialized_ == false);
+
+            int r = p.create();
+
+            REQUIRE(r == 0);
+            REQUIRE(v->initialized_);
+        }
+        SECTION("span (layer3 style)")
+        {
+            using proxy = internal::rtto_base::proxy<estd::span<char>>;
+
+            proxy p(rtto::utility, storage, sizeof(storage));
+
+            // Almost works.  Would need some fancy specialization.  Can't think of a direct need for layer3
+            // style, so leaving it
+            //int r = p.create();
+        }
     }
 }
 
