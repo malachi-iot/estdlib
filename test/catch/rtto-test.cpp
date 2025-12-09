@@ -10,6 +10,16 @@
 
 using namespace estd;
 
+// Not really useful in the real world, since T is more direct than CREATE.  But useful here for RTTO testing.
+template <class T>
+T* default_create(internal::instance_storage<T>& storage, int* ret)
+{
+    using rtto = internal::rtto<T, internal::rtto_traits<T>>;
+    *ret = rtto::utility(internal::rtto_modes::CREATE, storage.get(), sizeof(T), nullptr);
+    return storage.get();
+}
+
+
 TEST_CASE("rtto", "Runtime Type Operations")
 {
     using util = internal::rtto_base::utility_type;
@@ -47,9 +57,10 @@ TEST_CASE("rtto", "Runtime Type Operations")
         using type = test::NonCopyable;
         using storage = internal::instance_storage<type>;
         using rtto = internal::rtto<type>;
-        const util u = rtto::utility;
 
         storage s;
+
+        REQUIRE(size(rtto::utility) == sizeof(type));
     }
     SECTION("test::NonTrivial")
     {
@@ -74,29 +85,32 @@ TEST_CASE("rtto", "Runtime Type Operations")
         SECTION("basic case")
         {
             using type = test::NoDefaultConstructor;
-            using rtto = internal::rtto<type>;
-            const util u = rtto::utility;
             using storage = internal::instance_storage<type>;
 
             storage s1;
 
-            int ret = u(internal::rtto_modes::CREATE, &s1, 0, nullptr);
+            int ret{};
+
+            default_create(s1, &ret);
+
             REQUIRE(ret == EINVAL);
         }
         SECTION("forwarded")
         {
             using type = test::Forwarder<test::NoDefaultConstructor>;
-            using rtto = internal::rtto<type>;
-            const util u = rtto::utility;
             using storage = internal::instance_storage<type>;
 
             storage s1;
 
-            int ret = u(internal::rtto_modes::CREATE, &s1, 0, nullptr);
+            int ret{};
+
+            default_create(s1, &ret);
+
             REQUIRE(ret == EINVAL);
 
             // Noting peculiarity where overload resolution says this is default constructible, even though it isn't
             static_assert(std::is_default_constructible<type>{}.value);
+            static_assert(std::is_trivially_default_constructible<type>{}.value == false);
         }
     }
     SECTION("Proxy")
@@ -105,7 +119,7 @@ TEST_CASE("rtto", "Runtime Type Operations")
         //using storage = internal::instance_storage<type>;
 
         // Brute forcing to activate experimental CREATE mode
-        using rtto = internal::rtto<type, internal::rtto_traits<type, true>>;
+        using rtto = internal::rtto<type, internal::rtto_traits<type, std::bool_constant<true>>>;
         alignas(void*) char storage[128] {};
 
         SECTION("inline (layer1 style)")

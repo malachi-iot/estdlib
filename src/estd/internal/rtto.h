@@ -14,8 +14,8 @@ namespace estd { namespace internal {
 
 // DEBT: CREATE mode is experimental and is_default_constructible falls apart for forwarding constructors,
 // resulting in compile time errors in that case when base class really isn't default constructible.
-// Therefore for the time being we manually specify default constructible flag
-template <class T, bool is_default_constructible = false>
+// Therefore we play some games here.
+template <class T, class IsDefaultConstructible = std::is_trivially_default_constructible<T>>
 struct rtto_traits
 {
     using value_type = T;
@@ -25,7 +25,7 @@ struct rtto_traits
     using is_move_constructible = std::is_move_constructible<value_type>;
     using is_trivially_constructible = std::is_trivially_constructible<value_type>;
     //using is_constructible = std::is_default_constructible<value_type>;
-    using is_constructible = std::bool_constant<is_default_constructible>;
+    using is_constructible = IsDefaultConstructible;
 #if __cpp_lib_is_swappable
     using is_swappable = std::is_swappable<value_type>;
 #else
@@ -91,6 +91,7 @@ struct rtto_base : rtto_modes
         const int value_sz;
         bool copyable : 1;
         bool moveable : 1;
+        bool creatable : 1;
     };
 
     // Use case is where derived class wants to report its RTTO to anyone consuming it.
