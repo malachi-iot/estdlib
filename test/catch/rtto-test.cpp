@@ -69,12 +69,43 @@ TEST_CASE("rtto", "Runtime Type Operations")
 
         REQUIRE(s1->destroyed_);
     }
+    SECTION("No Defaut Constructor")
+    {
+        SECTION("basic case")
+        {
+            using type = test::NoDefaultConstructor;
+            using rtto = internal::rtto<type>;
+            const util u = rtto::utility;
+            using storage = internal::instance_storage<type>;
+
+            storage s1;
+
+            int ret = u(internal::rtto_modes::CREATE, &s1, 0, nullptr);
+            REQUIRE(ret == EINVAL);
+        }
+        SECTION("forwarded")
+        {
+            using type = test::Forwarder<test::NoDefaultConstructor>;
+            using rtto = internal::rtto<type>;
+            const util u = rtto::utility;
+            using storage = internal::instance_storage<type>;
+
+            storage s1;
+
+            int ret = u(internal::rtto_modes::CREATE, &s1, 0, nullptr);
+            REQUIRE(ret == EINVAL);
+
+            // Noting peculiarity where overload resolution says this is default constructible, even though it isn't
+            static_assert(std::is_default_constructible<type>{}.value);
+        }
+    }
     SECTION("Proxy")
     {
         using type = test::Dummy;
         //using storage = internal::instance_storage<type>;
 
-        using rtto = internal::rtto<type>;
+        // Brute forcing to activate experimental CREATE mode
+        using rtto = internal::rtto<type, internal::rtto_traits<type, true>>;
         alignas(void*) char storage[128] {};
 
         SECTION("inline (layer1 style)")

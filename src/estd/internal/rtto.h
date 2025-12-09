@@ -12,7 +12,10 @@
 
 namespace estd { namespace internal {
 
-template <class T>
+// DEBT: CREATE mode is experimental and is_default_constructible falls apart for forwarding constructors,
+// resulting in compile time errors in that case when base class really isn't default constructible.
+// Therefore for the time being we manually specify default constructible flag
+template <class T, bool is_default_constructible = false>
 struct rtto_traits
 {
     using value_type = T;
@@ -21,7 +24,8 @@ struct rtto_traits
     using is_copy_constructible = std::is_copy_constructible<value_type>;
     using is_move_constructible = std::is_move_constructible<value_type>;
     using is_trivially_constructible = std::is_trivially_constructible<value_type>;
-    using is_constructible = std::is_default_constructible<value_type>;
+    //using is_constructible = std::is_default_constructible<value_type>;
+    using is_constructible = std::bool_constant<is_default_constructible>;
 #if __cpp_lib_is_swappable
     using is_swappable = std::is_swappable<value_type>;
 #else

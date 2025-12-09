@@ -4,6 +4,7 @@
 #include "accessors.h"
 
 #include "../../cstdlib.h"
+#include "../rtto.h"
 
 namespace estd {
 
@@ -580,9 +581,9 @@ public:
 
 
 template <class T>
-class instance_storage : protected variant_storage_base<is_trivial<T>::value, T>
+class instance_storage : protected variant_storage_base<is_trivially_constructible<T>::value, T>
 {
-    using base_type = variant_storage_base<is_trivial<T>::value, T>;
+    using base_type = variant_storage_base<is_trivially_constructible<T>::value, T>;
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 

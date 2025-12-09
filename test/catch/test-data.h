@@ -108,9 +108,10 @@ struct NonCopyable
 {
     int val;
 
-    NonCopyable() {}
+    // FIX: We are mostly-copyable with a default constructor
+    NonCopyable() = default;
 
-    // FIX: technically we are somewhat-copyable with this explicit
+    // FIX: technically we are mostly-copyable with this explicit
     // constructor
     explicit NonCopyable(const NonCopyable& copy_from) : val(copy_from.val) {}
 
@@ -128,6 +129,15 @@ struct DefaultConstructor
     DefaultConstructor() : val(default_value()) {}
 };
 
+struct NoDefaultConstructor
+{
+    int val;
+
+    NoDefaultConstructor() = delete;
+
+    explicit NoDefaultConstructor(int val) : val{val}   {}
+};
+
 template <unsigned N>
 class Templated
 {
@@ -135,6 +145,14 @@ public:
     int val1;
 
     static constexpr unsigned index = N;
+};
+
+
+template <class Base>
+struct Forwarder : Base
+{
+    template <class ...Args>
+    Forwarder(Args&&...args) : Base(std::forward<Args>(args)...) {}
 };
 
 
