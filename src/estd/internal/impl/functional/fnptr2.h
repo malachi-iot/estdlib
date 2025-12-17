@@ -71,7 +71,25 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
     struct model : model_base
     {
         using base_type = model_base;
+        using typename base_type::function_type;
         using rtto = internal::rtto<model>;
+
+#if FEATURE_ESTD_RTTO_GET_INVOKE
+        // EXPERIMENTAL
+        static int utility(modes mode, void* p0, int p1, void* p2)
+        {
+            if(mode == GET_INVOKE)
+            {
+                // At this point, you have to wonder if a vtable is better
+                *static_cast<function_type*>(p0) = &model::exec;
+                return 0;
+            }
+
+            return rtto::utility(mode, p0, p1, p2);
+        }
+#else
+        using utility = rtto::utility;
+#endif
 
         //template <typename U>
 #if !__GNUC__ || __clang__ || __GNUC__ > 8
@@ -79,8 +97,8 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 #endif
         explicit model(F&& u) :
             base_type(
-                static_cast<typename base_type::function_type>(&model::exec),
-                rtto::utility),
+                static_cast<function_type>(&model::exec),
+                utility),
             f(std::forward<F>(u))
         {
         }
@@ -89,8 +107,8 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 #endif
         explicit model(const F& u) :
             base_type(
-                static_cast<typename base_type::function_type>(&model::exec),
-                rtto::utility),
+                static_cast<function_type>(&model::exec),
+                utility),
             f(u)
         {
         }
