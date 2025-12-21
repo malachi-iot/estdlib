@@ -90,7 +90,8 @@ constexpr int size(const rtto_modes::utility_type u)
     return u(rtto_modes::SIZE, nullptr, 0, nullptr);
 }
 
-
+template <class T, class Traits = rtto_traits<T>>
+struct rtto;
 
 struct rtto_base : rtto_modes
 {
@@ -180,11 +181,31 @@ struct rtto_base : rtto_modes
             base_type(u)
         {}
 
+        // DEBT: Overlap with above?
         template <class ...Args>
-        constexpr proxy(utility_type u, Args&&...args) :
+        explicit constexpr proxy(utility_type u, Args&&...args) :
             base_type(u),
             storage_{std::forward<Args>(args)...}
         {}
+
+        // EXPERIMENTAL, kind of a substitute for emplace
+        // Won't work with exotic storage types
+        template <class T, class ...Args>
+        explicit proxy(in_place_type_t<T>, Args&&...args) :
+            base_type(rtto<T>::utility)
+        {
+            // DEBT: I bet there's a way to get this constexpr-friendly
+            new (storage_) T(std::forward<Args>(args)...);
+        }
+
+        // NOTE: Can default move constructor have an additional parameter like this? Hmm... probably?
+        proxy(proxy&& move_from, int sz = 0) :
+            base_type(move_from.u_)
+        {
+            // Leaving u_ intact in move_from. A destroy on a moved object is 100% correct and only
+            // possible if we leave that u_ there
+            move_from.move_to(storage_, sz);
+        }
 
         // EXPERIMENTAL
         int create(int sz = 0)
@@ -242,7 +263,7 @@ struct rtto_base : rtto_modes
 
 // TODO: Look into https://en.cppreference.com/w/cpp/memory/polymorphic_allocator.html to
 // see if there's any overlap.  So far it doesn't seem so
-template <class T, class Traits = rtto_traits<T>>
+template <class T, class Traits>
 struct rtto :
     rtto_base,
     Traits

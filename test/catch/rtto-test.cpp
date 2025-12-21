@@ -120,7 +120,8 @@ TEST_CASE("rtto", "Runtime Type Operations")
 
         // Brute forcing to activate experimental CREATE mode
         using rtto = internal::rtto<type, internal::rtto_traits<type, std::bool_constant<true>>>;
-        alignas(void*) char storage[128] {};
+        alignas(void*) char storage[64] {};
+        alignas(void*) char storage2[64] {};
 
         SECTION("inline (layer1 style)")
         {
@@ -128,11 +129,41 @@ TEST_CASE("rtto", "Runtime Type Operations")
 
             auto p = (proxy*) storage;  // NOLINT
             new (storage) proxy(rtto::utility);
-            int r = p->create();
+            int r = p->create();        // EXPERIMENTAL, but great for testing
             auto v = p->storage<type*>();
 
             REQUIRE(r == 0);
             REQUIRE(v->initialized_);
+        }
+        SECTION("move constructor")
+        {
+            int counter = 0;
+
+            using proxy = internal::rtto_base::proxy<>;
+
+            auto p1 = (proxy*) storage;  // NOLINT
+            auto p2 = (proxy*) storage2;  // NOLINT
+
+            //new (p1) proxy(rtto::utility);
+            //auto dummy1 = new (p1->storage()) type(7, "hello", &counter);
+            new (p1) proxy(estd::in_place_type_t<type>{}, 7, "Hello", &counter);
+            auto dummy1 = (type*) p1->storage();
+
+            REQUIRE(dummy1->moved_ == false);
+            REQUIRE(dummy1->moved_from_ == false);
+
+            new (p2) proxy(std::move(*p1));
+            auto dummy2 = (type*) p2->storage();
+
+            REQUIRE(dummy1->moved_from_ == true);
+            REQUIRE(dummy2->moved_);
+
+            REQUIRE(counter == 0);
+
+            p1->destroy();
+            p2->destroy();
+
+            REQUIRE(counter == 1);
         }
         SECTION("pointer (layer2 style)")
         {
