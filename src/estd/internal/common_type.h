@@ -48,7 +48,6 @@ struct common_type<T1, T2> : internal::common_type_2_impl<T1, T2> { };
 
 //////// 3+ types
 
-#ifdef FEATURE_CPP_VARIADIC
 template<class AlwaysVoid, class T1, class T2, class...R>
 struct common_type_multi_impl { };
 
@@ -60,12 +59,9 @@ struct common_type_multi_impl<estd::void_t<typename common_type<T1, T2>::type>, 
 template <class T1, class T2, class... R>
 struct common_type<T1, T2, R...>
     : common_type_multi_impl<void, T1, T2, R...> { };
-#endif
 
-#ifdef FEATURE_CPP_ALIASTEMPLATE
-template< class... T >
+template<class... T>
 using common_type_t = typename common_type<T...>::type;
-#endif
 
 #endif // FEATURE_CPP_VARIADIC
 }

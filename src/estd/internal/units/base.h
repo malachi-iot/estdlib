@@ -247,6 +247,18 @@ public:
         return operator -=(unit_base(v));
     }
 
+    unit_base& operator *=(const rep& v)
+    {
+        rep_ *= v;
+        return *this;
+    }
+
+    unit_base& operator /=(const rep& v)
+    {
+        rep_ /= v;
+        return *this;
+    }
+
 
     // EXPERIMENTAL - may have diminished/confusing utility especially for
     // floating point types

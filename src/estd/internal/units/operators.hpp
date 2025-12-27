@@ -170,7 +170,7 @@ constexpr bool operator<(
 
 
 template <class Rep1, class Rep2, class Tag, class Proj,
-         typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
 constexpr bool operator>=(
     const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
     const Rep2& rhs)
@@ -179,12 +179,41 @@ constexpr bool operator>=(
 }
 
 template <class Rep1, class Rep2, class Tag, class Proj,
-         typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
 constexpr bool operator<=(
     const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
     const Rep2& rhs)
 {
     return lhs.count() <= rhs;
+}
+
+// regular arithmetic things
+
+template <class Rep1, class Period, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr auto operator *(
+    unit_base<Rep1, Period, Tag, Proj> lhs,
+    const Rep2& rhs) -> decltype(ct_helper(lhs, rhs))
+{
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() * rhs };
+}
+
+template <class Rep1, class Period, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr auto operator /(
+    unit_base<Rep1, Period, Tag, Proj> lhs,
+    const Rep2& rhs) -> decltype(ct_helper(lhs, rhs))
+{
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() / rhs };
+}
+
+template <class Rep1, class Period, class Rep2, class Tag, class Proj,
+    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+constexpr auto operator %(
+    unit_base<Rep1, Period, Tag, Proj> lhs,
+    const Rep2& rhs) -> decltype(ct_helper(lhs, rhs))
+{
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() % rhs };
 }
 
 

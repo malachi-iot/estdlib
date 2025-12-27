@@ -47,6 +47,16 @@ constexpr common_type_t<
     return {};
 }
 
+template <class Rep1, class Period1, class Rep2, class Tag, class Adder1>
+constexpr
+    unit_base<common_type_t<Rep1, Rep2>, Period1, Tag, Adder1> ct_helper(
+    const unit_base<Rep1, Period1, Tag, Adder1>&,
+    const Rep2&)
+{
+    return {};
+}
+
+
 }}
 
 }

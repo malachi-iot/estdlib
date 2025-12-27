@@ -64,6 +64,12 @@ struct promote_type<uint32_t>
     typedef uint64_t type;
 };
 
+template<>
+struct promote_type<float>
+{
+    using type = double;
+};
+
 }
 
 // TODO: Fix name - auto_promote means, if necessary, move
@@ -112,4 +118,12 @@ struct promoted_type
             typename internal::promote_type<aligned_more_bits_type>::type,
             aligned_more_bits_type>::type type;
 };
+
+// DEBT: Crude application for non-integers
+template<bool auto_promote>
+struct promoted_type<float, double, auto_promote>
+{
+    using type = double;
+};
+
 }

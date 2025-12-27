@@ -4,6 +4,10 @@
 #include <estd/locale.h>
 #include "../../ios.h"
 
+#if FEATURE_STD_OSTREAM
+#include <ostream>
+#endif
+
 #include "fwd.h"
 
 namespace estd { namespace internal { namespace units {
@@ -79,11 +83,16 @@ void write_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out,
 
 namespace detail {
 
+// DEBT: This guy is great, make concept support 
 template <class Unit>
 struct unit_put : estd::detail::ostream_functor_tag
 {
     const Unit unit;
     const bool abbrev;
+
+    using rep = typename Unit::rep;
+    using period = typename Unit::period;
+    using tag = typename Unit::tag_type;
 
     constexpr unit_put(const Unit& unit, bool abbrev) :
         unit{unit},
@@ -117,6 +126,36 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
 } */
 
 }
+
+
+#if FEATURE_STD_OSTREAM
+// UNTESTED
+template <class Char, class Traits, class Unit>
+inline std::basic_ostream<Char, Traits>& operator<<(
+    std::basic_ostream<Char, Traits>& out,
+    const detail::unit_put<Unit>& unit)
+{
+    using tag = typename Unit::tag_type;
+    using period = typename Unit::period;
+
+    //out << si::traits<Period, Tag>::name() << traits<Tag>::name();
+    //out << traits<Tag>::abbrev();
+    out << unit.unit.count();
+
+    out << ' ';
+
+    if(unit.abbrev)
+    {
+        out << si::traits<period, tag>::abbrev() << traits<tag>::abbrev();
+    }
+    else
+    {
+        out << si::traits<period, tag>::name() << traits<tag>::name();
+    }
+
+    return out;
+}
+#endif
 
 
 }}

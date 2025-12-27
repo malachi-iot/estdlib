@@ -27,6 +27,39 @@ struct traits<frequency_tag>
 
 }}}
 
+// TODO: Put this and some other things in a 'synthetic' or other consumable test area,
+// because this and things like 'Dummy' are just useful for other libs too
+namespace Catch {
+
+using namespace estd::internal;
+
+template <class Rep, class Period, class Tag, class F>
+struct StringMaker<units::unit_base<Rep, Period, Tag, F>>
+{
+    static std::string convert(units::unit_base<Rep, Period, Tag, F> const& v)
+    {
+        // DEBT: Perhaps put this code into some diagnostic/explicit to_string
+
+        std::ostringstream oss;
+        if(Period::num != Period::den)
+        {
+            using human_type = units::unit_base<double, estd::ratio<1>, Tag, F>;
+
+            human_type human(v);
+
+            oss << human.count() << units::traits<Tag>::abbrev();
+
+            oss << " (count=" << v.count() << ")";
+        }
+        else
+        {
+            oss << v.count() << units::traits<Tag>::abbrev();
+        }
+        return oss.str();
+    }
+};
+}
+
 TEST_CASE("units")
 {
     using namespace estd::internal::units;
@@ -120,6 +153,25 @@ TEST_CASE("units")
             bool v = p3 > adc_p1;
 
             REQUIRE(v);
+        }
+        SECTION("multiply")
+        {
+            p2 *= 2;
+            p1 = p2 * 3;
+
+            //detail::unit_put(p1);
+
+            // DEBT: Add ability to compare against narrowed 90_pct etc
+            REQUIRE(p2 == 90.0_pct);
+            REQUIRE(p1 == 270.0_pct);
+        }
+        SECTION("divide")
+        {
+            p2 /= 2;
+            p1 = p2 / 3;
+
+            REQUIRE(p2 == 22.5_pct);
+            REQUIRE(p1 == 7.5_pct);
         }
     }
     SECTION("ostream")
