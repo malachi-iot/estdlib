@@ -12,6 +12,37 @@
 
 namespace estd { namespace internal { namespace units {
 
+template <class Ostream>
+struct is_std_ostream : estd::false_type {};
+
+template <class Ostream>
+struct is_estd_ostream : estd::false_type {};
+
+#if FEATURE_STD_OSTREAM
+template <class Char, class Traits>
+struct is_std_ostream<std::basic_ostream<Char, Traits>> : estd::true_type{};
+#endif
+
+template <class Impl, class Base>
+struct is_estd_ostream<estd::detail::basic_ostream<Impl, Base>> : estd::true_type{};
+
+// EXPERIMENTAL, UNTESTED
+template <class Out>
+struct ostream_like
+{
+    static_assert(is_std_ostream<Out>::value || is_estd_ostream<Out>::value);
+
+    Out* out;
+};
+
+// EXPERIMENTAL, UNTESTED
+template <class Out, class T>
+ostream_like<Out> operator <<(ostream_like<Out> out, T&& v)
+{
+    *out.out << std::forward<T>(v);
+    return out;
+}
+
 // DEBT: Slightly horrifying kludge for 'double' support in ostream
 template <class TStreambuf, class TBase>
 estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
@@ -62,6 +93,15 @@ template <class Tag, class Period, class TStreambuf, class TBase,
 void write_suffix_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out)
 {
     out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
+}
+
+// UNTESTED
+template <class Tag, class Period, class Out,
+         estd::enable_if_t<
+             !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
+void write_suffix_abbrev(ostream_like<Out> out)
+{
+    *out.out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
 }
 
 template <class Rep, class Period, class F, class Tag, class TStreambuf, class TBase>

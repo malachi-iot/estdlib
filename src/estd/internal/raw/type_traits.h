@@ -45,7 +45,6 @@ template <bool B>
 using bool_constant = integral_constant<bool, B>;
 #endif
 
-
 typedef integral_constant<bool, true> true_type;
 typedef integral_constant<bool, false> false_type;
 

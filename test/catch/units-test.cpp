@@ -41,6 +41,7 @@ struct StringMaker<units::unit_base<Rep, Period, Tag, F>>
         // DEBT: Perhaps put this code into some diagnostic/explicit to_string
 
         std::ostringstream oss;
+        //oss << estd::put_unit(v, true);
         if(Period::num != Period::den)
         {
             using human_type = units::unit_base<double, estd::ratio<1>, Tag, F>;
