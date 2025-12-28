@@ -80,7 +80,7 @@ TEST_CASE("units")
 
         REQUIRE(v.count() == 0);
 
-        out << estd::put_unit(v);
+        out << put_unit(v);
 
         REQUIRE(s == "0.00Hz");
     }
@@ -89,13 +89,13 @@ TEST_CASE("units")
         bytes<unsigned> v(2048);
         kilobytes<double> v2(v);
 
-        out << estd::put_unit(v);
+        out << put_unit(v);
 
         REQUIRE(s == "2048B");
 
         out.rdbuf()->clear();
 
-        out << estd::put_unit(v2);
+        out << put_unit(v2);
 
         REQUIRE(s == "2.00kB");
     }
@@ -188,13 +188,13 @@ TEST_CASE("units")
 
         SECTION("regular")
         {
-            out << estd::put_unit(p);
+            out << put_unit(p);
 
             REQUIRE(s == "50.00%");
         }
         SECTION("non abbrev")
         {
-            out << estd::put_unit(p, false);
+            out << put_unit(p, false);
 
             REQUIRE(s == "50.00 percent");
         }

@@ -9,7 +9,6 @@ namespace estd { namespace internal { namespace units {
 
 // DEBT: Consolidate with all the clever chrono "common_type" versions - for now
 // implementing only the most basic to avoid too much code duplication
-// TODO: Needs to get smarter and account for mismatched Rep, Period and F
 
 template <class Traits>
 constexpr v2::unit_base<Traits> operator +(
@@ -19,8 +18,6 @@ constexpr v2::unit_base<Traits> operator +(
     return v2::unit_base<Traits>{ (typename Traits::rep) (lhs.root_count() + rhs.root_count()) };
 }
 
-//template <typename Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
-// FIX: Make sure tags match
 template <class Traits1, class Traits2>
 constexpr auto operator +(
     const v2::unit_base<Traits1>& lhs,
@@ -40,7 +37,6 @@ constexpr v2::unit_base<Traits> operator -(
 }
 
 
-// FIX: match on Tag
 template <class Traits1, class Traits2>
 constexpr auto operator -(
     const v2::unit_base<Traits1>& lhs,
@@ -56,7 +52,6 @@ constexpr auto operator -(
 // the same CT in those cases
 
 
-// FIX: Match on tag
 template <class Traits1, class Traits2>
 constexpr bool operator>(
     const v2::unit_base<Traits1>& lhs,
@@ -68,10 +63,10 @@ constexpr bool operator>(
 }
 
 
-template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+template <class Traits1, class Traits2>
 constexpr bool operator<(
-    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
-    const unit_base<Rep2, Period2, Tag, Adder2>& rhs)
+    const v2::unit_base<Traits1>& lhs,
+    const v2::unit_base<Traits2>& rhs)
 {
     using CT = decltype(lhs + rhs);
 
@@ -79,10 +74,10 @@ constexpr bool operator<(
 }
 
 
-template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+template <class Traits1, class Traits2>
 constexpr bool operator>=(
-    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
-    const unit_base<Rep2, Period2, Tag, Adder2>& rhs)
+    const v2::unit_base<Traits1>& lhs,
+    const v2::unit_base<Traits2>& rhs)
 {
     using CT = decltype(lhs + rhs);
 
@@ -90,10 +85,10 @@ constexpr bool operator>=(
 }
 
 
-template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+template <class Traits1, class Traits2>
 constexpr bool operator<=(
-    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
-    const unit_base<Rep2, Period2, Tag, Adder2>& rhs)
+    const v2::unit_base<Traits1>& lhs,
+    const v2::unit_base<Traits2>& rhs)
 {
     using CT = decltype(lhs + rhs);
 
@@ -102,7 +97,6 @@ constexpr bool operator<=(
 
 
 
-// FIX: Match on tag
 template <class Traits1, class Traits2>
 constexpr bool operator==(
     const v2::unit_base<Traits1>& lhs,
@@ -114,7 +108,6 @@ constexpr bool operator==(
 }
 
 
-// FIX: Match on tag
 template <class Traits1, class Traits2>
 constexpr bool operator!=(
     const v2::unit_base<Traits1>& lhs,
@@ -156,39 +149,39 @@ constexpr bool operator==(
     return lhs.count() == rhs;
 }
 
-template <class Rep1, class Rep2, class Tag, class Proj,
-    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+template <class Traits, typename Rep,
+    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
 constexpr bool operator>(
-    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
-    const Rep2& rhs)
+    const v2::unit_base<Traits>& lhs,
+    const Rep& rhs)
 {
     return lhs.count() > rhs;
 }
 
-template <class Rep1, class Rep2, class Tag, class Proj,
-    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+template <class Traits, typename Rep,
+    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
 constexpr bool operator<(
-    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
-    const Rep2& rhs)
+    const v2::unit_base<Traits>& lhs,
+    const Rep& rhs)
 {
     return lhs.count() < rhs;
 }
 
 
-template <class Rep1, class Rep2, class Tag, class Proj,
-    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+template <class Traits, typename Rep,
+    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
 constexpr bool operator>=(
-    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
-    const Rep2& rhs)
+    const v2::unit_base<Traits>& lhs,
+    const Rep& rhs)
 {
     return lhs.count() >= rhs;
 }
 
-template <class Rep1, class Rep2, class Tag, class Proj,
-    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+template <class Traits, typename Rep,
+    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
 constexpr bool operator<=(
-    const unit_base<Rep1, estd::ratio<1>, Tag, Proj>& lhs,
-    const Rep2& rhs)
+    const v2::unit_base<Traits>& lhs,
+    const Rep& rhs)
 {
     return lhs.count() <= rhs;
 }
@@ -213,11 +206,11 @@ constexpr auto operator /(
     return decltype(ct_helper(lhs, rhs)){ lhs.count() / rhs };
 }
 
-template <class Rep1, class Period, class Rep2, class Tag, class Proj,
-    typename estd::enable_if_t<is_arithmetic<Rep2>::value>* = nullptr>
+template <class Rep, class Traits,
+    typename estd::enable_if_t<is_arithmetic<Rep>::value>* = nullptr>
 constexpr auto operator %(
-    unit_base<Rep1, Period, Tag, Proj> lhs,
-    const Rep2& rhs) -> decltype(ct_helper(lhs, rhs))
+    v2::unit_base<Traits> lhs,
+    const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
     return decltype(ct_helper(lhs, rhs)){ lhs.count() % rhs };
 }

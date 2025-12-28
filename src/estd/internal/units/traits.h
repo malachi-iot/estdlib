@@ -38,6 +38,8 @@ struct unit_traits
     using period = Period;
     using tag = Tag;
     using projector = F;
+
+    constexpr static rep default_value() { return {}; }
 };
 
 

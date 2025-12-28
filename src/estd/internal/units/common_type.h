@@ -10,7 +10,6 @@
 namespace estd {
 
 
-// FIX: Make sure tags match too
 template <class Traits1, class Traits2>
 struct common_type<
     internal::units::v2::unit_base<Traits1>,
@@ -20,8 +19,7 @@ struct common_type<
     using period2 = typename Traits2::period;
     using tag = typename Traits1::tag;
 
-    // DEBT: Produce better error message
-    static_assert(is_same<tag, typename Traits2::tag>::value, "Tag mismatch");
+    static_assert(is_same<tag, typename Traits2::tag>::value, "Unit tags must match");
 
     using common_rep_type = typename promoted_type<typename Traits1::rep, typename Traits2::rep>::type;
 
@@ -35,36 +33,9 @@ public:
     using type = internal::units::unit_base<common_rep_type, ratio_type, tag>;
 };
 
-// for units to be a common type, we need the same denominator.  This means
-// one of the ratio's numerators must increase, thus reducing the precision on the
-// other ratio.
-// custom "promoted_type" is utilized to keep duration's 'Rep' from bloating
-template <typename Dur1Int, typename Dur2Int,
-    std::intmax_t Num1, std::intmax_t Num2,
-    std::intmax_t Denom1, std::intmax_t Denom2,
-    // DEBT: Add support for projectors here, I believe they do modify precision
-    class Tag>
-struct common_type<
-    internal::units::unit_base<Dur1Int, ratio<Num1, Denom1>, Tag>,
-    internal::units::unit_base<Dur2Int, ratio<Num2, Denom2>, Tag> >
-{
-private:
-    // gracefully promote (or not) types used.  non-specialized common_type is very
-    // aggressive about promoting and almost always adds bits - otherwise we'd use it
-    using common_int_type = typename promoted_type<Dur1Int, Dur2Int>::type;
-
-    static constexpr std::intmax_t gcd_num = internal::gcd<Num1, Num2>::value;
-    static constexpr std::intmax_t lcm_den = internal::lcm<Denom1, Denom2>::value;
-
-public:
-    using ratio_type =  estd::ratio<gcd_num, lcm_den>;
-
-    using type = internal::units::unit_base<common_int_type, ratio_type, Tag>;
-};
 
 namespace internal { namespace units {
 
-// FIX: match on 'tag'
 template <class Traits1, class Traits2>
 constexpr common_type_t<
     v2::unit_base<Traits1>,
