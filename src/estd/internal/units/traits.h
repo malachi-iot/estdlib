@@ -1,31 +1,20 @@
 #pragma once
 
+#include "../../flags.h"
 #include "../../ratio.h"
 
-#include "../fwd/limits.h"
 #include "fwd.h"
 
 namespace estd { namespace internal { namespace units {
 
-
-// EXPERIMENTAL
-template <class Unit>
-struct unit_traits_old
+enum options
 {
-    using value_type = typename Unit::rep;
-    using limits = estd::numeric_limits<value_type>;
+    none,
 
-    static constexpr value_type min()
-    {
-        return limits::min();
-    }
-
-    static constexpr value_type max()
-    {
-        return limits::max();
-    }
+    default_prohibited,
+    default_value_initialized,
+    default_unassigned
 };
-
 
 // 'traits' occupied by just tag.  Might consider shifting names around at some point
 // tag_traits?
@@ -38,6 +27,8 @@ struct unit_traits
     using period = Period;
     using tag = Tag;
     using projector = F;
+
+    static constexpr units::options options = units::options::default_prohibited;
 
     constexpr static rep default_value() { return {}; }
 };

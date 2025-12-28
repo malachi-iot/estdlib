@@ -27,13 +27,21 @@ struct duration_values
     static constexpr Rep max() { return estd::numeric_limits<Rep>::max(); }
 };
 
+
+template <class Rep, class Period>
+struct duration_unit_traits : estd::internal::units::unit_traits<Rep, Period, seconds_tag>
+{
+    static constexpr estd::internal::units::options options =
+        estd::internal::units::options::default_value_initialized;
+};
+
 }
 
 template<class Rep, class Period>
 class duration :
-    public estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>
+    public estd::internal::units::v2::unit_base<internal::duration_unit_traits<Rep, Period>>
 {
-    using base_type = estd::internal::units::unit_base<Rep, Period, internal::seconds_tag>;
+    using base_type = estd::internal::units::v2::unit_base<internal::duration_unit_traits<Rep, Period>>;
     using base_type::rep_;
 
 protected:

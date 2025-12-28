@@ -12,8 +12,14 @@
 
 struct frequency_tag {};
 
+template <class Rep, class Period, class F>
+struct frequency_unit_traits : estd::internal::units::unit_traits<Rep, Period, frequency_tag, F>
+{
+    static constexpr auto options = estd::internal::units::options::default_unassigned;
+};
+
 template <class Rep, class Period = estd::ratio<1>, typename F = estd::internal::units::passthrough<Rep> >
-using hz = estd::internal::units::unit_base<Rep, Period, frequency_tag, F>;
+using hz = estd::internal::units::v2::unit_base<frequency_unit_traits<Rep, Period, F>>;
 
 
 namespace estd { namespace internal { namespace units {
@@ -76,13 +82,29 @@ TEST_CASE("units")
     }
     SECTION("hz")
     {
-        hz<double> v(0);
+        SECTION("basics")
+        {
+            hz<double> v(0);
 
-        REQUIRE(v.count() == 0);
+            REQUIRE(v.count() == 0);
 
-        out << put_unit(v);
+            out << put_unit(v);
 
-        REQUIRE(s == "0.00Hz");
+            REQUIRE(s == "0.00Hz");
+        }
+        SECTION("unassigned sanity check")
+        {
+            // DEBT: GCC and clang type pun for us, but others won't
+            union
+            {
+                hz<int> hz1;
+                int raw1{123};
+            };
+
+            static_assert(std::is_trivial<hz<int>>::value);
+
+            REQUIRE(hz1.count() == 123);
+        }
     }
     SECTION("bytes")
     {
@@ -242,6 +264,13 @@ TEST_CASE("units")
 
             REQUIRE(s == "50.70 percent");
         }
+#if EXPOSITIONAL_ONLY
+        SECTION("prohibited constructor")
+        {
+            // Correctly fails to compile, units default behavior is to demand initialization
+            percent<int> p;
+        }
+#endif
         SECTION("conversion")
         {
             SECTION("common_type")

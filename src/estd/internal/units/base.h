@@ -90,6 +90,51 @@ struct compound_unit_helper
 
 namespace v2 {
 
+template <class Traits, class = void>
+class scalar_base;
+
+template <class Traits>
+class scalar_base<Traits, enable_if_t<Traits::options == options::default_prohibited>>
+{
+public:
+    using rep = typename Traits::rep;
+
+protected:
+    rep rep_;
+
+    scalar_base() = delete;
+    constexpr scalar_base(rep v) : rep_{v}   {}
+};
+
+
+template <class Traits>
+class scalar_base<Traits, enable_if_t<Traits::options == options::default_value_initialized>>
+{
+public:
+    using rep = typename Traits::rep;
+
+protected:
+    rep rep_;
+
+    constexpr scalar_base() : rep_{Traits::default_value()} {}
+    constexpr scalar_base(rep v) : rep_{v}   {}
+};
+
+
+template <class Traits>
+class scalar_base<Traits, enable_if_t<Traits::options == options::default_unassigned>>
+{
+public:
+    using rep = typename Traits::rep;
+
+protected:
+    rep rep_;
+
+    constexpr scalar_base() = default;
+    constexpr scalar_base(rep v) : rep_{v}   {}
+};
+
+
 // DEBT: Consolidate this with chrono if we can.  Specifically, I don't want disperate
 // scalar bases intermingling with one another, so we need some kind of type lockout/forced
 // conversion
@@ -102,9 +147,12 @@ namespace v2 {
 /// @tparam F final conversion.  defaults to passthrough (noop)
 template <class Traits>
 class unit_base :
+    scalar_base<Traits>,
     public unit_base_tag,
     public Traits::tag        // Deriving from tag not necessary, but might be useful for is_base_of query
 {
+    using base_type = scalar_base<Traits>;
+
 public:
     using traits = Traits;
     using projector = typename Traits::projector;
@@ -122,7 +170,7 @@ protected:
     template <class Traits2>
     static constexpr bool period_matches() { return is_same<period, typename Traits2::period>::value; }
 
-    rep rep_;
+    using base_type::rep_;
 
 #if UNIT_TESTING
 public:
@@ -170,11 +218,10 @@ public:
         return convert_from<decltype(v.count()), typename Traits2::period>(v.count());
     }
 
-protected:
+public:
     constexpr unit_base() = default;
 
-public:
-    explicit constexpr unit_base(const rep& rep) : rep_{rep} {}
+    explicit constexpr unit_base(const rep& rep) : base_type{rep} {}
 
     // Converting constructors are NOT explicit, since we happily want silent conversions
     // in this case.  We're not converting strings etc, but very narrowly similar unit_bases.  See:
@@ -192,13 +239,13 @@ public:
     //template <class Traits2, class = enable_if_t<tag_matches<Traits2>() && !period_matches<Traits2>()>>
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     constexpr unit_base(const unit_base<Traits2>& s) :   // NOLINT
-        rep_{convert_from(s)}
+        base_type{convert_from(s)}
     {
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     constexpr unit_base(const unit_base<Traits2>& s, relaxed_narrow_t) :   // NOLINT
-        rep_{rep(convert_from(s))}
+        base_type(rep(convert_from(s)))
     {
     }
 
