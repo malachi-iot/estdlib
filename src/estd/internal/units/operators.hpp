@@ -11,18 +11,20 @@ namespace estd { namespace internal { namespace units {
 // implementing only the most basic to avoid too much code duplication
 // TODO: Needs to get smarter and account for mismatched Rep, Period and F
 
-template <typename Rep, class Period, class Tag, class F>
-constexpr unit_base<Rep, Period, Tag, F> operator +(
-    const unit_base<Rep, Period, Tag, F>& lhs,
-    const unit_base<Rep, Period, Tag, F>& rhs)
+template <class Traits>
+constexpr v2::unit_base<Traits> operator +(
+    const v2::unit_base<Traits>& lhs,
+    const v2::unit_base<Traits>& rhs)
 {
-    return unit_base<Rep, Period, Tag, F>{ (Rep) (lhs.root_count() + rhs.root_count()) };
+    return v2::unit_base<Traits>{ (typename Traits::rep) (lhs.root_count() + rhs.root_count()) };
 }
 
-template <typename Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+//template <typename Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+// FIX: Make sure tags match
+template <class Traits1, class Traits2>
 constexpr auto operator +(
-    const unit_base<Rep1, Period1, Tag, Adder1>& lhs,
-    const unit_base<Rep2, Period2, Tag, Adder2>& rhs) -> decltype(ct_helper(lhs, rhs))
+    const v2::unit_base<Traits1>& lhs,
+    const v2::unit_base<Traits2>& rhs) -> decltype(ct_helper(lhs, rhs))
 {
     using CT = decltype(ct_helper(lhs, rhs));
 

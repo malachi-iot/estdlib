@@ -133,21 +133,21 @@ void write_suffix_abbrev(ostream_like<Out> out)
     *out.out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
 }
 
-template <class Rep, class Period, class F, class Tag, class Out>
+template <class Traits, class Out>
 void write(ostream_like<Out> out,
-    const unit_base<Rep, Period, Tag, F>& unit)
+    const v2::unit_base<Traits>& unit)
 {
     out << unit.count() << ' ';
-    write_suffix<Tag, Period>(out);
+    write_suffix<typename Traits::tag, typename Traits::period>(out);
 }
 
-template <class Rep, class Period, class F, class Tag, class Out>
+template <class Traits, class Out>
 void write_abbrev(ostream_like<Out> out,
-    const unit_base<Rep, Period, Tag, F>& unit, bool include_space = false)
+    const v2::unit_base<Traits>& unit, bool include_space = false)
 {
     out << unit.count();
     if(include_space) out << ' ';
-    write_suffix_abbrev<Tag, Period>(out);
+    write_suffix_abbrev<typename Traits::tag, typename Traits::period>(out);
 }
 
 namespace detail {
@@ -161,7 +161,7 @@ struct unit_put : estd::detail::ostream_functor_tag
 
     using rep = typename Unit::rep;
     using period = typename Unit::period;
-    using tag = typename Unit::tag_type;
+    using tag = typename Unit::tag;
 
     constexpr unit_put(const Unit& unit, bool abbrev) :
         unit{unit},
@@ -218,10 +218,10 @@ inline std::basic_ostream<Char, Traits>& operator<<(
 
 }}
 
-template <class Rep, class Period, class Tag, class F>
+template <class Traits>
 constexpr internal::units::detail::unit_put<
-    internal::units::unit_base<Rep, Period, Tag, F> > put_unit(
-    const internal::units::unit_base<Rep, Period, Tag, F>& unit, bool abbrev = true)
+    internal::units::v2::unit_base<Traits> > put_unit(
+    const internal::units::v2::unit_base<Traits>& unit, bool abbrev = true)
 {
     return { unit, abbrev };
 }

@@ -39,10 +39,30 @@ struct passthrough
 #endif
 };
 
-
 template <class Rep, class Period, class Tag,
-    ESTD_CPP_CONCEPT(Projector<Rep>) = passthrough<Rep> >
+    ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
+struct unit_traits;
+
+// 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
+template <class Rep, class Tag>
+struct basic_unit_traits;
+
+namespace v2 {
+
+template <class Traits>
 class unit_base;
+
+}
+
+inline namespace v1 {
+
+template <typename Rep, class Period, class Tag,
+    ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
+//using unit_base = v2::unit_base<unit_traits<Rep, Period, Tag, F>>;
+using unit_base = v2::unit_base<basic_unit_traits<Rep, Tag>>;
+
+}
+
 
 template <class Rep, class Period>
 struct cast_helper;

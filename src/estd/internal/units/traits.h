@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../ratio.h"
+
 #include "../fwd/limits.h"
 #include "fwd.h"
 
@@ -28,14 +30,19 @@ struct unit_traits_old
 // 'traits' occupied by just tag.  Might consider shifting names around at some point
 // tag_traits?
 template <class Rep, class Period, class Tag,
-    ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
-struct unit_traits : traits<Tag>
+    ESTD_CPP_CONCEPT(Projector<Rep>) F>
+struct unit_traits
+    //: traits<Tag> // DEBT: Bring this guy back, temporarily disabling while I sort out dependencies
 {
     using rep = Rep;
     using period = Period;
     using tag = Tag;
     using projector = F;
 };
+
+
+template <class Rep, class Tag>
+struct basic_unit_traits : unit_traits<Rep, estd::ratio<1>, Tag, passthrough<Rep>> {};
 
 
 }}}
