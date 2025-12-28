@@ -90,7 +90,7 @@ private:
             fmtfl_{dec | right},
             iostate_{goodbit},
 #if FEATURE_ESTD_OSTREAM_FLOAT
-            precision_{FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION},
+            precision_{ESTD_OSTREAM_DEFAULT_PRECISION},
 #endif
             width_{0}
         {}
@@ -107,7 +107,7 @@ private:
             width_{0},
             fmtfl_{dec | right},
 #if FEATURE_ESTD_OSTREAM_FLOAT
-            precision_{FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION},
+            precision_{ESTD_OSTREAM_DEFAULT_PRECISION},
 #endif
             iostate_{goodbit}
         {}
@@ -146,8 +146,7 @@ public:
 #if FEATURE_ESTD_OSTREAM_FLOAT
         return state_.precision_;
 #else
-        // Until FEATURE_ESTD_OSTREAM_FLOAT, we hardcode
-        return FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION;
+        return ESTD_OSTREAM_DEFAULT_PRECISION;
 #endif
     }
 

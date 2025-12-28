@@ -1,8 +1,5 @@
 #include <catch2/catch_all.hpp>
 
-// DEBT: Kludge to force precision to match "horrifying kludge" double support in internal/units/ostream.h
-#define FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION 2
-
 #include <estd/internal/units/base.h>
 #include <estd/internal/units/bytes.h>
 #include <estd/internal/units/ostream.h>
@@ -48,7 +45,7 @@ struct StringMaker<units::unit_base<Rep, Period, Tag, F>>
         std::ostringstream oss;
 
         if(Period::num != Period::den)
-            oss << put_unit(human_type(v)) << " (count=" << v.count() << ")";
+            oss << put_unit(human_type(v, units::relaxed_narrow_t{})) << " (count=" << v.count() << ")";
         else
             oss << put_unit(v);
 
@@ -66,7 +63,11 @@ TEST_CASE("units")
 
 #if FEATURE_ESTD_OSTREAM_FLOAT
     out.precision(2);
+#elif ESTD_OSTREAM_DEFAULT_PRECISION != 2
+#warning "Precision does not appear to be set or settable to 2, as needed"
 #endif
+
+    REQUIRE(out.precision() == 2);
 
     SECTION("make_ostream_like")
     {
