@@ -1,3 +1,14 @@
+# v0.8.11 - XXXXX26
+
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/160 units now have selectable deleted, value-init or uninitialized constructors
+* `rtto` mechanism for runtime `std::move` operation (TBD mention other parts of rtto also)
+
+## Quality Updates & Bug Fies
+
+* units system cleanup: transition to `traits` approach
+
 # v0.8.10 - 08OCT25
 
 ## Added Features
