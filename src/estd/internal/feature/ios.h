@@ -22,8 +22,14 @@
 #endif
 
 // Track ostream.precision() and fixed/scientific/etc formats
+// NOT WELL TESTED YET
 #ifndef FEATURE_ESTD_OSTREAM_FLOAT
 #define FEATURE_ESTD_OSTREAM_FLOAT 0
+#endif
+
+// https://en.cppreference.com/w/cpp/io/basic_ios/init.html tells us 6 for default
+#ifndef FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION
+#define FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION 6
 #endif
 
 

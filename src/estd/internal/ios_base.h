@@ -80,23 +80,35 @@ private:
         fmtflags fmtfl_ : 8;
         // DEBT: Experimental nodatabit doesn't fit here
         iostate iostate_ : 4;
+#if FEATURE_ESTD_OSTREAM_FLOAT
+        unsigned precision_ : 4;
+#endif
         // Width applies to istream *and* ostream
         unsigned width_ : 4;
 
         constexpr state() :
             fmtfl_{dec | right},
             iostate_{goodbit},
+#if FEATURE_ESTD_OSTREAM_FLOAT
+            precision_{FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION},
+#endif
             width_{0}
         {}
 
 #else
-        unsigned width_ : 16;
+        unsigned width_ : 8;
         fmtflags fmtfl_ : 8;
+#if FEATURE_ESTD_OSTREAM_FLOAT
+        unsigned precision_ : 6;
+#endif
         iostate iostate_ : 8;
 
         constexpr state() :
             width_{0},
             fmtfl_{dec | right},
+#if FEATURE_ESTD_OSTREAM_FLOAT
+            precision_{FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION},
+#endif
             iostate_{goodbit}
         {}
 
@@ -131,11 +143,20 @@ public:
 
     constexpr streamsize precision() const
     {
-        // Until FEATURE_ESTD_OSTREAM_FLOAT, we hardcode to 6 as per default
-        // https://en.cppreference.com/w/cpp/io/basic_ios/init.html
-        return 6;
+#if FEATURE_ESTD_OSTREAM_FLOAT
+        return state_.precision_;
+#else
+        // Until FEATURE_ESTD_OSTREAM_FLOAT, we hardcode
+        return FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION;
+#endif
     }
 
+#if FEATURE_ESTD_OSTREAM_FLOAT
+    void precision(streamsize v)
+    {
+        state_.precision_ = v;
+    }
+#endif
 
     fmtflags setf(fmtflags flags)
     { fmtflags prior = state_.fmtfl_; state_.fmtfl_ |= flags; return prior; }

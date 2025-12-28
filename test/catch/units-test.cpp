@@ -1,5 +1,8 @@
 #include <catch2/catch_all.hpp>
 
+// DEBT: Kludge to force precision to match "horrifying kludge" double support in internal/units/ostream.h
+#define FEATURE_ESTD_OSTREAM_DEFAULT_PRECISION 2
+
 #include <estd/internal/units/base.h>
 #include <estd/internal/units/bytes.h>
 #include <estd/internal/units/ostream.h>
@@ -36,26 +39,19 @@ using namespace estd::internal;
 template <class Rep, class Period, class Tag, class F>
 struct StringMaker<units::unit_base<Rep, Period, Tag, F>>
 {
+    using human_type = units::unit_base<double, estd::ratio<1>, Tag, F>;
+
     static std::string convert(units::unit_base<Rep, Period, Tag, F> const& v)
     {
         // DEBT: Perhaps put this code into some diagnostic/explicit to_string
 
         std::ostringstream oss;
-        //oss << estd::put_unit(v, true);
+
         if(Period::num != Period::den)
-        {
-            using human_type = units::unit_base<double, estd::ratio<1>, Tag, F>;
-
-            human_type human(v);
-
-            oss << human.count() << units::traits<Tag>::abbrev();
-
-            oss << " (count=" << v.count() << ")";
-        }
+            oss << put_unit(human_type(v)) << " (count=" << v.count() << ")";
         else
-        {
-            oss << v.count() << units::traits<Tag>::abbrev();
-        }
+            oss << put_unit(v);
+
         return oss.str();
     }
 };
@@ -68,6 +64,15 @@ TEST_CASE("units")
     estd::layer1::ostringstream<256> out;
     auto& s = out.rdbuf()->str();
 
+#if FEATURE_ESTD_OSTREAM_FLOAT
+    out.precision(2);
+#endif
+
+    SECTION("make_ostream_like")
+    {
+        std::ostringstream oss;
+        make_ostream_like(oss);
+    }
     SECTION("hz")
     {
         hz<double> v(0);
@@ -226,13 +231,13 @@ TEST_CASE("units")
 
         SECTION("ostream percent2")
         {
-            write_abbrev(out, percent2);
+            write_abbrev(make_ostream_like(out), percent2);
 
             REQUIRE(out.rdbuf()->str() == "50%");
         }
         SECTION("ostream percent3")
         {
-            write(out, percent3);
+            write(make_ostream_like(out), percent3);
 
             REQUIRE(s == "50.70 percent");
         }

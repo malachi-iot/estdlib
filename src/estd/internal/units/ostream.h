@@ -12,10 +12,10 @@
 
 namespace estd { namespace internal { namespace units {
 
-template <class Ostream>
+template <class>
 struct is_std_ostream : estd::false_type {};
 
-template <class Ostream>
+template <class>
 struct is_estd_ostream : estd::false_type {};
 
 #if FEATURE_STD_OSTREAM
@@ -23,27 +23,64 @@ template <class Char, class Traits>
 struct is_std_ostream<std::basic_ostream<Char, Traits>> : estd::true_type{};
 #endif
 
-template <class Impl, class Base>
-struct is_estd_ostream<estd::detail::basic_ostream<Impl, Base>> : estd::true_type{};
+template <class Streambuf, class Base>
+struct is_estd_ostream<estd::detail::basic_ostream<Streambuf, Base>> : estd::true_type{};
 
-// EXPERIMENTAL, UNTESTED
 template <class Out>
 struct ostream_like
 {
     static_assert(is_std_ostream<Out>::value || is_estd_ostream<Out>::value);
 
     Out* out;
+
+    /* No substitute for CTAD unfortunately
+    template <class Char, class Traits>
+    constexpr ostream_like(std::basic_ostream<Char, Traits>& out) : out(&out) {}
+
+    template <class Impl, class Base>
+    constexpr ostream_like(estd::detail::basic_ostream<Impl, Base>& out) : out(&out)    {}  */
+
+    operator Out&() { return *out; }
+
+    template <class T>
+    ostream_like& operator <<(T&& v)
+    {
+        *out << std::forward<T>(v);
+        return *this;
+    }
 };
 
+
+/*
+template <class Out>
+ostream_like<Out> make_ostream_like(Out& out)
+{
+    return { &out };
+}*/
+
+template <class Streambuf, class Base>
+ostream_like<estd::detail::basic_ostream<Streambuf, Base>> make_ostream_like(estd::detail::basic_ostream<Streambuf, Base>& out)
+{
+    return { &out };
+}
+
+template <class Char, class Traits>
+ostream_like<std::basic_ostream<Char, Traits>> make_ostream_like(std::basic_ostream<Char, Traits>& out)
+{
+    return { &out };
+}
+
+/*
 // EXPERIMENTAL, UNTESTED
 template <class Out, class T>
 ostream_like<Out> operator <<(ostream_like<Out> out, T&& v)
 {
     *out.out << std::forward<T>(v);
     return out;
-}
+}   */
 
 // DEBT: Slightly horrifying kludge for 'double' support in ostream
+// DEBT: Resolve/semi combine this with the one appearing in estd/ostream.h
 template <class TStreambuf, class TBase>
 estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
     estd::detail::basic_ostream<TStreambuf, TBase>& out,
@@ -63,57 +100,49 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
     return out;
 }
 
-template <class Tag, class Period, class TStreambuf, class TBase,
+template <class Tag, class Period, class Out,
     estd::enable_if_t<
         estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
-void write_suffix(estd::detail::basic_ostream<TStreambuf, TBase>& out)
+void write_suffix(ostream_like<Out> out)
 {
     out << traits<Tag>::name();
 }
 
-template <class Tag, class Period, class TStreambuf, class TBase,
+template <class Tag, class Period, class Out,
     estd::enable_if_t<
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
-void write_suffix(estd::detail::basic_ostream<TStreambuf, TBase>& out)
+void write_suffix(ostream_like<Out> out)
 {
     out << si::traits<Period, Tag>::name() << traits<Tag>::name();
 }
 
-template <class Tag, class Period, class TStreambuf, class TBase,
+template <class Tag, class Period, class Out,
     estd::enable_if_t<
         estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
-void write_suffix_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out)
+void write_suffix_abbrev(ostream_like<Out> out)
 {
-    out << traits<Tag>::abbrev();
+    *out.out << traits<Tag>::abbrev();
 }
 
-template <class Tag, class Period, class TStreambuf, class TBase,
+
+template <class Tag, class Period, class Out,
     estd::enable_if_t<
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
-void write_suffix_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out)
-{
-    out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
-}
-
-// UNTESTED
-template <class Tag, class Period, class Out,
-         estd::enable_if_t<
-             !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix_abbrev(ostream_like<Out> out)
 {
     *out.out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
 }
 
-template <class Rep, class Period, class F, class Tag, class TStreambuf, class TBase>
-void write(estd::detail::basic_ostream<TStreambuf, TBase>& out,
+template <class Rep, class Period, class F, class Tag, class Out>
+void write(ostream_like<Out> out,
     const unit_base<Rep, Period, Tag, F>& unit)
 {
     out << unit.count() << ' ';
     write_suffix<Tag, Period>(out);
 }
 
-template <class Rep, class Period, class F, class Tag, class TStreambuf, class TBase>
-void write_abbrev(estd::detail::basic_ostream<TStreambuf, TBase>& out,
+template <class Rep, class Period, class F, class Tag, class Out>
+void write_abbrev(ostream_like<Out> out,
     const unit_base<Rep, Period, Tag, F>& unit, bool include_space = false)
 {
     out << unit.count();
@@ -139,13 +168,19 @@ struct unit_put : estd::detail::ostream_functor_tag
         abbrev{abbrev}
     {}
 
-    template <class Streambuf, class Base>
-    void operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
+    template <class Out>
+    void operator()(ostream_like<Out> out) const
     {
         if(abbrev)
             write_abbrev(out, unit);
         else
             write(out, unit);
+    }
+
+    template <class Streambuf, class Base>
+    void operator()(estd::detail::basic_ostream<Streambuf, Base>& out) const
+    {
+        return operator()(make_ostream_like(out));
     }
 };
 
@@ -169,29 +204,12 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
 
 
 #if FEATURE_STD_OSTREAM
-// UNTESTED
 template <class Char, class Traits, class Unit>
 inline std::basic_ostream<Char, Traits>& operator<<(
     std::basic_ostream<Char, Traits>& out,
     const detail::unit_put<Unit>& unit)
 {
-    using tag = typename Unit::tag_type;
-    using period = typename Unit::period;
-
-    //out << si::traits<Period, Tag>::name() << traits<Tag>::name();
-    //out << traits<Tag>::abbrev();
-    out << unit.unit.count();
-
-    out << ' ';
-
-    if(unit.abbrev)
-    {
-        out << si::traits<period, tag>::abbrev() << traits<tag>::abbrev();
-    }
-    else
-    {
-        out << si::traits<period, tag>::name() << traits<tag>::name();
-    }
+    unit(make_ostream_like(out));
 
     return out;
 }
