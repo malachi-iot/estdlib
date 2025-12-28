@@ -58,8 +58,7 @@ inline namespace v1 {
 
 template <typename Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
-//using unit_base = v2::unit_base<unit_traits<Rep, Period, Tag, F>>;
-using unit_base = v2::unit_base<basic_unit_traits<Rep, Tag>>;
+using unit_base = v2::unit_base<unit_traits<Rep, Period, Tag, F>>;
 
 }
 

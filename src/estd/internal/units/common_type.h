@@ -20,6 +20,9 @@ struct common_type<
     using period2 = typename Traits2::period;
     using tag = typename Traits1::tag;
 
+    // DEBT: Produce better error message
+    static_assert(is_same<tag, typename Traits2::tag>::value, "Tag mismatch");
+
     using common_rep_type = typename promoted_type<typename Traits1::rep, typename Traits2::rep>::type;
 
     // DEBT: Use estd intmax_t
@@ -61,21 +64,24 @@ public:
 
 namespace internal { namespace units {
 
-template <class Rep1, class Period1, class Rep2, class Period2, class Tag, class Adder1, class Adder2>
+// FIX: match on 'tag'
+template <class Traits1, class Traits2>
 constexpr common_type_t<
-    unit_base<Rep1, Period1, Tag, Adder1>,
-    unit_base<Rep2, Period2, Tag, Adder2>> ct_helper(
-    const unit_base<Rep1, Period1, Tag, Adder1>&,
-    const unit_base<Rep2, Period2, Tag, Adder2>&)
+    v2::unit_base<Traits1>,
+    v2::unit_base<Traits2>> ct_helper(
+    const v2::unit_base<Traits1>&,
+    const v2::unit_base<Traits2>&)
 {
     return {};
 }
 
-template <class Rep1, class Period1, class Rep2, class Tag, class Adder1>
+template <class Traits, class Rep>
 constexpr
-    unit_base<common_type_t<Rep1, Rep2>, Period1, Tag, Adder1> ct_helper(
-    const unit_base<Rep1, Period1, Tag, Adder1>&,
-    const Rep2&)
+    v2::unit_base<
+        unit_traits<
+            common_type_t<typename Traits::rep, Rep>,
+        typename Traits::period, typename Traits::tag, typename Traits::projector>>
+    ct_helper(const v2::unit_base<Traits>&, const Rep&)
 {
     return {};
 }

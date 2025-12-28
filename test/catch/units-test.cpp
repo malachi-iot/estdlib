@@ -188,13 +188,13 @@ TEST_CASE("units")
 
         SECTION("regular")
         {
-            out << put_unit(p);
+            out << estd::put_unit(p);
 
             REQUIRE(s == "50.00%");
         }
         SECTION("non abbrev")
         {
-            out << put_unit(p, false);
+            out << estd::put_unit(p, false);
 
             REQUIRE(s == "50.00 percent");
         }
@@ -244,7 +244,7 @@ TEST_CASE("units")
         }
         SECTION("conversion")
         {
-            SECTION("common type")
+            SECTION("common_type")
             {
                 SECTION("test1")
                 {
@@ -272,6 +272,17 @@ TEST_CASE("units")
                     // 1:1 integer wouldn't, we promote to 1:1024
                     static_assert(estd::is_same<CT::period, estd::ratio<1, 1024>>::value, "");
                 }
+                // Does indeed fail to compile, as intended
+#if EXPOSITIONAL_ONLY
+                SECTION("mismatch tags")
+                {
+                    hz<uint16_t> hz1(10);
+                    percent<uint16_t> p1(10);
+
+                    // static assert - mismatched types
+                    using CT = decltype(ct_helper(hz1, p1));
+                }
+#endif
             }
             SECTION("int <--> float")
             {
