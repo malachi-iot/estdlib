@@ -29,7 +29,7 @@ struct duration_values
 
 
 template <class Rep, class Period>
-struct duration_unit_traits : estd::internal::units::unit_traits<Rep, Period, seconds_tag>
+struct duration_unit_traits : estd::units::v1::detail::traits<Rep, Period, seconds_tag>
 {
     static constexpr estd::internal::units::options options =
         estd::internal::units::options::default_value_initialized;

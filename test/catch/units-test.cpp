@@ -13,13 +13,13 @@
 struct frequency_tag {};
 
 template <class Rep, class Period, class F>
-struct frequency_unit_traits : estd::internal::units::unit_traits<Rep, Period, frequency_tag, F>
+struct frequency_unit_traits : estd::units::v1::detail::traits<Rep, Period, frequency_tag, F>
 {
     static constexpr auto options = estd::internal::units::options::default_unassigned;
 };
 
 template <class Rep, class Period = estd::ratio<1>, typename F = estd::internal::units::passthrough<Rep> >
-using hz = estd::internal::units::v2::unit_base<frequency_unit_traits<Rep, Period, F>>;
+using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
 
 
 namespace estd { namespace internal { namespace units {

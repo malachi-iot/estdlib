@@ -49,7 +49,7 @@ constexpr common_type_t<
 template <class Traits, class Rep>
 constexpr
     v2::unit_base<
-        unit_traits<
+        ::estd::units::v1::detail::traits<
             common_type_t<typename Traits::rep, Rep>,
         typename Traits::period, typename Traits::tag, typename Traits::projector>>
     ct_helper(const v2::unit_base<Traits>&, const Rep&)

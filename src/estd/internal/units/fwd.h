@@ -66,10 +66,6 @@ using unit_base_tag = ::estd::units::v1::detail::unit_base_tag;
 template <class T>
 using passthrough = ::estd::units::v1::passthrough<T>;
 
-template <class Rep, class Period, class Tag,
-    ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
-using unit_traits = ::estd::units::v1::detail::traits<Rep, Period, Tag, F>;
-
 // 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
 template <class Rep, class Tag>
 struct basic_unit_traits;
@@ -85,7 +81,7 @@ inline namespace v1 {
 
 template <typename Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
-using unit_base = v2::unit_base<unit_traits<Rep, Period, Tag, F>>;
+using unit_base = ::estd::units::unit<Rep, Period, Tag, F>;
 
 }
 
