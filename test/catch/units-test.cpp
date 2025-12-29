@@ -63,6 +63,7 @@ struct StringMaker<unit<Rep, Period, Tag, F>>
 TEST_CASE("units")
 {
     using namespace estd::internal::units;
+    using namespace estd::literals::units_literals;
 
     estd::layer1::ostringstream<256> out;
     auto& s = out.rdbuf()->str();
@@ -125,7 +126,7 @@ TEST_CASE("units")
     {
         // DEBT: 55_pct doesn't auto play nice with percent<double>
 
-        using percent_type = percent<int16_t, estd::ratio<100, 1024> >;
+        using percent_type = estd::units::v1::percent<int16_t, estd::ratio<100, 1024> >;
         percent_type adc_p1(512), adc_p2(100);
         percent<double> p1(55.0_pct);
         //percent<float> p2(45.0_pct);

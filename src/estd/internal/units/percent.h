@@ -11,24 +11,23 @@ namespace estd { namespace internal { namespace units {
 
 struct percent_tag {};
 
+}}}
+
+namespace estd { namespace units { inline namespace v1 {
+
 // Represented as 0 through 100, not 0 through 1
 template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
-using percent = unit_base<Rep, Period, percent_tag, F>;
+using percent = unit<Rep, Period, internal::units::percent_tag, F>;
 
-inline namespace literals {
+using namespace estd::literals::units_literals;
 
-constexpr percent<unsigned> operator ""_pct (unsigned long long int v)
-{
-    return percent<unsigned>(v);
-}
+}}}
 
-constexpr percent<double> operator ""_pct (long double v)
-{
-    return percent<double>(static_cast<double>(v));
-}
+namespace estd { namespace internal { namespace units {
 
-}
-
+// Represented as 0 through 100, not 0 through 1
+template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
+using percent = ::estd::units::v1::percent<Rep, Period, F>;
 
 template <>
 struct traits<percent_tag>
@@ -74,5 +73,19 @@ inline unit_base<Rep2, Ratio2, Tag, F2> get_from_percent(
     return get_from_percent(p, unit_base<Rep2, Ratio2, Tag, F2>(0), max);
 }
 
+
+}}} // estd::internal::units
+
+namespace estd { inline namespace literals { inline namespace units_literals {
+
+constexpr units::v1::percent<unsigned> operator ""_pct (unsigned long long int v)
+{
+    return units::v1::percent<unsigned>(v);
+}
+
+constexpr units::v1::percent<double> operator ""_pct (long double v)
+{
+    return units::v1::percent<double>(static_cast<double>(v));
+}
 
 }}}

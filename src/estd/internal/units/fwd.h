@@ -104,3 +104,7 @@ inline namespace literals {}
 
 
 }}}
+
+namespace estd { inline namespace literals { inline namespace units_literals {
+
+}}}

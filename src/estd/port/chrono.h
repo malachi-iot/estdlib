@@ -10,17 +10,7 @@
 
 #ifdef FEATURE_ESTD_CHRONO
 
-namespace estd {
-
-#ifdef FEATURE_CPP_INLINE_NAMESPACE
-inline
-#endif
-namespace literals {
-
-#ifdef FEATURE_CPP_INLINE_NAMESPACE
-inline
-#endif
-namespace chrono_literals {
+namespace estd { inline namespace literals { inline namespace chrono_literals {
 
 // CLang allows this during the compile phase, but ignores the definitions and generates
 // a bunch of warnings.  Until we can repair that, CLang is disabled.  In the short term,
