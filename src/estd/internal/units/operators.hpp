@@ -65,6 +65,68 @@ ESTD_UNITS_COMP(<=)
 ESTD_UNITS_COMP(==)
 ESTD_UNITS_COMP(!=)
 
+#undef ESTD_UNITS_COMP
+
+// ratio<1> specializations
+
+template <class Traits, typename Rep>
+using compatible_rep = bool_constant<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>;
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr unit<Traits>& operator +=(unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs += unit<Traits>(rhs);
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr unit<Traits>& operator -=(unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs -= unit<Traits>(rhs);
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator==(const unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs.count() == rhs;
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator<(const unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs.count() < rhs;
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator>(const unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs.count() > rhs;
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator<=(const unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs.count() <= rhs;
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator>=(const unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs.count() >= rhs;
+}
+
 
 }}}}
 
@@ -75,74 +137,6 @@ namespace estd { namespace internal { namespace units {
 
 // TODO: Add operator* and operator-.  They work well enough BUT we may not want to return
 // the same CT in those cases
-
-// ratio<1> specializations
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr v2::unit_base<Traits>& operator +=(
-    v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs += v2::unit_base<Traits>(rhs);
-}
-
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr v2::unit_base<Traits>& operator -=(
-    v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs -= v2::unit_base<Traits>(rhs);
-}
-
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr bool operator==(
-    const v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs.count() == rhs;
-}
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr bool operator>(
-    const v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs.count() > rhs;
-}
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr bool operator<(
-    const v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs.count() < rhs;
-}
-
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr bool operator>=(
-    const v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs.count() >= rhs;
-}
-
-template <class Traits, typename Rep,
-    typename estd::enable_if_t<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>* = nullptr>
-constexpr bool operator<=(
-    const v2::unit_base<Traits>& lhs,
-    const Rep& rhs)
-{
-    return lhs.count() <= rhs;
-}
 
 // regular arithmetic things
 
