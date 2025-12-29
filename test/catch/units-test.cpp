@@ -1,10 +1,7 @@
 #include <catch2/catch_all.hpp>
 
-#include <estd/internal/units/base.h>
-#include <estd/internal/units/bytes.h>
-#include <estd/internal/units/ostream.h>
-#include <estd/internal/units/percent.h>
-#include <estd/internal/units/operators.hpp>
+#include <estd/units.h>
+
 #include <estd/internal/units/mixins.h>
 
 #include <estd/sstream.h>
