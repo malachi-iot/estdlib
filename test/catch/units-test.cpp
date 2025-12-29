@@ -37,21 +37,21 @@ struct traits<frequency_tag>
 // because this and things like 'Dummy' are just useful for other libs too
 namespace Catch {
 
-using namespace estd::internal;
+using namespace estd::units::v1;
 
 template <class Rep, class Period, class Tag, class F>
-struct StringMaker<units::unit_base<Rep, Period, Tag, F>>
+struct StringMaker<unit<Rep, Period, Tag, F>>
 {
-    using human_type = units::unit_base<double, estd::ratio<1>, Tag, F>;
+    using human_type = unit<double, estd::ratio<1>, Tag, F>;
 
-    static std::string convert(units::unit_base<Rep, Period, Tag, F> const& v)
+    static std::string convert(unit<Rep, Period, Tag, F> const& v)
     {
         // DEBT: Perhaps put this code into some diagnostic/explicit to_string
 
         std::ostringstream oss;
 
         if(Period::num != Period::den)
-            oss << put_unit(human_type(v, units::relaxed_narrow_t{})) << " (count=" << v.count() << ")";
+            oss << put_unit(human_type(v, relaxed_narrow_t{})) << " (count=" << v.count() << ")";
         else
             oss << put_unit(v);
 

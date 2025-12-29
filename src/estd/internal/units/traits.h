@@ -5,7 +5,9 @@
 
 #include "fwd.h"
 
-namespace estd { namespace internal { namespace units {
+namespace estd { namespace units { inline namespace v1 {
+
+namespace detail {
 
 enum options
 {
@@ -20,7 +22,7 @@ enum options
 // tag_traits?
 template <class Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F>
-struct unit_traits
+struct traits
     //: traits<Tag> // DEBT: Bring this guy back, temporarily disabling while I sort out dependencies
 {
     using rep = Rep;
@@ -28,14 +30,21 @@ struct unit_traits
     using tag = Tag;
     using projector = F;
 
-    static constexpr units::options options = units::options::default_prohibited;
+    static constexpr detail::options options = detail::options::default_prohibited;
 
     constexpr static rep default_value() { return {}; }
 };
 
 
 template <class Rep, class Tag>
-struct basic_unit_traits : unit_traits<Rep, estd::ratio<1>, Tag, passthrough<Rep>> {};
+struct basic_unit_traits : traits<Rep, ratio<1>, Tag, passthrough<Rep>> {};
 
+} // detail
+
+}}} // estd::units::inline v1
+
+namespace estd { namespace internal { namespace units {
+
+using options = ::estd::units::v1::detail::options;
 
 }}}

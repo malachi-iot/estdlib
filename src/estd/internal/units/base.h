@@ -12,44 +12,6 @@
 
 namespace estd { namespace internal { namespace units {
 
-// Indicates to unit_base that narrowing might happen and to silently
-// permit it
-struct relaxed_narrow_t {};
-
-// DEBT: Pretty sure there's a std/estd flavor of this we can use,
-// though our flavor provides extra value in that reflected 'type'
-// is important for consumer to use for precision/signing
-template <typename Int, Int add>
-struct subtractor : estd::integral_constant<Int, add>
-{
-    template <typename Int2>
-    constexpr Int operator()(Int2 v) const
-    {
-        return v - add;
-    }
-
-    // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
-    // else.
-    using reversal = adder<Int, add>;
-};
-
-template <typename Int, Int add>
-struct adder : estd::integral_constant<Int, add>
-{
-    template <typename Int2>
-    constexpr Int operator()(Int2 v) const
-    {
-        return v + add;
-    }
-
-    // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
-    // else.
-    using reversal = subtractor<Int, add>;
-};
-
-
-
-
 
 template <class ToScalar, class FromScalar>
 constexpr ToScalar unit_cast(const FromScalar& s)
@@ -88,7 +50,11 @@ struct compound_unit_helper
     using type = unit_base<rep, period, tag_type>;
 };
 
-namespace v2 {
+}}}
+
+namespace estd { namespace units { inline namespace v1 {
+    
+namespace detail {
 
 template <class Traits, class = void>
 class scalar_base;
@@ -146,7 +112,7 @@ protected:
 /// @tparam Tag differentiating tag so as to disallow one unit from automatically converting to another
 /// @tparam F final conversion.  defaults to passthrough (noop)
 template <class Traits>
-class unit_base :
+class unit :
     scalar_base<Traits>,
     public unit_base_tag,
     public Traits::tag        // Deriving from tag not necessary, but might be useful for is_base_of query
@@ -213,15 +179,15 @@ public:
 
     // FIX: Need to enforce 'tag' matches
     template <class Traits2>
-    static constexpr rep convert_from(const unit_base<Traits2>& v)
+    static constexpr rep convert_from(const unit<Traits2>& v)
     {
         return convert_from<decltype(v.count()), typename Traits2::period>(v.count());
     }
 
 public:
-    constexpr unit_base() = default;
+    constexpr unit() = default;
 
-    explicit constexpr unit_base(const rep& rep) : base_type{rep} {}
+    explicit constexpr unit(const rep& rep) : base_type{rep} {}
 
     // Converting constructors are NOT explicit, since we happily want silent conversions
     // in this case.  We're not converting strings etc, but very narrowly similar unit_bases.  See:
@@ -238,19 +204,19 @@ public:
 
     //template <class Traits2, class = enable_if_t<tag_matches<Traits2>() && !period_matches<Traits2>()>>
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    constexpr unit_base(const unit_base<Traits2>& s) :   // NOLINT
+    constexpr unit(const unit<Traits2>& s) :   // NOLINT
         base_type{convert_from(s)}
     {
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    constexpr unit_base(const unit_base<Traits2>& s, relaxed_narrow_t) :   // NOLINT
+    constexpr unit(const unit<Traits2>& s, relaxed_narrow_t) :   // NOLINT
         base_type(rep(convert_from(s)))
     {
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    unit_base& operator=(const unit_base<Traits2>& copy_from)
+    unit& operator=(const unit<Traits2>& copy_from)
     {
         rep_ = convert_from(copy_from);
         return *this;
@@ -268,51 +234,51 @@ public:
 
     // EXPERIMENTAL
     template <class TCompountUnit>
-    using per = typename compound_unit_helper<unit_base, TCompountUnit>::type;
+    using per = typename internal::units::compound_unit_helper<unit, TCompountUnit>::type;
 
     // For more exotic cases, see standalone operator==() in operators.hpp
-    constexpr bool operator==(const unit_base& compare_to) const
+    constexpr bool operator==(const unit& compare_to) const
     {
         return rep_ == compare_to.rep_;
     }
 
-    unit_base& operator +=(const unit_base& v)
+    unit& operator +=(const unit& v)
     {
         rep_ += v.rep_;
         return *this;
     }
 
-    unit_base& operator -=(const unit_base& v)
+    unit& operator -=(const unit& v)
     {
         rep_ -= v.rep_;
         return *this;
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    unit_base& operator +=(const unit_base<Traits2>& v)
+    unit& operator +=(const unit<Traits2>& v)
     {
         using CT = decltype(ct_helper(*this, v));
-        static_assert(is_same<CT, unit_base>::value, "Using += this way would result in precision loss");
+        static_assert(is_same<CT, unit>::value, "Using += this way would result in precision loss");
 
-        return operator +=(unit_base(v));
+        return operator +=(unit(v));
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    unit_base& operator -=(const unit_base<Traits2>& v)
+    unit& operator -=(const unit<Traits2>& v)
     {
         using CT = decltype(ct_helper(*this, v));
-        static_assert(is_same<CT, unit_base>::value, "Using -= this way would result in precision loss");
+        static_assert(is_same<CT, unit>::value, "Using -= this way would result in precision loss");
 
-        return operator -=(unit_base(v));
+        return operator -=(unit(v));
     }
 
-    unit_base& operator *=(const rep& v)
+    unit& operator *=(const rep& v)
     {
         rep_ *= v;
         return *this;
     }
 
-    unit_base& operator /=(const rep& v)
+    unit& operator /=(const rep& v)
     {
         rep_ /= v;
         return *this;
@@ -321,20 +287,20 @@ public:
 
     // EXPERIMENTAL - may have diminished/confusing utility especially for
     // floating point types
-    unit_base& operator ++()
+    unit& operator ++()
     {
         ++rep_;
         return *this;
     }
 
-    constexpr const unit_base operator -() const
+    constexpr const unit operator -() const
     {
-        return unit_base(-rep_);
+        return unit(-rep_);
     }
 };
 
-}
+}   // detail
 
-}}}
+}}} // estd::units::inline v1
 
 #include "../macro/pop.h"

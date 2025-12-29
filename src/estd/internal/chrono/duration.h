@@ -69,7 +69,7 @@ public:
     // NOTE: It seems std::duration quietly permits narrowing, so so do we
     template <class Rep2, class Period2>
     constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
-        base_type(d, estd::internal::units::relaxed_narrow_t{})
+        base_type(d, estd::units::v1::relaxed_narrow_t{})
     {}
 
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO

@@ -3,7 +3,7 @@
 #if __cpp_concepts
 #include <concepts>
 
-namespace estd::internal::units {
+namespace estd::internal::units::inline concepts {
 
 // DEBT: Should name this something more like Adjuster
 template<class T, typename Int = int>
