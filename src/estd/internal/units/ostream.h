@@ -10,7 +10,7 @@
 
 #include "fwd.h"
 
-namespace estd { namespace internal { namespace units {
+namespace estd { namespace internal {
 
 template <class>
 struct is_std_ostream : estd::false_type {};
@@ -105,7 +105,7 @@ template <class Tag, class Period, class Out,
         estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix(ostream_like<Out> out)
 {
-    out << traits<Tag>::name();
+    out << units::traits<Tag>::name();
 }
 
 template <class Tag, class Period, class Out,
@@ -113,7 +113,7 @@ template <class Tag, class Period, class Out,
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix(ostream_like<Out> out)
 {
-    out << si::traits<Period, Tag>::name() << traits<Tag>::name();
+    out << units::si::traits<Period, Tag>::name() << units::traits<Tag>::name();
 }
 
 template <class Tag, class Period, class Out,
@@ -121,7 +121,7 @@ template <class Tag, class Period, class Out,
         estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix_abbrev(ostream_like<Out> out)
 {
-    *out.out << traits<Tag>::abbrev();
+    *out.out << units::traits<Tag>::abbrev();
 }
 
 
@@ -130,12 +130,12 @@ template <class Tag, class Period, class Out,
         !estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
 void write_suffix_abbrev(ostream_like<Out> out)
 {
-    *out.out << si::traits<Period, Tag>::abbrev() << traits<Tag>::abbrev();
+    *out.out << units::si::traits<Period, Tag>::abbrev() << units::traits<Tag>::abbrev();
 }
 
 template <class Traits, class Out>
 void write(ostream_like<Out> out,
-    const v2::unit_base<Traits>& unit)
+    const estd::units::v1::detail::unit<Traits>& unit)
 {
     out << unit.count() << ' ';
     write_suffix<typename Traits::tag, typename Traits::period>(out);
@@ -143,14 +143,15 @@ void write(ostream_like<Out> out,
 
 template <class Traits, class Out>
 void write_abbrev(ostream_like<Out> out,
-    const v2::unit_base<Traits>& unit, bool include_space = false)
+    const estd::units::v1::detail::unit<Traits>& unit, bool include_space = false)
 {
     out << unit.count();
     if(include_space) out << ' ';
     write_suffix_abbrev<typename Traits::tag, typename Traits::period>(out);
 }
 
-namespace detail {
+// DEBT: Bring back detail NS once we place into estd::units
+//namespace detail {
 
 // DEBT: This guy is great, make concept support 
 template <class Unit>
@@ -200,14 +201,14 @@ estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
     return out;
 } */
 
-}
+//}
 
 
 #if FEATURE_STD_OSTREAM
 template <class Char, class Traits, class Unit>
 inline std::basic_ostream<Char, Traits>& operator<<(
     std::basic_ostream<Char, Traits>& out,
-    const detail::unit_put<Unit>& unit)
+    const unit_put<Unit>& unit)
 {
     unit(make_ostream_like(out));
 
@@ -216,10 +217,10 @@ inline std::basic_ostream<Char, Traits>& operator<<(
 #endif
 
 
-}}
+}
 
 template <class Traits>
-constexpr internal::units::detail::unit_put<
+constexpr internal::unit_put<
     internal::units::v2::unit_base<Traits> > put_unit(
     const internal::units::v2::unit_base<Traits>& unit, bool abbrev = true)
 {

@@ -76,7 +76,7 @@ TEST_CASE("units")
     SECTION("make_ostream_like")
     {
         std::ostringstream oss;
-        make_ostream_like(oss);
+        estd::internal::make_ostream_like(oss);
     }
     SECTION("hz")
     {
