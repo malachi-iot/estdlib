@@ -8,8 +8,7 @@
 // 1.  Projection mode is uniquely useful (i.e. for J1939)
 // 2.  Predictably able to feed into chrono
 // 3.  Configurability of constructor really nice to have
-// I haven't done research into mp-units, for all I know it could have
-// all these things.
+// 4.  AVR and c++11 compatibility is practical
 
 // Copying the playbook from chrono
 
@@ -39,6 +38,10 @@ template <class Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
 struct traits;
 
+// 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
+template <class Rep, class Tag>
+struct basic_traits;
+
 template <class Traits>
 class unit;
 
@@ -65,10 +68,6 @@ using unit_base_tag = ::estd::units::v1::detail::unit_base_tag;
 
 template <class T>
 using passthrough = ::estd::units::v1::passthrough<T>;
-
-// 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
-template <class Rep, class Tag>
-struct basic_unit_traits;
 
 namespace v2 {
 
@@ -100,7 +99,7 @@ struct traits;
 
 }
 
-inline namespace literals {}
+//inline namespace literals {}
 
 
 }}}

@@ -10,16 +10,21 @@
 namespace estd {
 
 
+// DEBT: Does not yet account for projector, auto-demotes to
+// non-projected.  This may be OK since projected unit IIRC
+// auto-normalizes on the way out to regular non-projected flavor
 template <class Traits1, class Traits2>
 struct common_type<
-    internal::units::v2::unit_base<Traits1>,
-    internal::units::v2::unit_base<Traits2>>
+    units::v1::detail::unit<Traits1>,
+    units::v1::detail::unit<Traits2>>
 {
     using period1 = typename Traits1::period;
     using period2 = typename Traits2::period;
     using tag = typename Traits1::tag;
+    using projector = typename Traits1::projector;
 
     static_assert(is_same<tag, typename Traits2::tag>::value, "Unit tags must match");
+    //static_assert(is_same<projector, typename Traits2::projector>::value, "Unit projectors must match");
 
     using common_rep_type = typename promoted_type<typename Traits1::rep, typename Traits2::rep>::type;
 

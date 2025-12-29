@@ -37,7 +37,7 @@ struct traits
 
 
 template <class Rep, class Tag>
-struct basic_unit_traits : traits<Rep, ratio<1>, Tag, passthrough<Rep>> {};
+struct basic_traits : traits<Rep, ratio<1>, Tag, passthrough<Rep>> {};
 
 } // detail
 
