@@ -7,8 +7,6 @@
 
 namespace estd { namespace units { inline namespace v1 { namespace detail {
 
-using internal::units::ct_helper;
-
 template <class Traits>
 constexpr unit<Traits> operator +(
     const unit<Traits>& lhs,

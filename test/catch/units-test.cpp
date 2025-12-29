@@ -107,7 +107,7 @@ TEST_CASE("units")
     SECTION("bytes")
     {
         bytes<unsigned> v(2048);
-        kilobytes<double> v2(v);
+        estd::units::v1::kilobytes<double> v2(v);
 
         out << put_unit(v);
 

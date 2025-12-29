@@ -10,12 +10,12 @@
 // 1.  a fraction of a byte doesn't always make sense and when it does, it has unique rules for naming (nibble, bit, etc)
 // 2.  unlike all other units, 1024 is the kilo step not 1000
 
-namespace estd { namespace internal { namespace units {
+namespace estd { namespace units { inline namespace v1 {
 
 struct bytes_tag {};
 
 template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
-using bytes = unit_base<Rep, Period, bytes_tag, F>;
+using bytes = unit<Rep, Period, bytes_tag, F>;
 
 template <class Rep, typename F = passthrough<Rep> >
 using kilobytes = bytes<Rep, estd::ratio<1024>, F>;
@@ -26,20 +26,14 @@ using megabytes = bytes<Rep, estd::ratio<1024 * 1024>, F>;
 template <class Rep, typename F = passthrough<Rep> >
 using gigabytes = bytes<Rep, estd::ratio<1024 * 1024 * 1024>, F>;
 
-inline namespace literals {
+}}}
 
-constexpr bytes<unsigned> operator ""_bytes (unsigned long long int v)
-{
-    return bytes<unsigned>(v);
-}
+namespace estd { namespace internal { namespace units {
 
-constexpr bytes<double> operator ""_bytes (long double v)
-{
-    return bytes<double>(static_cast<double>(v));
-}
+using bytes_tag = estd::units::v1::bytes_tag;
 
-}
-
+template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
+using bytes = estd::units::v1::bytes<Rep, Period, F>;
 
 template <>
 struct traits<bytes_tag>
@@ -67,6 +61,21 @@ struct traits<estd::ratio<1024 * 1024 * 1024>, bytes_tag> : traits<estd::giga>
 {
 };
 
+}
+
+}}}
+
+
+namespace estd { inline namespace literals { inline namespace units_literals {
+
+constexpr units::v1::bytes<unsigned> operator ""_bytes (unsigned long long int v)
+{
+    return units::v1::bytes<unsigned>(v);
+}
+
+constexpr units::v1::bytes<double> operator ""_bytes (long double v)
+{
+    return units::v1::bytes<double>(static_cast<double>(v));
 }
 
 }}}

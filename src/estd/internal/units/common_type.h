@@ -35,34 +35,27 @@ struct common_type<
 public:
     using ratio_type =  ratio<gcd_num, lcm_den>;
 
-    using type = internal::units::unit_base<common_rep_type, ratio_type, tag>;
+    using type = units::v1::unit<common_rep_type, ratio_type, tag>;
 };
 
 
-namespace internal { namespace units {
+namespace units { inline namespace v1 { namespace detail {
 
 template <class Traits1, class Traits2>
 constexpr common_type_t<
-    v2::unit_base<Traits1>,
-    v2::unit_base<Traits2>> ct_helper(
-    const v2::unit_base<Traits1>&,
-    const v2::unit_base<Traits2>&)
-{
-    return {};
-}
+    unit<Traits1>,
+    unit<Traits2>> ct_helper(
+    const unit<Traits1>&,
+    const unit<Traits2>&);
 
 template <class Traits, class Rep>
 constexpr
-    v2::unit_base<
-        ::estd::units::v1::detail::traits<
+    unit<
+        traits<
             common_type_t<typename Traits::rep, Rep>,
-        typename Traits::period, typename Traits::tag, typename Traits::projector>>
-    ct_helper(const v2::unit_base<Traits>&, const Rep&)
-{
-    return {};
-}
+            typename Traits::period, typename Traits::tag, typename Traits::projector>>
+ct_helper(const unit<Traits>&, const Rep&);
 
-
-}}
+}}}
 
 }
