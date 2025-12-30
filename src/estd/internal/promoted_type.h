@@ -144,11 +144,10 @@ struct is_safe_arithmetic_conversion<
 };
 
 // Human provided additional support
-
 // Permits signed -> unsigned provided 'To' is already a promoted precision
 template <class From, class To>
 struct is_safe_arithmetic_conversion<From, To,
-    enable_if_t<!is_signed<To>::value>> :
+    enable_if_t<!is_same<From, To>::value && !is_signed<To>::value>> :
     bool_constant<is_safe_arithmetic_conversion<From, internal::promote_type_t<From>>::value>
 {
 };
