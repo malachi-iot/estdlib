@@ -257,8 +257,8 @@ public:
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     unit& operator +=(const unit<Traits2>& v)
     {
-        using CT = decltype(ct_helper(*this, v));
-        static_assert(is_same<CT, unit>::value, "Using += this way would result in precision loss");
+        static constexpr bool compatible = is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        static_assert(compatible, "Using += this way would result in precision loss");
 
         return operator +=(unit(v));
     }
@@ -266,8 +266,8 @@ public:
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     unit& operator -=(const unit<Traits2>& v)
     {
-        using CT = decltype(ct_helper(*this, v));
-        static_assert(is_same<CT, unit>::value, "Using -= this way would result in precision loss");
+        static constexpr bool compatible = is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        static_assert(compatible, "Using -= this way would result in precision loss");
 
         return operator -=(unit(v));
     }

@@ -131,6 +131,11 @@ TEST_CASE("units")
         const percent<uint32_t> p3{90};
         percent<int> p4{50};
 
+        struct special_traits : estd::units::detail::basic_traits<int, estd::internal::units::percent_tag>{};
+
+        estd::units::v1::detail::unit<special_traits> p5{1};
+        percent<int16_t> p6{1};
+
         SECTION("addition")
         {
             auto v = adc_p1 + adc_p2;
@@ -156,6 +161,27 @@ TEST_CASE("units")
             p1 += 3;
 
             REQUIRE(p1 == 58);
+
+            // compatible types
+
+            p1 += p2;
+
+            REQUIRE(p1 == 103);
+
+            p1 += p6;
+
+            REQUIRE(p1 == 104.0_pct);
+
+            p1 += p5;
+
+            REQUIRE(p1 == 105.0_pct);
+
+            //p5 += p1;   // Doesn't compile because p1 is double and p5 is int
+            p5 += p4;
+            //p5 += p3;     // Doesn't compile because p3 uint32_t doesn't pass narrowing conversion to int
+
+            // DEBT: Make Stringizer more resilient to basic_traits and friends
+            REQUIRE(p5.count() == 51);
         }
         SECTION("subtraction")
         {
@@ -338,7 +364,7 @@ TEST_CASE("units (outside namespace)")
 {
     //namespace units = estd::internal::units;
 
-    estd::internal::units::percent<int16_t, estd::ratio<100, 1024> >
+    estd::units::percent<int16_t, estd::ratio<100, 1024> >
         p1(512), p2(100);
 
     auto p3 = p1 + p2;

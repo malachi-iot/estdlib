@@ -126,4 +126,33 @@ struct promoted_type<float, double, auto_promote>
     using type = double;
 };
 
+
+// AI provided narrowing sanity check, somewhat works
+template<class From, class To, class = void>
+struct is_safe_arithmetic_conversion : false_type {};
+
+template<class From, class To>
+struct is_safe_arithmetic_conversion<
+    From,
+    To,
+    decltype(void(To{ std::declval<From>() }))
+    > : true_type
+{
+};
+
+// Human provided additional support, could use some cleanup - but works
+template <> struct is_safe_arithmetic_conversion<int16_t, uint32_t> : true_type {};
+template <> struct is_safe_arithmetic_conversion<int16_t, uint64_t> : true_type {};
+template <> struct is_safe_arithmetic_conversion<int32_t, uint64_t> : true_type {};
+template <> struct is_safe_arithmetic_conversion<short, float> : true_type {};
+template <> struct is_safe_arithmetic_conversion<short, double> : true_type {};
+template <> struct is_safe_arithmetic_conversion<int, double> : true_type {};
+
+static_assert(is_safe_arithmetic_conversion<int, double>::value, "Sanity check");
+static_assert(is_safe_arithmetic_conversion<float, double>::value, "Sanity check");
+static_assert(!is_safe_arithmetic_conversion<double, float>::value, "Sanity check");
+static_assert(is_safe_arithmetic_conversion<int, long>::value, "Sanity check");
+static_assert(!is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
+static_assert(is_safe_arithmetic_conversion<short, unsigned long>::value, "Sanity check");
+
 }

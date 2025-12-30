@@ -18,6 +18,8 @@ struct common_type<
     units::v1::detail::unit<Traits1>,
     units::v1::detail::unit<Traits2>>
 {
+    using traits1 = Traits1;
+    using traits2 = Traits2;
     using period1 = typename Traits1::period;
     using period2 = typename Traits2::period;
     using tag = typename Traits1::tag;
@@ -55,6 +57,19 @@ constexpr
             common_type_t<typename Traits::rep, Rep>,
             typename Traits::period, typename Traits::tag, typename Traits::projector>>
 ct_helper(const unit<Traits>&, const Rep&);
+
+template <class Traits1, class Traits2>
+using is_same_rep_and_period =
+    bool_constant<
+        is_same<typename Traits1::rep, typename Traits2::rep>::value &&
+        is_same<typename Traits1::period, typename Traits2::period>::value>;
+
+// FIX: Does not work right
+template <class TraitsFrom, class TraitsTo>
+using is_promotable_rep_and_same_period =
+    bool_constant<
+        is_safe_arithmetic_conversion<typename TraitsFrom::rep, typename TraitsTo::rep>::value &&
+        is_same<typename TraitsFrom::period, typename TraitsTo::period>::value>;
 
 }}}
 
