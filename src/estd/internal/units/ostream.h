@@ -79,27 +79,6 @@ ostream_like<Out> operator <<(ostream_like<Out> out, T&& v)
     return out;
 }   */
 
-// DEBT: Slightly horrifying kludge for 'double' support in ostream
-// DEBT: Resolve/semi combine this with the one appearing in estd/ostream.h
-template <class TStreambuf, class TBase>
-estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
-    estd::detail::basic_ostream<TStreambuf, TBase>& out,
-    double v)
-{
-    auto v_ = (int64_t)v;
-    auto v_dec = (int64_t)(v * 100) % 100;
-
-    if(v_dec < 0)   v_dec = -v_dec;
-
-    // DEBT: I think ostream is supposed to auto reset to dec, but isn't
-    out << estd::dec << v_;
-    out << '.';
-    if(v_dec < 10) out << '0';
-    out << v_dec;
-
-    return out;
-}
-
 template <class Tag, class Period, class Out,
     estd::enable_if_t<
         estd::is_same<Period, estd::ratio<1>>::value, bool> = true>
@@ -150,8 +129,9 @@ void write_abbrev(ostream_like<Out> out,
     write_suffix_abbrev<typename Traits::tag, typename Traits::period>(out);
 }
 
-// DEBT: Bring back detail NS once we place into estd::units
-//namespace detail {
+}
+
+namespace units { inline namespace v1 {
 
 // DEBT: This guy is great, make concept support 
 template <class Unit>
@@ -170,7 +150,7 @@ struct unit_put : estd::detail::ostream_functor_tag
     {}
 
     template <class Out>
-    void operator()(ostream_like<Out> out) const
+    void operator()(internal::ostream_like<Out> out) const
     {
         if(abbrev)
             write_abbrev(out, unit);
@@ -210,21 +190,20 @@ inline std::basic_ostream<Char, Traits>& operator<<(
     std::basic_ostream<Char, Traits>& out,
     const unit_put<Unit>& unit)
 {
-    unit(make_ostream_like(out));
+    unit(internal::make_ostream_like(out));
 
     return out;
 }
 #endif
 
 
-}
-
 template <class Traits>
-constexpr internal::unit_put<
-    internal::units::v2::unit_base<Traits> > put_unit(
-    const internal::units::v2::unit_base<Traits>& unit, bool abbrev = true)
+constexpr unit_put<detail::unit<Traits>> put_unit(
+    const detail::unit<Traits>& unit, bool abbrev = true)
 {
     return { unit, abbrev };
 }
+
+}}
 
 }

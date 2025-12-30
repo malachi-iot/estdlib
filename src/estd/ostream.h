@@ -63,6 +63,31 @@ typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStr
     return out_int_helper(out, value);
 }
 
+// Keeping this kludgey FP converter around.  In the event we encounter a non-std,
+// non-AVR environment (can't think of one), this might come in handy
+#if REFERENCE
+// DEBT: Slightly horrifying kludge for 'double' support in ostream
+// DEBT: Resolve/semi combine this with the one appearing in estd/ostream.h
+template <class TStreambuf, class TBase>
+estd::detail::basic_ostream<TStreambuf, TBase>& operator <<(
+    estd::detail::basic_ostream<TStreambuf, TBase>& out,
+    double v)
+{
+    auto v_ = (int64_t)v;
+    auto v_dec = (int64_t)(v * 100) % 100;
+
+    if(v_dec < 0)   v_dec = -v_dec;
+
+    // DEBT: I think ostream is supposed to auto reset to dec, but isn't
+    out << estd::dec << v_;
+    out << '.';
+    if(v_dec < 10) out << '0';
+    out << v_dec;
+
+    return out;
+}
+#endif
+
 template <class Streambuf, class Base, typename T>
 enable_if_t<is_floating_point<T>::value, basic_ostream<Streambuf, Base>&>
 operator <<(basic_ostream<Streambuf, Base>& out, T v)
