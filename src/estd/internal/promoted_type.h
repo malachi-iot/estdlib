@@ -20,6 +20,9 @@ namespace internal {
 template<class T>
 struct promote_type;
 
+template<class T>
+using promote_type_t = typename promote_type<T>::type;
+
 template<>
 struct promote_type<int8_t>
 {
@@ -140,10 +143,16 @@ struct is_safe_arithmetic_conversion<
 {
 };
 
-// Human provided additional support, could use some cleanup - but works
-template <> struct is_safe_arithmetic_conversion<int16_t, uint32_t> : true_type {};
-template <> struct is_safe_arithmetic_conversion<int16_t, uint64_t> : true_type {};
-template <> struct is_safe_arithmetic_conversion<int32_t, uint64_t> : true_type {};
+// Human provided additional support
+
+// Permits signed -> unsigned provided 'To' is already a promoted precision
+template <class From, class To>
+struct is_safe_arithmetic_conversion<From, To,
+    enable_if_t<!is_signed<To>::value>> :
+    bool_constant<is_safe_arithmetic_conversion<From, internal::promote_type_t<From>>::value>
+{
+};
+
 template <> struct is_safe_arithmetic_conversion<short, float> : true_type {};
 template <> struct is_safe_arithmetic_conversion<short, double> : true_type {};
 template <> struct is_safe_arithmetic_conversion<int, double> : true_type {};
@@ -154,5 +163,7 @@ static_assert(!is_safe_arithmetic_conversion<double, float>::value, "Sanity chec
 static_assert(is_safe_arithmetic_conversion<int, long>::value, "Sanity check");
 static_assert(!is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<short, unsigned long>::value, "Sanity check");
+static_assert(!is_safe_arithmetic_conversion<unsigned long, int>::value, "Sanity check");
+static_assert(!is_safe_arithmetic_conversion<unsigned long, float>::value, "Sanity check");
 
 }
