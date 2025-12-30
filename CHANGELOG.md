@@ -4,10 +4,12 @@
 
 * https://github.com/malachi-iot/estdlib/issues/160 units now have selectable deleted, value-init or uninitialized constructors
 * `rtto` mechanism for runtime `std::move` operation (TBD mention other parts of rtto also)
+* Minimal FEATURE_ESTD_OSTREAM_FLOAT (ostream precision support) now available
 
 ## Quality Updates & Bug Fies
 
-* units system cleanup: transition to `traits` approach
+* units system: promoted from `internal` namespace now to `estd::units` namespace
+* units system: transition to `traits` approach, lots of associated improved quality/scrubbing
 
 # v0.8.10 - 08OCT25
 

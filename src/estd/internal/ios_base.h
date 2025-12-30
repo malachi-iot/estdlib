@@ -42,10 +42,6 @@ public:
     // TODO: Not yet used, right now we are generally hardcoded to skipws = on
     static constexpr fmtflags skipws = 0x80;
 
-#if FEATURE_ESTD_OSTREAM_FLOAT
-    // 13AUG25 MB Not ready yet
-#endif
-
     typedef uint8_t openmode;
 
     static constexpr openmode app = 0x01;
