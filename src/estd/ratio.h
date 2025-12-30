@@ -28,6 +28,9 @@ public:
     static CONSTEXPR std::intmax_t den = Denom;
 };
 
+inline namespace si {
+
+typedef ratio<1, 1000000000000000> femto;
 typedef ratio<1, 1000000000000> pico;
 typedef ratio<1, 1000000000> nano;
 typedef ratio<1, 1000000> micro;
@@ -39,6 +42,10 @@ typedef ratio<1000, 1> kilo;
 typedef ratio<1000000, 1> mega;
 typedef ratio<1000000000, 1> giga;
 typedef ratio<1000000000000, 1> tera;
+typedef ratio<1000000000000000, 1> peta;
+typedef ratio<1000000000000000000, 1> exa;
+
+}
 
 /*
 // both have numerator of 1

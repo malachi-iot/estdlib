@@ -33,4 +33,7 @@ template <class R1, class R2>
 using ratio_add = typename detail::ratio_add<R1, R2>::type;
 #endif
 
+// Forward declaration of si for estd::units to notice
+inline namespace si {}
+
 }

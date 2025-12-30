@@ -47,17 +47,17 @@ namespace si {
 // specialize how we determine what a kilobyte, megabyte, etc. string gets computed as
 
 template <>
-struct traits<estd::ratio<1024>, bytes_tag> : traits<estd::kilo>
+struct traits<estd::ratio<1024>, bytes_tag> : traits<kilo>
 {
 };
 
 template <>
-struct traits<estd::ratio<1024 * 1024>, bytes_tag> : traits<estd::mega>
+struct traits<estd::ratio<1024 * 1024>, bytes_tag> : traits<mega>
 {
 };
 
 template <>
-struct traits<estd::ratio<1024 * 1024 * 1024>, bytes_tag> : traits<estd::giga>
+struct traits<estd::ratio<1024 * 1024 * 1024>, bytes_tag> : traits<giga>
 {
 };
 
