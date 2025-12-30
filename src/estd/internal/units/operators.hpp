@@ -125,45 +125,34 @@ constexpr bool operator>=(const unit<Traits>& lhs, const Rep& rhs)
     return lhs.count() >= rhs;
 }
 
-
-}}}}
-
-namespace estd { namespace internal { namespace units {
-
-// DEBT: Consolidate with all the clever chrono "common_type" versions - for now
-// implementing only the most basic to avoid too much code duplication
-
-// TODO: Add operator* and operator-.  They work well enough BUT we may not want to return
-// the same CT in those cases
-
 // regular arithmetic things
 
 template <class Rep, class Traits,
-    typename estd::enable_if_t<is_arithmetic<Rep>::value>* = nullptr>
+    enable_if_t<is_arithmetic<Rep>::value, int> = 0>
 constexpr auto operator *(
-    v2::unit_base<Traits> lhs,
+    unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
     return decltype(ct_helper(lhs, rhs)){ lhs.count() * rhs };
 }
 
 template <class Rep, class Traits,
-         typename estd::enable_if_t<is_arithmetic<Rep>::value>* = nullptr>
+    enable_if_t<is_arithmetic<Rep>::value, int> = 0>
 constexpr auto operator /(
-    v2::unit_base<Traits> lhs,
+    unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
     return decltype(ct_helper(lhs, rhs)){ lhs.count() / rhs };
 }
 
 template <class Rep, class Traits,
-    typename estd::enable_if_t<is_arithmetic<Rep>::value>* = nullptr>
+    enable_if_t<is_arithmetic<Rep>::value, int> = 0>
 constexpr auto operator %(
-    v2::unit_base<Traits> lhs,
+    unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
     return decltype(ct_helper(lhs, rhs)){ lhs.count() % rhs };
 }
 
 
-}}}
+}}}}

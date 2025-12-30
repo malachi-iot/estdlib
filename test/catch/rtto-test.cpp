@@ -119,6 +119,9 @@ TEST_CASE("rtto", "Runtime Type Operations")
         //using storage = internal::instance_storage<type>;
 
         // Brute forcing to activate experimental CREATE mode
+        // FIX: If using estd::bool_constant, this dies, presumably because we don't alias it out
+        // See https://github.com/malachi-iot/estdlib/issues/164 - matters because not everyone
+        // is on c++17
         using rtto = internal::rtto<type, internal::rtto_traits<type, std::bool_constant<true>>>;
         alignas(void*) char storage[64] {};
         alignas(void*) char storage2[64] {};
