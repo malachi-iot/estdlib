@@ -74,7 +74,7 @@ protected:
 
 
 template <class Traits>
-class scalar_base<Traits, enable_if_t<Traits::options == options::default_value_initialized>>
+class scalar_base<Traits, enable_if_t<Traits::options == options::value_initialized>>
 {
 public:
     using rep = typename Traits::rep;
@@ -88,7 +88,7 @@ protected:
 
 
 template <class Traits>
-class scalar_base<Traits, enable_if_t<Traits::options == options::default_unassigned>>
+class scalar_base<Traits, enable_if_t<Traits::options == options::default_initialized>>
 {
 public:
     using rep = typename Traits::rep;

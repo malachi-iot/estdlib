@@ -14,8 +14,8 @@ enum options
     none,
 
     default_prohibited,
-    default_value_initialized,
-    default_unassigned
+    value_initialized,
+    default_initialized
 };
 
 // 'traits' occupied by just tag.  Might consider shifting names around at some point

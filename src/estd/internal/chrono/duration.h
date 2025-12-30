@@ -31,17 +31,17 @@ struct duration_values
 template <class Rep, class Period>
 struct duration_unit_traits : estd::units::v1::detail::traits<Rep, Period, seconds_tag>
 {
-    static constexpr estd::internal::units::options options =
-        estd::internal::units::options::default_value_initialized;
+    static constexpr units::detail::options options =
+        units::v1::detail::options::default_initialized;
 };
 
 }
 
 template<class Rep, class Period>
 class duration :
-    public estd::internal::units::v2::unit_base<internal::duration_unit_traits<Rep, Period>>
+    public units::v1::detail::unit<internal::duration_unit_traits<Rep, Period>>
 {
-    using base_type = estd::internal::units::v2::unit_base<internal::duration_unit_traits<Rep, Period>>;
+    using base_type = units::v1::detail::unit<internal::duration_unit_traits<Rep, Period>>;
     using base_type::rep_;
 
 protected:

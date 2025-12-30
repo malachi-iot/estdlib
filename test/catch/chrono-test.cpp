@@ -545,4 +545,17 @@ TEST_CASE("chrono tests")
         c.dostuff();
     }
 #endif
+    SECTION("edge cases")
+    {
+        SECTION("Triviality")
+        {
+            using duration_type = estd::chrono::duration<uint16_t, estd::milli>;
+
+            union
+            {
+                duration_type duration;
+                uint16_t raw;
+            };
+        }
+    }
 }
