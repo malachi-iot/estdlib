@@ -34,7 +34,7 @@ static void handler(expected<int, errc> e)
 
 }
 
-typedef estd::test::NonTrivial ExplicitError;
+using ExplicitError = estd::test::NonTrivial;
 
 TEST_CASE("expected")
 {
@@ -127,11 +127,21 @@ TEST_CASE("expected")
             expected_type e;
 
             REQUIRE(e.has_value());
+            REQUIRE(e);
         }
-        SECTION("with error")
+        SECTION("with error, explicit")
         {
             expected_type e(estd::unexpect_t{}, estd::errc::invalid_argument);
 
+            REQUIRE(!e);
+            REQUIRE(!e.has_value());
+            REQUIRE(e.error() == estd::errc::invalid_argument);
+        }
+        SECTION("with error, implicit")
+        {
+            expected_type e = expected_type::unexpected_type(estd::errc::invalid_argument);
+
+            REQUIRE(!e);
             REQUIRE(!e.has_value());
             REQUIRE(e.error() == estd::errc::invalid_argument);
         }

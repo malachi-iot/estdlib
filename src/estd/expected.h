@@ -82,11 +82,11 @@ class expected : public internal::expected<T, E>
     }
 
 public:
-    typedef unexpected<E> unexpected_type;
+    using unexpected_type = unexpected<E>;
     typedef typename base_type::nonvoid_value_type nonvoid_value_type;
-    typedef typename base_type::error_type error_type;
+    using typename base_type::error_type;
 
-    ESTD_CPP_CONSTEXPR_RET expected() :
+    constexpr expected() :
         has_value_(true)
     {}
 
@@ -121,7 +121,6 @@ public:
     {}
 #endif
 
-#if __cpp_rvalue_references
     template <class U, class enabled = enable_if_t<internal::expected_ctor_6<U>::value> >
     constexpr expected(U&& v) :
         base_type(in_place_t{}, std::forward<U>(v)),
@@ -129,14 +128,11 @@ public:
     {}
 
     // DEBT: Not tested
-    ESTD_CPP_CONSTEXPR_RET expected(expected&& move_from) NOEXCEPT :
+    constexpr expected(expected&& move_from) NOEXCEPT :
         base_type(std::move(move_from), move_from.has_value()),
         has_value_(move_from.has_value())
     {}
-#endif
 
-
-#if __cpp_variadic_templates
     template <class... TArgs>
     constexpr explicit expected(in_place_t, TArgs&&...args) :
         base_type(in_place_t{}, std::forward<TArgs>(args)...),
@@ -148,19 +144,6 @@ public:
         base_type(unexpect_t{}, std::forward<TArgs>(args)...),
         has_value_(false)
     {}
-#else
-    template <class T1>
-    ESTD_CPP_CONSTEXPR_RET expected(in_place_t, const T1& v) :
-        base_type(in_place_t(), v),
-        has_value_(true)
-    {}
-
-    template <class TE1>
-    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) :
-        base_type(unexpect_t(), e),
-        has_value_(false)
-    {}
-#endif
 
     template <class G>
 #if __cpp_conditional_explicit || FEATURE_ESTD_STRICT_EXPECTED
@@ -195,13 +178,9 @@ public:
     }
 #endif
 
-#if __cplusplus >= 201103L
     template <class G, class GF = const G&, class enabled = enable_if_t<
         internal::is_variant_assignable<E, GF>::value
         >>
-#else
-    template <class G>
-#endif
     expected& operator=(const unexpected<G>& copy_from)
     {
         base_type::assign_error(!has_value_, copy_from.error());
@@ -216,7 +195,6 @@ public:
         destroy();
     }
 
-#if __cpp_variadic_templates
     template <class ...TArgs>
     nonvoid_value_type& emplace(TArgs&&...args)
     {
@@ -225,7 +203,6 @@ public:
         has_value_ = true;
         return base_type::value();
     }
-#endif
 
     nonvoid_value_type& value() ESTD_CPP_REFQ
     {
@@ -241,7 +218,7 @@ public:
         return base_type::value();
     }
 
-    ESTD_CPP_CONSTEXPR_RET bool has_value() const { return has_value_; }
+    constexpr bool has_value() const { return has_value_; }
 
     nonvoid_value_type& operator*() ESTD_CPP_REFQ
     {
@@ -253,7 +230,6 @@ public:
         return base_type::value();
     }
 
-#if __cpp_rvalue_references
     nonvoid_value_type&& operator*() &&
     {
         return base_type::value();
@@ -263,25 +239,19 @@ public:
     {
         return base_type::value();
     }
-#endif
 
     const T* operator->() const
     {
         return &base_type::value();
     }
 
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-    operator bool() const { return has_value_; }
+    constexpr explicit operator bool() const { return has_value_; }
 
-#if __cpp_rvalue_references
     template <class U>
-    ESTD_CPP_CONSTEXPR_RET T value_or(U&& default_value) const&
+    constexpr T value_or(U&& default_value) const&
     {
         return has_value_ ? base_type::value() : default_value;
     }
-#endif
 };
 
 
