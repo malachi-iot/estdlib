@@ -157,11 +157,10 @@ protected:
     model_base* m;
 
 public:
-    // DEBT: We need operator = for these two as well, so that we can
-    // make them explicit - unless we can prove having just these constructors
-    // is a good practice (and document here)
-    function(nullptr_t = nullptr_t{}) : m(NULLPTR) {}
-    function(model_base* m) : m(m) {}
+    // NOT making explicit to match with std::function signature
+    // https://en.cppreference.com/w/cpp/utility/functional/function/function.html
+    constexpr function(nullptr_t = nullptr_t{}) : m(nullptr) {}     // NOLINT
+    constexpr function(model_base* m) : m(m) {}                     // NOLINT
 
     function(const function& copy_from) = default;
 
@@ -171,6 +170,11 @@ public:
     }
 
     function& operator =(const function&) = default;
+    function& operator =(nullptr_t)
+    {
+        m = nullptr;
+        return *this;
+    }
 
 #if FEATURE_ESTD_FUNCTION_RVALUE
     // Deviating from std::function who does Args...args to avoid possible copy
@@ -231,6 +235,28 @@ public:
     constexpr static model<F> make_model(const F& f)
     {
         return model<F>(f);
+    }
+
+    template <typename F>
+    constexpr static model<F>* place_model(void* storage, F&& f)
+    {
+        return new (storage) model<F>(std::forward<F>(f));
+    }
+
+    template <typename F>
+    constexpr static model<F>* place_model(void* storage, int sz, F&& f)
+    {
+        if(sizeof(model<F>) > sz)   return nullptr;
+
+        return new (storage) model<F>(std::forward<F>(f));
+    }
+
+    template <class T, size_t N, typename F>
+    constexpr static model<F>* place_model(T (&storage)[N], F&& f)
+    {
+        static_assert(sizeof(model<F>) <= sizeof(storage));
+
+        return new (storage) model<F>(std::forward<F>(f));
     }
 
     // EXPERIMENTAL

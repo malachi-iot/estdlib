@@ -340,6 +340,37 @@ TEST_CASE("functional")
                 }
             }
         }
+        SECTION("place_model")
+        {
+            //using fn_type = detail::v2::function<void(), detail::impl::function_fnptr2>;
+            using fn_type = detail::v2::function<void(), detail::impl::function_virtual>;
+            fn_type f;
+            char raw[64];
+            int counter1 = 0;
+            int counter2 = 10;
+
+            SECTION("void*")
+            {
+                void* p = raw;
+                f = fn_type::place_model(p, [&counter1, counter2]
+                    { counter1 += counter2; });
+
+                f();
+
+                REQUIRE(counter1 == counter2);
+            }
+            SECTION("array")
+            {
+                f = fn_type::place_model(raw, [&counter1, counter2]
+                    { counter1 += counter2; });
+
+                f();
+
+                REQUIRE(counter1 == counter2);
+            }
+
+            //fn_type::place_model([&]());
+        }
     }
     SECTION("obsolete")
     {

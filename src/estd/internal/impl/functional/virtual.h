@@ -21,7 +21,7 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
 #else
         virtual Result operator()(Args...args) = 0;
 #endif
-        virtual ~model_base() = default;
+        //virtual ~model_base() = default;
 #if FEATURE_ESTD_GH135
 #endif
     };
