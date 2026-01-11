@@ -149,6 +149,7 @@ TEST_CASE("charconv")
                     r = from_chars_integer<10, true>(src_pos, src_pos + 5, svalue);
                     REQUIRE(svalue == 1234);
                     r = from_chars_integer<10, true>(src_pos, src_pos + 5, uvalue);
+                    REQUIRE(r.ec == 0);
                     REQUIRE(uvalue == 1234);
                     r = from_chars_integer<10, true>(src_ws, src_ws + 7, svalue);
                     REQUIRE(svalue == -1234);
@@ -156,6 +157,7 @@ TEST_CASE("charconv")
                     REQUIRE(svalue == 255);
 
                     r = estd::from_chars<int, true>(src_hex, src_hex + 4, svalue, 0);
+                    REQUIRE(r.ec == 0);
                     REQUIRE(svalue == 255);
                 }
             }

@@ -40,11 +40,11 @@ ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_integer(Char
     // the matched characters is not representable in the type of value, value is unmodified," [1]
     T local_value = 0;
 
-    // DEBT: Spec calls for octal leading '0' parsing when base = 0.  A fallback to decimal
-    // is also expected.  Specifically:
+    // For sto mode (feeds stoi, stol, etc) spec calls for octal leading '0' parsing when base = 0.
+    // A fallback to decimal is also expected.  Specifically:
     // "pattern identical to the one used by std::strtol" [1]
     // "If the value of base is 0, the numeric base is auto-detected: if the prefix is 0, [...]
-    //  otherwise the base is decimal" [2]
+    //  otherwise the base is decimal" https://en.cppreference.com/w/cpp/string/basic_string/stol.html
 
     // "leading whitespace is not ignored" [1]
     // Only eat whitespace in sto mode
@@ -62,22 +62,30 @@ ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_integer(Char
 
     if(sto_mode && *current == '+')    ++current;
 
+    if(sto_mode && *current == '0')
+    {
+        char_type c = *++current;
+
+        if((base == 0 || base == 16) && (c == 'x' || c == 'X'))
+        {
+            base = 16;
+            ++current;
+        }
+#if FEATURE_ESTD_FROM_CHARS_OCTAL
+        else if(base == 0)
+            base = 8;
+#endif
+    }
+
     while(current < last)
     {
         const optional_type digit = cbase_type::from_char(*current, base);
+
+        //printf("PHASE 1: current=%c, local_value=%d base=%u digit.has_value=%u\n",
+        //    *current, local_value, base, digit.has_value());
+
         if(digit.has_value())
         {
-#if FEATURE_ESTD_FROM_CHARS_OCTAL
-            if ESTD_CPP_CONSTEXPR(17) (sto_mode)
-            {
-                // Reach here when first character was '0' and base == 0 (autodeduce)
-                if(base == 0 && current == first + 1 && local_value == 0)
-                {
-                    base = 8;
-                }
-            }
-#endif
-
             bool success = raise_and_add(local_value, base, digit.value());
 
             // If we didn't succeed, that means we overflowed
@@ -97,24 +105,14 @@ ESTD_CPP_CONSTEXPR(14) detail::from_chars_result<CharIt> from_chars_integer(Char
         }
         else
         {
-            if(sto_mode)
-            {
-                // Look for 0x, 0X
-                if((base == 16 || base == 0) && current == first + 1)
-                {
-                    if(local_value == 0 && (*current == 'x' || *current == 'X'))
-                    {
-                        base = 16;
-                        ++current;
-                        continue;
-                    }
-                }
-            }
-
+            // If some character other than first character isn't a digit,
+            // abort but succeed
             last = current;
         }
         ++current;
     }
+
+    //printf("PHASE 2: current=%c, local_value=%d\n", *current, local_value);
 
     value = estd::is_signed<T>::value && negate ? -local_value : local_value;
 

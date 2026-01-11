@@ -10,6 +10,7 @@
 
 * units system: promoted from `internal` namespace now to `estd::units` namespace
 * units system: transition to `traits` approach, lots of associated improved quality/scrubbing
+* https://github.com/malachi-iot/estdlib/issues/169 fixed glitchy from_chars sto mode hex/octal detection
 
 # v0.8.10 - 08OCT25
 
