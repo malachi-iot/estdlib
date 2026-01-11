@@ -7,8 +7,6 @@
 
 #include <catch2/catch_all.hpp>
 
-using namespace estd::internal;     // DEBT: Get rid of this, causes too much confusion
-
 template <ESTD_CPP_CONCEPT(estd::concepts::v1::Bipbuf) Bipbuf>
 void test_bipbuf(Bipbuf& bip)
 {
@@ -48,6 +46,8 @@ TEST_CASE("buffers")
     }
     SECTION("layer2")
     {
+        using namespace estd::internal;
+
         SECTION("ptr")
         {
             uint8_t* ptr = estd::test::octet_data;
@@ -181,6 +181,32 @@ TEST_CASE("buffers")
             estd::span<const uint8_t> s2(s1);
 
             REQUIRE(s2.size() == sizeof(buf));
+        }
+    }
+    SECTION("Freestanding")
+    {
+        char buf[32];
+
+        // container freestanding assist functions
+        SECTION("raw array")
+        {
+            using traits = estd::internal::container_traits<decltype(buf)>;
+
+            REQUIRE(estd::size(buf) == 32);
+            REQUIRE(estd::data(buf) == buf);
+
+            REQUIRE(traits::extent != estd::detail::dynamic_extent());
+        }
+        SECTION("span")
+        {
+            estd::span<char> s(buf);
+
+            using traits = estd::internal::container_traits<decltype(s)>;
+
+            REQUIRE(traits::extent == estd::detail::dynamic_extent());
+
+            REQUIRE(estd::size(s) == 32);
+            REQUIRE(estd::data(s) == buf);
         }
     }
 }

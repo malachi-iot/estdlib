@@ -13,16 +13,11 @@
 
 namespace estd {
 
-#if __cpp_alias_templates
 template <class T>
 struct type_identity { using type = T; };
 
 template <class T>
 using type_identity_t = typename type_identity<T>::type;
-#else
-template <class T>
-struct type_identity { typedef T type; };
-#endif
 
 // Aliasing this guy is very helpful since we alias directly to things like std::is_constructible
 // who in turn of course uses std::integral_constant
@@ -37,7 +32,7 @@ struct integral_constant
     using value_type = T;
     using type = integral_constant; // using injected-class-name
 
-    constexpr operator value_type() const NOEXCEPT { return value; }
+    constexpr operator value_type() const noexcept { return value; }
     constexpr value_type operator()() const noexcept { return value; }
 };
 

@@ -19,7 +19,7 @@ using dynamic_extent = integral_constant<estd::size_t, (estd::size_t)-1>;
 
 }
 
-template <class T, estd::size_t Extent = detail::dynamic_extent::value>
+template <class T, estd::size_t Extent = detail::dynamic_extent()>
 class span;
 
 #ifdef FEATURE_CPP_INLINE_VARIABLES
