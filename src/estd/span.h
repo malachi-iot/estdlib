@@ -6,25 +6,13 @@
 
 #include "type_traits.h"
 #include "cstddef.h"
+#include "internal/fwd/span.h"
 
 #ifdef FEATURE_STD_ARRAY
 #include <array>
 #endif
 
 namespace estd {
-
-namespace detail {
-
-using dynamic_extent = integral_constant<estd::size_t, (estd::size_t)-1>;
-
-}
-
-template <class T, estd::size_t Extent = detail::dynamic_extent()>
-class span;
-
-#ifdef FEATURE_CPP_INLINE_VARIABLES
-inline constexpr estd::size_t dynamic_extent = detail::dynamic_extent::value;
-#endif
 
 namespace internal {
 
