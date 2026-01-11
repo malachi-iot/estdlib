@@ -7,6 +7,10 @@
 #include "cstddef.h"
 #include "../fwd/type_traits.h"
 
+#if FEATURE_ESTD_TYPE_TRAITS_ALIASED
+#include <type_traits>
+#endif
+
 namespace estd {
 
 #if __cpp_alias_templates
@@ -20,7 +24,12 @@ template <class T>
 struct type_identity { typedef T type; };
 #endif
 
-
+// Aliasing this guy is very helpful since we alias directly to things like std::is_constructible
+// who in turn of course uses std::integral_constant
+#if FEATURE_ESTD_TYPE_TRAITS_ALIASED
+template<class T, T v>
+using integral_constant = std::integral_constant<T, v>;
+#else
 template<class T, T v>
 struct integral_constant
 {
@@ -38,15 +47,13 @@ struct integral_constant
 template<class T, T v>
 CONSTEXPR T integral_constant<T, v>::value;
 #endif
-
-
-#ifdef __cpp_alias_templates
-template <bool B>
-using bool_constant = integral_constant<bool, B>;
 #endif
 
-typedef integral_constant<bool, true> true_type;
-typedef integral_constant<bool, false> false_type;
+template <bool B>
+using bool_constant = integral_constant<bool, B>;
+
+using true_type = bool_constant<true>;
+using false_type = bool_constant<false>;
 
 template< class T > struct remove_const          { typedef T type; };
 template< class T > struct remove_const<const T> { typedef T type; };

@@ -86,9 +86,11 @@ TEST_CASE("units")
 
             REQUIRE(v.count() == 0);
 
+#if FEATURE_STD_CHARCONV
             out << put_unit(v);
 
             REQUIRE(s == "0.00Hz");
+#endif
         }
         SECTION("unassigned sanity check")
         {
@@ -115,9 +117,11 @@ TEST_CASE("units")
 
         out.rdbuf()->clear();
 
+#if FEATURE_STD_CHARCONV
         out << put_unit(v2);
 
         REQUIRE(s == "2.00kB");
+#endif
     }
     SECTION("operators")
     {
@@ -227,6 +231,7 @@ TEST_CASE("units")
             REQUIRE(p1 == 7.5_pct);
         }
     }
+#if FEATURE_STD_CHARCONV
     SECTION("ostream")
     {
         //percent<double> p = 50_pct;   // FIX: It considers this narrowing, but wouldn't unsigned -> double be the opposite?
@@ -245,6 +250,7 @@ TEST_CASE("units")
             REQUIRE(s == "50.00 percent");
         }
     }
+#endif
     SECTION("percent")
     {
         percent<uint16_t, estd::ratio<1, 10> > percent1{974};
@@ -282,12 +288,14 @@ TEST_CASE("units")
 
             REQUIRE(out.rdbuf()->str() == "50%");
         }
+#if FEATURE_STD_CHARCONV
         SECTION("ostream percent3")
         {
             write(make_ostream_like(out), percent3);
 
             REQUIRE(s == "50.70 percent");
         }
+#endif
 #if EXPOSITIONAL_ONLY
         SECTION("prohibited constructor")
         {

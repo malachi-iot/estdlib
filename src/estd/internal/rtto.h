@@ -283,19 +283,19 @@ struct rtto :
     // EXPERIMENTAL
     //static constexpr metadata mdata{value_sz};
 
-    static ESTD_CPP_CONSTEXPR(14) int copy(const_pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int copy(const_pointer from, void* to, true_type)
     {
         new (to) value_type(*from);
         return 0;
     }
 
-    static ESTD_CPP_CONSTEXPR(14) int move(pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int move(pointer from, void* to, true_type)
     {
         new (to) value_type(std::move(*from));
         return 0;
     }
 
-    static ESTD_CPP_CONSTEXPR(14) int create(void* storage, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int create(void* storage, true_type)
     {
         new (storage) value_type;
         return 0;
@@ -307,7 +307,7 @@ struct rtto :
     // - overlapping/to==this conditions
     // - lifecycle concerns (TBD can't remember)
     // - virtual method maint (TBD can't remember)
-    static ESTD_CPP_CONSTEXPR(14) int copy_and_swap(const_pointer from, void* to, std::true_type)
+    static ESTD_CPP_CONSTEXPR(14) int copy_and_swap(const_pointer from, void* to, true_type)
     {
         // DEBT: Make sure this sucker isn't too big for comfort
         // DEBT: Account for alignment/padding
@@ -317,10 +317,10 @@ struct rtto :
         return 0;
     }
 
-    static constexpr int copy(void*, void*, std::false_type) { return EINVAL; }
-    static constexpr int move(void*, void*, std::false_type) { return EINVAL; }
-    static constexpr int create(void*, std::false_type) { return EINVAL; }
-    static constexpr int copy_and_swap(pointer from, void* to, std::false_type) { return EINVAL; }
+    static constexpr int copy(void*, void*, false_type) { return EINVAL; }
+    static constexpr int move(void*, void*, false_type) { return EINVAL; }
+    static constexpr int create(void*, false_type) { return EINVAL; }
+    static constexpr int copy_and_swap(pointer from, void* to, false_type) { return EINVAL; }
 
     constexpr static bool size_ok(int sz)
     {
