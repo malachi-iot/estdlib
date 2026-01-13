@@ -1,8 +1,7 @@
 #pragma once
 
-#include <estd/iosfwd.h>
-#include <estd/locale.h>
-#include "../../ios.h"
+#include "../iosfwd.h"
+#include "../../locale.h"
 
 #if FEATURE_STD_OSTREAM
 #include <ostream>

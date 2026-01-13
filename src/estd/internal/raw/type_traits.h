@@ -6,6 +6,7 @@
 
 #include "cstddef.h"
 #include "../fwd/type_traits.h"
+#include "../feature/type_traits.h"
 
 #if FEATURE_ESTD_TYPE_TRAITS_ALIASED
 #include <type_traits>
