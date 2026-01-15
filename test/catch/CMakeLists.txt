@@ -107,6 +107,8 @@ else()
         unordered-test.cpp)
 endif()
 
+#file(COPY ".gdbinit" DESTINATION ${CMAKE_BINARY_DIR} )
+
 # DEBT: Make a linkage property so that we don't have to double these guys up,
 # and also put into estd proper not unit test
 if(FEATURE_ESTD_INTERFACE)
