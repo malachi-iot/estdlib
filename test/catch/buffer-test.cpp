@@ -187,12 +187,22 @@ TEST_CASE("buffers")
     {
         char buf[32];
 
+        struct holder
+        {
+            char buf[32];
+        }   holder1;
+
+        holder* holder2 = &holder1;
+
         // container freestanding assist functions
         SECTION("raw array")
         {
             using traits = estd::internal::container_traits<decltype(buf)>;
 
-            REQUIRE(estd::size(buf) == 32);
+            int sz = 32;
+
+            REQUIRE(estd::size(buf) == sz);
+            REQUIRE(estd::size(holder2->buf) == sz);
             REQUIRE(estd::data(buf) == buf);
 
             REQUIRE(traits::extent != estd::detail::dynamic_extent());

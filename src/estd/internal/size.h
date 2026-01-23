@@ -118,7 +118,7 @@ constexpr auto size(const C& c) -> decltype(c.size())
 }
 
 template <class T, size_t N>
-ESTD_CPP_CONSTEVAL size_t size(const T(&)[N])
+constexpr size_t size(const T(&)[N])
 {
     return N;
 }
