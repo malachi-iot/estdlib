@@ -7,6 +7,10 @@
 #include "../internal/fwd/span.h"
 #include "utility.h"
 
+#if FEATURE_STD_SPAN
+#include <span>
+#endif
+
 namespace estd {
 
 namespace internal {
@@ -43,6 +47,15 @@ struct container_traits<span<T, N>, enable_if_t<(N > 0)>> :
 {
     static constexpr size_t extent = N;
 };
+
+#if FEATURE_STD_SPAN
+template <class T, size_t N>
+struct container_traits<std::span<T, N>, enable_if_t<(N > 0)>> :
+    container_traits_base<std::span<T, N>>
+{
+    static constexpr size_t extent = N;
+};
+#endif
 
 template <class T, size_t N>
 struct container_traits<T[N]> : type_identity<T[N]>

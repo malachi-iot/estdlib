@@ -218,5 +218,18 @@ TEST_CASE("buffers")
             REQUIRE(estd::size(s) == 32);
             REQUIRE(estd::data(s) == buf);
         }
+#if FEATURE_STD_SPAN
+        SECTION("std::span")
+        {
+            std::span<char> s(buf);
+
+            using traits = estd::internal::container_traits<decltype(s)>;
+
+            REQUIRE(traits::extent == estd::detail::dynamic_extent());
+
+            REQUIRE(estd::size(s) == 32);
+            REQUIRE(estd::data(s) == buf);
+        }
+#endif
     }
 }

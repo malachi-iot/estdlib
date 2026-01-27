@@ -8,8 +8,12 @@
 #include "cstddef.h"
 #include "internal/fwd/span.h"
 
-#ifdef FEATURE_STD_ARRAY
+#if FEATURE_STD_ARRAY
 #include <array>
+#endif
+
+#if FEATURE_STD_SPAN
+#include <span>
 #endif
 
 namespace estd {

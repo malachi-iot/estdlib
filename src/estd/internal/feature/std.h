@@ -46,6 +46,10 @@
 #define FEATURE_STD_CHARCONV 1
 #endif
 
+#if __cplusplus >= 202002L || __cpp_lib_span
+#define FEATURE_STD_SPAN 1
+#endif
+
 #define FEATURE_STD_ITERATOR 1
 #define FEATURE_STD_MEMORY 1
 #define FEATURE_STD_OSTREAM 1
