@@ -72,6 +72,21 @@ using compatible_rep = bool_constant<is_same<typename Traits::period, ratio<1>>:
 
 template <class Traits, typename Rep,
     enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr unit<Traits> operator+(unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs += unit<Traits>(rhs);
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr unit<Traits> operator-(unit<Traits>& lhs, const Rep& rhs)
+{
+    return lhs -= unit<Traits>(rhs);
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits>& operator +=(unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs += unit<Traits>(rhs);
@@ -123,6 +138,49 @@ template <class Traits, typename Rep,
 constexpr bool operator>=(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() >= rhs;
+}
+
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator<(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs < rhs.count();
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator<=(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs <= rhs.count();
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator>(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs > rhs.count();
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator>=(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs >= rhs.count();
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator!=(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs != rhs.count();
+}
+
+template <class Traits, typename Rep,
+    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+constexpr bool operator==(const Rep& lhs, const unit<Traits>& rhs)
+{
+    return lhs == rhs.count();
 }
 
 // regular arithmetic things

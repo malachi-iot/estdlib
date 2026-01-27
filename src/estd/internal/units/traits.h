@@ -13,9 +13,13 @@ enum options
 {
     none,
 
-    default_prohibited,
-    value_initialized,
-    default_initialized
+    default_prohibited  = 0x01,
+    value_initialized   = 0x02,
+    default_initialized = 0x03,
+
+    default_mask        = 0x03,
+
+    implicit_rep        = 0x04,         // Permit implicit conversion to and from 'rep' type (NOT USED YET)
 };
 
 // 'traits' occupied by just tag.  Might consider shifting names around at some point
