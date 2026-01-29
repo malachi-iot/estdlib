@@ -192,6 +192,11 @@ ESTD_CPP_CONSTEXPR(14) void swap(T& a, T& b)
 
 namespace internal {
 
+// As per:
+// https://stackoverflow.com/questions/36906/what-is-the-fastest-way-to-swap-values-in-c
+// https://stackoverflow.com/questions/16535461/why-dont-people-use-xor-swaps
+// Do a regular temp variable swap instead.  Wipe out below specializations
+// but keep xor_swap itself incase someone does want it
 template <class T>
 inline void xor_swap(T& a, T& b)
 {
@@ -202,6 +207,7 @@ inline void xor_swap(T& a, T& b)
 
 }
 
+#if FEATURE_ESTD_XOR_SWAP
 template<>
 inline void swap(char& a, char& b) { internal::xor_swap(a, b); }
 
@@ -225,5 +231,14 @@ inline void swap(unsigned int& a, unsigned int& b) { internal::xor_swap(a, b); }
 
 template<>
 inline void swap(unsigned long& a, unsigned long& b) { internal::xor_swap(a, b); }
+#endif
+
+template<class T>
+constexpr add_const_t<T>& as_const(T& t) noexcept
+{
+    return t;
+}
+
+template<class T> void as_const(const T&&) = delete;
 
 }

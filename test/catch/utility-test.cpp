@@ -324,6 +324,15 @@ TEST_CASE("utility")
             REQUIRE(seq::get<3>::value == 0);
         }
     }
+    SECTION("as_const")
+    {
+        int value;
+
+        const int& value2 = estd::as_const(value);
+
+        // Correctly kicks back as deleted
+        //estd::as_const(1);
+    }
 }
 
 // DEBT: Put this test elsewhere

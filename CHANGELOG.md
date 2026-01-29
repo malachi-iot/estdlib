@@ -3,6 +3,7 @@
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/160 units now have selectable deleted, value-init or uninitialized constructors
+* https://github.com/malachi-iot/estdlib/issues/174 add `as_const`
 * `rtto` mechanism for runtime `std::move` operation (TBD mention other parts of rtto also)
 * Minimal FEATURE_ESTD_OSTREAM_FLOAT (ostream precision support) now available
 
@@ -11,6 +12,7 @@
 * units system: promoted from `internal` namespace now to `estd::units` namespace
 * units system: transition to `traits` approach, lots of associated improved quality/scrubbing
 * https://github.com/malachi-iot/estdlib/issues/169 fixed glitchy from_chars sto mode hex/octal detection
+* https://github.com/malachi-iot/estdlib/issues/173 additional units operators for 1:1 mode
 
 # v0.8.10 - 08OCT25
 
