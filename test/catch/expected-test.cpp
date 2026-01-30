@@ -90,10 +90,10 @@ TEST_CASE("expected")
             typedef estd::expected<int, const char*> expected_type2;
 
             //expected_type e(estd::errc::invalid_argument);    // Beware, this cascades out to non-error value
-            expected_type e2(estd::unexpected<int>(0));
+            expected_type e2(estd::unexpected<estd::errc>(estd::errc{}));
 
             REQUIRE(e2.has_value() == false);
-            REQUIRE(e2.error() == 0);
+            REQUIRE(e2.error() == estd::errc{});
 
             //expected_type2 e3("hello");
             expected_type2 e4(estd::unexpected<const char*>("hello"));

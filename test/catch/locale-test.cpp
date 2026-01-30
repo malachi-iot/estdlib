@@ -12,16 +12,16 @@
 
 using namespace estd;
 
-template <internal::encodings::values encoding, bool enabled>
+template <internal::encodings encoding, bool enabled>
 struct test_fallthrough;
 
-template <internal::encodings::values encoding>
+template <internal::encodings encoding>
 struct test_fallthrough2;
 
-template <internal::encodings::values encoding>
+template <internal::encodings encoding>
 struct test_fallthrough<encoding, false> {};
 
-template <internal::encodings::values encoding, typename enabled = void>
+template <internal::encodings encoding, typename enabled = void>
 struct test_fallthrough3;
 
 /*
@@ -59,7 +59,7 @@ struct test_fallthrough3<encoding, estd::enable_if_t<encoding == estd::internal:
 
 }; */
 
-template <internal::encodings::values encoding>
+template <internal::encodings encoding>
 struct test_fallthrough3<encoding,
         typename internal::is_compatible_encoding<
             estd::internal::encodings::ASCII, encoding
@@ -124,9 +124,9 @@ TEST_CASE("locale")
 {
     locale::type<locale::iso::en_US,
         locale::encodings::UTF8> l;
-    internal::locale<internal::locale_code::fr_FR,
+    internal::locale<internal::locale_codes::fr_FR,
         internal::encodings::UTF8> l_fr;
-    internal::locale<internal::locale_code::en_US,
+    internal::locale<internal::locale_codes::en_US,
             internal::encodings::ASCII> l_ASCII;
 
     // Not truly necessary (classic_type is fully static) but we do have the API for those

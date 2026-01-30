@@ -22,7 +22,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result = estd::from_chars(
                     val.data(), val.data() + val.size(), output);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE(output == 1234);
             }
             SECTION("good 2")
@@ -31,7 +31,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result = estd::from_chars(
                     val.data(), val.data() + val.size(), output);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE(output == 12);
             }
             SECTION("bad")
@@ -100,7 +100,7 @@ TEST_CASE("charconv")
                             src.data(),
                             src.data() + src.size(), value);
 
-                    REQUIRE(result.ec == 0);
+                    REQUIRE(result.ec == estd::errc{});
                     REQUIRE(value == 1234);
                     REQUIRE(estd::layer2::const_string(result.ptr) == " hello");
                 }
@@ -131,16 +131,16 @@ TEST_CASE("charconv")
                 SECTION("off (default)")
                 {
                     r = from_chars_integer<10, false>(src_pos, src_pos + 5, svalue);
-                    REQUIRE(r.ec == errc::invalid_argument);
+                    REQUIRE(r.ec == estd::errc::invalid_argument);
                     REQUIRE(svalue == 0);
                     r = from_chars_integer<10, false>(src_pos, src_pos + 5, uvalue);
                     r = from_chars_integer<10, false>(src_ws, src_ws + 7, svalue);
-                    REQUIRE(r.ec == errc::invalid_argument);
+                    REQUIRE(r.ec == estd::errc::invalid_argument);
                     REQUIRE(svalue == 0);
 
                     // Bad hex still resolves the first '0' as a valid value
                     r = from_chars_integer<16, false>(src_hex, src_hex + 4, svalue);
-                    REQUIRE(r.ec == 0);
+                    REQUIRE(r.ec == estd::errc{});
                     REQUIRE(r.ptr == src_hex + 1);
                     REQUIRE(svalue == 0);
                 }
@@ -149,7 +149,7 @@ TEST_CASE("charconv")
                     r = from_chars_integer<10, true>(src_pos, src_pos + 5, svalue);
                     REQUIRE(svalue == 1234);
                     r = from_chars_integer<10, true>(src_pos, src_pos + 5, uvalue);
-                    REQUIRE(r.ec == 0);
+                    REQUIRE(r.ec == estd::errc{});
                     REQUIRE(uvalue == 1234);
                     r = from_chars_integer<10, true>(src_ws, src_ws + 7, svalue);
                     REQUIRE(svalue == -1234);
@@ -157,7 +157,7 @@ TEST_CASE("charconv")
                     REQUIRE(svalue == 255);
 
                     r = estd::from_chars<int, true>(src_hex, src_hex + 4, svalue, 0);
-                    REQUIRE(r.ec == 0);
+                    REQUIRE(r.ec == estd::errc{});
                     REQUIRE(svalue == 255);
                 }
             }
@@ -172,7 +172,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result =
                     estd::from_chars(s.data(), s.data() + s.size(), value);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE(value == 1234);
             }
             SECTION("unsigned")
@@ -183,7 +183,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result =
                     estd::from_chars(s.data(), s.data() + s.size(), value);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE(value == 1234);
             }
             SECTION("lazy")
@@ -195,7 +195,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result =
                     estd::from_chars(s, &s[0] + sizeof(s), value);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE(value == 1234);
             }
             SECTION("float")
@@ -206,7 +206,7 @@ TEST_CASE("charconv")
                 estd::from_chars_result result =
                     estd::from_chars(s, &s[0] + sizeof(s), value);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
                 REQUIRE_THAT(value, Catch::Matchers::WithinAbs(123.456, 0.00001));
                 //REQUIRE(result.ptr == &s[0] + sizeof(s));
             }
@@ -237,7 +237,7 @@ TEST_CASE("charconv")
             {
                 estd::to_chars_result result = estd::to_chars(&buffer[0], &buffer[127], inputs[i]);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
 
                 *result.ptr = 0;
 
@@ -252,7 +252,7 @@ TEST_CASE("charconv")
                 // designate the end a little earlier so there's room for the null terminator
                 estd::to_chars_result result = estd::to_chars_opt(buffer, buffer + sizeof(buffer) - 1, inputs[i]);
 
-                REQUIRE(result.ec == 0);
+                REQUIRE(result.ec == estd::errc{});
 
                 buffer[127] = 0;
 
@@ -263,7 +263,7 @@ TEST_CASE("charconv")
         {
             estd::to_chars_result result = estd::to_chars_exp(&buffer[0], &buffer[127], 255);
 
-            REQUIRE(result.ec == 0);
+            REQUIRE(result.ec == estd::errc{});
 
             *result.ptr = 0;
 
@@ -283,7 +283,7 @@ TEST_CASE("charconv")
 
             // DEBT: errc needs work, needs a default constructor and ability to == and friends
             //REQUIRE(result.ec == estd::errc(0));
-            REQUIRE(result.ec == 0);
+            REQUIRE(result.ec == estd::errc{});
         }
         SECTION("base 16")
         {
