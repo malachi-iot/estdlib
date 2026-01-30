@@ -39,6 +39,7 @@ template <class Rep, class Period, class Tag,
 struct traits;
 
 // 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
+// therefore not an alias
 template <class Rep, class Tag>
 struct basic_traits;
 

@@ -15,7 +15,16 @@ struct frequency_unit_traits : estd::units::v1::detail::traits<Rep, Period, freq
     static constexpr auto options = estd::units::detail::options::default_initialized;
 };
 
-template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep> >
+template <class Rep, class Period, class Tag>
+struct value_init_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag>
+{
+    static constexpr auto options = estd::units::detail::options::value_initialized;
+
+    constexpr static Rep default_value() { return 7; }
+};
+
+
+template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep>>
 using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
 
 
@@ -303,6 +312,29 @@ TEST_CASE("units")
             percent<int> p;
         }
 #endif
+        SECTION("initialization")
+        {
+            SECTION("value-init")
+            {
+                using hz = estd::units::detail::unit<
+                    value_init_unit_traits<int, estd::ratio<1>, frequency_tag>>;
+
+                hz v;
+
+                // 1:1 specializations help us here
+                REQUIRE(v == 7);
+            }
+            SECTION("default-init")
+            {
+                union
+                {
+                    int v1{10};
+                    hz<int> v2;
+                };
+
+                REQUIRE(v2 == 10);
+            }
+        }
         SECTION("conversion")
         {
             SECTION("common_type")
@@ -362,6 +394,20 @@ TEST_CASE("units")
                 adc1 = percent1;
 
                 REQUIRE(adc1.count() == 519);
+            }
+            SECTION("same tag, different traits")
+            {
+                using hz_init = estd::units::detail::unit<
+                    value_init_unit_traits<int, estd::ratio<1>, frequency_tag>>;
+
+                hz_init v1;
+                hz<int> v2(v1);
+
+                REQUIRE(v2 == v1);
+
+                v1 = v2 + 1;
+
+                REQUIRE(v1 == 8);
             }
         }
     }
