@@ -64,7 +64,7 @@ using is_same_rep_and_period =
         is_same<typename Traits1::rep, typename Traits2::rep>::value &&
         is_same<typename Traits1::period, typename Traits2::period>::value>;
 
-// FIX: Does not work right
+
 template <class TraitsFrom, class TraitsTo>
 using is_promotable_rep_and_same_period =
     bool_constant<

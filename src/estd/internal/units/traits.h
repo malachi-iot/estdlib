@@ -20,6 +20,7 @@ enum options
     default_mask        = 0x03,
 
     implicit_rep        = 0x04,         // Permit implicit conversion to and from 'rep' type (NOT USED YET)
+    permissive          = 0x08,         // Permit conditions which risk precision loss (UNTESTED)
 };
 
 // 'traits' occupied by just tag.  Might consider shifting names around at some point

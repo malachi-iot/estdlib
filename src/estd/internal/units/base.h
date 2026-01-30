@@ -184,6 +184,8 @@ public:
         return convert_from<decltype(v.count()), typename Traits2::period>(v.count());
     }
 
+    static constexpr bool permissive = traits::options & detail::permissive;
+
 public:
     constexpr unit() = default;
 
@@ -257,7 +259,7 @@ public:
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     unit& operator +=(const unit<Traits2>& v)
     {
-        static constexpr bool compatible = is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        static constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
         static_assert(compatible, "Using += this way would result in precision loss");
 
         return operator +=(unit(v));
@@ -266,7 +268,7 @@ public:
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
     unit& operator -=(const unit<Traits2>& v)
     {
-        static constexpr bool compatible = is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        static constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
         static_assert(compatible, "Using -= this way would result in precision loss");
 
         return operator -=(unit(v));

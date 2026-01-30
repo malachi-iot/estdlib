@@ -30,6 +30,7 @@ using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
 
 namespace estd { namespace internal { namespace units {
 
+// DEBT: Last holdout, still needs to live in estd::internal::units
 template <>
 struct traits<frequency_tag>
 {
@@ -195,6 +196,30 @@ TEST_CASE("units")
 
             // DEBT: Make Stringizer more resilient to basic_traits and friends
             REQUIRE(p5.count() == 51);
+        }
+        SECTION("addition: precision change during +/-")
+        {
+            SECTION("percent: 8-bit")
+            {
+                percent<int8_t> p1(-50);
+                percent<uint8_t> p2(50);
+
+                p2 -= p1;
+
+                REQUIRE(p2 == 100);
+            }
+            SECTION("bytes: 16-bit")
+            {
+                bytes<int16_t> b1(20000);
+                bytes<uint16_t> b2(20000);
+
+                b2 += b1;
+
+                REQUIRE(b2 == 40000);
+
+                // Disallowed due to potential precision loss
+                //b1 -= b2;
+            }
         }
         SECTION("subtraction")
         {

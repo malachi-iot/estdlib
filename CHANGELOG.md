@@ -2,10 +2,11 @@
 
 ## Added Features
 
+* https://github.com/malachi-iot/estdlib/issues/155 units now can do `/`, `<=`, `>=` plus other housekeeping
 * https://github.com/malachi-iot/estdlib/issues/160 units now have selectable deleted, value-init or uninitialized constructors
 * https://github.com/malachi-iot/estdlib/issues/166 data, begin, end, size container helpers
 * https://github.com/malachi-iot/estdlib/issues/174 add `as_const`
-* `rtto` mechanism for runtime `std::move` operation (TBD mention other parts of rtto also)
+* `rtto` mechanism for runtime `std::move` operation.  `internal` at this time, meaning API subject to change
 * Minimal FEATURE_ESTD_OSTREAM_FLOAT (ostream precision support) now available
 
 ## Quality Updates & Bug Fies
