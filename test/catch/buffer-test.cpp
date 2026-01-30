@@ -185,25 +185,31 @@ TEST_CASE("buffers")
     }
     SECTION("Freestanding")
     {
-        char buf[32];
+        constexpr int sz = 32;
 
-        struct holder
+        union holder
         {
-            char buf[32];
+            const char cbuf[sz]{};
+            char buf[sz];
         }   holder1;
+
+        char (&buf)[sz] = holder1.buf;
 
         holder* holder2 = &holder1;
 
         // container freestanding assist functions
         SECTION("raw array")
         {
-            using traits = estd::internal::container_traits<decltype(buf)>;
-
-            int sz = 32;
+            using traits = estd::internal::container_traits<estd::remove_reference_t<decltype(buf)>>;
 
             REQUIRE(estd::size(buf) == sz);
             REQUIRE(estd::size(holder2->buf) == sz);
             REQUIRE(estd::data(buf) == buf);
+            REQUIRE(estd::data(holder1.cbuf) == buf);
+            REQUIRE(estd::begin(buf) == buf);
+            REQUIRE(estd::begin(holder1.cbuf) == buf);
+            REQUIRE(estd::end(buf) == buf + sz);
+            REQUIRE(estd::end(holder1.cbuf) == buf + sz);
 
             REQUIRE(traits::extent != estd::detail::dynamic_extent());
         }
@@ -215,8 +221,10 @@ TEST_CASE("buffers")
 
             REQUIRE(traits::extent == estd::detail::dynamic_extent());
 
-            REQUIRE(estd::size(s) == 32);
+            REQUIRE(estd::size(s) == sz);
             REQUIRE(estd::data(s) == buf);
+            REQUIRE(estd::begin(s) == buf);
+            REQUIRE(estd::end(s) == buf + sz);
         }
 #if FEATURE_STD_SPAN
         SECTION("std::span")

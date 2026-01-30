@@ -17,6 +17,8 @@ namespace internal {
 
 // 11JAN26 EXPERIMENTAL, kind of not liking container_traits for things like estd::data,
 // estd::size though I do think there's utility in extent and value_type
+// 30JAN26 Changing my mind.  Although a little bulky compared to pure freestanding functions,
+// I like that parties can consume container_traits directly if they so choose
 
 // Underlying feeder for begin, end, size
 template <class Container>
@@ -24,13 +26,14 @@ struct container_traits_base : type_identity<Container>
 {
     using size_type = decltype(std::declval<Container>().size());
     using iterator = typename Container::iterator;
+    using const_iterator = typename Container::const_iterator;
 
     ESTD_CPP_STD_VALUE_TYPE(typename Container::value_type)
 
-    static ESTD_CPP_CONSTEXPR(17) iterator begin(Container& c) { return c.begin(); }
-    static ESTD_CPP_CONSTEXPR(17) iterator end(Container& c) { return c.end(); }
+    static constexpr iterator begin(Container& c) { return c.begin(); }
+    static constexpr iterator end(Container& c) { return c.end(); }
 
-    static constexpr size_type size(Container& c)
+    static constexpr size_type size(const Container& c)
     {
         return c.size();
     }
@@ -66,42 +69,29 @@ struct container_traits<T[N]> : type_identity<T[N]>
 
     ESTD_CPP_STD_VALUE_TYPE(T)
 
-    static ESTD_CPP_CONSTEXPR(17) iterator begin(T (&c)[N])
-    {
-        return c;
-    }
-
-    static ESTD_CPP_CONSTEXPR(17) iterator end(T (&c)[N])
-    {
-        return c;
-    }
-
-    static constexpr size_type size(const T(&)[N])
-    {
-        return N;
-    }
+    static constexpr iterator begin(T (&c)[N])              { return c; }
+    static constexpr iterator end(T (&c)[N])                { return &c[N]; }
+    static constexpr size_type size(const T(&)[N])          { return N; }
 
     static constexpr size_t extent = N;
 };
 
 }
 
+#pragma push_macro("CTRAITS")
+#define CTRAITS internal::container_traits<C>
+
 template <class C>
-constexpr auto begin(const C& c) -> decltype(c.begin())
+constexpr typename CTRAITS::iterator begin(C& c)
 {
-    return c.begin();
+    return CTRAITS::begin(c);
 }
 
-template <class T, size_t N>
-ESTD_CPP_CONSTEXPR(17) T* begin(T(&c)[N])
-{
-    return c;
-}
 
-template <class T, size_t N>
-constexpr const T* begin(const T(&c)[N])
+template <class C>
+constexpr typename CTRAITS::iterator end(C& c)
 {
-    return c;
+    return CTRAITS::end(c);
 }
 
 
@@ -125,15 +115,11 @@ constexpr const T* data(const T(&c)[N])
 
 
 template <class C>
-constexpr auto size(const C& c) -> decltype(c.size())
+constexpr typename CTRAITS::size_type size(const C& c)
 {
-    return c.size();
+    return CTRAITS::size(c);
 }
 
-template <class T, size_t N>
-constexpr size_t size(const T(&)[N])
-{
-    return N;
-}
+#pragma pop_macro("CTRAITS")
 
 }
