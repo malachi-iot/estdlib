@@ -30,10 +30,9 @@ public:
 template <class E>
 class unexpected : public internal::unexpected<const E>
 {
-    typedef internal::unexpected<const E> base_type;
+    using base_type = internal::unexpected<const E>;
 
 public:
-#if __cpp_rvalue_references
     constexpr unexpected(const unexpected&) = default;
     constexpr unexpected(unexpected&&) noexcept = default;
 
@@ -45,9 +44,6 @@ public:
     constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
 
     // TODO: Need in_place_t ctor
-#else
-    ESTD_CPP_CONSTEXPR_RET unexpected(const E& e) : base_type(e) {}
-#endif
 };
 
 #if __cpp_deduction_guides

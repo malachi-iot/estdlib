@@ -34,6 +34,8 @@ namespace estd {
 // manual "enum class", enum itself must always be called 'values'
 enum class errc
 {
+    none = 0,   ///< Nonstandard - mainly so that errc{} doesn't give compiler warnings
+
     argument_out_of_domain = EDOM,
 #if     FEATURE_STD_FULL_ERRNO
     address_family_not_supported = EAFNOSUPPORT,

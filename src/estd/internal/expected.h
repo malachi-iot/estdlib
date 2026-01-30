@@ -60,23 +60,18 @@ private:
     const E error_;
 
 protected:
-    typedef E error_type;
+    using error_type = E;
 
-#if __cpp_variadic_templates
     constexpr unexpected(const unexpected&) = default;
-    constexpr unexpected(unexpected&&) NOEXCEPT = default;
+    constexpr unexpected(unexpected&&) noexcept = default;
 
     template <class Err = E>
     constexpr explicit unexpected(Err&& e) : error_(std::forward<Err>(e)) {}
 
-    template <class ...TArgs>
-    constexpr explicit unexpected(in_place_t, TArgs&&...args) :
-        error_(std::forward<TArgs>(args)...)
+    template <class ...Args>
+    constexpr explicit unexpected(in_place_t, Args&&...args) :
+        error_(std::forward<Args>(args)...)
     {}
-#else
-    template <class TE1>
-    ESTD_CPP_CONSTEXPR_RET unexpected(const TE1& e) : error_(e) {}
-#endif
 
 public:
     E& error() { return error_; }
@@ -95,8 +90,8 @@ template <class T, class E>
 class expected
 {
 public:
-    typedef T value_type;
-    typedef E error_type;
+    using value_type = T;
+    using error_type = E;
 
     // Silently promote void to monostate so that it registers as 'trivial'
     // and plays nice with variant_storage.  Deviates from std approach.
@@ -123,35 +118,18 @@ protected:
     ESTD_CPP_CONSTEXPR_RET expected() :
         storage(in_place_index_t<0>()) {}
 
-#if __cpp_variadic_templates
-    template <class... TArgs>
-    constexpr explicit expected(in_place_t, TArgs&&...args) :
-        storage(in_place_index_t<VALUE>{}, std::forward<TArgs>(args)...)
+    template <class... Args>
+    constexpr explicit expected(in_place_t, Args&&...args) :
+        storage(in_place_index_t<VALUE>{}, std::forward<Args>(args)...)
     {}
 
-    template <class... TArgs>
-    constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        storage(in_place_index_t<ERROR>{}, std::forward<TArgs>(args)...)
-    {}
-#else
-    template <class T1>
-    ESTD_CPP_CONSTEXPR_RET expected(in_place_t, const T1& v) :
-        storage(in_place_index_t<VALUE>(), v)
+    template <class... Args>
+    constexpr explicit expected(unexpect_t, Args&&...args) :
+        storage(in_place_index_t<ERROR>{}, std::forward<Args>(args)...)
     {}
 
-    template <class TE1>
-    ESTD_CPP_CONSTEXPR_RET expected(unexpect_t, const TE1& e) :
-        storage(in_place_index_t<ERROR>(), e)
-    {}
-#endif
-
-#if __cpp_constexpr && __cpp_rvalue_references
     constexpr explicit expected(nonvoid_value_type&& v) :
         storage(in_place_index_t<VALUE>{}, std::forward<nonvoid_value_type>(v))
-#else
-    expected(const nonvoid_value_type& v) :
-        storage(in_place_index_t<VALUE>(), v)
-#endif
     {}
 
     void destroy_value()
