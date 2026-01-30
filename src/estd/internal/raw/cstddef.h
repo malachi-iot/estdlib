@@ -10,21 +10,7 @@
 
 namespace estd {
 
-#ifdef FEATURE_CPP_ENUM_CLASS
 enum class byte : unsigned char {};
-#else
-// non-member operator overloads want a full struct or enum
-struct byte
-{
-    unsigned char value;
-
-    byte() {}
-
-    byte(unsigned char value) : value(value) {}
-
-    operator unsigned char() const { return value; }
-};
-#endif
 
 // TODO: Only allow overloads which conform to is_integral, as per spec
 // TODO: Optimize by doing direct unsigned char bit in-place operations
@@ -49,11 +35,7 @@ ESTD_CPP_CONSTEXPR_RET IntegerType to_integer(byte b) NOEXCEPT
 template <class IntegerType>
 ESTD_CPP_CONSTEXPR_RET byte to_byte(IntegerType value) NOEXCEPT
 {
-#ifdef FEATURE_CPP_ENUM_CLASS
     return (byte) value;
-#else
-    return byte(value);
-#endif
 }
 
 

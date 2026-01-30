@@ -83,7 +83,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
 
     const to_chars_result result = num_put::to_chars(buffer, buffer + N, out, value);
 
-    if(result.ec == 0)
+    if(result.ec == errc{})
     {
         const unsigned sz = &buffer[N] - result.ptr;
         write_filled_buffer(out, result.ptr, sz);

@@ -46,7 +46,7 @@ struct cbase;
 template <class Char, class Locale, typename Enabled = void>
 class ctype;
 
-template <internal::locale_code::values locale_code, internal::encodings::values encoding>
+template <internal::locale_codes locale_code, internal::encodings encoding>
 struct locale;
 
 template <typename Char, class Locale, class Enabled = void>

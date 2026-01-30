@@ -240,8 +240,8 @@ struct cbase_ascii<Char, b, policy, estd::internal::Range<(b > 10 && b <= 36)> >
 // DEBT: Doesn't fully account for UTF8 behaviors
 // https://github.com/malachi-iot/estdlib/issues/142
 template <typename Char, unsigned b,
-    internal::locale_code::values lc,
-    internal::encodings::values encoding>
+    internal::locale_codes lc,
+    internal::encodings encoding>
 struct cbase<Char, b, internal::locale<lc, encoding>,
     typename estd::enable_if<
         encoding == internal::encodings::ASCII ||

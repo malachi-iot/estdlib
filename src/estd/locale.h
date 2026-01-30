@@ -42,8 +42,8 @@ struct locale : internal::locale_base_base
     // ISO 639-1 and ISO 3166 (i.e. en_US)
     // https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html
     // https://www.gnu.org/software/gettext/manual/html_node/Country-Codes.html
-    typedef internal::locale_code::values iso;
-    typedef internal::encodings::values encodings;
+    typedef internal::locale_codes iso;
+    typedef internal::encodings encodings;
 
 #ifdef FEATURE_CPP_ALIASTEMPLATE
     template <iso iso_code, encodings encoding>

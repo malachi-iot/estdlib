@@ -66,9 +66,9 @@ struct numpunct<wchar_t, Locale,
 };
 
 
-template <internal::encodings::values encoding>
+template <internal::encodings encoding>
 struct numpunct<char,
-    internal::locale<internal::locale_code::fr_FR, encoding>,
+    internal::locale<internal::locale_codes::fr_FR, encoding>,
     typename internal::is_compatible_encoding<internal::encodings::ASCII, encoding>::type> :
     classic_numpunct<char>
 {

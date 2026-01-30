@@ -8,30 +8,30 @@ namespace estd { namespace internal {
 
 struct locale_id
 {
-    locale_code::values code;
-    internal::encodings::values encoding;
+    locale_codes code;
+    internal::encodings encoding;
 };
 
 // locale_names generally correspond to what we see in Debian
 
-template <locale_code::values locale_code, internal::encodings::values encoding>
+template <locale_codes locale_code, internal::encodings encoding>
 constexpr const char* locale_name();
 
 template <>
-constexpr const char* locale_name<locale_code::en_US, internal::encodings::UTF8>()
+constexpr const char* locale_name<locale_codes::en_US, internal::encodings::UTF8>()
 {
     return "en_US.UTF-8";
 };
 
 
 template <>
-constexpr const char* locale_name<locale_code::en_US, internal::encodings::ASCII>()
+constexpr const char* locale_name<locale_codes::en_US, internal::encodings::ASCII>()
 {
     return "en_US";
 };
 
 template <>
-constexpr const char* locale_name<locale_code::C, internal::encodings::ASCII>()
+constexpr const char* locale_name<locale_codes::C, internal::encodings::ASCII>()
 {
     return "C";
 };
@@ -48,7 +48,7 @@ struct locale_base_base
 };
 
 
-template <internal::locale_code::values locale_code_, internal::encodings::values encoding_>
+template <internal::locale_codes locale_code_, internal::encodings encoding_>
 struct locale : locale_base_base
 {
     struct facet
@@ -62,11 +62,11 @@ struct locale : locale_base_base
     const char* name() const { return internal::locale_name<locale_code_, encoding_>(); }
 
     // EXPERIMENTAL
-    static constexpr internal::locale_code::values locale_code = locale_code_;
-    static constexpr internal::encodings::values encoding = encoding_;
+    static constexpr internal::locale_codes locale_code = locale_code_;
+    static constexpr internal::encodings encoding = encoding_;
 };
 
-typedef locale<locale_code::C, encodings::ASCII> classic_locale_type;
+typedef locale<locale_codes::C, encodings::ASCII> classic_locale_type;
 
 
 }}

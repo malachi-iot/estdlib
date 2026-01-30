@@ -3,12 +3,14 @@
 #include "fwd.h"
 #include "facet.h"
 
+#include "../raw/type_traits.h"
+
 namespace estd { namespace internal {
 
 // Can the presented encoding work with the core encoding?  If so we get a 'type'
 // of the presented encoding
 // DEBT: Naming should be changed to reflect demote/promote relation between the two encodings
-template<internal::encodings::values core_encoding, internal::encodings::values presented_encoding,
+template<internal::encodings core_encoding, internal::encodings presented_encoding,
     class T = void>
 struct is_compatible_encoding : estd::false_type {};
 
@@ -28,20 +30,20 @@ struct is_compatible_encoding<internal::encodings::ASCII, internal::encodings::A
 
 // locale codes are sometimes freely interchangeable.  For example, numpunct true/false is identical
 // for en_US and en_GB and all other english variants.  For those scenarios, use this helper
-template<locale_code::values core, locale_code::values presented,
+template<locale_codes core, locale_codes presented,
     class T = void>
 struct is_compatible_locale_code : estd::false_type {};
 
 
 template<class T>
-struct is_compatible_locale_code<locale_code::en_US, locale_code::en_GB, T> :
+struct is_compatible_locale_code<locale_codes::en_US, locale_codes::en_GB, T> :
     estd::true_type
 {
     typedef T type;
 };
 
 template<class T>
-struct is_compatible_locale_code<locale_code::en_US, locale_code::en_US, T> :
+struct is_compatible_locale_code<locale_codes::en_US, locale_codes::en_US, T> :
     estd::true_type
 {
     typedef T type;
@@ -49,7 +51,7 @@ struct is_compatible_locale_code<locale_code::en_US, locale_code::en_US, T> :
 
 
 template<class T>
-struct is_compatible_locale_code<locale_code::en_US, locale_code::C, T> :
+struct is_compatible_locale_code<locale_codes::en_US, locale_codes::C, T> :
     estd::true_type
 {
     typedef T type;
@@ -58,11 +60,11 @@ struct is_compatible_locale_code<locale_code::en_US, locale_code::C, T> :
 template<class Locale, class T = void>
 struct is_compatible_with_classic_locale : estd::false_type {};
 
-template <locale_code::values lc, internal::encodings::values encoding>
+template <locale_codes lc, internal::encodings encoding>
 struct is_compatible_with_classic_locale<locale<lc, encoding>,
     estd::enable_if_t<
         is_compatible_encoding<internal::encodings::ASCII, encoding>::value &&
-        is_compatible_locale_code<locale_code::en_US, lc>::value>> :
+        is_compatible_locale_code<locale_codes::en_US, lc>::value>> :
     estd::true_type
 {
     //typedef bool type;
