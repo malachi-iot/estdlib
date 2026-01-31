@@ -24,13 +24,14 @@ These tests are all for variants of Espressif ESP32
 | 20JUL23 | ios      | ESP32 Lolin Generic  | ESP32          | v5.0.3   | Pass   |
 | 19DEC23 | ios      | WaveShare C6-DevKit  | ESP32C6        | v5.1.2   | Pass   |
 | 02MAR24 | ios      | Seeed Xiao           | ESP32S3        | v5.1.3   | Pass   |
+| 31JAN26 | ios      | QEMU                 | ESP32          | v5.5.2   | Pass   |
 | 30JUL25 | ios      | QEMU                 | ESP32          | v5.4.2   | Pass   |
 | 22FEB25 | ios      | QEMU                 | ESP32S3        | v5.3.2   | Pass   |
 | 07DEC22 | timer    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 15JUN23 | timer    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.0.2   | Pass   |
 | 03AUG25 | thread   | QEMU                 | ESP32          | v5.5     | Pass   |
 | 21JUL25 | unity    | QEMU                 | ESP32          | v5.4.2   | Pass   |
-| 05OCT25 | unity    | QEMU                 | ESP32          | v5.5.1   | Pass   |
+| 31JAN26 | unity    | QEMU                 | ESP32          | v5.5.2   | Pass   |
 | 08AUG25 | unity    | QEMU                 | ESP32          | v6.0-dev | Pass   |
 | 29DEC25 | unity    | QEMU                 | ESP32S3        | v5.5.2   | Pass   |
 | 07DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |

@@ -38,7 +38,7 @@ Int stoi(
     if(pos)     *pos = r.ptr - data;
 #else
     // Backchannel error status as '0' chars processed since we don't do exceptions
-    if(pos)     *pos = r.ec == 0 ? (r.ptr - data) : 0;
+    if(pos)     *pos = r.ec == estd::errc{} ? (r.ptr - data) : 0;
 #endif
 
     return v;
