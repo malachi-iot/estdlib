@@ -322,6 +322,23 @@ static void test_event_groups()
 #endif
 }
 
+
+static void test_mutex_defer_init()
+{
+    {
+        estd::freertos::mutex<false> m(estd::defer_init_t{});
+
+        TEST_ASSERT_EQUAL(estd::errc::none, m.create());
+    }
+#if configSUPPORT_STATIC_ALLOCATION
+    {
+        estd::freertos::mutex<true> m(estd::defer_init_t{});
+
+        TEST_ASSERT_EQUAL(estd::errc::none, m.create());
+    }
+#endif
+}
+
 }
 
 // DEBT: Move some of this out to 'freertos.cpp' test area
@@ -335,6 +352,7 @@ static void test_freertos()
     RUN_TEST(freertos::test_mutex_static);
 #endif
     RUN_TEST(freertos::test_recursive_mutex);
+    RUN_TEST(freertos::test_mutex_defer_init);
     RUN_TEST(freertos::test_semaphore);
     RUN_TEST(freertos::test_thread);
     RUN_TEST(freertos::test_timer);

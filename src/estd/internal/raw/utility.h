@@ -41,10 +41,14 @@ template <size_t I>
 constexpr in_place_index_t<I> in_place_index {};
 #endif
 
+// non-std indicator that RAII is NOT desired for a particular constructor
+struct defer_init_t {};
+
 // DEBT: Not well tested - but it seems GCC can do global constexpr variables sooner than spec allows, so
 // take advantage
 #if __cplusplus >= 201703L || (defined(__GNUC__) && __cpp_constexpr)
-constexpr in_place_t in_place{};
+constexpr in_place_t    in_place{};
+constexpr defer_init_t  defer_init{};
 #endif
 
 }

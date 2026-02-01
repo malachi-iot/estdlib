@@ -26,7 +26,7 @@ public:
     struct recursive_mutex_tag {};
     struct mutex_tag {};
 
-    semaphore() = default;
+    constexpr semaphore() = default;
     constexpr semaphore(SemaphoreHandle_t s) :
         s{s} {}
 
@@ -54,11 +54,6 @@ public:
     inline static SemaphoreHandle_t create(mutex_tag, StaticSemaphore_t* storage)
     {
         return xSemaphoreCreateMutexStatic(storage);
-    }
-
-    SemaphoreHandle_t create_binary(StaticSemaphore_t* storage)
-    {
-        return s = create(binary_tag(), storage);
     }
 #endif
 
@@ -96,6 +91,11 @@ public:
         StaticSemaphore_t* storage)
     {
         return s = create(counting_tag(), maxCount, initialCount, storage);
+    }
+
+    SemaphoreHandle_t create_binary(StaticSemaphore_t* storage)
+    {
+        return s = xSemaphoreCreateBinaryStatic(storage);
     }
 
     SemaphoreHandle_t create_mutex(StaticSemaphore_t* storage)

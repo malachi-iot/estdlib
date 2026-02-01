@@ -16,7 +16,9 @@ class semaphore_base
 protected:
     typedef wrapper::semaphore wrapped;
 
-    const wrapper::semaphore s;
+    wrapper::semaphore s;
+
+    constexpr semaphore_base() = default;
 
     constexpr semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
@@ -39,7 +41,7 @@ protected:
     // Helper for simple cases.  Not using parameter pack for clarity
     // and for c++03 compatibility
     template <class TTag>
-    static inline SemaphoreHandle_t create(TTag tag)
+    static inline SemaphoreHandle_t create2(TTag tag)
     {
         return wrapped::create(tag);
     }
@@ -55,6 +57,7 @@ public:
 class semaphore : public semaphore_base
 {
 protected:
+    constexpr semaphore() = default;
     constexpr semaphore(SemaphoreHandle_t s) : semaphore_base(s) {}
 
 public:
@@ -124,6 +127,8 @@ struct counting_semaphore<max, false> : internal::semaphore,
     counting_semaphore(unsigned desired = 0) :
         internal::semaphore(wrapped::create(counting_tag(), max, desired))
     {}
+
+    constexpr counting_semaphore(defer_init_t) {}
 };
 
 template <>
@@ -131,8 +136,10 @@ struct counting_semaphore<1, false> : internal::semaphore,
     internal::semaphore_max<1>
 {
     counting_semaphore() :
-        internal::semaphore(create(binary_tag()))
+        internal::semaphore(wrapped::create(binary_tag()))
     {}
+
+    constexpr counting_semaphore(defer_init_t) {}
 };
 #endif
 
@@ -149,6 +156,8 @@ public:
         internal::semaphore(
             wrapped::create(counting_tag(), max, desired, &storage))
     {}
+
+    constexpr counting_semaphore(defer_init_t) {}
 };
 
 
@@ -165,6 +174,8 @@ public:
             wrapped::create(binary_tag(), &storage))
     {
     }
+
+    constexpr counting_semaphore(defer_init_t) {}
 };
 #endif
 

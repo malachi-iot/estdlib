@@ -11,6 +11,8 @@ namespace internal {
 class mutex_base : public semaphore_base
 {
 protected:
+    constexpr mutex_base() = default;
+
     constexpr mutex_base(SemaphoreHandle_t s) :
         semaphore_base(s) {}
 
@@ -91,6 +93,13 @@ public:
             xSemaphoreCreateMutex())
     {
     }
+
+    constexpr mutex(defer_init_t) {}
+
+    errc create()
+    {
+        return s.create_mutex() ? errc{} : errc::no_lock_available;
+    }
 };
 
 
@@ -109,6 +118,13 @@ public:
             wrapped::create(binary_tag(), &storage) : 
             wrapped::create(mutex_tag(), &storage))
     {
+    }
+
+    constexpr mutex(defer_init_t) {}
+
+    errc create()
+    {
+        return s.create_mutex(&storage) ? errc{} : errc::no_lock_available;
     }
 };
 #endif

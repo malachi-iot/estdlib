@@ -44,14 +44,14 @@ struct adopt_lock_t
 // or perhaps we make a layer1::unique_lock for that purpose
 // NOTE: value_evaporator extra experimental code ironically disappeared...
 template <
-        class TMutex,
-        class TBase = experimental::instance_provider<TMutex*> >
-class unique_lock : protected TBase
+        class Mutex,
+        class Base = experimental::instance_provider<Mutex*> >
+class unique_lock : protected Base
 {
-    typedef TBase base_type;
+    using base_type = Base;
 
 public:
-    typedef TMutex mutex_type;
+    typedef Mutex mutex_type;
 
     mutex_type* mutex() const { return base_type::value(); }
 
