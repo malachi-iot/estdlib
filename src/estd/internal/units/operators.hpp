@@ -191,7 +191,7 @@ constexpr auto operator *(
     unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
-    return decltype(ct_helper(lhs, rhs)){ lhs.count() * rhs };
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() * rhs, relaxed_narrow_t{} };
 }
 
 template <class Rep, class Traits,
@@ -200,7 +200,7 @@ constexpr auto operator /(
     unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
-    return decltype(ct_helper(lhs, rhs)){ lhs.count() / rhs };
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() / rhs, relaxed_narrow_t{} };
 }
 
 template <class Rep, class Traits,
@@ -209,7 +209,7 @@ constexpr auto operator %(
     unit<Traits> lhs,
     const Rep& rhs) -> decltype(ct_helper(lhs, rhs))
 {
-    return decltype(ct_helper(lhs, rhs)){ lhs.count() % rhs };
+    return decltype(ct_helper(lhs, rhs)){ lhs.count() % rhs, relaxed_narrow_t{} };
 }
 
 

@@ -265,11 +265,21 @@ TEST_CASE("units")
             // DEBT: Add ability to compare against narrowed 90_pct etc
             REQUIRE(p2 == 90.0_pct);
             REQUIRE(p1 == 270.0_pct);
+
+            p4 = p4 * 2;
         }
         SECTION("multiply: precision change")
         {
             constexpr int16_t m1 = 4;
+
+            // NOTE: p7 has a more permissive implicit constructor, but that's not actually
+            // needed to test multiply precision change since that is permissive already.
+            // Specifically, since C++ doesn't complain if we do:
+            // int16 m; m = m + m1;
+            // Then we follow suit
             p7 = p7 * m1;
+
+            p6 = p6 * m1;
         }
         SECTION("divide")
         {

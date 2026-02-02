@@ -12,6 +12,10 @@ struct passthrough
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     using reversal = passthrough<T>;
 
+    // UNTESTED
+    template <class T2>
+    using rebind = passthrough<T2>;
+
     constexpr T operator()(T v) const { return v; }
 
 #if __cpp_constexpr >= 201304L   // "relaxed constexpr" (just to make debugging easier)
@@ -29,6 +33,9 @@ struct passthrough
 }}}
 
 namespace estd { namespace internal { namespace units {
+
+template <typename Int, Int add>
+struct adder;
 
 // DEBT: Pretty sure there's a std/estd flavor of this we can use,
 // though our flavor provides extra value in that reflected 'type'

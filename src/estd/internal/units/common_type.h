@@ -57,9 +57,7 @@ constexpr common_type_t<
 template <class Traits, class Rep>
 constexpr
     unit<
-        traits<
-            common_type_t<typename Traits::rep, Rep>,
-            typename Traits::period, typename Traits::tag, typename Traits::projector>>
+        typename Traits::template rebind<common_type_t<typename Traits::rep, Rep>>>
 ct_helper(const unit<Traits>&, const Rep&);
 
 template <class Traits1, class Traits2>

@@ -189,7 +189,7 @@ public:
     explicit constexpr unit(const rep& r, false_type) :
         base_type(r) {}
 
-    template <class Rep>
+    template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>
     explicit constexpr unit(const Rep& r, true_type) :
         base_type(rep(r))
     {
@@ -201,6 +201,10 @@ public:
 
     template <class Rep>
     explicit constexpr unit(const Rep& r) : unit(r, bool_constant<permissive>{})
+    {}
+
+    template <class Rep, enable_if_t<is_arithmetic<Rep>::value, int> = 0>
+    explicit constexpr unit(const Rep& r, relaxed_narrow_t) : unit(r, true_type{})
     {}
 
 

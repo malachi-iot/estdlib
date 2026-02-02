@@ -27,7 +27,7 @@ struct traits
 
     // DEBT: We ought to carry along default_value too
     // DEBT: Projector itself may need a rebind for full functionality
-    template <class Rep2, class Period2, class F2 = projector>
+    template <class Rep2, class Period2 = Period, class F2 = projector>
     using rebind = rebindable_traits<Rep2, Period2, Tag, F2, options>;
 };
 
@@ -39,6 +39,9 @@ template <class Rep, class Period, class Tag,
 struct rebindable_traits : traits<Rep, Period, Tag, F>
 {
     static constexpr detail::options options = o;
+
+    template <class Rep2, class Period2 = Period, class F2 = F>
+    using rebind = rebindable_traits<Rep2, Period2, Tag, F2, options>;
 };
 
 template <class Rep, class Tag>
