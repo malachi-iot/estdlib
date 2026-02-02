@@ -27,7 +27,7 @@ struct traits
 
     // DEBT: We ought to carry along default_value too
     // DEBT: Projector itself may need a rebind for full functionality
-    template <class Rep2, class Period2, class F2>
+    template <class Rep2, class Period2, class F2 = projector>
     using rebind = rebindable_traits<Rep2, Period2, Tag, F2, options>;
 };
 

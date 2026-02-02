@@ -60,7 +60,7 @@ template <class Traits, class = void>
 class scalar_base;
 
 template <class Traits>
-class scalar_base<Traits, enable_if_t<Traits::options == options::default_prohibited>>
+class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::default_prohibited>>
 {
 public:
     using rep = typename Traits::rep;
@@ -74,7 +74,7 @@ protected:
 
 
 template <class Traits>
-class scalar_base<Traits, enable_if_t<Traits::options == options::value_initialized>>
+class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::value_initialized>>
 {
 public:
     using rep = typename Traits::rep;
@@ -88,7 +88,7 @@ protected:
 
 
 template <class Traits>
-class scalar_base<Traits, enable_if_t<Traits::options == options::default_initialized>>
+class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::default_initialized>>
 {
 public:
     using rep = typename Traits::rep;
@@ -186,10 +186,23 @@ public:
 
     static constexpr bool permissive = traits::options & detail::permissive;
 
+    explicit constexpr unit(const rep& r, false_type) :
+        base_type(r) {}
+
+    template <class Rep>
+    explicit constexpr unit(const Rep& r, true_type) :
+        base_type(rep(r))
+    {
+    }
+
+
 public:
     constexpr unit() = default;
 
-    explicit constexpr unit(const rep& rep) : base_type{rep} {}
+    template <class Rep>
+    explicit constexpr unit(const Rep& r) : unit(r, bool_constant<permissive>{})
+    {}
+
 
     // Converting constructors are NOT explicit, since we happily want silent conversions
     // in this case.  We're not converting strings etc, but very narrowly similar unit_bases.  See:

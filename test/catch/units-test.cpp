@@ -150,6 +150,16 @@ TEST_CASE("units")
         estd::units::v1::detail::unit<special_traits> p5{1};
         percent<int16_t> p6{1};
 
+        using options = estd::units::detail::options;
+
+        // DEBT: Unweildy way of adding 'permissive' to options
+        using permissive_traits =
+            estd::units::detail::rebindable_traits<int16_t, estd::ratio<1>,
+            special_traits::tag, special_traits::projector,
+            options(options::permissive | options::default_initialized)>;
+
+        estd::units::v1::detail::unit<permissive_traits> p7{10};
+
         SECTION("addition")
         {
             auto v = adc_p1 + adc_p2;
@@ -259,7 +269,7 @@ TEST_CASE("units")
         SECTION("multiply: precision change")
         {
             constexpr int16_t m1 = 4;
-            p6 = p6 * m1;
+            p7 = p7 * m1;
         }
         SECTION("divide")
         {
