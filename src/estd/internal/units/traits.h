@@ -9,20 +9,6 @@ namespace estd { namespace units { inline namespace v1 {
 
 namespace detail {
 
-enum options
-{
-    none,
-
-    default_prohibited  = 0x01,
-    value_initialized   = 0x02,
-    default_initialized = 0x03,
-
-    default_mask        = 0x03,
-
-    implicit_rep        = 0x04,         // Permit implicit conversion to and from 'rep' type (NOT USED YET)
-    permissive          = 0x08,         // Permit conditions which risk precision loss (UNTESTED)
-};
-
 // 'traits' occupied by just tag.  Might consider shifting names around at some point
 // tag_traits?
 template <class Rep, class Period, class Tag,
@@ -38,8 +24,22 @@ struct traits
     static constexpr detail::options options = detail::options::default_prohibited;
 
     constexpr static rep default_value() { return {}; }
+
+    // DEBT: We ought to carry along default_value too
+    // DEBT: Projector itself may need a rebind for full functionality
+    template <class Rep2, class Period2, class F2>
+    using rebind = rebindable_traits<Rep2, Period2, Tag, F2, options>;
 };
 
+
+// for use cases which change rep and period around, gives us a way to retain options
+// conveniently.  Not combining with above traits to reduce code error spew
+template <class Rep, class Period, class Tag,
+    ESTD_CPP_CONCEPT(Projector<Rep>) F, options o>
+struct rebindable_traits : traits<Rep, Period, Tag, F>
+{
+    static constexpr detail::options options = o;
+};
 
 template <class Rep, class Tag>
 struct basic_traits : traits<Rep, ratio<1>, Tag> {};

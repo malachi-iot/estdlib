@@ -2,6 +2,7 @@
 
 #include "concepts.h"
 #include "../macros.h"
+#include "enum.h"
 
 // 28DEC25 - Noticing https://github.com/mpusz/mp-units really is a
 // powerhouse.  Continuing with our own efforts since:
@@ -37,6 +38,10 @@ struct unit_base_tag {};
 template <class Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
 struct traits;
+
+template <class Rep, class Period, class Tag,
+    ESTD_CPP_CONCEPT(Projector<Rep>) F, options o>
+struct rebindable_traits;
 
 // 1:1 ratio, passthrough always - used for readability, to reduce error verbosity
 // therefore not an alias

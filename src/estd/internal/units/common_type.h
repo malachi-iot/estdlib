@@ -25,6 +25,8 @@ struct common_type<
     using tag = typename Traits1::tag;
     using projector = typename Traits1::projector;
 
+    static constexpr estd::units::v1::detail::options options = traits1::options;
+
     static_assert(is_same<tag, typename Traits2::tag>::value, "Unit tags must match");
     //static_assert(is_same<projector, typename Traits2::projector>::value, "Unit projectors must match");
 
@@ -37,7 +39,9 @@ struct common_type<
 public:
     using ratio_type =  ratio<gcd_num, lcm_den>;
 
-    using type = units::v1::unit<common_rep_type, ratio_type, tag>;
+    using traits = typename traits1::template rebind<common_rep_type, ratio_type, units::v1::passthrough<common_rep_type>>;
+    //using traits = units::v1::detail::traits<common_rep_type, ratio_type, tag>;
+    using type = units::v1::detail::unit<traits>;
 };
 
 

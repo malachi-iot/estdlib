@@ -256,6 +256,11 @@ TEST_CASE("units")
             REQUIRE(p2 == 90.0_pct);
             REQUIRE(p1 == 270.0_pct);
         }
+        SECTION("multiply: precision change")
+        {
+            constexpr int16_t m1 = 4;
+            p6 = p6 * m1;
+        }
         SECTION("divide")
         {
             p2 /= 2;
