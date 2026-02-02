@@ -15,7 +15,7 @@ enum options
     default_mask        = 0x03,
 
     implicit_rep        = 0x04,         // Permit implicit conversion to and from 'rep' type (NOT USED YET)
-    permissive          = 0x08,         // Permit conditions which risk precision loss (UNTESTED)
+    permissive          = 0x08,         // Permit conditions which risk precision loss (ALPHA quality)
 };
 
 }

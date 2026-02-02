@@ -289,6 +289,14 @@ TEST_CASE("units")
             REQUIRE(p2 == 22.5_pct);
             REQUIRE(p1 == 7.5_pct);
         }
+        SECTION("other permissive tests")
+        {
+            percent<int16_t> v(5.0);
+
+            v += 50;
+
+            REQUIRE(v == 55);
+        }
     }
 #if FEATURE_STD_CHARCONV
     SECTION("ostream")

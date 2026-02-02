@@ -186,10 +186,14 @@ public:
 
     static constexpr bool permissive = traits::options & detail::permissive;
 
+    // 02FEB26 MB DEBT: I am not seeing any conditions where !permissive kicks back, seems everyone silently
+    // converts to 'rep'.  Furthermore, this may REQUIRE permissive behaviors otherwise we can't comfortably
+    // do things like unit<int16_t> v(10)
+
     explicit constexpr unit(const rep& r, false_type) :
         base_type(r) {}
 
-    template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>
+    template <class Rep>
     explicit constexpr unit(const Rep& r, true_type) :
         base_type(rep(r))
     {
@@ -199,11 +203,11 @@ public:
 public:
     constexpr unit() = default;
 
-    template <class Rep>
+    template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>
     explicit constexpr unit(const Rep& r) : unit(r, bool_constant<permissive>{})
     {}
 
-    template <class Rep, enable_if_t<is_arithmetic<Rep>::value, int> = 0>
+    template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>
     explicit constexpr unit(const Rep& r, relaxed_narrow_t) : unit(r, true_type{})
     {}
 
