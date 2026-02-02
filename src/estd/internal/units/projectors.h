@@ -2,10 +2,12 @@
 
 #include "../raw/type_traits.h"
 
+#include "fwd.h"
+
 namespace estd { namespace units { inline namespace v1 {
 
 template <class T>
-struct passthrough
+struct passthrough : type_identity<T>
 {
     using value_type = T;
 
@@ -29,14 +31,6 @@ struct passthrough
 #endif
 };
 
-
-}}}
-
-namespace estd { namespace internal { namespace units {
-
-template <typename Int, Int add>
-struct adder;
-
 // DEBT: Pretty sure there's a std/estd flavor of this we can use,
 // though our flavor provides extra value in that reflected 'type'
 // is important for consumer to use for precision/signing
@@ -52,6 +46,10 @@ struct subtractor : estd::integral_constant<Int, add>
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     // else.
     using reversal = adder<Int, add>;
+
+    // UNTESTED
+    template <class T2>
+    using rebind = subtractor<T2, T2(add)>;
 };
 
 template <typename Int, Int add>
@@ -66,7 +64,10 @@ struct adder : estd::integral_constant<Int, add>
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     // else.
     using reversal = subtractor<Int, add>;
-};
 
+    // UNTESTED
+    template <class T2>
+    using rebind = adder<T2, T2(add)>;
+};
 
 }}}

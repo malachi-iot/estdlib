@@ -26,6 +26,13 @@ using namespace estd::internal::units::concepts;
 template <class T>
 struct passthrough;
 
+template <typename Int, Int sub>
+struct subtractor;
+
+template <typename Int, Int add>
+struct adder;
+
+
 // Indicates to unit_base that narrowing might happen and to silently
 // permit it
 struct relaxed_narrow_t {};
@@ -63,12 +70,6 @@ namespace estd { namespace internal { namespace units {
 
 template <class Tag>
 struct traits;
-
-template <typename Int, Int sub>
-struct subtractor;
-
-template <typename Int, Int add>
-struct adder;
 
 using unit_base_tag = ::estd::units::v1::detail::unit_base_tag;
 
