@@ -60,6 +60,8 @@ struct rtto_modes
         // --- EXPERIMENTAL
     };
 
+    /// generally returns POSIX errno.h codes except for:
+    /// SIZE which returns type size
     using utility_type = int (*)(modes, void*, int, void*);
 };
 
