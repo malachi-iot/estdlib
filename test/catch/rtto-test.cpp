@@ -168,6 +168,31 @@ TEST_CASE("rtto", "Runtime Type Operations")
 
             REQUIRE(counter == 1);
         }
+        SECTION("copy constructor")
+        {
+            int counter = 0;
+            using proxy = internal::rtto_base::proxy<>;
+
+            auto p1 = (proxy*) storage;  // NOLINT
+            auto p2 = (proxy*) storage2;  // NOLINT
+
+            //new (p1) proxy(rtto::utility);
+            //auto dummy1 = new (p1->storage()) type(7, "hello", &counter);
+            new (p1) proxy(estd::in_place_type_t<type>{}, 7, "Hello", &counter);
+
+            new (p2) proxy(*p1);
+
+            auto dummy1 = static_cast<type*>(p1->storage());
+            auto dummy2 = static_cast<type*>(p2->storage());
+
+            REQUIRE(dummy1->copied_ == false);
+            REQUIRE(dummy2->copied_);
+
+            p1->destroy();
+            p2->destroy();
+
+            REQUIRE(counter == 2);
+        }
         SECTION("pointer (layer2 style)")
         {
             using proxy = internal::rtto_base::proxy<char*>;

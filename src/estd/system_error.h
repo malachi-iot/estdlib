@@ -31,7 +31,7 @@ namespace estd {
 #endif
 #endif
 
-// manual "enum class", enum itself must always be called 'values'
+
 enum class errc
 {
     none = 0,   ///< Nonstandard - mainly so that errc{} doesn't give compiler warnings

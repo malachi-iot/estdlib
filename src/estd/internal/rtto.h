@@ -167,7 +167,8 @@ struct rtto_base : rtto_modes
     };
 
 
-    // Edge case where someone who is NOT target type wants to help with target operations
+    // Case where someone who is NOT target type wants to help with target operations
+    // Think of this as the 'has a' vs implied 'is a' of base
     template <class Storage = char[]>
     class proxy : public base
     {
@@ -205,6 +206,12 @@ struct rtto_base : rtto_modes
             // Leaving u_ intact in move_from. A destroy on a moved object is 100% correct and only
             // possible if we leave that u_ there
             move_from.move_to(storage_, sz);
+        }
+
+        proxy(const proxy& copy_from, int sz = 0) :
+            base_type(copy_from.u_)
+        {
+            copy_from.copy_to(storage_, sz);
         }
 
         // EXPERIMENTAL
