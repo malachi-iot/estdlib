@@ -6,7 +6,7 @@
 
 #include "fwd/span.h"
 #include "type_traits.h"
-#include "utility.h"
+#include "fwd/utility.h"
 
 #if FEATURE_STD_SPAN
 #include <span>
@@ -22,13 +22,23 @@ struct is_container : false_type {};
 //template <class Container, class Enabled = void>
 //struct container_traits_base;
 
-template <class Container, class Enabled = void>
+template <class T, class Enabled = void>
 struct container_traits;
+
+
+// Flag whether normal container detection ought to be bypassed.  This is useful for conditions where your
+// container DOES conform to begin/end/size, but you want to control specializations anyway.  This
+// is required because SFINAE can't easily differentiate between our container-detector and your own
+// complete specialization.
+// DEBT: I dislike excluding 'span' explicitly like this.  At least it is sequestered in a customizable
+// bypass mechanism.
+template <class T>
+struct container_bypass : detail::is_span<T> {};
 
 }
 
-template <class C>
-constexpr typename internal::container_traits<C>::iterator begin(C&);
+//template <class C>
+//constexpr typename internal::container_traits<C>::iterator begin(C&);
 
 namespace internal {
 
@@ -53,40 +63,48 @@ struct is_container<
         is_present<decltype(std::declval<T&>().end())>::value &&
         is_present<decltype(std::declval<T&>().size())>::value>> : true_type {};
 
-template <class T>
-struct is_span : false_type {};
 
-template <class T, size_t N>
-struct is_span<estd::span<T, N>> : true_type {};
+// DEBT: Rename to container_traits_base once below one is renamed too
+template <class Value, size_t Extent = detail::dynamic_extent::value>
+struct container_traits_core
+{
+    ESTD_CPP_STD_VALUE_TYPE(Value)
+
+    static constexpr size_t extent = Extent;
+};
+
+#if !__cpp_inline_variables
+template <class Value, size_t Extent>
+constexpr size_t container_traits_core<Value, Extent>::extent;
+#endif
 
 // Underlying feeder for begin, end, size
+// DEBT: Rename to something like container_traits_standard
 template <class Container>
-struct container_traits_base : type_identity<Container>
+struct container_traits_base :
+    type_identity<Container>,
+    container_traits_core<typename Container::value_type>
 {
     using size_type = decltype(std::declval<Container>().size());
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
 
-    ESTD_CPP_STD_VALUE_TYPE(typename Container::value_type)
-
-    static constexpr iterator begin(Container& c) { return c.begin(); }
-    static constexpr iterator end(Container& c) { return c.end(); }
+    static constexpr iterator begin(Container& c)               { return c.begin(); }
+    static constexpr iterator end(Container& c)                 { return c.end(); }
+    static constexpr const_iterator begin(const Container& c)   { return c.begin(); }
+    static constexpr const_iterator end(const Container& c)     { return c.end(); }
 
     static constexpr size_type size(const Container& c)
     {
         return c.size();
     }
-
-    static constexpr size_t extent = detail::dynamic_extent::value;
 };
 
-// DEBT: I really hate excluding 'span' explicitly like this.  I spent 2 hours debugging this
-// and I am tired.  This works.
-template <class Container>
+template <class T>
 struct container_traits<
-    Container,
-    enable_if_t<is_span<Container>::value == false && is_container<Container>::value>> :
-    container_traits_base<Container> {};
+    T,
+    enable_if_t<container_bypass<T>::value == false && is_container<T>::value>> :
+    container_traits_base<T> {};
 
 template <class T, size_t N>
 struct container_traits<estd::span<T, N>> :
@@ -105,28 +123,38 @@ struct container_traits<std::span<T, N>, enable_if_t<(N > 0)>> :
 #endif
 
 template <class T, size_t N>
-struct container_traits<T[N]> : type_identity<T[N]>
+struct container_traits<T[N]> : type_identity<T[N]>, container_traits_core<T, N>
 {
     using size_type = size_t;
     using iterator = T*;
     using const_iterator = const T*;
 
-    ESTD_CPP_STD_VALUE_TYPE(T)
-
     static constexpr iterator begin(T (&c)[N])              { return c; }
     static constexpr iterator end(T (&c)[N])                { return &c[N]; }
+    static constexpr const_iterator begin(const T (&c)[N])  { return c; }
+    static constexpr const_iterator end(const T (&c)[N])    { return &c[N]; }
     static constexpr size_type size(const T(&)[N])          { return N; }
-
-    static constexpr size_t extent = N;
 };
 
 }
 
 #pragma push_macro("CTRAITS")
-#define CTRAITS internal::container_traits<C>
+#define CTRAITS internal::container_traits<estd::remove_const_t<C>>
 
 template <class C>
 constexpr typename CTRAITS::iterator begin(C& c)
+{
+    return CTRAITS::begin(c);
+}
+
+template <class C>
+constexpr typename CTRAITS::const_iterator begin(const C& c)
+{
+    return CTRAITS::begin(c);
+}
+
+template <class C>
+constexpr typename CTRAITS::const_iterator cbegin(const C& c)
 {
     return CTRAITS::begin(c);
 }
@@ -138,6 +166,19 @@ constexpr typename CTRAITS::iterator end(C& c)
     return CTRAITS::end(c);
 }
 
+
+template <class C>
+constexpr typename CTRAITS::const_iterator end(const C& c)
+{
+    return CTRAITS::end(c);
+}
+
+
+template <class C>
+constexpr typename CTRAITS::const_iterator cend(const C& c)
+{
+    return CTRAITS::end(c);
+}
 
 template <class C>
 constexpr auto data(const C& c) -> decltype(c.data())
