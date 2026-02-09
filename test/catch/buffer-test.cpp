@@ -2,6 +2,7 @@
 #include <estd/internal/buffer.h>
 #include <estd/internal/bip/buffer.h>
 #include <estd/internal/size.h>
+#include <estd/expected.h>
 
 #include "test-data.h"
 
@@ -36,6 +37,14 @@ void test_bipbuf(Bipbuf& bip)
 
 TEST_CASE("buffers")
 {
+    SECTION("Catch compatibility")
+    {
+        estd::expected<void, estd::errc> exp;
+
+        // Catch2 is sensitive to begin() treatment.  If this compiles, we're good.
+        // See estd::internal::is_container
+        CAPTURE(exp);
+    }
     SECTION("layer1")
     {
         SECTION("bipbuffer")
