@@ -257,7 +257,7 @@ TEST_CASE("buffers")
 
                 using traits = estd::internal::container_traits<decltype(s)>;
 
-                REQUIRE(traits::extent == estd::detail::dynamic_extent());
+                REQUIRE(traits::extent == sz);
             }
             SECTION("struct + dynamic extent")
             {

@@ -53,6 +53,12 @@ struct is_container<
         is_present<decltype(std::declval<T&>().end())>::value &&
         is_present<decltype(std::declval<T&>().size())>::value>> : true_type {};
 
+template <class T>
+struct is_span : false_type {};
+
+template <class T, size_t N>
+struct is_span<estd::span<T, N>> : true_type {};
+
 // Underlying feeder for begin, end, size
 template <class Container>
 struct container_traits_base : type_identity<Container>
@@ -74,12 +80,17 @@ struct container_traits_base : type_identity<Container>
     static constexpr size_t extent = detail::dynamic_extent::value;
 };
 
+// DEBT: I really hate excluding 'span' explicitly like this.  I spent 2 hours debugging this
+// and I am tired.  This works.
 template <class Container>
-struct container_traits<Container, enable_if_t<is_container<Container>::value>> : container_traits_base<Container> {};
+struct container_traits<
+    Container,
+    enable_if_t<is_span<Container>::value == false && is_container<Container>::value>> :
+    container_traits_base<Container> {};
 
 template <class T, size_t N>
-struct container_traits<span<T, N>, enable_if_t<(N > 0)>> :
-    container_traits_base<span<T, N>>
+struct container_traits<estd::span<T, N>> :
+    container_traits_base<estd::span<T, N>>
 {
     static constexpr size_t extent = N;
 };
