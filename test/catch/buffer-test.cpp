@@ -224,16 +224,50 @@ TEST_CASE("buffers")
         }
         SECTION("span")
         {
-            estd::span<char> s(buf);
+            SECTION("static extent")
+            {
+                estd::span<char, sz> s(buf);
 
-            using traits = estd::internal::container_traits<decltype(s)>;
+                using traits = estd::internal::container_traits<decltype(s)>;
 
-            REQUIRE(traits::extent == estd::detail::dynamic_extent());
+                REQUIRE(traits::extent == sz);
 
-            REQUIRE(estd::size(s) == sz);
-            REQUIRE(estd::data(s) == buf);
-            REQUIRE(estd::begin(s) == buf);
-            REQUIRE(estd::end(s) == buf + sz);
+                REQUIRE(estd::size(s) == sz);
+                REQUIRE(estd::data(s) == buf);
+                REQUIRE(estd::begin(s) == buf);
+                REQUIRE(estd::end(s) == buf + sz);
+            }
+            SECTION("dynamic extent")
+            {
+                estd::span<char> s(buf);
+
+                using traits = estd::internal::container_traits<decltype(s)>;
+
+                REQUIRE(traits::extent == estd::detail::dynamic_extent());
+
+                REQUIRE(estd::size(s) == sz);
+                REQUIRE(estd::data(s) == buf);
+                REQUIRE(estd::begin(s) == buf);
+                REQUIRE(estd::end(s) == buf + sz);
+            }
+            SECTION("struct + static extent")
+            {
+                estd::test::Dummy storage[4];
+                estd::span<estd::test::Dummy, sz> s(storage);
+
+                using traits = estd::internal::container_traits<decltype(s)>;
+
+                REQUIRE(traits::extent == estd::detail::dynamic_extent());
+            }
+            SECTION("struct + dynamic extent")
+            {
+                estd::test::Dummy storage[4];
+                estd::span<estd::test::Dummy> s(storage);
+
+                using traits = estd::internal::container_traits<decltype(s)>;
+
+                REQUIRE(traits::extent == estd::detail::dynamic_extent());
+            }
         }
 #if FEATURE_STD_SPAN
         SECTION("std::span")

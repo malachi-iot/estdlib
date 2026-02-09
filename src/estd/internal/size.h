@@ -19,6 +19,9 @@ namespace internal {
 template <class T, class Enabled = void>
 struct is_container : false_type {};
 
+//template <class Container, class Enabled = void>
+//struct container_traits_base;
+
 template <class Container, class Enabled = void>
 struct container_traits;
 
