@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../system_error.h"
+
 #include "semaphore.h"
 
 namespace estd {
