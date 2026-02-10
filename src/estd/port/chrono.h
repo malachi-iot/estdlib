@@ -24,22 +24,22 @@ namespace estd { inline namespace literals { inline namespace chrono_literals {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wliteral-suffix"
 
-constexpr chrono::seconds operator "" s(unsigned long long s)
+constexpr chrono::seconds operator ""s(unsigned long long s)
 {
     return chrono::seconds(s);
 }
 
-constexpr chrono::milliseconds operator "" ms(unsigned long long ms)
+constexpr chrono::milliseconds operator ""ms(unsigned long long ms)
 {
     return chrono::milliseconds(ms);
 }
 
-constexpr chrono::microseconds operator "" us(unsigned long long rep)
+constexpr chrono::microseconds operator ""us(unsigned long long rep)
 {
     return chrono::microseconds(rep);
 }
 
-constexpr chrono::nanoseconds operator "" ns(unsigned long long rep)
+constexpr chrono::nanoseconds operator ""ns(unsigned long long rep)
 {
     return chrono::nanoseconds(rep);
 }

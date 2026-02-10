@@ -22,6 +22,7 @@ set(COMPONENT_EMBED_FILES ${RESOURCES})
 register_component()
 
 component_compile_options("-Wstack-usage=128")
+component_compile_options("-Wno-error=stack-usage=")
 
 # FEATURE_ESTD_CHARTRAITS works well.  Leaving it off in pursuit of getting to the
 # bottom of std::char_traits bloat
