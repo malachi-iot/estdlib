@@ -110,12 +110,12 @@ private:
 
 protected:
     template <class U, class G>
-    ESTD_CPP_CONSTEXPR_RET expected(const expected<U, G>& copy_from, bool has_value) :
+    constexpr expected(const expected<U, G>& copy_from, bool has_value) :
         storage(copy_from.storage, has_value ? VALUE : ERROR)
     {
     }
 
-    ESTD_CPP_CONSTEXPR_RET expected() :
+    constexpr expected() :
         storage(in_place_index_t<0>()) {}
 
     template <class... Args>

@@ -40,7 +40,7 @@ TEST_CASE("expected")
 {
     SECTION("int value_type")
     {
-        typedef estd::expected<int, estd::errc> expected_type;
+        using expected_type = estd::expected<int, estd::errc>;
 
         SECTION("default")
         {
@@ -78,7 +78,7 @@ TEST_CASE("expected")
         }
         SECTION("non trivial error type")
         {
-            typedef estd::expected<int, ExplicitError> expected_type2;
+            using expected_type2 = estd::expected<int, ExplicitError>;
 
             expected_type2 e;
 
@@ -87,7 +87,7 @@ TEST_CASE("expected")
         }
         SECTION("explicit converting E")
         {
-            typedef estd::expected<int, const char*> expected_type2;
+            using expected_type2 = estd::expected<int, const char*>;
 
             //expected_type e(estd::errc::invalid_argument);    // Beware, this cascades out to non-error value
             expected_type e2(estd::unexpected<estd::errc>(estd::errc{}));
@@ -148,7 +148,7 @@ TEST_CASE("expected")
     }
     SECTION("non-trivial value_type")
     {
-        typedef estd::expected<test::NonTrivial, int> expected_type;
+        using expected_type = estd::expected<test::NonTrivial, int>;
 
         SECTION("with value")
         {
@@ -229,9 +229,13 @@ TEST_CASE("expected")
         }
         SECTION("are_trivial")
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
             // TODO: Move these out to proper algorithm/type_traits area
             REQUIRE(estd::is_trivial<void>::value == false);    // DEBT: Unclear to me what to expect from void here
-            REQUIRE(estd::is_trivial<ExplicitError>::value == false);
+            REQUIRE(estd::is_trivial<ExplicitError>::value == false);   // NOLINT
+#pragma GCC diagnostic pop
 
             REQUIRE(estd::internal::are_trivial<int, int>::value);
             REQUIRE(estd::internal::are_trivial<int, ExplicitError>::value == false);

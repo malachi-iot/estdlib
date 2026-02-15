@@ -177,14 +177,18 @@ public:
 #endif
     }
 
-    // FIX: Need to enforce 'tag' matches
+    static constexpr bool permissive = traits::options & detail::permissive;
+
+    // May need to enforce 'tag' matches, though callers do that for us
     template <class Traits2>
     static constexpr rep convert_from(const unit<Traits2>& v)
     {
+        // These work OK, just taking a hands-off approach until we sort out permissive/strict modes
+        //static_assert(is_convertible<decltype(v.count()), rep>::value);
+        //static_assert(is_convertible<typename Traits2::rep, rep>::value);
+
         return convert_from<decltype(v.count()), typename Traits2::period>(v.count());
     }
-
-    static constexpr bool permissive = traits::options & detail::permissive;
 
     // 02FEB26 MB DEBT: I am not seeing any conditions where !permissive kicks back, seems everyone silently
     // converts to 'rep'.  Furthermore, this may REQUIRE permissive behaviors otherwise we can't comfortably

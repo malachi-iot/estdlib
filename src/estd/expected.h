@@ -55,7 +55,7 @@ unexpected(E) -> unexpected<E>;
 template <class T, class E>
 class expected : public internal::expected<T, E>
 {
-    typedef internal::expected<T, E> base_type;
+    using base_type = internal::expected<T, E>;
 
     bool has_value_;
 
@@ -99,7 +99,7 @@ public:
     {}
 #endif
 
-    ESTD_CPP_CONSTEXPR_RET expected(const expected& copy_from) :
+    constexpr expected(const expected& copy_from) :
         base_type(copy_from, copy_from.has_value()),
         has_value_(copy_from.has_value())
     {

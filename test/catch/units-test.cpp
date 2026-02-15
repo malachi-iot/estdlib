@@ -2,6 +2,10 @@
 
 #include <estd/units.h>
 
+#if FEATURE_STD_CHRONO
+#include <chrono>
+#endif
+
 #include <estd/internal/units/mixins.h>
 
 #include <estd/sstream.h>
@@ -297,6 +301,21 @@ TEST_CASE("units")
             v += 50;
 
             REQUIRE(v == 55);
+
+            // DEBT: It's OK to precision loss, as demonstrated by chrono below.  However,
+            // according to AI we're supposed to kick back if periods have a specific kind of
+            // mismatch (I don't fully grok that part yet but it's intuitive)
+            percent<int32_t> v2(v);
+            percent<int16_t> v3(v2);
+
+            REQUIRE(v3 == v);
+
+#if FEATURE_STD_CHRONO
+            std::chrono::duration<int32_t> d1(5);
+            std::chrono::duration<int16_t> d2(d1);
+
+            REQUIRE(d2.count() == 5);
+#endif
         }
     }
 #if FEATURE_STD_CHARCONV

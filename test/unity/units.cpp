@@ -24,8 +24,13 @@ void test_units()
         v2 = v2 + v1;
     }
     {
-        // FIX: Now we are too permissive, this shouldn't compile
+        // TODO: chrono is this permissive.  We would like our permissive/stict
+        // flag to excercise some control over this
         units::percent<uint32_t> v1(5);
         units::percent<int16_t> v2(v1);
+    }
+    {
+        // TODO: Do an incompatible period conversion reinterpretation of above
+        // uint32_t->int16_t idea
     }
 }
