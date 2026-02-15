@@ -207,6 +207,14 @@ TEST_CASE("limits & common_type tests")
 
             REQUIRE(digits == 15);
         }
+        SECTION("int -> long signed")
+        {
+            using type = typename promoted_type<unsigned, int>::type;
+            using limits = numeric_limits<type>;
+
+            static_assert(limits::is_signed);
+            static_assert(is_same<type, long>::value);
+        }
     }
     SECTION("string length")
     {

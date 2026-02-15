@@ -104,6 +104,26 @@ static void test_limits_double()
 }
 
 
+static void test_promotion()
+{
+    {
+        using type = typename estd::promoted_type<uint16_t, int16_t>::type;
+        using limits = estd::numeric_limits<type>;
+
+        static_assert(limits::is_signed);
+        static_assert(estd::is_same<type, int32_t>::value);
+    }
+    {
+        // FIX: Doesn't work correctly or unsigned/int.  Is very close to a DEBT.
+        // However, this IS a published feature so despite light rotation and mostly-functional
+        // the easy-to-encounter case of int/unsigned fails = a problem
+        //using type = typename estd::promoted_type<unsigned, int>::type;
+        //using limits = estd::numeric_limits<type>;
+        //static_assert(estd::is_same<type, long>::value);
+    }
+}
+
+
 #ifdef ESP_IDF_TESTING
 TEST_CASE("limits tests", "[limits]")
 #else
@@ -115,4 +135,5 @@ void test_limits()
     RUN_TEST(test_limits_least64);
     RUN_TEST(test_limits_float);
     RUN_TEST(test_limits_double);
+    RUN_TEST(test_promotion);
 }

@@ -79,8 +79,8 @@ struct promote_type<float>
 
 }
 
-// TODO: Fix name - auto_promote means, if necessary, move
-// to a higher bitness than T1 or T2 (for signed/unsigned mixing)
+// DEBT: Fix name - auto_promote means, if necessary, move
+// to a higher bitness than T1 or T2 for signed/unsigned mixing
 template<class T1, class T2, bool auto_promote = true>
 struct promoted_type
 {
