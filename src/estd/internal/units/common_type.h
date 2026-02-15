@@ -30,7 +30,10 @@ struct common_type<
     static_assert(is_same<tag, typename Traits2::tag>::value, "Unit tags must match");
     //static_assert(is_same<projector, typename Traits2::projector>::value, "Unit projectors must match");
 
-    using common_rep_type = typename promoted_type<typename Traits1::rep, typename Traits2::rep>::type;
+    using rep = common_type_t<typename Traits1::rep, typename Traits2::rep>;
+    // DEBT: still sorting out 'permissive' unit mode, so silently not kicking back against precision loss
+    // here.  This is consistent with std::chrono::duration behavior
+    //using rep = typename promoted_type<typename Traits1::rep, typename Traits2::rep>::type;
 
     // DEBT: Use estd intmax_t
     static constexpr std::intmax_t gcd_num = internal::gcd<period1::num, period2::num>::value;
@@ -39,8 +42,8 @@ struct common_type<
 public:
     using ratio_type =  ratio<gcd_num, lcm_den>;
 
-    using traits = typename traits1::template rebind<common_rep_type, ratio_type, units::v1::passthrough<common_rep_type>>;
-    //using traits = units::v1::detail::traits<common_rep_type, ratio_type, tag>;
+    using traits = typename traits1::template rebind<rep, ratio_type, units::v1::passthrough<rep>>;
+    //using traits = units::v1::detail::traits<rep, ratio_type, tag>;
     using type = units::v1::detail::unit<traits>;
 };
 

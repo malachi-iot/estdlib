@@ -53,7 +53,8 @@ struct StringMaker<unit<Rep, Period, Tag, F>>
 
     static std::string convert(unit<Rep, Period, Tag, F> const& v)
     {
-        // DEBT: Perhaps put this code into some diagnostic/explicit to_string
+        // DEBT: Perhaps put this code into some diagnostic/explicit to_string.
+        // i.e. we somewhat duplicated this in embr::mem
 
         std::ostringstream oss;
 

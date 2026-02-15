@@ -41,12 +41,16 @@ struct promote_type<int32_t>
     typedef int64_t type;
 };
 
-// Can't promote past 64 bit, but some of the conditional-template logic
-// touches the struct so we do need it
 template<>
 struct promote_type<int64_t>
 {
+#if __SIZEOF_INT128__
+    using type = __int128_t;
+#else
+    // Can't promote past 64 bit, but some of the conditional-template logic
+    // touches the struct so we do need it
     typedef void type;
+#endif
 };
 
 template<>
