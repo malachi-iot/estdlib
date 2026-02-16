@@ -54,7 +54,7 @@ TEST_CASE("chrono tests")
     {
         estd::chrono::seconds sec(1);
         estd::chrono::milliseconds ms(sec);
-        estd::chrono::duration<uint32_t, estd::deci> de = ms;
+        estd::chrono::duration<uint32_t, estd::deci> de(ms, estd::units::relaxed_narrow_t{});
 
         REQUIRE(ms.count() == 1000);
         REQUIRE(de.count() == 10);

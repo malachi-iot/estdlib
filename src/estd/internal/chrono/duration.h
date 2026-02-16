@@ -66,10 +66,16 @@ public:
         base_type(r)
     {}
 
-    // NOTE: It seems std::duration quietly permits narrowing, so so do we
+    // FIX: Too permissive.  See https://github.com/malachi-iot/estdlib/issues/177
     template <class Rep2, class Period2>
+    //[[deprecated("Temporary deprecation to find people needing this guy")]]
     constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
-        base_type(d, estd::units::v1::relaxed_narrow_t{})
+        base_type(d, units::relaxed_narrow_t{})
+    {}
+
+    template <class Rep2, class Period2>
+    constexpr duration(const duration<Rep2, Period2>& d, units::relaxed_narrow_t) :  // NOLINT
+        base_type(d, units::relaxed_narrow_t{})
     {}
 
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO

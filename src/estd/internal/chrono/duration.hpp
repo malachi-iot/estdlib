@@ -57,7 +57,7 @@ constexpr Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Re
 template <class ToDuration, class Rep, class Period>
 constexpr ToDuration duration_cast(const duration<Rep, Period>& d)
 {
-    return ToDuration(d);
+    return ToDuration(d, units::relaxed_narrow_t{});
 }
 
 
