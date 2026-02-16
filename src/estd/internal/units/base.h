@@ -12,7 +12,7 @@
 
 namespace estd { namespace internal { namespace units {
 
-
+/*
 template <class ToScalar, class FromScalar>
 constexpr ToScalar unit_cast(const FromScalar& s)
 {
@@ -20,7 +20,7 @@ constexpr ToScalar unit_cast(const FromScalar& s)
     typedef typename ToScalar::period period;
 
     return cast_helper<rep, period>::do_cast(s);
-}
+}*/
 
 template <class Tag1, class Tag2>
 struct compound_tag
@@ -53,7 +53,18 @@ struct compound_unit_helper
 }}}
 
 namespace estd { namespace units { inline namespace v1 {
-    
+
+// Specifically placing this here and NOT chrono, proclaiming units namespace as the authority.
+// Also, we have tag awareness helping specialize for the particular unit in question.
+template <class Rep, class Tag = void>
+struct treat_as_floating_point : is_floating_point<Rep> {};
+
+template <class ToUnit, class Traits>
+constexpr ToUnit unit_cast(const detail::unit<Traits>& u)
+{
+    return ToUnit(u, relaxed_narrow_t{});
+}
+
 namespace detail {
 
 template <class Traits, class = void>
@@ -141,6 +152,21 @@ protected:
 #if UNIT_TESTING
 public:
 #endif
+    // Feeder for unit -> unit converting constructor
+    // Matches condition 4 here https://en.cppreference.com/w/cpp/chrono/duration/duration.html
+    template <class Traits2>
+    static constexpr bool can_unit_convert()
+    {
+        using rep2 = typename Traits2::rep;
+
+        return
+            tag_matches<Traits2>() &&
+            is_convertible<rep, rep2>::value &&
+            (treat_as_floating_point<rep, tag>::value ||
+                (ratio_divide<typename Traits2::period, period>::den == 1 &&
+                    !treat_as_floating_point<rep2, tag>::value));
+    }
+
 
     // It does work, but it is prone to overflow so be careful.  Also,
     // chrono one is supposed to offer compile time protection against overflow
@@ -230,7 +256,7 @@ public:
     }   */
 
     //template <class Traits2, class = enable_if_t<tag_matches<Traits2>() && !period_matches<Traits2>()>>
-    template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
+    template <class Traits2, class = enable_if_t<can_unit_convert<Traits2>()>>
     constexpr unit(const unit<Traits2>& s) :   // NOLINT
         base_type{convert_from(s)}
     {

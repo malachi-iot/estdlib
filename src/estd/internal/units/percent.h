@@ -26,6 +26,7 @@ using namespace estd::literals::units_literals;
 namespace estd { namespace internal { namespace units {
 
 // Represented as 0 through 100, not 0 through 1
+// DEPRECATED - use estd::units::v1 flavor directly
 template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
 using percent = ::estd::units::v1::percent<Rep, Period, F>;
 

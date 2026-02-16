@@ -92,8 +92,8 @@ using unit_base = ::estd::units::unit<Rep, Period, Tag, F>;
 }
 
 
-template <class Rep, class Period>
-struct cast_helper;
+//template <class Rep, class Period>
+//struct cast_helper;
 
 template <class, class>
 struct compound_tag;

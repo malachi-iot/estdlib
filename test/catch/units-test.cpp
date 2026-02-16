@@ -74,7 +74,7 @@ struct StringMaker<unit<Rep, Period, Tag, F>>
 
 TEST_CASE("units")
 {
-    using namespace estd::internal::units;
+    using namespace estd::units::v1;
     using namespace estd::literals::units_literals;
 
     estd::layer1::ostringstream<256> out;
@@ -92,6 +92,25 @@ TEST_CASE("units")
     {
         std::ostringstream oss;
         estd::internal::make_ostream_like(oss);
+    }
+    SECTION("prerequisites")
+    {
+        SECTION("1:1")
+        {
+            using type = percent<int>;
+            using traits2 = detail::traits<long, estd::ratio<1>, type::tag>;
+
+            static_assert(treat_as_floating_point<int, type::tag>::value == false);
+            static_assert(type::can_unit_convert<traits2>());
+        }
+        SECTION("100:1024 (25:256)")
+        {
+            using type = percent<int16_t, estd::ratio<100, 1024> >;
+            using traits2 = detail::traits<uint32_t, estd::ratio<1>, type::tag>;
+
+            static_assert(treat_as_floating_point<int, type::tag>::value == false);
+            static_assert(!type::can_unit_convert<traits2>());
+        }
     }
     SECTION("hz")
     {
@@ -181,7 +200,7 @@ TEST_CASE("units")
 
             // implicit precision loss not permitted here
             //adc_p2 += p3;
-            adc_p2 += percent_type(p3);
+            adc_p2 += unit_cast<percent_type>(p3);
 
             REQUIRE(adc_p2.count() == 1021);
 
@@ -342,7 +361,7 @@ TEST_CASE("units")
     {
         percent<uint16_t, estd::ratio<1, 10> > percent1{974};
 
-        REQUIRE(percent<uint8_t>(percent1).count() == 97);
+        REQUIRE(unit_cast<percent<uint8_t>>(percent1) == 97);
 
         auto percent2 = 50_pct;
 
@@ -423,8 +442,8 @@ TEST_CASE("units")
                     percent<int32_t> p2{0};
 
                     using CT = decltype(ct_helper(p1, p2));
-                    static_assert(estd::is_same<CT::period, estd::ratio<1, 10>>::value, "");
-                    static_assert(estd::is_same<CT::rep, int32_t>::value, "");
+                    static_assert(estd::is_same<CT::period, estd::ratio<1, 10>>::value, "");    // NOLINT
+                    static_assert(estd::is_same<CT::rep, int32_t>::value, "");                  // NOLINT
                     //period v1;
 
                     CT p3{p2};
@@ -438,10 +457,10 @@ TEST_CASE("units")
 
                     using CT = decltype(ct_helper(p1, p2));
 
-                    static_assert(estd::is_same<CT::rep, uint32_t>::value, "");
+                    static_assert(estd::is_same<CT::rep, uint32_t>::value, ""); // NOLINT
                     // NOTE: since 100:1024 precision has some clicky fine points that a regular
                     // 1:1 integer wouldn't, we promote to 1:1024
-                    static_assert(estd::is_same<CT::period, estd::ratio<1, 1024>>::value, "");
+                    static_assert(estd::is_same<CT::period, estd::ratio<1, 1024>>::value, "");  // NOLINT
                 }
                 // Does indeed fail to compile, as intended
 #if EXPOSITIONAL_ONLY
@@ -460,7 +479,7 @@ TEST_CASE("units")
                 // Need 100:1024 because ->
                 // 512/1024 = 0.5 then we need * 100
                 percent<int16_t, estd::ratio<100, 1024> > adc1{512};
-                percent<int> p{adc1};
+                percent<int> p{adc1, relaxed_narrow_t{}};
                 percent<double> percent4{adc1};
 
                 REQUIRE(p.count() == 50);

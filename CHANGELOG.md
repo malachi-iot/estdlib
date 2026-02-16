@@ -14,6 +14,7 @@
 * units system:
     * promoted from `internal` namespace now to `estd::units` namespace
     * transition to `traits` approach, lots of associated improved quality/scrubbing
+    * stricter constructor rules and unit_cast to counterbalance it
 * https://github.com/malachi-iot/estdlib/issues/159 `enum_class` helper deprecated
 * https://github.com/malachi-iot/estdlib/issues/169 fixed glitchy from_chars sto mode hex/octal detection
 * https://github.com/malachi-iot/estdlib/issues/173 additional units operators for 1:1 mode
