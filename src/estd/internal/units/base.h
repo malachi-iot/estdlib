@@ -268,7 +268,7 @@ public:
     {
     }
 
-    template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
+    template <class Traits2, class = enable_if_t<can_unit_convert<Traits2>()>>
     unit& operator=(const unit<Traits2>& copy_from)
     {
         rep_ = convert_from(copy_from);

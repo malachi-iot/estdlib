@@ -142,6 +142,10 @@ template <std::intmax_t Num1, std::intmax_t Num2,
 struct ratio_divide<ratio<Num1, Denom1>, std::ratio<Num2, Denom2> > :
     ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> > {};
 
+template <std::intmax_t Num1, std::intmax_t Num2,
+    std::intmax_t Denom1, std::intmax_t Denom2>
+struct ratio_divide<std::ratio<Num1, Denom1>, std::ratio<Num2, Denom2> > :
+    ratio_divide<ratio<Num1, Denom1>, ratio<Num2, Denom2> > {};
 #endif
 
 }

@@ -369,7 +369,7 @@ TEST_CASE("units")
 
         percent<double> percent3{50.1};
 
-        percent1 = percent3;
+        percent1 = unit_cast<decltype(percent1)>(percent3);
 
         REQUIRE(percent1.count() == 501);
 
@@ -488,7 +488,7 @@ TEST_CASE("units")
 
                 REQUIRE(percent3.count() == 50);
 
-                adc1 = percent1;
+                adc1 = unit_cast<decltype(adc1)>(percent1);
 
                 REQUIRE(adc1.count() == 519);
             }
