@@ -141,6 +141,7 @@ TEST_CASE("rtto", "Runtime Type Operations")
         SECTION("move constructor")
         {
             int counter = 0;
+            int rc = -1;
 
             using proxy = internal::rtto_base::proxy<>;
 
@@ -155,7 +156,10 @@ TEST_CASE("rtto", "Runtime Type Operations")
             REQUIRE(dummy1->moved_ == false);
             REQUIRE(dummy1->moved_from_ == false);
 
-            new (p2) proxy(std::move(*p1));
+            new (p2) proxy(std::move(*p1), &rc);
+
+            REQUIRE(rc == 0);
+
             auto dummy2 = (type*) p2->storage();
 
             REQUIRE(dummy1->moved_from_ == true);
@@ -170,6 +174,7 @@ TEST_CASE("rtto", "Runtime Type Operations")
         }
         SECTION("copy constructor")
         {
+            int rc = -1;
             int counter = 0;
             using proxy = internal::rtto_base::proxy<>;
 
@@ -180,7 +185,9 @@ TEST_CASE("rtto", "Runtime Type Operations")
             //auto dummy1 = new (p1->storage()) type(7, "hello", &counter);
             new (p1) proxy(estd::in_place_type_t<type>{}, 7, "Hello", &counter);
 
-            new (p2) proxy(*p1);
+            new (p2) proxy(*p1, &rc);
+
+            REQUIRE(rc == 0);
 
             auto dummy1 = static_cast<type*>(p1->storage());
             auto dummy2 = static_cast<type*>(p2->storage());

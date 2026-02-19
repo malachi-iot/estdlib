@@ -202,18 +202,28 @@ struct rtto_base : rtto_modes
         }
 
         // NOTE: Can default move constructor have an additional parameter like this? Hmm... probably?
-        proxy(proxy&& move_from, int sz = 0) :
+        explicit proxy(proxy&& move_from, int* rc, int sz = 0) :
             base_type(move_from.u_)
         {
             // Leaving u_ intact in move_from. A destroy on a moved object is 100% correct and only
             // possible if we leave that u_ there
-            move_from.move_to(storage_, sz);
+            *rc = move_from.move_to(storage_, sz);
         }
 
-        proxy(const proxy& copy_from, int sz = 0) :
+        explicit proxy(const proxy& copy_from, int* rc, int sz = 0) :
             base_type(copy_from.u_)
         {
-            copy_from.copy_to(storage_, sz);
+            *rc = copy_from.copy_to(storage_, sz);
+        }
+
+        explicit proxy(proxy&& move_from) : base_type(move_from.u_)
+        {
+            assert(move_from.move_to(storage_) == 0);
+        }
+
+        explicit proxy(const proxy& copy_from) : base_type(copy_from.u_)
+        {
+            assert(copy_from.move_to(storage_) == 0);
         }
 
         // EXPERIMENTAL
