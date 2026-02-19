@@ -6,6 +6,8 @@
 #include <estd/cstdint.h>
 #include <estd/utility.h>
 
+#include <estd/internal/rtto.h>
+
 #include "macro/push.h"
 
 #include "test/nontrivial.h"
@@ -85,6 +87,26 @@ struct Dummy
 };
 
 struct ChildOfDummy : Dummy {};
+
+struct VirtualRttoDummy : Dummy, estd::internal::rtto_base::virtual_base
+{
+    using this_type = VirtualRttoDummy;
+
+    template <class ...Args>
+    constexpr VirtualRttoDummy(Args&&...args) : Dummy(std::forward<Args>(args)...)    {}
+
+    int copy_to(void* dest, int sz) override
+    {
+        new (dest) this_type(*this);
+        return 0;
+    }
+
+    int move_to(void* dest, int sz) override
+    {
+        new (dest) this_type(std::move(*this));
+        return 0;
+    }
+};
 
 struct Functor : Dummy
 {

@@ -226,6 +226,20 @@ TEST_CASE("rtto", "Runtime Type Operations")
             //int r = p.create();
         }
     }
+    SECTION("virtual")
+    {
+        int counter = 0;
+
+        test::VirtualRttoDummy vrd1(7, "vrd1", &counter);
+        test::VirtualRttoDummy vrd2;
+
+        REQUIRE(vrd1.initialized_);
+
+        vrd1.move_to(&vrd2, 0);
+
+        REQUIRE(vrd1.moved_from_);
+        REQUIRE(vrd2.moved_);
+    }
 }
 
 #include "macro/pop.h"
