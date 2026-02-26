@@ -506,6 +506,16 @@ TEST_CASE("units")
 
                 REQUIRE(v1 == 8);
             }
+            SECTION("rebind")
+            {
+                using type1 = percent<double>;
+                using traits1 = typename type1::traits;
+                using traits2 = typename traits1::rebind<int>;
+                using type2 = estd::units::detail::unit<traits2>;
+
+                static_assert(std::is_same<traits2::rep, int>::value);
+                static_assert(std::is_same<type2::rep, int>::value);
+            }
         }
     }
 }

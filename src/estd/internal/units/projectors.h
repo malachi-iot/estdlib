@@ -14,7 +14,6 @@ struct passthrough : type_identity<T>
     // DEBT: Sloppy, but less sloppy than slapping negative signs everywhere
     using reversal = passthrough<T>;
 
-    // UNTESTED
     template <class T2>
     using rebind = passthrough<T2>;
 

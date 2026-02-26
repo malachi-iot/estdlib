@@ -11,6 +11,8 @@ concept Projector = requires(T projector)
 {
     typename T::value_type;
     { projector(Int{}) } -> std::same_as<typename T::value_type>;
+
+    // TODO: Add 'rebind'
 };
 
 // Deprecated, use 'Projector' instead

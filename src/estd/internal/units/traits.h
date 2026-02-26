@@ -26,8 +26,8 @@ struct traits
     constexpr static rep default_value() { return {}; }
 
     // DEBT: We ought to carry along default_value too
-    // DEBT: Projector itself may need a rebind for full functionality
-    template <class Rep2, class Period2 = Period, class F2 = projector>
+    // NOTE: 'unit' watches projector to determine rep
+    template <class Rep2, class Period2 = Period, class F2 = typename projector::template rebind<Rep2>>
     using rebind = rebindable_traits<Rep2, Period2, Tag, F2, options>;
 };
 
