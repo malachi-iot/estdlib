@@ -20,7 +20,7 @@ class basic_iostream : public basic_ostream<Streambuf, basic_istream<Streambuf> 
     using base_type = basic_ostream<Streambuf, basic_istream<Streambuf> >;
 
 public:
-    ESTD_CPP_FORWARDING_CTOR(basic_iostream);
+    ESTD_CPP_FORWARDING_CTOR(basic_iostream)
 };
 
 }

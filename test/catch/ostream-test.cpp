@@ -21,6 +21,28 @@ struct exp_manipulator : detail::ostream_functor_tag
     }
 };
 
+// EXPERIMENTAL
+template <class Derived>
+class sstream_crtp : public Derived
+{
+    template <class T>
+    struct helper
+    {
+        using streambuf_type = typename T::streambuf_type;
+        using string_type = typename streambuf_type::string_type;
+    };
+
+public:
+    const typename Derived::streambuf_type::string_type& str()
+    {
+        auto self = static_cast<Derived*>(this);
+
+        return self->rdbuf()->str();
+    }
+};
+
+using l1_test = sstream_crtp<layer1::ostringstream<64>>;
+
 TEST_CASE("ostream")
 {
     layer1::ostringstream<64> out;
@@ -250,7 +272,14 @@ TEST_CASE("ostream")
 
         REQUIRE(out.tellp() == 4);
     }
+    SECTION("crtp (EXPERIMENTAL)")
+    {
+        l1_test l1;
 
+        l1 << "Hello";
+
+        REQUIRE(l1.str() == "Hello");
+    }
 }
 
 #include "macro/pop.h"
