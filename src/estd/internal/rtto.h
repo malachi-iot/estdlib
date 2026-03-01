@@ -176,11 +176,20 @@ struct rtto_base : rtto_modes
 
     class virtual_base
     {
+    protected:
+        using metadata = rtto_base::metadata;
+
+        template <class T>
+        const metadata* get() const { return rtto<T>::get_metadata(); }
+
     public:
         virtual ~virtual_base() = default;
 
         virtual int copy_to(void*, int = 0) = 0;
         virtual int move_to(void*, int = 0) = 0;
+#if FEATURE_ESTD_RTTO_GET_METADATA
+        virtual int get_metadata(const metadata** out) const = 0;
+#endif
 
         void destroy() { this->~virtual_base(); }
     };
@@ -278,6 +287,16 @@ struct rtto :
         return move(from, to, is_move_constructible{});
     }
 
+    // Always succeeds, so deviates from runtime signature with no RC
+    static const metadata* get_metadata()
+    {
+        static constexpr const metadata mdata
+        {
+            value_sz, is_copy_constructible::value, is_move_constructible::value
+        };
+        return &mdata;
+    }
+
     static int utility(modes mode, void* p0, int p1, void* p2)
     {
         auto this_ = static_cast<pointer>(p0);
@@ -312,16 +331,11 @@ struct rtto :
 #endif
 
 #if FEATURE_ESTD_RTTO_GET_METADATA
-            // EXPERIMENTAL
             case GET_METADATA:
             {
-                // DEBT: Incorrect convention because Qt Creator loses it's f***in mind here
-                static constexpr const metadata mdata{
-                    value_sz, is_copy_constructible::value, is_move_constructible::value
-                };
                 auto dest = static_cast<const metadata**>(p2);
-                *dest = &mdata;
-                break;
+                *dest = get_metadata();
+                return 0;
             }
 #endif
 

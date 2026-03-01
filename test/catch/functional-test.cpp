@@ -421,6 +421,14 @@ TEST_CASE("functional")
                     {
                         return ENOSYS;
                     }
+
+#if FEATURE_ESTD_RTTO_GET_METADATA
+                    int get_metadata(const metadata** out) const override
+                    {
+                        *out = get<model>();
+                        return 0;
+                    }
+#endif
 #endif
                 };
 

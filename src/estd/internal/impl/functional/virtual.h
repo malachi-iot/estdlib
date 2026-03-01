@@ -63,6 +63,14 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         {
             return rtto::move(this, dest, sz);
         }
+
+#if FEATURE_ESTD_RTTO_GET_METADATA
+        int get_metadata(const metadata** out) const override
+        {
+            *out = model_base::template get<model>();
+            return 0;
+        }
+#endif
 #endif
     };
 
@@ -96,6 +104,15 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         {
             return ENOSYS;
         }
+
+#if FEATURE_ESTD_RTTO_GET_METADATA
+        int get_metadata(const metadata** out) const override
+        {
+            // 50% implemented
+            *out = model_base::template get<method_model>();
+            return ENOSYS;
+        }
+#endif
 #endif
     };
 };

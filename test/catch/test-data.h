@@ -95,6 +95,14 @@ struct VirtualRttoDummy : Dummy, estd::internal::rtto_base::virtual_base
     template <class ...Args>
     constexpr VirtualRttoDummy(Args&&...args) : Dummy(std::forward<Args>(args)...)    {}
 
+#if FEATURE_ESTD_RTTO_GET_METADATA
+    int get_metadata(const metadata** out) const override
+    {
+        *out = get<VirtualRttoDummy>();
+        return 0;
+    }
+#endif
+
     int copy_to(void* dest, int sz) override
     {
         new (dest) this_type(*this);
