@@ -27,6 +27,12 @@ struct value_init_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag
     constexpr static Rep default_value() { return 7; }
 };
 
+template <class Rep, class Period, class Tag>
+struct permissive_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag>
+{
+    static constexpr auto options = estd::units::detail::options::permissive;
+};
+
 
 template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep>>
 using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
@@ -171,10 +177,10 @@ TEST_CASE("units")
 
         struct special_traits : estd::units::detail::basic_traits<int, estd::internal::units::percent_tag>{};
 
-        estd::units::v1::detail::unit<special_traits> p5{1};
+        detail::unit<special_traits> p5{1};
         percent<int16_t> p6{1};
 
-        using options = estd::units::detail::options;
+        using options = detail::options;
 
         // DEBT: Unweildy way of adding 'permissive' to options
         using permissive_traits =
@@ -182,7 +188,7 @@ TEST_CASE("units")
             special_traits::tag, special_traits::projector,
             options(options::permissive | options::default_initialized)>;
 
-        estd::units::v1::detail::unit<permissive_traits> p7{10};
+        detail::unit<permissive_traits> p7{10};
 
         SECTION("addition")
         {
@@ -473,6 +479,11 @@ TEST_CASE("units")
                     using CT = decltype(ct_helper(hz1, p1));
                 }
 #endif
+                SECTION("permissive")
+                {
+                    detail::unit<permissive_unit_traits<int32_t, estd::ratio<1, 8>, frequency_tag>> u1(0);
+                    detail::unit<permissive_unit_traits<int16_t, estd::ratio<1>, frequency_tag>> u2(u1);
+                }
             }
             SECTION("int <--> float")
             {

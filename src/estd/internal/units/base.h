@@ -7,6 +7,7 @@
 #include "fwd.h"
 #include "traits.h"
 #include "projectors.h"
+#include "scalar.h"
 
 #include "../macro/push.h"
 
@@ -67,50 +68,6 @@ constexpr ToUnit unit_cast(const detail::unit<Traits>& u)
 
 namespace detail {
 
-template <class Traits, class = void>
-class scalar_base;
-
-template <class Traits>
-class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::default_prohibited>>
-{
-public:
-    using rep = typename Traits::rep;
-
-protected:
-    rep rep_;
-
-    scalar_base() = delete;
-    constexpr scalar_base(rep v) : rep_{v}   {}
-};
-
-
-template <class Traits>
-class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::value_initialized>>
-{
-public:
-    using rep = typename Traits::rep;
-
-protected:
-    rep rep_;
-
-    constexpr scalar_base() : rep_{Traits::default_value()} {}
-    constexpr scalar_base(rep v) : rep_{v}   {}
-};
-
-
-template <class Traits>
-class scalar_base<Traits, enable_if_t<(Traits::options & options::default_mask) == options::default_initialized>>
-{
-public:
-    using rep = typename Traits::rep;
-
-protected:
-    rep rep_;
-
-    constexpr scalar_base() = default;
-    constexpr scalar_base(rep v) : rep_{v}   {}
-};
-
 
 // DEBT: Consolidate this with chrono if we can.  Specifically, I don't want disperate
 // scalar bases intermingling with one another, so we need some kind of type lockout/forced
@@ -152,6 +109,13 @@ protected:
 #if UNIT_TESTING
 public:
 #endif
+    static constexpr bool permissive = traits::options & detail::permissive;
+
+    // Splitting out in case we feel like upgrading options to support it.  Not doing so
+    // at the moment since rep already appears to be extremely permissive
+    static constexpr bool permissive_rep = permissive;
+    static constexpr bool permissive_period = permissive;
+
     // Feeder for unit -> unit converting constructor
     // Matches condition 4 here https://en.cppreference.com/w/cpp/chrono/duration/duration.html
     template <class Traits2>
@@ -162,7 +126,7 @@ public:
         return
             tag_matches<Traits2>() &&
             is_convertible<rep, rep2>::value &&
-            (treat_as_floating_point<rep, tag>::value ||
+            (treat_as_floating_point<rep, tag>::value || permissive_period ||
                 (ratio_divide<typename Traits2::period, period>::den == 1 &&
                     !treat_as_floating_point<rep2, tag>::value));
     }
@@ -203,8 +167,6 @@ public:
 #endif
     }
 
-    static constexpr bool permissive = traits::options & detail::permissive;
-
     // May need to enforce 'tag' matches, though callers do that for us
     template <class Traits2>
     static constexpr rep convert_from(const unit<Traits2>& v)
@@ -234,7 +196,7 @@ public:
     constexpr unit() = default;
 
     template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>
-    explicit constexpr unit(const Rep& r) : unit(r, bool_constant<permissive>{})
+    explicit constexpr unit(const Rep& r) : unit(r, bool_constant<permissive_rep>{})
     {}
 
     template <class Rep, enable_if_t<is_convertible<const Rep&, rep>::value, int> = 0>

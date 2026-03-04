@@ -8,7 +8,7 @@ enum options
 {
     none,
 
-    default_prohibited  = 0x01,
+    default_prohibited  = 0x01,         ///< Default
     value_initialized   = 0x02,
     default_initialized = 0x03,
 
