@@ -321,9 +321,9 @@ TEST_CASE("units")
 
             REQUIRE(v == 55);
 
-            // DEBT: It's OK to precision loss, as demonstrated by chrono below.  However,
-            // according to AI we're supposed to kick back if periods have a specific kind of
-            // mismatch (I don't fully grok that part yet but it's intuitive)
+            // It's OK to precision loss, as demonstrated by chrono below.
+            // We're supposed to kick back if periods mismatch in such a way where
+            // the ratio division yields a precision loss (Rep is largely ignored)
             percent<int32_t> v2(v);
             percent<int16_t> v3(v2);
 

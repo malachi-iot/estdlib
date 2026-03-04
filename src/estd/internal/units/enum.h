@@ -14,7 +14,11 @@ enum options
 
     default_mask        = 0x03,
 
+    // 04MAR26 - Not to be confused with only permissive construction, this is also the other direction converting unit -> intrinsic
     implicit_rep        = 0x04,         // Permit implicit conversion to and from 'rep' type (NOT USED YET)
+
+    // As per https://github.com/malachi-iot/estdlib/issues/183 we very probably want to transition this flag
+    // to focus itself on period rather than rep
     permissive          = 0x08,         // Permit conditions which risk precision loss (ALPHA quality, may phase out)
 };
 
