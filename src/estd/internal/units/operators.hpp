@@ -72,7 +72,7 @@ using compatible_rep = bool_constant<is_same<typename Traits::period, ratio<1>>:
 
 template <class Traits, typename Rep,
     enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
-constexpr unit<Traits> operator+(unit<Traits>& lhs, const Rep& rhs)
+constexpr unit<Traits> operator+(unit<Traits> lhs, const Rep& rhs)
 {
     return lhs += unit<Traits>(rhs);
 }
@@ -80,7 +80,7 @@ constexpr unit<Traits> operator+(unit<Traits>& lhs, const Rep& rhs)
 
 template <class Traits, typename Rep,
     enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
-constexpr unit<Traits> operator-(unit<Traits>& lhs, const Rep& rhs)
+constexpr unit<Traits> operator-(unit<Traits> lhs, const Rep& rhs)
 {
     return lhs -= unit<Traits>(rhs);
 }
