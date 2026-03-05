@@ -459,7 +459,11 @@ public:
     template <size_t I, class T_i, class T,
         enable_if_t<
             is_convertible<T, T_i>::value &&
+#if FEATURE_STD_TYPE_TRAITS
+            !std::is_trivially_constructible<T_i>::value, bool> = true>
+#elif FEATURE_ESTD_IS_TRIVIAL
             !estd::is_trivial<T_i>::value, bool> = true>
+#endif
     void direct_init_helper(T&& t, bool = true)
     {
         assignment_emplace_helper<I, T_i>(std::forward<T>(t));

@@ -412,7 +412,7 @@ TEST_CASE("functional")
                     int counter = 0;
 
 #if FEATURE_ESTD_GH135
-                    int copy_to(void* dest, int) override
+                    int copy_to(void* dest, int) const override
                     {
                         return ENOSYS;
                     }

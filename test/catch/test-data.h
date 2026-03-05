@@ -103,7 +103,7 @@ struct VirtualRttoDummy : Dummy, estd::internal::rtto_base::virtual_base
     }
 #endif
 
-    int copy_to(void* dest, int sz) override
+    int copy_to(void* dest, int sz) const override
     {
         new (dest) this_type(*this);
         return 0;

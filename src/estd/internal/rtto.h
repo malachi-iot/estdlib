@@ -185,7 +185,7 @@ struct rtto_base : rtto_modes
     public:
         virtual ~virtual_base() = default;
 
-        virtual int copy_to(void*, int = 0) = 0;
+        virtual int copy_to(void*, int = 0) const = 0;
         virtual int move_to(void*, int = 0) = 0;
 #if FEATURE_ESTD_RTTO_GET_METADATA
         virtual int get_metadata(const metadata** out) const = 0;

@@ -6,6 +6,7 @@
 #include "../internal/container/traditional_accessor.h"
 #include "../internal/container/iterator.h"
 #include "../internal/array.h"
+#include "../internal/feature/std.h"
 #include <string.h> // for strlen
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"
@@ -363,7 +364,10 @@ namespace layer1 {
 template <class T, size_t len,
     class Array = conditional_t<
         is_integral<T>::value
-#if FEATURE_ESTD_IS_TRIVIAL
+#if FEATURE_STD_TYPE_TRAITS
+            || std::is_trivially_constructible<T>::value,
+#elif FEATURE_ESTD_IS_TRIVIAL
+// DEBT: Only for AVR at this point, needs some love - see https://github.com/malachi-iot/estdlib/issues/171
             || is_trivial<T>::value,
 #endif
         T[len],

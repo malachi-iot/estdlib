@@ -41,9 +41,9 @@ template <class R>
 struct variant_visit
 {
     template <class Visitor, class Variant, size_t ...Is>
-    static constexpr R visit(Visitor&& visitor, Variant&& vv, index_sequence<Is...>)
+    static ESTD_CPP_CONSTEXPR(17) R visit(Visitor&& visitor, Variant&& vv, index_sequence<Is...>)
     {
-        [[maybe_unused]] bool found;
+        bool found{};
         return index_visitor<R>::visit([&](auto vi)
             {
                 return visitor(*get_ll<vi.index>(std::forward<Variant>(vv)));

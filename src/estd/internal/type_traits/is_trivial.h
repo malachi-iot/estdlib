@@ -16,7 +16,10 @@ using underlying_type = std::underlying_type<T>;
 template <typename T>
 using is_trivial
 #if __cplusplus >= 201402L
-[[deprecated]]
+// 05MAR26 Keep deprecated commented as we slowly phase out our own usage of is_trivial
+// as per https://github.com/malachi-iot/estdlib/issues/171 (turning it on creates
+// hundreds of warnings right now)
+//[[deprecated]]
 #endif
 = std::is_trivial<T>;
 
