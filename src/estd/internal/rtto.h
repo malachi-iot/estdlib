@@ -15,10 +15,15 @@ namespace estd { namespace internal {
 
 struct rtto_base : rtto_modes
 {
-    // EXPERIMENTAL
     struct metadata
     {
         const int value_sz;
+
+        // 0 = unmeasured (assumed as close to trivial as possible)
+        // 1 = relatively trivial
+        // 2 = moderate copy complexity
+        // 3 = high copy complexity
+        unsigned complexity : 2;        // Used to assess how complicated a copy operation is.  move is assumed less complicated
         bool copyable : 1;
         bool moveable : 1;
         bool creatable : 1;
@@ -189,6 +194,9 @@ struct rtto_base : rtto_modes
         virtual int move_to(void*, int = 0) = 0;
 #if FEATURE_ESTD_RTTO_GET_METADATA
         virtual int get_metadata(const metadata** out) const = 0;
+
+        // TODO: Use this signature instead
+        //virtual const metadata* get_metadata() = 0;
 #endif
 
         void destroy() { this->~virtual_base(); }
@@ -292,7 +300,7 @@ struct rtto :
     {
         static constexpr const metadata mdata
         {
-            value_sz, is_copy_constructible::value, is_move_constructible::value
+            traits::complexity, value_sz, is_copy_constructible::value, is_move_constructible::value
         };
         return &mdata;
     }

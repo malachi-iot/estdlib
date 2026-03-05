@@ -21,6 +21,9 @@ struct rtto_traits
 #else
     using is_swappable = std::false_type;
 #endif
+
+    // See metadata for commentary
+    static constexpr unsigned complexity = 0;
 };
 
 }}
