@@ -423,10 +423,9 @@ TEST_CASE("functional")
                     }
 
 #if FEATURE_ESTD_RTTO_GET_METADATA
-                    int get_metadata(const metadata** out) const override
+                    const metadata* get_metadata() const override
                     {
-                        *out = get<model>();
-                        return 0;
+                        return get<model>();
                     }
 #endif
 #endif

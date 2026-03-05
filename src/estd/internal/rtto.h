@@ -193,10 +193,7 @@ struct rtto_base : rtto_modes
         virtual int copy_to(void*, int = 0) const = 0;
         virtual int move_to(void*, int = 0) = 0;
 #if FEATURE_ESTD_RTTO_GET_METADATA
-        virtual int get_metadata(const metadata** out) const = 0;
-
-        // TODO: Use this signature instead
-        //virtual const metadata* get_metadata() = 0;
+        virtual const metadata* get_metadata() const = 0;
 #endif
 
         void destroy() { this->~virtual_base(); }
@@ -300,7 +297,7 @@ struct rtto :
     {
         static constexpr const metadata mdata
         {
-            traits::complexity, value_sz, is_copy_constructible::value, is_move_constructible::value
+            value_sz, traits::complexity, is_copy_constructible::value, is_move_constructible::value
         };
         return &mdata;
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-// EXPERIMENTAL still and occupies ROM space even when not used
+// Occupies ROM space even when not used
 #ifndef FEATURE_ESTD_RTTO_GET_METADATA
 #define FEATURE_ESTD_RTTO_GET_METADATA 0
 #endif

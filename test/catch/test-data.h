@@ -96,10 +96,9 @@ struct VirtualRttoDummy : Dummy, estd::internal::rtto_base::virtual_base
     constexpr VirtualRttoDummy(Args&&...args) : Dummy(std::forward<Args>(args)...)    {}
 
 #if FEATURE_ESTD_RTTO_GET_METADATA
-    int get_metadata(const metadata** out) const override
+    const metadata* get_metadata() const override
     {
-        *out = get<VirtualRttoDummy>();
-        return 0;
+        return get<VirtualRttoDummy>();
     }
 #endif
 

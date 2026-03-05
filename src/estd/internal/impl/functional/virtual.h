@@ -65,10 +65,9 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         }
 
 #if FEATURE_ESTD_RTTO_GET_METADATA
-        int get_metadata(const metadata** out) const override
+        const metadata* get_metadata() const override
         {
-            *out = model_base::template get<model>();
-            return 0;
+            return model_base::template get<model>();
         }
 #endif
 #endif
@@ -106,11 +105,10 @@ struct function_virtual<Result(Args...), o> : internal::rtto_base
         }
 
 #if FEATURE_ESTD_RTTO_GET_METADATA
-        int get_metadata(const metadata** out) const override
+        const metadata* get_metadata() const override
         {
             // 50% implemented
-            *out = model_base::template get<method_model>();
-            return ENOSYS;
+            return model_base::template get<method_model>();
         }
 #endif
 #endif
