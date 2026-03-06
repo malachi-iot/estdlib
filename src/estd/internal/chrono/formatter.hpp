@@ -6,6 +6,7 @@
 #pragma once
 
 #include "../fwd/chrono.h"
+#include "../chrono/duration.h"
 
 #include "units.hpp"
 
@@ -37,16 +38,16 @@ public:
     //constexpr
     chrono::month month() const NOEXCEPT
     {
-        chrono::years y = days_.time_since_epoch();
-        chrono::days d{y};
-        chrono::months m = days_.time_since_epoch() - d;
+        chrono::years y{days_.time_since_epoch(), units::relaxed_narrow_t{}};
+        chrono::days d{y, units::relaxed_narrow_t{}};
+        chrono::months m(days_.time_since_epoch() - d, units::relaxed_narrow_t{});
         return clock_traits::adjust_epoch(chrono::month(m.count() + 1));
     }
 
     //constexpr
     chrono::year year() const NOEXCEPT
     {
-        chrono::years y = days_.time_since_epoch();
+        chrono::years y(days_.time_since_epoch(), units::relaxed_narrow_t{});
         return clock_traits::adjust_epoch(chrono::year(y.count()));
     }
 
@@ -158,7 +159,7 @@ class hh_mm_ss
     }
 
 public:
-    EXPLICIT ESTD_CPP_CONSTEXPR_RET hh_mm_ss(Duration duration) : value(duration) {}
+    explicit constexpr hh_mm_ss(Duration duration) : value(duration) {}
 
     // NOTE: Purposely leaving this raw instead of computing a common type against seconds
     // because we want to leave 'rep' in a lower-precision state for embedded systems unless
@@ -172,25 +173,25 @@ public:
 
     constexpr hours_type hours() const NOEXCEPT
     {
-        return hours_type{_abs()};
+        return hours_type{_abs(), units::relaxed_narrow_t{}};
     }
 
     constexpr minutes_type minutes() const NOEXCEPT
     {
-        return minutes_type{_abs() - hours()};
+        return minutes_type{_abs() - hours(), units::relaxed_narrow_t{}};
     }
 
     inline seconds_type seconds() const NOEXCEPT
     {
         duration_type a = _abs();
-        auto v = a - minutes_type{a};
-        return seconds_type{v};
+        auto v = a - minutes_type{a, units::relaxed_narrow_t{}};
+        return seconds_type{v, units::relaxed_narrow_t{}};
     }
 
     inline precision subseconds() const NOEXCEPT
     {
         duration_type a = _abs();
-        return precision{a - seconds_type{a}};
+        return precision{a - seconds_type{a, units::relaxed_narrow_t{}}};
     }
 
     constexpr explicit operator precision() const NOEXCEPT { return value; }

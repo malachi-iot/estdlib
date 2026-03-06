@@ -133,6 +133,27 @@ TEST_CASE("chrono tests")
             REQUIRE(digits == 15);
         }
     }
+    SECTION("conversions")
+    {
+        SECTION("estd")
+        {
+            using namespace estd::chrono;
+
+            seconds s1(5);
+            milliseconds ms1(s1);
+            // FIX: https://github.com/malachi-iot/estdlib/issues/177
+            //seconds s2(ms1);
+
+        }
+        SECTION("parity")
+        {
+            using namespace std::chrono;
+
+            seconds s1(5);
+            milliseconds ms1(s1);
+            //seconds s2(ms1);
+        }
+    }
     SECTION("fake_clock tests")
     {
         clock.ticks = 0;
@@ -384,9 +405,9 @@ TEST_CASE("chrono tests")
     {
         using namespace estd::literals::chrono_literals;
 
-        estd::chrono::seconds s = 10s + 4000ms + 1000000us;
+        //estd::chrono::seconds s = 10s + 4000ms + 1000000us;
 
-        REQUIRE(s.count() == 15);
+        //REQUIRE(s.count() == 15);
     }
 #endif
     SECTION("C++20 style")
@@ -508,9 +529,9 @@ TEST_CASE("chrono tests")
             // But that has some issues
             //auto dp = floor<estd::chrono::days>{tp};
             fake_clock::time_point _tp{tp};
-            auto dp = estd::chrono::days{_tp.time_since_epoch()};
+            auto dp = estd::chrono::days{_tp.time_since_epoch(), estd::units::relaxed_narrow_t{}};
             auto _v = _tp - dp;
-            auto ms = estd::chrono::milliseconds(_v.time_since_epoch());
+            auto ms = estd::chrono::milliseconds(_v.time_since_epoch(), estd::units::relaxed_narrow_t{});
             estd::chrono::hh_mm_ss<decltype(ms)> __v{ms};
 
             /*

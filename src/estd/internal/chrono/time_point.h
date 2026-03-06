@@ -45,7 +45,8 @@ public:
     // NOTE: Compiles, but not tested
     template <class Duration2>
     constexpr time_point(const time_point<Clock, Duration2>& t) :
-        m_time_since_epoch(t.time_since_epoch())
+        // DEBT: https://github.com/malachi-iot/estdlib/issues/177
+        m_time_since_epoch(t.time_since_epoch(), units::relaxed_narrow_t{})
     {}
 
 #ifdef FEATURE_STD_CHRONO

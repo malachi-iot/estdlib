@@ -70,7 +70,7 @@ public:
     template <class Rep2, class Period2>
     //[[deprecated("Temporary deprecation to find people needing this guy")]]
     constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
-        base_type(d, units::relaxed_narrow_t{})
+        base_type(d)
     {}
 
     template <class Rep2, class Period2>
@@ -84,11 +84,11 @@ public:
         base_type(convert_from(d))
     {}
 
-    typedef std::ratio<Period::num, Period::den> std_period_type;
+    using std_period_type = std::ratio<Period::num, Period::den>;
 
     constexpr operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
     {
-        return std::chrono::duration<Rep, std_period_type>(base_type::count());
+        return std::chrono::duration<Rep, std_period_type>(rep_);
     }
 #endif
 
