@@ -3,6 +3,7 @@
 #include "../fwd/chrono.h"
 #include "duration.hpp"
 #include "ratio.h"
+#include "../units/operators.hpp"
 #include "../macro/push.h"
 
 namespace estd { namespace chrono {
@@ -130,10 +131,9 @@ constexpr bool operator!=(const duration<Rep1, Period1>& lhs,
 // ---
 
 
-template< class C, class D1, class D2 >
-constexpr typename estd::common_type<D1,D2>::type
-operator-( const time_point<C,D1>& pt_lhs,
-    const time_point<C,D2>& pt_rhs )
+template <class C, class D1, class D2>
+constexpr estd::common_type_t<D1, D2>
+operator-( const time_point<C, D1>& pt_lhs, const time_point<C, D2>& pt_rhs )
 {
     return pt_lhs.time_since_epoch() - pt_rhs.time_since_epoch();
 }

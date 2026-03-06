@@ -37,6 +37,15 @@ struct duration_unit_traits : estd::units::v1::detail::traits<Rep, Period, secon
 
 }
 
+namespace detail {
+
+// TODO: Give mixins a try here to reduce footprint of duration.  Note that will bulk
+// up c++ error surface when things go wrong
+template <class Traits>
+class duration;
+
+}
+
 template<class Rep, class Period>
 class duration :
     public units::v1::detail::unit<internal::duration_unit_traits<Rep, Period>>
@@ -66,9 +75,7 @@ public:
         base_type(r)
     {}
 
-    // FIX: Too permissive.  See https://github.com/malachi-iot/estdlib/issues/177
     template <class Rep2, class Period2>
-    //[[deprecated("Temporary deprecation to find people needing this guy")]]
     constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
         base_type(d)
     {}

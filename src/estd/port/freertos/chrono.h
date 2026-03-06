@@ -32,6 +32,9 @@ typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 template <class Rep>
 struct freertos_duration_traits : duration_unit_traits<Rep, freertos_system_period>
 {
+    // DEBT: A little more permissive than maybe it should be.  Done in response to 
+    // https://github.com/malachi-iot/estdlib/issues/177 since feeding 'milliseconds' into
+    // freertos durations is just too convenient.
     static constexpr auto options =
         units::v1::detail::options::default_initialized |
         units::v1::detail::options::permissive;
@@ -44,8 +47,10 @@ struct freertos_clock
     //typedef estd::chrono::internal::milli_rep rep;
     using rep = TickType_t;
     using period = internal::freertos_system_period;
+    // FIX: Our unit base isn't quite fully a substitute for duration.  Either make it
+    // so or make a detail::duration which takes Traits
     using duration = units::detail::unit<internal::freertos_duration_traits<rep>>; 
-    typedef internal::estd_chrono::time_point<freertos_clock> time_point;
+    using time_point = internal::estd_chrono::time_point<freertos_clock>;
 
     static constexpr bool is_steady = true;
 
