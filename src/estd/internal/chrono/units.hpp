@@ -16,14 +16,6 @@ namespace estd { namespace chrono {
 
 namespace internal {
 
-// DEBT: Only using these aliases to bring things up.
-// Stand-ins for sys_time, sys_seconds, sys_days
-template<class Duration, class TClock>
-using clock_time = estd::chrono::time_point<TClock, Duration>;
-
-template <class TClock>
-using clock_days = clock_time<estd::chrono::days, TClock>;
-
 // Generic int wrapper.  There must be something like this elsewhere already...
 // NOTE: We are forward casting all over the place here, which means inheriting class
 // SHOULD NOT do multiple inheritance.  Furthermore, this is quite easily broken so

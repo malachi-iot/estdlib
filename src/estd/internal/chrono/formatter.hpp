@@ -7,6 +7,7 @@
 
 #include "../fwd/chrono.h"
 #include "../chrono/duration.h"
+#include "../chrono/math.h"
 
 #include "units.hpp"
 
@@ -15,19 +16,27 @@
 namespace estd { namespace chrono {
 
 namespace internal {
+    
+// NOTE: Stand-ins for sys_time, sys_days
+template<class Duration, class Clock>
+using clock_time = chrono::time_point<Clock, Duration>;
+
+template <class Clock>
+using clock_days = clock_time<chrono::days, Clock>;
 
 // As per
 // https://en.cppreference.com/w/cpp/chrono/year_month_day example
 // system_clock epoch is calculated into days(), months(), years()
-template <class TClock>
+template <class Clock>
 class year_month_day
 {
-    typedef clock_days<TClock> sys_days;
-    typedef estd::chrono::internal::clock_traits<TClock> clock_traits;
+    using sys_days = clock_days<Clock>;
+    using clock_traits = chrono::internal::clock_traits<Clock>;
 
     sys_days days_;
 
 public:
+    // FIX: Not working yet due to difficulty of calculation
     chrono::day days() const NOEXCEPT
     {
         chrono::months m = days_.time_since_epoch();
@@ -73,7 +82,7 @@ public:
 };
 
 
-template <class TClock>
+template <class Clock>
 class year_month_day_last
 {
     const chrono::year year_;
@@ -81,7 +90,7 @@ class year_month_day_last
 
 public:
     constexpr year_month_day_last(const chrono::year& y,
-        const month_day_last<TClock>& mdl) NOEXCEPT :
+        const month_day_last<Clock>& mdl) NOEXCEPT :
         year_{y},
         month_{mdl.month()}
     {}
@@ -137,7 +146,6 @@ public:
 
 // DEBT: Optimize with modulo instead of brute force subtracting (which will cascade out into
 // multiplies and divides)
-// DEBT:
 template <class Duration>
 class hh_mm_ss
 {

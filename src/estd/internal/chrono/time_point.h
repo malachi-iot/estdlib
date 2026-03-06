@@ -18,7 +18,7 @@ template<
     class Duration
     > class time_point
 {
-    Duration m_time_since_epoch;
+    Duration time_since_epoch_;
 
 public:
     typedef Clock clock;
@@ -38,15 +38,15 @@ public:
 // mean 0 i.e. the starting point from which the clock begins - unix epoch is around 1970,
 // and the seconds count up from there so 0 = 1970.  The inspecific nature of things
 // implies there's a way to reach into Clock itself and grab this epoch
-    constexpr time_point() : m_time_since_epoch(0) {}
+    constexpr time_point() : time_since_epoch_(0) {}
 
-    constexpr explicit time_point(const Duration& duration) : m_time_since_epoch(duration) {}
+    constexpr explicit time_point(const Duration& duration) : time_since_epoch_(duration) {}
 
     // NOTE: Compiles, but not tested
     template <class Duration2>
     constexpr time_point(const time_point<Clock, Duration2>& t) :
         // DEBT: https://github.com/malachi-iot/estdlib/issues/177
-        m_time_since_epoch(t.time_since_epoch(), units::relaxed_narrow_t{})
+        time_since_epoch_(t.time_since_epoch(), units::relaxed_narrow_t{})
     {}
 
 #ifdef FEATURE_STD_CHRONO
@@ -72,22 +72,22 @@ public:
                          >::value
                  , bool>::type = true>
     inline time_point(const std::chrono::time_point<TClock2, TDuration2>& t) :
-        m_time_since_epoch(t.time_since_epoch())
+        time_since_epoch_(t.time_since_epoch())
     {}
 #endif
 
-    constexpr Duration time_since_epoch() const { return m_time_since_epoch; }
+    constexpr Duration time_since_epoch() const { return time_since_epoch_; }
 
     //constexpr
     time_point& operator+=( const duration& d )
     {
-        m_time_since_epoch += d;
+        time_since_epoch_ += d;
         return *this;
     }
 
     time_point& operator-=( const duration& d )
     {
-        m_time_since_epoch -= d;
+        time_since_epoch_ -= d;
         return *this;
     }
 
