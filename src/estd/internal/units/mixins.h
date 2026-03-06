@@ -22,14 +22,12 @@ using unit = unit_base<
 // EXPERIMENTAL, not in use
 // unit_base is intended consumer, though it would have to change its signature to unit_base<traits>
 template <template <class Traits> class Derived, class Traits>
-class adder
+class converting_adder
 {
     using value_type = Derived<Traits>;
     using pointer = value_type*;
     using reference = value_type&;
 
-protected:
-    constexpr adder() = default;
 public:
 
     value_type& operator +=(const value_type& v)
@@ -40,6 +38,7 @@ public:
         return *self;
     }
 
+    // FIX: Hmm this seems wrong, do we really want to return value_type and especially value_type&
     template <class Traits2>
     value_type& operator +=(const Derived<Traits2>& v)
     {
@@ -56,6 +55,43 @@ public:
         using CT = decltype(ct_helper(lhs, rhs));
 
         return CT(lhs) + CT(rhs);
+    }
+};
+
+// EXPERIMENTAL
+template <class Derived, class Base>
+class wrapped_adder
+{
+    ESTD_CPP_STD_VALUE_TYPE(typename Base::rep)
+
+public:
+    Derived& operator +=(const Derived& v)
+    {
+        return static_cast<Derived&>(Base::operator +=(v));
+    }
+
+    constexpr friend Derived operator+(const Derived& lhs, const Derived& rhs)
+    {
+        return Derived(lhs + rhs);
+    }
+};
+
+
+// EXPERIMENTAL
+template <class Derived, class Base>
+class wrapped_subtractor
+{
+    ESTD_CPP_STD_VALUE_TYPE(typename Base::rep)
+
+public:
+    Derived& operator -=(const Derived& v)
+    {
+        return static_cast<Derived&>(Base::operator -=(v));
+    }
+
+    constexpr friend Derived operator-(const Derived& lhs, const Derived& rhs)
+    {
+        return Derived(lhs - rhs);
     }
 };
 

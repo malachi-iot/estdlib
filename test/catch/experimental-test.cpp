@@ -11,6 +11,9 @@
 #include <estd/charconv.h>
 #include <estd/cctype.h>
 //#include <estd/locale.h>
+
+#include <estd/internal/chrono/units.hpp>
+
 #include "estd/exp/unique_handle.h"
 
 using namespace estd::test;
@@ -228,6 +231,14 @@ TEST_CASE("experimental tests")
         //STATIC_ASSERT(false); // does indeed halt compilation, clunky though
     }
 #endif
+    SECTION("chrono::unit_base2")
+    {
+        using namespace estd;
+
+        chrono::internal::year2 y1(0), y2(1);
+
+        //y1 += y2;
+    }
 }
 
 #pragma GCC diagnostic pop

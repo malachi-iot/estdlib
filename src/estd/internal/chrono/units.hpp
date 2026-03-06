@@ -6,6 +6,8 @@
 #pragma once
 
 #include "../fwd/chrono.h"
+#include "duration.h"
+#include "../units/mixins.h"
 
 #include "../macro/push.h"
 
@@ -53,6 +55,45 @@ public:
     constexpr operator TInt() const { return value_; }
 
     constexpr const TInt& value() const { return value_; }
+};
+
+// EXPERIMENTAL
+struct sys_days_tag {};
+
+// EXPERIMENTAL
+template <class Rep>
+using unit_base2_traits = units::detail::traits<Rep, ratio<1>, sys_days_tag>;
+
+// EXPERIMENTAL
+// NOTE: This could potentially elevate to a detail::unit helper which auto-wraps 'Self'
+// would consider doing that at detail::unit itself, but that would add to the C++-error-spew-nightmare
+template <class Traits, class Self>
+class unit_base2_impl :
+    public units::detail::unit<Traits>,
+    public estd::internal::units::mixins::wrapped_adder<Self, units::detail::unit<Traits>>,
+    public estd::internal::units::mixins::wrapped_subtractor<Self, units::detail::unit<Traits>>
+{
+    using base_type = units::detail::unit<Traits>;
+
+public:
+    template <class ...Args>
+    constexpr explicit unit_base2_impl(Args&&...args) : base_type(std::forward<Args>(args)...)  {}
+
+    constexpr operator typename base_type::rep() { return base_type::rep_; }
+};
+
+// EXPERIMENTAL
+template <class Rep, class Self>
+using unit_base2 = unit_base2_impl<unit_base2_traits<Rep>, Self>;
+
+// EXPERIMENTAL
+class year2 : public unit_base2<int16_t, year2>
+{
+    using base_type = unit_base2<int16_t, year2>;
+
+public:
+    template <class ...Args>
+    constexpr explicit year2(Args&&...args) : base_type(std::forward<Args>(args)...)  {}
 };
 
 }
