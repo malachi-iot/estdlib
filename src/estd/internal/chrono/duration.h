@@ -3,6 +3,7 @@
 #include "features.h"
 #include "../../ratio.h"
 #include "../chrono.h"
+#include "../fwd/chrono.h"
 #include "../units/base.h"
 
 #include "../macro/push.h"
@@ -17,8 +18,10 @@ namespace estd { namespace chrono {
 
 namespace internal {
 
+// DEBT: Move this tag out to 'detail'
 struct seconds_tag {};
 
+// DEBT: Strongly consider reworking/infusing this into duration_traits
 template <class Rep>
 struct duration_values
 {
@@ -27,47 +30,47 @@ struct duration_values
     static constexpr Rep max() { return estd::numeric_limits<Rep>::max(); }
 };
 
+}
 
 template <class Rep, class Period>
-struct duration_unit_traits : estd::units::v1::detail::traits<Rep, Period, seconds_tag>
+struct duration_traits : estd::units::v1::detail::traits<Rep, Period, internal::seconds_tag>
 {
     static constexpr units::detail::options options =
         units::v1::detail::options::default_initialized;
+
+#if FEATURE_STD_CHRONO_CORE
+    using std_period = std::ratio<Period::num, Period::den>;
+    using std_duration = std::chrono::duration<Rep, std_period>;
+#endif
 };
 
-}
 
 namespace detail {
 
 // TODO: Give mixins a try here to reduce footprint of duration.  Note that will bulk
 // up c++ error surface when things go wrong
 template <class Traits>
-class duration;
-
-}
-
-template<class Rep, class Period>
-class duration :
-    public units::v1::detail::unit<internal::duration_unit_traits<Rep, Period>>
+class duration : public units::v1::detail::unit<Traits>
 {
-    using base_type = units::v1::detail::unit<internal::duration_unit_traits<Rep, Period>>;
+    using base_type = units::v1::detail::unit<Traits>;
     using base_type::rep_;
 
+public:
+    using typename base_type::rep;
+    using typename base_type::period;
+
 protected:
-    template <class Rep2, class Period2>
-    static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const duration<Rep2, Period2>& d);
+    template <class Traits2>
+    static ESTD_CPP_CONSTEXPR_RET rep convert_from(const duration<Traits2>& d);
 
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
-    static ESTD_CPP_CONSTEXPR_RET Rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
+    static ESTD_CPP_CONSTEXPR_RET rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
 
-    using duration_values = internal::duration_values<Rep>;
+    using duration_values = internal::duration_values<rep>;
 
 public:
-    using rep = Rep;
-    using period = typename Period::type;
-
     constexpr duration() = default;
 
     template <class Rep2>
@@ -75,13 +78,13 @@ public:
         base_type(r)
     {}
 
-    template <class Rep2, class Period2>
-    constexpr duration(const duration<Rep2, Period2>& d) :  // NOLINT
+    template <class Traits2>
+    constexpr duration(const duration<Traits2>& d) :  // NOLINT
         base_type(d)
     {}
 
-    template <class Rep2, class Period2>
-    constexpr duration(const duration<Rep2, Period2>& d, units::relaxed_narrow_t) :  // NOLINT
+    template <class Traits2>
+    constexpr duration(const duration<Traits2>& d, units::relaxed_narrow_t) :  // NOLINT
         base_type(d, units::relaxed_narrow_t{})
     {}
 
@@ -91,11 +94,11 @@ public:
         base_type(convert_from(d))
     {}
 
-    using std_period_type = std::ratio<Period::num, Period::den>;
+    using std_period_type = std::ratio<period::num, period::den>;
 
-    constexpr operator std::chrono::duration<Rep, std_period_type>() const // NOLINT
+    constexpr operator std::chrono::duration<rep, std_period_type>() const // NOLINT
     {
-        return std::chrono::duration<Rep, std_period_type>(rep_);
+        return std::chrono::duration<rep, std_period_type>(rep_);
     }
 #endif
 
@@ -137,6 +140,9 @@ public:
     static constexpr duration max() { return duration(duration_values::max()); }
     static constexpr duration zero() { return duration(duration_values::zero()); }
 };
+
+}
+
 #endif
 
 // These lower-precision ones are available even during non-FEATURE_ESTD_CHRONO

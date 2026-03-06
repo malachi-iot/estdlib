@@ -5,34 +5,37 @@
 #include "ratio.h"
 #include "../macro/push.h"
 
-namespace estd { namespace chrono {
+namespace estd { namespace chrono { namespace detail {
 
 // lifted from https://en.cppreference.com/w/cpp/chrono/duration/abs
-template <class Rep, class Period, class = estd::enable_if_t<
-    estd::numeric_limits<Rep>::is_signed &&
-        duration<Rep, Period>::min() < duration<Rep, Period>::zero()> >
-constexpr duration<Rep, Period> abs(duration<Rep, Period> d)
+template <class Traits, class = estd::enable_if_t<
+    estd::numeric_limits<typename Traits::rep>::is_signed &&
+        duration<Traits>::min() < duration<Traits>::zero()> >
+constexpr duration<Traits> abs(duration<Traits> d)
 {
     return d >= d.zero() ? d : -d;
 }
 
 
-template <class Rep, class Period, typename estd::enable_if_t<
-    estd::numeric_limits<Rep>::is_signed &&
-        duration<Rep, Period>::min() >= duration<Rep, Period>::zero()> >
-constexpr duration<Rep, Period> abs(duration<Rep, Period> d)
+template <class Traits, typename estd::enable_if_t<
+    estd::numeric_limits<typename Traits::rep>::is_signed &&
+        duration<Traits>::min() >= duration<Traits>::zero()> >
+constexpr duration<Traits> abs(duration<Traits> d)
 {
     return d;
 }
 
 
-template <class Rep, class Period, typename estd::enable_if_t<
-    !estd::numeric_limits<Rep>::is_signed, bool> = true>
-constexpr duration<Rep, Period> abs(duration<Rep, Period> d)
+template <class Traits, typename estd::enable_if_t<
+    !estd::numeric_limits<typename Traits::rep>::is_signed, bool> = true>
+constexpr duration<Traits> abs(duration<Traits> d)
 {
     return d;
 }
 
+}
+
+using detail::abs;
 
 }}
 

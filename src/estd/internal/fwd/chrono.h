@@ -11,11 +11,19 @@
 
 namespace estd { namespace chrono {
 
-template<
-    class Rep,
-    class Period = estd::ratio<1>
->
+template <class Rep, class Period>
+struct duration_traits;
+
+namespace detail {
+
+template <class Traits>
 class duration;
+
+}
+
+template<class Rep, class Period = estd::ratio<1>>
+using duration = detail::duration<duration_traits<Rep, Period>>;
+
 
 template<
     class Clock,

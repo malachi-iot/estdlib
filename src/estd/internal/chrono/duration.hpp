@@ -4,20 +4,18 @@
 
 namespace estd { namespace chrono {
 
-template<
-    class Rep,
-    class Period
-    >
-template<
-    class Rep2,
-    class Period2
-    >
-ESTD_CPP_CONSTEXPR_RET Rep duration<Rep, Period>::convert_from(const duration<Rep2, Period2>& d)
+namespace detail {
+
+// DEBT: Consolidate with units::convert_from, if we can
+template<class Traits>
+template<class Traits2>
+constexpr auto duration<Traits>::convert_from(const duration<Traits2>& d) -> rep
 {
+    using period2 = typename Traits2::period2;
 #ifdef __cpp_alias_templates
-    typedef ratio_divide<Period2, Period> rd;
+    typedef ratio_divide<period2, period> rd;
 #else
-    typedef detail::ratio_divide<Period2, Period> rd;
+    typedef detail::ratio_divide<period2, period> rd;
 #endif
 
 // So this isn't the answer but it's close
@@ -38,13 +36,13 @@ ESTD_CPP_CONSTEXPR_RET Rep duration<Rep, Period>::convert_from(const duration<Re
 }
 
 #ifdef FEATURE_STD_CHRONO
-template<class Rep, class Period>
+template<class Traits>
 template<class Rep2, class Period2>
-constexpr Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Rep2, Period2>& d)
+constexpr auto duration<Traits>::convert_from(const std::chrono::duration<Rep2, Period2>& d) -> rep
 {
     // DEBT: Duplication with estd::ratio flavor is a no no, but needed so far
 
-    typedef std::ratio_divide<Period2, Period> rd;
+    typedef std::ratio_divide<Period2, period> rd;
 
     // FIX: Overly simplistic and going to overflow in some conditions
     // put into this helper method so that (perhaps) we can specialize/overload
@@ -53,6 +51,8 @@ constexpr Rep duration<Rep, Period>::convert_from(const std::chrono::duration<Re
     return d.count() * rd::num / rd::den;
 }
 #endif
+
+}
 
 template <class ToDuration, class Rep, class Period>
 constexpr ToDuration duration_cast(const duration<Rep, Period>& d)

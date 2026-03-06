@@ -30,7 +30,7 @@ namespace internal {
 typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
 template <class Rep>
-struct freertos_duration_traits : duration_unit_traits<Rep, freertos_system_period>
+struct freertos_duration_traits : duration_traits<Rep, freertos_system_period>
 {
     // DEBT: A little more permissive than maybe it should be.  Done in response to 
     // https://github.com/malachi-iot/estdlib/issues/177 since feeding 'milliseconds' into

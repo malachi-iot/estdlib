@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../internal/chrono.h"
+#include "../../internal/fwd/chrono.h"
 
 #ifdef FEATURE_ESTD_CHRONO
 
@@ -18,50 +19,60 @@ inline ToDuration duration_cast(const std::chrono::duration<Rep, Period>& d)
 }
 
 // Even though 'duration' has a conversion operator back to std::chrono::duration, we still
-// need these overloads below
+// need these overloads below.  Caveats:
+// 1.  AI indicates this is undefined behavior specializing these operators
+// 2.  In std::chrono, no common_type occurs for +=/-=, but we do it
 
-template <class Rep1, class Period1, class Rep2, class Period2>
-typename std::common_type<std::chrono::duration<Rep1,Period1>, std::chrono::duration<Rep2,Period2>>::type
-constexpr operator+( const std::chrono::duration<Rep1,Period1>& lhs,
-    const duration<Rep2,Period2>& rhs )
+namespace detail {
+
+template <class Rep1, class Period1, class Traits>
+std::common_type_t<std::chrono::duration<Rep1,Period1>, typename Traits::std_duration>
+constexpr operator+(const std::chrono::duration<Rep1,Period1>& lhs,
+    const duration<Traits>& rhs )
 {
-    return lhs + std::chrono::duration<Rep2, Period2>(rhs.count());
+    return lhs + typename Traits::std_duration(rhs.count());
 }
 
-template <class C, class D1, class R2, class P2>
-constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
-operator+(const std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+template <class C, class D1, class Traits>
+constexpr std::chrono::time_point<
+    C,
+    std::common_type_t<D1, typename Traits::std_duration>>
+operator+(const std::chrono::time_point<C,D1>& pt, const duration<Traits>& d)
 {
-    typedef std::ratio<P2::num, P2::den> period_type;
-
-    return pt + std::chrono::duration<R2, period_type>(d.count());
+    return pt + typename Traits::std_duration(d.count());
 }
 
-template <class C, class D1, class R2, class P2>
-constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
-operator-(const std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+template <class C, class D1, class Traits>
+constexpr std::chrono::time_point<C, std::common_type_t<D1, typename Traits::std_duration>>
+operator-(const std::chrono::time_point<C,D1>& pt, const duration<Traits>& d)
 {
-    typedef std::ratio<P2::num, P2::den> period_type;
-
-    return pt - std::chrono::duration<R2, period_type>(d.count());
+    return pt - typename Traits::std_duration(d.count());
 }
 
-template <class C, class D1, class R2, class P2>
-constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
-operator+=(std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+template <class C, class D1, class Traits>
+constexpr std::chrono::time_point<
+    C,
+    std::common_type<D1, std::chrono::duration<typename Traits::rep, typename Traits::period>>>
+operator+=(std::chrono::time_point<C,D1>& pt, const duration<Traits>& d)
 {
-    typedef std::ratio<P2::num, P2::den> period_type;
+    using p2 = typename Traits::period;
+    typedef std::ratio<p2::num, p2::den> period_type;
 
-    return pt += std::chrono::duration<R2, period_type>(d.count());
+    return pt += std::chrono::duration<typename Traits::rep, period_type>(d.count());
 }
 
-template <class C, class D1, class R2, class P2>
-constexpr std::chrono::time_point<C, typename std::common_type<D1, std::chrono::duration<R2,P2> >::type>
-operator-=(std::chrono::time_point<C,D1>& pt, const duration<R2,P2>& d)
+template <class C, class D1, class Traits>
+constexpr std::chrono::time_point<
+    C,
+    std::common_type_t<D1, std::chrono::duration<typename Traits::rep, typename Traits::period>>>
+operator-=(std::chrono::time_point<C, D1>& pt, const duration<Traits>& d)
 {
-    typedef std::ratio<P2::num, P2::den> period_type;
+    using p2 = typename Traits::period;
+    typedef std::ratio<p2::num, p2::den> period_type;
 
-    return pt -= std::chrono::duration<R2, period_type>(d.count());
+    return pt -= std::chrono::duration<typename Traits::rep, period_type>(d.count());
+}
+
 }
 #endif
 
