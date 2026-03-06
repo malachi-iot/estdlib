@@ -139,6 +139,19 @@ operator-( const time_point<C,D1>& pt_lhs,
 }
 
 
+/*
+ * NOTE: Undecided if we want to do this here or inside time_point, but needed now that duration
+ * init is stricter
+template<class C, class D1, class Rep, class Period>
+// return time_point
+constexpr estd::common_type_t<D1, duration<Rep, Period>>
+operator-(const time_point<C, D1>& pt_lhs,
+    const duration<Rep, Period>& d_rhs )
+{
+    return pt_lhs.time_since_epoch() - d_rhs;
+}   */
+
+
 template< class Clock, class Dur1, class Dur2 >
 constexpr bool operator<( const time_point<Clock,Dur1>& lhs,
     const time_point<Clock,Dur2>& rhs )

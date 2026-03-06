@@ -29,17 +29,25 @@ namespace internal {
 
 typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
 
+template <class Rep>
+struct freertos_duration_traits : duration_unit_traits<Rep, freertos_system_period>
+{
+    static constexpr auto options =
+        units::v1::detail::options::default_initialized |
+        units::v1::detail::options::permissive;
+};
+
 }
 
 struct freertos_clock
 {
     //typedef estd::chrono::internal::milli_rep rep;
-    typedef TickType_t rep;
-    typedef internal::freertos_system_period period;
-    typedef internal::estd_chrono::duration<rep, period> duration;
+    using rep = TickType_t;
+    using period = internal::freertos_system_period;
+    using duration = units::detail::unit<internal::freertos_duration_traits<rep>>; 
     typedef internal::estd_chrono::time_point<freertos_clock> time_point;
 
-    static CONSTEXPR bool is_steady = true;
+    static constexpr bool is_steady = true;
 
     static time_point now()
     {
