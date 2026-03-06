@@ -37,6 +37,8 @@ struct permissive_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag
 template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep>>
 using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
 
+template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep>>
+using permissive_hz = estd::units::v1::detail::unit<permissive_unit_traits<Rep, Period, frequency_tag>>;
 
 namespace estd { namespace internal { namespace units {
 
@@ -483,6 +485,14 @@ TEST_CASE("units")
                 {
                     detail::unit<permissive_unit_traits<int32_t, estd::ratio<1, 8>, frequency_tag>> u1(0);
                     detail::unit<permissive_unit_traits<int16_t, estd::ratio<1>, frequency_tag>> u2(u1);
+                    permissive_hz<int16_t> u3(u1);
+
+                    SECTION("permissive and regular mixed")
+                    {
+                        hz<int> h1(1);
+                        auto v1 = u3 - h1;
+                        REQUIRE(v1.count() == -1);
+                    }
                 }
             }
             SECTION("int <--> float")
