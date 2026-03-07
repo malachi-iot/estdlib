@@ -126,7 +126,7 @@ public:
 
     constexpr duration operator-() const
     {
-        static_assert (numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
+        static_assert(numeric_limits<rep>::is_signed, "operator -() requires a signed Rep type");
 
         return duration(-rep_);
     }

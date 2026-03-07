@@ -19,23 +19,17 @@ namespace estd {
 
 namespace chrono {
 
-
-// configTICK_RATE_HZ = ticks we expect to occur per second
-// portTICK_PERIOD_MS = milliseconds we expect to occur per tick
-// std:: tick period =
-// "a tick period, where the tick period is a compile-time rational
-// constant representing the number of seconds from one tick to the next."
-namespace internal {
-
-typedef estd_ratio::ratio<1, configTICK_RATE_HZ> freertos_system_period;
-
-}
-
 struct freertos_clock
 {
-    //typedef estd::chrono::internal::milli_rep rep;
     using rep = TickType_t;
+
+    // configTICK_RATE_HZ = ticks we expect to occur per second
+    // portTICK_PERIOD_MS = milliseconds we expect to occur per tick
+    // std:: tick period =
+    // "a tick period, where the tick period is a compile-time rational
+    // constant representing the number of seconds from one tick to the next."
     using period = ratio<1, configTICK_RATE_HZ>;
+
     template <class Rep>
     struct traits : duration_traits<Rep, period>
     {
@@ -58,6 +52,11 @@ struct freertos_clock
     }
 };
 
+namespace internal {
+
+using freertos_system_period = freertos_clock::period;
+
+}
 
 }
 
