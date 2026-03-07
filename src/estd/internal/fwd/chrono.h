@@ -141,9 +141,6 @@ namespace estd_chrono = std::chrono;
 
 }
 
-template <class ToDuration, class Rep, class Period>
-constexpr ToDuration duration_cast(const duration<Rep, Period>& d);
-
 namespace detail {
 
 template <class Traits1, class Traits2>
@@ -154,7 +151,12 @@ template <class Traits1, class Traits2>
 estd::common_type_t<duration<Traits1>, duration<Traits2>>
 constexpr operator+(const duration<Traits1>& lhs, const duration<Traits2>& rhs);
 
+template <class ToDuration, class Traits>
+constexpr ToDuration duration_cast(const duration<Traits>& d);
+
 }
+
+using detail::duration_cast;
 
 // DEBT: Get these guys all the detail-traits treatment or better yet CRTP/mixin the heck
 // out of it or better still cascade down to 'units' base support.  The latter even works-ish

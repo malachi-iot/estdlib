@@ -55,14 +55,13 @@ constexpr auto duration<Traits>::convert_from(const std::chrono::duration<Rep2, 
 }
 #endif
 
-}
 
-template <class ToDuration, class Rep, class Period>
-constexpr ToDuration duration_cast(const duration<Rep, Period>& d)
+template <class ToDuration, class Traits>
+constexpr ToDuration duration_cast(const duration<Traits>& d)
 {
     return ToDuration(d, units::relaxed_narrow_t{});
 }
 
-
+}
 
 }}

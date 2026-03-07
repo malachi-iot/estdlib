@@ -35,13 +35,13 @@ namespace estd { namespace units { inline namespace v1 {
 template <class Rep, class Tag = void>
 struct treat_as_floating_point : is_floating_point<Rep> {};
 
+namespace detail {
+
 template <class ToUnit, class Traits>
-constexpr ToUnit unit_cast(const detail::unit<Traits>& u)
+constexpr ToUnit unit_cast(const unit<Traits>& u)
 {
     return ToUnit(u, relaxed_narrow_t{});
 }
-
-namespace detail {
 
 
 // DEBT: Consolidate this with chrono if we can.  Specifically, I don't want disperate
@@ -299,6 +299,8 @@ public:
 };
 
 }   // detail
+
+using detail::unit_cast;
 
 }}} // estd::units::inline v1
 
