@@ -6,8 +6,8 @@
 #pragma once
 
 #include "../fwd/chrono.h"
-#include "../chrono/duration.h"
-#include "../chrono/math.h"
+#include "duration.h"
+#include "math.h"
 
 #include "units.hpp"
 

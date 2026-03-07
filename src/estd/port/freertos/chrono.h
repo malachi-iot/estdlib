@@ -13,7 +13,7 @@ extern "C" {
 
 }
 
-#include "../chrono.h"
+#include "../../internal/chrono/time_point.h"
 
 namespace estd {
 
@@ -47,8 +47,6 @@ struct freertos_clock
             units::v1::detail::options::permissive;
     };
 
-    // FIX: Our unit base isn't quite fully a substitute for duration.  Either make it
-    // so or make a detail::duration which takes Traits
     using duration = detail::duration<traits<rep>>; 
     using time_point = internal::estd_chrono::time_point<freertos_clock>;
 

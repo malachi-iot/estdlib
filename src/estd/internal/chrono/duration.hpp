@@ -6,10 +6,12 @@ namespace estd { namespace chrono {
 
 namespace detail {
 
-// DEBT: Consolidate with units::convert_from, if we can
+#if UNUSED
+// units::convert_from has been shouldering this burden for a while.  Just keeping
+// around since the comments are interesting and it's a simpler case to understand
 template<class Traits>
 template<class Traits2>
-constexpr auto duration<Traits>::convert_from(const duration<Traits2>& d) -> rep
+constexpr auto duration<Traits>::convert_from_old(const duration<Traits2>& d) -> rep
 {
     using period2 = typename Traits2::period2;
 #ifdef __cpp_alias_templates
@@ -34,6 +36,7 @@ constexpr auto duration<Traits>::convert_from(const duration<Traits2>& d) -> rep
     // even when Rep is much smaller of an integer type than Rep2
     return d.count() * rd::num / rd::den;
 }
+#endif
 
 #ifdef FEATURE_STD_CHRONO
 template<class Traits>

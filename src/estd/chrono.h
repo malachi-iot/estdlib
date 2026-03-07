@@ -8,8 +8,16 @@
 
 #include "internal/platform.h"
 #include "port/identify_platform.h"
-#include "port/chrono.h"
+#include "port/std/chrono.h"
+#include "internal/chrono.h"
 #include "internal/chrono/formatter.hpp"
+#ifdef FEATURE_ESTD_CHRONO
+#include "internal/chrono/duration.hpp"
+#include "internal/chrono/operators.hpp"
+#include "internal/chrono/literals.h"
+#include "internal/chrono/ratio.h"
+#include "internal/chrono/math.h"
+#endif
 
 // esp-idf native version coexists with the others
 #if defined(ESTD_SDK_IDF)

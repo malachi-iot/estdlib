@@ -60,12 +60,9 @@ public:
     using typename base_type::period;
 
 protected:
-    template <class Traits2>
-    static ESTD_CPP_CONSTEXPR_RET rep convert_from(const duration<Traits2>& d);
-
 #if FEATURE_STD_CHRONO_CORE || FEATURE_STD_CHRONO
     template <class Rep2, class Period2>
-    static ESTD_CPP_CONSTEXPR_RET rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
+    static constexpr rep convert_from(const std::chrono::duration<Rep2, Period2>& d);
 #endif
 
     using duration_values = internal::duration_values<rep>;

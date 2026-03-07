@@ -139,7 +139,7 @@ public:
     template <class Rep2, class Period2>
     static constexpr rep convert_from(const Rep2& count)
     {
-        typedef estd::ratio_divide<Period2, period> rd;
+        using rd = estd::ratio_divide<Period2, period>;
         // find common type so that we more often have the precision we need.
         // still doesn't fully protect us from overflows though (we'd need to go
         // one higher precision for that)

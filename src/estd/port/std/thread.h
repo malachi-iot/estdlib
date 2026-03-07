@@ -3,7 +3,7 @@
 #include "../../internal/platform.h"
 
 #include <thread>
-#include "../chrono.h"
+#include "chrono.h"
 
 namespace estd {
 
