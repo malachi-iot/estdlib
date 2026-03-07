@@ -13,6 +13,9 @@ struct common_type
 {
 };
 
+template<class... T>
+using common_type_t = typename common_type<T...>::type;
+
 #else
 
 // NOTE: C++98 mode currently only implemented for chrono specialization

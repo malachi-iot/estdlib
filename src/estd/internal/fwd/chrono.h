@@ -144,15 +144,20 @@ namespace estd_chrono = std::chrono;
 template <class ToDuration, class Rep, class Period>
 constexpr ToDuration duration_cast(const duration<Rep, Period>& d);
 
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-constexpr operator-( const duration<Rep1,Period1>& lhs,
-    const duration<Rep2,Period2>& rhs );
+namespace detail {
 
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-constexpr operator+( const duration<Rep1,Period1>& lhs,
-    const duration<Rep2,Period2>& rhs );
+template <class Traits1, class Traits2>
+estd::common_type_t<duration<Traits1>, duration<Traits2>>
+constexpr operator-(const duration<Traits1>& lhs, const duration<Traits2>& rhs);
+
+template <class Traits1, class Traits2>
+estd::common_type_t<duration<Traits1>, duration<Traits2>>
+constexpr operator+(const duration<Traits1>& lhs, const duration<Traits2>& rhs);
+
+}
+
+// DEBT: Get these guys all the detail-traits treatment or better yet CRTP/mixin the heck
+// out of it or better still cascade down to 'units' base support
 
 template <class Rep1, class Period1, class Rep2, class Period2>
 constexpr bool operator>(const duration<Rep1, Period1>& lhs,

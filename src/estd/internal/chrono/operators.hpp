@@ -6,31 +6,29 @@
 #include "../units/operators.hpp"
 #include "../macro/push.h"
 
-namespace estd { namespace chrono {
+namespace estd { namespace chrono { namespace detail {
 
 // NOTE: Not well tested for operations across different duration types
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-constexpr operator-( const duration<Rep1,Period1>& lhs,
-    const duration<Rep2,Period2>& rhs )
+template <class Traits1, class Traits2>
+estd::common_type_t<duration<Traits1>, duration<Traits2>>
+constexpr operator-(const duration<Traits1>& lhs, const duration<Traits2>& rhs)
 {
-    typedef typename common_type<duration<Rep1, Period1>,
-        duration<Rep2, Period2> >::type CT;
+    using CT = common_type_t<duration<Traits1>, duration<Traits2>>;
 
     return CT(CT(lhs).count() - CT(rhs).count());
 }
 
 
 
-template< class Rep1, class Period1, class Rep2, class Period2 >
-typename estd::common_type<duration<Rep1,Period1>, duration<Rep2,Period2> >::type
-constexpr operator+( const duration<Rep1,Period1>& lhs,
-    const duration<Rep2,Period2>& rhs )
+template <class Traits1, class Traits2>
+estd::common_type_t<duration<Traits1>, duration<Traits2>>
+constexpr operator+(const duration<Traits1>& lhs, const duration<Traits2>& rhs)
 {
-    typedef typename common_type<duration<Rep1, Period1>,
-        duration<Rep2, Period2> >::type CT;
+    using CT = common_type_t<duration<Traits1>, duration<Traits2>>;
 
     return CT(CT(lhs).count() + CT(rhs).count());
+}
+
 }
 
 // In test where lhs is milliseconds and rhs is seconds, rhs doesn't auto promote to milliseconds correctly
