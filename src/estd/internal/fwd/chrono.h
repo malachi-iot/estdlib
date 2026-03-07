@@ -157,7 +157,9 @@ constexpr operator+(const duration<Traits1>& lhs, const duration<Traits2>& rhs);
 }
 
 // DEBT: Get these guys all the detail-traits treatment or better yet CRTP/mixin the heck
-// out of it or better still cascade down to 'units' base support
+// out of it or better still cascade down to 'units' base support.  The latter even works-ish
+// now, but we have to still resolve the dup convert_to constructor gate before really
+// folding all this down
 
 template <class Rep1, class Period1, class Rep2, class Period2>
 constexpr bool operator>(const duration<Rep1, Period1>& lhs,

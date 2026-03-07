@@ -95,4 +95,30 @@ public:
     }
 };
 
+
+// EXPERIMENTAL
+// Probably not needed, only useful if constructor itself adds more utility than detail::units one
+template <template <class Traits> class Derived, class Traits>
+class unit_compare_gt
+{
+public:
+    template <class Traits2>
+    constexpr bool operator >(const Derived<Traits2>& compare_to) const
+    {
+        auto self = static_cast<const Derived<Traits>*>(this);
+        using CT = estd::common_type_t<Derived<Traits>, Derived<Traits2>>;
+
+        return CT(self->count()) > CT(compare_to.count());
+    }
+
+    template <class Traits2>
+    constexpr bool operator >=(const Derived<Traits2>& compare_to) const
+    {
+        auto self = static_cast<const Derived<Traits>*>(this);
+        using CT = estd::common_type_t<Derived<Traits>, Derived<Traits2>>;
+
+        return CT(self->count()) >= CT(compare_to.count());
+    }
+};
+
 }}}}
