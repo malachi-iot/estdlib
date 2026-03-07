@@ -25,11 +25,6 @@ using namespace estd::literals::units_literals;
 
 namespace estd { namespace internal { namespace units {
 
-// Represented as 0 through 100, not 0 through 1
-// DEPRECATED - use estd::units::v1 flavor directly
-template <class Rep, class Period = estd::ratio<1>, typename F = passthrough<Rep> >
-using percent = ::estd::units::v1::percent<Rep, Period, F>;
-
 template <>
 struct traits<percent_tag>
 {
@@ -45,7 +40,7 @@ struct traits<percent_tag>
 // special multiply?  we keep coming back to the oddball 0-100 behavior of percent
 template <class Rep1, class Ratio1, class F1, class Traits2>
 inline estd::units::detail::unit<Traits2> get_from_percent(
-    const percent<Rep1, Ratio1, F1>& p,
+    const estd::units::percent<Rep1, Ratio1, F1>& p,
     estd::units::detail::unit<Traits2> min,
     estd::units::detail::unit<Traits2> max)
 {
@@ -66,7 +61,7 @@ inline estd::units::detail::unit<Traits2> get_from_percent(
 
 template <class Rep1, class Ratio1, class F1, class Traits2>
 inline estd::units::detail::unit<Traits2> get_from_percent(
-    const percent<Rep1, Ratio1, F1>& p,
+    const estd::units::percent<Rep1, Ratio1, F1>& p,
     estd::units::detail::unit<Traits2> max)
 {
     return get_from_percent(p, estd::units::detail::unit<Traits2>(0), max);

@@ -84,8 +84,9 @@ protected:
 #if UNIT_TESTING
 public:
 #endif
-    static constexpr bool permissive = traits::options & detail::permissive_prec;
+    static constexpr bool permissive = traits::options & detail::permissive_period;
     static constexpr bool implicit_rep = traits::options & detail::implicit_rep;
+    static constexpr bool is_1_1 = period::num == period::den;
 
     // Splitting out in case we feel like upgrading options to support it.  Not doing so
     // at the moment since rep already appears to be extremely permissive
@@ -181,7 +182,7 @@ public:
 
     template <class Rep,
         enable_if_t<
-            is_convertible<const Rep&, rep>::value && implicit_rep, int> = 0>
+            is_convertible<const Rep&, rep>::value && implicit_rep && is_1_1, int> = 0>
     constexpr operator Rep() const
     {
         return rep_;

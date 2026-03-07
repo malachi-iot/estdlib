@@ -192,7 +192,7 @@ TEST_CASE("units")
         using permissive_traits =
             estd::units::detail::rebindable_traits<int16_t, estd::ratio<1>,
             special_traits::tag, special_traits::projector,
-            options(options::permissive_prec | options::default_initialized)>;
+            options(options::permissive_period | options::default_initialized)>;
 
         detail::unit<permissive_traits> p7{10};
 
