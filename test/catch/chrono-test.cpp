@@ -250,6 +250,9 @@ TEST_CASE("chrono tests")
 
         REQUIRE(abs(mp) == abs(mn));
 
+        // Correctly does not compile, permissive_1_1 not a std::chrono::duration friendly flag
+        //mp == 5;
+
         // needs enhanced common_type to operate and switch between precisions
         SECTION("abs + bool")
         {
