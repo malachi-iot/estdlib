@@ -68,10 +68,12 @@ ESTD_UNITS_COMP(!=)
 // ratio<1> specializations
 
 template <class Traits, typename Rep>
-using compatible_rep = bool_constant<is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value>;
+using compatible_1_1 = bool_constant<
+    is_same<typename Traits::period, ratio<1>>::value && is_arithmetic<Rep>::value &&
+    Traits::options & options::permissive_1_1>;
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits> operator+(unit<Traits> lhs, const Rep& rhs)
 {
     return lhs += unit<Traits>(rhs);
@@ -79,14 +81,14 @@ constexpr unit<Traits> operator+(unit<Traits> lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits> operator-(unit<Traits> lhs, const Rep& rhs)
 {
     return lhs -= unit<Traits>(rhs);
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits>& operator +=(unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs += unit<Traits>(rhs);
@@ -94,7 +96,7 @@ constexpr unit<Traits>& operator +=(unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits>& operator -=(unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs -= unit<Traits>(rhs);
@@ -102,7 +104,7 @@ constexpr unit<Traits>& operator -=(unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator==(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() == rhs;
@@ -110,7 +112,7 @@ constexpr bool operator==(const unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator<(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() < rhs;
@@ -118,7 +120,7 @@ constexpr bool operator<(const unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator>(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() > rhs;
@@ -126,7 +128,7 @@ constexpr bool operator>(const unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator<=(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() <= rhs;
@@ -134,7 +136,7 @@ constexpr bool operator<=(const unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator>=(const unit<Traits>& lhs, const Rep& rhs)
 {
     return lhs.count() >= rhs;
@@ -142,42 +144,42 @@ constexpr bool operator>=(const unit<Traits>& lhs, const Rep& rhs)
 
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator<(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs < rhs.count();
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator<=(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs <= rhs.count();
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator>(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs > rhs.count();
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator>=(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs >= rhs.count();
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator!=(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs != rhs.count();
 }
 
 template <class Traits, typename Rep,
-    enable_if_t<compatible_rep<Traits, Rep>::value, int> = 0>
+    enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr bool operator==(const Rep& lhs, const unit<Traits>& rhs)
 {
     return lhs == rhs.count();

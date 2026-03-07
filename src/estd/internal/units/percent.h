@@ -43,14 +43,13 @@ struct traits<percent_tag>
 
 // These feel not quite ready yet - i.e. what's the major upgrade from a
 // special multiply?  we keep coming back to the oddball 0-100 behavior of percent
-template <class Rep1, class Ratio1, class F1,
-    class Rep2, class Ratio2, class Tag, class F2>
-inline unit_base<Rep2, Ratio2, Tag, F2> get_from_percent(
+template <class Rep1, class Ratio1, class F1, class Traits2>
+inline estd::units::detail::unit<Traits2> get_from_percent(
     const percent<Rep1, Ratio1, F1>& p,
-    unit_base<Rep2, Ratio2, Tag, F2> min,
-    unit_base<Rep2, Ratio2, Tag, F2> max)
+    estd::units::detail::unit<Traits2> min,
+    estd::units::detail::unit<Traits2> max)
 {
-    using target_type = unit_base<Rep2, Ratio2, Tag, F2>;
+    using target_type = estd::units::detail::unit<Traits2>;
     const target_type range = max - min;
 
     // DEBT: Use common_type here
@@ -65,13 +64,12 @@ inline unit_base<Rep2, Ratio2, Tag, F2> get_from_percent(
     return target_type(v + min.count());
 }
 
-template <class Rep1, class Ratio1, class F1,
-    class Rep2, class Ratio2, class Tag, class F2>
-inline unit_base<Rep2, Ratio2, Tag, F2> get_from_percent(
+template <class Rep1, class Ratio1, class F1, class Traits2>
+inline estd::units::detail::unit<Traits2> get_from_percent(
     const percent<Rep1, Ratio1, F1>& p,
-    unit_base<Rep2, Ratio2, Tag, F2> max)
+    estd::units::detail::unit<Traits2> max)
 {
-    return get_from_percent(p, unit_base<Rep2, Ratio2, Tag, F2>(0), max);
+    return get_from_percent(p, estd::units::detail::unit<Traits2>(0), max);
 }
 
 

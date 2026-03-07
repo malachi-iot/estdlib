@@ -19,7 +19,9 @@ enum options
 
     // As per https://github.com/malachi-iot/estdlib/issues/183 we very probably want to transition this flag
     // to focus itself on period rather than rep
-    permissive          = 0x08,         // Permit conditions which risk precision loss (ALPHA quality, may phase out)
+    permissive_prec     = 0x08,         // Permit conditions which risk precision loss
+    permissive_1_1      = 0x10,         // Permit implicit conversions from 'rep' when 1:1
+    permissive          = permissive_prec | permissive_1_1 | implicit_rep
 };
 
 }

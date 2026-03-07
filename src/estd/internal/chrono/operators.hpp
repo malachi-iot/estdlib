@@ -67,7 +67,7 @@ constexpr operator/(const duration<Rep1,Period>& lhs, const Rep2& rhs)
     return CT(lhs.count() / rhs);
 }
 
-// +++ DEBT: Refactor these out to rely only on unit_base ones, if we can.  Indications look good so far,
+// +++ DEBT: Refactor these out to rely only on detail::unit, if we can.  Indications look good so far,
 // quick test against < worked
 
 template <class Rep1, class Period1, class Rep2, class Period2>

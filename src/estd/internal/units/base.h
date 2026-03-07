@@ -4,6 +4,7 @@
 
 #include "concepts.h"
 #include "common_type.h"
+#include "compound.h"
 #include "fwd.h"
 #include "traits.h"
 #include "projectors.h"
@@ -23,33 +24,7 @@ constexpr ToScalar unit_cast(const FromScalar& s)
     return cast_helper<rep, period>::do_cast(s);
 }*/
 
-template <class Tag1, class Tag2>
-struct compound_tag
-{
-    using tag1_type = Tag1;
-    using tag2_type = Tag2;
-};
 
-// EXPERIMENTAL
-// Playing with a specialization-generated rate/compound unit (aka mph, kph, mAh, etc)
-template <class TUnit1, class TUnit2,
-    typename Rep = typename estd::promoted_type<
-        typename TUnit1::rep,
-        typename TUnit2::rep>::type >
-struct compound_unit_helper
-{
-    using tag_type = compound_tag<
-        typename TUnit1::tag_type,
-        typename TUnit2::tag_type>;
-
-    // FIX: Need to grab rep/period from somewhere.  Really this ought to be deduced
-    // by looking at the lcd/gcd characteristics of both rep/period from both types
-    using rep = Rep;
-    using period = typename TUnit1::period;
-
-    // TODO: Wrestle with f/offset-er later
-    using type = unit_base<rep, period, tag_type>;
-};
 
 }}}
 
@@ -109,7 +84,8 @@ protected:
 #if UNIT_TESTING
 public:
 #endif
-    static constexpr bool permissive = traits::options & detail::permissive;
+    static constexpr bool permissive = traits::options & detail::permissive_prec;
+    static constexpr bool implicit_rep = traits::options & detail::implicit_rep;
 
     // Splitting out in case we feel like upgrading options to support it.  Not doing so
     // at the moment since rep already appears to be extremely permissive
@@ -203,16 +179,24 @@ public:
     explicit constexpr unit(const Rep& r, relaxed_narrow_t) : unit(r, true_type{})
     {}
 
+    template <class Rep,
+        enable_if_t<
+            is_convertible<const Rep&, rep>::value && implicit_rep, int> = 0>
+    constexpr operator Rep() const
+    {
+        return rep_;
+    }
+
 
     // Converting constructors are NOT explicit, since we happily want silent conversions
-    // in this case.  We're not converting strings etc, but very narrowly similar unit_bases.  See:
+    // in this case.  We're not converting strings etc, but very narrowly similar unit.  See:
     // https://stackoverflow.com/questions/66382983/how-do-i-enable-conversion-from-one-class-to-another
     // https://www.reddit.com/r/cpp_questions/comments/ndnrp0/should_every_singleargument_constructor_be_marked/
 
     /*
     // Converting only precision or F modified
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>() && period_matches<Traits2>()>>
-    constexpr unit_base(const unit_base<Traits2>& s) :    // NOLINT
+    constexpr unit(const unit<Traits2>& s) :    // NOLINT
         rep_{s.count()}
     {
     }   */

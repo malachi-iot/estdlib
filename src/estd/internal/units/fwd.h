@@ -76,15 +76,10 @@ using unit_base_tag = ::estd::units::v1::detail::unit_base_tag;
 template <class T>
 using passthrough = ::estd::units::v1::passthrough<T>;
 
-namespace v2 {
-
-template <class Traits>
-using unit_base = ::estd::units::v1::detail::unit<Traits>;
-
-}
-
+// DEBT: Keeping this guy around until J1939 library refactors away
 inline namespace v1 {
 
+// OBSOLETE - do not use unit_base
 template <typename Rep, class Period, class Tag,
     ESTD_CPP_CONCEPT(Projector<Rep>) F = passthrough<Rep>>
 using unit_base = ::estd::units::unit<Rep, Period, Tag, F>;

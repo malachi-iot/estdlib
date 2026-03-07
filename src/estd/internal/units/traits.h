@@ -21,7 +21,9 @@ struct traits
     using tag = Tag;
     using projector = F;
 
-    static constexpr detail::options options = detail::options::default_prohibited;
+    static constexpr auto options = detail::options(
+        detail::options::default_prohibited |
+        detail::options::permissive_1_1);
 
     constexpr static rep default_value() { return {}; }
 

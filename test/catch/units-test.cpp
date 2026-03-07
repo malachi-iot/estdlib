@@ -16,13 +16,17 @@ struct frequency_tag {};
 template <class Rep, class Period, class F>
 struct frequency_unit_traits : estd::units::v1::detail::traits<Rep, Period, frequency_tag, F>
 {
-    static constexpr auto options = estd::units::detail::options::default_initialized;
+    static constexpr auto options =
+        estd::units::detail::default_initialized |
+        estd::units::detail::permissive_1_1;
 };
 
 template <class Rep, class Period, class Tag>
 struct value_init_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag>
 {
-    static constexpr auto options = estd::units::detail::options::value_initialized;
+    static constexpr auto options =
+        estd::units::detail::options::value_initialized |
+        estd::units::detail::permissive_1_1;
 
     constexpr static Rep default_value() { return 7; }
 };
@@ -188,7 +192,7 @@ TEST_CASE("units")
         using permissive_traits =
             estd::units::detail::rebindable_traits<int16_t, estd::ratio<1>,
             special_traits::tag, special_traits::projector,
-            options(options::permissive | options::default_initialized)>;
+            options(options::permissive_prec | options::default_initialized)>;
 
         detail::unit<permissive_traits> p7{10};
 
@@ -536,6 +540,15 @@ TEST_CASE("units")
 
                 static_assert(std::is_same<traits2::rep, int>::value);
                 static_assert(std::is_same<type2::rep, int>::value);
+            }
+            SECTION("implicit convert to rep")
+            {
+                // Correctly disallowed
+                //int val = hz<int>(0);
+
+                int val = permissive_hz<int>(5);
+
+                REQUIRE(val == 5);
             }
         }
     }

@@ -12,15 +12,7 @@
 
 namespace estd { namespace internal { namespace units { namespace mixins {
 
-template <class Traits>
-using unit = unit_base<
-    typename Traits::rep,
-    typename Traits::period,
-    typename Traits::tag,
-    typename Traits::projector>;
-
 // EXPERIMENTAL, not in use
-// unit_base is intended consumer, though it would have to change its signature to unit_base<traits>
 template <template <class Traits> class Derived, class Traits>
 class converting_adder
 {
