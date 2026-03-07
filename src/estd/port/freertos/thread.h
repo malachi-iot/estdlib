@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chrono.h"
+#include "../../internal/chrono/duration.hpp"
 #include "../../functional.h"
 #include "../arch/freertos.h"
 
@@ -103,14 +104,12 @@ namespace this_thread {
 
 // untested, not yet compiled, but everything is in place so I expect this to work with little
 // effort
-template< class Rep, class Period >
-void sleep_for( const chrono::duration<Rep, Period>& sleep_duration )
+template<class Traits>
+void sleep_for(const chrono::detail::duration<Traits>& sleep_duration)
 {
-    // TODO: Pretty sure we can do a straight chrono::stead_clock::duration instance here
-    chrono::freertos_clock::rep count =
-            estd::chrono::duration_cast<chrono::freertos_clock::duration>(sleep_duration).count();
+    auto duration = chrono::duration_cast<chrono::freertos_clock::duration>(sleep_duration);
 
-    vTaskDelay(count);
+    vTaskDelay(duration.count());
 }
 
 // FreeRTOS' "delay until" code is subtly but fundamentally different than std lib version,
