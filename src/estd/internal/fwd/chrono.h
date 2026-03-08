@@ -158,31 +158,6 @@ constexpr ToDuration duration_cast(const duration<Traits>& d);
 
 using detail::duration_cast;
 
-// DEBT: Get these guys all the detail-traits treatment or better yet CRTP/mixin the heck
-// out of it or better still cascade down to 'units' base support.  The latter even works-ish
-// now, but we have to still resolve the dup convert_to constructor gate before really
-// folding all this down
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-constexpr bool operator>(const duration<Rep1, Period1>& lhs,
-    const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-constexpr bool operator<(const duration<Rep1, Period1>& lhs,
-    const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-constexpr bool operator>=(const duration<Rep1, Period1>& lhs,
-    const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-constexpr bool operator<=(const duration<Rep1, Period1>& lhs,
-    const duration<Rep2, Period2>& rhs);
-
-template <class Rep1, class Period1, class Rep2, class Period2>
-constexpr bool operator==(const duration<Rep1, Period1>& lhs,
-    const duration<Rep2, Period2>& rhs);
-
 template< class C, class D1, class D2 >
 constexpr typename estd::common_type<D1,D2>::type
 operator-( const time_point<C,D1>& pt_lhs,

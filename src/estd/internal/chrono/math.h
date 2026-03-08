@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../fwd/chrono.h"
+#include "../units/operators.hpp"
 #include "duration.hpp"
 #include "ratio.h"
 #include "../macro/push.h"

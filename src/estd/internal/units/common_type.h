@@ -58,7 +58,9 @@ constexpr common_type_t<
     const unit<Traits1>&,
     const unit<Traits2>&);
 
-template <class Traits, class Rep>
+// DEBT: I'm pretty sure we don't need this is_arithmetic filter, but until I resolve
+// duration vs unit squirrelyness (#184 related) I want that safety gauruntee.
+template <class Traits, class Rep, enable_if_t<is_arithmetic<Rep>::value, int> = 0>
 constexpr
     unit<
         typename Traits::template rebind<common_type_t<typename Traits::rep, Rep>>>
