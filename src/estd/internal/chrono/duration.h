@@ -2,9 +2,9 @@
 
 #include "features.h"
 #include "../../ratio.h"
-#include "../chrono.h"
 #include "../fwd/chrono.h"
 #include "../units/base.h"
+#include "traits.h"
 
 #include "../macro/push.h"
 
@@ -18,9 +18,6 @@ namespace estd { namespace chrono {
 
 namespace internal {
 
-// DEBT: Move this tag out to 'detail'
-struct seconds_tag {};
-
 // DEBT: Strongly consider reworking/infusing this into duration_traits
 template <class Rep>
 struct duration_values
@@ -31,19 +28,6 @@ struct duration_values
 };
 
 }
-
-template <class Rep, class Period>
-struct duration_traits : estd::units::v1::detail::traits<Rep, Period, internal::seconds_tag>
-{
-    static constexpr units::detail::options options =
-        units::v1::detail::options::default_initialized;
-
-#if FEATURE_STD_CHRONO_CORE
-    using std_period = std::ratio<Period::num, Period::den>;
-    using std_duration = std::chrono::duration<Rep, std_period>;
-#endif
-};
-
 
 namespace detail {
 

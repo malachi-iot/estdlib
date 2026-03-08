@@ -18,6 +18,17 @@ public:
     }
 };
 
+template <class Rep, class Period>
+struct permissive_traits : estd::chrono::duration_traits<Rep, Period>
+{
+    static constexpr auto options =
+        estd::units::detail::default_initialized |
+        estd::units::detail::permissive;
+};
+
+template <class Rep, class Period = estd::ratio<1>>
+using permissive_duration = estd::units::detail::unit<permissive_traits<Rep, Period>>;
+
 template <>
 struct estd::chrono::internal::clock_traits<fake_clock> :
     estd::chrono::internal::unix_epoch_clock_traits
@@ -546,6 +557,13 @@ TEST_CASE("chrono tests")
             */
 
             REQUIRE(dp.count() > 0);
+        }
+        SECTION("")
+        {
+            permissive_duration<int> d1(0);
+            estd::chrono::microseconds m1(500);
+
+            permissive_duration<int> d2(d1 + m1, estd::units::relaxed_narrow_t{});
         }
     }
     SECTION("std parity check")

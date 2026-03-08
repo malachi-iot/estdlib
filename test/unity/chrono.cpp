@@ -111,6 +111,14 @@ static void test_freertos_clock()
     test_clock<clock>();
 
     this_thread::sleep_until(clock::now() + chrono::milliseconds(0));
+
+    chrono::microseconds ms(500);
+
+    // FIX: Broken, common_type perhaps needs to specialize on duration too and definitely
+    // rebind is occurring (not yet sure why that's needed) and it's losing options along
+    // the way
+    // https://github.com/malachi-iot/estdlib/issues/184
+    //[[maybe_unused]] clock::duration v(clock::duration(2) + ms, estd::units::relaxed_narrow_t{});
 }
 #endif
 
