@@ -40,9 +40,10 @@ struct common_type<
     static constexpr std::intmax_t lcm_den = internal::lcm<period1::den, period2::den>::value;
 
 public:
-    using ratio_type =  ratio<gcd_num, lcm_den>;
+    using period = ratio<gcd_num, lcm_den>;
 
-    using traits = typename traits1::template rebind<rep, ratio_type, units::v1::passthrough<rep>>;
+    // DEBT: Hardcoding to traits1 for the rebind imperfect
+    using traits = typename traits1::template rebind<rep, period, units::v1::passthrough<rep>>;
     //using traits = units::v1::detail::traits<rep, ratio_type, tag>;
     using type = units::v1::detail::unit<traits>;
 };

@@ -12,6 +12,7 @@
 #include "internal/chrono.h"
 #include "internal/chrono/formatter.hpp"
 #ifdef FEATURE_ESTD_CHRONO
+#include "internal/chrono/common_type.h"
 #include "internal/chrono/duration.hpp"
 #include "internal/chrono/operators.hpp"
 #include "internal/chrono/literals.h"

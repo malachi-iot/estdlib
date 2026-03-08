@@ -51,6 +51,9 @@ protected:
 
     using duration_values = internal::duration_values<rep>;
 
+    static_assert(is_same<typename Traits::tag, internal::seconds_tag>::value,
+        "Duration traits must have seconds_tag");
+
 public:
     constexpr duration() = default;
 

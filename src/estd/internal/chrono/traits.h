@@ -3,7 +3,7 @@
 #include "features.h"
 #include "../../ratio.h"
 #include "../fwd/chrono.h"
-#include "../units/base.h"
+#include "../units/traits.h"
 
 namespace estd { namespace chrono {
 
