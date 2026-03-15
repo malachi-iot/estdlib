@@ -49,12 +49,19 @@ TEST_CASE("expected")
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
         }
-        SECTION("specific value initialized")
+        SECTION("converting constructor: specific value initialized")
         {
             expected_type e(10);
 
             REQUIRE(e.has_value());
             REQUIRE(*e == 10);
+
+            // Implicit conversion works
+            handler(10);
+            // Explicit conversion needed here for handler to resolve
+            //handler("hi");
+            // Explicit conversion doesn't work anyway, and that is correct
+            //expected_type e2("hi");
         }
         SECTION("error state")
         {

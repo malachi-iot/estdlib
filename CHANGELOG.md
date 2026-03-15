@@ -19,6 +19,7 @@
 * https://github.com/malachi-iot/estdlib/issues/169 fixed glitchy from_chars sto mode hex/octal detection
 * https://github.com/malachi-iot/estdlib/issues/173 additional units operators for 1:1 mode
 * BREAKING CHANGE: https://github.com/malachi-iot/estdlib/issues/177 chrono::duration now has more std-compliant stricter constructor
+* `estd::expected` converting constructor now checks is_convertible
 
 
 # v0.8.10 - 08OCT25

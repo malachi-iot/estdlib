@@ -29,10 +29,11 @@ using is_variant_assignable = bool_constant<
 #endif
 
 // Very similar to c++20 flavor, but importantly returns monostate instead
-template <class T2, class ...TArgs>
-inline static monostate construct_at(void* placement, TArgs&&...args)
+// DEBT: Document why that's wanted
+template <class T, class ...Args>
+inline ESTD_CPP_CONSTEXPR(17) static monostate construct_at(void* placement, Args&&...args)
 {
-    new (placement) T2(std::forward<TArgs>(args)...);
+    new (placement) T(std::forward<Args>(args)...);
     return {};
 }
 

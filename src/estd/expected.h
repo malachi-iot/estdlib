@@ -117,8 +117,25 @@ public:
     {}
 #endif
 
-    template <class U, class enabled = enable_if_t<internal::expected_ctor_6<U>::value> >
+    // When U is convertible, converting constructor is implicit.  Aligns with constructor #6 from
+    // https://en.cppreference.com/w/cpp/utility/expected/expected.html
+    template <class U,
+        enable_if_t<
+            internal::expected_ctor_6<U>::value &&
+            is_convertible<T, U>::value, int > = 0>
     constexpr expected(U&& v) :
+        base_type(in_place_t{}, std::forward<U>(v)),
+        has_value_{true}
+    {}
+
+    // When U is not convertible, converting constructor is explicit.  Aligns with constructor #6 from
+    // https://en.cppreference.com/w/cpp/utility/expected/expected.html.  This expects underlying T
+    // has a converting constructor
+    template <class U,
+        enable_if_t<
+            internal::expected_ctor_6<U>::value &&
+            !is_convertible<T, U>::value, int > = 0>
+    constexpr explicit expected(U&& v) :
         base_type(in_place_t{}, std::forward<U>(v)),
         has_value_{true}
     {}
@@ -129,15 +146,15 @@ public:
         has_value_(move_from.has_value())
     {}
 
-    template <class... TArgs>
-    constexpr explicit expected(in_place_t, TArgs&&...args) :
-        base_type(in_place_t{}, std::forward<TArgs>(args)...),
+    template <class... Args>
+    constexpr explicit expected(in_place_t, Args&&...args) :
+        base_type(in_place_t{}, std::forward<Args>(args)...),
         has_value_(true)
     {}
 
-    template <class... TArgs>
-    constexpr explicit expected(unexpect_t, TArgs&&...args) :
-        base_type(unexpect_t{}, std::forward<TArgs>(args)...),
+    template <class... Args>
+    constexpr explicit expected(unexpect_t, Args&&...args) :
+        base_type(unexpect_t{}, std::forward<Args>(args)...),
         has_value_(false)
     {}
 
@@ -146,14 +163,13 @@ public:
     CONSTEXPR_EXPLICIT((!is_convertible<const G&, E>::value)) expected(
         const unexpected<G>& u) :
 #else
-    ESTD_CPP_CONSTEXPR_RET expected(const unexpected<G>& u) :
+    constexpr expected(const unexpected<G>& u) :
 #endif
         base_type(unexpect_t(), u.error()),
         has_value_(false)
     {}
 
 
-#if __cpp_rvalue_references
     template <class U, class enabled = enable_if_t<
         is_same<expected, remove_cvref_t<U>>::value == false &&
         internal::is_unexpected<remove_cvref_t<U>>::value == false &&
@@ -165,14 +181,6 @@ public:
         if(!has_value_) has_value_ = true;
         return *this;
     }
-#else
-    expected& operator=(const nonvoid_value_type& v)
-    {
-        base_type::assign_value(has_value_, v);
-        if(!has_value_) has_value_ = true;
-        return *this;
-    }
-#endif
 
     template <class G, class GF = const G&, class enabled = enable_if_t<
         internal::is_variant_assignable<E, GF>::value
