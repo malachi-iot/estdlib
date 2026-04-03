@@ -11,6 +11,64 @@
 
 namespace estd { namespace detail { namespace impl {
 
+// DORMANT: To be used by all flavors of function_fnptr2
+template <typename Result, typename... Args>
+struct function_fnptr2_model
+{
+    class base
+    {
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        using function_type = Result (*)(void*, Args&&...);
+#else
+        using function_type = Result (*)(void*, Args...);
+#endif
+
+        const function_type fptr_;
+
+    public:
+        constexpr explicit base(function_type f) :
+            fptr_(f)
+        {}
+
+        base(const base& copy_from) = default;
+        base(base&& move_from) = default;
+
+        inline Result invoke(Args&&...args)
+        {
+            return fptr_(this, std::forward<Args>(args)...);
+        }
+
+        inline Result operator()(Args&&...args)
+        {
+            return fptr_(this, std::forward<Args>(args)...);
+        }
+    };
+
+    // Effectively a functor itself wrapping our true functor - adding mainly 'exec' and of
+    // course bringing in whatever Base things we want to prepend
+    template <class F, class Base>
+    class model : public Base
+    {
+        static_assert(estd::is_base_of<base, Base>::value, "Must derive from 'base'");
+
+        F functor_;
+
+    public:
+        constexpr explicit model(F&& f) :
+            functor_{std::forward<F>(f)}
+        {}
+
+        // DEBT: Consider https://github.com/malachi-iot/estdlib/issues/186 - may affect
+        // signature here
+        ESTD_CPP_CONSTEXPR(14) Result operator()(Args&&...args)
+        {
+            return functor_(std::forward<Args>(args)...);
+        }
+
+        ESTD_CPP_DEFAULT_RULE_OF_5(model);
+    };
+};
+
 template <typename Result, typename... Args, fn_options o>
 struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 {
@@ -124,7 +182,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         }   */
 
         // TODO: Consolidate different models down to a model_base since they
-        // all need this exec function
+        // all need this exec function.
         ESTD_CPP_CONSTEXPR(14) Result operator()(Args&&...args)
         {
             return f(std::forward<Args>(args)...);
@@ -172,7 +230,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 
 // Special version which calls dtor right after function invocation
 template <typename Result, typename... Args>
-struct function_fnptr2_opt<Result(Args...)>
+struct function_fnptr2_oneshot<Result(Args...)>
 {
     struct model_base
     {

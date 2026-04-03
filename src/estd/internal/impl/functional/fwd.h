@@ -8,10 +8,14 @@ enum fn_options
 {
     FN_NONE,
 
+    // +++ 03APR26 MB DEBT: Deprecated - seems more sensible to have discrete
+    // function_xxx impls for each interesting condition.  Keeping fn_options overall
+    // since we've invested in it and we may want some other option at some point
     FN_COPY,            // fn(const fn&)
     FN_MOVE,            // fn(fn&&)
     FN_DTOR,            // ~fn
     FN_AUTO_DTOR,       // ~fn *always* after execution (opt mode)
+    // ---
 
     // TODO: Consider fnptr1, fnptr2 and virtual specifiers here too
 
@@ -24,16 +28,19 @@ template <typename F, fn_options = FN_DEFAULT>
 struct function_fnptr1;
 
 template <typename F, fn_options = FN_DEFAULT>
-struct function_fnptr1_opt;
+struct function_fnptr1_oneshot;
 
 template <typename F, fn_options = FN_DEFAULT>
 struct function_fnptr2;
 
 template <typename F, fn_options = FN_DEFAULT>
-struct function_fnptr2_opt;
+struct function_fnptr2_oneshot;
 
 template <typename F, fn_options = FN_DEFAULT>
 struct function_virtual;
+
+template <typename F, fn_options o = FN_DEFAULT>
+using function_fnptr2_opt = function_fnptr2_oneshot<F, o>;
 
 // 23NOV25 MB In progress, coming along:
 // 1. fnptr1 no #135 implementation

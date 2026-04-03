@@ -90,7 +90,7 @@ struct function_fnptr1<Result(Args...)>
 
 // Special version which calls dtor right after function invocation
 template <typename Result, typename... Args>
-struct function_fnptr1_opt<Result(Args...)>
+struct function_fnptr1_oneshot<Result(Args...)>
 {
     struct model_base
     {

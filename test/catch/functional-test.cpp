@@ -130,7 +130,7 @@ TEST_CASE("functional")
     {
         SECTION("fn_exp")
         {
-            using fn_type = detail::v2::function<void(), detail::impl::function_fnptr2_opt>;
+            using fn_type = detail::v2::function<void(), detail::impl::function_fnptr2_oneshot>;
             int counter = 0;
             test::Dummy dummy;
             dummy.inc_on_destruct = &counter;
@@ -511,14 +511,14 @@ TEST_CASE("functional")
                     REQUIRE(m.counter == 5);
                 }
             }
-            SECTION("fnptr2_opt")
+            SECTION("fnptr2_oneshot")
             {
                 // ISSUE_39_BRINGUP
                 typedef estd::detail::function<int(void),
-                    estd::detail::impl::function_fnptr2_opt<int(
+                    estd::detail::impl::function_fnptr2_oneshot<int(
                         void)> > _fb;
                 typedef estd::detail::function<void(void),
-                    estd::detail::impl::function_fnptr2_opt<void(
+                    estd::detail::impl::function_fnptr2_oneshot<void(
                         void)> > _fb2;
 
                 int counter = 0;
