@@ -15,41 +15,12 @@ namespace estd { namespace detail { namespace impl {
 template <typename Result, typename... Args>
 struct function_fnptr2_model
 {
-    class base
-    {
-#if FEATURE_ESTD_FUNCTION_RVALUE
-        using function_type = Result (*)(void*, Args&&...);
-#else
-        using function_type = Result (*)(void*, Args...);
-#endif
-
-        const function_type fptr_;
-
-    public:
-        constexpr explicit base(function_type f) :
-            fptr_(f)
-        {}
-
-        base(const base& copy_from) = default;
-        base(base&& move_from) = default;
-
-        inline Result invoke(Args&&...args)
-        {
-            return fptr_(this, std::forward<Args>(args)...);
-        }
-
-        inline Result operator()(Args&&...args)
-        {
-            return fptr_(this, std::forward<Args>(args)...);
-        }
-    };
-
     // Effectively a functor itself wrapping our true functor - adding mainly 'exec' and of
     // course bringing in whatever Base things we want to prepend
     template <class F, class Base>
     class model : public Base
     {
-        static_assert(estd::is_base_of<base, Base>::value, "Must derive from 'base'");
+        //static_assert(estd::is_base_of<base, Base>::value, "Must derive from 'base'");
 
         F functor_;
 
@@ -66,12 +37,63 @@ struct function_fnptr2_model
         }
 
         ESTD_CPP_DEFAULT_RULE_OF_5(model);
+
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args&&...args)
+#else
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args...args)
+#endif
+        {
+            return ((model*)_this)->operator()(std::forward<Args>(args)...);    // NOLINT
+        }
     };
 };
 
 template <typename Result, typename... Args, fn_options o>
 struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 {
+    template <class Derived>
+    struct mixin
+    {
+        Result invoke(Args&&... args)
+        {
+            auto self = static_cast<Derived*>(this);
+
+            return self->_invoke(this, std::forward<Args>(args)...);
+        }
+
+        Result operator()(Args&&... args)
+        {
+            return invoke(std::forward<Args>(args)...);
+        }
+    };
+
+    class base2
+    {
+        template <class Derived>
+        friend struct mixin;
+    protected:
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        using function_type = Result (*)(void*, Args&&...);
+#else
+        using function_type = Result (*)(void*, Args...);
+#endif
+
+        const function_type fptr_;
+
+        constexpr explicit base2(function_type f) :
+            fptr_(f)
+        {}
+
+        // Prepending _ because normally nobody should be calling this guy - only mixin
+        Result _invoke(void* self, Args&&... args) const
+        {
+            // Special treatment needed because MI creates a mismatch between 'self' and 'this'
+            return fptr_(self, std::forward<Args>(args)...);
+        }
+    };
+
+
     static constexpr fn_options options = o;
     // DEBT: Make this optional and default to off
     static constexpr bool has_utility = true; //o & fn_options::FN_COPY;
@@ -86,43 +108,14 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         base,
         no_utility_base>;
 
-    // this is a slightly less fancy more brute force approach to try to diagnose esp32
-    // woes
-    struct model_base : model_rtto_base
+    struct model_base : model_rtto_base, base2, mixin<model_base>
     {
-        using base_type = model_rtto_base;
-
-#if FEATURE_ESTD_FUNCTION_RVALUE
-        using function_type = Result (*)(void*, Args&&...);
-#else
-        using function_type = Result (*)(void*, Args...);
-#endif
-
-        const function_type f_;
-
         constexpr explicit model_base(
-            function_type f,
+            typename base2::function_type f,
             utility_type u) :
-            base_type(u),
-            f_(f)
+            model_rtto_base(u),
+            base2(f)
         {}
-
-        model_base(const model_base& copy_from) = default;
-
-        constexpr model_base(model_base&& move_from) noexcept :
-            base_type(std::move(move_from)),
-            f_(std::move(move_from.f_))
-        {}
-
-        inline Result _exec(Args&&...args)
-        {
-            return f_(this, std::forward<Args>(args)...);
-        }
-
-        inline Result operator()(Args&&...args)
-        {
-            return f_(this, std::forward<Args>(args)...);
-        }
     };
 
     template <typename F>
@@ -228,26 +221,30 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
     };
 };
 
+template <typename Result, typename... Args, fn_options o>
+struct function_fnptr2_trivial<Result(Args...), o>
+{
+    template <class F>
+    class model
+    {
+        // Not ready, see https://github.com/malachi-iot/estdlib/issues/171
+        static_assert(estd::is_trivially_constructible<F>::value, "F must be trivial");
+        //static_assert(estd::is_trivially_moveable<F>::value, "F must be trivial");
+    };
+};
+
 // Special version which calls dtor right after function invocation
 template <typename Result, typename... Args>
 struct function_fnptr2_oneshot<Result(Args...)>
 {
-    struct model_base
+    using base2 = typename function_fnptr2<Result(Args...)>::base2;
+
+    template <class Derived>
+    using mixin = typename function_fnptr2<Result(Args...)>::template mixin<Derived>;
+
+    struct model_base : base2, mixin<model_base>
     {
-#if FEATURE_ESTD_FUNCTION_RVALUE
-        typedef Result (*function_type)(void*, Args&&...);
-#else
-        typedef Result (*function_type)(void*, Args...);
-#endif
-
-        const function_type f;
-
-        constexpr explicit model_base(function_type f) : f(f) {}
-
-        inline Result operator()(Args&&...args)
-        {
-            return f(this, std::forward<Args>(args)...);
-        }
+        constexpr explicit model_base(typename base2::function_type f) : base2(f) {}
     };
 
 

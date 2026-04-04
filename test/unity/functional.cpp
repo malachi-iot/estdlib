@@ -11,7 +11,7 @@ static void test_detail_function()
 
     auto m = fb.make_model([&](){++counter;});
 
-    m._exec();
+    m.invoke();
 
     TEST_ASSERT_EQUAL(1, counter);
 }

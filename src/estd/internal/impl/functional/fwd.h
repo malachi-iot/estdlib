@@ -34,6 +34,9 @@ template <typename F, fn_options = FN_DEFAULT>
 struct function_fnptr2;
 
 template <typename F, fn_options = FN_DEFAULT>
+struct function_fnptr2_trivial;
+
+template <typename F, fn_options = FN_DEFAULT>
 struct function_fnptr2_oneshot;
 
 template <typename F, fn_options = FN_DEFAULT>
