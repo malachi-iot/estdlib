@@ -68,22 +68,21 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         }
     };
 
-    class base2
+    class model_ptr
     {
         template <class Derived>
         friend struct mixin;
-    protected:
+    public:
 #if FEATURE_ESTD_FUNCTION_RVALUE
         using function_type = Result (*)(void*, Args&&...);
 #else
         using function_type = Result (*)(void*, Args...);
 #endif
 
-        const function_type fptr_;
+    protected:
+        function_type fptr_;
 
-        constexpr explicit base2(function_type f) :
-            fptr_(f)
-        {}
+        constexpr explicit model_ptr(function_type f) : fptr_(f) {}
 
         // Prepending _ because normally nobody should be calling this guy - only mixin
         Result _invoke(void* self, Args&&... args) const
@@ -108,13 +107,13 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         base,
         no_utility_base>;
 
-    struct model_base : model_rtto_base, base2, mixin<model_base>
+    struct model_base : model_rtto_base, model_ptr, mixin<model_base>
     {
         constexpr explicit model_base(
-            typename base2::function_type f,
+            typename model_ptr::function_type f,
             utility_type u) :
             model_rtto_base(u),
-            base2(f)
+            model_ptr(f)
         {}
     };
 
@@ -224,6 +223,14 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 template <typename Result, typename... Args, fn_options o>
 struct function_fnptr2_trivial<Result(Args...), o>
 {
+    using model_ptr = typename function_fnptr2<Result(Args...)>::model_ptr;
+
+    struct model_base : model_ptr,
+        function_fnptr2<Result(Args...)>::template mixin<model_base>
+    {
+        constexpr explicit model_base(typename model_ptr::function_type f) : model_ptr(f) {}
+    };
+
     template <class F>
     class model
     {
@@ -237,22 +244,22 @@ struct function_fnptr2_trivial<Result(Args...), o>
 template <typename Result, typename... Args>
 struct function_fnptr2_oneshot<Result(Args...)>
 {
-    using base2 = typename function_fnptr2<Result(Args...)>::base2;
+    using model_ptr = typename function_fnptr2<Result(Args...)>::model_ptr;
+    using function_type = typename model_ptr::function_type;
 
-    template <class Derived>
-    using mixin = typename function_fnptr2<Result(Args...)>::template mixin<Derived>;
-
-    struct model_base : base2, mixin<model_base>
+    struct model_base : model_ptr,
+        function_fnptr2<Result(Args...)>::template mixin<model_base>
     {
-        constexpr explicit model_base(typename base2::function_type f) : base2(f) {}
-    };
+        constexpr explicit model_base(function_type f) : model_ptr(f) {}
 
+        model_base(const model_base&) = delete;
+        model_base(model_base&&) = delete;
+    };
 
     template <typename F>
     struct model_void : model_base
     {
         using base_type = model_base;
-        using typename base_type::function_type;
 
         //template <typename U>
         constexpr explicit model_void(F&& u) :
@@ -270,9 +277,11 @@ struct function_fnptr2_oneshot<Result(Args...)>
         static void exec(void* this_, Args...args)
 #endif
         {
-            F& f = ((model_void*)this_)->f;
+            auto self = (model_void*) this_;
+            F& f = self->f;
             f(std::forward<Args>(args)...);
             f.~F();
+            self->fptr_ = nullptr;
         }
     };
 
@@ -280,7 +289,6 @@ struct function_fnptr2_oneshot<Result(Args...)>
     struct model_nonvoid : model_base
     {
         using base_type = model_base;
-        using typename base_type::function_type;
 
         //template <typename U>
         constexpr explicit model_nonvoid(F&& u) :
@@ -294,9 +302,11 @@ struct function_fnptr2_oneshot<Result(Args...)>
 
         static Result exec(void* this_, Args&&...args)
         {
-            F& f = ((model_nonvoid*)this_)->f;
+            auto self = (model_nonvoid*) this_;
+            F& f = self->f;
             Result r = f(std::forward<Args>(args)...);
             f.~F();
+            self->fptr_ = nullptr;
             return r;
         }
     };
