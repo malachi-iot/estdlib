@@ -148,7 +148,8 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 #endif
         explicit model(F&& u) :
             base_type(
-                static_cast<function_type>(&model::exec),
+                //static_cast<function_type>(&model::exec),
+                &model::exec,
                 utility),
             f(std::forward<F>(u))
         {
@@ -158,7 +159,8 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 #endif
         explicit model(const F& u) :
             base_type(
-                static_cast<function_type>(&model::exec),
+                //static_cast<function_type>(&model::exec),
+                &model::exec,
                 utility),
             f(u)
         {
@@ -245,87 +247,62 @@ struct function_fnptr2_trivial<Result(Args...), o>
 template <typename Result, typename... Args>
 struct function_fnptr2_oneshot<Result(Args...)>
 {
-    using model_ptr = typename function_fnptr2<Result(Args...)>::model_ptr;
-    using function_type = typename model_ptr::function_type;
-
-    struct model_base : model_ptr,
-        function_fnptr2<Result(Args...)>::template mixin<model_base>
-    {
-        constexpr explicit model_base(function_type f) : model_ptr(f) {}
-
-        model_base(const model_base&) = delete;
-        model_base(model_base&&) = delete;
-    };
+    using model_base = typename function_fnptr2_trivial<Result(Args...)>::model_base;
 
     template <typename F>
-    struct model_void : model_base
+    class model : public model_base
     {
         using base_type = model_base;
+        using base_type::fptr_;
 
-        //template <typename U>
-        constexpr explicit model_void(F&& u) :
+#if FEATURE_ESTD_FUNCTION_RVALUE
+    void exec_ll(bool_constant<true>, Args&&...args)
+#else
+    void exec_ll(bool_constant<true>, Args...args)
+#endif
+    {
+        F& f = *functor_.get();
+        f(std::forward<Args>(args)...);
+        f.~F();
+        fptr_ = nullptr;
+    }
+
+#if FEATURE_ESTD_FUNCTION_RVALUE
+    Result exec_ll(bool_constant<false>, Args&&...args)
+#else
+    Result exec_ll(bool_constant<false>, Args...args)
+#endif
+    {
+        F& f = *functor_.get();
+        Result r = f(std::forward<Args>(args)...);
+        f.~F();
+        fptr_ = nullptr;
+        return r;
+    }
+
+    public:
+        constexpr explicit model(F&& u) :
             base_type(
-                static_cast<function_type>(&model_void::exec)),
+                //static_cast<typename model_base::function_type>(&model::exec)),
+                &model::exec),
             functor_(in_place_t{}, std::forward<F>(u))
         {
         }
 
-        ~model_void()
-        {
-            if(base_type::fptr_)   functor_.destroy();
-        }
+        ~model()    { if(fptr_)   functor_.destroy(); }
 
+        // Using instance_storage to excercise stronger control over object life cycle
         estd::internal::instance_storage<F> functor_;
 
 #if FEATURE_ESTD_FUNCTION_RVALUE
-        static void exec(void* this_, Args&&...args)
+        static Result exec(void* self, Args&&...args)
 #else
-        static void exec(void* this_, Args...args)
+        static Result exec(void* self, Args...args)
 #endif
         {
-            auto self = (model_void*) this_;
-            F& f = *self->functor_.get();
-            f(std::forward<Args>(args)...);
-            f.~F();
-            self->fptr_ = nullptr;
+            return ((model*) self)->exec_ll(is_void<Result>{}, std::forward<Args>(args)...);
         }
     };
-
-    template <typename F>
-    struct model_nonvoid : model_base
-    {
-        using base_type = model_base;
-
-        //template <typename U>
-        constexpr explicit model_nonvoid(F&& u) :
-            base_type(
-                static_cast<function_type>(&model_nonvoid::exec)),
-            functor_(in_place_t{}, std::forward<F>(u))
-        {
-        }
-
-        ~model_nonvoid()
-        {
-            if(base_type::fptr_)   functor_.destroy();
-        }
-
-        estd::internal::instance_storage<F> functor_;
-
-        static Result exec(void* this_, Args&&...args)
-        {
-            auto self = (model_nonvoid*) this_;
-            F& f = *self->functor_.get();
-            Result r = f(std::forward<Args>(args)...);
-            f.~F();
-            self->fptr_ = nullptr;
-            return r;
-        }
-    };
-
-    template <class F>
-    using model = conditional_t<is_void<Result>::value,
-        model_void<F>,
-        model_nonvoid<F> >;
 };
 
 }}}
