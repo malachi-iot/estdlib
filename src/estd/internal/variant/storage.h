@@ -594,6 +594,13 @@ class instance_storage : protected variant_storage_base<is_trivially_constructib
 public:
     // NOLINTBEGIN
 
+    template <class ...Args>
+    constexpr explicit instance_storage(in_place_t, Args&&...args) :
+        base_type(in_place_index_t<0>{}, std::forward<Args>(args)...)
+    {}
+
+    instance_storage() = default;
+
     pointer get() { return base_type::template get<0>(); }
     constexpr const_pointer get() const { return base_type::template get<0>(); }
 

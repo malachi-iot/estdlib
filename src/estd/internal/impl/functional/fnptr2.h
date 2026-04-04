@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../variant/storage.h"
 #include "../../type_traits.h"
 #include "../../rtto.h"
 
@@ -265,11 +266,16 @@ struct function_fnptr2_oneshot<Result(Args...)>
         constexpr explicit model_void(F&& u) :
             base_type(
                 static_cast<function_type>(&model_void::exec)),
-            f(std::forward<F>(u))
+            functor_(in_place_t{}, std::forward<F>(u))
         {
         }
 
-        F f;
+        ~model_void()
+        {
+            if(base_type::fptr_)   functor_.destroy();
+        }
+
+        estd::internal::instance_storage<F> functor_;
 
 #if FEATURE_ESTD_FUNCTION_RVALUE
         static void exec(void* this_, Args&&...args)
@@ -278,7 +284,7 @@ struct function_fnptr2_oneshot<Result(Args...)>
 #endif
         {
             auto self = (model_void*) this_;
-            F& f = self->f;
+            F& f = *self->functor_.get();
             f(std::forward<Args>(args)...);
             f.~F();
             self->fptr_ = nullptr;
@@ -294,16 +300,21 @@ struct function_fnptr2_oneshot<Result(Args...)>
         constexpr explicit model_nonvoid(F&& u) :
             base_type(
                 static_cast<function_type>(&model_nonvoid::exec)),
-            f(std::forward<F>(u))
+            functor_(in_place_t{}, std::forward<F>(u))
         {
         }
 
-        F f;
+        ~model_nonvoid()
+        {
+            if(base_type::fptr_)   functor_.destroy();
+        }
+
+        estd::internal::instance_storage<F> functor_;
 
         static Result exec(void* this_, Args&&...args)
         {
             auto self = (model_nonvoid*) this_;
-            F& f = self->f;
+            F& f = *self->functor_.get();
             Result r = f(std::forward<Args>(args)...);
             f.~F();
             self->fptr_ = nullptr;

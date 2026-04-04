@@ -522,12 +522,13 @@ TEST_CASE("functional")
                         void)> > _fb2;
 
                 int counter = 0;
-                int counter2 = 0;
+                int dtor_counter = 0;
+                int dtor_counter2 = 0;
 
                 estd::test::Dummy dummy1, dummy2;
 
-                dummy1.inc_on_destruct = &counter;
-                dummy2.inc_on_destruct = &counter2;
+                dummy1.inc_on_destruct = &dtor_counter;
+                dummy2.inc_on_destruct = &dtor_counter2;
 
                 {
                     // Beware there's a copy and a move of 'dummy1'
@@ -550,18 +551,15 @@ TEST_CASE("functional")
                         f();
                         f2();
 
-                        REQUIRE(counter == 2);
-                        REQUIRE(counter2 == 1);
+                        REQUIRE(counter == 1);
+                        REQUIRE(dtor_counter2 == 1);
                     }
 
-                    REQUIRE(counter == 2);
+                    REQUIRE(counter == 1);
                 }
 
-                // NOTE: It's a feature not a bug, dtor is called once too many times.
-                // that is because _opt flavor is conceived of to work in a placement new
-                // scenario where the "delete" never happens.
-                REQUIRE(counter == 3);
-                REQUIRE(counter2 == 2);
+                REQUIRE(dtor_counter == 1);
+                REQUIRE(dtor_counter2 == 1);
             }
         }
         SECTION("aliased")
