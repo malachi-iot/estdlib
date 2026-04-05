@@ -2,6 +2,10 @@
 
 #include "../raw/type_traits.h"
 
+#if FEATURE_STD_SPAN
+#include <span>
+#endif
+
 namespace estd {
 
 namespace detail {
@@ -23,7 +27,18 @@ inline constexpr size_t dynamic_extent = detail::dynamic_extent::value;
 namespace detail {
 
 template <class T, size_t N>
-struct is_span<estd::span<T, N>> : true_type {};
+struct is_span<estd::span<T, N>> : true_type
+{
+    static constexpr bool std_span = false;
+};
+
+#if FEATURE_STD_SPAN
+template <class T, size_t N>
+struct is_span<std::span<T, N>> : true_type
+{
+    static constexpr bool std_span = true;
+};
+#endif
 
 }
 

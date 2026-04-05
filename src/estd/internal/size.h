@@ -80,14 +80,14 @@ constexpr size_t container_traits_core<Value, Extent>::extent;
 
 // Underlying feeder for begin, end, size
 // DEBT: Rename to something like container_traits_standard
-template <class Container>
+template <class Container, class ConstIterator = typename Container::const_iterator>
 struct container_traits_base :
     type_identity<Container>,
     container_traits_core<typename Container::value_type>
 {
     using size_type = decltype(std::declval<Container>().size());
     using iterator = typename Container::iterator;
-    using const_iterator = typename Container::const_iterator;
+    using const_iterator = ConstIterator;
 
     static constexpr iterator begin(Container& c)               { return c.begin(); }
     static constexpr iterator end(Container& c)                 { return c.end(); }
@@ -104,7 +104,10 @@ template <class T>
 struct container_traits<
     T,
     enable_if_t<container_bypass<T>::value == false && is_container<T>::value>> :
-    container_traits_base<T> {};
+    container_traits_base<T>
+{
+
+};
 
 template <class T, size_t N>
 struct container_traits<estd::span<T, N>> :
@@ -116,7 +119,7 @@ struct container_traits<estd::span<T, N>> :
 #if FEATURE_STD_SPAN
 template <class T, size_t N>
 struct container_traits<std::span<T, N>, enable_if_t<(N > 0)>> :
-    container_traits_base<std::span<T, N>>
+    container_traits_base<std::span<T, N>, typename std::span<T, N>::const_pointer>
 {
     static constexpr size_t extent = N;
 };
