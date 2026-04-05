@@ -12,21 +12,21 @@
 
 namespace estd { namespace detail { namespace impl {
 
-// DORMANT: To be used by all flavors of function_fnptr2
+// EXPERIMENTAL
 template <typename Result, typename... Args>
 struct function_fnptr2_model
 {
     // Effectively a functor itself wrapping our true functor - adding mainly 'exec' and of
     // course bringing in whatever Base things we want to prepend
     template <class F, class Base>
-    class model : public Base
+    class model_functor : public Base
     {
         //static_assert(estd::is_base_of<base, Base>::value, "Must derive from 'base'");
 
         F functor_;
 
     public:
-        constexpr explicit model(F&& f) :
+        constexpr explicit model_functor(F&& f) :
             functor_{std::forward<F>(f)}
         {}
 
@@ -37,15 +37,13 @@ struct function_fnptr2_model
             return functor_(std::forward<Args>(args)...);
         }
 
-        ESTD_CPP_DEFAULT_RULE_OF_5(model);
-
 #if FEATURE_ESTD_FUNCTION_RVALUE
-        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args&&...args)
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* self, Args&&...args)
 #else
-        ESTD_CPP_CONSTEXPR(14) static Result exec(void* _this, Args...args)
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* self, Args...args)
 #endif
         {
-            return ((model*)_this)->operator()(std::forward<Args>(args)...);    // NOLINT
+            return ((model_functor*)self)->operator()(std::forward<Args>(args)...);    // NOLINT
         }
     };
 };
@@ -95,25 +93,13 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 
 
     static constexpr fn_options options = o;
-    // DEBT: Make this optional and default to off
-    static constexpr bool has_utility = true; //o & fn_options::FN_COPY;
 
-    struct no_utility_base
-    {
-        ESTD_CPP_DEFAULT_RULE_OF_5(no_utility_base)
-        constexpr explicit no_utility_base(utility_type) {}
-    };
-
-    using model_rtto_base = conditional_t<has_utility,
-        base,
-        no_utility_base>;
-
-    struct model_base : model_rtto_base, model_ptr, mixin<model_base>
+    struct model_base : base, model_ptr, mixin<model_base>
     {
         constexpr explicit model_base(
             typename model_ptr::function_type f,
             utility_type u) :
-            model_rtto_base(u),
+            base(u),
             model_ptr(f)
         {}
     };
@@ -151,7 +137,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
                 //static_cast<function_type>(&model::exec),
                 &model::exec,
                 utility),
-            f(std::forward<F>(u))
+            f(std::move(u))
         {
         }
 
@@ -235,11 +221,30 @@ struct function_fnptr2_trivial<Result(Args...), o>
     };
 
     template <class F>
-    class model
+    class model : public model_base
     {
-        // Not ready, see https://github.com/malachi-iot/estdlib/issues/171
-        static_assert(estd::is_trivially_constructible<F>::value, "F must be trivial");
-        //static_assert(estd::is_trivially_moveable<F>::value, "F must be trivial");
+        static_assert(is_trivially_constructible<F>::value, "F must be trivial");
+        static_assert(is_trivially_move_constructible<F>::value, "F must be trivial");
+        static_assert(is_trivially_destructible<F>::value, "F must be trivial");
+
+        F functor_;
+
+    public:
+        constexpr explicit model(F&& u) :
+            model_base(&model::exec),
+            functor_(std::move(u))
+        {
+        }
+
+#if FEATURE_ESTD_FUNCTION_RVALUE
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* self, Args&&...args)
+#else
+        ESTD_CPP_CONSTEXPR(14) static Result exec(void* self, Args...args)
+#endif
+        {
+            return ((model*)self)->functor_(std::forward<Args>(args)...);
+        }
+
     };
 };
 
