@@ -3,6 +3,8 @@
 #include "../../internal/chrono.h"
 #include "../../internal/fwd/chrono.h"
 
+#include "type_traits.h"
+
 #ifdef FEATURE_ESTD_CHRONO
 
 namespace estd { namespace chrono {

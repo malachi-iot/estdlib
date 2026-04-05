@@ -12,11 +12,8 @@ namespace estd {
 template <class T, class U>
 using is_assignable = std::is_assignable<T, U>;
 
-template <class T>
-using is_copy_assignable = std::is_copy_assignable<T>;
-
-template <class T>
-using is_move_assignable = std::is_move_assignable<T>;
+using std::is_copy_assignable;
+using std::is_move_assignable;
 
 template <class T>
 using is_nothrow_move_assignable = std::is_nothrow_move_assignable<T>;

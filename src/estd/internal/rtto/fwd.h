@@ -4,7 +4,7 @@
 
 namespace estd { namespace internal {
 
-template <class T, class IsDefaultConstructible = std::is_trivially_default_constructible<T>>
+template <class T, class IsDefaultConstructible = is_trivially_default_constructible<T>>
 struct rtto_traits;
 
 template <class T, class Traits = rtto_traits<T>>

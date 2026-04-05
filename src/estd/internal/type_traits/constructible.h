@@ -7,25 +7,19 @@
 
 namespace estd {
 
-// DEBT: Copy/paste inline version of this from LLVM, GNU, etc.
-#if __cpp_alias_templates
 template <class T, class ...TArgs>
 using is_constructible = std::is_constructible<T, TArgs...>;
 
 template <class T>
 using is_copy_constructible = std::is_copy_constructible<T>;
 
-template <class T>
-using is_move_constructible = std::is_move_constructible<T>;
-
 template <class T, class ...TArgs>
 using is_nothrow_constructible = std::is_nothrow_constructible<T, TArgs...>;
 
-template <class T>
-using is_nothrow_move_constructible = std::is_nothrow_move_constructible<T>;
-
-template <class T, class ...TArgs>
-using is_trivially_constructible = std::is_trivially_constructible<T, TArgs...>;
+using std::is_nothrow_move_constructible;
+using std::is_trivially_constructible;
+using std::is_trivially_default_constructible;
+using std::is_move_constructible;
 
 #if __cpp_inline_variables
 template <class T, class ...TArgs>
@@ -38,14 +32,12 @@ template <class T, class ...TArgs>
 inline constexpr bool is_trivially_constructible_v = is_trivially_constructible<T, TArgs...>::value;
 #endif
 
-#endif
-
 }
-#endif
+#endif  // FEATURE_ESTD_TYPE_TRAITS_ALIASED
 
 // Partially enabling our own flavor even when aliasing is requested just for unit test
 // scenarios
-#if __cpp_alias_templates && (UNIT_TESTING || FEATURE_ESTD_TYPE_TRAITS_ALIASED == false)
+#if (UNIT_TESTING || FEATURE_ESTD_TYPE_TRAITS_ALIASED == false)
 
 #include "../raw/type_traits.h"
 #include "../utility/declval.h"
@@ -80,6 +72,13 @@ struct is_move_constructible : false_type {};
 template <class T>
 struct is_move_constructible<
     void_t<decltype(T(std::declval<T&&>()))>, T> : true_type {};
+
+#if __GNUC__
+// See https://rocm.docs.amd.com/projects/llvm-project/en/docs-6.2.1/LLVM/clang/html/LanguageExtensions.html
+template <class T, class ...Args>
+using is_trivially_constructible = bool_constant<__is_trivially_constructible(T, Args...)>;
+#endif
+
 }
 
 #if FEATURE_ESTD_TYPE_TRAITS_ALIASED == false

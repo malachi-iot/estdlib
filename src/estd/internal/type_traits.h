@@ -18,6 +18,7 @@
 #include "type_traits/is_function.h"
 #include "type_traits/is_convertible.h"
 #include "type_traits/is_member.h"
+#include "type_traits/is_movable.h"
 #include "type_traits/make_unsigned.h"
 #include "type_traits/is_trivial.h"
 
