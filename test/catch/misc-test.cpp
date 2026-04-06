@@ -15,7 +15,7 @@ TEST_CASE("miscellaneous")
 {
     SECTION("monostate")
     {
-        REQUIRE(estd::is_empty_f<estd::monostate>());
+        REQUIRE(estd::is_empty<estd::monostate>());
         REQUIRE(monostate{} == monostate{});
 
         SECTION("hash")

@@ -39,9 +39,6 @@ void forwarder(TArgs&&...args)
     forwarder_func(std::forward<TArgs>(args)...);
 }
 
-template <typename T>
-using fb = detail::v2::function<T, detail::impl::function_virtual>;
-
 template <template <class, detail::impl::fn_options> class Impl, typename F>
 struct ProvidedTest1;
 
@@ -340,37 +337,6 @@ TEST_CASE("functional")
                 }
             }
         }
-        SECTION("place_model")
-        {
-            //using fn_type = detail::v2::function<void(), detail::impl::function_fnptr2>;
-            using fn_type = detail::v2::function<void(), detail::impl::function_virtual>;
-            fn_type f;
-            char raw[64];
-            int counter1 = 0;
-            int counter2 = 10;
-
-            SECTION("void*")
-            {
-                void* p = raw;
-                f = fn_type::place_model(p, [&counter1, counter2]
-                    { counter1 += counter2; });
-
-                f();
-
-                REQUIRE(counter1 == counter2);
-            }
-            SECTION("array")
-            {
-                f = fn_type::place_model(raw, [&counter1, counter2]
-                    { counter1 += counter2; });
-
-                f();
-
-                REQUIRE(counter1 == counter2);
-            }
-
-            //fn_type::place_model([&]());
-        }
     }
     SECTION("obsolete")
     {
@@ -562,21 +528,6 @@ TEST_CASE("functional")
                 REQUIRE(dtor_counter2 == 1);
             }
         }
-        SECTION("aliased")
-        {
-            fb<void(int&&)> f;
-
-            struct model : decltype(f)::model_base
-            {
-                int counter = 0;
-
-                void operator()(int&& v) override
-                {
-                    counter += v;
-                }
-            };
-
-        }
     }
     SECTION("impl")
     {
@@ -627,7 +578,7 @@ TEST_CASE("functional")
 
             p2 m2(&context);
 
-            typedef fn1_type::imbue<ProvidedTest2, float> type1;
+            using type1 = fn1_type::imbue<ProvidedTest2, float>;
 
             type1 p3;
 
@@ -879,8 +830,8 @@ TEST_CASE("functional")
                 REQUIRE(m1.f.val1 == 5);
 
                 byte raw2[sizeof(m1)], raw3[sizeof(m1)];
-                auto model2 = (decltype(m1)*) raw2;
-                auto model3 = (decltype(m1)*) raw3;
+                auto model2 = (decltype(m1)*) raw2; // NOLINT
+                auto model3 = (decltype(m1)*) raw3; // NOLINT
                 model_base* mb2 = model2;
                 model_base* mb3 = model3;
 
@@ -958,8 +909,8 @@ TEST_CASE("functional")
 
                 fb1(5);
 
-                REQUIRE(m1.f.moved_);
-                REQUIRE(m1.f.val1 == 5);
+                REQUIRE(m1.functor().moved_);
+                REQUIRE(m1.functor().val1 == 5);
 
                 byte raw[sizeof(m1)];
 

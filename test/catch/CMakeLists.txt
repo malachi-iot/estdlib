@@ -70,6 +70,7 @@ else()
         expected-test.cpp
         experimental-test.cpp
         functional-test.cpp
+        functional/virtual-test.cpp
         hash-test.cpp
         ios-test.cpp
         iostream-test.cpp

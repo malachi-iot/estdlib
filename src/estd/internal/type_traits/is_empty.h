@@ -5,7 +5,7 @@
 
 namespace estd {
 
-#if defined(FEATURE_CPP_CONSTEXPR) && FEATURE_ESTD_IS_EMPTY
+#if FEATURE_ESTD_IS_EMPTY
 #if defined(FEATURE_CPP_INLINE_VARIABLES)
 template <class T>
 inline constexpr bool is_empty_v = is_empty<T>::value;
@@ -15,6 +15,7 @@ inline constexpr bool is_empty_v = is_empty<T>::value;
 /// \tparam T
 /// \return
 template <class T>
+[[deprecated("Use is_empty<T>() instead")]]
 inline constexpr bool is_empty_f() { return is_empty<T>::value; }
 #endif
 
