@@ -76,24 +76,38 @@ concept BufferPolicy = requires
 
 
 template <class T>
+concept DynamicArrayPolicy = requires(T p)
+{
+    p.grow_by();
+};
+
+template <class T>
 concept AllocatedArrayOperations = requires
 {
     T::copy_into();
 };
 #endif
 
-template <ESTD_CPP_CONCEPT(AllocatedArrayImpl) TImpl>
+template <ESTD_CPP_CONCEPT(AllocatedArrayImpl)>
 class allocated_array;
 
 namespace impl {
 
+// DEBT: Fixed size 32 far from ideal https://github.com/malachi-iot/estdlib/issues/188, though this
+// new explicit policy is a step in the right direction
+struct default_dynamic_array_policy
+{
+    // EXPERIMENTAL
+    constexpr static unsigned grow_by() { return 32; }
+};
+
 // See reference implementation near bottom of internal/impl/dynamic_array.h
-template <class TAllocator, class TPolicy>
+template <class Allocator, class Policy>
 struct dynamic_array;
 
 // TODO: Fixup name.  Specializer to reveal size of either
 // an explicitly-sized or null-terminated entity
-template <class TAllocator, bool null_terminated, bool size_equals_capacity>
+template <class Allocator, bool null_terminated, bool size_equals_capacity>
 struct dynamic_array_length;
 
 

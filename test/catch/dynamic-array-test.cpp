@@ -55,8 +55,9 @@ struct synthetic_impl
 
 TEST_CASE("dynamic array")
 {
+    using policy_type = internal::impl::default_dynamic_array_policy;
     using da1_type = internal::dynamic_array<internal::impl::dynamic_array<
-        estd::internal::single_fixedbuf_allocator<int, 20>, void> >;
+        estd::internal::single_fixedbuf_allocator<int, 20>, policy_type> >;
     using pa1_type = experimental::private_array<pa_impl>;
 
     da1_type da1;

@@ -429,6 +429,10 @@ struct dynamic_array : public
 
     using policy_type = Policy;
 
+    // Won't always be the case (though typical) - prep code for
+    // https://github.com/malachi-iot/estdlib/issues/188
+    static_assert(is_void<Policy>() || is_empty<Policy>(), "0-size policy required");
+
     ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
     constexpr dynamic_array() = default;

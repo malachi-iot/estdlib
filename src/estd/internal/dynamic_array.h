@@ -70,9 +70,9 @@ public:
     using base_type::lock;
     using base_type::unlock;
 
-    typedef typename base_type::allocator_type allocator_type;
-    typedef typename base_type::allocator_traits allocator_traits;
-    typedef typename base_type::impl_type impl_type;
+    using typename base_type::allocator_type;
+    using typename base_type::allocator_traits;
+    using typename base_type::impl_type;
 
     typedef typename allocator_traits::handle_type handle_type;
     //typedef typename allocator_traits::handle_with_size handle_with_size;
@@ -97,6 +97,8 @@ protected:
     ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return base_type::m_impl; }
 
     constexpr const impl_type& impl() const { return base_type::m_impl; }
+
+    static constexpr typename impl_type::policy_type policy() { return {}; }
 
     // Use this instead of 'success' ptr
     // If success, grew by requested value - returns the size we started with
@@ -160,7 +162,8 @@ protected:
         // possibly resulting in big and crusty code here
 
         const size_type starting_size = size();
-        static constexpr size_type pad = ((32 + sizeof(value_type)) / sizeof(value_type));
+        static constexpr size_type pad_bytes = policy().grow_by();
+        static constexpr size_type pad = ((pad_bytes + sizeof(value_type)) / sizeof(value_type));
 
         // TODO: assert increase_by is a sensible value
         // above 0 and less than ... something
@@ -340,9 +343,9 @@ protected:
         unlock();
     }
 
-    template <class TForeignImpl>
+    template <class Impl2>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(
-        const allocated_array<TForeignImpl>& copy_from) :
+        const allocated_array<Impl2>& copy_from) :
         base_type(copy_from) {}
 
     /*

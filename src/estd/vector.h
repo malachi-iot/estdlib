@@ -12,7 +12,9 @@ template <class T, class Allocator
           = std::allocator<T>
 #endif
           >
-using vector = internal::dynamic_array<internal::impl::dynamic_array<Allocator, void>>;
+using vector = internal::dynamic_array<
+    internal::impl::dynamic_array<
+        Allocator, internal::impl::default_dynamic_array_policy>>;
 
 
 namespace layer1 {
@@ -23,8 +25,8 @@ class vector : public estd::vector<T, estd::layer1::allocator<T, N>>
     using base_type = estd::vector<T, estd::layer1::allocator<T, N>>;
 
 public:
-    typedef typename base_type::reference reference;
-    typedef typename base_type::const_reference const_reference;
+    using typename base_type::reference;
+    using typename base_type::const_reference;
 
     ESTD_CPP_DEFAULT_CTOR(vector)
 
