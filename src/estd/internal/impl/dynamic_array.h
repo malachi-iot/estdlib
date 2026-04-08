@@ -408,7 +408,7 @@ struct is_consttag_present : estd::false_type {};
 template<typename T>
 struct is_consttag_present<T, typename has_typedef<typename T::is_constant_tag_exp>::type> : estd::true_type {};
 
-template <class Allocator, class Policy>
+template <class Allocator, ESTD_CPP_CONCEPT(DynamicArrayPolicy) Policy>
 struct dynamic_array : public
         dynamic_array_base<
             typename estd::remove_reference<Allocator>::type,

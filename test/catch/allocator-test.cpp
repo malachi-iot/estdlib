@@ -170,8 +170,9 @@ TEST_CASE("allocator tests")
     {
         SECTION("layer1")
         {
-            typedef estd::layer1::allocator<int, 100 > allocator_type;
-            estd::internal::impl::dynamic_array<allocator_type, void> dai;
+            using policy_type = internal::impl::default_dynamic_array_policy;
+            using allocator_type = estd::layer1::allocator<int, 100 >;
+            estd::internal::impl::dynamic_array<allocator_type, policy_type> dai;
 
             int capacity = dai.capacity();
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../platform.h"
+#include "../container/fwd.h"
 
 #if __cpp_lib_concepts
 #include <concepts>
@@ -102,7 +103,7 @@ struct default_dynamic_array_policy
 };
 
 // See reference implementation near bottom of internal/impl/dynamic_array.h
-template <class Allocator, class Policy>
+template <class Allocator, ESTD_CPP_CONCEPT(DynamicArrayPolicy) Policy>
 struct dynamic_array;
 
 // TODO: Fixup name.  Specializer to reveal size of either

@@ -161,8 +161,9 @@ TEST_CASE("dynamic array")
         // even though that's an edge case.  Currently pgm_string and basic_string_view share
         // code with this, even though they aren't really dynamic
 
+        using policy_type = internal::impl::default_dynamic_array_policy;
         using da2_type = internal::dynamic_array<internal::impl::dynamic_array<
-            estd::internal::single_fixedbuf_allocator<int, 20, const int*>, void> >;
+            estd::internal::single_fixedbuf_allocator<int, 20, const int*>, policy_type> >;
 
         constexpr da2_type da2(data_);
 

@@ -23,6 +23,7 @@ concept Container = requires(T t)
 
     t.begin();
     t.end();
+    t.empty();
 };
 
 template <class T>
