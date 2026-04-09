@@ -63,9 +63,11 @@ public:
 protected:
     // NOTE: It's conceivable we could use a value_evaporator here in situations where
     // allocated array pointed to a static const(expr) * of some kind
-    Impl m_impl;
+    Impl impl_;
 
 public:
+    static constexpr typename impl_type::policy_type policy() { return {}; }
+
     static bool constexpr is_locking = internal::has_locking_tag<allocator_type>::value;
 
     // DEBT: a_it = allocator_iterator, fix up name after we formalize or phase out
@@ -76,27 +78,27 @@ public:
     // you gotta do it, so these are public
     ESTD_CPP_CONSTEXPR(17) pointer lock(size_type pos = 0, size_type count = 0)
     {
-        return &m_impl.lock(pos, count);
+        return &impl_.lock(pos, count);
     }
 
     constexpr const_pointer clock(size_type pos = 0, size_type count = 0) const
     {
-        return &m_impl.clock(pos, count);
+        return &impl_.clock(pos, count);
     }
 
     void unlock()
     {
-        m_impl.unlock();
+        impl_.unlock();
     }
 
     void cunlock() const
     {
-        m_impl.cunlock();
+        impl_.cunlock();
     }
 
 protected:
     explicit allocated_array(allocator_type& alloc) :
-        m_impl(alloc) {}
+        impl_(alloc) {}
 
     allocated_array(const allocated_array& copy_from)
 #ifdef FEATURE_CPP_DEFAULT_FUNCDEF
@@ -117,7 +119,7 @@ protected:
 
         estd::copy(initlist.begin(), initlist.end(), p);
 
-        m_impl.size(initlist.size());
+        impl_.size(initlist.size());
 
         unlock();
     }
@@ -126,7 +128,7 @@ protected:
     handle_with_offset offset(size_type  pos) const
     {
         //return helper.get_allocator().offset(helper.handle(), pos);
-        return m_impl.offset(pos);
+        return impl_.offset(pos);
     }
 
     // internal version of replace not conforming to standard
@@ -135,7 +137,7 @@ protected:
     // TODO: change to assign
     ESTD_CPP_CONSTEXPR(14) void assign(const value_type* buf, size_type len)
     {
-        m_impl.copy_into(buf, 0, len);
+        impl_.copy_into(buf, 0, len);
     }
 
 
@@ -175,21 +177,15 @@ protected:
 public:
     constexpr allocated_array() = default;
 
-    template <class THelperParam>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT allocated_array(const THelperParam& p) :
-            m_impl(p) {}
-
     // DEBT: Use ESTD_CPP_FORWARDING_CTOR_MEMBER if we can
     // DEBT: Consider requiring in_place_t here
     // DEBT: Use && here, not doing so because a complex failure with impl::dynamic_array occurs
     // and at the moment we are only adding this for true constexpr init on AVR (which is tricky
     // to do with initializer_list)
-#if __cpp_variadic_templates
     template <class ...T>
     constexpr explicit allocated_array(T...t) :
-        m_impl(t...)
+        impl_(t...)
     {}
-#endif
 
 #if UNUSED
     // TODO: make accessor do this comparison in a self contained way
@@ -243,7 +239,7 @@ public:
 
     typedef pointer traditional_iterator;
 
-    constexpr size_type size() const { return m_impl.size(); }
+    constexpr size_type size() const { return impl_.size(); }
 
     allocator_valref get_allocator() const
     {
@@ -251,7 +247,7 @@ public:
         // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
         // const call (important because we need to conform to const for front, back, etc)
         // because we need locking, side affects are to be expected
-        return const_cast<impl_type&>(m_impl).get_allocator();
+        return const_cast<impl_type&>(impl_).get_allocator();
     }
 
 #if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
@@ -342,18 +338,18 @@ public:
 
     constexpr size_type max_size() const
     {
-        return m_impl.max_size();
+        return impl_.max_size();
     }
 
     constexpr bool empty() const
     {
-        return m_impl.empty();
+        return impl_.empty();
     }
 
     // Non standard and not yet functional
-    ESTD_CPP_CONSTEXPR_RET bool full() const
+    constexpr bool full() const
     {
-        return m_impl.full();
+        return impl_.full();
     }
 
     // copy (into dest)

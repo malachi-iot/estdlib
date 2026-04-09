@@ -69,6 +69,8 @@ public:
     using base_type::cbegin;
     using base_type::lock;
     using base_type::unlock;
+    using base_type::policy;
+    using base_type::size;
 
     using typename base_type::allocator_type;
     using typename base_type::allocator_traits;
@@ -84,21 +86,21 @@ public:
     //typedef typename allocator_traits::reference reference; // one of our allocator_traits doesn't reveal this but I can't figure out which one
     typedef typename allocator_traits::handle_with_offset handle_with_offset;
 
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    using reference = value_type&;
+    using const_reference = const value_type&;
 
-    typedef typename base_type::accessor accessor;
+    using typename base_type::accessor;
 
     // TODO: utilize SFINAE if we can
     // ala https://stackoverflow.com/questions/7834226/detecting-typedef-at-compile-time-template-metaprogramming
     //typedef typename allocator_type::accessor accessor_experimental;
 
+    /// @remarks we don't relish exposing internals this way.  However, being a const it's relatively safe
+    /// and is particularly useful for unit testing
+    constexpr const impl_type& impl() const { return base_type::impl_; }
+
 protected:
-    ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return base_type::m_impl; }
-
-    constexpr const impl_type& impl() const { return base_type::m_impl; }
-
-    static constexpr typename impl_type::policy_type policy() { return {}; }
+    ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return base_type::impl_; }
 
     // Use this instead of 'success' ptr
     // If success, grew by requested value - returns the size we started with
@@ -374,12 +376,8 @@ public:
 #endif
 
     // TODO: iterate through and destruct elements
+    // https://github.com/malachi-iot/estdlib/issues/185
     //~dynamic_array() {}
-
-    ESTD_CPP_CONSTEXPR_RET size_type size() const   // NOLINT
-    {
-        return base_type::size();
-    }
 
     constexpr size_type capacity() const { return impl().capacity(); }
 
