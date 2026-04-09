@@ -2,10 +2,15 @@
 
 #include <estd/internal/dynamic_array.h>
 
+// Lower-level internal testing for dynamic_array, feeder of:
+// detail::string
+// vector
+
 using namespace estd;
 using namespace estd::internal;
 
 #include "mem.h"
+#include "test-data.h"
 
 #include "macro/push.h"
 
@@ -53,7 +58,7 @@ struct synthetic_impl
     static const int* offset(unsigned v) { return data_ + v; }
 };
 
-TEST_CASE("dynamic array")
+TEST_CASE("dynamic array: trivial")
 {
     using policy_type = internal::impl::default_dynamic_array_policy;
     using da1_type = internal::dynamic_array<internal::impl::dynamic_array<
@@ -168,6 +173,34 @@ TEST_CASE("dynamic array")
         constexpr da2_type da2(data_);
 
         REQUIRE(da2.empty());
+    }
+}
+
+TEST_CASE("dynamic array: non-trivial")
+{
+    using type = test::Dummy;
+    using policy_type = internal::impl::default_dynamic_array_policy;
+    using da1_type = internal::dynamic_array<internal::impl::dynamic_array<
+        layer1::allocator<type, 20>, policy_type>>;
+
+    int destruct_count = 0;
+
+    SECTION("basics")
+    {
+        {
+            da1_type da1;
+            da1.push_back(type(1, "dummy1", &destruct_count));
+            da1.emplace_back(2, "dummy2", &destruct_count);
+
+            // DEBT: Consider policy which force on/force off/auto-decide whether extra accessor with
+            // lock() is even needed (i.e. layer1::allocator it's purely in the way).  Today it's always forced on.
+            // auto is neat but you'd really want "if constexpr" to handle that
+            REQUIRE(da1[0].lock().initialized_);
+            REQUIRE(da1[1].lock().initialized_);
+        }
+
+        // See https://github.com/malachi-iot/estdlib/issues/185
+        //REQUIRE(destruct_count == 2);
     }
 }
 

@@ -100,16 +100,8 @@ protected:
     explicit allocated_array(allocator_type& alloc) :
         impl_(alloc) {}
 
-    allocated_array(const allocated_array& copy_from)
-#ifdef FEATURE_CPP_DEFAULT_FUNCDEF
-        = default;
-#else
-        : m_impl(copy_from.m_impl)
-    {
-    }
-#endif
+    allocated_array(const allocated_array& copy_from) = default;
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
     // DEBT: Switch this out for a forwarding constructor and do this down
     // at m_impl ctor level - thus opening up more comfortable constexpr
     // possibilities
@@ -123,7 +115,6 @@ protected:
 
         unlock();
     }
-#endif
 
     handle_with_offset offset(size_type  pos) const
     {
@@ -172,7 +163,6 @@ protected:
 
         return r;
     }
-
 
 public:
     constexpr allocated_array() = default;
@@ -494,6 +484,26 @@ public:
         if(raw_size != s_size) return false;
 
         return helper::equal(*this, compare_to, raw_size);
+    }
+
+protected:
+    // 09APR26 'destroy' aren't used yet, prep for https://github.com/malachi-iot/estdlib/issues/185
+    // Needs external party to lock things
+    void destroy_ll(pointer i, const_pointer end)
+    {
+        for(; i != end; ++i)  i->~value_type();
+    }
+
+    /// @remarks presumes size() > 0 AND does not change size()
+    void destroy(unsigned offset = 0)
+    {
+        assert(size() > 0);
+
+        pointer begin = lock(offset);
+
+        destory_ll(begin, begin + size());
+
+        unlock();
     }
 };
 
