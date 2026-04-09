@@ -162,7 +162,7 @@ protected:
         // possibly resulting in big and crusty code here
 
         const size_type starting_size = size();
-        static constexpr size_type pad_bytes = policy().grow_by();
+        static constexpr size_type pad_bytes = policy().pad_bytes();
         static constexpr size_type pad = ((pad_bytes + sizeof(value_type)) / sizeof(value_type));
 
         // TODO: assert increase_by is a sensible value

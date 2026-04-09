@@ -79,7 +79,7 @@ concept BufferPolicy = requires
 template <class T>
 concept DynamicArrayPolicy = requires(T p)
 {
-    p.grow_by();
+    p.pad_bytes();
 };
 
 template <class T>
@@ -99,7 +99,7 @@ namespace impl {
 struct default_dynamic_array_policy
 {
     // EXPERIMENTAL
-    constexpr static unsigned grow_by() { return 32; }
+    constexpr static unsigned pad_bytes() { return 32; }
 };
 
 // See reference implementation near bottom of internal/impl/dynamic_array.h

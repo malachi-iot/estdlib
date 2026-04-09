@@ -33,7 +33,7 @@ struct string_policy<CharTraits, o, Size,
     static constexpr bool is_null_termination(const char& value) { return value == 0; }
 
     // EXPERIMENTAL
-    static constexpr unsigned grow_by() { return 8; }
+    static constexpr unsigned pad_bytes() { return 8; }
 };
 
 // Denotes a string whose buffer size is tracked at runtime via an integer
@@ -48,7 +48,7 @@ struct string_policy<CharTraits, o, Size,
     typedef void is_explicitly_sized_tag_exp;
 
     // EXPERIMENTAL
-    static constexpr unsigned grow_by() { return 8; }
+    static constexpr unsigned pad_bytes() { return 8; }
 };
 
 }}
