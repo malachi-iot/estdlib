@@ -9,7 +9,7 @@ set(FEATURE_ESTD_COMPILE_VERBOSITY 3 CACHE STRING
 
 include(../../tools/cmake/setvars.cmake)
 
-CPMAddPackage("gh:catchorg/Catch2@3.11.0")
+CPMAddPackage("gh:catchorg/Catch2@3.14.0")
 
 include(testrc.cmake)
 

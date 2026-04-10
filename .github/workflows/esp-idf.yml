@@ -7,11 +7,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [v5.3.5, v5.5.4, v6.0]
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: "esp-idf build"
       uses: espressif/esp-idf-ci-action@v1
       with:
-        esp_idf_version: v5.5.4
+        esp_idf_version: ${{ matrix.version }}
         path: 'test/esp-idf/unity'

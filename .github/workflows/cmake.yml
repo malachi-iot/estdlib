@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [ "dev/**", "alpha" ]
+    branches: [ "feat/**", "alpha" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4.2.2
+    - uses: actions/checkout@v6
       with:
         submodules: recursive
 
