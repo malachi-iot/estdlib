@@ -1,0 +1,17 @@
+name: ESP-IDF
+
+on:
+  push:
+    branches: [ "feat/**", "alpha" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: "esp-idf build"
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.5.4
+        path: 'test/esp-idf/unity'
