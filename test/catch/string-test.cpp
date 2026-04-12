@@ -57,6 +57,11 @@ TEST_CASE("string tests")
 
             REQUIRE(s == test_str);
         }
+        SECTION("begin/end init")
+        {
+            // https://en.cppreference.com/w/cpp/string/basic_string/basic_string.html #4
+            layer1::string<32> s(test_str, test_str + strlen(test_str));
+        }
     }
     SECTION("layer 1 null terminated")
     {
@@ -362,7 +367,7 @@ TEST_CASE("string tests")
         char buf3[100];
 
         layer1::basic_string<char, 100> s1;
-        layer2::basic_string<char, 100> s2(buf2, 0);
+        layer2::basic_string<char, 100> s2(buf2, 0);    // NOLINT
 
         s1 = "Hello";
 
@@ -384,8 +389,8 @@ TEST_CASE("string tests")
         // Filters down into map_base somehow... ??
         s1 = "Hello";
 
-        layer2::string<> s2(buf2, 0);
-        layer3::string s3(buf3, 0);
+        layer2::string<> s2(buf2, 0);   // NOLINT
+        layer3::string s3(buf3, 0);     // NOLINT
 
         s2 = s1;
 

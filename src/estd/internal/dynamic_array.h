@@ -346,7 +346,7 @@ protected:
     }
 
     template <class Impl2>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(
+    constexpr explicit dynamic_array(
         const allocated_array<Impl2>& copy_from) :
         base_type(copy_from) {}
 
@@ -361,7 +361,7 @@ protected:
 public:
     constexpr dynamic_array() = default;
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(allocator_type& t) :
+    constexpr explicit dynamic_array(allocator_type& t) :
         base_type(t) {}
 
     // DEBT: a handle related compilation glitch occurs if we try to do perfect forwarding here
@@ -370,10 +370,8 @@ public:
     ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(const Param1 p1) :
         base_type(p1) {}
 
-#if __cpp_initializer_lists
     constexpr dynamic_array(std::initializer_list<value_type> initlist)
         : base_type(initlist) {}
-#endif
 
     // TODO: iterate through and destruct elements
     // https://github.com/malachi-iot/estdlib/issues/185

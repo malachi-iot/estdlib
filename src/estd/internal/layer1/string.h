@@ -27,6 +27,11 @@ public:
 
     constexpr basic_string() = default;
 
+    // DEBT: As implied by https://github.com/malachi-iot/estdlib/issues/88 and
+    // https://github.com/malachi-iot/estdlib/issues/127, base level allocator/dynamic_array
+    // need better flow-through/init constructor support as is evidenced by all these
+    // explicit calls in constructors here.
+
     basic_string(const_pointer s)        // NOLINT
     {
         base_type::operator =(s);
@@ -35,6 +40,13 @@ public:
     basic_string(const_pointer s, size_type count)        // NOLINT
     {
         base_type::assign(s, count);
+    }
+
+    template <class It>
+    basic_string(It first, It last)        // NOLINT
+    {
+        // DEBT: Underlying copy doesn't respond well to this
+        base_type::assign(first, last - first);
     }
 
     template <class Impl>
@@ -52,17 +64,15 @@ public:
 
     CharT* c_str()
     {
-#if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
-#endif
+
         return data();
     }
 
     constexpr const_pointer c_str() const
     {
-#if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
-#endif
+
         return data();
     }
 
