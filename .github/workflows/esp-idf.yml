@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [v5.3.5, v5.5.4, v6.0]
+        version: [v5.3.5, v5.4.3, v5.5.4, v6.0]
+        target: [esp32, esp32s3, esp32c6]
     steps:
     - name: Checkout repo
       uses: actions/checkout@v6
@@ -17,4 +18,5 @@ jobs:
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: ${{ matrix.version }}
+        target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'

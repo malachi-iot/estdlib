@@ -364,11 +364,7 @@ public:
     constexpr explicit dynamic_array(allocator_type& t) :
         base_type(t) {}
 
-    // DEBT: a handle related compilation glitch occurs if we try to do perfect forwarding here
-    //ESTD_CPP_FORWARDING_CTOR(dynamic_array)
-    template <class Param1>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT dynamic_array(const Param1 p1) :
-        base_type(p1) {}
+    ESTD_CPP_FORWARDING_CTOR(dynamic_array)
 
     constexpr dynamic_array(std::initializer_list<value_type> initlist)
         : base_type(initlist) {}
