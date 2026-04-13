@@ -111,7 +111,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // copies into da from first to last
     template <class InputIt>
-    void copy_from(array& da, unsigned pos, InputIt first, InputIt last)
+    static void copy_from(array& da, unsigned pos, InputIt first, InputIt last)
     {
         pointer raw = da.lock(pos);
 

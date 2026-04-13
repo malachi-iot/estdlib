@@ -45,8 +45,9 @@ public:
     template <class It>
     basic_string(It first, It last)        // NOLINT
     {
-        // DEBT: Underlying copy doesn't respond well to this
-        base_type::assign(first, last - first);
+        // DEBT: Having to brute force 'false' (non shrink, non reallocate) is clunky and inconsistent
+        // with above 'assign'
+        base_type::assign(first, last, false);
     }
 
     template <class Impl>

@@ -397,11 +397,11 @@ public:
     }
 
     template <class InputIt>
-    void assign(InputIt first, InputIt last)
+    void assign(InputIt first, InputIt last, bool shrink = true)
     {
-        ensure_total_size(last - first, 0, true);
+        ensure_total_size(last - first, 0, shrink);
 
-        helper::copy(*this, 0, first, last);
+        helper::copy_from(*this, 0, first, last);
     }
 
 //protected:

@@ -61,6 +61,8 @@ TEST_CASE("string tests")
         {
             // https://en.cppreference.com/w/cpp/string/basic_string/basic_string.html #4
             layer1::string<32> s(test_str, test_str + strlen(test_str));
+
+            REQUIRE(s == test_str);
         }
     }
     SECTION("layer 1 null terminated")
