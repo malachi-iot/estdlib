@@ -180,6 +180,13 @@ TEST_CASE("string tests")
                 // As desired, this won't compile since str is const
                 //str += " 2u";
             }
+            SECTION("copy")
+            {
+                char buf[32];
+                layer2::string<32> s(buf, test_str, test_str + strlen(test_str));
+
+                REQUIRE(s == test_str);
+            }
         }
         SECTION("assignment to literal")
         {

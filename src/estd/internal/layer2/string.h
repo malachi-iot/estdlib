@@ -11,15 +11,15 @@ namespace estd { namespace layer2 {
 // DEBT: Rework to only handle null terminated, because otherwise we're looking
 // at a fixed-size string which would be better served by a
 // layer1::basic_string_view
-template<class CharT, size_t N, bool null_terminated,
+template<class Char, size_t N, bool null_terminated,
          class Traits,
          ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
 class basic_string : public estd::internal::basic_string<
-    estd::layer2::allocator<CharT, N>,
+    estd::layer2::allocator<Char, N>,
     StringPolicy >
 {
     using base_type = estd::internal::basic_string<
-            estd::layer2::allocator<CharT, N>,
+            estd::layer2::allocator<Char, N>,
             StringPolicy>;
     using base_t = base_type;
     typedef typename base_t::impl_type helper_type;
@@ -35,37 +35,33 @@ public:
     // - a size=capacity variant, in which str_buffer isn't (necessarily) null terminated
     //   but size() still reflects the right size of the string
     // This particular constructor is good for string literals, assuming CharT is const char
-    constexpr basic_string(CharT* str_buffer) : base_type(str_buffer)
+    constexpr basic_string(Char* str_buffer) : base_type(str_buffer)
     {
     }
 
     // n means assign length to n, ignoring any null termination if present
-    basic_string(CharT* str_buffer, int n) : base_t(str_buffer)
+    basic_string(Char* str_buffer, int n) : base_type(str_buffer)
     {
         // doing this separately from above constructor because not all
         // specializations permit explicitly (re)sizing the string
-        base_t::impl().size(n);
+        base_type::impl().size(n);
     }
 
     /// Alternate initializer, explicitly demanding whether to initialize string
-    /// \param str_buffer
-    /// \param null_terminate_init
-    basic_string(CharT* str_buffer, bool null_terminate_init) : base_t(str_buffer)
+    /// @param str_buffer
+    /// @param null_terminate_init
+    basic_string(Char* str_buffer, bool null_terminate_init) : base_type(str_buffer)
     {
-#ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(null_terminated, "Constructor only valid for null terminated strings");
-#endif
 
         if(null_terminate_init)
             str_buffer[0] = 0;
     }
 
     template <size_type IncomingN>
-    basic_string(CharT (&buffer) [IncomingN]) : base_t(&buffer[0])
+    basic_string(Char (&buffer) [IncomingN]) : base_type(&buffer[0])
     {
-#ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
-#endif
     }
 
     // See 'n' documentation above
@@ -74,11 +70,9 @@ public:
     // a const CharT* is just incorrect as the underlying layer2::basic_string
     // isn't intrinsically const
     template <size_type IncomingN>
-    basic_string(CharT (&buffer) [IncomingN], int n) : base_t(&buffer[0])
+    basic_string(Char (&buffer) [IncomingN], int n) : base_type(&buffer[0])
     {
-#ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(IncomingN >= N || N == 0, "Incoming buffer size incompatible");
-#endif
 
         // FIX: for scenarios where:
         // a) C++03/98 is in effect and
@@ -97,6 +91,14 @@ public:
         copy_from.unlock();
     }
 
+    template <class It>
+    basic_string(Char* buffer, It first, It last) : base_type(buffer)       // NOLINT
+    {
+        // DEBT: Having to brute force 'false' (non shrink, non reallocate) is clunky and inconsistent
+        // with above 'assign'
+        base_type::assign(first, last, false);
+    }
+
     // Assigns incoming copy_from to whatever pointer we are tracking.
     template <class Impl>
     basic_string& operator=(const estd::internal::allocated_array<Impl>& copy_from) // NOLINT
@@ -105,26 +107,24 @@ public:
         return *this;
     }
 
-    basic_string& operator=(const CharT* s)
+    basic_string& operator=(const Char* s)
     {
         //return base_t::operator =(s);
         base_t::assign(s, strlen(s));
         return *this;
     }
 
-    CharT* c_str()
+    Char* c_str()
     {
-#if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
-#endif
+
         return data();
     }
 
-    constexpr const CharT* c_str() const
+    constexpr const Char* c_str() const
     {
-#if __cpp_static_assert
         static_assert(null_terminated, "Only works for null terminated strings");
-#endif
+
         return data();
     }
 
