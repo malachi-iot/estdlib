@@ -788,6 +788,14 @@ TEST_CASE("string tests")
 
         REQUIRE(v == 1234);
     }
+    SECTION("compare")
+    {
+        layer3::const_string lhs = "abc";
+        layer1::string<16> rhs = "def";
+
+        REQUIRE(lhs < rhs);
+        REQUIRE(rhs > lhs);
+    }
     SECTION("internal")
     {
         SECTION("shifted string")

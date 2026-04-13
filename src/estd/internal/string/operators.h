@@ -23,6 +23,30 @@ constexpr bool operator ==(const basic_string<Impl1>& lhs, const basic_string<Im
     return lhs.compare(rhs) == 0;
 }
 
+template <class Impl1, class Impl2>
+constexpr bool operator <(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
+{
+    return lhs.compare(rhs) < 0;
+}
+
+template <class Impl1, class Impl2>
+constexpr bool operator <=(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
+{
+    return lhs.compare(rhs) <= 0;
+}
+
+template <class Impl1, class Impl2>
+constexpr bool operator >(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
+{
+    return lhs.compare(rhs) > 0;
+}
+
+template <class Impl1, class Impl2>
+constexpr bool operator >=(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
+{
+    return lhs.compare(rhs) >= 0;
+}
+
 // DEBT: std::ostream support should actually be elsewhere
 
 #if FEATURE_STD_OSTREAM
