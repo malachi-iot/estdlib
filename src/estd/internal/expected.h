@@ -38,7 +38,6 @@ template <class T, class E>
 struct is_expected<expected<T, E> > : true_type {};
 
 
-#if __cplusplus >= 201103L
 template <class T>
 using expected_ctor_6 = bool_constant<
     is_void<T>::value == false &&
@@ -47,7 +46,6 @@ using expected_ctor_6 = bool_constant<
     is_expected<remove_cvref_t<T>>::value == false &&
     is_unexpected<remove_cvref_t<T>>::value == false
     >;
-#endif
 
 
 // Doesn't need to play with uninitialized storage

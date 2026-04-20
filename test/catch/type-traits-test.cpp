@@ -166,6 +166,8 @@ TEST_CASE("type traits tests")
 
         REQUIRE(v1 == false);
 
+        static_assert(is_convertible<int&, int>::value, "");
+
         v1 = is_constructible<const char*, int>::value;
 
         REQUIRE(v1 == false);

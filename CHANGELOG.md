@@ -1,3 +1,9 @@
+# v0.8.12 - XXXXX26
+
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/195 `expected` converting constructor fix
+
 # v0.8.11 - 10APR26
 
 ## Added Features
@@ -9,7 +15,7 @@
 * `rtto` mechanism for runtime `std::move` operation.  `internal` at this time, meaning API subject to change
 * Minimal FEATURE_ESTD_OSTREAM_FLOAT (ostream precision support) now available
 
-## Quality Updates & Bug Fies
+## Quality Updates & Bug Fixes
 
 * units system:
     * promoted from `internal` namespace now to `estd::units` namespace

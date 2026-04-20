@@ -49,7 +49,7 @@ TEST_CASE("expected")
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
         }
-        SECTION("converting constructor: specific value initialized")
+        SECTION("explicit converting constructor: specific value initialized")
         {
             expected_type e(10);
 
@@ -62,6 +62,19 @@ TEST_CASE("expected")
             //handler("hi");
             // Explicit conversion doesn't work anyway, and that is correct
             //expected_type e2("hi");
+        }
+        SECTION("implicit converting constructor: specific value initialized")
+        {
+            SECTION("int")
+            {
+                int v = 4;
+                auto f = [&](expected_type ex)
+                {
+                    return *ex + 5;
+                };
+
+                REQUIRE(f(v) == 9);
+            }
         }
         SECTION("error state")
         {

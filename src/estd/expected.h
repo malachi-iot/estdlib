@@ -119,10 +119,11 @@ public:
 
     // When U is convertible, converting constructor is implicit.  Aligns with constructor #6 from
     // https://en.cppreference.com/w/cpp/utility/expected/expected.html
-    template <class U,
+    template <class U = remove_cv_t<T>,
         enable_if_t<
             internal::expected_ctor_6<U>::value &&
-            is_convertible<T, U>::value, int > = 0>
+                is_convertible<U, T>::value,
+            int> = 0>
     constexpr expected(U&& v) :
         base_type(in_place_t{}, std::forward<U>(v)),
         has_value_{true}
@@ -131,10 +132,11 @@ public:
     // When U is not convertible, converting constructor is explicit.  Aligns with constructor #6 from
     // https://en.cppreference.com/w/cpp/utility/expected/expected.html.  This expects underlying T
     // has a converting constructor
-    template <class U,
+    template <class U = remove_cv_t<T>,
         enable_if_t<
             internal::expected_ctor_6<U>::value &&
-            !is_convertible<T, U>::value, int > = 0>
+                !is_convertible<U, T>::value,
+            int> = 0>
     constexpr explicit expected(U&& v) :
         base_type(in_place_t{}, std::forward<U>(v)),
         has_value_{true}
@@ -149,7 +151,7 @@ public:
     template <class... Args>
     constexpr explicit expected(in_place_t, Args&&...args) :
         base_type(in_place_t{}, std::forward<Args>(args)...),
-        has_value_(true)
+        has_value_{true}
     {}
 
     template <class... Args>
