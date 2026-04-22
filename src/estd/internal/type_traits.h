@@ -25,3 +25,14 @@
 
 
 #include "../port/support_platform.h"
+
+namespace estd {
+
+// DEBT: Location for this not ideal.  Needs to come after port/type_traits and
+// type_traits/is_trivial
+#if FEATURE_ESTD_UNDERLYING_TYPE
+template <class T>
+using underlying_type_t = typename underlying_type<T>::type;
+#endif
+
+}

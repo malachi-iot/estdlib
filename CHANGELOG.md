@@ -3,6 +3,7 @@
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/195 `expected` converting constructor fix
+* Cleanup of `flags` conversion operators
 
 # v0.8.11 - 10APR26
 

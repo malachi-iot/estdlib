@@ -2,7 +2,7 @@
 
 #include <estd/flags.h>
 
-enum synthetic_flags
+enum synthetic_flags    // NOLINT
 {
     SN_NONE = 0x00,
     SN_CONST = 0x01,
@@ -43,9 +43,9 @@ TEST_CASE("flags (compile-time capable)", "[flags]")
     using t2 = test1<SN_DOUBLE>;
     using t3 = test1<SN_DOUBLE | SN_CONST>;
 
-    static_assert(std::is_same<t1::value_type, int>::value, "");
-    static_assert(std::is_same<t2::value_type, double>::value, "");
-    static_assert(t3::is_const, "");
+    static_assert(std::is_same<t1::value_type, int>::value, "");    // NOLINT
+    static_assert(std::is_same<t2::value_type, double>::value, ""); // NOLINT
+    static_assert(t3::is_const, "");    // NOLINT
 
     assert_double(t2{});
 }

@@ -14,7 +14,6 @@ struct rtto_traits
 {
     using value_type = T;
 
-    // DEBT: Switch these to estd variety for AVR compability
     using is_copy_constructible = estd::is_copy_constructible<value_type>;
     using is_move_constructible = estd::is_move_constructible<value_type>;
     using is_trivially_constructible = estd::is_trivially_constructible<value_type>;

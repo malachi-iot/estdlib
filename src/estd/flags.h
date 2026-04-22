@@ -1,10 +1,17 @@
 #pragma once
 
+#include "internal/raw/type_traits.h"
+#include "port/type_traits.h"
 #include "internal/type_traits/is_trivial.h"
+
+// DEBT: Can't do this yet because is_base_of includes utility which includes fwd to functional which uses flags
+//#include "internal/type_traits.h"
 
 #include "internal/fwd/flags.h"
 
 namespace estd { namespace detail { inline namespace v1 {
+
+// NOLINTBEGIN(*-explicit-constructor)
 
 ///
 /// Designed really to be fully consteval friendly, but works as intended merely as constexpr
@@ -40,13 +47,16 @@ public:
         return *this;
     }
 
+    ESTD_CPP_ATTR_NODISCARD constexpr bool is_set() const { return value_ != value_type{}; }
+
     constexpr operator value_type() const { return value_; }
 
-#if __GNUC_PREREQ(7,3)
-    constexpr operator bool() const { return value_ != value_type{}; }
+    // constexpr conversions like this aren't part of C++ standard, but clang and new-ish GCC support it
+    // technically we don't have to filter it out like this, but better to prohibit it completely in those
+    // early GCC environments to avoid confusion
+#if __GNUC_PREREQ(7,3) || __clang__
+    constexpr operator bool() const { return is_set(); }
 #endif
-
-    constexpr bool is_set() const { return value_ != value_type{}; }
 
     // EXPERIMENTAL - works, but clumsy
     //constexpr bool operator ()() const { return value_ != value_type{}; }
@@ -76,6 +86,7 @@ public:
     }
 };
 
+// NOLINTEND(*-explicit-constructor)
 
 template <class Enum>
 constexpr bool operator==(const flags<Enum>& lhs, const Enum& rhs)
