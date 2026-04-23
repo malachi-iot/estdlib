@@ -1,0 +1,7 @@
+menu "estdlib Unity"
+
+config ESTD_CI_MODE
+    bool "TBD"
+    default false
+
+endmenu
