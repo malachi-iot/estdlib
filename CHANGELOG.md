@@ -1,9 +1,13 @@
 # v0.8.12 - XXXXX26
 
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/192 partial: layer1 implementation for begin/end constructor
+
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/195 `expected` converting constructor fix
-* Cleanup of `flags` conversion operators
+* Cleanup of `flags` conversion operators, LLVM compatibility
 
 # v0.8.11 - 10APR26
 
