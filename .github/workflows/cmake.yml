@@ -10,6 +10,11 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        fail-fast: false
+        cxx_std: [11, 17, 20]
+
     env:
       unit_test_dir: ${{github.workspace}}/test/catch
 
@@ -24,6 +29,10 @@ jobs:
       uses: threeal/cmake-action@v2.1.0
       with:
         source-dir: ${{env.unit_test_dir}}
+        options: |
+          -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
+          -DCMAKE_CXX_STANDARD_REQUIRED=ON
+          # TODO: -DCMAKE_CXX_EXTENSIONS=OFF
 
     - name: Test
       uses: threeal/ctest-action@v1.1.0
