@@ -30,9 +30,10 @@ jobs:
       with:
         source-dir: ${{env.unit_test_dir}}
         options: |
-          -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
-          -DCMAKE_CXX_STANDARD_REQUIRED=ON
-          # TODO: -DCMAKE_CXX_EXTENSIONS=OFF
+          CMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
+          CMAKE_CXX_STANDARD_REQUIRED=ON
+
+      # TODO: -DCMAKE_CXX_EXTENSIONS=OFF
 
     - name: Test
       uses: threeal/ctest-action@v1.1.0
