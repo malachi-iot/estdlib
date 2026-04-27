@@ -13,6 +13,11 @@ if [ ! -f "$FILE" ]; then
     FILE="profiles/${CATEGORY}.matrix.default.json"
 fi
 
+if [ ! -f "$FILE" ]; then
+    echo "Cannot find: $FILE" >&2
+    exit 1
+fi
+
 MATRIX=$(cat "$FILE")
 
 echo "Using: $FILE" >&2
