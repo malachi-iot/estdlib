@@ -24,8 +24,7 @@ jobs:
   build:
     strategy:
       fail-fast: false
-      matrix:
-        cxx_std: [11, 17, 20]
+      matrix: ${{ fromJson(needs.select-profile.outputs.matrix) }}
 
     env:
       unit_test_dir: ${{github.workspace}}/test/catch
@@ -44,6 +43,7 @@ jobs:
         options: |
           CMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
           CMAKE_CXX_STANDARD_REQUIRED=ON
+          CMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       # TODO: -DCMAKE_CXX_EXTENSIONS=OFF
 
