@@ -18,7 +18,8 @@ jobs:
     - uses: actions/checkout@v6
     - id: matrix
       shell: bash
-      run: tools/github/get-matrix cmake ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
+      working-directory: tools/github
+      run: ./get-matrix cmake ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
 
   build:
     strategy:
