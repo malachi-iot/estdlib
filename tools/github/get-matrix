@@ -24,4 +24,5 @@ fi
 MATRIX=$(jq -c . "$FILE")
 
 echo "Using: $FILE" >&2
-echo "matrix=$MATRIX"
+#echo "matrix=$MATRIX"
+echo $MATRIX

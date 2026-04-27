@@ -15,7 +15,10 @@ jobs:
     - id: matrix
       shell: bash
       working-directory: tools/github
-      run: ./get-matrix esp-idf ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
+      run: |
+        MATRIX=$(./get-matrix esp-idf "${GITHUB_REF_NAME}")
+        echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+      #run: ./get-matrix esp-idf ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
 
   build:
     needs: select-profile
