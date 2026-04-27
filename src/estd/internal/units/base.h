@@ -242,43 +242,43 @@ public:
         return rep_ == compare_to.rep_;
     }
 
-    unit& operator +=(const unit& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator +=(const unit& v)
     {
         rep_ += v.rep_;
         return *this;
     }
 
-    unit& operator -=(const unit& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator -=(const unit& v)
     {
         rep_ -= v.rep_;
         return *this;
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    unit& operator +=(const unit<Traits2>& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator +=(const unit<Traits2>& v)
     {
-        static constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
         static_assert(compatible, "Using += this way would result in precision loss");
 
         return operator +=(unit(v));
     }
 
     template <class Traits2, class = enable_if_t<tag_matches<Traits2>()>>
-    unit& operator -=(const unit<Traits2>& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator -=(const unit<Traits2>& v)
     {
-        static constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
+        constexpr bool compatible = permissive || is_promotable_rep_and_same_period<Traits2, Traits>::value;
         static_assert(compatible, "Using -= this way would result in precision loss");
 
         return operator -=(unit(v));
     }
 
-    unit& operator *=(const rep& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator *=(const rep& v)
     {
         rep_ *= v;
         return *this;
     }
 
-    unit& operator /=(const rep& v)
+    ESTD_CPP_CONSTEXPR(14) unit& operator /=(const rep& v)
     {
         rep_ /= v;
         return *this;

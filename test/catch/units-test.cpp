@@ -37,7 +37,6 @@ struct permissive_unit_traits : estd::units::v1::detail::traits<Rep, Period, Tag
     static constexpr auto options = estd::units::detail::options::permissive;
 };
 
-
 template <class Rep, class Period = estd::ratio<1>, typename F = estd::units::passthrough<Rep>>
 using hz = estd::units::v1::detail::unit<frequency_unit_traits<Rep, Period, F>>;
 
@@ -83,6 +82,18 @@ struct StringMaker<unit<Rep, Period, Tag, F>>
     }
 };
 }
+
+
+struct constexpr_things
+{
+    using percent = estd::units::percent<int>;
+
+    static constexpr auto p1 = percent(10);
+    static constexpr auto p2 = p1 + 2;
+
+    static_assert(p2.count() == 12, "");
+};
+
 
 TEST_CASE("units")
 {

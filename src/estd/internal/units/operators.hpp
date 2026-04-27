@@ -76,7 +76,7 @@ template <class Traits, typename Rep,
     enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits> operator+(unit<Traits> lhs, const Rep& rhs)
 {
-    return lhs += unit<Traits>(rhs);
+    return unit<Traits>(lhs.count() + rhs);
 }
 
 
@@ -84,7 +84,7 @@ template <class Traits, typename Rep,
     enable_if_t<compatible_1_1<Traits, Rep>::value, int> = 0>
 constexpr unit<Traits> operator-(unit<Traits> lhs, const Rep& rhs)
 {
-    return lhs -= unit<Traits>(rhs);
+    return unit<Traits>(lhs.count() - rhs);
 }
 
 template <class Traits, typename Rep,
