@@ -4,10 +4,6 @@ on:
   push:
     branches: [ "feat/**", "alpha" ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   select-profile:
     runs-on: ubuntu-latest
@@ -22,6 +18,7 @@ jobs:
       run: ./get-matrix cmake ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
 
   build:
+    needs: select-profile
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.select-profile.outputs.matrix) }}
