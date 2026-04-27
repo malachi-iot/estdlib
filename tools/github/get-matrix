@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Retrieves a set of JSON matrix values for a given category and profile
+# First param = category (currently esp-idf, cmake)
+# Second param = profile name
+
+CATEGORY=$1
+PROFILE=$2
+
+FILE="profiles/${CATEGORY}.matrix.${PROFILE}.json"
+
+if [ ! -f "$FILE" ]; then
+    FILE="profiles/${CATEGORY}.matrix.default.json"
+fi
+
+MATRIX=$(cat "$FILE")
+
+echo "Using: $FILE" >&2
+echo $MATRIX

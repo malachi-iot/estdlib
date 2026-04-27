@@ -5,7 +5,19 @@ on:
     branches: [ "feat/**", "alpha" ]
 
 jobs:
+  select-profile:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+    - uses: actions/checkout@v6
+    - id: matrix
+      shell: bash
+      run: tools/github/get-matrix >> "$GITHUB_OUTPUT"
+
   build:
+    needs: select-profile
     runs-on: ubuntu-latest
     strategy:
       matrix:
