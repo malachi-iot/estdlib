@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # Retrieves a set of JSON matrix values for a given category and profile
+# Inputs:
 # First param = category (currently esp-idf, cmake)
 # Second param = profile name
+# Output:
+# $GITHUB_OUTPUT-friendly GH env variable setter
 
 CATEGORY=$1
 PROFILE=$2
@@ -21,4 +24,4 @@ fi
 MATRIX=$(cat "$FILE")
 
 echo "Using: $FILE" >&2
-echo $MATRIX
+echo "matrix=$MATRIX"

@@ -1,3 +1,4 @@
 {
-  "cxx_std": [11, 20]
+  "cxx_std": [11, 20],
+  "build_type": "Debug"
 }
