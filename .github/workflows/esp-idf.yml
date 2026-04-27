@@ -27,7 +27,8 @@ jobs:
         esp_idf_version: ${{ matrix.version }}
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
-        command: "idf.py build ${BUILD_OPT}"
+        #command: "idf.py build ${BUILD_OPT}"
+        command: "idf.py build ${{ env.BUILD_OPT }}"
     # 27APR26 MB TODO: Rework this to be a needs: relationship
     - name: "esp-idf qemu"
       timeout-minutes: 1
