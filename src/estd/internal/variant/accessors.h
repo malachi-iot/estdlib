@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../cstdlib.h"
+
 #include "core.h"
 
 namespace estd {
@@ -37,11 +39,7 @@ void assert_index_matches(const variant<Types...>& v)
 #else
     // NOTE: Not tested yet
     if(v.index() != index)
-#if FEATURE_STD
         std::abort();
-#else
-        abort();
-#endif
 #endif
 }
 

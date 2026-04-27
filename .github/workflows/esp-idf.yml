@@ -18,7 +18,7 @@ jobs:
       if: matrix.version == 'v6.0' && matrix.target != 'esp32c6'
       run: |
         cat >> $GITHUB_ENV <<EOF
-        BUILD_OPT=-DSDKCONFIG_DEFAULTS=sdkconfig.defaults.ci;sdkconfig.defaults
+        BUILD_OPT="-DSDKCONFIG_DEFAULTS=sdkconfig.defaults.ci;sdkconfig.defaults"
         ENABLE_QEMU=true
         EOF
     - name: "esp-idf build"
@@ -27,7 +27,7 @@ jobs:
         esp_idf_version: ${{ matrix.version }}
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
-        command: idf.py build ${BUILD_OPT}
+        command: "idf.py build ${BUILD_OPT}"
     # 27APR26 MB TODO: Rework this to be a needs: relationship
     - name: "esp-idf qemu"
       timeout-minutes: 1
