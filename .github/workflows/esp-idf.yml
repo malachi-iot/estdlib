@@ -29,7 +29,7 @@ jobs:
     needs: select-profile
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.select_profile.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.select-profile.outputs.matrix) }}
         #version: [v5.3.5, v5.4.4, v5.5.4, v6.0]
         #target: [esp32, esp32s3, esp32c6]
     steps:
