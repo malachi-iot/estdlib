@@ -14,12 +14,20 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v6
+    - name: esp-idf option prep
+      if: matrix.version == 'v6.0'
+      run: |
+        cat >> $GITHUB_ENV <<EOF
+        BUILD_OPT=-DSDKCONFIG_DEFAULTS=sdkconfig.defaults.ci;sdkconfig.defaults
+        EOF
     - name: "esp-idf build"
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: ${{ matrix.version }}
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
+        command: idf.py qemu ${BUILD_OPT}
+    # 27APR26 MB TODO: Rework this to be a needs: relationship
     - name: "esp-idf qemu"
       timeout-minutes: 1
       if: matrix.version == 'v6.0'
@@ -29,3 +37,8 @@ jobs:
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
         command: idf.py qemu --qemu-extra-args="-no-reboot" | tee qemu_output.txt
+    - name: "QEMU output inspection"
+      if: matrix.version == 'v6.0'
+      # 27APR26 MB: Not doing much right now.  Need to pipe/redirect qemu_output
+      # into it
+      run: tools/esp-idf/unity-gh.action.py
