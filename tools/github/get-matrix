@@ -21,7 +21,7 @@ if [ ! -f "$FILE" ]; then
     exit 1
 fi
 
-MATRIX=$(cat "$FILE")
+MATRIX=$(jq -c . "$FILE")
 
 echo "Using: $FILE" >&2
 echo "matrix=$MATRIX"
