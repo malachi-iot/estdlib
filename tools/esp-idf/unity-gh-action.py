@@ -22,6 +22,7 @@ def parse_test_summary(lines):
         if saw_separator:
             parts = line.split()
 
+            # DEBT: Do a namedtuple unless somehow we can do an "anonymous class"
             # Expect: "<tests> Tests <failures> Failures <ignored> Ignored"
             if len(parts) == 6 and parts[1] == "Tests" and parts[3] == "Failures" and parts[5] == "Ignored":
                 try:
@@ -38,4 +39,10 @@ def parse_test_summary(lines):
 
     return None
 
-print(parse_test_summary(sys.stdin))
+r = parse_test_summary(sys.stdin)
+
+if r["failures"] > 0 or r == None:
+    print(f"Unit tests FAIL: {r["tests"]} ran, {r["failures"]} failed")
+    exit(1)
+
+print(f"Unit tests OK: {r["tests"]} passed")
