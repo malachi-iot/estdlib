@@ -27,8 +27,12 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v6
-    - name: esp-idf option prep
-      if: matrix.version == 'v6.0' && matrix.target != 'esp32c6'
+    - name: esp-idf QEMU option prep
+      if: |
+        matrix.version == 'v6.0.1' &&
+          (matrix.target == 'esp32' ||
+          matrix.target == 'esp32c3' ||
+          matrix.target == 'esp32s3')
       run: |
         cat >> $GITHUB_ENV <<EOF
         BUILD_OPT="-DSDKCONFIG_DEFAULTS=sdkconfig.defaults.ci;sdkconfig.defaults"
