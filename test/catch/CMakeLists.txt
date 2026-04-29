@@ -64,9 +64,6 @@ else()
         deque-test.cpp
         dynamic-array-test.cpp
         flags-test.cpp
-        experimental/memory-pool1-test.cpp
-        experimental/memory-pool2-test.cpp
-        experimental/memory-pool3-test.cpp
         expected-test.cpp
         experimental-test.cpp
         functional-test.cpp
@@ -106,6 +103,15 @@ else()
         vector-test.cpp
         internal-test.cpp
         unordered-test.cpp)
+
+    # Experimental burden of success much lower - this fails in Release mode and
+    # that's OK
+    target_sources(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:
+            experimental/memory-pool1-test.cpp
+            experimental/memory-pool2-test.cpp
+            experimental/memory-pool3-test.cpp
+        >)
 endif()
 
 #file(COPY ".gdbinit" DESTINATION ${CMAKE_BINARY_DIR} )
