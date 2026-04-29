@@ -21,9 +21,13 @@ jobs:
     needs: select-profile
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.select-profile.outputs.matrix) }}
         #version: [v5.3.5, v5.4.4, v5.5.4, v6.0]
         #target: [esp32, esp32s3, esp32c6]
+      exclude:
+      - version: v5.3.5
+        target: esp32c5
     steps:
     - name: Checkout repo
       uses: actions/checkout@v6
