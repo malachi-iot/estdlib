@@ -58,6 +58,6 @@ jobs:
         command: idf.py qemu --qemu-extra-args="-no-reboot" | tee qemu_output.txt
     - name: "QEMU output inspection"
       if: env.ENABLE_QEMU=='true'
-      # 27APR26 MB: Not doing much right now.  Need to pipe/redirect qemu_output
-      # into it
-      run: tools/esp-idf/unity-gh-action.py
+      # 29APR26 MB: Almost there.  Python looks to be parsing well, just doing nothing
+      # with it.
+      run: cat test/esp-idf/unity/qemu_output.txt | tools/esp-idf/unity-gh-action.py
