@@ -6,7 +6,7 @@ on:
 
 jobs:
   select-profile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
 
@@ -25,8 +25,10 @@ jobs:
 
     env:
       unit_test_dir: ${{github.workspace}}/test/catch
+      CC: ${{ matrix.compiler }}
+      CXX: ${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v6
