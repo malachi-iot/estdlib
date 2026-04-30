@@ -25,7 +25,12 @@ struct common_type<
     using tag = typename Traits1::tag;
     using projector = typename Traits1::projector;
 
-    static constexpr estd::units::v1::detail::options options = traits1::options;
+    static_assert(is_convertible<decltype(traits1::options), int>::value, "Options must be more-or-less of type units::v1::detail::options");
+    // DEBT: Need this, grabbing first options and calling it a day is no good
+    //static_assert(is_compatible<traits1::options, traits2::options>::value, "");
+
+    // LLVM doesn't like auto casting integer back to 'options' again.  GCC doesn't care.
+    static constexpr auto options = static_cast<units::v1::detail::options>(traits1::options);
 
     static_assert(is_same<tag, typename Traits2::tag>::value, "Unit tags must match");
     //static_assert(is_same<projector, typename Traits2::projector>::value, "Unit projectors must match");
@@ -59,7 +64,7 @@ constexpr common_type_t<
     const unit<Traits2>&);
 
 // DEBT: I'm pretty sure we don't need this is_arithmetic filter, but until I resolve
-// duration vs unit squirrelyness (#184 related) I want that safety gauruntee.
+// duration vs unit squirrelyness (#184 related) I want that safety guarantee.
 template <class Traits, class Rep, enable_if_t<is_arithmetic<Rep>::value, int> = 0>
 constexpr
     unit<
