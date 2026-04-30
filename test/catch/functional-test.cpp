@@ -803,6 +803,7 @@ TEST_CASE("functional")
 
             fb fb2 = fb1.move_to(raw2, sizeof(raw2));
 
+            // FIX: Dies in release mode
             fb2(5);
 
             REQUIRE(dummy.val1 == 12);

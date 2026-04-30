@@ -41,9 +41,16 @@ TEST_CASE("rtto", "Runtime Type Operations")
         REQUIRE(d2.inc_on_destruct);
         REQUIRE(destruct_counter == 0);
 
+        // 29APR26 MB FIX: UB may actually bite us in Release mode, which *appears*
+        // to optimize this whole move_to_and_destory chain (how'd it do that with the fnptr? anyway...)
+        // and d2 ends up not getting its trivialish destructor called.  Not going to assume
+        // all that though, that's just my current theory - until proven, we keep this
+        // here (failing in Release mode)
+        int rc = move_to_and_destroy(u, &d2, &d3);
+
         // NOTE: d2 is destroyed here, which gives us partial UB since d2 auto destructs
         // and end of scope too.  test::Dummy is simplistic so this causes us no issues
-        REQUIRE(move_to_and_destroy(u, &d2, &d3) == 0);
+        REQUIRE(rc == 0);
 
         // DEBT: Not working right because destruct_counter is not intuitive with dest::Dummy.
         // Needs some love
