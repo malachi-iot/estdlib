@@ -22,7 +22,7 @@ struct Dummy
     const bool moved_ = false;      ///< This object was made from a move
     const bool copied_ = false;     ///< This object was made via a copy
     bool moved_from_ = false;       ///< This object was the source of a move
-    bool destroyed_ = false;        ///< Set when destroyed, somewhat UB to read this so watch out
+    bool destroyed_ = false;        ///< Set when destroyed, usually UB to read this so watch out
     bool initialized_ = true;
 
     // because underlying struct is an array for layer1::queue, darnit
@@ -38,6 +38,8 @@ struct Dummy
         inc_on_destruct(move_from.inc_on_destruct),
         moved_{true}
     {
+        // DEBT: inc_on_destruct null'd out here is not ideal.  Might be better to 'duplicate' it
+        // so that we better detect destruction
         move_from.inc_on_destruct = nullptr;
         move_from.moved_from_ = true;
     }

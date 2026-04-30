@@ -12,6 +12,7 @@
 #error variant: strict assignment not supported yet
 #endif
 
+// https://github.com/malachi-iot/estdlib/issues/196
 #if !FEATURE_ESTD_VARIANT_EAGER_DESTRUCT
 #error variant: only eager destruct mode supported
 #endif
@@ -101,6 +102,7 @@ class variant : protected variant_storage<Types...>
 
             v.template move<I>(std::move(move_from));
 
+// https://github.com/malachi-iot/estdlib/issues/196
 #if FEATURE_ESTD_VARIANT_EAGER_DESTRUCT
             // remember, our variant destroys as soon as we determine transition to
             // valueless state - once valueless, we lose ability to identify who
@@ -159,12 +161,12 @@ public:
     template <class T>
     using select_type = typename estd::internal::select_type<T, Types...>::first;
 
-    template <class F, class ...TArgs>
-    size_type visit(F&& f, TArgs&&...args)
+    template <class F, class ...Args>
+    size_type visit(F&& f, Args&&...args)
     {
         int selected = base_type::visit_instance(
             std::forward<F>(f),
-            std::forward<TArgs>(args)...);
+            std::forward<Args>(args)...);
         return selected == -1 ? variant_npos() : selected;
     }
 
@@ -185,17 +187,17 @@ public:
     }
 
 
-    template <size_t index, class ...TArgs>
-    constexpr explicit variant(in_place_index_t<index>, TArgs&&...args) :
-        base_type(in_place_index_t<index>{}, std::forward<TArgs>(args)...),
+    template <size_t index, class ...Args>
+    constexpr explicit variant(in_place_index_t<index>, Args&&...args) :
+        base_type(in_place_index_t<index>{}, std::forward<Args>(args)...),
         index_{index}
     {}
 
-    template <class T, class ...TArgs>
-    constexpr explicit variant(in_place_type_t<T>, TArgs&&...args) :
+    template <class T, class ...Args>
+    constexpr explicit variant(in_place_type_t<T>, Args&&...args) :
         base_type(
             in_place_index_t<select_type<T>::index>{},
-            std::forward<TArgs>(args)...),
+            std::forward<Args>(args)...),
         index_{select_type<T>::index}
     {}
 

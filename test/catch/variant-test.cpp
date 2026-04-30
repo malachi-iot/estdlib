@@ -82,7 +82,7 @@ TEST_CASE("variant")
 {
     SECTION("main")
     {
-        typedef variant<int, test::NonTrivial, const char*> variant1_type;
+        using variant1_type = variant<int, test::NonTrivial, const char*>;
 
         SECTION("default ctor")
         {
@@ -135,7 +135,10 @@ TEST_CASE("variant")
         SECTION("assign")
         {
             int counter = 0;
-            auto dtor_fn = [&]{ ++counter; };
+            auto dtor_fn = [&]
+            {
+                ++counter;
+            };
 
             variant1_type v;
 
@@ -181,6 +184,8 @@ TEST_CASE("variant")
                     REQUIRE(get<1>(v3).moved_ == false);
                     REQUIRE(get<1>(v3).moved_from_ == false);
 
+                    REQUIRE(counter == 3);
+
                     // since no assignment operator, existing 'v' dtor runs
                     // v3 dtor also runs, but dtor_fn does NOT, because move on a std::function
                     // clears out the target
@@ -192,9 +197,14 @@ TEST_CASE("variant")
                     // is still OK (not undefined)
                     REQUIRE(v4.initialized_ == true);
                     REQUIRE(v4.moved_ == false);
+                    REQUIRE(counter == 4);  // Since 'v' dtor runs
+                    // Inspecting values after std::move is permitted though not recommended.
+                    // Inspecting values after destruction is UB.  It works OK in Debug mode.
+#if !NDEBUG
                     REQUIRE(v4.moved_from_);
                     REQUIRE(v4.destroyed_);
                     REQUIRE(v4.on_dtor == nullptr);
+#endif
 
                     REQUIRE(counter == 4);
                     REQUIRE(get<1>(v).code_ == 8);
@@ -317,7 +327,7 @@ TEST_CASE("variant")
     }
     SECTION("storage")
     {
-        typedef estd::internal::variant_storage<estd::monostate, int> vs_type;
+        using vs_type = estd::internal::variant_storage<estd::monostate, int>;
 
         SECTION("empty")
         {
