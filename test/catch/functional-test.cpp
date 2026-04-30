@@ -6,7 +6,7 @@
 
 #include "macro/push.h"
 
-static const char* got_something = NULLPTR;
+static const char* got_something = NULLPTR; // NOLINT
 
 int do_something(const char* msg)
 {
@@ -16,6 +16,8 @@ int do_something(const char* msg)
     return -1;
 }
 
+#define ESTD_FWD(x) std::forward<decltype(x)>(x)
+
 template <typename F, class ...Args>
 int do_something_inspector(F&& f, Args&&...args)
 {
@@ -23,7 +25,8 @@ int do_something_inspector(F&& f, Args&&...args)
 
     static_assert(estd::is_same<typename traits::return_type, int>::value, "functor must return int");
 
-    return f(std::forward<Args>(args)...);
+    //return f(std::forward<Args>(args)...);
+    return ESTD_FWD(f)(ESTD_FWD(args)...);
 }
 
 using namespace estd;
@@ -45,7 +48,7 @@ struct ProvidedTest1;
 template <template <class, detail::impl::fn_options> class Impl, typename TResult, typename ...TArgs>
 struct ProvidedTest1<Impl, TResult(TArgs...)>
 {
-    typedef TResult (test)(TArgs...);
+    typedef TResult (test)(TArgs...);   // NOLINT
 
     static TResult test2(TArgs...) { return TResult(); }
 };

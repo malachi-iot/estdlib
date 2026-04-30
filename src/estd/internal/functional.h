@@ -5,11 +5,14 @@
  */
 #pragma once
 
+#include <assert.h>
+
 #include "fwd/functional.h"
 #include "impl/functional.h"
 #include "raw/functional.h"
 #include "functional/hash.h"
 #include "functional/function_traits.h"
+#include "../cstddef.h"
 #include "../type_traits.h"
 #include "../tuple.h"
 
@@ -270,7 +273,8 @@ public:
     // EXPERIMENTAL
     function move_to(void* dest, int sz = 0)
     {
-        assert(m->move_to(dest, sz) == 0);
+        ESTD_CPP_ATTR_MAYBE_UNUSED int rc = m->move_to(dest, sz);  // NOLINT
+        assert(rc == 0);
         m = nullptr;
         // We trust that move_to does in fact construct a model_base
         return { static_cast<model_base*>(dest) };
@@ -279,7 +283,8 @@ public:
     // EXPERIMENTAL
     function copy_to(model_base* dest)
     {
-        assert(m->copy_to(dest) == 0);
+        ESTD_CPP_ATTR_MAYBE_UNUSED int rc = m->copy_to(dest);  // NOLINT
+        assert(rc == 0);
         return { dest };
     }
 

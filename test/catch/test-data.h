@@ -32,7 +32,7 @@ struct Dummy
         val1(val1), value2(val2), inc_on_destruct(inc_on_destruct)
         {}
 
-    Dummy(Dummy&& move_from) NOEXCEPT :
+    Dummy(Dummy&& move_from) noexcept :
         val1(move_from.val1),
         value2(move_from.value2),
         inc_on_destruct(move_from.inc_on_destruct),
