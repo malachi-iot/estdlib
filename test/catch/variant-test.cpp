@@ -36,7 +36,7 @@ template <class ...Types>
 struct access_experiment : protected internal::variant_storage<Types...>
 {
     using this_type = access_experiment;
-    typedef internal::variant_storage<Types...> base_type;
+    using base_type = internal::variant_storage<Types...>;
 
     ESTD_CPP_FORWARDING_CTOR(access_experiment);
 
