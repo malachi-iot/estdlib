@@ -6,7 +6,7 @@ on:
 
 jobs:
   select-profile:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
 
@@ -27,6 +27,7 @@ jobs:
       unit_test_dir: ${{github.workspace}}/test/catch
       CC: ${{ matrix.compiler }}
       CXX: ${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+      CPM_SOURCE_CACHE: ~/.cache/cpm
 
     runs-on: ubuntu-24.04
 
@@ -35,7 +36,12 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Build
+    - uses: actions/cache@v5
+      with:
+        path: ${{ env.CPM_SOURCE_CACHE }}
+        key: ${{ runner.os }}-cpm-${{ hashFiles('CMakeLists.txt') }}
+
+    - id: cmake-build
       uses: threeal/cmake-action@v2.1.0
       with:
         source-dir: ${{env.unit_test_dir}}
@@ -49,6 +55,5 @@ jobs:
     - name: Test
       uses: threeal/ctest-action@v1.1.0
       with:
-        # DEBT: Grab "build-dir" from above cmake-action
-        test-dir: ${{env.unit_test_dir}}/build
+        test-dir: ${{ env.unit_test_dir }}/${{ steps.cmake-build.output.build-dir }}
 
