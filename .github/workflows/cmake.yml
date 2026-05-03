@@ -13,7 +13,6 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - id: matrix
-      shell: bash
       working-directory: tools/github
       run: ./get-matrix cmake ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
 
@@ -55,5 +54,5 @@ jobs:
     - name: Test
       uses: threeal/ctest-action@v1.1.0
       with:
-        test-dir: ${{ env.unit_test_dir }}/${{ steps.cmake-build.output.build-dir }}
+        test-dir: ${{ env.unit_test_dir }}/${{ steps.cmake-build.outputs.build-dir }}
 
