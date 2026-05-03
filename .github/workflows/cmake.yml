@@ -23,7 +23,6 @@ jobs:
       matrix: ${{ fromJson(needs.select-profile.outputs.matrix) }}
 
     env:
-      unit_test_dir: ${{github.workspace}}/test/catch
       CC: ${{ matrix.compiler }}
       CXX: ${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
       CPM_SOURCE_CACHE: ~/.cache/cpm
@@ -43,7 +42,7 @@ jobs:
     - id: cmake-build
       uses: threeal/cmake-action@v2.1.0
       with:
-        source-dir: ${{env.unit_test_dir}}
+        source-dir: ${{github.workspace}}/test/catch
         options: |
           CMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
           CMAKE_CXX_STANDARD_REQUIRED=ON
@@ -54,5 +53,5 @@ jobs:
     - name: Test
       uses: threeal/ctest-action@v1.1.0
       with:
-        test-dir: ${{ env.unit_test_dir }}/${{ steps.cmake-build.outputs.build-dir }}
+        test-dir: ${{ steps.cmake-build.outputs.build-dir }}
 
