@@ -461,6 +461,10 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size
 
 }
 
+// 05MAY26 MB - Note how long FIX is down there.  See
+// https://github.com/malachi-iot/estdlib/issues/88
+// https://github.com/malachi-iot/estdlib/issues/127
+//
 // FIX: Very nasty explicit specializations for handle_descriptor on various canned fixed allocators
 //      plan to revise this using either typedef-tags or CONSTEXPR bool (not bool functions) so that
 //      we can unify c++11 and pre-c++11 approach

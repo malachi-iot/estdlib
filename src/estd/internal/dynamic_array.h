@@ -364,6 +364,12 @@ public:
     constexpr explicit dynamic_array(allocator_type& t) :
         base_type(t) {}
 
+    constexpr dynamic_array(const dynamic_array&) = default;
+    constexpr dynamic_array(dynamic_array&&) = default;
+
+    constexpr dynamic_array& operator=(const dynamic_array&) = default;
+    constexpr dynamic_array& operator=(dynamic_array&&) = default;
+
     template <class ...Args>
     constexpr explicit dynamic_array(Args&&...args) :
         base_type(in_place_t{}, std::forward<Args>(args)...)
