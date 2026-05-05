@@ -257,7 +257,7 @@ public:
     template <class T, size_t N, typename F>
     constexpr static model<F>* place_model(T (&storage)[N], F&& f)
     {
-        static_assert(sizeof(model<F>) <= sizeof(storage));
+        static_assert(sizeof(model<F>) <= sizeof(storage), "storage provided is too small");
 
         return new (storage) model<F>(std::forward<F>(f));
     }

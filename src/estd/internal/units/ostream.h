@@ -28,7 +28,7 @@ struct is_estd_ostream<estd::detail::basic_ostream<Streambuf, Base>> : estd::tru
 template <class Out>
 struct ostream_like
 {
-    static_assert(is_std_ostream<Out>::value || is_estd_ostream<Out>::value);
+    static_assert(is_std_ostream<Out>::value || is_estd_ostream<Out>::value, "");
 
     Out* out;
 

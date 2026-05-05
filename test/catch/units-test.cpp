@@ -123,16 +123,16 @@ TEST_CASE("units")
             using type = percent<int>;
             using traits2 = detail::traits<long, estd::ratio<1>, type::tag>;
 
-            static_assert(treat_as_floating_point<int, type::tag>::value == false);
-            static_assert(type::can_unit_convert<traits2>());
+            static_assert(treat_as_floating_point<int, type::tag>::value == false, "");
+            static_assert(type::can_unit_convert<traits2>(), "");
         }
         SECTION("100:1024 (25:256)")
         {
             using type = percent<int16_t, estd::ratio<100, 1024> >;
             using traits2 = detail::traits<uint32_t, estd::ratio<1>, type::tag>;
 
-            static_assert(treat_as_floating_point<int, type::tag>::value == false);
-            static_assert(!type::can_unit_convert<traits2>());
+            static_assert(treat_as_floating_point<int, type::tag>::value == false, "");
+            static_assert(!type::can_unit_convert<traits2>(), "");  // NOLINT
         }
     }
     SECTION("hz")
@@ -158,7 +158,7 @@ TEST_CASE("units")
                 int raw1{123};
             };
 
-            static_assert(std::is_trivial<hz<int>>::value);
+            static_assert(std::is_trivial<hz<int>>::value, "");     // NOLINT
 
             REQUIRE(hz1.count() == 123);
         }
@@ -549,8 +549,8 @@ TEST_CASE("units")
                 using traits2 = typename traits1::rebind<int>;
                 using type2 = estd::units::detail::unit<traits2>;
 
-                static_assert(std::is_same<traits2::rep, int>::value);
-                static_assert(std::is_same<type2::rep, int>::value);
+                static_assert(std::is_same<traits2::rep, int>::value, "");  // NOLINT
+                static_assert(std::is_same<type2::rep, int>::value, "");    // NOLINT
             }
             SECTION("implicit convert to rep")
             {
