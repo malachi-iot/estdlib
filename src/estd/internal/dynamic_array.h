@@ -53,6 +53,7 @@ namespace internal {
 /// @tparam Impl typically estd::internal::impl::dynamic_array.  Abstracts away allocator-specific behaviors
 /// @remarks Kind of a superset of vector.
 /// EXPERIMENTAL: specializations via impl MIGHT be read/only i.e. not sizeable
+/// 04MAY26 MB Time to start considering this guy for 'detail' namespace
 template <class Impl>
 class dynamic_array : public allocated_array<Impl>
 {
@@ -364,7 +365,10 @@ public:
     constexpr explicit dynamic_array(allocator_type& t) :
         base_type(t) {}
 
-    ESTD_CPP_FORWARDING_CTOR(dynamic_array)
+    template <class ...Args>
+    constexpr explicit dynamic_array(Args&&...args) :
+        base_type(in_place_t{}, std::forward<Args>(args)...)
+    {}
 
     constexpr dynamic_array(std::initializer_list<value_type> initlist)
         : base_type(initlist) {}
@@ -721,7 +725,10 @@ struct dynamic_array<impl::allocated_array<Allocator, Policy> > :
     // confusing
     void insert();
 
-    ESTD_CPP_FORWARDING_CTOR(dynamic_array)
+    template <class ...Args>
+    constexpr explicit dynamic_array(Args&&...args) :
+        base_type(in_place_t{}, std::forward<Args>(args)...)
+    {}
 };
 
 }

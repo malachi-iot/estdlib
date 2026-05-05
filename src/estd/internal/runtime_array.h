@@ -167,14 +167,9 @@ protected:
 public:
     constexpr allocated_array() = default;
 
-    // DEBT: Use ESTD_CPP_FORWARDING_CTOR_MEMBER if we can
-    // DEBT: Consider requiring in_place_t here
-    // DEBT: Use && here, not doing so because a complex failure with impl::dynamic_array occurs
-    // and at the moment we are only adding this for true constexpr init on AVR (which is tricky
-    // to do with initializer_list)
-    template <class ...T>
-    constexpr explicit allocated_array(T...t) :
-        impl_(t...)
+    template <class ...Args>
+    constexpr explicit allocated_array(in_place_t, Args&&...args) :
+        impl_(std::forward<Args>(args)...)
     {}
 
 #if UNUSED

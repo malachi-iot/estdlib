@@ -131,13 +131,13 @@ class handle_descriptor :
 
 public:
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(
+    constexpr explicit handle_descriptor(
         typename TTraits::handle_type h = TTraits::invalid()) :
         base_type(h) {}
 
-    template <class TAllocatorParameter>
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor(TAllocatorParameter& p) :
-        base_type(p, TTraits::invalid()) {}
+    template <class AllocatorParameter>
+    constexpr explicit handle_descriptor(AllocatorParameter&& p) :
+        base_type(std::forward<AllocatorParameter>(p), TTraits::invalid()) {}
 
     typedef typename base_type::size_type size_type;
 

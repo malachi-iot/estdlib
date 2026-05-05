@@ -192,10 +192,10 @@ public:
 
 public:
     // TODO: Still need to reconcile actually passing in handle for already-allocated-handle scenarios
-    template <class TAllocatorParameter>
-    ESTD_CPP_CONSTEXPR_RET allocator_and_handle_descriptor(TAllocatorParameter& p, const handle_type& h) :
-            base_t(p),
-            handle_base_t(h)
+    template <class AllocatorParameter>
+    constexpr allocator_and_handle_descriptor(AllocatorParameter&& p, const handle_type& h) :
+        base_t(std::forward<AllocatorParameter>(p)),
+        handle_base_t(h)
     {}
 
     ESTD_CPP_CONSTEXPR_RET allocator_and_handle_descriptor(const handle_type& h) :

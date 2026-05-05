@@ -167,7 +167,7 @@ TEST_CASE("charconv")
             SECTION("long")
             {
                 estd::layer2::const_string s = "1234";
-                long value;
+                long value{};
 
                 estd::from_chars_result result =
                     estd::from_chars(s.data(), s.data() + s.size(), value);
@@ -178,7 +178,7 @@ TEST_CASE("charconv")
             SECTION("unsigned")
             {
                 estd::layer2::const_string s = "1234";
-                unsigned value;
+                unsigned value{};
 
                 estd::from_chars_result result =
                     estd::from_chars(s.data(), s.data() + s.size(), value);
@@ -190,7 +190,7 @@ TEST_CASE("charconv")
             {
                 const char s[128] = "1234";
 
-                unsigned value;
+                unsigned value{};
 
                 estd::from_chars_result result =
                     estd::from_chars(s, &s[0] + sizeof(s), value);
@@ -201,7 +201,7 @@ TEST_CASE("charconv")
             SECTION("float")
             {
                 const char s[] = "123.456";
-                float value;
+                float value{};
 
                 estd::from_chars_result result =
                     estd::from_chars(s, &s[0] + sizeof(s), value);
