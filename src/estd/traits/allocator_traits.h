@@ -41,6 +41,7 @@ enum class allocator_options
     /// MUST = true blue locking
     /// MAY = emulated locking
     /// MUST NOT = no locking API, regular iterator/accessor
+    /// FIX: Resolve with allocator_locking_preference
     locking         = 0x10,
     /// Is allocator's size a compile time constant (i.e. layer3 this is false)
     const_size      = 0x20,
@@ -68,7 +69,6 @@ template <class T> struct hasSerialize : has_member_base
     static CONSTEXPR bool value = sizeof(test<T>(0)) == sizeof(yes);
 };
 #endif
-
 
 ESTD_FN_HAS_METHOD(void, destroy,)
 
@@ -349,6 +349,8 @@ struct allocator_traits
     static CONSTEXPR bool has_size() { return TAllocator::has_size(); }
 #endif
 
+    // 05MAY26 MB - Rework to use allocator_options
+    // See https://github.com/malachi-iot/estdlib/issues/127
     static CONSTEXPR bool is_locking_exp = internal::has_locking_tag<allocator_type>::value;
 
     static CONSTEXPR bool is_stateful_exp = internal::has_stateful_tag<allocator_type>::value;
@@ -360,6 +362,13 @@ struct allocator_traits
     // NOTE: contiguous is an experimental and incomplete feature, and one can safely assume all
     // allocators are marked as TRUE for is_contiguous as this time
     static CONSTEXPR bool is_contiguous_exp = !internal::has_noncontiguous_tag<allocator_type>::value;
+
+    // 05MAY26 MB - Brand new, not well tested or used
+    static constexpr internal::allocator_options options =
+        (is_stateful_exp ? internal::allocator_options::stateful : internal::allocator_options::none) |
+        (is_singular_exp ? internal::allocator_options::singular : internal::allocator_options::none) |
+        (!is_contiguous_exp ? internal::allocator_options::noncontiguous : internal::allocator_options::none) |
+        (has_size_exp ? internal::allocator_options::sized : internal::allocator_options::none);
 
     //static CONSTEXPR value_type invalid_handle() { return TAllocator::invalid_handle(); }
 

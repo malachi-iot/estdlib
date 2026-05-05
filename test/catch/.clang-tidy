@@ -28,6 +28,7 @@ Checks: >-
   -cppcoreguidelines-pro-type-union-access,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -misc-random-seed,
   -modernize-avoid-macro,
   -modernize-macro-to-constexpr,

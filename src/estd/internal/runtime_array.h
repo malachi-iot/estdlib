@@ -97,10 +97,12 @@ public:
     }
 
 protected:
+    // DEBT: Magic allocator_type treatment here perhaps should be best left for
+    // perfect forwarding constructor below
     explicit constexpr allocated_array(allocator_type& alloc) :
         impl_(alloc) {}
 
-    constexpr allocated_array(const allocated_array& copy_from) = default;
+    //constexpr allocated_array(const allocated_array& copy_from) = default;
 
     // DEBT: Switch this out for a forwarding constructor and do this down
     // at m_impl ctor level - thus opening up more comfortable constexpr

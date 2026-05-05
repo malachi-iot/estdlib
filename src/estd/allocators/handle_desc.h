@@ -9,7 +9,8 @@
 // very allocator oriented, it doesn't in it of itself define an allocator
 namespace estd { namespace internal {
 
-// TODO: Utilize allocator_traits throughout
+// TODO: Utilize allocator_traits && allocator_options throughout
+// See https://github.com/malachi-iot/estdlib/issues/127
 // TODO: See if there's a smooth way to incorporate initial
 //       offset in here as well or otherwise incorporate gracefully with handle_with_offset
 
@@ -112,6 +113,8 @@ public:
 }
 
 // Mainly done to be pre c++11 friendly, but could eventually be a cleaner architecture also
+// 05MAY26 MB - Rework to use allocator_options
+// See https://github.com/malachi-iot/estdlib/issues/127
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
 template <class TAllocator,
            class TTraits = allocator_traits<typename remove_reference<TAllocator>::type> >

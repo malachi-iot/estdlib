@@ -122,8 +122,8 @@ TEST_CASE("rtto", "Runtime Type Operations")
             REQUIRE(ret == EINVAL);
 
             // Noting peculiarity where overload resolution says this is default constructible, even though it isn't
-            static_assert(std::is_default_constructible<type>{}.value);
-            static_assert(std::is_trivially_default_constructible<type>{}.value == false);
+            static_assert(std::is_default_constructible<type>{}.value, "");
+            static_assert(std::is_trivially_default_constructible<type>{}.value == false, "");
         }
     }
     SECTION("Proxy")
