@@ -97,10 +97,10 @@ public:
     }
 
 protected:
-    explicit allocated_array(allocator_type& alloc) :
+    explicit constexpr allocated_array(allocator_type& alloc) :
         impl_(alloc) {}
 
-    allocated_array(const allocated_array& copy_from) = default;
+    constexpr allocated_array(const allocated_array& copy_from) = default;
 
     // DEBT: Switch this out for a forwarding constructor and do this down
     // at m_impl ctor level - thus opening up more comfortable constexpr
@@ -167,6 +167,7 @@ protected:
 public:
     constexpr allocated_array() = default;
 
+    // 04MAY26 MB - Now that in_place_t is finally here, I'm not sure I like it
     template <class ...Args>
     constexpr explicit allocated_array(in_place_t, Args&&...args) :
         impl_(std::forward<Args>(args)...)
@@ -319,6 +320,11 @@ public:
     accessor back() const
     {
         return create_accessor(size() - 1);
+    }
+
+    constexpr size_type capacity() const
+    {
+        return impl_.capacity();
     }
 
     constexpr size_type max_size() const

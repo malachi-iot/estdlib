@@ -60,7 +60,8 @@ class dynamic_array : public allocated_array<Impl>
     using base_type = allocated_array<Impl>;
 
 protected:
-    typedef dynamic_array_helper<Impl> helper;
+    using helper = dynamic_array_helper<Impl>;
+    using base_type::impl_;
 
 public:
     using typename base_type::size_type;
@@ -98,10 +99,10 @@ public:
 
     /// @remarks we don't relish exposing internals this way.  However, being a const it's relatively safe
     /// and is particularly useful for unit testing
-    constexpr const impl_type& impl() const { return base_type::impl_; }
+    constexpr const impl_type& impl() const { return impl_; }
 
 protected:
-    ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return base_type::impl_; }
+    ESTD_CPP_CONSTEXPR(14) impl_type& impl() { return impl_; }
 
     // Use this instead of 'success' ptr
     // If success, grew by requested value - returns the size we started with
@@ -136,7 +137,7 @@ protected:
 
     bool ensure_total_capacity(size_type new_size, size_type pad = 0)
     {
-        if(new_size > capacity())
+        if(new_size > base_type::capacity())
         {
             // TODO: Do an assert here, or return true/false to indicate success
             if(!reserve(new_size + pad)) return false;
@@ -198,7 +199,6 @@ protected:
 
     // DEBT: Use a strictness feature flag to disallow falling back
     // to constructors
-#ifdef __cpp_rvalue_references
     template <class T2 = value_type>
     typename enable_if<is_move_assignable<T2>::value>::type
     move_assist(pointer first, pointer last, pointer d_last)
@@ -217,7 +217,6 @@ protected:
         while (first != last)
             new (--d_last) T2(std::move(*--last));
     }
-#endif
 #endif
 
     template <class T2 = value_type>
@@ -376,8 +375,6 @@ public:
     // TODO: iterate through and destruct elements
     // https://github.com/malachi-iot/estdlib/issues/185
     //~dynamic_array() {}
-
-    constexpr size_type capacity() const { return impl().capacity(); }
 
     ESTD_CPP_CONSTEXPR(14) bool resize(size_type count)
     {

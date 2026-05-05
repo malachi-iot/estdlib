@@ -35,11 +35,12 @@ class handle_descriptor_base;
 
 
 // With explicit runtime size knowledge, since (constexpr) has_size = false
-template <class TAllocator, bool is_stateful, bool is_singular>
-class handle_descriptor_base<TAllocator, is_stateful, false, is_singular, true> :
-    public allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular>
+// 04APR26 MB - As per https://github.com/malachi-iot/estdlib/issues/127 consider 'options' paradigm
+template <class Allocator, bool is_stateful, bool is_singular>
+class handle_descriptor_base<Allocator, is_stateful, false, is_singular, true> :
+    public allocator_and_handle_descriptor<Allocator, is_stateful, is_singular>
 {
-    typedef allocator_and_handle_descriptor<TAllocator, is_stateful, is_singular> base_type;
+    using base_type = allocator_and_handle_descriptor<Allocator, is_stateful, is_singular>;
 
 public:
     typedef typename base_type::allocator_type allocator_type;
@@ -53,17 +54,17 @@ private:
 protected:
     void size(size_type n) { m_size = n; }
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT handle_descriptor_base(const handle_type& h) :
+    constexpr explicit handle_descriptor_base(const handle_type& h) :
         base_type(h),
         m_size(0) {}
 
-    template <class TAllocatorParameter>
-    handle_descriptor_base(TAllocatorParameter& p, const handle_type& h) :
-        base_type(p, h),
+    template <class AllocatorParameter>
+    constexpr handle_descriptor_base(AllocatorParameter&& p, const handle_type& h) :
+        base_type(std::forward<AllocatorParameter>(p), h),
         m_size(0)
     {}
 
-    handle_descriptor_base(allocator_type& allocator, const handle_type& h, size_type initial_size = 0) :
+    constexpr handle_descriptor_base(allocator_type& allocator, const handle_type& h, size_type initial_size = 0) :
         base_type(allocator, h),
         m_size(initial_size)
     {}
