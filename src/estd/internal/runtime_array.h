@@ -167,7 +167,14 @@ protected:
     }
 
 public:
+    // 05MAY26 MB DEBT: I don't think we really need to specify all these guys (implicitly they'll
+    // be there, right?) - but being extra careful as I debug embr::gc vector
     constexpr allocated_array() = default;
+    constexpr allocated_array(const allocated_array&) = default;
+    constexpr allocated_array(allocated_array&&) = default;
+
+    allocated_array& operator=(const allocated_array&) = default;
+    allocated_array& operator=(allocated_array&&) = default;
 
     // 04MAY26 MB - Now that in_place_t is finally here, I'm not sure I like it
     template <class ...Args>
