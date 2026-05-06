@@ -16,7 +16,7 @@ class basic_string : public estd::internal::basic_string<
     StringPolicy>
 {
     using base_type = estd::internal::basic_string<
-        estd::layer1::allocator<CharT, N>,
+        estd::layer1::allocator<CharT, N, CharT[N]>,
         StringPolicy>;
 
 public:

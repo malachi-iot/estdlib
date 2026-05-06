@@ -191,10 +191,16 @@ struct layer1_allocator
 // NOTE: We flow through with Base and fall back to regular estd::array if dealing
 // with integral types, since they have no constructor and it makes debugging easier and
 // potentially the codebase slightly smaller since the optimizer works less hard
-template <class T, unsigned N>
+template <class T, unsigned N, class Raw = estd::array<T, N>>
 using uninitialized_array = conditional_t<
-    is_integral<T>::value,
-    estd::array<T, N>,
+    is_integral<T>::value
+#if FEATURE_STD_TYPE_TRAITS
+        || std::is_trivially_constructible<T>::value,
+#elif FEATURE_ESTD_IS_TRIVIAL
+        // DEBT: Only for AVR at this point, needs some love - see https://github.com/malachi-iot/estdlib/issues/171
+        || is_trivial<T>::value,
+#endif
+    Raw,
     internal::array<impl::uninitialized_array<T, N>>>;
 
 

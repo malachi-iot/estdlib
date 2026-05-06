@@ -362,16 +362,7 @@ namespace layer1 {
 
 // Fixed in place singular buffer
 template <class T, size_t len,
-    class Array = conditional_t<
-        is_integral<T>::value
-#if FEATURE_STD_TYPE_TRAITS
-            || std::is_trivially_constructible<T>::value,
-#elif FEATURE_ESTD_IS_TRIVIAL
-// DEBT: Only for AVR at this point, needs some love - see https://github.com/malachi-iot/estdlib/issues/171
-            || is_trivial<T>::value,
-#endif
-        T[len],
-        internal::uninitialized_array<T, len>>>
+    class Array = internal::uninitialized_array<T, len, T[len]>>
 using allocator = estd::internal::single_fixedbuf_allocator<T, len, Array>;
 
 }
