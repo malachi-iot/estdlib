@@ -372,24 +372,7 @@ template <class T, size_t len,
 #endif
         T[len],
         internal::uninitialized_array<T, len>>>
-#if __cpp_alias_templates
 using allocator = estd::internal::single_fixedbuf_allocator<T, len, Array>;
-
-namespace legacy {
-#endif
-
-// DEBT: See allocator-test.cpp, for specialization (in that one case) something about the aliased
-// version malfunctions
-template <class T, size_t len>
-struct allocator : estd::internal::single_fixedbuf_allocator<T, len,
-    estd::internal::uninitialized_array<T, len> >
-{
-
-};
-
-#if __cpp_alias_templates
-}
-#endif
 
 }
 
@@ -428,11 +411,9 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size
     using typename base_type::size_type;
     using typename base_type::difference_type;
 
-#ifdef __cpp_initializer_lists
     constexpr allocator(std::initializer_list<T> initlist) : base_type(initlist)
     {
     }
-#endif
 
     template <Size N>
     ESTD_CPP_CONSTEXPR_RET EXPLICIT allocator(T (&array) [N]) : base_type(array, N)
@@ -461,7 +442,7 @@ struct allocator : estd::internal::single_fixedbuf_runtimesize_allocator<T, Size
 
 }
 
-// 05MAY26 MB - Note how long FIX is down there.  See
+// 05MAY26 MB - Note how long FIX has existed down there.  See
 // https://github.com/malachi-iot/estdlib/issues/88
 // https://github.com/malachi-iot/estdlib/issues/127
 //

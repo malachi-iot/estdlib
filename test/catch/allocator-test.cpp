@@ -12,17 +12,15 @@
 
 using namespace estd;
 
-template <class TAllocator>
+template <class Allocator>
 struct test_specialization;
 
-// DEBT: This is the only known party which doesn't like the aliased layer1::allocator,
-// figure out what the problem is
 template <class T, size_t N>
-struct test_specialization<layer1::legacy::allocator<T, N> > :
-        internal::handle_descriptor_base<layer1::legacy::allocator<T, N>,
+struct test_specialization<layer1::allocator<T, N> > :
+        internal::handle_descriptor_base<layer1::allocator<T, N>,
         true, true, true, true>
 {
-    typedef internal::handle_descriptor_base<layer1::legacy::allocator<T, N>,
+    typedef internal::handle_descriptor_base<layer1::allocator<T, N>,
     true, true, true, true> base;
 
     test_specialization() :
@@ -150,7 +148,7 @@ TEST_CASE("allocator tests")
     }
     SECTION("impl::dynamic_array_base testing")
     {
-        using allocator_type = estd::layer1::legacy::allocator<int, 100>;
+        using allocator_type = estd::layer1::allocator<int, 100>;
         estd::internal::impl::dynamic_array_base<allocator_type, false, false> dai;
 
         int capacity = dai.capacity();
