@@ -61,8 +61,8 @@ struct synthetic_impl
 TEST_CASE("dynamic array: trivial")
 {
     using policy_type = internal::impl::default_dynamic_array_policy;
-    using da1_type = internal::dynamic_array<internal::impl::dynamic_array<
-        estd::internal::single_fixedbuf_allocator<int, 20>, policy_type> >;
+    using da_impl = internal::impl::dynamic_array<estd::layer1::allocator<int, 20>, policy_type>;
+    using da1_type = internal::dynamic_array<da_impl>;
     using pa1_type = experimental::private_array<pa_impl>;
 
     da1_type da1;
@@ -173,6 +173,21 @@ TEST_CASE("dynamic array: trivial")
         constexpr da2_type da2(data_);
 
         REQUIRE(da2.empty());
+    }
+    SECTION("copy construction")
+    {
+        da1.push_back(5);
+        da1_type da1_1(da1);
+    }
+    SECTION("move construction")
+    {
+        da1.push_back(5);
+        // 05MAY26 MB DEBT: No underlying move constructor here, so da1 keeps
+        // indicating '1' afterwards.  Wrong, but harmless
+        da1_type da1_1(std::move(da1));
+
+        REQUIRE(da1_1.size() == 1);
+        REQUIRE(da1_1[0] == 5);
     }
 }
 

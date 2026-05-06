@@ -361,10 +361,12 @@ protected:
 public:
     constexpr dynamic_array() = default;
 
-    constexpr explicit dynamic_array(allocator_type& t) :
-        base_type(t) {}
+    //constexpr explicit dynamic_array(allocator_type& t) :
+    //    base_type(t) {}
 
     constexpr dynamic_array(const dynamic_array&) = default;
+    // This guy helps stave off greedy forwarding constructor below
+    constexpr dynamic_array(dynamic_array&) = default;
     constexpr dynamic_array(dynamic_array&&) = default;
 
     dynamic_array& operator=(const dynamic_array&) = default;

@@ -10,6 +10,8 @@ namespace estd { namespace internal {
 // DEBT: Wants a better name and better namespace
 // EXPERIMENTAL - some inner discord as to how allocators and policies get along.  Idea though
 // is that policy is a configuration point of sorts which then allocators will specialize upon
+// 05MAY26 MB DEBT: Consolidate this with allocator_options
+// See https://github.com/malachi-iot/estdlib/issues/127
 struct policy_base
 {
     static constexpr const bool is_singular = false;

@@ -96,6 +96,8 @@ namespace impl {
 
 // DEBT: Fixed size 32 far from ideal https://github.com/malachi-iot/estdlib/issues/188, though this
 // new explicit policy is a step in the right direction
+// 05MAY26 MB DEBT: Consolidate with policy/base.h
+// Relates to https://github.com/malachi-iot/estdlib/issues/127
 struct default_dynamic_array_policy
 {
     // EXPERIMENTAL

@@ -30,9 +30,7 @@ public:
 
     ESTD_CPP_DEFAULT_CTOR(vector)
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-    vector(std::initializer_list<T> initlist) : base_type(initlist) {}
-#endif
+    constexpr vector(std::initializer_list<T> initlist) : base_type(initlist) {}
 
     // Because layer1 is *always* a simple fixed buffer, enable data() call here
     // Also, for that same reason, lock/clock are no-ops, so we can call them without
