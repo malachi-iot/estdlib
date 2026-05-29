@@ -2,10 +2,16 @@
 
 #include "cstddef.h"
 
+#if FEATURE_STD_UTILITY
+#include <utility>
+#endif
+
 namespace estd {
 
 namespace internal {
 
+// 28MAY26 MB - In order for https://github.com/malachi-iot/estdlib/issues/164 to
+// fully realize, in_place_tag has to go (in particular variant depends on it)
 struct in_place_tag {};
 
 template <size_t>
