@@ -315,7 +315,11 @@ public:
     }
 
     // nullopt_t is prep for string_options::uninitialized
-    ESTD_CPP_CONSTEXPR(17) dynamic_array_base(nullopt_t = nullopt_t{0})
+    // 28MAY26 MB FIX: pseudo-default constructor here is ambiguous and error prone
+    // with below forwarding constructor.  Even after in_place_t is used for forwarding
+    // constructor, we really want nullopt_t w/o = nullopt here to force consumer to
+    // choose which direction they are going
+    ESTD_CPP_CONSTEXPR(17) dynamic_array_base(nullopt_t = nullopt)
     {
         // FIX: A little sloppy, brute forcing to 0 here because null-terminated
         // specialization doesn't have all the data it needs to do this

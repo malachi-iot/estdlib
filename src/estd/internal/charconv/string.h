@@ -69,6 +69,11 @@ public:
     // NOTE: Deviates from std::string behavior in that size (begin_) remains unintialized!
     shifted_string() = default;
 
+    // 28MAY26 MB DEBT: Adding this to conform to our nullopt upgrade.  As you can see, this
+    // is a lie - we don't actually init begin_.  This is because at the moment, for this guy,
+    // that is the responsibility of begin(int) down below.  Clearly needs a cleanup.
+    constexpr shifted_string(nullopt_t) {}
+
     const value_type& lock(int pos, int count)
     {
         return allocator_.lock({}, pos + begin_, count);

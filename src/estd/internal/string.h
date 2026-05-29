@@ -102,7 +102,9 @@ public:
 
     // ---
 
-    constexpr basic_string() = default;
+    // 28MAY26 MB DEBT: There are edge cases where we want uninitialized strings, and
+    // also the underlying impl now has to be perhaps overly conformant
+    constexpr basic_string() : base_type(nullopt)   {}
 
     constexpr size_type length() const { return base_type::size(); }
 

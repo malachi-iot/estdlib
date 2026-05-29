@@ -16,13 +16,6 @@
 
 namespace estd {
 
-// DEBT: Pretty sure this won't work with c++03.  If it does, document that
-#ifdef FEATURE_CPP_INLINE_VARIABLES
-inline
-#elif defined(FEATURE_CPP_INLINE_STATIC)
-static
-#endif
-constexpr nullopt_t nullopt{0};
 
 #if __cpp_exceptions
 class bad_optional_access : public std::exception {};

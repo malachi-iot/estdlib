@@ -45,6 +45,7 @@
 
 #if __cplusplus >= 201703L
 #define FEATURE_STD_CHARCONV 1
+#define FEATURE_STD_OPTIONAL 1
 #endif
 
 #if __cplusplus >= 202002L || __cpp_lib_span

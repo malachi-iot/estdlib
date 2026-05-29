@@ -47,6 +47,16 @@ TEST_CASE("string tests")
     }
     SECTION("layer 1")
     {
+        SECTION("concat")
+        {
+            layer1::string<32> s;
+
+            s += "hi2u";
+            s += ':';
+            s += "hi2me";
+
+            REQUIRE(s == "hi2u:hi2me");
+        }
         SECTION("string literal assignment")
         {
             layer1::string<32> s = "hi2u";
