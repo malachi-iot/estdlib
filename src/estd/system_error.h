@@ -6,12 +6,13 @@
 #include "internal/platform.h"
 #include "internal/enum.h"
 
-// Not actually using std:: one yet, so as to dogfood our custom version
+// 28MAY26 MB - Switching on std::errc alias.  Arduino (non std) test has not happened
+// in quite some time
 #ifdef FEATURE_STD_SYSTEM_ERROR
 #include <system_error>
 namespace estd {
 
-typedef std::errc errc;
+using std::errc;
 
 #else
 
@@ -32,6 +33,9 @@ namespace estd {
 #endif
 
 
+// https://en.cppreference.com/cpp/header/system_error
+// https://man7.org/linux/man-pages/man3/errno.3.html
+// https://www.open-std.org/jtc1/sc22/open/n4217.pdf starting at lines 7564
 enum class errc
 {
     none = 0,   ///< Nonstandard - mainly so that errc{} doesn't give compiler warnings
@@ -46,15 +50,23 @@ enum class errc
     invalid_argument = EINVAL,
     no_buffer_space = ENOBUFS,
     no_lock_available = ENOLCK,
+    no_message_available = ENODATA,
+    no_stream_resources = ENOSR,
     no_such_file_or_directory = ENOENT,
     no_such_process = ESRCH,
     not_enough_memory = ENOMEM,
     not_supported = ENOTSUP,
+    operation_canceled = ECANCELED,
+    operation_in_progress = EINPROGRESS,
+    operation_not_permitted = EPERM,
+    operation_not_supported = EOPNOTSUPP,
+    operation_would_block = EWOULDBLOCK,
 #else
     invalid_argument = EDOM + 10,
     not_supported = EDOM + 20,
 #endif
     result_out_of_range = ERANGE,
+    resource_unavailable_try_again = EAGAIN,
 #if     FEATURE_STD_FULL_ERRNO
     timed_out = ETIMEDOUT,
     value_too_large = EOVERFLOW
