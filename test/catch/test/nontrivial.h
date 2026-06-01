@@ -18,7 +18,7 @@ struct NonTrivial
 {
     const int code_;
     const bool copied_ = false;
-    const bool moved_ = false;
+    const bool moved_ = false;  // moved to
     const bool initialized_ = false;
     bool destroyed_ = false;
     bool moved_from_ = false;

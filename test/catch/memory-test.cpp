@@ -279,6 +279,36 @@ TEST_CASE("memory.h tests")
         //INFO("test")
         //printf("GOT HERE");
     }
+    SECTION("uninitialized_move")
+    {
+        SECTION("trivial")
+        {
+            int v1[] { 1, 2, 3 };
+            int v2[3];
+
+            uninitialized_move(v1, v1 + 3, v2);
+        }
+        SECTION("NonTrivial")
+        {
+            using type = test::NonTrivial;
+            type v1[]
+            {
+                type{ 0 },
+                type{ 1 },
+                type{ 2 }
+            };
+            internal::uninitialized_array<type, 3> v2;
+
+            REQUIRE(!v1[0].moved_from_);
+
+            uninitialized_move(v1, v1 + 3, v2.begin());
+
+            REQUIRE(v1[0].moved_from_);
+
+            REQUIRE(v2[1].moved_);      // NOLINT
+            REQUIRE(v2[1].code_ == 1);  // NOLINT
+        }
+    }
 }
 
 #pragma GCC diagnostic pop

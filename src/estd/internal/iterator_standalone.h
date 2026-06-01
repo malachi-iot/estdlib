@@ -50,6 +50,8 @@ distance(InputIt first, InputIt last)
     return count;
 }
 
+// 01JUN26 DEBT: Alias this guy out to 'std' when possible so that any specializations estd
+// consumers do can get picked up by regular std
 template <class T>
 struct iterator_traits
 {

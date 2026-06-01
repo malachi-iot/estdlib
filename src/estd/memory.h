@@ -5,6 +5,9 @@
 
 #include "internal/platform.h"
 #include "internal/value_evaporator.h"
+#include "internal/raw/memory.h"
+#include "internal/memory/copy.h"
+#include "internal/memory/move.h"
 #include "internal/memory/v1/pool.h"
 
 // turns on or off the 'stored' pointer feature of a shared_ptr
