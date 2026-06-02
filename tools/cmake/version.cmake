@@ -15,7 +15,8 @@ if(Git_FOUND)
             ${GIT_EXECUTABLE} describe --tags --always --dirty > ${WORKING_DIR}/git-described
         VERBATIM
     )
-    FILE(READ ${WORKING_DIR}/git-described GIT_DESCRIBED)
+    file(READ ${WORKING_DIR}/git-described GIT_DESCRIBED)
+    string(STRIP ${GIT_DESCRIBED} GIT_DESCRIBED)
     message(DEBUG "GIT_DESCRIBED: ${GIT_DESCRIBED}")
 
     set(SEMVER_REGEX "^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)")
@@ -24,24 +25,25 @@ if(Git_FOUND)
     string(REGEX MATCH ${SEMVER_REGEX} GIT_TAG_SEMVER ${GIT_DESCRIBED})
     #string(REGEX MATCHALL "^v([0-9]).([0-9])([.])?([0-9])?(-)?(.+)?" GIT_TAG_SEMVER ${GIT_DESCRIBED})
 
-    set(ESTD_VER_MAJOR ${CMAKE_MATCH_1})
-    set(ESTD_VER_MINOR ${CMAKE_MATCH_2})
-    set(ESTD_VER_PATCH ${CMAKE_MATCH_3})
-    set(ESTD_VER_SUFFIX ${CMAKE_MATCH_5})
+    set(GIT_TAG_SEMVER_MAJOR ${CMAKE_MATCH_1})
+    set(GIT_TAG_SEMVER_MINOR ${CMAKE_MATCH_2})
+    set(GIT_TAG_SEMVER_PATCH ${CMAKE_MATCH_3})
+    set(GIT_TAG_SEMVER_SUFFIX ${CMAKE_MATCH_5})
 
-    message(STATUS "estd: v${ESTD_VER_MAJOR}.${ESTD_VER_MINOR}.${ESTD_VER_PATCH} (${ESTD_VER_SUFFIX})")
+    message(STATUS "estd: v${GIT_TAG_SEMVER_MAJOR}.${GIT_TAG_SEMVER_MINOR}.${GIT_TAG_SEMVER_PATCH} (${GIT_TAG_SEMVER_SUFFIX})")
 
-    string(REGEX MATCHALL "${SEMVER_ID_REGEX}" GIT_TAG_SEMVER_ID "${ESTD_VER_SUFFIX}")
+    string(REGEX MATCHALL "${SEMVER_ID_REGEX}" GIT_TAG_SEMVER_SUFFIX2 "${GIT_TAG_SEMVER_SUFFIX}")
 
-    list(GET GIT_TAG_SEMVER_ID 0 ESTD_SEMVER_ID)
+    list(GET GIT_TAG_SEMVER_SUFFIX2 0 GIT_TAG_SEMVER_ID)
 
-    #foreach(w IN LISTS GIT_TAG_SEMVER_ID)
+    #foreach(w IN LISTS GIT_TAG_SEMVER_SUFFIX)
     #    message(STATUS "word: ${w}")
     #endforeach()
-    message(STATUS "ESTD_SEMVER_ID: ${ESTD_SEMVER_ID}")
+    message(STATUS "GIT_TAG_SEMVER_ID: ${GIT_TAG_SEMVER_ID}")
 
 elseif()
     message(STATUS "Couldn't find git, skipping version header generation")
+    set(GIT_TAG_SEMVER_ID "")
 endif()
 
 #add_custom_target(generate_version ALL
@@ -56,6 +58,10 @@ endif()
 configure_file(
     ${IN_DIR}/version.in.h
     ${CMAKE_CURRENT_SOURCE_DIR}/estd/port/version.h)
+
+configure_file(
+    ${IN_DIR}/git-version.in.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/estd/port/git-version.h)
 
 # esp-idf: For internal testing
 configure_file(

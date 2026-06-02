@@ -1,0 +1,2 @@
+# Generated every build from version.cmake
+git-version.h
