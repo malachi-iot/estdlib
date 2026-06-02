@@ -10,7 +10,9 @@ NOT USED, cmake version.cmake uses regex's git-describe out instead.  Keeping fo
 
 import subprocess
 import sys
+import re
 
+regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
 
 def run_git_describe():
     try:
@@ -45,15 +47,23 @@ def split_semver(desc: str):
 def main():
     desc = run_git_describe()
 
+    semver = re.findall(regex, desc)[0]
+    #print(semver)
+
     # Remove leading 'v' only (convention, not semantic)
     if desc.startswith("v"):
         desc = desc[1:]
 
     core, suffix, word = split_semver(desc)
 
+    # DEBT: Mishmash of regex and non-regex approaches.  Needs cleaning
     print(f"set(GIT_TAG_SEMVER {core})")
+    print(f"set(GIT_TAG_SEMVER_MAJOR {semver[0]})")
+    print(f"set(GIT_TAG_SEMVER_MINOR {semver[1]})")
+    print(f"set(GIT_TAG_SEMVER_PATCH {semver[2]})")
     print(f"set(GIT_TAG_SEMVER_PRERELEASE {suffix})")
     print(f"set(GIT_TAG_SEMVER_IDENTIFIER {word})")
+    print(f"set(GIT_DESCRIBED {desc})")
 
 
 if __name__ == "__main__":
