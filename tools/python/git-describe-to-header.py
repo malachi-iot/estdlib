@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Emit git describe parts in a cmake-friendly format
-NOT USED, cmake version.cmake uses regex's git-describe out instead.  Keeping for novelty
+Emit git describe parts in c++ header file format
+Usage:
+git-describe-to-header [project_name] [template-file]
 """
 
 #!/usr/bin/env python3
@@ -11,23 +12,28 @@ NOT USED, cmake version.cmake uses regex's git-describe out instead.  Keeping fo
 import subprocess
 import sys
 import re
+import git_describe
+import argparse
 
-regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
+parser = argparse.ArgumentParser(
+    description="git-describe C++ header repackager"
+)
 
-def run_git_describe():
-    try:
-        result = subprocess.run(
-            ["git", "describe", "--tags", "--long", "--dirty"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print("git describe failed:", file=sys.stderr)
-        print(e.stderr or e.stdout, file=sys.stderr)
-        sys.exit(1)
+parser.add_argument(
+    "--version",
+    help="Version string"
+)
 
+# 02JUN26 MB - TODO: Beef up argument parsing so we can do things like:
+# 1. Specify stdin vs file for input template
+# 2. Query version and usage
+# 3. Emit other forms of git describe breakdown such as cmake or env flavors
+#args = parser.parse_args()
+
+from string import Template
+
+project_name = sys.argv[1]
+infile = sys.argv[2]
 
 def split_semver(desc: str):
     # Find first "-" after semantic version prefix
@@ -45,9 +51,9 @@ def split_semver(desc: str):
 
 
 def main():
-    desc = run_git_describe()
+    desc = git_describe.run_git_describe()
 
-    semver = re.findall(regex, desc)[0]
+    semver = re.findall(git_describe.regex, desc)[0]
     #print(semver)
 
     # Remove leading 'v' only (convention, not semantic)
@@ -57,13 +63,31 @@ def main():
     core, suffix, word = split_semver(desc)
 
     # DEBT: Mishmash of regex and non-regex approaches.  Needs cleaning
-    print(f"set(GIT_TAG_SEMVER {core})")
-    print(f"set(GIT_TAG_SEMVER_MAJOR {semver[0]})")
-    print(f"set(GIT_TAG_SEMVER_MINOR {semver[1]})")
-    print(f"set(GIT_TAG_SEMVER_PATCH {semver[2]})")
-    print(f"set(GIT_TAG_SEMVER_PRERELEASE {suffix})")
-    print(f"set(GIT_TAG_SEMVER_IDENTIFIER {word})")
-    print(f"set(GIT_DESCRIBED {desc})")
+    #print(f"set(GIT_TAG_SEMVER {core})")
+    #print(f"set(GIT_TAG_SEMVER_MAJOR {semver[0]})")
+    #print(f"set(GIT_TAG_SEMVER_MINOR {semver[1]})")
+    #print(f"set(GIT_TAG_SEMVER_PATCH {semver[2]})")
+    #print(f"set(GIT_TAG_SEMVER_PRERELEASE {suffix})")
+    #print(f"set(GIT_TAG_SEMVER_IDENTIFIER {word})")
+    #print(f"set(GIT_DESCRIBED {desc})")
+
+    #template = Template(open("../cmake/in/git-version.in.h").read())
+    template = Template(open(infile).read())
+
+    output = template.substitute(
+        # DEBT: Un-hardwire from ESTD
+        PROJECT_NAME_UPPER=project_name.upper(),
+        GIT_TAG_SEMVER=core,
+        GIT_TAG_SEMVER_MAJOR=semver[0],
+        GIT_TAG_SEMVER_MINOR=semver[1],
+        GIT_TAG_SEMVER_PATCH=semver[2],
+        GIT_TAG_SEMVER_PRERELEASE=suffix,
+        GIT_TAG_SEMVER_IDENTIFIER=word,
+        GIT_DESCRIBED=desc,
+        GIT_HASH="abc123",
+    )
+
+    print(output)
 
 
 if __name__ == "__main__":

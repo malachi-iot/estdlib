@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/setvars.cmake)
 
+set(IN_DIR ${CMAKE_CURRENT_LIST_DIR}/in)
 set(WORKING_DIR ${CMAKE_CURRENT_LIST_DIR}/temp)
 
 # Was pretty promising but it occurs that all this file/regex stuff only really happens
@@ -48,6 +49,10 @@ endif()
 add_custom_target(generate-version ALL
     COMMAND
         ${Python3_EXECUTABLE}
-        ${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake
+        #${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake
+        ${ROOT_DIR}/tools/python/git-describe-to-header.py
+            estd
+            ${IN_DIR}/git-version.in.h >
+            ${ROOT_DIR}/src/estd/port/git-version.h
     VERBATIM
 )

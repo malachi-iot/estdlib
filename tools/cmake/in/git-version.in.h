@@ -1,6 +1,6 @@
 #pragma once
 
-// This file is auto-populated from version.in.h via CMake
+// This file is auto-populated from git-version.in.h via CMake + Python
 
 #include <estd/port/arch/version.h>
 
