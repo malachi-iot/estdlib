@@ -47,6 +47,7 @@ endif()
 ]]
 
 add_custom_target(generate-version ALL
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMAND
         ${Python3_EXECUTABLE}
         #${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake

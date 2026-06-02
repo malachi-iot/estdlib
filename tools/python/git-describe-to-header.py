@@ -19,21 +19,28 @@ parser = argparse.ArgumentParser(
     description="git-describe C++ header repackager"
 )
 
+parser.add_argument('project_name', help="Name of project (#define prefix)");
+parser.add_argument('template_file', help="Name of input .h template file");
+
 parser.add_argument(
     "--version",
-    help="Version string"
+    help="Version string",
+    action="version",
+    version="%(prog)s 0.0.0"
 )
 
 # 02JUN26 MB - TODO: Beef up argument parsing so we can do things like:
 # 1. Specify stdin vs file for input template
 # 2. Query version and usage
 # 3. Emit other forms of git describe breakdown such as cmake or env flavors
-#args = parser.parse_args()
+args = parser.parse_args()
 
 from string import Template
 
-project_name = sys.argv[1]
-infile = sys.argv[2]
+#project_name = sys.argv[1]
+#infile = sys.argv[2]
+project_name = args.project_name
+infile = args.template_file
 
 def split_semver(desc: str):
     # Find first "-" after semantic version prefix
