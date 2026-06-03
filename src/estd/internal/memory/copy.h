@@ -1,10 +1,6 @@
 #pragma once
 
-#include "fwd.h"
-
-#include "../iterator_standalone.h"
-#include "../raw/memory.h"
-#include "../raw/type_traits.h"
+#include "move.h"
 
 namespace estd {
 
@@ -17,11 +13,16 @@ template<class InputIt, class ForwardIt>
 ESTD_CPP_CONSTEXPR(14) ForwardIt uninitialized_copy(InputIt first, InputIt last,
     ForwardIt d_first)
 {
-    using value_type = typename iterator_traits<ForwardIt>::value_type;
-    for (; first != last; ++first, ++d_first)
-        return ::new (addressof(*d_first)) value_type(*first);
+    return internal::uninitialized_ops<InputIt, ForwardIt>::
+        move_or_copy(first, last, d_first, false_type{});
+}
 
-    return d_first;
+template<class InputIt, class Size, class ForwardIt>
+ESTD_CPP_CONSTEXPR(14) ForwardIt uninitialized_copy_n(InputIt first, Size count,
+    ForwardIt d_first)
+{
+    return internal::uninitialized_ops<InputIt, ForwardIt>::
+        move_or_copy_n(first, count, d_first, false_type{});
 }
 #endif
 
