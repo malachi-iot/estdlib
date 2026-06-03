@@ -132,6 +132,8 @@ endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_OSTREAM_FLOAT=1)
+# Force dogfooding
+target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_MEMORY_ALIAS=0)
 
 estd_compile_options()
 

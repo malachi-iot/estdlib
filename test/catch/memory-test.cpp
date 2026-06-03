@@ -1,7 +1,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <estd/allocators/fixed.h>
-#include "estd/memory.h"
+#include <estd/memory.h>
 #include "estd/exp/tmr.h"
 #include <estd/forward_list.h>
 #include <estd/internal/linked_ref.h>
@@ -59,7 +59,7 @@ TEST_CASE("memory.h tests")
             a.allocate(15);
             a.inner_allocator().allocate(20);
 
-            typedef decltype(a) a_type;
+            using a_type = decltype(a);
 
             a_type::inner_allocator_type::outer_allocator_type test;
 
@@ -112,7 +112,7 @@ TEST_CASE("memory.h tests")
                 // experimenting with ensuring alignment/casting is proper.  the casting
                 // is needed so that dummy's destructor is not called twice
                 alignas(alignof(test::Dummy)) uint8_t buffer[sizeof(test::Dummy)];
-                test::Dummy* dummy = reinterpret_cast<test::Dummy*>(buffer);
+                auto dummy = reinterpret_cast<test::Dummy*>(buffer);
                 new (dummy) test::Dummy();
 
                 layer2::shared_ptr<test::Dummy> sp(dummy);
@@ -285,8 +285,10 @@ TEST_CASE("memory.h tests")
         {
             int v1[] { 1, 2, 3 };
             int v2[3];
+            std::array<int, 3> v3;
 
             uninitialized_move(v1, v1 + 3, v2);
+            uninitialized_move_n(v2, 3, v3.begin());
         }
         SECTION("NonTrivial")
         {
@@ -298,6 +300,7 @@ TEST_CASE("memory.h tests")
                 type{ 2 }
             };
             internal::uninitialized_array<type, 3> v2;
+            internal::uninitialized_array<type, 3> v3;
 
             REQUIRE(!v1[0].moved_from_);
 
@@ -307,6 +310,13 @@ TEST_CASE("memory.h tests")
 
             REQUIRE(v2[1].moved_);      // NOLINT
             REQUIRE(v2[1].code_ == 1);  // NOLINT
+
+            uninitialized_move_n(v2.begin(), 3, v3.begin());
+
+            REQUIRE(v2[0].moved_from_);
+
+            REQUIRE(v3[1].moved_);      // NOLINT
+            REQUIRE(v3[1].code_ == 1);  // NOLINT
         }
     }
 }
