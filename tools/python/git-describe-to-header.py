@@ -10,6 +10,7 @@ git-describe-to-header [project_name] [template-file]
 #!/usr/bin/env python3
 
 import subprocess
+import datetime as dt
 import sys
 import re
 import git_describe
@@ -81,9 +82,12 @@ def main():
     #template = Template(open("../cmake/in/git-version.in.h").read())
     template = Template(open(infile).read())
 
+    now = dt.datetime.now(dt.timezone.utc)
+
     output = template.substitute(
         # DEBT: Un-hardwire from ESTD
         PROJECT_NAME_UPPER=project_name.upper(),
+        TIMESTAMP_ISO8601=now.isoformat(timespec='seconds'),
         GIT_TAG_SEMVER=core,
         GIT_TAG_SEMVER_MAJOR=semver[0],
         GIT_TAG_SEMVER_MINOR=semver[1],

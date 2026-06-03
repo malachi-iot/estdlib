@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/setvars.cmake)
 
 set(IN_DIR ${CMAKE_CURRENT_LIST_DIR}/in)
-set(WORKING_DIR ${CMAKE_CURRENT_LIST_DIR}/temp)
+#set(WORKING_DIR ${CMAKE_CURRENT_LIST_DIR}/temp)
 
 include(${CMAKE_CURRENT_LIST_DIR}/git-describe.cmake)
 #include(${WORKING_DIR}/git-described.cmake)

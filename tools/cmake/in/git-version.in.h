@@ -1,6 +1,7 @@
 #pragma once
 
 // This file is auto-populated from git-version.in.h via CMake + Python
+// Generated at ${TIMESTAMP_ISO8601}
 
 #include <estd/port/arch/version.h>
 
