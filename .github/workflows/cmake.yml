@@ -34,7 +34,7 @@ jobs:
       with:
         submodules: recursive
         # Reach deep enough to grab latest tags
-        #fetch-depth: 1000
+        fetch-depth: 1000
         fetch-tags: true
 
     - uses: actions/cache@v5
