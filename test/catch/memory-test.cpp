@@ -6,7 +6,6 @@
 #include <estd/forward_list.h>
 #include <estd/internal/linked_ref.h>
 
-#include "mem.h"
 #include "test-data.h"
 
 #ifdef UNUSED
@@ -278,6 +277,16 @@ TEST_CASE("memory.h tests")
 
         //INFO("test")
         //printf("GOT HERE");
+    }
+    SECTION("uninitialized_copy")
+    {
+        SECTION("trivial")
+        {
+            int v1[] { 1, 2, 3 };
+            int v2[3];
+
+            uninitialized_copy(v1, v1 + 3, v2);
+        }
     }
     SECTION("uninitialized_move")
     {

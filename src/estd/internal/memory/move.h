@@ -24,6 +24,13 @@ constexpr Out* move_or_copy(void* dest, const In& src, false_type)
     return ::new (dest) Out(src);
 }
 
+template <class InputIt, class ForwardIt>
+struct uninitialized_ops
+{
+    using is_lvalue_ref = is_lvalue_reference<decltype(*std::declval<InputIt>())>;
+    using value_type = typename iterator_traits<ForwardIt>::value_type;
+};
+
 }
 
 #if FEATURE_ESTD_STD_MEMORY_ALIAS && __cplusplus >= 201703L
