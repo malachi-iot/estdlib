@@ -19,15 +19,16 @@ namespace estd {
 // NOTE: Aliasing these out as best we can because std copy/fill operations may have some nice
 // optimizations depending on your environment
 
-#if FEATURE_ESTD_ALGORITHM_OPT
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
 using std::copy;
 using std::copy_n;
+using std::move;
 using std::fill;
 using std::fill_n;
 #endif
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
-#if FEATURE_ESTD_ALGORITHM_OPT == 0
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS == 0
 template<class OutputIt, class Size, class T>
 inline ESTD_CPP_CONSTEXPR(14) OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
@@ -79,13 +80,24 @@ ESTD_CPP_CONSTEXPR(14) ForwardIt min_element(ForwardIt first, ForwardIt last,
 
 
 
-#if FEATURE_ESTD_ALGORITHM_OPT == 0
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS == 0
 template<class InputIt, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
               OutputIt d_first)
 {
     while (first != last) {
         *d_first++ = *first++;
+    }
+    return d_first;
+}
+
+template<class InputIt, class OutputIt>
+ESTD_CPP_CONSTEXPR(14) OutputIt move(InputIt first, InputIt last,
+              OutputIt d_first)
+{
+    for (;first != last; ++d_first, ++first)
+    {
+        *d_first = std::move(*first);
     }
     return d_first;
 }
@@ -107,7 +119,7 @@ template<class InputIt, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) inline OutputIt copy_backward(InputIt first, InputIt last,
               OutputIt d_last)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
     return std::copy_backward(first, last, d_last);
 #else
     while (first != last)
@@ -122,7 +134,7 @@ template<class InputIt, class OutputIt>
 ESTD_CPP_CONSTEXPR(14) inline OutputIt move_backward(InputIt first, InputIt last,
               OutputIt d_last)
 {
-#if FEATURE_ESTD_ALGORITHM_OPT
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
     return std::move_backward(first, last, d_last);
 #else
     while (first != last)
@@ -149,14 +161,19 @@ InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
 }
 
 template<class T, class Compare>
-ESTD_CPP_CONSTEXPR(17) const T& clamp( const T& v, const T& lo, const T& hi, Compare comp )
+constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)
 {
+    // DEBT: Make a STRICT_ASSERT macro since this assert is checking against
+    // UB, which is sort of anti-UB-ideology (UB lets things go unchecked).
+    // STRICT_ASSERT would only activate with a high strictness setting.  I
+    // considered FEATURE_ESTD_COMPILE_STRICTNESS, but this is a runtime
+    // thing not a compile time thing
     return assert( !comp(hi, lo) ),
         comp(v, lo) ? lo : comp(hi, v) ? hi : v;
 }
 
 template<class T>
-ESTD_CPP_CONSTEXPR(17) const T& clamp( const T& v, const T& lo, const T& hi )
+constexpr const T& clamp(const T& v, const T& lo, const T& hi)
 {
     return estd::clamp( v, lo, hi, estd::less<T>() );
 }

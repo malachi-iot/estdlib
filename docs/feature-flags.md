@@ -4,11 +4,13 @@
 
 Use bit packed structs to sacrifice speed for space
 
-## FEATURE_ESTD_ALGORITHM_OPT
+## FEATURE_ESTD_COMPILE_STRICTNESS
 
-Normally estd aliases out some of the <algorithm> functions in hopes that
-your particular platform has a nice optimized version.  This can be disabled
-by setting FEATURE_ESTD_ALGORITHM_OPT to 0
+See comments in `feature/estd.h`
+
+## FEATURE_ESTD_COMPILE_VERBOSITY
+
+See comments in `feature/estd.h`
 
 ## FEATURE_ESTD_CHRONO
 
@@ -55,6 +57,12 @@ If true (defaults to false) disables `FEATURE_STD_CHRONO_CORE` and `FEATURE_STD_
 Enables non-standard behavior to reduce size of tuples when empty (0-byte)
 size elements are used.  Defaults to true.  'get' will end up returning
 a temporary in this case
+
+## FEATURE_ESTD_STD_ALGORITHM_ALIAS
+
+Normally estd aliases out some of the <algorithm> functions in hopes that
+your particular platform has a nice optimized version.  This can be disabled
+by setting FEATURE_ESTD_STD_ALGORITHM_ALIAS to 0
 
 ## FEATURE_ESTD_STREAMBUF_TRAITS
 

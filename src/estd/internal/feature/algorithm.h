@@ -18,6 +18,6 @@
 #endif
 
 // Aliases out general operations to std library in anticipation of them being quicker
-#ifndef FEATURE_ESTD_ALGORITHM_OPT
-#define FEATURE_ESTD_ALGORITHM_OPT FEATURE_STD_ALGORITHM
+#ifndef FEATURE_ESTD_STD_ALGORITHM_ALIAS
+#define FEATURE_ESTD_STD_ALGORITHM_ALIAS FEATURE_STD_ALGORITHM
 #endif

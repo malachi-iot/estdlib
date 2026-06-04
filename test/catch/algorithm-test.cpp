@@ -239,4 +239,11 @@ TEST_CASE("algorithm tests")
         REQUIRE(found == &test::octet_data[2]);
         REQUIRE(*found == 3);
     }
+    SECTION("clamp")
+    {
+        int n = -1;
+        const int r = clamp(n, 0, 255);
+
+        REQUIRE(r == 0);
+    }
 }

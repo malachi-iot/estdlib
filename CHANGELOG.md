@@ -2,7 +2,9 @@
 
 ## Added Features
 
+* https://github.com/malachi-iot/estdlib/issues/181 `uninitialized_move` and friends
 * https://github.com/malachi-iot/estdlib/issues/192 partial: layer1 implementation for begin/end constructor
+* https://github.com/malachi-iot/estdlib/issues/201 aliased/added `errc` codes
 
 ## Quality Updates & Bug Fixes
 
