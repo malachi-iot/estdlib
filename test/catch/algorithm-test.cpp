@@ -239,6 +239,13 @@ TEST_CASE("algorithm tests")
         REQUIRE(found == &test::octet_data[2]);
         REQUIRE(*found == 3);
     }
+    SECTION("min")
+    {
+        constexpr int v1 = estd::min(5, 10);
+        int v2 = 1;
+        v2 = min(v1, v2);
+        REQUIRE(v2 == 1);
+    }
     SECTION("clamp")
     {
         int n = -1;

@@ -61,6 +61,7 @@ else()
         chrono-test.cpp
         cmath-test.cpp
         cstddef-test.cpp
+        cstdlib-test.cpp
         deque-test.cpp
         dynamic-array-test.cpp
         flags-test.cpp
@@ -134,6 +135,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE UNIT_TESTING)
 target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_OSTREAM_FLOAT=1)
 # Force dogfooding
 target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_ALGORITHM_ALIAS=0)
+target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_CSTDLIB_ALIAS=0)
 target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_MEMORY_ALIAS=0)
 
 estd_compile_options()

@@ -9,25 +9,19 @@ namespace estd {
 
 // https://en.cppreference.com/w/cpp/algorithm/min
 template <class T>
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-const T& min(const T& a, const T& b)
+constexpr const T& min(const T& a, const T& b)
 {
     return (b < a) ? b : a;
 }
 
 template <class T, class Compare>
-#if __cpp_constexpr >= 201304L
-constexpr
-#endif
-const T& min(const T& a, const T& b, Compare comp)
+constexpr const T& min(const T& a, const T& b, Compare comp)
 {
-    return (comp(b, a)) ? b : a;
+    return comp(b, a) ? b : a;
 }
 
 template <class T>
-ESTD_CPP_CONSTEXPR(14) const T& max(const T& a, const T& b)
+constexpr const T& max(const T& a, const T& b)
 {
     return (b > a) ? b : a;
 }

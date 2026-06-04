@@ -17,6 +17,7 @@ Checks: >-
   modernize-*,
   performance-*,
   portability-*,
+  -bugprone-return-const-ref-from-parameter,
   -*-avoid-c-arrays,
   -cert-msc51-cpp,
   -misc-non-private-member-variables-in-classes,
