@@ -16,6 +16,8 @@ import re
 import git_describe
 import argparse
 
+from typing import TextIO
+
 parser = argparse.ArgumentParser(
     description="git-describe C++ header repackager"
 )
@@ -28,6 +30,18 @@ parser.add_argument(
     help="Version string",
     action="version",
     version="%(prog)s 0.0.0"
+)
+
+# Not ready yet
+parser.add_argument(
+    "--cmake-out",
+    help="CMake compatible variables file"
+)
+
+# Not ready yet
+parser.add_argument(
+    "--soft-fail",
+    help="Always return success code, even if we fail."
 )
 
 # 02JUN26 MB - TODO: Beef up argument parsing so we can do things like:
@@ -57,6 +71,9 @@ def split_semver(desc: str):
 
     return parts[0], suffix, word
 
+def emit_cmake_helper(core: str, word: str, ostream: TextIO) -> None:
+    ostream.write(f'GIT_TAG_SEMVER={core}\n')
+    ostream.write(f'GIT_TAG_SEMVER_IDENTIFIER={word}\n')
 
 def main():
     desc = git_describe.run_git_describe()
@@ -69,6 +86,8 @@ def main():
         desc = desc[1:]
 
     core, suffix, word = split_semver(desc)
+
+    #emit_cmake_helper(core, word, sys.stdout)
 
     # DEBT: Mishmash of regex and non-regex approaches.  Needs cleaning
     #print(f"set(GIT_TAG_SEMVER {core})")

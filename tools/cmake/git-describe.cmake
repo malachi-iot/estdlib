@@ -3,7 +3,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/setvars.cmake)
 set(IN_DIR ${CMAKE_CURRENT_LIST_DIR}/in)
 
 # 03JUN26 MB DEBT: Make this optional and inspect Python3_Interpreter_FOUND
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Python3 COMPONENTS Interpreter)
 
 # Was pretty promising but it occurs that all this file/regex stuff only really happens
 # at configure time
@@ -48,15 +48,19 @@ elseif()
 endif()
 ]]
 
-add_custom_target(generate-version ALL
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    COMMAND
-        #${Python3_EXECUTABLE}
-        #${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake
-        Python3::Interpreter
-        ${ROOT_DIR}/tools/python/git-describe-to-header.py
-            estd
-            ${IN_DIR}/git-version.in.h >
-            ${ROOT_DIR}/src/estd/port/git-version.h
-    VERBATIM
-)
+if(Python3_Interpreter_FOUND)
+    add_custom_target(generate-version ALL
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        COMMAND
+            #${Python3_EXECUTABLE}
+            #${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake
+            Python3::Interpreter
+            ${ROOT_DIR}/tools/python/git-describe-to-header.py
+                estd
+                ${IN_DIR}/git-version.in.h >
+                ${ROOT_DIR}/src/estd/port/git-version.h
+        VERBATIM
+    )
+else()
+    message(STATUS "Python3 not found: skipping git-version.h generation")
+endif()
