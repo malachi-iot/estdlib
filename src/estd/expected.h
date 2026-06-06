@@ -57,6 +57,7 @@ class expected : public internal::expected<T, E>
 {
     using base_type = internal::expected<T, E>;
 
+    // DEBT: Consider refactor to use 'Positions' enum, just for more consistency
     bool has_value_;
 
     void destroy()
@@ -77,9 +78,23 @@ class expected : public internal::expected<T, E>
 #endif
     }
 
+    template <class U>
+    ESTD_CPP_CONSTEXPR(14) void assign_value(U&& u)
+    {
+        base_type::assign_value(has_value_, std::forward<U>(u));
+        has_value_ = true;
+    }
+
+    template <class G>
+    ESTD_CPP_CONSTEXPR(14) void assign_error(G&& e)
+    {
+        base_type::assign_error(!has_value_, std::forward<G>(e));
+        has_value_ = false;
+    }
+
 public:
     using unexpected_type = unexpected<E>;
-    typedef typename base_type::nonvoid_value_type nonvoid_value_type;
+    using typename base_type::nonvoid_value_type;
     using typename base_type::error_type;
 
     constexpr expected() :
@@ -174,15 +189,18 @@ public:
     ESTD_CPP_CONSTEXPR(14) expected& operator=(const expected& copy_from)
     {
         if(copy_from.has_value())
-        {
-            base_type::assign_value(has_value_, copy_from.value());
-            has_value_ = true;
-        }
+            assign_value(copy_from.value());
         else
-        {
-            base_type::assign_error(!has_value_, copy_from.error());
-            has_value_ = false;
-        }
+            assign_error(copy_from.error());
+        return *this;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) expected& operator=(expected&& move_from) noexcept
+    {
+        if(move_from.has_value())
+            assign_value(std::move(move_from.value()));
+        else
+            assign_error(std::move(move_from.error()));
         return *this;
     }
 
@@ -193,8 +211,7 @@ public:
         >>
     ESTD_CPP_CONSTEXPR(14) expected& operator=(U&& v)
     {
-        base_type::assign_value(has_value_, std::forward<U>(v));
-        if(!has_value_) has_value_ = true;
+        assign_value(std::forward<U>(v));
         return *this;
     }
 
@@ -203,8 +220,7 @@ public:
         >>
     ESTD_CPP_CONSTEXPR(14) expected& operator=(const unexpected<G>& copy_from)
     {
-        base_type::assign_error(!has_value_, copy_from.error());
-        if(has_value_) has_value_ = false;
+        assign_error(copy_from.error());
         return *this;
     }
 

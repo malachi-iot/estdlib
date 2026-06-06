@@ -97,6 +97,9 @@ TEST_CASE("expected")
             REQUIRE(e.error() == errc::invalid_argument);
 
             e2 = e;
+
+            // TODO: Add testing just to be 100% sure move/copy from https://github.com/malachi-iot/estdlib/issues/206
+            // is truly behaving
         }
         SECTION("non trivial error type")
         {

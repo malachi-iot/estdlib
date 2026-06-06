@@ -93,7 +93,7 @@ public:
 
     // Silently promote void to monostate so that it registers as 'trivial'
     // and plays nice with variant_storage.  Deviates from std approach.
-    typedef typename conditional<is_void<T>::value, monostate, T>::type nonvoid_value_type;
+    using nonvoid_value_type = conditional_t<is_void<T>::value, monostate, T>;
 
 private:
     enum Positions
@@ -130,33 +130,26 @@ protected:
         storage(in_place_index_t<VALUE>{}, std::forward<nonvoid_value_type>(v))
     {}
 
-    void destroy_value()
+    ESTD_CPP_CONSTEXPR(14) void destroy_value()
     {
         storage.template destroy<VALUE>();
     }
 
-    void destroy_error()
+    ESTD_CPP_CONSTEXPR(14) void destroy_error()
     {
         storage.template destroy<ERROR>();
     }
 
-#if __cpp_rvalue_references
+
     template <class U>
-    void assign_value(bool has_value, U&& v)
+    ESTD_CPP_CONSTEXPR(14) void assign_value(bool has_value, U&& v)
     {
         storage.template assign_or_init<0, 1>(has_value,
             std::forward<U>(v));
     }
-#else
-    template <class U>
-    void assign_value(bool has_value, const U& v)
-    {
-        storage.template assign_or_init<0, 1>(has_value, v);
-    }
-#endif
 
     template <class G>
-    void assign_error(bool has_error, const G& v)
+    ESTD_CPP_CONSTEXPR(14) void assign_error(bool has_error, const G& v)
     {
         storage.template assign_or_init<1, 0>(has_error, v);
     }

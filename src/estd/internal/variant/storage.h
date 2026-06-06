@@ -419,7 +419,7 @@ public:
 
     template <size_t I, class T_i, class T,
         enable_if_t<is_assignable<T_i&, T>::value, bool> = true>
-    void assignment_helper(T&& t)
+    ESTD_CPP_CONSTEXPR(14) void assignment_helper(T&& t)
     {
         //assign<I>(std::forward<T>(t));
         *get<I>() = std::forward<T>(t);
@@ -427,7 +427,7 @@ public:
 
     template <size_t I, class T_i, class T,
         enable_if_t<!is_assignable<T_i&, T>::value, bool> = true>
-    void assignment_helper(T&& t, bool = true)
+    ESTD_CPP_CONSTEXPR(14) void assignment_helper(T&& t, bool = true)
     {
         // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
         // but we do.  Consider feature-flagging
@@ -439,7 +439,7 @@ public:
         enable_if_t<
             is_convertible<T, T_i>::value &&
             estd::is_trivial<T_i>::value, bool> = true>
-    void direct_init_helper(T&& t)
+    ESTD_CPP_CONSTEXPR(14) void direct_init_helper(T&& t)
     {
         *get<I>() = std::forward<T>(t);
     }
@@ -479,7 +479,7 @@ public:
     // https://en.cppreference.com/w/cpp/utility/variant/operator%3D will assign to a
     // temporary copy of T_j if T_j has a noexcept move constructor or a non-noexcept copy constructor.
     template <size_t I, size_t index, class U>
-    void assign_or_init(bool match, U&& u)
+    ESTD_CPP_CONSTEXPR(14) void assign_or_init(bool match, U&& u)
     {
         typedef type_at_index<I> T_j;
 
@@ -499,9 +499,9 @@ public:
 
     // index = index of variant tracked in 'this'
     template <size_t I, class U>
-    void assign_or_init(size_type* index, U&& u)
+    ESTD_CPP_CONSTEXPR(14) void assign_or_init(size_type* index, U&& u)
     {
-        typedef type_at_index<I> T_j;
+        using T_j = type_at_index<I>;
 
         // DEBT: A static assert to determine whether U is convertible/
         // assignable to T_j would be useful here
@@ -538,7 +538,7 @@ public:
     // NOTE: This will assign the first one it finds; however, multiple
     // constructible technically is undefined behavior so do not rely on this
     template <class U>
-    void assign_or_init(size_type* index, U&& u)
+    ESTD_CPP_CONSTEXPR(14) void assign_or_init(size_type* index, U&& u)
     {
         typedef typename assign_or_init_selector<U>::first selected;
 
