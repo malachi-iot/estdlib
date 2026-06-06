@@ -5,6 +5,7 @@
 Emit git describe parts
 """
 
+import logging
 import subprocess
 import sys
 

@@ -9,14 +9,18 @@ git-describe-to-header [project_name] [template-file]
 
 #!/usr/bin/env python3
 
-import subprocess
-import datetime as dt
-import sys
-import re
-import git_describe
 import argparse
+import datetime as dt
+import logging
+import re
+import subprocess
+import sys
+
+import git_describe
 
 from typing import TextIO
+
+script_version = "0.0.0"
 
 parser = argparse.ArgumentParser(
     description="git-describe C++ header repackager"
@@ -29,7 +33,21 @@ parser.add_argument(
     "--version",
     help="Version string",
     action="version",
-    version="%(prog)s 0.0.0"
+    version=f"%(prog)s {script_version}"
+)
+
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action="count",
+    default=0,
+    help="Emit extra diagnostic messages (-v, -vv)"
+)
+
+parser.add_argument(
+    "--timestamps",
+    action="store_true",
+    help="Include timestamps in log messages"
 )
 
 # Not ready yet
@@ -40,22 +58,17 @@ parser.add_argument(
 
 # Not ready yet
 parser.add_argument(
+    "--out",
+    help="Output to this file rather than stdout"
+)
+
+# Not ready yet
+parser.add_argument(
     "--soft-fail",
     help="Always return success code, even if we fail."
 )
 
-# 02JUN26 MB - TODO: Beef up argument parsing so we can do things like:
-# 1. Specify stdin vs file for input template
-# 2. Query version and usage
-# 3. Emit other forms of git describe breakdown such as cmake or env flavors
-args = parser.parse_args()
-
 from string import Template
-
-#project_name = sys.argv[1]
-#infile = sys.argv[2]
-project_name = args.project_name
-infile = args.template_file
 
 def split_semver(desc: str):
     # Find first "-" after semantic version prefix
@@ -75,7 +88,43 @@ def emit_cmake_helper(core: str, word: str, ostream: TextIO) -> None:
     ostream.write(f'GIT_TAG_SEMVER={core}\n')
     ostream.write(f'GIT_TAG_SEMVER_IDENTIFIER={word}\n')
 
+
+def configure_logging(verbosity: int, timestamps: bool) -> None:
+    levels = [
+        logging.WARNING,
+        logging.INFO,
+        logging.DEBUG,
+    ]
+
+    level = levels[min(verbosity, len(levels) - 1)]
+
+    if timestamps:
+        log_format = "%(asctime)s %(levelname)s %(message)s"
+        date_format = "%Y-%m-%dT%H:%M:%S%z"
+    else:
+        log_format = "%(levelname)s %(message)s"
+        date_format = None
+
+    logging.basicConfig(
+        level=level,
+        format=log_format,
+        datefmt=date_format
+    )
+
 def main():
+    # 06JUN26 MB - TODO: Beef up argument parsing so we can do things like:
+    # 1. Specify stdin vs file for input template
+    # 2. Query version and usage
+    # 3. Emit other forms of git describe breakdown such as cmake or env flavors
+    args = parser.parse_args()
+
+    configure_logging(args.verbose, args.timestamps)
+
+    logging.info("git-describe-to-header v%s", script_version)
+
+    project_name = args.project_name
+    infile = args.template_file
+
     desc = git_describe.run_git_describe()
 
     semver = re.findall(git_describe.regex, desc)[0]

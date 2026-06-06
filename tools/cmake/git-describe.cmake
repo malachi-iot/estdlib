@@ -52,10 +52,7 @@ if(Python3_Interpreter_FOUND)
     add_custom_target(generate-version ALL
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         COMMAND
-            #${Python3_EXECUTABLE}
-            #${ROOT_DIR}/tools/python/git-describe-to-header.py > ${WORKING_DIR}/git-described.cmake
-            Python3::Interpreter
-            ${ROOT_DIR}/tools/python/git-describe-to-header.py
+            Python3::Interpreter ../python/git-describe-to-header.py
                 estd
                 ${IN_DIR}/git-version.in.h >
                 ${ROOT_DIR}/src/estd/port/git-version.h
