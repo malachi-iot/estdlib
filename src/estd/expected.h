@@ -67,7 +67,7 @@ class expected : public internal::expected<T, E>
             base_type::destroy_error();
     }
 
-    void assert_has_value()
+    ESTD_CPP_CONSTEXPR(14) void assert_has_value() const
     {
         if(!has_value_)
 #if __cpp_exceptions
@@ -143,7 +143,7 @@ public:
     {}
 
     // DEBT: Not tested
-    constexpr expected(expected&& move_from) NOEXCEPT :
+    constexpr expected(expected&& move_from) noexcept :
         base_type(std::move(move_from), move_from.has_value()),
         has_value_(move_from.has_value())
     {}
@@ -171,13 +171,27 @@ public:
         has_value_(false)
     {}
 
+    ESTD_CPP_CONSTEXPR(14) expected& operator=(const expected& copy_from)
+    {
+        if(copy_from.has_value())
+        {
+            base_type::assign_value(has_value_, copy_from.value());
+            has_value_ = true;
+        }
+        else
+        {
+            base_type::assign_error(!has_value_, copy_from.error());
+            has_value_ = false;
+        }
+        return *this;
+    }
 
     template <class U, class enabled = enable_if_t<
         is_same<expected, remove_cvref_t<U>>::value == false &&
         internal::is_unexpected<remove_cvref_t<U>>::value == false &&
         is_constructible<T, U>::value
         >>
-    expected& operator=(U&& v)
+    ESTD_CPP_CONSTEXPR(14) expected& operator=(U&& v)
     {
         base_type::assign_value(has_value_, std::forward<U>(v));
         if(!has_value_) has_value_ = true;
@@ -187,7 +201,7 @@ public:
     template <class G, class GF = const G&, class enabled = enable_if_t<
         internal::is_variant_assignable<E, GF>::value
         >>
-    expected& operator=(const unexpected<G>& copy_from)
+    ESTD_CPP_CONSTEXPR(14) expected& operator=(const unexpected<G>& copy_from)
     {
         base_type::assign_error(!has_value_, copy_from.error());
         if(has_value_) has_value_ = false;
@@ -217,7 +231,7 @@ public:
         return base_type::value();
     }
 
-    const nonvoid_value_type& value() const ESTD_CPP_REFQ
+    constexpr const nonvoid_value_type& value() const ESTD_CPP_REFQ
     {
         assert_has_value();
 
@@ -231,7 +245,7 @@ public:
         return base_type::value();
     }
 
-    const nonvoid_value_type& operator*() const ESTD_CPP_REFQ
+    constexpr const nonvoid_value_type& operator*() const ESTD_CPP_REFQ
     {
         return base_type::value();
     }

@@ -84,7 +84,7 @@ TEST_CASE("expected")
         }
         SECTION("assignment operator")
         {
-            expected_type e;
+            expected_type e, e2;
 
             e = 10;
 
@@ -95,6 +95,8 @@ TEST_CASE("expected")
 
             REQUIRE(!e.has_value());
             REQUIRE(e.error() == errc::invalid_argument);
+
+            e2 = e;
         }
         SECTION("non trivial error type")
         {
