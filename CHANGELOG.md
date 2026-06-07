@@ -12,6 +12,7 @@
 * https://github.com/malachi-iot/estdlib/issues/195 `expected` converting constructor fix
 * Cleanup of `flags` conversion operators, LLVM compatibility
 * https://github.com/malachi-iot/estdlib/issues/127 general internal container scrubbing
+* https://github.com/malachi-iot/estdlib/issues/206 `expected` assignment operator fix
 
 # v0.8.11 - 10APR26
 

@@ -84,7 +84,7 @@ TEST_CASE("expected")
         }
         SECTION("assignment operator")
         {
-            expected_type e, e2;
+            expected_type e, e2, e3;
 
             e = 10;
 
@@ -98,17 +98,26 @@ TEST_CASE("expected")
 
             e2 = e;
 
-            // TODO: Add testing just to be 100% sure move/copy from https://github.com/malachi-iot/estdlib/issues/206
-            // is truly behaving
+            REQUIRE(e2 == e);
+
+            e3 = std::move(e2);
+
+            REQUIRE(e3 == e);
         }
         SECTION("non trivial error type")
         {
             using expected_type2 = estd::expected<int, ExplicitError>;
 
-            expected_type2 e;
+            expected_type2 e, e2;
 
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
+
+            // FIX: This shouldn't work -- converting constructor DEBT bites us.
+            // This should require an in_place_t (not yet implemented here) to work
+            e = estd::unexpected<ExplicitError>(100);
+
+            e2 = std::move(e);
         }
         SECTION("explicit converting E")
         {

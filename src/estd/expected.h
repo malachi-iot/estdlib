@@ -288,6 +288,21 @@ public:
     {
         return has_value_ ? base_type::value() : default_value;
     }
+
+    // DEBT: For 'void' T monostate is comparable here, but shouldn't be
+    // DEBT: Do full conversion from T2 as per https://en.cppreference.com/cpp/utility/expected/operator_cmp
+    constexpr bool operator==(const nonvoid_value_type& compare_to) const
+    {
+        return has_value() && base_type::value() == compare_to;
+    }
+
+    // DEBT: Do full expected<T2, E2> as per https://en.cppreference.com/cpp/utility/expected/operator_cmp
+    constexpr bool operator==(const expected& compare_to) const
+    {
+        return (has_value() == compare_to.has_value()) &&
+            has_value() ? (value() == compare_to.value()) :
+            (base_type::error() == compare_to.error());
+    }
 };
 
 
