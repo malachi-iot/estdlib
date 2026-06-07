@@ -320,13 +320,13 @@ public:
     }
 
     template <class T, class ...Args>
-    ESTD_CPP_CONSTEXPR(14) ensure_pointer<T> emplace(Args&&...args)
+    constexpr ensure_pointer<T> emplace(Args&&...args)
     {
         return new (storage.raw) T(std::forward<Args>(args)...);
     }
 
     template <size_t I, class ...Args>
-    ESTD_CPP_CONSTEXPR(14) pointer_at_index<I> emplace(Args&&...args)
+    constexpr pointer_at_index<I> emplace(Args&&...args)
     {
         using T_i = type_at_index<I>;
         return emplace<T_i>(std::forward<Args>(args)...);
@@ -334,7 +334,7 @@ public:
 
 
     template <class T>
-    ensure_pointer<T> get() { return (T*) storage.raw; }
+    ESTD_CPP_CONSTEXPR(14) ensure_pointer<T> get() { return (T*) storage.raw; }
 
     template <class T>
     constexpr add_pointer_t<const ensure_type_t<T>> get() const
@@ -345,35 +345,36 @@ public:
     // Same operation as operator=, but more explicit since
     // type safety is up to programmer
     template <size_t I>
-    void assign(const this_type& assign_from)
+    constexpr type_at_index<I>& assign(const this_type& assign_from)
     {
-        *get<I>() = *assign_from.get<I>();
+        return *get<I>() = *assign_from.get<I>();
     }
 
     template <size_t I>
-    void assign(this_type&& assign_from)
+    constexpr type_at_index<I>& assign(this_type&& assign_from)
     {
-        *get<I>() = std::move(*assign_from.get<I>());
+        // DEBT: Do proper forwarding for assign_from
+        return *get<I>() = std::move(*assign_from.get<I>());
     }
 
     template <size_t I>
-    void assign(const type_at_index<I>& assign_from)
+    constexpr type_at_index<I>& assign(const type_at_index<I>& assign_from)
     {
-        *get<I>() = assign_from;
+        return *get<I>() = assign_from;
     }
 
     template <size_t I>
-    void assign(type_at_index<I>&& assign_from)
+    constexpr type_at_index<I>& assign(type_at_index<I>&& assign_from)
     {
-        *get<I>() = std::move(assign_from);
+        return *get<I>() = std::move(assign_from);
     }
 
     // Same operation as copy constructor, but more explicit since
     // type safety is up to programmer
     template <size_t I>
-    void copy(const this_type& copy_from)
+    constexpr pointer_at_index<I> copy(const this_type& copy_from)
     {
-        new (storage.raw) type_at_index<I> (*copy_from.get<I>());
+        return new (storage.raw) type_at_index<I> (*copy_from.get<I>());
     }
 
     // Same operation as move constructor, but more explicit since
@@ -387,11 +388,12 @@ public:
     template <size_t I, class T_i, class T,
         enable_if_t<
             !is_convertible<T, T_i>::value, bool> = true>
-    void assignment_emplace_helper(T&&, long = 0)
+    static constexpr pointer_at_index<I> assignment_emplace_helper(T&&, long = 0)
     {
 #if FEATURE_ESTD_VARIANT_STRICT_CONVERSION
         std::abort();
 #endif
+        return {};
     }
 
 
@@ -402,9 +404,9 @@ public:
             is_convertible<T, T_i>::value &&
             (is_nothrow_constructible<T_i, T>::value ||
             !is_nothrow_move_constructible<T_i>::value), bool> = true>
-    void assignment_emplace_helper(T&& t, bool = true)
+    constexpr pointer_at_index<I> assignment_emplace_helper(T&& t, bool = true)
     {
-        emplace<I>(std::forward<T>(t));
+        return emplace<I>(std::forward<T>(t));
     }
 
     template <size_t I, class T_i, class T,
@@ -412,27 +414,27 @@ public:
             is_convertible<T, T_i>::value &&
             !(is_nothrow_constructible<T_i, T>::value ||
             !is_nothrow_move_constructible<T_i>::value), bool> = true>
-    void assignment_emplace_helper(T&& t)
+    constexpr pointer_at_index<I> assignment_emplace_helper(T&& t)
     {
-        emplace<I>(T_i(std::forward<T>(t)));
+        return emplace<I>(T_i(std::forward<T>(t)));
     }
 
     template <size_t I, class T_i, class T,
         enable_if_t<is_assignable<T_i&, T>::value, bool> = true>
-    ESTD_CPP_CONSTEXPR(14) void assignment_helper(T&& t)
+    constexpr type_at_index<I>& assignment_helper(T&& t)
     {
         //assign<I>(std::forward<T>(t));
-        *get<I>() = std::forward<T>(t);
+        return *get<I>() = std::forward<T>(t);
     }
 
     template <size_t I, class T_i, class T,
         enable_if_t<!is_assignable<T_i&, T>::value, bool> = true>
-    ESTD_CPP_CONSTEXPR(14) void assignment_helper(T&& t, bool = true)
+    ESTD_CPP_CONSTEXPR(14) type_at_index<I>& assignment_helper(T&& t, bool = true)
     {
         // DEBT: std variant spec doesn't appear to handle 'emplace' for like-indexed assignment,
         // but we do.  Consider feature-flagging
         destroy<I>();
-        assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
+        return *assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
     }
 
     template <size_t I, class T_i, class T,
@@ -481,7 +483,7 @@ public:
     template <size_t I, size_t index, class U>
     ESTD_CPP_CONSTEXPR(14) void assign_or_init(bool match, U&& u)
     {
-        typedef type_at_index<I> T_j;
+        using T_j = type_at_index<I>;
 
         // Are we tracking 'I'?  If so, assign over it
         if(match)

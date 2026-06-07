@@ -154,6 +154,12 @@ protected:
         storage.template assign_or_init<1, 0>(has_error, v);
     }
 
+    template <class G>
+    ESTD_CPP_CONSTEXPR(14) void assign_error(bool has_error, G&& v)
+    {
+        storage.template assign_or_init<1, 0>(has_error, std::forward<G>(v));
+    }
+
 public:
     ESTD_CPP_CONSTEXPR(14) nonvoid_value_type& value() { return get<VALUE>(storage); }
     constexpr const nonvoid_value_type& value() const { return get<VALUE>(storage); }

@@ -114,8 +114,12 @@ TEST_CASE("expected")
             REQUIRE(*e == 0);
 
             e = estd::unexpected<ExplicitError>(100);
+            REQUIRE(e.error().initialized_);
+            REQUIRE(e.error().moved_from_ == false);
 
             e2 = std::move(e);
+            REQUIRE(e.error().moved_from_);
+            REQUIRE(e2.error().initialized_);
         }
         SECTION("explicit converting E")
         {
