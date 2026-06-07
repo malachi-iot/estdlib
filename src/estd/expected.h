@@ -43,6 +43,11 @@ public:
         >
     constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
 
+    template <class ...Args>
+    constexpr explicit unexpected(in_place_t, Args&&...args) :
+        base_type(std::forward<Args>(args)...)
+    {}
+
     // TODO: Need in_place_t ctor
 };
 
@@ -271,22 +276,31 @@ public:
         return base_type::value();
     }
 
-    const nonvoid_value_type&& operator*() const&&
+    constexpr const nonvoid_value_type&& operator*() const&&
     {
         return base_type::value();
     }
 
-    const T* operator->() const
+    constexpr const T* operator->() const
     {
         return &base_type::value();
     }
 
     constexpr explicit operator bool() const { return has_value_; }
 
+    // 07JUN26 MB - 'and_then' is compelling but return type description is incomprehensible
+    // https://en.cppreference.com/cpp/utility/expected/and_then
+
+    template <class G = E>
+    constexpr E error_or(G&& default_value) const&
+    {
+        return has_value_ ? static_cast<E>(std::forward<G>(default_value)) : base_type::error();
+    }
+
     template <class U>
     constexpr T value_or(U&& default_value) const&
     {
-        return has_value_ ? base_type::value() : default_value;
+        return has_value_ ? base_type::value() : static_cast<T>(std::forward<U>(default_value));
     }
 
     // DEBT: For 'void' T monostate is comparable here, but shouldn't be
@@ -303,6 +317,8 @@ public:
             has_value() ? (value() == compare_to.value()) :
             (base_type::error() == compare_to.error());
     }
+
+    // DEBT: Add operator==(unexpected)
 };
 
 

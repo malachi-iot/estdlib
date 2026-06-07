@@ -113,8 +113,6 @@ TEST_CASE("expected")
             REQUIRE(e.has_value());
             REQUIRE(*e == 0);
 
-            // FIX: This shouldn't work -- converting constructor DEBT bites us.
-            // This should require an in_place_t (not yet implemented here) to work
             e = estd::unexpected<ExplicitError>(100);
 
             e2 = std::move(e);

@@ -155,11 +155,11 @@ protected:
     }
 
 public:
-    nonvoid_value_type& value() { return get<VALUE>(storage); }
-    ESTD_CPP_CONSTEXPR_RET const nonvoid_value_type& value() const { return get<VALUE>(storage); }
+    ESTD_CPP_CONSTEXPR(14) nonvoid_value_type& value() { return get<VALUE>(storage); }
+    constexpr const nonvoid_value_type& value() const { return get<VALUE>(storage); }
 
-    E& error() { return get<ERROR>(storage); }
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return get<ERROR>(storage); }
+    ESTD_CPP_CONSTEXPR(14) E& error() { return get<ERROR>(storage); }
+    constexpr const E& error() const { return get<ERROR>(storage); }
 };
 
 #if __cpp_concepts

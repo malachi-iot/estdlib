@@ -14,6 +14,10 @@
 * https://github.com/malachi-iot/estdlib/issues/127 general internal container scrubbing
 * https://github.com/malachi-iot/estdlib/issues/206 `expected` assignment operator fix
 
+## Known Issues and Limitations
+
+* `expected` comparison operators present but a bit anemic
+
 # v0.8.11 - 10APR26
 
 ## Added Features
