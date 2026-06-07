@@ -36,19 +36,21 @@ public:
     constexpr unexpected(const unexpected&) = default;
     constexpr unexpected(unexpected&&) noexcept = default;
 
-    // DEBT: needs more filters to be not same as unexpected, in_place_t, etc
     template <class Err = E, class =
         enable_if_t<
+            is_constructible<E, Err>::value &&
+            is_same<remove_cvref<Err>, in_place_t>::value == false &&
             is_same<remove_cvref<Err>, unexpected>::value == false>
         >
-    constexpr explicit unexpected(Err&& e) : base_type(std::forward<Err>(e)) {}
+    constexpr explicit unexpected(Err&& e) :    // NOLINT
+        base_type(in_place_t{}, std::forward<Err>(e)) {}
 
     template <class ...Args>
     constexpr explicit unexpected(in_place_t, Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
 
-    // TODO: Need in_place_t ctor
+    // TODO: Still needs initialize_list flavor
 };
 
 #if __cpp_deduction_guides

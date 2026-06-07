@@ -55,7 +55,7 @@ template <class E>
 class unexpected
 {
 private:
-    const E error_;
+    E error_;
 
 protected:
     using error_type = E;
@@ -63,17 +63,14 @@ protected:
     constexpr unexpected(const unexpected&) = default;
     constexpr unexpected(unexpected&&) noexcept = default;
 
-    template <class Err = E>
-    constexpr explicit unexpected(Err&& e) : error_(std::forward<Err>(e)) {}
-
     template <class ...Args>
     constexpr explicit unexpected(in_place_t, Args&&...args) :
         error_(std::forward<Args>(args)...)
     {}
 
 public:
-    E& error() { return error_; }
-    ESTD_CPP_CONSTEXPR_RET const E& error() const { return error_; }
+    ESTD_CPP_CONSTEXPR(14) E& error() { return error_; }
+    constexpr const E& error() const { return error_; }
 };
 
 
