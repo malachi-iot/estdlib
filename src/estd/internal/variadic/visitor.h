@@ -289,7 +289,7 @@ struct type_visitor
     template <size_t I = 0, class F,
             class enabled = enable_if_t<(I < size)>,
             class... Args>
-    static int visit(F&& f, Args&&...args)
+    ESTD_CPP_CONSTEXPR(14) static short visit(F&& f, Args&&...args)
     {
         if(f(visitor_index<I, internal::type_at_index<I, Types...>>{}, std::forward<Args>(args)...))
             return I;

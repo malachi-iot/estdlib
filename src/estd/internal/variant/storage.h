@@ -168,16 +168,16 @@ struct variant_storage_base : variant_storage_tag
 
     struct getter_functor2
     {
-        template <size_t I, class T, class F, class ...TArgs>
-        constexpr bool operator()(variadic::visitor_index<I, T>, this_type& vs, F&& f, TArgs&&...args) const
+        template <size_t I, class T, class F, class ...Args>
+        constexpr bool operator()(variadic::visitor_index<I, T>, this_type& vs, F&& f, Args&&...args) const
         {
-            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<TArgs>(args)...);
+            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<Args>(args)...);
         }
 
-        template <size_t I, class T, class F, class ...TArgs>
-        constexpr bool operator()(variadic::visitor_index<I, T>, const this_type& vs, F&& f, TArgs&&...args) const
+        template <size_t I, class T, class F, class ...Args>
+        constexpr bool operator()(variadic::visitor_index<I, T>, const this_type& vs, F&& f, Args&&...args) const
         {
-            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<TArgs>(args)...);
+            return f(variadic::visitor_instance<I, T>{*vs.get<I>()}, std::forward<Args>(args)...);
         }
     };
 
@@ -545,8 +545,8 @@ public:
         assign_or_init<selected::index>(index, std::forward<U>(u));
     }
 
-    template <typename F, class ...TArgs>
-    int visit_instance(F&& f, TArgs&&...args)
+    template <typename F, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) int visit_instance(F&& f, Args&&...args)
     {
         /*
         int i = visitor::visit_instance(std::forward<F>(f),
@@ -555,26 +555,26 @@ public:
             std::forward<TArgs>(args)...); */
         int i = visitor::visit(getter_functor2{}, *this,
             std::forward<F>(f),
-            std::forward<TArgs>(args)...);
+            std::forward<Args>(args)...);
 
         return i;
     }
 
-    template <typename F, class ...TArgs>
-    static monostate visit(F&& f, size_type* index, TArgs&&...args)
+    template <typename F, class ...Args>
+    static monostate visit(F&& f, size_type* index, Args&&...args)
     {
-        int i = visitor::visit(std::forward<F>(f),
-                std::forward<TArgs>(args)...);
+        const size_type i = visitor::visit(std::forward<F>(f),
+            std::forward<Args>(args)...);
 
-        if(index != nullptr) *index = (std::size_t)i;
+        if(index != nullptr) *index = i;
         return {};
     }
 
     // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
     // continue to be a thorn in our side otherwise
-    template <class F, class ...TArgs>
-    variant_storage_base(in_place_visit_t, F&& f, size_type* index, TArgs&&...args) :
-        dummy{visit(std::forward<F>(f), index, *this, std::forward<TArgs>(args)...)}
+    template <class F, class ...Args>
+    variant_storage_base(in_place_visit_t, F&& f, size_type* index, Args&&...args) :
+        dummy{visit(std::forward<F>(f), index, *this, std::forward<Args>(args)...)}
     {}
 
     constexpr variant_storage_base(const variant_storage_base& copy_from, size_type index) :
