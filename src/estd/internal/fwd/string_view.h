@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../policy/string.h"
 #include "../../traits/char_traits.h"
+
+#include "string.h"
 
 namespace estd {
 

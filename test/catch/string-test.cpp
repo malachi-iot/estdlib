@@ -18,6 +18,24 @@ using namespace estd;
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";
 
+// +++ EXPERIMENTAL, prepping for string_view to auto-convert from const char* (and similar) if need be
+#include <estd/string_view.h>
+
+// ADL is cool but it doesn't bring conversion contructor along to the party
+constexpr bool operator <=(estd::string_view lhs, estd::string_view rhs)
+{
+    return lhs.compare(rhs) <= 0;
+}
+
+constexpr bool operator >=(estd::string_view lhs, estd::string_view rhs)
+{
+    return lhs.compare(rhs) >= 0;
+}
+// ---
+
+
+
+
 TEST_CASE("string tests")
 {
     SECTION("string tests")
@@ -778,16 +796,6 @@ TEST_CASE("string tests")
             }
         }
     }
-    SECTION("errc")
-    {
-        // TODO: Move this error eval code elsewhere
-        estd::errc error(estd::errc::invalid_argument);
-
-        REQUIRE(error == errc::invalid_argument);
-        REQUIRE(error != errc::result_out_of_range);
-
-        REQUIRE(error == estd::errc(EINVAL));
-    }
     SECTION("from_chars")
     {
         // Internal from_chars is not phased by locking iterator
@@ -798,13 +806,18 @@ TEST_CASE("string tests")
 
         REQUIRE(v == 1234);
     }
-    SECTION("compare")
+    SECTION("lexical compare")
     {
         layer3::const_string lhs = "abc";
         layer1::string<16> rhs = "def";
 
         REQUIRE(lhs < rhs);
         REQUIRE(rhs > lhs);
+
+        // NOT READY YET - testing string_view auto conversions
+        bool b1 = lhs <= "def";
+
+        REQUIRE(b1);
     }
     SECTION("internal")
     {
