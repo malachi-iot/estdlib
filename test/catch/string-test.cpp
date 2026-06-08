@@ -27,7 +27,7 @@ constexpr bool operator <=(estd::string_view lhs, estd::string_view rhs)
     return lhs.compare(rhs) <= 0;
 }
 
-constexpr bool operator >=(estd::string_view lhs, estd::string_view rhs)
+constexpr bool operator >=(layer3::const_string lhs, layer3::const_string rhs)
 {
     return lhs.compare(rhs) >= 0;
 }
@@ -818,6 +818,11 @@ TEST_CASE("string tests")
         bool b1 = lhs <= "def";
 
         REQUIRE(b1);
+
+        // NOT READY YET - testing layer3::const_string auto conversions
+        b1 = lhs >= "def";
+
+        REQUIRE(!b1);
     }
     SECTION("internal")
     {

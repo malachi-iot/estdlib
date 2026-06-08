@@ -17,7 +17,7 @@
 #include "policy/string.h"
 #include "port/string.h"
 #include "algorithm.h"
-#include "span.h"
+#include "internal/fwd/span.h"
 #include "cstdlib.h"
 
 #ifdef FEATURE_ESTD_IOSTREAM_NATIVE
@@ -28,9 +28,7 @@
 
 namespace estd {
 
-#ifdef FEATURE_STD_MEMORY
 using string = basic_string<char>;
-#endif
 
 
 // DEBT: Move this out to layer3/string.h if we plan to keep const_string.
@@ -55,14 +53,16 @@ public:
 
 
     template <size_type N>
-    const_string(const char (&buffer) [N], bool source_null_terminated = true) :
+    constexpr const_string(const char (&buffer) [N], bool source_null_terminated = true) :
         base_t(buffer, source_null_terminated ? strlen(buffer) : N, true) {}
 
     // convenience method since std::vector and std::string itself are reported to convert
     // uneventfully between unsigned char and char
     // note it's a little bit bad because of the distant possibility of a
     // byte != unsigned char != uint8_t
-    const_string(const estd::span<const uint8_t>& cast_from) :
+    // DEBT: Used to be const uint8_t but doing template Char here so that we can do fwd of span instead of full span
+    template <class Char>
+    const_string(const estd::span<const Char>& cast_from) :
         base_t(reinterpret_cast<const char*>(cast_from.data()), cast_from.size(), true) {}
 };
 
