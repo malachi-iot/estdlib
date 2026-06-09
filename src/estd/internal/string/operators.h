@@ -15,80 +15,37 @@ namespace estd { namespace detail {
 // Remember layer1, layer2, layer3 (and others) have slightly different behaviors during conversion,
 // meaning detail::basic_string can't on its own make a determination here.
 
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-constexpr bool operator ==(
-    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
-{
-    return rhs.compare(lhs) == 0;
+#pragma push_macro("STRING_OP")
+
+#undef STRING_OP
+#define STRING_OP(op, reverse_op) \
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl> constexpr bool operator op(    \
+    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)          \
+{                                                                                           \
+    return rhs.compare(lhs) reverse_op 0;                                                   \
+}   \
+    \
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl> constexpr bool operator op(    \
+    const basic_string<Impl>& lhs, typename basic_string<Impl>::const_pointer rhs)          \
+{                                                                                           \
+    return lhs.compare(rhs) op 0;                                                           \
+}   \
+    \
+template <class Impl1, class Impl2>                                                         \
+constexpr bool operator op(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)  \
+{                                                                                           \
+    return lhs.compare(rhs) op 0;                                                           \
 }
 
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-ESTD_CPP_CONSTEXPR_RET bool operator ==(
-    const basic_string<Impl>& lhs,
-    typename basic_string<Impl>::const_pointer rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
 
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-constexpr bool operator <=(
-    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
-{
-    return rhs.compare(lhs) > 0;
-}
+STRING_OP(==, ==)
+STRING_OP(!=, !=)
+STRING_OP(<, >=)
+STRING_OP(<=, >)
+STRING_OP(>, <=)
+STRING_OP(>=, <)
 
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-ESTD_CPP_CONSTEXPR_RET bool operator <=(
-    const basic_string<Impl>& lhs,
-    typename basic_string<Impl>::const_pointer rhs)
-{
-    return lhs.compare(rhs) <= 0;
-}
-
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-constexpr bool operator >=(
-    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
-{
-    return rhs.compare(lhs) < 0;
-}
-
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-ESTD_CPP_CONSTEXPR_RET bool operator >=(
-    const basic_string<Impl>& lhs,
-    typename basic_string<Impl>::const_pointer rhs)
-{
-    return lhs.compare(rhs) >= 0;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator ==(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator <(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
-{
-    return lhs.compare(rhs) < 0;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator <=(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
-{
-    return lhs.compare(rhs) <= 0;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator >(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
-{
-    return lhs.compare(rhs) > 0;
-}
-
-template <class Impl1, class Impl2>
-constexpr bool operator >=(const basic_string<Impl1>& lhs, const basic_string<Impl2>& rhs)
-{
-    return lhs.compare(rhs) >= 0;
-}
+#pragma pop_macro("STRING_OP")
 
 // DEBT: std::ostream support should actually be elsewhere
 

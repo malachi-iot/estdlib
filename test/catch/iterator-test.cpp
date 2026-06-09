@@ -76,6 +76,7 @@ TEST_CASE("iterator")
     SECTION("istream_iterator")
     {
         estd::experimental::istringstream<32> istream;
+        ESTD_CPP_ATTR_MAYBE_UNUSED
         estd::experimental::istream_iterator<unsigned, decltype(istream)> in(istream), end;
     }
     SECTION("filter_iterator")

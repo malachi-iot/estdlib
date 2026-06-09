@@ -6,7 +6,7 @@
 #include <catch2/catch_all.hpp>
 
 constexpr const char* test_str = "hello";
-constexpr const char* test_str2 = "hi2u";
+ESTD_CPP_ATTR_MAYBE_UNUSED constexpr const char* test_str2 = "hi2u";
 
 TEST_CASE("charconv")
 {
