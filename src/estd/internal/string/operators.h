@@ -10,11 +10,54 @@
 
 namespace estd { namespace detail {
 
-// DEBT: Grab CharT right from Impl, this is a little too permissive
-template <typename CharT, ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-constexpr bool operator ==(const CharT* lhs, const basic_string<Impl>& rhs)
+// Tried many alternatives such as mixins, concrete string_view, string_view_like overloads.  At the end of the day they
+// are squirrelly, don't cover all the use cases and are harder to debug than these explicit guys here.
+// Remember layer1, layer2, layer3 (and others) have slightly different behaviors during conversion,
+// meaning detail::basic_string can't on its own make a determination here.
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+constexpr bool operator ==(
+    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
 {
     return rhs.compare(lhs) == 0;
+}
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+ESTD_CPP_CONSTEXPR_RET bool operator ==(
+    const basic_string<Impl>& lhs,
+    typename basic_string<Impl>::const_pointer rhs)
+{
+    return lhs.compare(rhs) == 0;
+}
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+constexpr bool operator <=(
+    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
+{
+    return rhs.compare(lhs) > 0;
+}
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+ESTD_CPP_CONSTEXPR_RET bool operator <=(
+    const basic_string<Impl>& lhs,
+    typename basic_string<Impl>::const_pointer rhs)
+{
+    return lhs.compare(rhs) <= 0;
+}
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+constexpr bool operator >=(
+    typename basic_string<Impl>::const_pointer lhs, const basic_string<Impl>& rhs)
+{
+    return rhs.compare(lhs) < 0;
+}
+
+template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
+ESTD_CPP_CONSTEXPR_RET bool operator >=(
+    const basic_string<Impl>& lhs,
+    typename basic_string<Impl>::const_pointer rhs)
+{
+    return lhs.compare(rhs) >= 0;
 }
 
 template <class Impl1, class Impl2>

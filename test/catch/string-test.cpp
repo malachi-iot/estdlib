@@ -18,24 +18,6 @@ using namespace estd;
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";
 
-// +++ EXPERIMENTAL, prepping for string_view to auto-convert from const char* (and similar) if need be
-#include <estd/string_view.h>
-
-// ADL is cool but it doesn't bring conversion contructor along to the party
-constexpr bool operator <=(estd::string_view lhs, estd::string_view rhs)
-{
-    return lhs.compare(rhs) <= 0;
-}
-
-constexpr bool operator >=(layer3::const_string lhs, layer3::const_string rhs)
-{
-    return lhs.compare(rhs) >= 0;
-}
-// ---
-
-
-
-
 TEST_CASE("string tests")
 {
     SECTION("string tests")
@@ -818,15 +800,17 @@ TEST_CASE("string tests")
 
         REQUIRE(b1);
 
-        // NOT READY YET - testing string_view auto conversions
         b1 = lhs <= "def";
 
         REQUIRE(b1);
 
-        // NOT READY YET - testing layer3::const_string auto conversions
         b1 = lhs >= "def";
 
         REQUIRE(!b1);
+
+        b1 = "abc" <= rhs;
+
+        REQUIRE(b1);
     }
     SECTION("internal")
     {

@@ -414,15 +414,6 @@ public:
 #endif
 };
 
-// DEBT: move this guy out to string/operators.h
-template <ESTD_CPP_CONCEPT(concepts::v1::impl::String) Impl>
-ESTD_CPP_CONSTEXPR_RET bool operator ==(
-    const basic_string<Impl>& lhs,
-    typename basic_string<Impl>::const_pointer rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
 }}
 
 #include "macro/pop.h"
