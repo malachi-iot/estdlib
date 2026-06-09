@@ -34,6 +34,4 @@ concept StringViewLike =
 }}
 #endif
 
-using string_view = basic_string_view<char>;
-
 }

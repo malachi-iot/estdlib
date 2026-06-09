@@ -18,7 +18,7 @@
 namespace estd {
 
 #if __cpp_concepts
-namespace concepts { inline namespace v1 {
+namespace concepts::inline v1 {
 
 template <class T>
 concept CharTraits = requires
@@ -58,7 +58,7 @@ concept String = //impl::String<T>
     //s.operator =(rhs);
 };
 
-}}
+}
 #endif
 
 namespace internal {

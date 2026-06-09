@@ -7,6 +7,7 @@
 #include "fwd/string.h"
 #include "string/conversion.h"
 #include "string/hash.h"
+#include "string/len.h"
 #include "string/operators.h"
 
 #include "dynamic_array.h"
