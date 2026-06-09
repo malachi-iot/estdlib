@@ -15,7 +15,7 @@ class basic_string_view :
     using base_type = detail::basic_string<internal::impl::allocated_array<
         layer3::allocator<const typename traits_type::char_type, typename Policy::size_type>, Policy>>;
 
-    typedef typename base_type::allocator_type allocator_type;
+    using typename base_type::allocator_type;
 
     // DEBT: InitParam works, but are probably better served by something like
     // in_place_t.  InitParam was done to get around lack of variadic forwarding
@@ -25,14 +25,14 @@ public:
     using base_type::data;
     using typename base_type::size_type;
 
-    typedef typename base_type::pointer pointer;
-    typedef typename base_type::const_pointer const_pointer;
+    using typename base_type::pointer;
+    using typename base_type::const_pointer;
 
     // DEBT: Mainly to satisfy constraints observed by v0::impl::basic_sviewbuf.
     // There theoretically could be utility here in that a highly constrained
     // basic_string may generate a similarly constrained string_view (perhaps with
     // compile time sizing)
-    using view_type = basic_string_view<Policy>;
+    using view_type = basic_string_view;
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
@@ -45,7 +45,7 @@ public:
     }
 
     // C-style null terminated string
-    constexpr basic_string_view(const_pointer s) :
+    constexpr basic_string_view(const_pointer s) :  // NOLINT
         // char_traits::length only constexpr with c++17 on
 #if __cplusplus >= 201703L
         base_type(init_param_t(s, traits_type::length(s)))
@@ -57,9 +57,9 @@ public:
     }
 
     template <class Policy2>
-    constexpr basic_string_view(
+    constexpr basic_string_view(                    // NOLINT
         const basic_string_view<Policy2>& other) :
-        // NOTE: Similar to layer3::string init issue, other.size() may properly resulit
+        // NOTE: Similar to layer3::string init issue, other.size() may properly result
         // in narrowing warnings
         base_type(init_param_t(other.data(), other.size()))
     {
@@ -67,7 +67,7 @@ public:
     }
 
 
-    basic_string_view(const basic_string_view& other) = default;
+    //basic_string_view(const basic_string_view& other) = default;
 
     /*
     template <class Policy2>
@@ -102,8 +102,8 @@ public:
     // DEBT: Similar to above, for scenarios which are never gonna be locking (like layer strings)
     // we don't need the fancy locking iterator.  So continue to plumb the depths of locking_accessor,
     // base allocators and friends to smooth this out
-    typedef pointer iterator;
-    typedef const_pointer const_iterator;
+    using iterator = pointer;
+    using const_iterator = const_pointer;
 
     constexpr const_iterator begin() const { return data(); }
     constexpr const_iterator end() const { return data() + base_type::size(); }

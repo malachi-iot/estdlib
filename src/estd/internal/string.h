@@ -62,6 +62,8 @@ protected:
     template <typename InputIt>
     int compare(InputIt s, size_type s_size) const
     {
+        // DEBT: Augment helper to be a little more null-terminated aware and not demand
+        // raw_size here in that case
         size_type raw_size = base_type::size();
 
         if(raw_size < s_size) return -1;

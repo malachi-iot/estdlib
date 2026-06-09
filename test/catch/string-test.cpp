@@ -814,8 +814,12 @@ TEST_CASE("string tests")
         REQUIRE(lhs < rhs);
         REQUIRE(rhs > lhs);
 
+        bool b1 = lhs <= rhs;
+
+        REQUIRE(b1);
+
         // NOT READY YET - testing string_view auto conversions
-        bool b1 = lhs <= "def";
+        b1 = lhs <= "def";
 
         REQUIRE(b1);
 
