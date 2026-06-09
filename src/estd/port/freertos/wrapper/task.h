@@ -66,6 +66,21 @@ public:
         return xTaskNotifyIndexedFromISR(t, indexToNotify, ulValue, eAction,
             higherPriorityTaskWoken);
     }
+
+    static BaseType_t notify_wait(UBaseType_t uxIndexToWaitOn,
+        uint32_t ulBitsToClearOnEntry,
+        uint32_t ulBitsToClearOnExit,
+        uint32_t *pulNotificationValue,
+        TickType_t xTicksToWait)
+    {
+        return xTaskNotifyWaitIndexed(
+            uxIndexToWaitOn,
+            ulBitsToClearOnEntry,
+            ulBitsToClearOnExit,
+            pulNotificationValue,
+            xTicksToWait
+        );
+    }
 #endif
 
     uint32_t notify_value_clear(uint32_t bitsToClear) const
@@ -114,7 +129,7 @@ public:
         return xTaskGetApplicationTaskTag(t);
     }
 
-    void tag(TaskHookFunction_t tagValue)
+    void tag(TaskHookFunction_t tagValue) const
     {
         xTaskSetApplicationTaskTag(t, tagValue);
     }
@@ -137,7 +152,9 @@ public:
         return task(xTaskGetCurrentTaskHandle());
     }
 
-    // Being that we're a wrapper, non RAII is OK
+    // Being that we're a wrapper, non RAII is OK.  Furthermore, create vs create_static
+    // reflect underlying call signatures, thus the deviation where 'create' is in-place
+    // while create_static truly is static
 
 #if configSUPPORT_DYNAMIC_ALLOCATION
     BaseType_t create(TaskFunction_t pvTaskCode,
@@ -206,6 +223,13 @@ public:
             &s->task));
     }
 
+#endif
+
+#if INCLUDE_vTaskDelete
+    void del() const
+    {
+        vTaskDelete(t);
+    }
 #endif
 
     operator TaskHandle_t () const

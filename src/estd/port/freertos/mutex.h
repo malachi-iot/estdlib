@@ -19,17 +19,17 @@ protected:
         semaphore_base(s) {}
 
 public:
-    void lock()
+    void lock() const
     {
         s.take(portMAX_DELAY);
     }
 
-    bool try_lock()
+    bool try_lock() const
     {
         return s.take(0);
     }
 
-    bool unlock()
+    bool unlock() const
     {
         return s.give() == pdTRUE;
     }
@@ -67,17 +67,17 @@ public:
     recursive_mutex_base(SemaphoreHandle_t s) :
         semaphore_base(s) {}
 
-    void lock()
+    void lock() const
     {
         s.take_recursive(portMAX_DELAY);
     }
 
-    bool try_lock()
+    bool try_lock() const
     {
         return s.take_recursive(0);
     }
 
-    bool unlock()
+    bool unlock() const
     {
         return s.give_recursive() == pdTRUE;
     }
@@ -140,7 +140,7 @@ public:
     timed_mutex(bool binary = false) : base_type(binary) {}
     
     template< class Rep, class Period >
-    bool try_lock_for(const estd::chrono::duration<Rep,Period>& timeout_duration)
+    bool try_lock_for(const estd::chrono::duration<Rep,Period>& timeout_duration) const
     {
         // This should convert whatever incoming time format duration into our steady_clock
         // duration, which is very specifically freertos-tick bound
@@ -153,7 +153,7 @@ public:
     }
 
     template<class Clock, class Duration>
-    bool try_lock_until(const estd::chrono::time_point<Clock,Duration>& timeout_time)
+    bool try_lock_until(const estd::chrono::time_point<Clock,Duration>& timeout_time) const
     {
         return xSemaphoreTake(base_type::s, timeout_time - chrono::freertos_clock::now());
     }
