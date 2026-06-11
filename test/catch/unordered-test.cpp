@@ -141,6 +141,29 @@ TEST_CASE("unordered")
         }
         SECTION("erase and gc (distinct steps)")
         {
+            SECTION("erase_ll, inspect (with find_ll), then gc")
+            {
+                // FIX: idx 0 does not work here, but should.  Do we need to do an auto-gc?
+                // also I seem to recall idx 0 can be a special case sometimes - is that going on?
+                constexpr int idx = 10;
+                r2 = map.insert({idx, "hello1.1"}, true);
+                REQUIRE(r2.second);
+
+                auto found = map.find_ll(idx);
+
+                REQUIRE(found.second != map.npos());
+                REQUIRE(found.first->second.mapped() == "hello1.1");
+
+                // FIX: Although it's undefined behavior to read an object post-destruction,
+                // I don't think that's what's causing https://github.com/malachi-iot/estdlib/issues/197.
+                // Still, we ought to roll in destruction at gc phase not erase phase if we can
+                map.erase_ll(found);
+
+                REQUIRE(found.second != map.npos());
+                REQUIRE(found.first->second.mapped() == "hello1.1");
+
+                map.gc_sparse_ll(found.first);
+            }
             SECTION("duplicate")
             {
                 // DEBT: Would try emplace but that one doesn't permit dups
