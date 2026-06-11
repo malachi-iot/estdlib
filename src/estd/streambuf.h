@@ -235,10 +235,10 @@ public:
 }
 
 // traditional basic_streambuf, complete with virtual functions
-template<class TChar, class Traits>
-struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> >
+template<class Char, class Traits>
+struct basic_streambuf : internal::streambuf<estd::internal::impl::basic_streambuf<Char, Traits> >
 {
-    typedef internal::streambuf<estd::internal::impl::basic_streambuf<TChar, Traits> > base_type;
+    typedef internal::streambuf<estd::internal::impl::basic_streambuf<Char, Traits> > base_type;
 };
 
 }

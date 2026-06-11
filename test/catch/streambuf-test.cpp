@@ -55,7 +55,7 @@ TEST_CASE("streambuf")
         //internal::basic_streambuf_wrapped<posix_streambuf<char>& > sbw(psb);
 
         internal::basic_streambuf_wrapped<posix_streambuf<char> > sbw(*stdout);
-        basic_streambuf<char>& sb = sbw;
+        basic_streambuf<char, std::char_traits<char>>& sb = sbw;
 
 #ifdef TEST_COUT
         sb.sputn(raw_str, sizeof(raw_str) - 1);

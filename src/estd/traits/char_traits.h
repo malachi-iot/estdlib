@@ -15,29 +15,27 @@
 
 namespace estd {
 
-template <class TChar>
-struct char_traits;
-
-template<>
-struct char_traits<char>
+template<class Char>
+struct char_traits
 {
-    typedef char char_type;
+    using char_type = Char;
 
-    typedef int16_t int_type;
+    // DEBT: This will fall apart for sizeof(Char) >= 2
+    using int_type = int16_t;
 
     // DEBT: Use fpos instead
 #if ESTD_MCU_ATMEL_AVR
     typedef int pos_type;
 #else
-    typedef streampos pos_type;
+    using pos_type = streampos;
 #endif
-    typedef int off_type;
+    using off_type = streamoff;
 
-    static ESTD_CPP_CONSTEXPR_RET char_type to_char_type(int_type ch) { return ch; }
-    static ESTD_CPP_CONSTEXPR_RET int_type to_int_type(const char ch) { return ch; }
-    static ESTD_CPP_CONSTEXPR_RET int_type eof() { return -1; }
-    static ESTD_CPP_CONSTEXPR_RET bool eq(char c1, char c2) { return c1 == c2; }
-    static ESTD_CPP_CONSTEXPR_RET bool not_eof(int_type v) { return v != -1; }
+    static constexpr char_type to_char_type(int_type ch) { return ch; }
+    static constexpr int_type to_int_type(const char ch) { return ch; }
+    static constexpr int_type eof() { return -1; }
+    static constexpr bool eq(char c1, char c2) { return c1 == c2; }
+    static constexpr bool not_eof(int_type v) { return v != -1; }
 
     static const char_type* find(const char_type* p, size_t count, const char_type& ch)
     {
@@ -53,17 +51,9 @@ struct char_traits<char>
     // DEBT: Almost certainly there are some platform-specific
     // optimizations available for this.  We may prefer to reach
     // out to standard strlen
-    static
-#if __cpp_constexpr > 201304L
-        constexpr
-#endif
-        size_t length(const char_type* s)
+    static constexpr size_t length(const char_type* s)
     {
-        const char_type* i = s;
-
-        for(; *i != 0; ++i);
-
-        return i - s;
+        return estd::strlen(s);
     }
 
     static
@@ -90,8 +80,8 @@ struct char_traits<char>
 
 // DEBT: std spec doesn't indicate we can do this - may have to "deconst" all
 // our char_traits usages
-template<>
-struct char_traits<const char> : char_traits<char> {};
+//template<>
+//struct char_traits<const char> : char_traits<char> {};
 
 
 }

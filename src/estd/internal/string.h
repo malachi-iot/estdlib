@@ -24,9 +24,12 @@ struct string_view_like
     using char_type = typename Traits::char_type;
 
     static constexpr bool value =
+        (is_convertible<
+            const SV&,
+            std::basic_string_view<char_type, Traits>>::value |
         is_convertible<
             const SV&,
-            std::basic_string_view<char_type, Traits>>::value &
+            std::basic_string_view<char_type>>::value) &
         is_convertible<
             const SV&,
             const char_type*>::value == false;
