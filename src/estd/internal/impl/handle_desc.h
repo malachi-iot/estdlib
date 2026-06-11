@@ -141,7 +141,7 @@ protected:
 
     constexpr explicit handle_descriptor(const handle_type& h) : base_t(h) {}
 
-    value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
+    ESTD_CPP_CONSTEXPR(14) value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
     {
         return allocator_traits::lock(a, handle(), pos, len);
     }
@@ -151,12 +151,12 @@ protected:
         return allocator_traits::clock(a, handle(), pos, len);
     }
 
-    void unlock(allocator_ref a)
+    ESTD_CPP_CONSTEXPR(14) void unlock(allocator_ref a)
     {
         allocator_traits::unlock(a, handle());
     }
 
-    void cunlock(const allocator_type& a) const
+    ESTD_CPP_CONSTEXPR(14) void cunlock(const allocator_type& a) const
     {
         allocator_traits::cunlock(a, handle());
     }
@@ -220,9 +220,9 @@ public:
         return handle_base_t::clock(base_t::get_allocator(), pos, count);
     }
 
-    void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
+    ESTD_CPP_CONSTEXPR(14) void unlock() { handle_base_t::unlock(base_t::get_allocator()); }
 
-    void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
+    ESTD_CPP_CONSTEXPR(14) void cunlock() const { handle_base_t::cunlock(base_t::get_allocator()); }
 
 #ifdef FEATURE_CPP_VARIADIC
     /// Constructs an item specifically at the given position in an array
@@ -259,7 +259,7 @@ public:
         return handle_base_t::handle() != allocator_traits::invalid();
     }
 
-    bool is_allocated() const
+    constexpr bool is_allocated() const
     {
         return allocator_traits::invalid() != handle_base_t::handle();
     }

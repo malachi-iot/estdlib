@@ -74,17 +74,17 @@ public:
     // that is the responsibility of begin(int) down below.  Clearly needs a cleanup.
     constexpr shifted_string(nullopt_t) {}
 
-    const value_type& lock(int pos, int count)
+    constexpr const value_type& lock(int pos, int count)
     {
         return allocator_.lock({}, pos + begin_, count);
     }
 
-    const value_type& clock(int pos, int count) const
+    constexpr const value_type& clock(int pos, int count) const
     {
         return allocator_.clock({}, pos + begin_, count);
     }
 
-    void cunlock() const {}
+    ESTD_CPP_CONSTEXPR(14) void cunlock() const {}
 
     allocator_type& get_allocator() { return allocator_; }
 

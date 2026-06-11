@@ -86,12 +86,12 @@ public:
         return &impl_.clock(pos, count);
     }
 
-    void unlock()
+    ESTD_CPP_CONSTEXPR(14) void unlock()
     {
         impl_.unlock();
     }
 
-    void cunlock() const
+    ESTD_CPP_CONSTEXPR(14) void cunlock() const
     {
         impl_.cunlock();
     }

@@ -198,7 +198,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     /// Low-level compare - does NOT check for matching size!
     template <class Impl2>
-    static bool equal(const array& lhs, const allocated_array<Impl2>& rhs,
+    ESTD_CPP_CONSTEXPR(14) static bool equal(const array& lhs, const allocated_array<Impl2>& rhs,
         size_type len)
     {
         // gets here if size matches
@@ -217,7 +217,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
 
     /// Low-level compare - does NOT check for matching size!
-    static int compare(const detail::basic_string<Impl>& lhs, const_pointer s, size_type s_size)
+    ESTD_CPP_CONSTEXPR(14) static int compare(const detail::basic_string<Impl>& lhs, const_pointer s, size_type s_size)
     {
         typedef typename detail::basic_string<Impl>::traits_type traits_type;
         const_pointer raw = lhs.clock();

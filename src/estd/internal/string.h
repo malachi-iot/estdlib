@@ -63,7 +63,7 @@ protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
 
     template <typename InputIt>
-    int compare(InputIt s, size_type s_size) const
+    ESTD_CPP_CONSTEXPR(14) int compare(InputIt s, size_type s_size) const
     {
         // DEBT: Augment helper to be a little more null-terminated aware and not demand
         // raw_size here in that case

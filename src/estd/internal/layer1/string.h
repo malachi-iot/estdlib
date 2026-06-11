@@ -32,7 +32,7 @@ public:
     // need better flow-through/init constructor support as is evidenced by all these
     // explicit calls in constructors here.
 
-    basic_string(const_pointer s)        // NOLINT
+    ESTD_CPP_CONSTEXPR(14) basic_string(const_pointer s)        // NOLINT
     {
         base_type::operator =(s);
     }

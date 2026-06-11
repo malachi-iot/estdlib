@@ -40,7 +40,7 @@ struct dynamic_array_length<Allocator, true, false>
         return is_terminator;
     }
 
-    size_type size(const Allocator& a, const handle_type& h) const
+    ESTD_CPP_CONSTEXPR(14) size_type size(const Allocator& a, const handle_type& h) const
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         // specialization required if we aren't null terminated (to track size variable)
@@ -57,7 +57,7 @@ struct dynamic_array_length<Allocator, true, false>
         return sz;
     }
 
-    size_type size(const handle_descriptor& hd) const
+    ESTD_CPP_CONSTEXPR(14) size_type size(const handle_descriptor& hd) const
     {
         const value_type* s = &hd.clock();
 
@@ -293,9 +293,9 @@ public:
 
     // remember, dynamic_array_helper size() refers not to ALLOCATED size, but rather
     // 'used' size within that allocation.  For this variety, we could be null terminated
-    size_type size() const
+    ESTD_CPP_CONSTEXPR(14) size_type size() const
     {
-        if(!base_t::is_allocated()) return 0;
+        if(!base_type::is_allocated()) return 0;
 
         return length_helper_t::size(*this);
         //return length_helper_t::size(base_t::get_allocator(), base_t::handle());
@@ -514,7 +514,7 @@ public:
         allocator_traits::cunlock(allocator, handle);
     }
 
-    bool is_allocated() const
+    ESTD_CPP_CONSTEXPR(14) bool is_allocated() const
     {
         handle_type h = handle;
         return h != allocator_traits::invalid();

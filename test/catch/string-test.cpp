@@ -811,6 +811,12 @@ TEST_CASE("string tests")
         b1 = "abc" <= rhs;
 
         REQUIRE(b1);
+
+#if __cplusplus >= 201703L
+        constexpr layer3::const_string s = "abc";
+
+        static_assert(s <= "def");
+#endif
     }
     SECTION("internal")
     {
