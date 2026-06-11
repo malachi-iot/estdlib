@@ -147,10 +147,7 @@ ESTD_CPP_CONSTEXPR(14) inline OutputIt move_backward(InputIt first, InputIt last
 
 
 template<class InputIt, class UnaryPredicate>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-constexpr
-#endif
-InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
+ESTD_CPP_CONSTEXPR(17) InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
 {
     for (; first != last; ++first) {
         if (p(*first)) {
@@ -159,6 +156,18 @@ InputIt find_if(InputIt first, InputIt last, UnaryPredicate p)
     }
     return last;
 }
+
+
+template<class InputIt, class T>
+ESTD_CPP_CONSTEXPR(14) InputIt find(InputIt first, InputIt last, const T& value)
+{
+    for (; first != last; ++first)
+    {
+        if (*first == value) return first;
+    }
+    return last;
+}
+
 
 template<class T, class Compare>
 constexpr const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)

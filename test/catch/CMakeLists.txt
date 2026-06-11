@@ -26,7 +26,8 @@ endif()
 # Not dogfooding top-level CMakeLists, that makes CLion lose its mind
 add_subdirectory(${ROOT_DIR}/src estd)
 
-# Even when this is configured to c++11, we end up with c++14
+# Even when this is configured to c++11, we end up with c++14 - most likely due to Catch2
+# minimum c++14 requirement
 message(DEBUG "c++${CMAKE_CXX_STANDARD} / required=${CMAKE_CXX_STANDARD_REQUIRED}")
 
 set(EXTRA_FILES

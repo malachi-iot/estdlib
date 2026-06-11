@@ -4,6 +4,7 @@
 
 #include <estd/array.h>
 #include <estd/algorithm.h>
+#include <estd/internal/size.h> // This is where we define begin/end
 #include <estd/vector.h>
 
 #include "test-data.h"
@@ -25,6 +26,18 @@ TEST_CASE("algorithm tests")
 {
     //test_class_1 tc1;
 
+    SECTION("find")
+    {
+        static constexpr int values[] = { 0, 2, 4, 6 };
+        using iterator = const int*;
+        iterator v = estd::find(values, end(values), 2);
+        REQUIRE(v - values == 1);
+
+#if __cplusplus >= 201402L
+        constexpr iterator v2 = estd::find(values, estd::end(values), 4);
+        static_assert(v2 == values + 2);
+#endif
+    }
     SECTION("find_if in class")
     {
         // alas, can't do this.  closures are kinda mandatory it seems...
