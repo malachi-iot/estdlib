@@ -3,13 +3,15 @@
 #include "../internal/platform.h"
 
 #include "../internal/fpos.h"
-//#include "../iosfwd.h"
 
 // FEATURE_STD_STRING: Scenarios where system has no std::char_traits
 // FEATURE_ESTD_CHARTRAITS: System has std::char_traits, but we prefer ours
 #if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
 
 #include <stdint.h>
+
+#include "../internal/string/len.h"
+#include "../internal/raw/iosfwd.h"
 
 namespace estd {
 

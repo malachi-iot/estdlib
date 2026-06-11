@@ -4,6 +4,7 @@
 #include "fwd/streambuf.h"
 #include "locale/fwd.h"
 #include "istream/fwd.h"
+#include "raw/iosfwd.h"
 
 namespace estd {
 
@@ -46,9 +47,6 @@ class basic_istream;
 template <class Streambuf>
 class basic_iostream;
 
-// For our non-standard << overload which takes a functor
-struct ostream_functor_tag {};
-
 }
     
 namespace internal {
@@ -61,12 +59,5 @@ using ostream_functor_tag = detail::ostream_functor_tag;
 template <class TStreambuf, class TBase>
 detail::basic_istream<TStreambuf, TBase>&
     ws(detail::basic_istream<TStreambuf, TBase>& __is);
-
-// TODO: use specific 16/32/64 bit versions depending on architecture
-typedef int streampos;
-typedef int streamoff;
-typedef int streamsize;
-
-
 
 }

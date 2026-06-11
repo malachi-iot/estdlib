@@ -189,6 +189,20 @@ TEST_CASE("string_view")
         REQUIRE(v == 0x1234);
 #endif
     }
+    SECTION("lexical compare")
+    {
+        // Note, this code fully overlaps with basic_string.  So this is a sanity check, not a full unit test
+
+        string_view sv("test", 4);
+        string_view sv2 = sv;
+
+        REQUIRE(sv == sv2);
+        REQUIRE(sv >= "test");
+
+        bool v = sv < "test";
+
+        REQUIRE(!v);
+    }
 }
 
 
