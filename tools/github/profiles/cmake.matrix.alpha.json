@@ -1,5 +1,5 @@
 {
-  "cxx_std": [11, 14, 17, 20],
+  "cxx_std": [14, 17, 20, 23],
   "build_type": ["Debug", "Release"],
   "compiler": ["gcc", "clang"]
 }
