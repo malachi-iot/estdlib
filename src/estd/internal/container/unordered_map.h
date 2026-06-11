@@ -193,6 +193,16 @@ public:
         return try_emplace(key).first->second;
     }
 
+    mapped_type& at(const key_type& key)
+    {
+        find_result<control_pointer> found = find_ll(key);
+
+        // DEBT: Throw an exception if feature flag indicates to do so
+        if(found.second == npos()) abort();
+
+        return found.first->second.mapped();
+    }
+
     template <class ...Args>
     pair<iterator, bool> emplace(const key_type& key, Args&&...args)
     {

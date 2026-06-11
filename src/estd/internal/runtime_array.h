@@ -440,11 +440,11 @@ public:
         }
 
         const_pointer data = clock();
-        const_pointer rend = data - 1;
+        const_pointer begin = data;
 
         data += pos;
 
-        for(; data != rend; --pos, --data)
+        for(; data >= begin; --pos, --data)
         {
             if(memcmp(s, data, count) == 0)
             {

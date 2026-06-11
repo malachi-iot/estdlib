@@ -25,23 +25,37 @@ public:
     using key_type = Key;
     using map_type = layer1::unordered_map<Key, T, N>;
     using pointer = typename map_type::pointer;
+    using const_pointer = typename map_type::const_pointer;
     using iter_type = typename map_type::iterator;
 
 // Since this is unit testing, these are public
 //private:
+    /// General retry items tracked
     map_type tracked_;
+    /// Who's next up for retry emit
     layer1::priority_queue<pointer, N> queue_;
 
     pointer gc_target_ {};
 
 public:
-    void track(Key key, const T& value)
+    // Primarily for diagnostics, you wouldn't normally sniff around this guy.  Since
+    // it's const, it's still a safe and sane call.
+    const T* top() const
+    {
+        if(queue_.empty())  return nullptr;
+
+        const_pointer it = queue_.top();
+        return &it->second;
+    }
+
+    bool track(Key key, const T& value)
     {
         pair<iter_type, bool> r = tracked_.emplace(key, value);
 
-        if(r.second == false) return;
+        if(r.second == false) return false;
 
         queue_.emplace(estd::addressof(*r.first));
+        return true;
     }
 
     // TBD
@@ -51,7 +65,11 @@ public:
     }
 
     // boost-style
-    unsigned poll_one(int timestamp)
+    ///
+    /// @param timestamp
+    /// @param ack_received debug-oriented, indicate whether processed item was ACK'd and therefore removed
+    /// @return 0 or 1 item process counter
+    unsigned poll_one(int timestamp, bool* ack_received = nullptr)
     {
         if(queue_.empty())  return 0;
 
@@ -64,7 +82,9 @@ public:
 
         queue_.pop();
 
-        // Don't requeue when ack has been received
+        if(ack_received)    *ack_received = value.ack_received_;
+
+        // Don't requeue if ack was received
         if(value.ack_received_)
         {
             // ack_received is only set by 'incoming', who also marks this
@@ -76,6 +96,7 @@ public:
 
         // we can still operate on value since it lives in tracker_
         // infinite retry
+        // FIX: No way that '10' is a good value long term
         value.timestamp_ += 10;
 
         // iterator also still valid, once again it lives in tracker_
