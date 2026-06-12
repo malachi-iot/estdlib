@@ -189,13 +189,14 @@ public:
         }
     }
 
-    mapped_type& operator[](const key_type& key)
+    template <class K>
+    mapped_type& operator[](K&& key)
     {
-        find_result<control_pointer> found = find_ll(key);
+        find_result<control_pointer> found = find_ll(std::forward<K>(key));
 
         if(found.second != npos()) return found.first->second.mapped();
 
-        return try_emplace(key).first->second;
+        return try_emplace(std::forward<K>(key)).first->second;
     }
 
     ESTD_CPP_CONSTEXPR(14) mapped_type& at(const key_type& key)
@@ -218,13 +219,13 @@ public:
         return found.first->second.mapped();
     }
 
-    template <class ...Args>
-    pair<iterator, bool> emplace(const key_type& key, Args&&...args)
+    template <class K, class ...Args>
+    pair<iterator, bool> emplace(K&& key, Args&&...args)
     {
-        const insert_result ret = insert_precheck(key, false);
+        const insert_result ret = insert_precheck(std::forward<K>(key), false);
 
         if(ret.second)
-            new (ret.first) value_type(key, std::forward<Args>(args)...);
+            new (ret.first) value_type(std::forward<K>(key), std::forward<Args>(args)...);
 
         return wrap_result(ret);
     }

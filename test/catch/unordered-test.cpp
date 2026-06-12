@@ -442,10 +442,13 @@ TEST_CASE("unordered: synthetic retry", "[unordered][retry]")
         REQUIRE(tracker.queue_.size() == 1);
         REQUIRE(item1->ack_received_ == false);
 
-        tracker.track("hello10", test::retry_item{ 10 });   // item#2
+        // emplace mode
+        test::retry_item* item2 = tracker.track("hello10", 10);   // item#2
 
         REQUIRE(tracker.tracked_.size() == 2);
         REQUIRE(tracker.queue_.size() == 2);
+        REQUIRE(item2);
+        REQUIRE(item2->timestamp_ == 10);
 
         const test::retry_item* top = tracker.top();
         REQUIRE(top);

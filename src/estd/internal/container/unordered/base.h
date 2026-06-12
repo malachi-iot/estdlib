@@ -215,7 +215,7 @@ protected:
     ///         nullptr + false = no insert can occur.
     ///         control_pointer + false = duplicate found, and here it is
     template <class K>
-    insert_result insert_precheck(const K& key, bool permit_duplicates)
+    ESTD_CPP_CONSTEXPR(14) insert_result insert_precheck(const K& key, bool permit_duplicates)
     {
 #if ESTD_UNORDERED_MAP_STRICT
         if(nullable::is_null(key))  return { nullptr, false };

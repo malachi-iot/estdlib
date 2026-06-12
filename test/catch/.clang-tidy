@@ -34,6 +34,7 @@ Checks: >-
   -misc-random-seed,
   -modernize-avoid-macro,
   -modernize-macro-to-constexpr,
+  -modernize-unary-static-assert,
   -modernize-use-trailing-return-type,
   -readability-*,
 

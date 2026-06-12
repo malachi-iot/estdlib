@@ -41,6 +41,34 @@ public:
 
     pointer gc_target_ {};
 
+    // DEBT: Crude way to start decoupling from retry_item.  Still underway
+    struct traits
+    {
+        using value_type = T;
+        using timestamp = unsigned;
+
+        static void calc_backoff(value_type& i)
+        {
+            // FIX: No way that '10' is a good value long term
+            i.timestamp_ += 10;
+        }
+
+        static void ack_received(value_type& i, bool v)
+        {
+            i.ack_received_ = v;
+        }
+
+        constexpr static bool ack_received(const value_type& i)
+        {
+            return i.ack_received_;
+        }
+
+        constexpr static timestamp stamp(const value_type& i)
+        {
+            return i.timestamp_;
+        }
+    };
+
 public:
     // Primarily for diagnostics, you wouldn't normally sniff around this guy.  Since
     // it's const, it's still a safe and sane call.
@@ -52,11 +80,10 @@ public:
         return &it->second;
     }
 
-    // DEBT: Turn this into emplace style once we sort out
-    // https://github.com/malachi-iot/estdlib/issues/197
-    T* track(Key key, const T& value)
+    template <class ...Args>
+    T* track(Key key, Args&&...args)
     {
-        pair<iter_type, bool> r = tracked_.emplace(key, value);
+        pair<iter_type, bool> r = tracked_.emplace(key, std::forward<Args>(args)...);
 
         if(r.second == false) return nullptr;
 
@@ -84,14 +111,14 @@ public:
 
         // DEBT: Hard wired to test::retry_item
 
-        if(timestamp < value.timestamp_)    return 0;
+        if(timestamp < traits::stamp(value))    return 0;
 
         queue_.pop();
 
-        if(ack_received)    *ack_received = value.ack_received_;
+        if(ack_received)    *ack_received = traits::ack_received(value);
 
         // Don't requeue if ack was received
-        if(value.ack_received_)
+        if(traits::ack_received(value))
         {
             // ack_received is only set by 'incoming'.  Now we can fully
             // remove tracked as well
@@ -106,8 +133,7 @@ public:
 
         // we can still operate on value since it lives in tracker_
         // infinite retry
-        // FIX: No way that '10' is a good value long term
-        value.timestamp_ += 10;
+        traits::calc_backoff(value);
 
         // iterator also still valid, once again it lives in tracker_
         // DEBT: I think there's a "replace" mechanism in queue_
@@ -116,7 +142,7 @@ public:
         return 1;
     }
 
-    unsigned poll(int timestamp)
+    unsigned poll(typename traits::timestamp timestamp)
     {
         unsigned counter = 0;
 
@@ -130,21 +156,13 @@ public:
     //void incoming(const K& k)
     T* incoming(const key_type& k)
     {
-        /*
-        value_type found = tracked_.find(k);
-
-        if(found != tracked_.cend())
-        {
-            found->second.ack_received_ = true;
-        }   */
-
         // DEBT: Using find_ll because at the moment it's easier to determine
         // found/not found status
         find_result found = tracked_.find_ll(k);
 
         if(found.second != tracked_.npos())
         {
-            found.first->second.mapped().ack_received_ = true;
+            traits::ack_received(found.first->second.mapped(), true);
 
             return &found.first->second.mapped();
         }
