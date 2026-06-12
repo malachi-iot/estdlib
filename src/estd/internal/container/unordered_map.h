@@ -180,7 +180,13 @@ public:
 
     ESTD_CPP_CONSTEXPR(14) void clear()
     {
-        for(control_type& v : container_)   destruct(&v);
+        for(control_type& v : container_)
+        {
+            if(traits::is_empty(v))
+                traits::set_null(&v);       // Just incase he's sparse
+            else
+                destruct(&v);
+        }
     }
 
     mapped_type& operator[](const key_type& key)
@@ -192,9 +198,19 @@ public:
         return try_emplace(key).first->second;
     }
 
-    mapped_type& at(const key_type& key)
+    ESTD_CPP_CONSTEXPR(14) mapped_type& at(const key_type& key)
     {
         find_result<control_pointer> found = find_ll(key);
+
+        // DEBT: Throw an exception if feature flag indicates to do so
+        if(found.second == npos()) abort();
+
+        return found.first->second.mapped();
+    }
+
+    ESTD_CPP_CONSTEXPR(14) const mapped_type& at(const key_type& key) const
+    {
+        find_result<const_control_pointer> found = find_ll(key);
 
         // DEBT: Throw an exception if feature flag indicates to do so
         if(found.second == npos()) abort();

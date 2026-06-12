@@ -186,6 +186,15 @@ struct unordered_map_traits :
         nullable{}.set(&v->first);
     }
 
+    // NOT USED, EXPERIMENTAL
+    /// @v an active control_pointer
+    /// @remark Does not null out key
+    static ESTD_CPP_CONSTEXPR(14) void destruct(control_type* v)
+    {
+        key(*v).~key_type();
+        mapped(*v).~mapped_type();
+    }
+
 private:
     // Check that our casting wizardry doesn't get us into too much trouble
     static_assert(sizeof(meta) == sizeof(typename value_type::second_type),
@@ -234,12 +243,17 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual ESTD_UNO
         return nullable{}.is_null(v);
     }
 
-    static constexpr bool is_sparse(const value_type&) { return false; }
-    static constexpr bool is_sparse(const value_type&, unsigned) { return false; }
+    static constexpr bool is_sparse(const value_type&, unsigned = {}) { return false; }
 
     static constexpr const Key& key(const control_type& v) { return v; }
     static constexpr mapped_type& mapped(control_type& v) { return v; }
     static constexpr const mapped_type& mapped(const control_type& v) { return v; }
+
+    // NOT USED, EXPERIMENTAL
+    static ESTD_CPP_CONSTEXPR(14) void destruct(value_type* v)
+    {
+        v->~value_type();
+    }
 
     // DEBT: I tried to specialize this guy but failed, so we have this shim here instead
     static ESTD_CPP_CONSTEXPR(14) void swap(control_type& lhs, control_type& rhs)
