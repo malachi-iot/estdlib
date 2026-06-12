@@ -5,6 +5,7 @@
 #include "../fwd/functional.h"
 #include "../fwd/utility.h"
 #include "../array.h"
+#include "../raw/memory.h"
 #include "unordered/base.h"
 
 #include "../macro/push.h"
@@ -26,9 +27,6 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::cast;
     using base_type::insert_precheck;
     using traits = Traits;
-
-    template <class Pointer>
-    using find_result = typename base_type::template find_result<Pointer>;
 
 #if UNIT_TESTING
 public:
@@ -55,6 +53,9 @@ public:
     using typename base_type::mapped_type;
     using typename base_type::nullable;
     using typename base_type::size_type;
+
+    template <class Pointer>
+    using find_result = typename base_type::template find_result<Pointer>;
 
     ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type)
 

@@ -23,6 +23,7 @@ Checks: >-
   -misc-non-private-member-variables-in-classes,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-init-variables,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-macro-usage,
   -cppcoreguidelines-non-private-member-variables-in-classes,

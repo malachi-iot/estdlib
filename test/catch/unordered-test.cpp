@@ -35,7 +35,7 @@ struct buf_item
     char buf[0];
 };
 
-TEST_CASE("unordered")
+TEST_CASE("unordered", "[unordered]")
 {
     using map_type = estd::layer1::unordered_map<int, layer1::string<32>, 16>;
     using iter = typename map_type::iterator;
@@ -248,7 +248,7 @@ TEST_CASE("unordered")
         REQUIRE(count == 1);
 
         // Erase key#2 which is bucket index 2 (x4 = 8)
-        int r1 = map.erase(2);
+        unsigned r1 = map.erase(2);
         REQUIRE(r1 == 1);
         REQUIRE(map.size() == 5);
 
@@ -418,12 +418,18 @@ TEST_CASE("unordered")
             REQUIRE(it->second == 3);
         }
     }
+}
+
+TEST_CASE("unordered: synthetic retry", "[unordered][retry]")
+{
     SECTION("synthetic retry")
     {
         // synthetic (but representative, possibly reference) use case of transport retry logic
         test::retry_tracker<layer1::string<32>, test::retry_item> tracker;
 
-        tracker.track("hello5", test::retry_item{ 5 });     // item#1
+        test::retry_item* item1 = tracker.track("hello5", test::retry_item{ 5 });
+
+        REQUIRE(item1);
 
         REQUIRE(tracker.tracked_.size() == 1);
         REQUIRE(tracker.queue_.size() == 1);
@@ -434,6 +440,7 @@ TEST_CASE("unordered")
         REQUIRE(tracker.tracked_.at("hello5").timestamp_ == 5);
         REQUIRE(tracker.tracked_.size() == 1);
         REQUIRE(tracker.queue_.size() == 1);
+        REQUIRE(item1->ack_received_ == false);
 
         tracker.track("hello10", test::retry_item{ 10 });   // item#2
 
@@ -451,7 +458,16 @@ TEST_CASE("unordered")
         REQUIRE(tracker.queue_.size() == 2);    // no expiry + ACK received means queue size is unchanged
         processed = tracker.poll_one(9);        // item#1 evaluates, no ACK yet, reschedules itself for +10 from here (DEBT)
         REQUIRE(processed == 0);
-        tracker.incoming("hello5");             // ACK received
+        // DEBT: Don't use auto here
+        auto tracked_pointer = tracker.incoming("hello5");             // ACK received, immediately untrack
+        REQUIRE(tracked_pointer);
+        REQUIRE(tracked_pointer == item1);
+        REQUIRE(item1->timestamp_ == 14);
+        // FIX: Eager destruction by way of erase_ll indeed goofs us up.  Extremely surprising, but they DO say that memory
+        // in the recently destroyed area is no longer valid.  I presume some kind of bounds/memory checking is applied here
+        // in an implementation-defined way?
+        //REQUIRE(item1->ack_received_);
+        REQUIRE(tracker.tracked_.size() == 1);  // Revealed tracked size now shrinks, but GC hasn't happened yet so "hello5" still exists.
         REQUIRE(tracker.queue_.size() == 2);    // queue size only changes at poll
         // Don't do this because item is not fully tracked anymore, though lives on in not-yet-GC land
         //REQUIRE(tracker.tracked_.at("hello5").ack_received_);
@@ -468,6 +484,8 @@ TEST_CASE("unordered")
         top = tracker.top();
         REQUIRE(top);
         REQUIRE(top->timestamp_ == 14);         // item#1 rescheduled timestamp
+        REQUIRE(top == item1);
+        //REQUIRE(item1->ack_received_);
         processed += tracker.poll_one(15, &ack_received);
         REQUIRE(processed == 2);
 

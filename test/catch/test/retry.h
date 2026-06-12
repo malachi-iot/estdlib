@@ -14,6 +14,7 @@ struct retry_item_base : Impl
     bool ack_received_{false};
 
     explicit constexpr retry_item_base(TimeStamp timestamp) : timestamp_{timestamp}  {}
+    retry_item_base() = delete;
 };
 
 using retry_item = retry_item_base<int>;
@@ -24,9 +25,12 @@ class retry_tracker
 public:
     using key_type = Key;
     using map_type = layer1::unordered_map<Key, T, N>;
+    // DEBT: Rename from pointer/const_pointer because that's really what T ought to map to
     using pointer = typename map_type::pointer;
     using const_pointer = typename map_type::const_pointer;
     using iter_type = typename map_type::iterator;
+    using control_pointer = typename map_type::control_pointer;
+    using find_result = typename map_type::template find_result<control_pointer>;
 
 // Since this is unit testing, these are public
 //private:
@@ -48,14 +52,16 @@ public:
         return &it->second;
     }
 
-    bool track(Key key, const T& value)
+    // DEBT: Turn this into emplace style once we sort out
+    // https://github.com/malachi-iot/estdlib/issues/197
+    T* track(Key key, const T& value)
     {
         pair<iter_type, bool> r = tracked_.emplace(key, value);
 
-        if(r.second == false) return false;
+        if(r.second == false) return nullptr;
 
         queue_.emplace(estd::addressof(*r.first));
-        return true;
+        return &r.first->second;
     }
 
     // TBD
@@ -118,7 +124,7 @@ public:
     // DEBT: This would be better - at the moment our string hasher can't handle a char[]
     //template <class K>
     //void incoming(const K& k)
-    void incoming(const key_type& k)
+    T* incoming(const key_type& k)
     {
         /*
         value_type found = tracked_.find(k);
@@ -130,7 +136,7 @@ public:
 
         // DEBT: Using find_ll because at the moment it's easier to determine
         // found/not found status
-        auto found = tracked_.find_ll(k);
+        find_result found = tracked_.find_ll(k);
 
         if(found.second != tracked_.npos())
         {
@@ -138,7 +144,10 @@ public:
 
             // mark this guy for deletion (but don't delete yet)
             tracked_.erase_ll(found);
+            return &found.first->second.mapped();
         }
+
+        return nullptr;
     }
 };
 

@@ -136,6 +136,7 @@ public:
     }
 
 protected:
+    /// Given a key, return the physical index one may use in the container
     // DEBT: Doesn't handle non-empty hasher
     template <class K>
     constexpr size_type index(const K& key) const
@@ -417,6 +418,7 @@ protected:
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
 
+    // DEBT: Badly needs documentation
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<const_control_pointer> find_ll(const K& x) const
     {
