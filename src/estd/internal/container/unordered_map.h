@@ -64,6 +64,8 @@ public:
     using end_iterator = monostate;
 
 private:
+    // pointer and control_pointer overlap.  See unordered_base for breakdown
+
     static constexpr control_pointer cast_control(pointer pos)
     {
         return reinterpret_cast<control_pointer>(pos);
@@ -74,10 +76,6 @@ private:
         return reinterpret_cast<const_control_pointer>(pos);
     }
 
-    // DEBT: Temporary as we transition container_ from value_type -> control_type
-    constexpr pointer get_value(unsigned i) { return (pointer) &container_[i]; }
-    ESTD_CPP_CONSTEXPR(14) pointer get_value_end() { return (pointer) container_.end(); }
-
 public:
     using typename base_type::iterator;
     using typename base_type::const_iterator;
@@ -85,9 +83,9 @@ public:
     using typename base_type::const_local_iterator;
 
 private:
-    static void destruct(control_pointer v)
+    ESTD_CPP_CONSTEXPR(14) static void destruct(control_pointer v)
     {
-        base_type::destruct_ll(v->first);
+        base_type::destruct_ll(traits::key(*v));
         base_type::destruct(v);
     }
 

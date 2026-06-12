@@ -93,8 +93,12 @@ public:
         // Don't requeue if ack was received
         if(value.ack_received_)
         {
-            // ack_received is only set by 'incoming', who also marks this
-            // guy for deletion
+            // ack_received is only set by 'incoming'.  Now we can fully
+            // remove tracked as well
+            // DEBT: Consider a consolidated 'erase_and_gc' which takes 'it' type.  Not doing
+            // so yet because we need to document why we have separate mark/gc phases - especially
+            // since the mark phase eagerly destructs
+            tracked_.erase_ll(it);
             tracked_.gc_sparse_ll(it);
 
             return 1;
@@ -142,11 +146,6 @@ public:
         {
             found.first->second.mapped().ack_received_ = true;
 
-            // mark this guy for deletion (but don't delete yet)
-            // FIX: Here is our glitch, because not only does ~T run (which might be tolerable, though
-            // technically UB for us to inspect afterward) but also we union over him thus clobbering
-            // his data when tracking our meta/gc flags
-            tracked_.erase_ll(found);
             return &found.first->second.mapped();
         }
 

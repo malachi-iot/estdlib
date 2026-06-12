@@ -26,6 +26,8 @@ Deletion takes two stages:
 1. Mark for removal (gc flag)
 2. Actual null of entry
 
+Broadly speaking, we split GC into two phases so that hash lookups still operate properly after a bunch of deletions.
+
 Items marked for removal are called "sparse".  In broad terms, an item is in one of 3 states:
 
 * active = non-null key_type. mapped_type content
@@ -85,7 +87,7 @@ Described here are API deviating from `std::unordered_map`
 
 Takes as input `find_result`
 
-Runs destructor, nulls out key and marks GC bit
+Runs destructor, nulls out key and marks GC bit.  Item is now "sparse"
 
 ## erase
 

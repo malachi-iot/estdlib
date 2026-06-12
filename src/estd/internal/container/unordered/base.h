@@ -45,8 +45,17 @@ public:
     using typename base_type::mapped_type;
     using typename base_type::control_type;
     using typename base_type::nullable;
+
+    // control_type is set up in traits.  It is used for non-allocated
+    // entries and is generally:
+    // 1.  For unordered_map = pair<key, meta>
+    // 2.  For unordered_set = key
     using control_pointer = control_type*;
     using const_control_pointer = const control_type*;
+
+    // traits::value type (and therefore 'pointer') is used for allocated entries:
+    // 1.  For unordered_map = pair<const key, mapped_type>
+    // 2.  For unordered_set = key;
     ESTD_CPP_STD_VALUE_TYPE(typename traits::value_type)
 
 protected:

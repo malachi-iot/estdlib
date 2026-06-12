@@ -458,16 +458,12 @@ TEST_CASE("unordered: synthetic retry", "[unordered][retry]")
         REQUIRE(tracker.queue_.size() == 2);    // no expiry + ACK received means queue size is unchanged
         processed = tracker.poll_one(9);        // item#1 evaluates, no ACK yet, reschedules itself for +10 from here (DEBT)
         REQUIRE(processed == 0);
-        // DEBT: Don't use auto here
-        auto tracked_pointer = tracker.incoming("hello5");             // ACK received, immediately untrack
+        const test::retry_item* tracked_pointer = tracker.incoming("hello5");             // ACK received, immediately untrack
         REQUIRE(tracked_pointer);
         REQUIRE(tracked_pointer == item1);
-        REQUIRE(item1->timestamp_ == 14);
-        // FIX: Eager destruction by way of erase_ll indeed goofs us up.  Extremely surprising, but they DO say that memory
-        // in the recently destroyed area is no longer valid.  I presume some kind of bounds/memory checking is applied here
-        // in an implementation-defined way?  Ah, yes - MINE!  'meta' which stores retry_item is unioned with GC flags
-        //REQUIRE(item1->ack_received_);
-        REQUIRE(tracker.tracked_.size() == 1);  // Revealed tracked size now shrinks, but GC hasn't happened yet so "hello5" still exists.
+        REQUIRE(item1->timestamp_ == 15);
+        REQUIRE(item1->ack_received_);
+        REQUIRE(tracker.tracked_.size() == 2);  // "hello5" still exists, since we don't want him GC'd away yet
         REQUIRE(tracker.queue_.size() == 2);    // queue size only changes at poll
         // Don't do this because item is not fully tracked anymore, though lives on in not-yet-GC land
         //REQUIRE(tracker.tracked_.at("hello5").ack_received_);
@@ -483,26 +479,15 @@ TEST_CASE("unordered: synthetic retry", "[unordered][retry]")
 
         top = tracker.top();
         REQUIRE(top);
-        REQUIRE(top->timestamp_ == 14);         // item#1 rescheduled timestamp
+        REQUIRE(top->timestamp_ == 15);         // item#1 rescheduled timestamp
         REQUIRE(top == item1);
         //REQUIRE(item1->ack_received_);
         processed += tracker.poll_one(15, &ack_received);
         REQUIRE(processed == 2);
-
-        // ack_received not true as it should be, smelling again like unordered_map GC issue
-        // See https://github.com/malachi-iot/estdlib/issues/197
-#if !NDEBUG
         REQUIRE(ack_received);
-#endif
 
         REQUIRE(tracker.tracked_.size() == 1);  // item#1 (hello5) ACK received and removed from tracked
-        // FIX: Fails in release mode - push/emplace/pops seem to be working OK so I suspect
-        // retry_item_base.timestamp_ of not-completely-correct initialization.  Guarding by NDEBUG
-        // because test::retry_tracker itself is not production facing yet
-        // See https://github.com/malachi-iot/estdlib/issues/197
         unsigned size = tracker.queue_.size();
-#if !NDEBUG
         REQUIRE(size == 1);
-#endif
     }
 }
