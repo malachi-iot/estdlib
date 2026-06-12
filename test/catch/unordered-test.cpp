@@ -465,7 +465,7 @@ TEST_CASE("unordered: synthetic retry", "[unordered][retry]")
         REQUIRE(item1->timestamp_ == 14);
         // FIX: Eager destruction by way of erase_ll indeed goofs us up.  Extremely surprising, but they DO say that memory
         // in the recently destroyed area is no longer valid.  I presume some kind of bounds/memory checking is applied here
-        // in an implementation-defined way?
+        // in an implementation-defined way?  Ah, yes - MINE!  'meta' which stores retry_item is unioned with GC flags
         //REQUIRE(item1->ack_received_);
         REQUIRE(tracker.tracked_.size() == 1);  // Revealed tracked size now shrinks, but GC hasn't happened yet so "hello5" still exists.
         REQUIRE(tracker.queue_.size() == 2);    // queue size only changes at poll

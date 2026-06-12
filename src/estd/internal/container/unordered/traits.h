@@ -61,6 +61,7 @@ public:
     static constexpr key_equal key_eq() { return {}; }
 };
 
+// Sets up key + meta entry where meta tracks gc flag, storage
 template <class Key, class Mapped>
 struct unordered_map_traits_control
 {

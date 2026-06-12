@@ -143,6 +143,9 @@ public:
             found.first->second.mapped().ack_received_ = true;
 
             // mark this guy for deletion (but don't delete yet)
+            // FIX: Here is our glitch, because not only does ~T run (which might be tolerable, though
+            // technically UB for us to inspect afterward) but also we union over him thus clobbering
+            // his data when tracking our meta/gc flags
             tracked_.erase_ll(found);
             return &found.first->second.mapped();
         }
