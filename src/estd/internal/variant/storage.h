@@ -267,7 +267,7 @@ public:
     ensure_pointer<T> emplace(Args&&...args)
     {
 #if __cpp_lib_constexpr_memory
-        // DEBT: Not constexpr friendly yet
+        // DEBT: Not constexpr friendly yet.  See https://github.com/malachi-iot/estdlib/issues/213
         auto raw = (T*)storage.raw;   // NOLINT
         return std::construct_at(raw, std::forward<Args>(args)...);
 #else

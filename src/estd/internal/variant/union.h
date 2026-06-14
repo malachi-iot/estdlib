@@ -4,6 +4,17 @@
 
 namespace estd { namespace experimental {
 
+// Stealing idea from GCC.
+// https://github.com/gcc-mirror/gcc/blob/bd4b33d265d44bfb3222c7bb962818179242bf4b/libstdc%2B%2B-v3/include/std/variant
+// Interesting, they too track trivial - but for different functional reasons probably
+template <bool trivial, class ...Types>
+union variadic_union;
+
+template <class First, class ...Rest>
+union variadic_union<false, First, Rest...>
+{
+};
+
 template <bool active, class T>
 struct variant_storage_leaf;
 
