@@ -430,11 +430,13 @@ TEST_CASE("variant")
 
             REQUIRE(*vs.get<1>() == v);
         }
+#if __cpp_lib_constexpr_memory
         SECTION("constexpr")
         {
             //constexpr internal::variant_storage<int, int> vs(
-            //    estd::in_place_index_t<0>{}, 7);
+                //estd::in_place_index_t<0>{}, 7);
         }
+#endif
         SECTION("trival: exceed internal union size")
         {
             internal::variant_storage<int, int, int, int, int, int, int> vs;

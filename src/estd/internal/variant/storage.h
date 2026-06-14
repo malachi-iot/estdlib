@@ -6,6 +6,10 @@
 #include "../../cstdlib.h"
 #include "union.h"
 
+#if FEATURE_STD_MEMORY
+#include <memory>
+#endif
+
 namespace estd {
 
 template <class... Types>
@@ -27,16 +31,9 @@ using is_variant_assignable = bool_constant<
     is_assignable<T&, U>::value>;
 #endif
 
-// Very similar to c++20 flavor, but importantly returns monostate instead
-// FIX: A lie - c++20 flavor appears to be a loophole to permit otherwise-prohibited constexpr placement new
-// DEBT: Document why that's wanted
-template <class T, class ...Args>
-inline ESTD_CPP_CONSTEXPR(17) static monostate construct_at(void* placement, Args&&...args)
-{
-    new (placement) T(std::forward<Args>(args)...);
-    return {};
-}
-
+// https://en.cppreference.com/cpp/language/new
+// https://en.cppreference.com/cpp/memory/construct_at
+// https://stackoverflow.com/questions/41580022/constexpr-placement-new
 
 struct variant_storage_getter_functor
 {
@@ -229,26 +226,21 @@ public:
     variant_storage_base() = default;
 
     template <size_t index, class ...Args>
-    constexpr explicit variant_storage_base(in_place_index_t<index>, Args&&...args) :
-        dummy{
-            construct_at<type_at_index<index>>
-                (storage.raw, std::forward<Args>(args)...)}
+    ESTD_CPP_CONSTEXPR(14) explicit variant_storage_base(in_place_index_t<index>, Args&&...args)
     {
+        emplace<index>(std::forward<Args>(args)...);
     }
 
     template <size_t index, class ...Args>
-    constexpr explicit variant_storage_base(in_place_conditional_t<index>, bool condition, Args&&...args) :
-        dummy{
-            condition ?
-                construct_at<type_at_index<index>>
-                    (storage.raw, std::forward<Args>(args)...) :
-                monostate{}}
+    ESTD_CPP_CONSTEXPR(14) explicit variant_storage_base(in_place_conditional_t<index>, bool condition, Args&&...args)
     {
+        if(!condition)  return;
+        emplace<index>(std::forward<Args>(args)...);
     }
 
 
     template <size_t index>
-    pointer_at_index<index> get()
+    ESTD_CPP_CONSTEXPR(14) pointer_at_index<index> get()
     {
         return (pointer_at_index<index>) storage.raw;       // NOLINT
     }
@@ -260,9 +252,9 @@ public:
     }
 
     template <size_t index>
-    void destroy()
+    ESTD_CPP_CONSTEXPR(20) void destroy()
     {
-        typedef type_at_index<index> t;
+        using t = type_at_index<index>;
         get<index>()->~t();
     }
 
@@ -272,13 +264,19 @@ public:
     }
 
     template <class T, class ...Args>
-    constexpr ensure_pointer<T> emplace(Args&&...args)
+    ensure_pointer<T> emplace(Args&&...args)
     {
+#if __cpp_lib_constexpr_memory
+        // DEBT: Not constexpr friendly yet
+        auto raw = (T*)storage.raw;   // NOLINT
+        return std::construct_at(raw, std::forward<Args>(args)...);
+#else
         return new (storage.raw) T(std::forward<Args>(args)...);
+#endif
     }
 
     template <size_t I, class ...Args>
-    constexpr pointer_at_index<I> emplace(Args&&...args)
+    pointer_at_index<I> emplace(Args&&...args)
     {
         using T_i = type_at_index<I>;
         return emplace<T_i>(std::forward<Args>(args)...);
