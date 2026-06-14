@@ -544,6 +544,16 @@ TEST_CASE("variant")
 
         //value = internal::get<0>(v);
     }
+    SECTION("experimental: leaf storage")
+    {
+        using type = estd::experimental::variant_storage<0, 0, char, int, int64_t>;
+        using type1 = estd::experimental::variant_storage<1, 0, char, int, int64_t>;
+        using type2 = estd::experimental::variant_storage<2, 0, char, int, int64_t>;
+
+        static_assert(sizeof(type) == sizeof(char));
+        static_assert(sizeof(type1) == sizeof(int));
+        static_assert(sizeof(type2) == sizeof(int64_t));
+    }
 }
 
 #include "macro/pop.h"

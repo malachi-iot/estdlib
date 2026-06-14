@@ -2,6 +2,33 @@
 
 #include "core.h"
 
+namespace estd { namespace experimental {
+
+template <bool active, class T>
+struct variant_storage_leaf;
+
+template <class T>
+struct variant_storage_leaf<true, T>
+{
+    T value;
+};
+
+template <class T>
+struct variant_storage_leaf<false, T>
+{
+};
+
+template <size_t I_active, size_t I, class... Ts>
+struct variant_storage {};
+
+template<size_t I_active, size_t I, class Head, class... Tail>
+struct variant_storage<I_active, I, Head, Tail...>
+    : variant_storage_leaf<I == I_active, Head>
+    , variant_storage<I_active, I+1, Tail...>
+{};
+
+}}
+
 namespace estd { namespace internal {
 
 // Catches both trivial and non-trivial so that our debug friendly specializations below
@@ -17,7 +44,6 @@ union variant_union<true>
 {
 
 };
-
 
 // variant_union exists to make debugging friendlier.  variant_storage *always* targets 'raw'.
 // As one might guess, Debugger has a much easier time inspecting t1, t2 etc. than raw
