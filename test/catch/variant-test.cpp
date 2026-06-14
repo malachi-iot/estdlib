@@ -354,7 +354,7 @@ TEST_CASE("variant")
 
             REQUIRE(vs.is_trivial);
         }
-        SECTION("int, int")
+        SECTION("trivial: fits in variant_union helper")
         {
             estd::internal::variant_storage<int, int> vs;
 
@@ -362,7 +362,7 @@ TEST_CASE("variant")
 
             *vs.get<0>() = 7;
 
-            auto& v = estd::internal::get<0>(vs);
+            int& v = get<0>(vs);
 
             REQUIRE(v == 7);
         }
@@ -430,9 +430,18 @@ TEST_CASE("variant")
 
             REQUIRE(*vs.get<1>() == v);
         }
+        SECTION("constexpr")
+        {
+            //constexpr internal::variant_storage<int, int> vs(
+            //    estd::in_place_index_t<0>{}, 7);
+        }
         SECTION("trival: exceed internal union size")
         {
+            internal::variant_storage<int, int, int, int, int, int, int> vs;
 
+            //vs.assign_or_init(&index, v);
+            *vs.get<1>() = 7;
+            REQUIRE(*vs.get<int>() == 7);
         }
     }
     SECTION("visit_index")

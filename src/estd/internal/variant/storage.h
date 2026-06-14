@@ -4,10 +4,9 @@
 #include "accessors.h"
 
 #include "../../cstdlib.h"
+#include "union.h"
 
 namespace estd {
-
-#if __cpp_variadic_templates
 
 template <class... Types>
 struct variant_size<internal::variant_storage<Types...> > : variadic::size<Types...> {};
@@ -29,6 +28,7 @@ using is_variant_assignable = bool_constant<
 #endif
 
 // Very similar to c++20 flavor, but importantly returns monostate instead
+// FIX: A lie - c++20 flavor appears to be a loophole to permit otherwise-prohibited constexpr placement new
 // DEBT: Document why that's wanted
 template <class T, class ...Args>
 inline ESTD_CPP_CONSTEXPR(17) static monostate construct_at(void* placement, Args&&...args)
@@ -37,70 +37,18 @@ inline ESTD_CPP_CONSTEXPR(17) static monostate construct_at(void* placement, Arg
     return {};
 }
 
-template <class ...T>
-union variant_union<false, T...>
-{
-    estd::byte raw[sizeof(typename largest_type<T...>::type)];
-};
-
-template <>
-union variant_union<true>
-{
-
-};
-
-
-// Not 100% needed, but I like that I can see values more
-// easily in the debugger this way
-// Because this t1, t2 and friends are only used in this manner,
-// https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c183-dont-use-a-union-for-type-punning
-// is not violated, though debugger may produce garbage results.
-template <class T1>
-union variant_union<true, T1>
-{
-    T1 t1;
-    byte raw[0];
-};
-
-
-template <class T1, class T2>
-union variant_union<true, T1, T2>
-{
-    T1 t1;
-    T2 t2;
-    byte raw[0];
-};
-
-template <class T1, class T2, class T3>
-union variant_union<true, T1, T2, T3>
-{
-    T1 t1;
-    T2 t2;
-    T3 t3;
-    byte raw[0];
-};
-
-template <class T1, class T2, class T3, class T4>
-union variant_union<true, T1, T2, T3, T4>
-{
-    T1 t1;
-    T2 t2;
-    T3 t3;
-    T4 t4;
-    byte raw[0];
-};
-
 
 struct variant_storage_getter_functor
 {
     template <size_t I, class T, class ...Types>
-    T& operator()(variadic::visitor_index<I, T>, internal::variant_storage<Types...>& vs)
+    ESTD_CPP_CONSTEXPR(14) T& operator()(
+        variadic::visitor_index<I, T>, internal::variant_storage<Types...>& vs) const
     {
         return get<I>(vs);
     }
 
     template <size_t I, class T, class ...Types>
-    T& operator()(variadic::visitor_index<I, T>, variant<Types...>& vs)
+    ESTD_CPP_CONSTEXPR(14) T& operator()(variadic::visitor_index<I, T>, variant<Types...>& vs) const
     {
         // DEBT: A bit of a cheat
         return *get_ll<I>(vs);
@@ -266,6 +214,10 @@ private:
     union
     {
         variant_union<trivial, Types...> storage;
+
+        // constexpr constructors need to init some guy during construct_at.  Note that
+        // construct_at is only c++17 friendly at the moment, so the notion is either DEBT
+        // or flawed
         monostate dummy;
     };
 
@@ -276,20 +228,20 @@ protected:
 public:
     variant_storage_base() = default;
 
-    template <size_t index, class ...TArgs>
-    constexpr explicit variant_storage_base(in_place_index_t<index>, TArgs&&...args) :
+    template <size_t index, class ...Args>
+    constexpr explicit variant_storage_base(in_place_index_t<index>, Args&&...args) :
         dummy{
             construct_at<type_at_index<index>>
-                (storage.raw, std::forward<TArgs>(args)...)}
+                (storage.raw, std::forward<Args>(args)...)}
     {
     }
 
-    template <size_t index, class ...TArgs>
-    constexpr explicit variant_storage_base(in_place_conditional_t<index>, bool condition, TArgs&&...args) :
+    template <size_t index, class ...Args>
+    constexpr explicit variant_storage_base(in_place_conditional_t<index>, bool condition, Args&&...args) :
         dummy{
             condition ?
                 construct_at<type_at_index<index>>
-                    (storage.raw, std::forward<TArgs>(args)...) :
+                    (storage.raw, std::forward<Args>(args)...) :
                 monostate{}}
     {
     }
@@ -437,13 +389,14 @@ public:
         return *assignment_emplace_helper<I, T_i, T>(std::forward<T>(t));
     }
 
+    // 14JUN26 MB DEBT: Have a closer look at this guy, this kind of enable_if is sometimes flaky
     template <size_t I, class T_i, class T,
         enable_if_t<
             is_convertible<T, T_i>::value &&
             estd::is_trivial<T_i>::value, bool> = true>
-    ESTD_CPP_CONSTEXPR(14) void direct_init_helper(T&& t)
+    constexpr type_at_index<I>& direct_init_helper(T&& t)
     {
-        *get<I>() = std::forward<T>(t);
+        return *get<I>() = std::forward<T>(t);
     }
 
     template <size_t I, class T_i, class T,
@@ -542,7 +495,7 @@ public:
     template <class U>
     ESTD_CPP_CONSTEXPR(14) void assign_or_init(size_type* index, U&& u)
     {
-        typedef typename assign_or_init_selector<U>::first selected;
+        using selected = typename assign_or_init_selector<U>::first;
 
         assign_or_init<selected::index>(index, std::forward<U>(u));
     }
@@ -658,122 +611,5 @@ struct converting_constructor_functor2
 };
 
 }
-#else
-namespace internal {
-
-template <class T1>
-union variant_union<true, T1, void, void>
-{
-    T1 t1;
-    unsigned char raw[0];
-};
-
-template <class T1, class T2>
-union variant_union<true, T1, T2, void>
-{
-    T1 t1;
-    T2 t2;
-    unsigned char raw[0];
-};
-
-template <class T1, class T2, class T3>
-union variant_union<true, T1, T2, T3>
-{
-    T1 t1;
-    T2 t2;
-    T3 t3;
-    unsigned char raw[0];
-};
-
-
-template <class T1, class T2, class T3>
-struct variant_storage
-{
-    typedef are_trivial<T1, T2, T3> trivial;
-
-    variant_union<trivial::value, T1, T2, T3> storage;
-
-    template <size_t I>
-    struct type_at_index : get_type_at_index<I, T1, T2, T3> {};
-
-    variant_storage() {}
-
-    template <size_t I, class T>
-    variant_storage(in_place_index_t<I>, const T& v)
-    {
-        typedef typename type_at_index<I>::type type;
-        new (storage.raw) type(v);
-    }
-
-
-    template <size_t I, class T>
-    variant_storage(in_place_conditional_t<I>, bool condition, const T& v)
-    {
-        if(condition)
-        {
-            typedef typename type_at_index<I>::type type;
-            new (storage.raw) type(v);
-        }
-    }
-
-
-    template <size_t I>
-    variant_storage(in_place_index_t<I>)
-    {
-        typedef typename type_at_index<I>::type type;
-        new (storage.raw) type();
-    }
-
-    template <size_t I>
-    void destroy()
-    {
-        typedef typename type_at_index<I>::type type;
-        ((type*)storage.raw)->~type();
-    }
-
-    template <size_t I, class T_i_1>
-    typename type_at_index<I>::type* emplace(T_i_1& v1)
-    {
-        typedef typename type_at_index<I>::type type;
-        return new (storage.raw) type(v1);
-    }
-
-    template <size_t I>
-    typename type_at_index<I>::type* get()
-    {
-        return (typename type_at_index<I>::type*) storage.raw;
-    }
-
-    template <size_t I>
-    const typename type_at_index<I>::type* get() const
-    {
-        return (typename type_at_index<I>::type*) storage.raw;
-    }
-
-
-    // DEBT: Consolidate this with variadic flavor
-    template <size_t I, size_t index, class U>
-    void assign_or_init(bool match, const U& u)
-    {
-        typedef type_at_index<I> T_j;
-
-        // Are we tracking 'I'?  If so, assign over it
-        if(match)
-        {
-            *get<I>() = u;
-        }
-        else
-        {
-            // ... if not, destroy what we're tracking (if any) and
-            // do a direct initialization
-            destroy<index>();
-            emplace<I>(u);
-        }
-    }
-};
-
-
-}
-#endif
 
 }

@@ -20,11 +20,11 @@ class bad_variant_access;
 
 namespace internal {
 
-template <bool trivial, class ...TArgs>
+template <bool trivial, class ...Args>
 union variant_union;
 
 
-template <bool trivial, class ...Types>
+template <bool trivial, class ...ypes>
 struct variant_storage_base;
 
 template <class ...Types>
