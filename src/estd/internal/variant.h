@@ -21,8 +21,6 @@
 
 namespace estd {
 
-#if __cpp_variadic_templates
-
 namespace internal {
 
 template <class ...Types>
@@ -342,12 +340,4 @@ public:
 
 }
 
-#else
-
-namespace internal {
-
-
-}
-
-#endif
 }

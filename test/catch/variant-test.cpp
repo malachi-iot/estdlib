@@ -430,6 +430,10 @@ TEST_CASE("variant")
 
             REQUIRE(*vs.get<1>() == v);
         }
+        SECTION("trival: exceed internal union size")
+        {
+
+        }
     }
     SECTION("visit_index")
     {

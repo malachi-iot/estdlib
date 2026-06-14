@@ -2,7 +2,6 @@
 
 #include "internal/variant.h"
 
-#if __cpp_variadic_templates
 namespace estd {
 
 template <unsigned index, class ...Types>
@@ -47,4 +46,3 @@ struct variant_alternative<I, variant<Types...> > :
     type_identity<internal::type_at_index<I, Types...>> { };
 
 }
-#endif
