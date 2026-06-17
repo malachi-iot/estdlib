@@ -184,16 +184,16 @@ public:
         state_.iostate_ |= state;
     }
 
-    ESTD_CPP_CONSTEXPR_RET bool good() const
+    constexpr bool good() const
     { return rdstate() == goodbit; }
 
-    ESTD_CPP_CONSTEXPR_RET bool bad() const
+    constexpr bool bad() const
     { return rdstate() & badbit; }
 
-    ESTD_CPP_CONSTEXPR_RET bool fail() const
+    constexpr bool fail() const
     { return rdstate() & failbit || rdstate() & badbit; }
 
-    ESTD_CPP_CONSTEXPR_RET bool eof() const
+    constexpr bool eof() const
     { return rdstate() & eofbit; }
 
 protected:

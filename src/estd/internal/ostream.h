@@ -14,9 +14,12 @@ class basic_ostream :
         public Base,
         public internal::basic_ostream_base
 {
-    typedef Base base_type;
+    using base_type = Base;
+    using this_type = basic_ostream;
 
 public:
+    using base_type::rdbuf;
+
     typedef typename base_type::streambuf_type streambuf_type;
     typedef typename Base::char_type char_type;
     typedef typename streambuf_type::pos_type pos_type;
@@ -140,7 +143,7 @@ public:
         }
     };
 
-    typedef typename Base::traits_type traits_type;
+    using typename base_type::traits_type;
 
     typedef basic_ostream<Streambuf, Base> __ostream_type;
 
@@ -152,10 +155,20 @@ public:
         return *this;
     }
 
-    // UNTESTED
-    __ostream_type& seekp(off_type off, ios_base::seekdir dir)
+    // Lightly tested only
+    this_type& seekp(off_type off)
     {
-        this->rdbuf()->pubseekoff(off, dir, ios_base::out);
+        pos_type ret = rdbuf()->pubseekpos(off, ios_base::out);
+        if(ret == -1) base_type::setstate(ios_base::failbit);
+        return *this;
+    }
+
+    // UNTESTED
+    this_type& seekp(off_type off, ios_base::seekdir dir)
+    {
+        pos_type ret = rdbuf()->pubseekoff(off, dir, ios_base::out);
+        if(ret == -1) base_type::setstate(ios_base::failbit);
+        return *this;
     }
 
     // When the time comes, these will replace the old virtual ones

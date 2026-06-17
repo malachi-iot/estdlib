@@ -15,6 +15,7 @@ struct stringbuf_base : streambuf_base<typename remove_reference<String>::type::
     typedef typename remove_reference<String>::type string_type;
 };
 
+// 17JUN26 - No seek support at this time
 template <class String>
 struct out_stringbuf : stringbuf_base<String>
 {
@@ -54,8 +55,10 @@ struct out_stringbuf : stringbuf_base<String>
 
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {
-        // TODO: check to make sure which contains ios_base::out
-        return str_.size();
+        // Doesn't really support seeking, but can fake it to tell you strlen at least
+        if(off == 0 && ios_base::end && which == ios_base::out)  return str_.size();
+
+        return pos_type(off_type(-1));
     }
 
     constexpr typename string_type::view_type view() const

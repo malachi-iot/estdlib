@@ -83,6 +83,8 @@ protected:
         // openmode MUST include 'out' in this instance, otherwise error or ignore
         if(!(which & ios_base::out)) return -1;
 
+        // DEBT: Do bounds check if flagged by strictness feature flag
+
         switch(way)
         {
             case ios_base::cur:
@@ -101,6 +103,8 @@ protected:
 
         return base_out_type::pos();
     }
+
+    // DEBT: Put in a seekpos pseudo-override to do bounds check if feature flag indicates to do so
 
 public:
     void setbuf_experimental(char_type* s, streamsize n)

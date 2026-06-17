@@ -280,6 +280,34 @@ TEST_CASE("ostream")
 
         REQUIRE(l1.str() == "Hello");
     }
+    SECTION("repositioning")
+    {
+        SECTION("string")
+        {
+            // out_stringbuf doesn't actually handle seeking
+            out << "Hello";
+            out.seekp(0);
+            REQUIRE(out.fail());
+            //out << 'J';
+            //REQUIRE(out_s == "Jello");
+        }
+        SECTION("span")
+        {
+            uint8_t buf[128];
+            const uint8_t test1[] { 1, 2, 3, 4 };
+            estd::span<uint8_t> span(buf);
+
+            estd::detail::basic_ospanstream<uint8_t> out(span);
+
+            out.write(test1, 4);
+            out.seekp(0);
+            out.put(4);
+
+            // DEBT: Use Catch2 proper array compares
+            REQUIRE(buf[0] == 4);
+            REQUIRE(buf[1] == test1[1]);
+        }
+    }
 }
 
 #include "macro/pop.h"
