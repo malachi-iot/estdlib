@@ -90,6 +90,9 @@ struct unordered_map_traits_control
             // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
             uint16_t marked_for_gc : 1;
             // which bucket this empty slot *used to* belong to
+            // 18JUN26 MB DEBT: Needs better docs - IIRC this 'bucket' is a convenience
+            // variable so that GC already knows where this item lives, even though you
+            // could probably deduce it by doing some pointer math.
             uint16_t bucket : 6;
         };
 

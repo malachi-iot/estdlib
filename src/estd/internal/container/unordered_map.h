@@ -311,12 +311,10 @@ public:
             new (&p) mapped_type(std::forward<M>(obj));
             return { { this, cast(cp) }, true };
         }
-        else
-        {
-            // DEBT: Would prefer an emplace here, but it's not smart enough to reliably
-            // sort out class K
-            return insert({k, std::forward<M>(obj)});
-        }
+
+        // DEBT: Would prefer an emplace here, but it's not smart enough to reliably
+        // sort out class K
+        return insert({k, std::forward<M>(obj)});
     }
 
     // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly

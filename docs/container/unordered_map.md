@@ -12,6 +12,8 @@ A feature of `unordered_map` architecture is despite `erase` or `insert` operati
 pointers to existing items *remain stable* by default.  Outlined here is how that operates,
 though those details are largely opaque to the programmer.
 
+A "bucket" is the destination of a particular hash, meaning also that colliding hashes coexist in a bucket.
+
 ## Key Nullability
 
 Items are indicated as null or active by way of its key.  This can cause problems if your key needs to be "0".  In that scenario you have two options:

@@ -176,6 +176,8 @@ protected:
     // In fact, works for find too but it seems to make things more complicated,
     // not more tidy
     // DEBT: Given above and also the c++17 requirement, not decided if we're gonna keep him
+    // 18JUN26 MB DEBT: I don't even remember what I am doing here.
+    // Why am I returning under one path but not the other?
     template <class K, class F, class R = monostate>
     R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
     {
@@ -427,13 +429,16 @@ protected:
     template <class Pointer>
     using find_result = pair<Pointer, size_type>;
 
-    // DEBT: Badly needs documentation
+    // Iterate through all items in this particular bucket.  If we get a full
+    // key match (not just hash match), return control_pointer and bucket of residence.
+    // Otherwise, 'npos'
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<const_control_pointer> find_ll(const K& x) const
     {
 #if ESTD_UNORDERED_MAP_STRICT
         if(nullable::is_null(x))  return { container_.cend(), npos };
 #endif
+
         const size_type n = index(x);
 
         for(const_local_iterator it = begin(n); it != end(n); ++it)

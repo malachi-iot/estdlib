@@ -102,7 +102,7 @@ public:
     /// @param timestamp
     /// @param ack_received debug-oriented, indicate whether processed item was ACK'd and therefore removed
     /// @return 0 or 1 item process counter
-    unsigned poll_one(int timestamp, bool* ack_received = nullptr)
+    unsigned poll_one(typename traits::timestamp timestamp, bool* ack_received = nullptr)
     {
         if(queue_.empty())  return 0;
 
