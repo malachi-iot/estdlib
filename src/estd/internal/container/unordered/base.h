@@ -219,30 +219,37 @@ protected:
     template <class K>
     ESTD_CPP_CONSTEXPR(14) insert_result insert_precheck(const K& key, bool permit_duplicates)
     {
+        constexpr insert_result null { nullptr, false };
+
 #if ESTD_UNORDERED_MAP_STRICT
-        if(nullable::is_null(key))  return { nullptr, false };
+        if(nullable::is_null(key))  return null;
 #endif
 
         const size_type n = index(key);
 
-        // linear probing
+        // linear probing-ish
+        // See https://github.com/malachi-iot/estdlib/issues/211
 
         control_pointer it = &container_[n];
 
         // Move over occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
-        for(;traits::is_empty(*it) == false; ++it)
+        while(traits::is_empty(*it) == false)
         {
             // if we get to the complete end, that's a fail
             // if we've moved to the next bucket, that's also a fail
-            if(it == container_.cend() || index(base_type::key(*it)) != n)
-                return { nullptr, false };
-            else if(!permit_duplicates)
+            if(index(base_type::key(*it)) != n)
+                return null;
+
+            if(!permit_duplicates)
             {
                 if(key_eq_c(key, *it))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
             }
+
+            if(++it == container_.cend())
+                return null;
 
             // Unlike std::unordered_map, we don't always kick back duplicate keys.
             // Instead, that's undefined behavior if you try to pull via [],
