@@ -144,6 +144,9 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_MEMORY_ALIAS
 
 #target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_CHARTRAITS=1)
 
+# See https://github.com/malachi-iot/estdlib/issues/211
+target_compile_definitions(${PROJECT_NAME} PRIVATE ISSUE_211_BRINGUP=1)
+
 estd_compile_options()
 
 target_link_libraries(${PROJECT_NAME} estd testrc Catch2::Catch2WithMain)

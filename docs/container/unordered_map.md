@@ -45,6 +45,8 @@ AND designate no further searching for items in this bucket is needed.
 
 ### sparse item
 
+This is the magic that helps keep pointers stable, letting you hold a pointer to a mapped entry.
+
 Sparse entries are a placeholder to 'extend' a bucket forward.  This way null entries
 don't interrupt discovery of active entries.
 

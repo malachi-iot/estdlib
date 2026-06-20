@@ -324,6 +324,7 @@ protected:
         }
     };
 
+    // Iterates through all active spots in a bucket
     // Skips null spots, omits sparse guys and ends if we go outside of bucket
     // DEBT: Inherit from iterator_base, if we can
     template <class LocalIt>
