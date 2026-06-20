@@ -144,7 +144,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_MEMORY_ALIAS
 
 #target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_CHARTRAITS=1)
 
-# See https://github.com/malachi-iot/estdlib/issues/211
+# See https://github.com/malachi-iot/estdlib/issues/211.  At the moment
+# Issue# 211 is very correlated to stronger linear probing behavior
 target_compile_definitions(${PROJECT_NAME} PRIVATE ISSUE_211_BRINGUP=1)
 
 estd_compile_options()

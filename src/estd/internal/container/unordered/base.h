@@ -232,14 +232,21 @@ protected:
 
         control_pointer it = &container_[n];
 
+#if ISSUE_211_BRINGUP
+        control_pointer start = it;
+#endif
+
         // Move over occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
         while(traits::is_empty(*it) == false)
         {
             // if we get to the complete end, that's a fail
+
+#if !ISSUE_211_BRINGUP
             // if we've moved to the next bucket, that's also a fail
             if(index(base_type::key(*it)) != n)
                 return null;
+#endif
 
             if(!permit_duplicates)
             {
@@ -248,8 +255,15 @@ protected:
                     return { it, false };
             }
 
+#if ISSUE_211_BRINGUP
+            if(++it == container_.cend())
+                it = &container_[0];
+
+            if(it == start) return null;
+#else
             if(++it == container_.cend())
                 return null;
+#endif
 
             // Unlike std::unordered_map, we don't always kick back duplicate keys.
             // Instead, that's undefined behavior if you try to pull via [],
@@ -333,6 +347,9 @@ protected:
 
     // Iterates through all active spots in a bucket
     // Skips null spots, omits sparse guys and ends if we go outside of bucket
+    // 20JUN26 MB: For linear probing upgrade (https://github.com/malachi-iot/estdlib/issues/211)
+    //  'outside the bucket' actually means reaching a null spot.  Also, "skips null spots"
+    //  is misleading.  We actually terminate at null spots.
     // DEBT: Inherit from iterator_base, if we can
     template <class LocalIt>
     struct local_iterator_base
@@ -346,6 +363,11 @@ protected:
         const size_type n_;
 
         const_control_pointer it_;
+
+#if ISSUE_211_BRINGUP
+        // DEBT: Crude wraparound detect helper
+        const_control_pointer start_{nullptr};
+#endif
 
         constexpr LocalIt cast() const
         {
@@ -403,14 +425,62 @@ protected:
             return n_ == parent_->index(traits::key(*it_));
         }
 
+        void bump_with_rollover()
+        {
+            // DEBT: Really obnoxious wraparound detect assist
+            if(start_ == nullptr)   start_ = it_;
+
+            if(++it_ == parent_->container_.cend()) it_ = &parent_->container_[0];
+        }
+
+        // return false = rolled over, total end
+        // return true = it_ is valid
+        bool skip_sparse_and_foreign_buckets()
+        {
+            //const_control_pointer start = &parent_->container_[n_];
+            // Linear probing dictates we may encounter foreign bucket hashes along the way.  They
+            // do not constitute the end of a bucket.  Only a null entry or a rollover is the end
+            // of a bucket.
+            while(it_ != start_ && !traits::is_null_not_sparse(*it_))
+            {
+                // Skip sparse guys - they are just placeholders to keep spots allocated for
+                // pointer stability
+                // FIX: is_sparse is more bucket-dependent than linear probing wants it to be I think.
+                // Falling back to is_empty since we already filtered out null meaning empty will ONLY
+                // indicate sparse
+                bool is_sparse = traits::is_empty(*it_);
+                //bool is_sparse = traits::is_sparse(*it_, n_);
+                // Skip non-matching buckets as is the norm for linear probing
+                bool is_foreign = parent_->index(traits::key(*it_)) != n_;
+
+                // If not sparse or foreign, and not null - we are an active entry matching
+                // the requested bucket, so don't consume
+                if(!(is_sparse || is_foreign))  return true;
+
+                bump_with_rollover();
+            }
+
+            // FIX: == end comparisons broken for similar reason as ringbuffer not knowing if we're at
+            // the start or beginning.  Unknown how to solve that just yet without side-effecting this
+            // iterator more (by way of start_)
+
+            // Reaching here means we either wrapped around - basically meaning end of the line -
+            // or we reached a null, also the end of the line
+            return false;
+        }
+
         this_type& operator++()
         {
+#if ISSUE_211_BRINGUP
+            bump_with_rollover();
+            skip_sparse_and_foreign_buckets();
+#else
             ++it_;
 
             // skip over any sparse entries belonging to this bucket.  They are invisible
-            // null entries for this iterator
+            // null entries for this iterator - specifically we are only revealing 'active' here
             for(; traits::is_sparse(*it_, n_) && it_ != parent_->container_.cend(); ++it_)   {}
-
+#endif
             return *this;
         }
 

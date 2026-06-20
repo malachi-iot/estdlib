@@ -246,6 +246,12 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual ESTD_UNO
         return nullable{}.is_null(v);
     }
 
+    // No notion of sparse is currently supported for unordered_set
+    static constexpr bool is_null_not_sparse(const value_type& v)
+    {
+        return is_empty(v);
+    }
+
     static constexpr bool is_sparse(const value_type&, unsigned = {}) { return false; }
 
     static constexpr const Key& key(const control_type& v) { return v; }
