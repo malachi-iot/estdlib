@@ -130,8 +130,7 @@ public:
     // Idea being if you have two buckets near each other of only size 1, you'll not
     // have room to insert a collision/duplicate in that bucket - and end up in a linear
     // probe overflow (which isn't the end of the world, really)
-    // DEBT: Make depth adjustable via traits/impl
-    static constexpr unsigned bucket_depth = ESTD_UNORDERED_MAP_BUCKET_SIZE;
+    static constexpr unsigned bucket_depth = traits::bucket_depth;
 
     ESTD_CPP_ATTR_NODISCARD
     constexpr size_type max_size() const { return container_.size(); }
@@ -466,6 +465,7 @@ protected:
             if(++it_ == parent_->container_.cend()) it_ = &parent_->container_[0];
         }
 
+#if ISSUE_211_BRINGUP
         // return false = rolled over, total end
         // return true = it_ is valid
         bool skip_sparse_and_foreign_buckets()
@@ -501,6 +501,7 @@ protected:
             // or we reached a null, also the end of the line
             return false;
         }
+#endif
 
         this_type& operator++()
         {

@@ -59,6 +59,8 @@ public:
     //hasher hash_function() const { return {}; }
 
     static constexpr key_equal key_eq() { return {}; }
+
+    static constexpr unsigned bucket_depth = ESTD_UNORDERED_MAP_BUCKET_SIZE;
 };
 
 // Sets up key + meta entry where meta tracks gc flag, storage
