@@ -88,6 +88,11 @@ TEST_CASE("unordered", "[unordered]")
             make_tuple(3),
             make_tuple("hello2"));
 
+        SECTION("bucket ops")
+        {
+            // We already do a lot of bucket ops.  This is to push it harder
+
+        }
         SECTION("counts / contains")
         {
             REQUIRE(map.contains(2));

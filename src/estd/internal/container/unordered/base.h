@@ -301,6 +301,7 @@ protected:
         iterator_base(const iterator_base&) = default;
 
         // Assist to enable iterator_base to comfortably demote to const_iterator_base
+        // 21JUN26 MB DEBT: Tighten up rules here
         template <class Value2>
         constexpr iterator_base(const iterator_base<Value2, Parent>& copy_from) :
             parent_{copy_from.parent_},
@@ -367,6 +368,8 @@ protected:
 #if ISSUE_211_BRINGUP
         // DEBT: Crude wraparound detect helper
         const_control_pointer start_{nullptr};
+
+        constexpr bool started() const { return start_ != nullptr; }
 #endif
 
         constexpr LocalIt cast() const
@@ -386,6 +389,37 @@ protected:
 
         operator LocalIt() { return cast(); }
 
+        constexpr bool is_empty() const
+        {
+            return parent_->is_empty(*it_);
+        }
+
+#if ISSUE_211_BRINGUP
+        // Enhanced linear probing flavor puts more validity burden
+        // on skip_sparse_and_foreign_buckets, resulting in a simplified
+        // equality operator
+        ESTD_CPP_CONSTEXPR(14) bool operator==(end_local_iterator it) const
+        {
+            // If we reach a null slot, then that's the end of probing
+            if(is_empty()) return true;
+
+            // Otherwise if we wrap around, that's also the end
+            return started() && it_ == it.it_;
+        }
+
+        ESTD_CPP_CONSTEXPR(14) bool operator!=(end_local_iterator it) const
+        {
+            // If we reach a null slot, then that's the end of probing
+            if(is_empty()) return false;
+
+            // If we haven't bumped forward, there's no chance of wraparound
+            // so we can't be at the end
+            if(!started()) return true;
+
+            // If we wrap around, that's also the end
+            return it_ != it.it_;
+        }
+#else
         constexpr bool operator==(end_local_iterator it) const
         {
             // If we reach end of entire set, indicate we are at the end
@@ -424,6 +458,7 @@ protected:
             // end of this bucket
             return n_ == parent_->index(traits::key(*it_));
         }
+#endif
 
         void bump_with_rollover()
         {
@@ -448,7 +483,7 @@ protected:
                 // FIX: is_sparse is more bucket-dependent than linear probing wants it to be I think.
                 // Falling back to is_empty since we already filtered out null meaning empty will ONLY
                 // indicate sparse
-                bool is_sparse = traits::is_empty(*it_);
+                bool is_sparse = is_empty();
                 //bool is_sparse = traits::is_sparse(*it_, n_);
                 // Skip non-matching buckets as is the norm for linear probing
                 bool is_foreign = parent_->index(traits::key(*it_)) != n_;
@@ -633,6 +668,36 @@ public:
         return { this, cast(container_.cend()) };
     }
 
+#if ISSUE_211_BRINGUP
+    ESTD_CPP_CONSTEXPR(14) local_iterator begin(size_type n)
+    {
+        local_iterator it{ this, n, &container_[n] };
+        it.skip_sparse_and_foreign_buckets();
+        return it;
+    }
+
+    constexpr const_local_iterator begin(size_type n) const
+    {
+        return cbegin(n);
+    }
+
+    ESTD_CPP_CONSTEXPR(14) const_local_iterator cbegin(size_type n) const
+    {
+        const_local_iterator it{ this, n, &container_[n] };
+        it.skip_sparse_and_foreign_buckets();
+        return it;
+    }
+
+    constexpr end_local_iterator end(size_type n) const
+    {
+        return cend(n);
+    }
+
+    constexpr end_local_iterator cend(size_type n) const
+    {
+        return { &container_[n] };
+    }
+#else
     ESTD_CPP_CONSTEXPR(17) local_iterator begin(size_type n)
     {
         return { this, n, skip_sparse(&container_[n], n) };
@@ -657,6 +722,7 @@ public:
     {
         return { container_.cend() };
     }
+#endif
 };
 
 // UNTESTED for unodered_map
