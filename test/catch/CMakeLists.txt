@@ -104,7 +104,9 @@ else()
         variant-test.cpp
         vector-test.cpp
         internal-test.cpp
-        unordered-test.cpp)
+        unordered-map-test.cpp
+        unordered-test.cpp
+        )
 
     # Experimental burden of success much lower - this fails in Release mode and
     # that's OK

@@ -30,8 +30,6 @@ struct unordered_base_constants
     static constexpr size_type npos = numeric_limits<size_type>::max();
 };
 
-constexpr unsigned unordered_base_constants::npos;
-
 template <class Container, class Traits>
 class unordered_base : public Traits,
     public unordered_base_constants
@@ -548,8 +546,10 @@ protected:
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<const_control_pointer> find_ll(const K& x) const
     {
+        constexpr auto np = npos;
+
 #if ESTD_UNORDERED_MAP_STRICT
-        if(nullable::is_null(x))  return { container_.cend(), npos };
+        if(nullable::is_null(x))  return { container_.cend(), np };
 #endif
 
         const size_type n = index(x);
@@ -557,21 +557,25 @@ protected:
         for(const_local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq_c(x, *it))    return { it.control(), n };
 
-        return { container_.cend(), npos };
+        return { container_.cend(), np };
     }
 
     template <class K>
     ESTD_CPP_CONSTEXPR(14) find_result<control_pointer> find_ll(const K& x)
     {
+        // estd::pair behaves like it's taking the address of npos, resulting in
+        // linker issues for c++11, c++14.  This works around that
+        constexpr auto np = npos;
+
 #if ESTD_UNORDERED_MAP_STRICT
-        if(nullable::is_null(x))  return { container_.end(), npos };
+        if(nullable::is_null(x))  return { container_.end(), np };
 #endif
         const size_type n = index(x);
 
         for(local_iterator it = begin(n); it != end(n); ++it)
             if(key_eq_c(x, *it))    return { it.control(), n };
 
-        return { container_.end(), npos };
+        return { container_.end(), np };
     }
 
     // deviates from std in that other iterators part of this bucket could be invalidated

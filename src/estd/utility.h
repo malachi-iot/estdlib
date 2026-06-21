@@ -39,7 +39,10 @@ struct pair
         first(first), second(second) {}
 
     template <class U1, class U2>
-    constexpr pair(U1&& first, U2&& second) : first(first), second(second) {}
+    constexpr pair(U1&& first, U2&& second) :
+        first(std::forward<U1>(first)),
+        second(std::forward<U2>(second))
+    {}
 
 #if FEATURE_ESTD_CPP03_TUPLE == 0
     template <class ...Args1, class ...Args2>
