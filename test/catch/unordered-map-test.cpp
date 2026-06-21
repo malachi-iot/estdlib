@@ -348,48 +348,87 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         using traits = map_traits1;
         using type = internal::unordered_map<internal::uninitialized_array<typename traits::control_type, 4>, traits>;
         using pair = estd::pair<typename type::iterator, bool>;
+        internal::uninitialized_array<pair, 4> its;
         using local_iterator = typename type::const_local_iterator;
 
         type map;
 
-        pair it1 = map.try_emplace(1, "Hello1");
-        pair it2 = map.try_emplace(2, "Hello2");
-        pair it3 = map.try_emplace(3, "Hello3");
-        pair it4 = map.try_emplace(4, "Hello4");
+        SECTION("full up: distinct buckets")
+        {
+            its[0] = map.try_emplace(1, "Hello1");
+            its[1] = map.try_emplace(2, "Hello2");
+            its[2] = map.try_emplace(3, "Hello3");
+            its[3] = map.try_emplace(4, "Hello4");
 
-        REQUIRE(it1.second);
-        REQUIRE(it2.second);
-        REQUIRE(it3.second);
-        REQUIRE(it4.second);
+            REQUIRE(its[0].second);
+            REQUIRE(its[1].second);
+            REQUIRE(its[2].second);
+            REQUIRE(its[3].second);
 
-        pair it5 = map.try_emplace(5, "Hello5");
+            pair it5 = map.try_emplace(5, "Hello5");
 
-        REQUIRE(!it5.second);
+            REQUIRE(!it5.second);
 
-        REQUIRE(map.bucket(1) == 1);
-        REQUIRE(map.bucket(2) == 2);
-        REQUIRE(map.bucket(3) == 3);
-        REQUIRE(map.bucket(4) == 0);
+            REQUIRE(map.bucket(1) == 1);
+            REQUIRE(map.bucket(2) == 2);
+            REQUIRE(map.bucket(3) == 3);
+            REQUIRE(map.bucket(4) == 0);
 
-        int key = 1;
-        unsigned bucket1 = map.bucket(key);
+            int key = 1;
+            unsigned bucket1 = map.bucket(key);
 
-        // FIX: 'count' reported 1, even when all 4 items really were in one bucket
-        unsigned bucket_count = map.count(1);
+            // FIX: 'count' reported 1, even when all 4 items really were in one bucket
+            unsigned bucket_count = map.count(1);
 
-        REQUIRE(bucket_count == 1);
+            REQUIRE(bucket_count == 1);
 
-        local_iterator lit = map.cbegin(bucket1);
+            local_iterator lit = map.cbegin(bucket1);
 
-        REQUIRE(lit->second == "Hello1");
+            REQUIRE(lit->second == "Hello1");
 
-        ++lit;
+            ++lit;
 
-        // DEBT: Don't use auto here
-        auto cend = map.cend(bucket1);
+            // DEBT: Don't use auto here
+            auto cend = map.cend(bucket1);
 
-        bool ended = lit == cend;
+            bool ended = lit == cend;
 
-        REQUIRE(ended);
+            REQUIRE(ended);
+        }
+        SECTION("full up: shared bucket")
+        {
+            its[0] = map.try_emplace(1, "Hello1");
+            its[1] = map.try_emplace(2, "Hello2");
+            its[2] = map.try_emplace(3, "Hello3");
+            its[3] = map.try_emplace(5, "Hello5");
+
+            REQUIRE(its[0].second);
+            REQUIRE(its[1].second);
+            REQUIRE(its[2].second);
+            REQUIRE(its[3].second);
+
+            REQUIRE(map.bucket(1) == 1);
+            REQUIRE(map.bucket(5) == 1);
+
+            local_iterator lit = map.cbegin(1);
+
+            REQUIRE(lit->second == "Hello1");
+
+            ++lit;
+
+            REQUIRE(lit->second == "Hello5");
+
+            ++lit;
+
+            // DEBT: Don't use auto here
+            auto cend = map.cend(1);
+
+            bool ended = lit == cend;
+
+            REQUIRE(ended);
+
+            // Catch2 gets mad about this
+            //REQUIRE(lit == cend);
+        }
     }
 }
