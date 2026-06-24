@@ -442,5 +442,13 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             // Catch2 gets mad about this
             //REQUIRE(lit == cend);
         }
+        // TODO: Do test which fills up a bucket, causes it to wrap around, then remove items
+        // (not yet gc) and do further inserts to see where they land.  Then, GC and do it again.
+        // TODO: As part of this, verify insert_precheck is skipping non-fitting sparse items
+        // (you can insert back into a sparse if the bucket matches).
+        // TODO: Outline insert_precheck use cases for when we encounter sparse items:
+        //       1. Are there conditions where we accept inserting into a non-fitting sparse?
+        //       1.a. Like what if we move past all the active items and find outself in another bucket?
+        // TODO: Verify insert_precheck behaves rationally as above TODOs inquire about during a wrap around
     }
 }
