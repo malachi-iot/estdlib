@@ -9,6 +9,8 @@
 
 #include "test/retry.h"
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 using namespace estd;
 
 struct map_traits1 : internal::unordered_map_traits<int, layer1::string<16>>
@@ -303,6 +305,16 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         REQUIRE(map1[1] == "hi2u");
         REQUIRE(map1.size() == 1);
     }
+    SECTION("unordered_map: layer3")
+    {
+        using type = layer3::unordered_map<int, estd::string_view>;
+        using control_type = typename type::control_type;
+        control_type backing[16];
+
+        type map1(backing);
+
+
+    }
     SECTION("unordered_map: edge cases")
     {
         SECTION("more complicated item")
@@ -344,12 +356,14 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
     SECTION("full container")
     {
         //using type = layer1::unordered_map<int, layer1::string<16>, 4>;
-        // FIX: This traits trickery is to override bucket_size down to 1.  However, it's not getting picked up
         using traits = map_traits1;
-        using type = internal::unordered_map<internal::uninitialized_array<typename traits::control_type, 4>, traits>;
+        using type = layer1::detail::unordered_map<4, traits>;
         using pair = estd::pair<typename type::iterator, bool>;
         internal::uninitialized_array<pair, 4> its;
         using local_iterator = typename type::const_local_iterator;
+        using end_local_iterator = typename type::end_local_iterator;
+
+        static_assert(type::bucket_depth == 1);
 
         type map;
 
@@ -388,8 +402,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
             ++lit;
 
-            // DEBT: Don't use auto here
-            auto cend = map.cend(bucket1);
+            end_local_iterator cend = map.cend(bucket1);
 
             bool ended = lit == cend;
 
@@ -420,8 +433,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
             ++lit;
 
-            // DEBT: Don't use auto here
-            auto cend = map.cend(1);
+            end_local_iterator cend = map.cend(1);
 
             bool ended = lit == cend;
 

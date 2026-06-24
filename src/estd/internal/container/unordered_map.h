@@ -34,8 +34,8 @@ public:
 
     // DEBT: Key SHOULD be value-initializable at this time.
     using typename base_type::control_type;
-    using control_pointer = control_type*;
-    using const_control_pointer = const control_type*;
+    using typename base_type::control_pointer;
+    using typename base_type::const_control_pointer;
     using typename base_type::end_local_iterator;
     using typename base_type::insert_result;
 
@@ -66,12 +66,12 @@ public:
 private:
     // pointer and control_pointer overlap.  See unordered_base for breakdown
 
-    static constexpr control_pointer cast_control(pointer pos)
+    static control_pointer cast_control(pointer pos)
     {
         return reinterpret_cast<control_pointer>(pos);
     }
 
-    static constexpr const_control_pointer cast_control(const_pointer pos)
+    static const_control_pointer cast_control(const_pointer pos)
     {
         return reinterpret_cast<const_control_pointer>(pos);
     }

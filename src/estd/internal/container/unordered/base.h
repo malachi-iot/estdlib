@@ -44,6 +44,9 @@ public:
     using typename base_type::control_type;
     using typename base_type::nullable;
 
+    // As mentioned elsewhere, 'control_type' and 'value_type' are basically union-ized
+    // We discriminate which is which based on 'key' null state
+
     // control_type is set up in traits.  It is used for non-allocated
     // entries and is generally:
     // 1.  For unordered_map = pair<key, meta>
@@ -357,6 +360,9 @@ protected:
 
         const parent_type* const parent_;
 
+        // DEBT: Do this to hide non-const control() guy
+        //friend parent_type;
+
         // bucket designator
         const size_type n_;
 
@@ -369,20 +375,21 @@ protected:
         constexpr bool started() const { return start_ != nullptr; }
 #endif
 
-        constexpr LocalIt cast() const
+        LocalIt cast() const
         {
             // DEBT: Do static assert to verify convertibility
+            //static_assert(is_same<remove_cv_t<LocalIt>, pointer>::value);
+            //static_assert(is_same<add_const_t<LocalIt>, const_pointer>::value);
 
             return (LocalIt) it_;
         }
 
-        constexpr const_reference operator*() const { return *cast(); }
+        const_reference operator*() const { return *cast(); }
 
-        constexpr const_pointer operator->() const { return cast(); }
+        const_pointer operator->() const { return cast(); }
 
-        // DEBT: Effectively a const_cast
-        control_pointer control() { return (control_pointer)it_; }
-        const_control_pointer control() const { return it_; }
+        control_pointer control() { return const_cast<control_pointer>(it_); }
+        constexpr const_control_pointer control() const { return it_; }
 
         operator LocalIt() { return cast(); }
 
@@ -492,10 +499,6 @@ protected:
 
                 bump_with_rollover();
             }
-
-            // FIX: == end comparisons broken for similar reason as ringbuffer not knowing if we're at
-            // the start or beginning.  Unknown how to solve that just yet without side-effecting this
-            // iterator more (by way of start_)
 
             // Reaching here means we either wrapped around - basically meaning end of the line -
             // or we reached a null, also the end of the line
