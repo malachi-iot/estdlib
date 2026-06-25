@@ -357,15 +357,16 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
     {
         //using type = layer1::unordered_map<int, layer1::string<16>, 4>;
         using traits = map_traits1;
-        using type = layer1::detail::unordered_map<4, traits>;
+        using type = layer2::detail::unordered_map<4, traits>;
         using pair = estd::pair<typename type::iterator, bool>;
-        internal::uninitialized_array<pair, 4> its;
+        map_traits1::control_type backing[4] {};
+        pair its[4] {};
         using local_iterator = typename type::const_local_iterator;
         using end_local_iterator = typename type::end_local_iterator;
 
         static_assert(type::bucket_depth == 1);
 
-        type map;
+        type map(backing);
 
         SECTION("full up: distinct buckets")
         {
@@ -420,6 +421,11 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             REQUIRE(its[2].second);
             REQUIRE(its[3].second);
 
+            //void* loc = its[1].first.operator();
+            //bool b = its[1].first == backing + 1;
+
+            //REQUIRE(b);
+
             REQUIRE(map.bucket(1) == 1);
             REQUIRE(map.bucket(5) == 1);
 
@@ -441,6 +447,10 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
             // Catch2 gets mad about this
             //REQUIRE(lit == cend);
+        }
+        SECTION("full up: wraparound")
+        {
+
         }
         // TODO: Do test which fills up a bucket, causes it to wrap around, then remove items
         // (not yet gc) and do further inserts to see where they land.  Then, GC and do it again.

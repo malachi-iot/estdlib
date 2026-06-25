@@ -63,7 +63,7 @@ using ring = internal::circular_queue<internal::span_circular_policy<T, N, o>>;
 namespace layer3 {
 
 template <class T, internal::queue_options o = ring_options::none>
-using ring = internal::circular_queue<internal::span_circular_policy<T, detail::dynamic_extent::value, o>>;
+using ring = internal::circular_queue<internal::span_circular_policy<T, estd::detail::dynamic_extent::value, o>>;
 
 }
 

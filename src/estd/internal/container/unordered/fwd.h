@@ -86,6 +86,15 @@ using unordered_set = internal::unordered_set<
 
 namespace layer2 {
 
+namespace detail {
+
+template <unsigned N, class Traits>
+using unordered_map = internal::unordered_map<
+    estd::span<typename Traits::control_type, N>,
+    Traits>;
+
+}
+
 template <class Key, class T, unsigned N,
     class Hash = hash<Key>,
     class KeyEqual = equal_to<Key>,
@@ -93,9 +102,7 @@ template <class Key, class T, unsigned N,
     class Nullable = internal::nullable_traits<Key>,
 #endif
     class Traits = internal::unordered_map_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>>
-using unordered_map = internal::unordered_map<
-    estd::span<typename Traits::control_type, N>,
-    Traits>;
+using unordered_map = detail::unordered_map<N, Traits>;
 
 // UNTESTED
 template <class Key, unsigned N,
@@ -109,6 +116,15 @@ using unordered_set = internal::unordered_set<
 
 namespace layer3 {
 
+namespace detail {
+
+template <class Traits>
+using unordered_map = internal::unordered_map<
+    estd::span<typename Traits::control_type>,
+    Traits>;
+
+}
+
 // UNTESTED
 template <class Key, class T,
     class Hash = hash<Key>,
@@ -117,9 +133,7 @@ template <class Key, class T,
     class Nullable = internal::nullable_traits<Key>,
 #endif
     class Traits = internal::unordered_map_traits<Key, T, Hash, KeyEqual ESTD_UNORDERED_MAP_NULLABLE_OPT>>
-using unordered_map = internal::unordered_map<
-    estd::span<typename Traits::control_type>,
-    Traits>;
+using unordered_map = detail::unordered_map<Traits>;
 
 }
 

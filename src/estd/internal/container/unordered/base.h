@@ -293,6 +293,7 @@ protected:
         friend class iterator_base;
 
     public:
+        constexpr iterator_base() = default;
         constexpr iterator_base(const parent_type* parent, pointer it) :
             parent_{parent},
             it_{it}

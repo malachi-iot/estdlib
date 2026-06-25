@@ -98,7 +98,7 @@ namespace layer2 {
 
 #ifdef __cpp_alias_templates
 template<class Char, size_t N = 0, bool null_terminated = true, class Traits = estd::char_traits<Char> >
-using basic_stringbuf = detail::streambuf <
+using basic_stringbuf = estd::detail::streambuf <
     internal::impl::basic_stringbuf<
         layer2::basic_string <Char, N, null_terminated, Traits> > >;
 
@@ -106,7 +106,7 @@ using stringbuf = basic_stringbuf<char>;
 
 template <class Char, size_t N = 0, bool null_terminated = true, class Traits = estd::char_traits<Char> >
 using basic_istringstream =
-    detail::basic_istream<basic_stringbuf<Char, N, null_terminated, Traits>>;
+    estd::detail::basic_istream<basic_stringbuf<Char, N, null_terminated, Traits>>;
 #endif
 
 }
