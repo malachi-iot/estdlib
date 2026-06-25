@@ -30,6 +30,8 @@ struct unordered_base_constants
     static constexpr size_type npos = numeric_limits<size_type>::max();
 };
 
+
+// DEBT: Split up the logic in this class if we can so that we don't have such a massive line count
 template <class Container, class Traits>
 class unordered_base : public Traits,
     public unordered_base_constants
@@ -276,7 +278,7 @@ protected:
 
 
     // semi-smart, can skip null spots
-    template <class Value, class Parent>
+    template <class Value, class Parent = this_type>
     class iterator_base
     {
         using parent_type = Parent;
@@ -650,10 +652,29 @@ public:
         return index(key);
     }
 
-    using iterator = iterator_base<value_type, this_type>;
-    using const_iterator = iterator_base<const value_type, this_type>;
+#if NDEBUG
+    using iterator = iterator_base<value_type>;
+    using const_iterator = iterator_base<const value_type>;
     using local_iterator = local_iterator_base<pointer>;
     using const_local_iterator = local_iterator_base<const_pointer>;
+#else
+    // Not aliasing here purely for benefit of integrated debugging, reducing the template metadata spew
+
+    struct iterator : iterator_base<value_type>
+    {
+        template <class ...Args>
+        iterator(Args&&...args) : iterator_base<value_type>(std::forward<Args>(args)...) {}
+    };
+
+    struct const_iterator : iterator_base<const value_type>
+    {
+        template <class ...Args>
+        const_iterator(Args&&...args) : iterator_base<const value_type>(std::forward<Args>(args)...) {}
+    };
+
+    using local_iterator = local_iterator_base<pointer>;
+    using const_local_iterator = local_iterator_base<const_pointer>;
+#endif
 
     iterator begin()
     {

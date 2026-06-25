@@ -313,7 +313,9 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
         type map1(backing);
 
-
+        map1[1] = "hi2u";
+        REQUIRE(map1[1] == "hi2u");
+        REQUIRE(map1.size() == 1);
     }
     SECTION("unordered_map: edge cases")
     {
@@ -361,8 +363,15 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         using pair = estd::pair<typename type::iterator, bool>;
         map_traits1::control_type backing[4] {};
         pair its[4] {};
+        using iterator = typename type::iterator;
         using local_iterator = typename type::const_local_iterator;
         using end_local_iterator = typename type::end_local_iterator;
+
+        auto addr_of = [](estd::pair<iterator, bool> v)
+        {
+            void* addr = v.first.operator->();
+            return addr;
+        };
 
         static_assert(type::bucket_depth == 1);
 
@@ -421,10 +430,8 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             REQUIRE(its[2].second);
             REQUIRE(its[3].second);
 
-            //void* loc = its[1].first.operator();
-            //bool b = its[1].first == backing + 1;
-
-            //REQUIRE(b);
+            REQUIRE(addr_of(its[0]) == backing + 1);    // Key 1 at position 1
+            REQUIRE(addr_of(its[3]) == backing);        // Key 5 at position 0 due to wraparound
 
             REQUIRE(map.bucket(1) == 1);
             REQUIRE(map.bucket(5) == 1);
