@@ -25,3 +25,5 @@ register_component()
 
 # For diagnostic only - will break compilation
 #component_compile_options("-Wstack-usage=32" "-S")
+
+target_compile_definitions(${COMPONENT_LIB} PUBLIC ISSUE_211_BRINGUP=1)

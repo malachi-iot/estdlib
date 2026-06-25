@@ -464,6 +464,7 @@ protected:
         }
 #endif
 
+#if ISSUE_211_BRINGUP
         void bump_with_rollover()
         {
             // DEBT: Really obnoxious wraparound detect assist
@@ -472,7 +473,6 @@ protected:
             if(++it_ == parent_->container_.cend()) it_ = &parent_->container_[0];
         }
 
-#if ISSUE_211_BRINGUP
         // return false = rolled over, total end
         // return true = it_ is valid
         bool skip_sparse_and_foreign_buckets()
