@@ -18,6 +18,35 @@ struct map_traits1 : internal::unordered_map_traits<int, layer1::string<16>>
     static constexpr unsigned bucket_depth = 1;
 };
 
+template <class Container, class Traits>
+void gc(internal::unordered_map<Container, Traits>& map)
+{
+    using map_type = internal::unordered_map<Container, Traits>;
+    using iterator = typename map_type::iterator;
+
+    // Iterate through every item, looking for active entries.  Linear probing dictates that despite locality of buckets,
+    // All entries encountered may or may not be positioned near their ideal bucket.  This is aggravated by GC situation.
+    // Also this is intended design, all to retain iterator stability without dynamic allocation and also perhaps
+    // to reduce the amount of entry movement in general.  GC though says OK, you had your fun, now your iterators invalidate.
+
+    // On writing this though it occurs when I left off, there was a this idea that:
+    // 1. Each 'erase' did housekeeping on bucket, wiping out sparse entries preceding erased item
+    // 2. gc_active was the ONLY way an active item every physically moved
+
+    // Sound logic, but misses an important and typical use case:
+    // Scenario where you are NOT tracking iterators but just doing key lookups all the time.
+    // Now, you are on the hook to retrieve the iterator (not a HUGE ask, but still) and then
+    // call gc_active yourself.  This sorta works out in theory, but items you aren't even thinking
+    // to retrieve just hang around non-GC'd.  So, all that is to say, we need a full-sweep GC
+
+    // For all active entries
+    for(iterator it = map.begin(); it != map.end(); ++it)
+    {
+        // Remember entries may or may not be in the expected physical bucket location
+        map.gc_active(it);
+    }
+}
+
 TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 {
     using map_type = estd::layer1::unordered_map<int, layer1::string<32>, 16>;
@@ -477,6 +506,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
             // FIX: Need a real gc()
             //map.gc_active()
+            gc(map);    // Underway
         }
         // TODO: Do test which fills up a bucket, causes it to wrap around, then remove items
         // (not yet gc) and do further inserts to see where they land.  Then, GC and do it again.

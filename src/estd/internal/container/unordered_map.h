@@ -109,6 +109,10 @@ private:
     {
         assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
 
+        // FIX: Needs heavy revision for linear probing/wraparound realitites:
+        // 1. cend() needs to switch to compare-against-start like we do with local_iterator
+        // 2. swap dangerous because it can emit a mismatched second.bucket
+
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
