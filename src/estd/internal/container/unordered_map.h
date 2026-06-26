@@ -98,6 +98,17 @@ private:
         return { { this, (pointer)r.first }, r.second };
     }
 
+    // Wraparound linear probe accomodation
+    constexpr control_pointer bump(control_pointer i)
+    {
+        return ++i == container_.cend() ? container_.begin() : i;
+    }
+
+    constexpr const_control_pointer bump(const_control_pointer i) const
+    {
+        return ++i == container_.cend() ? container_.cbegin() : i;
+    }
+
     /// perform garbage collection on the bucket containing this active pos, namely moving
     /// pos to first empty slot starting from 'begin' in bucket.
     /// @param pos entry to possibly move
@@ -112,6 +123,7 @@ private:
         // FIX: Needs heavy revision for linear probing/wraparound realitites:
         // 1. cend() needs to switch to compare-against-start like we do with local_iterator
         // 2. swap dangerous because it can emit a mismatched second.bucket
+        // 3. it < pos presumes that 'pos' is nearby correct bucket, but that is not a gauruntee with linear probing
 
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
@@ -379,10 +391,7 @@ public:
 
         destruct(control);
 
-        const_control_pointer next = control + 1;
-
-        // Wraparound linear probe accomodation
-        if(next == container_.cend())   next = container_.cbegin();
+        const const_control_pointer next = bump(control);
 
         // If no further bucket entries, do prune
         // that means:
