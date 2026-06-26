@@ -357,6 +357,9 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
     }
     SECTION("full container")
     {
+        // Remember default hash for integer key is merely to return the key.
+        // Thought that varies per std implementation, it is always true in estd
+
         //using type = layer1::unordered_map<int, layer1::string<16>, 4>;
         using traits = map_traits1;
         using type = layer2::detail::unordered_map<4, traits>;
@@ -377,6 +380,12 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
 
         type map(backing);
 
+        REQUIRE(map.bucket(1) == 1);
+        REQUIRE(map.bucket(2) == 2);
+        REQUIRE(map.bucket(3) == 3);
+        REQUIRE(map.bucket(4) == 0);
+        REQUIRE(map.bucket(7) == 3);
+
         SECTION("full up: distinct buckets")
         {
             its[0] = map.try_emplace(1, "Hello1");
@@ -392,11 +401,6 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             pair it5 = map.try_emplace(5, "Hello5");
 
             REQUIRE(!it5.second);
-
-            REQUIRE(map.bucket(1) == 1);
-            REQUIRE(map.bucket(2) == 2);
-            REQUIRE(map.bucket(3) == 3);
-            REQUIRE(map.bucket(4) == 0);
 
             int key = 1;
             unsigned bucket1 = map.bucket(key);
@@ -457,7 +461,22 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         }
         SECTION("full up: wraparound")
         {
+            its[0] = map.try_emplace(3, "Hello3");      // Bucket 3
+            its[1] = map.try_emplace(7, "Hello7");      // Bucket 3 (linear probes into Bucket 0)
+            its[2] = map.try_emplace(4, "Hello4");      // Bucket 0
 
+            REQUIRE(addr_of(its[0]) == backing + 3);    // Key 3 at position 3
+            REQUIRE(addr_of(its[1]) == backing);        // Key 7 at position 0 due to probe + wraparound
+            REQUIRE(addr_of(its[2]) == backing + 1);    // Key 4 at position 1 due to probe + wraparound
+
+            iterator it = map.erase(its[1].first);
+
+            REQUIRE(it == its[2].first);
+
+            // other iterators remain constant *until* a GC occurs
+
+            // FIX: Need a real gc()
+            //map.gc_active()
         }
         // TODO: Do test which fills up a bucket, causes it to wrap around, then remove items
         // (not yet gc) and do further inserts to see where they land.  Then, GC and do it again.

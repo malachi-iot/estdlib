@@ -99,32 +99,32 @@ private:
     }
 
     /// perform garbage collection on the bucket containing this active pos, namely moving
-    /// pos if gc wishes it
+    /// pos to first empty slot starting from 'begin' in bucket.
     /// @param pos entry to possibly move
+    /// @param begin position to start from, useful for GC'ing multiple entries
+    /// @param n bucket of interest.  Must be bucket in which 'pos' resides
     /// @returns potentially moved 'pos'
-    control_pointer gc_active_ll(control_pointer pos)
+    /// @remarks we pass in 'n' as an optimimzation to avoid double-calculating hash
+    control_pointer gc_active_ll(control_pointer pos, control_pointer begin, const size_type n)
     {
-        const key_type& key = pos->first;
-        const size_type n = index(key);
+        assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
 
         // look through other items in this bucket.  Not using local_iterator because he's
         // designed to skip over nulls, while we specifically are looking for those guys.
         // Also, we don't want to swap our active guy further down the bucket, only earlier
-        for(control_pointer it = container_.begin() + n; it != container_.cend() && it < pos; ++it)
+        for(control_pointer it = begin; it != container_.cend() && it < pos; ++it)
         {
             // if item is null (maybe) sparse
             if(is_empty(*it))
             {
-                control_pointer control = it;
-
                 // if sparse, double check we're in the same bucket still
-                if(control->second.marked_for_gc)
+                if(it->second.marked_for_gc)
                 {
                     // moving out of the bucket terminates the GC operation, no null slot found
                     // NOTE: we could make an extended mode which just reaches on forever, linear probing doesn't
                     // prohibit that at all - it's just crossing into a new bucket now we have to do some extra checks.
                     // a prune_sparse_ll may make that easier
-                    if(control->second.bucket != n) return pos;
+                    if(it->second.bucket != n) return pos;
                 }
 
                 //it->swap(*pos);
@@ -135,6 +135,18 @@ private:
 
         return pos;
     }
+
+    /// perform garbage collection on the bucket containing this active pos, namely moving
+    /// pos to first empty slot in bucket.
+    /// @param pos entry to possibly move
+    /// @returns potentially moved 'pos'
+    control_pointer gc_active_ll(control_pointer pos)
+    {
+        const size_type n = index(traits::key(*pos));
+
+        return gc_active_ll(pos, container_.begin() + n, n);
+    }
+
 
 #if UNIT_TESTING
 public:
@@ -397,6 +409,8 @@ public:
     // NOTE: example implies internal ordering of unordered_map is predictable, which
     // on one hand feels reasonable, but on the other seems to conflict with the notion
     // that we are officially unordered.
+    /// @param pos
+    /// @return Iterator following the removed element
     iterator erase(iterator pos)
     {
         pointer p = estd::addressof(*pos);
