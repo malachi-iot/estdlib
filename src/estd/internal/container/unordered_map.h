@@ -377,13 +377,15 @@ public:
 
         const_control_pointer next = control + 1;
 
+        // Wraparound linear probe accomodation
+        if(next == container_.cend())   next = container_.cbegin();
+
         // If no further bucket entries, do prune
         // that means:
-        // - if we're at the end
         // - if next entry is an active item in a different bucket
         // - if next entry is a null entry
         // then we are clear to null out trailing sparse entries
-        if(auto_prune && (next == container_.cend() || is_null_not_sparse(*next)))
+        if(auto_prune && is_null_not_sparse(*next))
         {
             gc_sparse_ll(control);      // nullify this entry
             control_pointer start = container_.begin() + n;
