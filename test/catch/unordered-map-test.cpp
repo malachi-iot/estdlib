@@ -158,6 +158,14 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         }
         SECTION("erase and gc (distinct steps)")
         {
+            SECTION("erase and gc (primary case)")
+            {
+                constexpr int idx = 17;
+                REQUIRE(map.bucket(idx) == map.bucket(1));
+                pair r10 = map.insert({idx, "hello1.1"}, true);
+
+                // TODO: Need more tests here before gc_active_ll can really be proven
+            }
             SECTION("erase_ll, inspect (with find_ll), then gc")
             {
                 // FIX: idx 0 does not work here, but should.  Do we need to do an auto-gc?
@@ -190,7 +198,9 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
                 REQUIRE(p1->second == "hello1");
                 map.erase(p1);
                 // DEBT: insert itself needs to pass back iter
-                p1 = map.gc_active(r2.first);
+                // moves r2 into p1 slot
+                iter p1_matched = map.gc_active(r2.first);
+                REQUIRE(p1 == p1_matched);
                 REQUIRE(p1->second == "hello1.1");
                 map.erase(p1);
                 //p1 = map.gc_active_ll(p1);

@@ -15,7 +15,8 @@
 * Cleanup of `flags` conversion operators, LLVM compatibility
 * https://github.com/malachi-iot/estdlib/issues/127 general internal container scrubbing
 * https://github.com/malachi-iot/estdlib/issues/206 `expected` assignment operator fix
-* TBD: misc unordered fixes: one-past-end insert detect glitch, npos glitch
+* TBD (unordered): misc unordered fixes: one-past-end insert detect glitch, npos glitch
+* TBD (unordered_map): upgrading gc_active_ll to be linear-probe-friendly
 
 ## Known Issues and Limitations
 

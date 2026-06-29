@@ -120,6 +120,35 @@ private:
     {
         assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
 
+        for(control_pointer it = begin; it != pos;)
+        {
+            // if item is null or sparse
+            if(is_empty(*it))
+            {
+                // true null = end of bucket.  If we see true null, that means
+                // data was corrupted or 'pos' is invalid, since 'pos' MUST exist
+                // in a linear-probe-discoverable way in bucket 'n'.  Therefore,
+                // empty entries MUST be sparse
+                assert(it->second.marked_for_gc);
+
+                // Whatever sparse bucket was tracked is not material since linear
+                // probing rules dictate 'pos' doesn't have to sit in the ideal bucket area
+                // providing we reached here after a series of other active members
+
+                traits::swap(*it, *pos);
+                return it;
+            }
+
+            if((it = bump(it)) == begin)    return pos;
+        }
+
+        return pos;
+    }
+
+    control_pointer gc_active_ll_old(control_pointer pos, control_pointer begin, const size_type n)
+    {
+        assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
+
         // FIX: Needs heavy revision for linear probing/wraparound realitites:
         // 1. cend() needs to switch to compare-against-start like we do with local_iterator
         // 2. swap dangerous because it can emit a mismatched second.bucket
