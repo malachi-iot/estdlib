@@ -95,6 +95,11 @@ struct unordered_map_traits_control
             // 18JUN26 MB DEBT: Needs better docs - IIRC this 'bucket' is a convenience
             // variable so that GC already knows where this item lives, even though you
             // could probably deduce it by doing some pointer math.
+            // 29JUN26 MB NOTE: 'bucket' may be on the way out.  With deeper linear-probing
+            // behavior, the following no longer need it:
+            // 1. prune_sparse_ll
+            // 2. gc_active_ll
+            // That said, 'skip_sparse' gets some real mileage out of it
             uint16_t bucket : 6;
         };
 

@@ -135,6 +135,8 @@ private:
                 // probing rules dictate 'pos' doesn't have to sit in the ideal bucket area
                 // providing we reached here after a series of other active members
 
+                // 29JUN26 MB FIX: Still have lingering issue (#2 below) about mismatched bucket.  Despite
+                // bucket appearing to be on the way out, that's not fully corroborated just yet
                 traits::swap(*it, *pos);
                 return it;
             }

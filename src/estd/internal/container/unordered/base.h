@@ -105,6 +105,7 @@ protected:
     template <class It, class It2>
     static ESTD_CPP_CONSTEXPR(14) It skip_empty(It it, It2 end)
     {
+        // FIX: Needs wraparound treatment
         for(; traits::is_empty(*it) && it != end; ++it)   {}
 
         return it;
@@ -119,6 +120,7 @@ protected:
     template <class Control>
     ESTD_CPP_CONSTEXPR(14) Control skip_sparse(Control p, unsigned n) const
     {
+        // FIX: Needs wraparound treatment
         for(; traits::is_sparse(*p, n) && p != container_.cend(); ++p)    {}
 
         return p;
