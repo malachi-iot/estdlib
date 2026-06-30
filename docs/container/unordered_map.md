@@ -14,6 +14,8 @@ though those details are largely opaque to the programmer.
 
 A "bucket" is the destination of a particular hash, meaning also that colliding hashes coexist in a bucket.
 
+> NOTE: Remember linear probing means that hashes can end in and around a foreign bucket.
+
 ## Key Nullability
 
 Items are indicated as null or active by way of its key.  This can cause problems if your key needs to be "0".  In that scenario you have two options:

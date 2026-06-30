@@ -72,13 +72,15 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         // NOTE: Key '0' won't work due to collision between hash(0) and Null, but that can be overcome
         // by tuning nullable_traits
 
-        pair r2 = map.insert({1, "hi2u"});
-        REQUIRE(r2.second);
-        r2 = map.insert({1, "hi again"});
-        REQUIRE(r2.second == false);
-        REQUIRE(r2.first->second == "hi2u");
+        pair r1 = map.insert({1, "hi2u"});
+        REQUIRE(r1.second);
+        r1 = map.insert({1, "hi again"});
+        REQUIRE(r1.second == false);
+        REQUIRE(r1.first->second == "hi2u");
         int bucket1 = map.bucket(1);
         unsigned counter = 0;
+
+        REQUIRE(map.bucket_size(bucket1) == 1);
 
         // NOTE: Undefined behavior, but valid in this tightly controlled unit test
         REQUIRE(bucket1 == type::bucket_depth);     // key 1 x bucket_depth
@@ -161,18 +163,24 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             SECTION("erase and gc (primary case)")
             {
                 constexpr int idx = 17;
-                REQUIRE(map.bucket(idx) == map.bucket(1));
-                pair r10 = map.insert({idx, "hello1.1"}, true);
+                unsigned bucket = map.bucket(idx);
+                REQUIRE(bucket == bucket1);
+
+                pair r17 = map.insert({idx, "hello1.1"}, true);
 
                 // TODO: Need more tests here before gc_active_ll can really be proven
+
+                unsigned count = map.bucket_size(bucket);
+
+                REQUIRE(count == 2);
             }
             SECTION("erase_ll, inspect (with find_ll), then gc")
             {
                 // FIX: idx 0 does not work here, but should.  Do we need to do an auto-gc?
                 // also I seem to recall idx 0 can be a special case sometimes - is that going on?
                 constexpr int idx = 10;
-                r2 = map.insert({idx, "hello1.1"}, true);
-                REQUIRE(r2.second);
+                pair r10 = map.insert({idx, "hello1.1"}, true);
+                REQUIRE(r10.second);
 
                 auto found = map.find_ll(idx);
 
@@ -192,7 +200,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
             SECTION("duplicate")
             {
                 // DEBT: Would try emplace but that one doesn't permit dups
-                r2 = map.insert({2, "hello1.1"}, true);
+                pair r2 = map.insert({2, "hello1.1"}, true);
                 REQUIRE(r2.second);
                 iter p1 = map.find(2);
                 REQUIRE(p1->second == "hello1");

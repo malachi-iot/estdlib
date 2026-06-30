@@ -128,6 +128,7 @@ protected:
 
 
 public:
+    // 30JUN26 MB - Perhaps a sentinel, if a sentinel can have instance variables
     struct end_local_iterator
     {
         const_control_pointer it_;
@@ -183,10 +184,11 @@ protected:
     // 18JUN26 MB DEBT: I don't even remember what I am doing here.
     // Why am I returning under one path but not the other?
     template <class K, class F, class R = monostate>
-    R&& bucket_foreach(const K& key, F&& f, R&& r = monostate{}) const
+    R&& key_foreach(const K& key, F&& f, R&& r = monostate{}) const
     {
         const size_type n = bucket(key);
-        for(const_local_iterator it = begin(n); it != end(n); ++it)
+        const end_local_iterator end = cend(n);
+        for(const_local_iterator it = begin(n); it != end; ++it)
         {
             if(key_eq_c(key, *it))
             {
@@ -398,6 +400,11 @@ protected:
 
         operator LocalIt() { return cast(); }
 
+        constexpr bool is_null() const
+        {
+            return traits::is_null_not_sparse(*it_);
+        }
+
         constexpr bool is_empty() const
         {
             return parent_->is_empty(*it_);
@@ -410,7 +417,7 @@ protected:
         ESTD_CPP_CONSTEXPR(14) bool operator==(end_local_iterator it) const
         {
             // If we reach a null slot, then that's the end of probing
-            if(is_empty()) return true;
+            if(is_null()) return true;
 
             // Otherwise if we wrap around, that's also the end
             return started() && it_ == it.it_;
@@ -419,7 +426,7 @@ protected:
         ESTD_CPP_CONSTEXPR(14) bool operator!=(end_local_iterator it) const
         {
             // If we reach a null slot, then that's the end of probing
-            if(is_empty()) return false;
+            if(is_null()) return false;
 
             // If we haven't bumped forward, there's no chance of wraparound
             // so we can't be at the end
@@ -617,7 +624,18 @@ public:
     {
         unsigned counter = 0;
         // DEBT: Depends on c++17
-        bucket_foreach(x, [&](const_local_iterator) { ++counter; });
+        key_foreach(x, [&](const_local_iterator) { ++counter; });
+        return counter;
+    }
+
+    ESTD_CPP_CONSTEXPR(14) size_type bucket_size(size_type n) const
+    {
+        unsigned counter = 0;
+        const end_local_iterator end = cend(n);
+
+        for(const_local_iterator it = begin(n); it != end; ++it)
+            ++counter;
+
         return counter;
     }
 

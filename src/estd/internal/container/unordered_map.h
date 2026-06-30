@@ -376,17 +376,6 @@ public:
         return insert({k, std::forward<M>(obj)});
     }
 
-    // NOTE: This works, but you'd prefer to avoid it and iterate yourself directly
-    ESTD_CPP_CONSTEXPR(14) size_type bucket_size(size_type n) const
-    {
-        unsigned counter = 0;
-
-        for(const_local_iterator it = begin(n); it != end(n); ++it)
-            ++counter;
-
-        return counter;
-    }
-
     iterator gc_active(iterator pos)
     {
         return { this, (pointer) gc_active_ll(cast_control(estd::addressof(*pos))) };
