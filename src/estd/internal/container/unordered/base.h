@@ -598,6 +598,24 @@ protected:
         return { container_.end(), np };
     }
 
+    void erase_and_gc_ll_new(control_pointer pos)
+    {
+        auto start = pos;
+
+        destruct(pos);  // destroy active value + null out key = pos is now empty
+
+        // TODO:
+        // 1. Move forward to first ctl_ptr with matching hash bucket, and move that to this slot
+        // 2. Keep moving forward and bump remaining ctl_ptrs back one
+        // Remember we don't yet have easy access to GC marking (since we're base) so crude is better here
+
+        bump(pos);
+
+        for(; pos != start && !traits::is_null_not_sparse(*pos); bump(pos))
+        {
+        }
+    }
+
     // deviates from std in that other iterators part of this bucket could be invalidated
     void erase_and_gc_ll(control_pointer pos)
     {
