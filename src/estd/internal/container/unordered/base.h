@@ -178,11 +178,14 @@ protected:
 
     using insert_result = pair<control_pointer, bool>;
 
+    // 13JUN26 MB Keeping around as a curiousity.  Observe how datapath changes depending on presence of
+    // return type.  I recall now that was a novel feature:
+    // 1. F w/ return type = one-shot, find first key match and return a app-specific value
+    // 2. F w/o return type = general foreach across matching key space
+    // Actual practical use case of condition 1 slips my mind and perhaps was never fully identified
+#if OBSOLETE
     // In fact, works for find too but it seems to make things more complicated,
     // not more tidy
-    // DEBT: Given above and also the c++17 requirement, not decided if we're gonna keep him
-    // 18JUN26 MB DEBT: I don't even remember what I am doing here.
-    // Why am I returning under one path but not the other?
     template <class K, class F, class R = monostate>
     R&& key_foreach(const K& key, F&& f, R&& r = monostate{}) const
     {
@@ -202,6 +205,7 @@ protected:
 
         return std::forward<R>(r);
     }
+#endif
 
     ///
     /// @brief key_eq_c do key_eq on lhs key and rhs control_type
@@ -608,8 +612,11 @@ protected:
         if (base_type::is_empty(*pos))
             return;
 
+        // FIX: Needs wraparound treatment
+
         // Quick-deduce our bucket#
         size_type n = start - container_.cbegin();
+
         // Find last one in bucket
         for(;n == index(traits::key(*pos)) && pos < container_.cend(); ++pos) {}
         // Decrement to position on actual last one in bucket
@@ -618,24 +625,31 @@ protected:
         traits::swap(*pos, *start);
     }
 
+    template <class F, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) void bucket_foreach(size_type n, F&& f, Args&&...args) const
+    {
+        const end_local_iterator end = cend(n);
+
+        for(const_local_iterator it = begin(n); it != end; ++it)
+            f(it, std::forward<Args>(args)...);
+    }
+
 public:
     template <class K>
-    size_type count(const K& x) const
+    ESTD_CPP_CONSTEXPR(14) size_type count(const K& x) const
     {
         unsigned counter = 0;
-        // DEBT: Depends on c++17
-        key_foreach(x, [&](const_local_iterator) { ++counter; });
+        bucket_foreach(bucket(x), [&](const_local_iterator it)
+        {
+            if(key_eq_c(x, *it))   ++counter;
+        });
         return counter;
     }
 
     ESTD_CPP_CONSTEXPR(14) size_type bucket_size(size_type n) const
     {
         unsigned counter = 0;
-        const end_local_iterator end = cend(n);
-
-        for(const_local_iterator it = begin(n); it != end; ++it)
-            ++counter;
-
+        bucket_foreach(n, [&](const_local_iterator) { ++counter; });
         return counter;
     }
 
