@@ -127,7 +127,7 @@ def main():
     if desc.startswith("v"):
         desc = desc[1:]
 
-    core, suffix, word = sv.split(desc)
+    core, prerelease, suffix = sv.split(desc)
 
     #emit_cmake_helper(core, word, sys.stdout)
 
@@ -153,8 +153,8 @@ def main():
         GIT_TAG_SEMVER_MAJOR=semver[0],
         GIT_TAG_SEMVER_MINOR=semver[1],
         GIT_TAG_SEMVER_PATCH=semver[2],
-        GIT_TAG_SEMVER_PRERELEASE=suffix,
-        GIT_TAG_SEMVER_IDENTIFIER=word,
+        GIT_TAG_SEMVER_SUFFIX=suffix,
+        GIT_TAG_SEMVER_IDENTIFIER=f"{prerelease[0]}{prerelease[1]}",
         GIT_DESCRIBED=desc,
         GIT_HASH="abc123",
     )
