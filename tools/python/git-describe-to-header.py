@@ -13,6 +13,7 @@ script_version = "0.0.0"
 
 import argparse
 import datetime as dt
+import estd
 import git
 import logging
 import re
@@ -82,28 +83,6 @@ def emit_cmake_helper(core: str, word: str, ostream: TextIO) -> None:
     ostream.write(f'GIT_TAG_SEMVER_IDENTIFIER={word}\n')
 
 
-def configure_logging(verbosity: int, timestamps: bool) -> None:
-    levels = [
-        logging.WARNING,
-        logging.INFO,
-        logging.DEBUG,
-    ]
-
-    level = levels[min(verbosity, len(levels) - 1)]
-
-    if timestamps:
-        log_format = "%(asctime)s %(levelname)s %(message)s"
-        date_format = "%Y-%m-%dT%H:%M:%S%z"
-    else:
-        log_format = "%(levelname)s %(message)s"
-        date_format = None
-
-    logging.basicConfig(
-        level=level,
-        format=log_format,
-        datefmt=date_format
-    )
-
 def main():
     # 06JUN26 MB - TODO: Beef up argument parsing so we can do things like:
     # 1. Specify stdin vs file for input template
@@ -111,7 +90,7 @@ def main():
     # 3. Emit other forms of git describe breakdown such as cmake or env flavors
     args = parser.parse_args()
 
-    configure_logging(args.verbose, args.timestamps)
+    estd.logging.configure(args.verbose, args.timestamps)
 
     logging.info("git-describe-to-header v%s", script_version)
 
@@ -120,12 +99,14 @@ def main():
 
     desc = git.describe(dirty=True)
 
-    semver = sv.parse(desc)
-    #print(semver)
-
     # Remove leading 'v' only (convention, not semantic)
     if desc.startswith("v"):
         desc = desc[1:]
+    else:
+        logging.warning("Expected prepending 'v' on %s", desc)
+
+    semver = sv.parse(desc)
+    logging.debug("semver: %s", semver)
 
     core, prerelease, suffix = sv.split(desc)
 

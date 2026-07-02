@@ -4,7 +4,9 @@ Part of https://github.com/malachi-iot/estdlib and subject to its APACHE license
 
 import re
 
-regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
+# 'v' prefix is not standard semver - you have to strip that yourself
+#regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
+regex=r"^([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
 
 def parse(desc: str):
     return re.findall(regex, desc)[0]
