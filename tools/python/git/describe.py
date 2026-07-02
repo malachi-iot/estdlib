@@ -10,11 +10,20 @@ Emit git describe parts
 import logging
 import subprocess
 import sys
+from typing import Optional
 
-def describe():
+def describe(abbrev: Optional[int] = None, dirty: bool = False) -> str:
+    cmd = ["git", "describe", "--tags", "--long"]
+
+    if abbrev is not None:
+        cmd.append(f"--abbrev={abbrev}")
+
+    if dirty:
+        cmd.append("--dirty")
+
     try:
         result = subprocess.run(
-            ["git", "describe", "--tags", "--long", "--dirty"],
+            cmd,
             capture_output=True,
             text=True,
             check=True,

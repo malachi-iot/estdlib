@@ -118,7 +118,7 @@ def main():
     project_name = args.project_name
     infile = args.template_file
 
-    desc = git.describe()
+    desc = git.describe(dirty=True)
 
     semver = sv.parse(desc)
     #print(semver)
