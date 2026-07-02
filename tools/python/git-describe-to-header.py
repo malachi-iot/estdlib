@@ -2,32 +2,39 @@
 # -*- coding: utf-8 -*-
 
 """
+Part of https://github.com/malachi-iot/estdlib and subject to its APACHE license
+
 Emit git describe parts in c++ header file format
 Usage:
 git-describe-to-header [project_name] [template-file]
 """
 
-#!/usr/bin/env python3
+script_version = "0.0.0"
 
 import argparse
 import datetime as dt
+import git
 import logging
 import re
+import semver as sv
 import subprocess
 import sys
 
-import git_describe
-
+from pathlib import Path
 from typing import TextIO
 
-script_version = "0.0.0"
+script_dir = Path(__file__).resolve().parent
+root_dir = script_dir.parent.parent
 
 parser = argparse.ArgumentParser(
     description="git-describe C++ header repackager"
 )
 
 parser.add_argument('project_name', help="Name of project (#define prefix)");
-parser.add_argument('template_file', help="Name of input .h template file");
+parser.add_argument('template_file',
+    # Neat idea, but positional arguments naturally don't want to have defaults
+    #default=root_dir / "tools" / "cmake" / "in" / "git-version.in.h",
+    help="Name of input .h template file");
 
 parser.add_argument(
     "--version",
@@ -70,20 +77,6 @@ parser.add_argument(
 
 from string import Template
 
-def split_semver(desc: str):
-    # Find first "-" after semantic version prefix
-    # We assume SemVer core is always x.y.z
-    parts = desc.split("-", 1)
-
-    if len(parts) == 1:
-        suffix = ""
-        word = ""
-    else:
-        suffix = parts[1]
-        word = suffix.split("-", 1)[0]
-
-    return parts[0], suffix, word
-
 def emit_cmake_helper(core: str, word: str, ostream: TextIO) -> None:
     ostream.write(f'GIT_TAG_SEMVER={core}\n')
     ostream.write(f'GIT_TAG_SEMVER_IDENTIFIER={word}\n')
@@ -125,16 +118,16 @@ def main():
     project_name = args.project_name
     infile = args.template_file
 
-    desc = git_describe.run_git_describe()
+    desc = git.describe()
 
-    semver = re.findall(git_describe.regex, desc)[0]
+    semver = sv.parse(desc)
     #print(semver)
 
     # Remove leading 'v' only (convention, not semantic)
     if desc.startswith("v"):
         desc = desc[1:]
 
-    core, suffix, word = split_semver(desc)
+    core, suffix, word = sv.split(desc)
 
     #emit_cmake_helper(core, word, sys.stdout)
 

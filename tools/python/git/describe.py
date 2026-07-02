@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
+Part of https://github.com/malachi-iot/estdlib and subject to its APACHE license
+
 Emit git describe parts
 """
 
@@ -9,9 +11,7 @@ import logging
 import subprocess
 import sys
 
-regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
-
-def run_git_describe():
+def describe():
     try:
         result = subprocess.run(
             ["git", "describe", "--tags", "--long", "--dirty"],
