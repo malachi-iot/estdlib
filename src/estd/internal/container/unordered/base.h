@@ -100,10 +100,20 @@ protected:
         return reinterpret_cast<const_pointer>(p);
     }
 
+    static control_pointer cast_control(pointer pos)
+    {
+        return reinterpret_cast<control_pointer>(pos);
+    }
+
+    static const_control_pointer cast_control(const_pointer pos)
+    {
+        return reinterpret_cast<const_control_pointer>(pos);
+    }
+
     // 'It' must be control_pointer or const_control_pointer
     // DEBT: Get rid of 'It2'
     template <class It, class It2>
-    static ESTD_CPP_CONSTEXPR(14) It skip_empty(It it, It2 end)
+    static ESTD_CPP_CONSTEXPR(14) It skip_empty_old(It it, It2 end)
     {
         // FIX: Needs wraparound treatment
         for(; traits::is_empty(*it) && it != end; ++it)   {}
@@ -114,14 +124,20 @@ protected:
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_empty(It it) const
     {
-        return skip_empty(it, cast(container_.cend()));
+        return skip_empty_old(it, cast(container_.cend()));
+        //return foreach(it, [](const auto& c) { return traits::is_empty(c); });
     }
 
     template <class Control>
     ESTD_CPP_CONSTEXPR(14) Control skip_sparse(Control p, unsigned n) const
     {
+        // NOTE: At the moment, 'p' always represents container + n
         // FIX: Needs wraparound treatment
-        for(; traits::is_sparse(*p, n) && p != container_.cend(); ++p)    {}
+        //for(; traits::is_sparse(*p, n) && p != container_.cend(); ++p)    {}
+        for(Control start = p; traits::is_sparse(*p, n);)
+        {
+            if((p = bump(p)) == start) return nullptr;
+        }
 
         return p;
     }
@@ -555,6 +571,17 @@ protected:
         }
     };
 
+    // Wraparound linear probe accomodation
+    constexpr control_pointer bump(control_pointer i)
+    {
+        return ++i == container_.cend() ? container_.begin() : i;
+    }
+
+    constexpr const_control_pointer bump(const_control_pointer i) const
+    {
+        return ++i == container_.cend() ? container_.cbegin() : i;
+    }
+
     // represents invalid bucket
     // pointer and bucket
     template <class Pointer>
@@ -641,6 +668,18 @@ protected:
         --pos;
 
         traits::swap(*pos, *start);
+    }
+
+    // EXPERIMENTAL
+    template <class It, class F, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) It foreach(It it, F&& f, Args&&...args) const
+    {
+        for(It begin = it; f(*it);)
+        {
+            if((it = bump(it)) == begin) return nullptr;
+        }
+
+        return it;
     }
 
     template <class F, class ...Args>

@@ -100,7 +100,7 @@ struct unordered_map_traits_control
             // 1. prune_sparse_ll
             // 2. gc_active_ll
             // That said, 'skip_sparse' gets some real mileage out of it
-            uint16_t bucket : 6;
+            //uint16_t bucket : 6;
         };
 
         uint16_t raw;
@@ -173,7 +173,8 @@ struct unordered_map_traits :
     {
         return is_empty(v) &&
             v.second.marked_for_gc &&
-            v.second.bucket == n;
+            true;
+            //v.second.bucket == n;
     }
 
     template <class K, class T2>

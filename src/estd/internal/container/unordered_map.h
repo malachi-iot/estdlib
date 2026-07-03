@@ -40,6 +40,8 @@ public:
     using typename base_type::insert_result;
 
 public:
+    using base_type::bump;
+    using base_type::cast_control;
     using base_type::is_null_not_sparse;
     using base_type::is_empty;
     using base_type::find_ll;
@@ -66,16 +68,6 @@ public:
 private:
     // pointer and control_pointer overlap.  See unordered_base for breakdown
 
-    static control_pointer cast_control(pointer pos)
-    {
-        return reinterpret_cast<control_pointer>(pos);
-    }
-
-    static const_control_pointer cast_control(const_pointer pos)
-    {
-        return reinterpret_cast<const_control_pointer>(pos);
-    }
-
 public:
     using typename base_type::iterator;
     using typename base_type::const_iterator;
@@ -98,17 +90,6 @@ private:
         return { { this, (pointer)r.first }, r.second };
     }
 
-    // Wraparound linear probe accomodation
-    constexpr control_pointer bump(control_pointer i)
-    {
-        return ++i == container_.cend() ? container_.begin() : i;
-    }
-
-    constexpr const_control_pointer bump(const_control_pointer i) const
-    {
-        return ++i == container_.cend() ? container_.cbegin() : i;
-    }
-
     /// perform garbage collection on the bucket containing this active pos, namely moving
     /// pos to first empty slot starting from 'begin' in bucket.
     /// @param pos entry to possibly move
@@ -116,8 +97,12 @@ private:
     /// @param n bucket of interest.  Must be bucket in which 'pos' resides
     /// @returns potentially moved 'pos'
     /// @remarks we pass in 'n' as an optimimzation to avoid double-calculating hash
-    control_pointer gc_active_ll(control_pointer pos, control_pointer begin, const size_type n)
+    control_pointer gc_active_ll(
+        control_pointer pos,
+        control_pointer begin, const size_type n)
     {
+        const_control_pointer begin_n = container_.cbegin() + n;
+
         assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
 
         for(control_pointer it = begin; it != pos;)
@@ -141,7 +126,7 @@ private:
                 return it;
             }
 
-            if((it = bump(it)) == begin)    return pos;
+            if((it = bump(it)) == begin_n)    return pos;
         }
 
         return pos;
@@ -430,7 +415,7 @@ public:
             // "mark and sweep" erase rather than erase (and swap) immediately in place.
             // More inline with spec, namely doesn't disrupt other iterators
             control->second.marked_for_gc = 1;
-            control->second.bucket = n;
+            //control->second.bucket = n;
         }
     }
 
