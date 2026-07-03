@@ -124,22 +124,38 @@ protected:
     template <class It>
     ESTD_CPP_CONSTEXPR(14) It skip_empty(It it) const
     {
+        /*
+        It p = it;
+        for(It start = p; traits::is_empty(*p);)
+        {
+            if((p = bump(p)) == start) return (It) container_.cend();
+        }
+
+        return p;   */
         return skip_empty_old(it, cast(container_.cend()));
         //return foreach(it, [](const auto& c) { return traits::is_empty(c); });
+    }
+
+    // EXPERIMENTAL
+    //template <class It>
+    ESTD_CPP_CONSTEXPR(14) pointer skip_empty_new(pointer it)
+    {
+        it = foreach(it, [](const auto& c) { return traits::is_empty(c); });
+        return it == nullptr ? cast(container_.end()) : it;
+    }
+
+    // EXPERIMENTAL
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) It skip_empty_new(It it) const
+    {
+        it = foreach(it, [](const auto& c) { return traits::is_empty(c); });
+        return it == nullptr ? cast(container_.cend()) : it;
     }
 
     template <class Control>
     ESTD_CPP_CONSTEXPR(14) Control skip_sparse(Control p, unsigned n) const
     {
-        // NOTE: At the moment, 'p' always represents container + n
-        // FIX: Needs wraparound treatment
-        //for(; traits::is_sparse(*p, n) && p != container_.cend(); ++p)    {}
-        for(Control start = p; traits::is_sparse(*p, n);)
-        {
-            if((p = bump(p)) == start) return nullptr;
-        }
-
-        return p;
+        return foreach(p, [n](const auto& c) { return traits::is_sparse(c, n); });
     }
 
 
@@ -305,14 +321,17 @@ protected:
     template <class Value, class Parent = this_type>
     class iterator_base
     {
-        using parent_type = Parent;
+        static constexpr bool is_const = estd::is_const<Value>::value;
+
+        //using parent_type = conditional_t<is_const, const Parent, Parent>;
+        using parent_type = const Parent;
         using this_type = iterator_base;
 
         // these two may or may not be const
         using value_type = Value;
         using pointer = value_type*;
 
-        const parent_type* parent_;
+        parent_type* parent_;
         pointer it_;
 
         template <class OtherIt, class Parent2>
@@ -320,7 +339,7 @@ protected:
 
     public:
         constexpr iterator_base() = default;
-        constexpr iterator_base(const parent_type* parent, pointer it) :
+        constexpr iterator_base(parent_type* parent, pointer it) :
             parent_{parent},
             it_{it}
         {}
@@ -338,6 +357,10 @@ protected:
         this_type& operator++()
         {
             ++it_;
+
+            // NOTE: At the moment this hack is necessary to call skip_empty_new - however,
+            // skip_empty_new doesn't yet work in this context anyway
+            //auto unconst_parent = (Parent*)parent_;
 
             it_ = parent_->skip_empty(it_);
 
@@ -572,15 +595,34 @@ protected:
     };
 
     // Wraparound linear probe accomodation
-    constexpr control_pointer bump(control_pointer i)
+    template <class Pointer>
+    ESTD_CPP_CONSTEXPR(17) Pointer bump(Pointer i)
     {
-        return ++i == container_.cend() ? container_.begin() : i;
+        static_assert(
+            is_same<Pointer, control_pointer>::value ||
+            is_same<Pointer, pointer>::value);
+
+        auto end = (Pointer) container_.cend();
+        auto begin = (Pointer) container_.begin();
+
+        return ++i == end ? begin : i;
     }
 
-    constexpr const_control_pointer bump(const_control_pointer i) const
+    template <class Pointer>
+    ESTD_CPP_CONSTEXPR(17) Pointer cbump(Pointer i) const
     {
-        return ++i == container_.cend() ? container_.cbegin() : i;
+        static_assert(
+            is_same<Pointer, const_control_pointer>::value ||
+            is_same<Pointer, const_pointer>::value);
+
+        auto end = (Pointer) container_.cend();
+        auto begin = (Pointer) container_.cbegin();
+
+        return ++i == end ? begin : i;
     }
+
+    template <class Pointer>
+    ESTD_CPP_CONSTEXPR(17) Pointer bump(Pointer i) const { return cbump(i); }
 
     // represents invalid bucket
     // pointer and bucket
@@ -671,8 +713,21 @@ protected:
     }
 
     // EXPERIMENTAL
+    // Wraparound foreach
     template <class It, class F, class ...Args>
     ESTD_CPP_CONSTEXPR(14) It foreach(It it, F&& f, Args&&...args) const
+    {
+        for(It begin = it; f(*it);)
+        {
+            if((it = cbump(it)) == begin) return nullptr;
+        }
+
+        return it;
+    }
+
+    // EXPERIMENTAL
+    template <class It, class F, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) It foreach(It it, F&& f, Args&&...args)
     {
         for(It begin = it; f(*it);)
         {
@@ -769,12 +824,12 @@ public:
 
     iterator begin()
     {
-        return { this, skip_empty(cast(container_.begin())) };
+        return { this, skip_empty_new(cast(container_.begin())) };
     }
 
     constexpr const_iterator begin() const
     {
-        return { this, skip_empty(cast(container_.cbegin())) };
+        return { this, skip_empty_new(cast(container_.cbegin())) };
     }
 
     // DEBT: can probably use a hard type like end_iterator (optimization) though
