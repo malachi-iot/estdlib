@@ -222,6 +222,18 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
                 //p1 = map.gc_active_ll(p1);
                 REQUIRE(map.count(2) == 0);
             }
+            SECTION("postfix ++")
+            {
+                const_iterl it = map.cbegin(bucket1);
+
+                it++;
+
+                bool r = it == map.cend(bucket1);
+
+                REQUIRE(r);
+                // FIX: Catch2 gets made at us here due to some string conversion glitch during ==
+                //REQUIRE(it == map.cend(bucket1));
+            }
         }
         SECTION("insert_or_assign")
         {

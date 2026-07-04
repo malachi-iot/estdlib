@@ -344,7 +344,7 @@ protected:
     }
 
 
-    // semi-smart, can skip null spots
+    // semi-smart, skips empty spots
     // does NOT wrap around
     template <class Value, class Parent = this_type>
     class iterator_base
@@ -425,12 +425,8 @@ protected:
         }
     };
 
-    // Iterates through all active spots in a bucket
-    // Skips null spots, omits sparse guys and ends if we go outside of bucket
-    // 20JUN26 MB: For linear probing upgrade (https://github.com/malachi-iot/estdlib/issues/211)
-    //  'outside the bucket' actually means reaching a null spot.  Also, "skips null spots"
-    //  is misleading.  We actually terminate at null spots.
-    // DEBT: Inherit from iterator_base, if we can
+    // Iterates through all occupied/active spots in a bucket
+    // Skips tombstone spots and ends if we go outside of bucket (null or wraparound)
     template <class LocalIt>
     struct local_iterator_base
     {
@@ -554,7 +550,7 @@ protected:
             // DEBT: Really obnoxious wraparound detect assist
             if(start_ == nullptr)   start_ = it_;
 
-            if(++it_ == parent_->container_.cend()) it_ = &parent_->container_[0];
+            it_ = parent_->bump(it_);
         }
 
         // return false = rolled over, total end
@@ -567,11 +563,10 @@ protected:
             // of a bucket.
             while(it_ != start_ && !traits::is_null_not_sparse(*it_))
             {
-                // Skip sparse guys - they are just placeholders to keep spots allocated for
-                // pointer stability
-                // FIX: is_sparse is more bucket-dependent than linear probing wants it to be I think.
+                // Skip tombstones - they are just placeholders to keep spots allocated for
+                // linear probe + pointer stability
                 // Falling back to is_empty since we already filtered out null meaning empty will ONLY
-                // indicate sparse
+                // indicate sparse (aka tombstone)
                 bool is_sparse = is_empty();
                 //bool is_sparse = traits::is_sparse(*it_, n_);
                 // Skip non-matching buckets as is the norm for linear probing
@@ -607,9 +602,10 @@ protected:
 
         this_type operator++(int)
         {
+            const_control_pointer it_old = it_;
             operator++();
 
-            return { n_, it_ - 1 };
+            return { parent_, n_, it_old };
         }
 
         constexpr bool operator==(const LocalIt& other) const
