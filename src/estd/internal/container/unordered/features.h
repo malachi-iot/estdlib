@@ -20,3 +20,10 @@
 #ifndef ISSUE_211_BRINGUP
 #define ISSUE_211_BRINGUP 0
 #endif
+
+// EXPERIMENTAL
+// This approach reserves one null slot so that tombstone -> null conversion
+// has a foothold in reality.  See null_slots() method for more info
+#ifndef ESTD_UNORDERED_MAP_RESERVE_SLOT_OPT
+#define ESTD_UNORDERED_MAP_RESERVE_SLOT_OPT 1
+#endif

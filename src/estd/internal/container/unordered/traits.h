@@ -89,6 +89,8 @@ struct unordered_map_traits_control
 
         struct
         {
+            // 04JUL26 MB - marked as a "tombstone" or "deleted" entry, consider changing
+            // API surface to reflect this more common terminology than "sparse"
             // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
             uint16_t marked_for_gc : 1;
             // which bucket this empty slot *used to* belong to

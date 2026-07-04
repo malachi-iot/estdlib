@@ -196,6 +196,36 @@ protected:
         return lhs == index(rhs);
     }
 
+#if ESTD_UNORDERED_MAP_RESERVE_SLOT_OPT
+    unsigned null_slots_;
+
+    // To help mitigate tombstone saturation.  Don't go below 1 null slot.  This
+    // way GC has a real marker for end of linear probing.  That way incrementally
+    // one can slowly convert tombstones to null slots again.
+    // Wraparound IS a marker to stop linear probing, but doesn't reveal a safe
+    // location to convert tombstones to null slots
+    unsigned null_slots() const
+    {
+        return null_slots_;
+    }
+#endif
+
+    // Placeholder only
+    float load_factor() const
+    {
+        // TODO: Consider using fixed point eventually if/when we move it in from embr
+        // that said, savings is probably negligible since a lot of time is already occupied
+        // just scanning things
+        return 0;
+    }
+
+    // In-place rehash.  Traditionally used when no null slots are left, or as a general
+    // optimization of occupied placement after many insert and deletes
+    void rehash_ll()
+    {
+
+    }
+
     // rehash: increasing size of a bucket
     void rehash_up()
     {
@@ -298,10 +328,7 @@ protected:
             }
 
 #if ISSUE_211_BRINGUP
-            if(++it == container_.cend())
-                it = &container_[0];
-
-            if(it == start) return null;
+            if((it = bump(it)) == start) return null;
 #else
             if(++it == container_.cend())
                 return null;
