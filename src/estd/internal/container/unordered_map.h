@@ -23,7 +23,9 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::match;
     using base_type::container_;
     using base_type::is_sparse;
-    using base_type::skip_empty;
+    //using base_type::skip_empty_old;
+    using base_type::skip_empty_new;
+    //using base_type::skip_empty;
     using base_type::cast;
     using base_type::insert_precheck;
     using traits = Traits;
@@ -437,7 +439,8 @@ public:
 
         erase_ll(p);
 
-        return { this, skip_empty(p + 1) };
+        //return { this, skip_empty_old(p + 1) };
+        return { this, skip_empty_new(bump(p)) };
     }
 
     void erase_and_gc(iterator pos)

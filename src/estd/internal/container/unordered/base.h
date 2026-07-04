@@ -122,7 +122,7 @@ protected:
     }
 
     template <class It>
-    ESTD_CPP_CONSTEXPR(14) It skip_empty(It it) const
+    ESTD_CPP_CONSTEXPR(14) It skip_empty_old(It it) const
     {
         /*
         It p = it;
@@ -318,6 +318,7 @@ protected:
 
 
     // semi-smart, can skip null spots
+    // does NOT wrap around
     template <class Value, class Parent = this_type>
     class iterator_base
     {
@@ -361,8 +362,9 @@ protected:
             // NOTE: At the moment this hack is necessary to call skip_empty_new - however,
             // skip_empty_new doesn't yet work in this context anyway
             //auto unconst_parent = (Parent*)parent_;
+            //it_ = unconst_parent->skip_empty_new(it_);
 
-            it_ = parent_->skip_empty(it_);
+            it_ = parent_->skip_empty_old(it_);
 
             return *this;
         }
