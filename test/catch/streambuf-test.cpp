@@ -177,11 +177,14 @@ TEST_CASE("streambuf")
     {
         char buf[128];
 
+        constexpr char binary_stuff[] { 0x1, (char)0xF0, (char)0xFF };      // NOLINT
+
         using sb_type = estd::detail::basic_ispanbuf<const char>;
 
         typedef typename sb_type::traits_type traits_type;
 
         sb_type sb(raw_str);
+        sb_type sb_binary(binary_stuff);
 
         SECTION("sgetn")
         {
@@ -197,6 +200,14 @@ TEST_CASE("streambuf")
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[0]));
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[1]));
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[2]));
+
+            // OK, it's char_traits<const char> which upsets it since that one's not specialized
+            int c = traits_type::to_int_type(binary_stuff[1]);
+            c = std::char_traits<char>::to_int_type(binary_stuff[1]);
+            REQUIRE(c == 0xF0);
+            // Glitch as per https://github.com/malachi-iot/estdlib/issues/220
+            REQUIRE(sb_binary.sbumpc() == binary_stuff[0]);
+            //REQUIRE(sb_binary.sbumpc() == (unsigned)binary_stuff[1]);
         }
         SECTION("pubseekoff")
         {
