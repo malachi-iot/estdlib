@@ -4,13 +4,16 @@
 
 #include "../internal/fpos.h"
 
+#if FEATURE_STD_STRING
+#include <string>
+#endif
+
+// FEATURE_STD_STRING: Does system even have std::char_traits?
+// FEATURE_ESTD_CHARTRAITS: System may have std::char_traits, but we prefer ours
+
 #ifndef FEATURE_ESTD_CHARTRAITS
 //#define FEATURE_ESTD_CHARTRAITS 1
 #endif
-
-// FEATURE_STD_STRING: Scenarios where system has no std::char_traits
-// FEATURE_ESTD_CHARTRAITS: System has std::char_traits, but we prefer ours
-#if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
 
 #include <stdint.h>
 
@@ -47,10 +50,10 @@ struct char_traits_base
         while(count--)
         {
             if(*p == ch) return p;
-            p++;
+            ++p;
         }
 
-        return NULLPTR;
+        return nullptr;
     }
 
     // DEBT: Almost certainly there are some platform-specific
@@ -83,27 +86,35 @@ struct char_traits_base
 #endif
 };
 
+// Nearly char_traits_byte.  However, when Char is uint8_t, obviously we
+// don't need to static_cast - so this is char specific
+template<class Char>
+struct char_traits_char : char_traits_base<Char, int16_t>
+{
+    constexpr static int16_t to_int_type(Char ch)
+    {
+        return static_cast<uint8_t>(ch);
+    }
+};
+
+// 19JUL26 MB DEBT: clearly we need wchar, char8, etc.
+
+
 }
 
+// Always available regardless of FEATURE_ESTD_CHARTRAITS configuration
 namespace detail {
 
 template<class Char>
 struct char_traits : internal::char_traits_base<Char, int> {};
 
-}
+template<>
+struct char_traits<char> : internal::char_traits_char<char> {};
 
-// DEBT: std spec doesn't indicate we can do this - may have to "deconst" all
-// our char_traits usages
-//template<>
-//struct char_traits<const char> : char_traits<char> {};
-
+template<>
+struct char_traits<const char> : internal::char_traits_char<const char> {};
 
 }
-#else
-#include <string>
-#endif
-
-namespace estd {
 
 #if __ADSPBLACKFIN__
 // Naughty ADI didn't make theirs compatible
@@ -113,9 +124,8 @@ struct char_traits;
 
 template <>
 struct char_traits<char> : std::char_traits {};
-#elif FEATURE_ESTD_CHARTRAITS
-template <class Char>
-using char_traits = estd::detail::char_traits<Char>;
+#elif FEATURE_ESTD_CHARTRAITS || !defined(FEATURE_STD_STRING)
+using detail::char_traits;
 #elif defined(FEATURE_STD_STRING)
 using std::char_traits;
 #else

@@ -201,9 +201,13 @@ TEST_CASE("streambuf")
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[1]));
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[2]));
 
-            // OK, it's char_traits<const char> which upsets it since that one's not specialized
-            int c = traits_type::to_int_type(binary_stuff[1]);
-            c = std::char_traits<char>::to_int_type(binary_stuff[1]);
+            // std::char_traits<const char> upsets to_int_type it since that one's not specialized,
+            // semi-corrupting binary char data
+            // therefore for ispanbuf we default to estd::detail::char_traits who DOES specialize
+            int c;
+            c = traits_type::to_int_type(binary_stuff[1]);
+            //c = detail::char_traits<const char>::to_int_type(binary_stuff[1]);
+            //c = std::char_traits<char>::to_int_type(binary_stuff[1]);
             REQUIRE(c == 0xF0);
             // Glitch as per https://github.com/malachi-iot/estdlib/issues/220
             REQUIRE(sb_binary.sbumpc() == binary_stuff[0]);
