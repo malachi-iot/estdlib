@@ -4,6 +4,10 @@
 
 #include "../internal/fpos.h"
 
+#ifndef FEATURE_ESTD_CHARTRAITS
+//#define FEATURE_ESTD_CHARTRAITS 1
+#endif
+
 // FEATURE_STD_STRING: Scenarios where system has no std::char_traits
 // FEATURE_ESTD_CHARTRAITS: System has std::char_traits, but we prefer ours
 #if !defined(FEATURE_STD_STRING) || FEATURE_ESTD_CHARTRAITS
@@ -15,13 +19,14 @@
 
 namespace estd {
 
-template<class Char>
-struct char_traits
+namespace internal {
+
+template<class Char, class Int>
+struct char_traits_base
 {
     using char_type = Char;
 
-    // DEBT: This will fall apart for sizeof(Char) >= 2
-    using int_type = int16_t;
+    using int_type = Int;
 
     // DEBT: Use fpos instead
 #if ESTD_MCU_ATMEL_AVR
@@ -32,9 +37,9 @@ struct char_traits
     using off_type = streamoff;
 
     static constexpr char_type to_char_type(int_type ch) { return ch; }
-    static constexpr int_type to_int_type(const char ch) { return ch; }
+    static constexpr int_type to_int_type(char_type ch) { return ch; }
     static constexpr int_type eof() { return -1; }
-    static constexpr bool eq(char c1, char c2) { return c1 == c2; }
+    static constexpr bool eq(char_type c1, char_type c2) { return c1 == c2; }
     static constexpr bool not_eof(int_type v) { return v != -1; }
 
     static const char_type* find(const char_type* p, size_t count, const char_type& ch)
@@ -78,6 +83,15 @@ struct char_traits
 #endif
 };
 
+}
+
+namespace detail {
+
+template<class Char>
+struct char_traits : internal::char_traits_base<Char, int> {};
+
+}
+
 // DEBT: std spec doesn't indicate we can do this - may have to "deconst" all
 // our char_traits usages
 //template<>
@@ -99,8 +113,13 @@ struct char_traits;
 
 template <>
 struct char_traits<char> : std::char_traits {};
-#elif defined(FEATURE_STD_STRING) && FEATURE_ESTD_CHARTRAITS == 0
+#elif FEATURE_ESTD_CHARTRAITS
+template <class Char>
+using char_traits = estd::detail::char_traits<Char>;
+#elif defined(FEATURE_STD_STRING)
 using std::char_traits;
+#else
+#error "Couldn't resolve char_traits"
 #endif
 
 }
