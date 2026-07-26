@@ -149,10 +149,9 @@ TEST_CASE("ostream")
                 REQUIRE(s[0] == ' ');
             }
         }
-        SECTION("int (hex)")
+        SECTION("int (hex) + uppercase")
         {
-            out.setf(ios_base::uppercase);
-            out << hex;
+            out << uppercase << hex;
 
             const auto& s = out.rdbuf()->str();
 
@@ -190,6 +189,12 @@ TEST_CASE("ostream")
                 // ... "Overloads of basic_ostream::operator<<() that take arithmetic type"
                 // https://en.cppreference.com/w/cpp/io/manip/setw#Notes
                 REQUIRE(s == "0F:F");
+            }
+            SECTION("clear uppercase")
+            {
+                out << nouppercase << 12;
+
+                REQUIRE(s[0] == 'c');
             }
         }
         SECTION("clock style")

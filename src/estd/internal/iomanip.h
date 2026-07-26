@@ -23,14 +23,30 @@ struct setw
 
 }
 
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& endl(
-    detail::basic_ostream<TStreambuf, TBase>& os)
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& endl(
+    detail::basic_ostream<Streambuf, Base>& os)
 {
     // uses specialized call to bypass sentry so that we don't needlessly check
     // unitbuf and potentially double-flush
     os.put(os.widen('\n'), true);
     os.flush();
+    return os;
+}
+
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& uppercase(
+    detail::basic_ostream<Streambuf, Base>& os)
+{
+    os.setf(os.uppercase);
+    return os;
+}
+
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& nouppercase(
+    detail::basic_ostream<Streambuf, Base>& os)
+{
+    os.unsetf(os.uppercase);
     return os;
 }
 
@@ -52,18 +68,21 @@ inline detail::basic_ostream<TStreambuf, TBase>& noshowbase(
     return os;
 }
 
-
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& left(
-    detail::basic_ostream<TStreambuf, TBase>& os)
+// 26JUL26 MB DEBT: MAY work, but untested
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& left(
+    detail::basic_ostream<Streambuf, Base>& os)
 {
+    os.setf(os.left);
     return os;
 }
 
-template <class TStreambuf, class TBase>
-inline detail::basic_ostream<TStreambuf, TBase>& right(
-    detail::basic_ostream<TStreambuf, TBase>& os)
+// 26JUL26 MB DEBT: MAY work, but untested
+template <class Streambuf, class Base>
+inline detail::basic_ostream<Streambuf, Base>& right(
+    detail::basic_ostream<Streambuf, Base>& os)
 {
+    os.setf(os.right);
     return os;
 }
 
