@@ -15,11 +15,12 @@
 * Cleanup of `flags` conversion operators, LLVM compatibility
 * https://github.com/malachi-iot/estdlib/issues/127 general internal container scrubbing
 * https://github.com/malachi-iot/estdlib/issues/206 `expected` assignment operator fix
-* TBD: unordered one-past-end insert detect glitch
 
 ## Known Issues and Limitations
 
 * `expected` comparison operators present but a bit anemic
+* `unordered_map` has significant issues and is not fit for use.  A rework is underway.
+  See #211 and #217
 
 # v0.8.11 - 10APR26
 
