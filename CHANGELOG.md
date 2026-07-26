@@ -20,7 +20,8 @@
 
 * `expected` comparison operators present but a bit anemic
 * `unordered_map` has significant issues and is not fit for use.  A rework is underway.
-  See #211 and #217
+  See https://github.com/malachi-iot/estdlib/issues/211 and
+   https://github.com/malachi-iot/estdlib/issues/217
 
 # v0.8.11 - 10APR26
 
