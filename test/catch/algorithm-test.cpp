@@ -26,6 +26,14 @@ TEST_CASE("algorithm tests")
 {
     //test_class_1 tc1;
 
+    SECTION("equal")
+    {
+        static constexpr int values1[] = { 0, 2, 4, 6 };
+        static constexpr int values2[] = { 0, 2, 4, 7 };
+
+        REQUIRE(equal(values1, values1 + 4, values1, values1 + 4));
+        REQUIRE(!equal(values1, values1 + 4, values2));
+    }
     SECTION("find")
     {
         static constexpr int values[] = { 0, 2, 4, 6 };
