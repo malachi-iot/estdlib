@@ -308,9 +308,24 @@ TEST_CASE("ostream")
             out.seekp(0);
             out.put(4);
 
+            REQUIRE(out.good());
+
             // DEBT: Use Catch2 proper array compares
             REQUIRE(buf[0] == 4);
             REQUIRE(buf[1] == test1[1]);
+
+            out.seekp(-1, ios_base::cur);
+
+            REQUIRE(out.good());
+
+            out.put(5);
+
+            REQUIRE(buf[0] == 5);
+
+            out.seekp(1);
+            out.put(6);
+
+            REQUIRE(buf[1] == 6);
         }
     }
 }
