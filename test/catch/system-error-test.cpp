@@ -4,16 +4,24 @@
 
 #include "macro/push.h"
 
+using namespace estd;
+
 TEST_CASE("system_error tests")
 {
     SECTION("errc")
     {
-        estd::errc error(estd::errc::invalid_argument);
+        errc error(estd::errc::invalid_argument);
 
         REQUIRE(error == errc::invalid_argument);
         REQUIRE(error != errc::result_out_of_range);
 
         REQUIRE(error == estd::errc(EINVAL));
+    }
+    SECTION("error_code")
+    {
+        string_view s = estd::make_error_code(errc::invalid_argument).message();
+
+        REQUIRE(s == "invalid_argument");
     }
 }
 

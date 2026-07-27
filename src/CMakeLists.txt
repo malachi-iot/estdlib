@@ -19,6 +19,7 @@ set(SOURCE_FILES ${SOURCE_FILES}
     port/posix/streambuf.cpp
     )
 
+# DEBT: Rework this as per https://github.com/malachi-iot/estdlib/issues/225
 list(TRANSFORM SOURCE_FILES PREPEND estd/)
 
 

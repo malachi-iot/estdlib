@@ -93,6 +93,7 @@ else()
         streambuf-test.cpp
         string-test.cpp
         string-view-test.cpp
+        system-error-test.cpp
         ratio-test.cpp
         rtto-test.cpp
         test-data.h
