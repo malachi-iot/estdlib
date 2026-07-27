@@ -8,6 +8,7 @@
 * https://github.com/malachi-iot/estdlib/issues/192 strings now have begin/end constructor
 * https://github.com/malachi-iot/estdlib/issues/199 abs, min, max cleanup
 * https://github.com/malachi-iot/estdlib/issues/201 aliased/added `errc` codes
+* https://github.com/malachi-iot/estdlib/issues/207 make_error_code now usable for to_string style operations on errc
 
 ## Quality Updates & Bug Fixes
 
@@ -23,6 +24,7 @@
   See https://github.com/malachi-iot/estdlib/issues/211 and
    https://github.com/malachi-iot/estdlib/issues/217
 * https://github.com/malachi-iot/estdlib/issues/192 from above has breaking change, layer3::string loses a constructor.  See associated PR for details
+* https://github.com/malachi-iot/estdlib/issues/207 largely internal API as I familiarize myself with std::error_code
 
 # v0.8.11 - 10APR26
 
