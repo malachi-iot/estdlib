@@ -19,8 +19,8 @@ struct is_error_condition_enum;
 
 namespace internal {
 
-struct system_category_tag {};
-struct generic_category_tag {};
+struct system_category_tag {};  // platform-specific, more or less
+struct generic_category_tag {}; // portable, more or less
 
 template <class ErrorCodeEnum>
 struct error_traits
@@ -41,6 +41,13 @@ constexpr int error_traits<errc>::map_to<system_category_tag>(value_type v)
     return int(v);
 }
 
+template <>
+template <>
+constexpr int error_traits<errc>::map_to<generic_category_tag>(value_type v)
+{
+    return int(v);
+}
+
 using system_error_traits = error_traits<errc>;
 
 template <class ErrorTraits, class CategoryTag = generic_category_tag>
@@ -54,18 +61,18 @@ class error_category
 {
 public:
     using traits = ErrorTraits;
-    using condition_type = error_condition<ErrorTraits, generic_category_tag>;
+    using value_type = typename traits::value_type;
 
     static constexpr string_view message(int condition)
     {
-        using value_type = typename traits::value_type;
-
         return traits::template to_string<CategoryTag>(static_cast<value_type>(condition));
     }
 
-    static constexpr condition_type default_error_condition(int val)
+    // 27JUL26 MB FIX: This still just doesn't line up with std flavor's philosophy
+    template <class CategoryTag2 = generic_category_tag>
+    static constexpr error_condition<ErrorTraits, CategoryTag2> default_error_condition(int val)
     {
-        return { int(traits::template map_to<CategoryTag>(val)) };
+        return { int(traits::template map_to<CategoryTag2>(static_cast<value_type>(val))) };
     }
 };
 
@@ -86,6 +93,8 @@ public:
     {
         return category().message(ec_);
     }
+
+    constexpr int value() const noexcept { return ec_; }
 };
 
 // "holds a platform-independent value identifying an error condition"
@@ -111,9 +120,10 @@ public:
 
     constexpr error_code(value_type ec) : base_type{static_cast<int>(ec)}   {}
 
-    constexpr typename category_type::condition_type default_error_condition() const
+    template <class CategoryTag2 = generic_category_tag>
+    constexpr error_condition<ErrorTraits, CategoryTag2> default_error_condition() const
     {
-        return base_type::category().default_error_condition(base_type::ec_);
+        return base_type::category().template default_error_condition<CategoryTag2>(base_type::ec_);
     }
 };
 

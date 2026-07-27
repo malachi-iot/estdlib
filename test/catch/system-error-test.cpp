@@ -22,6 +22,19 @@ TEST_CASE("system_error tests")
         string_view s = estd::make_error_code(errc::invalid_argument).message();
 
         REQUIRE(s == "invalid_argument");
+
+        REQUIRE(
+            estd::make_error_code(errc::invalid_argument).default_error_condition().value() ==
+            EINVAL);
+
+        REQUIRE(
+            estd::make_error_code(errc::invalid_argument).value() ==
+            EINVAL);
+
+        REQUIRE(
+            estd::make_error_condition(errc::invalid_argument).value() ==
+            EINVAL);
+
     }
 }
 
