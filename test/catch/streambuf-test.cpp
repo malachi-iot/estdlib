@@ -270,6 +270,30 @@ TEST_CASE("streambuf")
                 REQUIRE(pos == 1);
                 REQUIRE(layer2::const_string(sb1.gptr()) == "i2u");
             }
+            SECTION("pbase, pptr")
+            {
+                // Doing pptr ops on a stringbuf takes precision.  You'll
+                // need to manually indicate what your new desired size is
+                char* pbase = sb1.pbase();
+                char* pptr = sb1.pptr();
+
+                REQUIRE(pptr < sb1.egptr());
+
+                estd::string_view v(pbase, pptr);
+
+                REQUIRE(v == "hi2u");
+
+                // A pbump would be kind of interesting too, but arguably a poor fit
+                // for string (a much more low level resize interaction may be required
+                // for that)
+                sb1.resize(5);
+
+                *pptr = '!';
+
+                v = { pbase, sb1.pptr() };
+
+                REQUIRE(v == "hi2u!");
+            }
         }
         SECTION("layer2")
         {

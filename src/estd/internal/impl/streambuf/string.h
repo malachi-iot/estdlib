@@ -36,9 +36,11 @@ struct out_stringbuf : stringbuf_base<String>
 
     streamsize xsputn(const char_type* s, streamsize count)
     {
-        // FIX: normal strings throw an exception if we exceed internal
-        // buffer size, but here we should instead have an optional error
-        // facility
+        int remaining_free = str_.max_size() - str_.size();
+        if(count > remaining_free)  count = remaining_free;
+        // DEBT: normal strings throw an exception if we exceed internal
+        // buffer size.  'append' just asserts, thus the extra check above.
+        // ideally we'd have an augmented append to also choose an estd::expected result
         str_.append(s, count);
         return count;
     }
@@ -49,9 +51,15 @@ struct out_stringbuf : stringbuf_base<String>
         return traits_type::to_int_type(ch);
     }
 
+    char_type* pbase() { return str_.data(); }
+    char_type* pptr() { return str_.data() + str_.size(); }
+    char_type* egptr() { return str_.data() + str_.max_size(); }
+
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
     constexpr const string_type& str() const { return str_; }
+
+    void resize(unsigned sz) { str_.resize(sz); }
 
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {

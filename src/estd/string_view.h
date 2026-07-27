@@ -19,6 +19,7 @@ class basic_string_view :
 
     // DEBT: InitParam works, but are probably better served by something like
     // in_place_t.  InitParam was done to get around lack of variadic forwarding
+    // https://github.com/malachi-iot/estdlib/issues/223
     typedef typename allocator_type::InitParam init_param_t;
 
 public:
@@ -40,6 +41,12 @@ public:
 
     constexpr basic_string_view(const_pointer s, size_type count) :
         base_type(init_param_t(s, count))
+    {
+
+    }
+
+    constexpr basic_string_view(const_pointer begin, const_pointer end) :
+        base_type(init_param_t(begin, end - begin))
     {
 
     }
