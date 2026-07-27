@@ -11,8 +11,21 @@ TEST_CASE("iterator")
         // - better const awareness
         // -- maybe a specialization replacing layer3::const_string into layer3::basic_string<const char>
         //estd::layer3::stringbuf in("hello");
+        using streambuf_legacy_type = estd::layer3::stringbuf;
+        /*
+         * Almost, but something about the init_t/InitParam chain gets confused
+         * when const char is used here.  Noting that in https://github.com/malachi-iot/estdlib/issues/223
+        using streambuf_good_type = // NOLINT
+            estd::layer3::basic_stringbuf<
+                const char, false,
+                estd::detail::char_traits<const char>>;
+        using streambuf_type = streambuf_good_type; */
+        using streambuf_type = streambuf_legacy_type;
         estd::layer3::stringbuf::size_type sz = 11;
-        estd::layer3::stringbuf in((char*)"hello world", sz, sz);
+        const char* s = "hello world";
+        // FIX: Relating to the FIX above, clearly don't be casting away const here
+        streambuf_type in((char*)s, (char*)s + sz, sz);
+        //streambuf_type in(s, s + sz, sz);
 
         SECTION("end-of-stream")
         {
@@ -22,7 +35,7 @@ TEST_CASE("iterator")
         }
         SECTION("misc stringbuf")
         {
-            estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in);
+            estd::istreambuf_iterator<streambuf_type> it(&in);
 
             SECTION("characters")
             {
@@ -41,7 +54,7 @@ TEST_CASE("iterator")
 
                 SECTION("prefix")
                 {
-                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                    estd::istreambuf_iterator<streambuf_type> it(&in), end;
 
                     for (i = sz; i > 0; --i, ++it);
 
@@ -49,7 +62,7 @@ TEST_CASE("iterator")
                 }
                 SECTION("postfix")
                 {
-                    estd::istreambuf_iterator<estd::layer3::stringbuf> it(&in), end;
+                    estd::istreambuf_iterator<streambuf_type> it(&in), end;
 
                     for (i = sz; i > 0; i--, it++);
 

@@ -66,8 +66,19 @@ public:
         base_t::impl().size(initial_size);
     }
 
+    /*
+     * 26JUL26 MB - Disabling this perfectly functional constructor.  Reason being
+     * buffer_size really ought to have come first.  So, use the new below
+     * basic_string(start, end) as a workaround.  I may just sunset this guy forever,
+     * it's easy to get confused with those two size parameters.
     basic_string(CharT* buffer, size_type initial_size, size_type buffer_size) :
         base_t(init_t(buffer, buffer_size))
+    {
+        base_t::impl().size(initial_size);
+    }   */
+
+    basic_string(CharT* start, CharT* end, size_type initial_size) :
+        base_t(init_t(start, start - end))
     {
         base_t::impl().size(initial_size);
     }
