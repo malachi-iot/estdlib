@@ -5,7 +5,7 @@
 * https://github.com/malachi-iot/estdlib/issues/181 `uninitialized_move` and friends
 * https://github.com/malachi-iot/estdlib/issues/187 added `find`
 * https://github.com/malachi-iot/estdlib/issues/191 added string lexical compare operators
-* https://github.com/malachi-iot/estdlib/issues/192 partial: layer1 implementation for begin/end constructor
+* https://github.com/malachi-iot/estdlib/issues/192 strings now have begin/end constructor
 * https://github.com/malachi-iot/estdlib/issues/199 abs, min, max cleanup
 * https://github.com/malachi-iot/estdlib/issues/201 aliased/added `errc` codes
 
@@ -22,6 +22,7 @@
 * `unordered_map` has significant issues and is not fit for use.  A rework is underway.
   See https://github.com/malachi-iot/estdlib/issues/211 and
    https://github.com/malachi-iot/estdlib/issues/217
+* https://github.com/malachi-iot/estdlib/issues/192 from above has breaking change, layer3::string loses a constructor.  See associated PR for details
 
 # v0.8.11 - 10APR26
 
