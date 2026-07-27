@@ -5,7 +5,8 @@ namespace estd { namespace internal {
 #define CASE(x) case errc::x: return #x;
 
 template <>
-const char* error_traits<errc>::to_condition_string(errc err)
+template <>
+const char* error_traits<errc>::to_string<system_category_tag>(errc err)
 {
     switch(err)
     {
