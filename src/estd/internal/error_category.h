@@ -42,13 +42,6 @@ using system_error_traits = error_traits<int, system_category_tag>;
 // generic_category is more or less 1:1 with errc
 using generic_error_traits = error_traits<errc, generic_category_tag>;
 
-template <>
-template <>
-constexpr int error_traits<errc, generic_category_tag>::map_to<generic_error_traits>(value_type v)
-{
-    return int(v);
-}
-
 // Crude POSIX comparisons acknowledging that errno codes and errc match in these
 // environments
 #if __unix__
@@ -61,7 +54,7 @@ constexpr int error_traits<errc, generic_category_tag>::map_to<system_error_trai
 
 template <>
 template <>
-constexpr int error_traits<errc, system_error_traits>::map_to<generic_category_tag>(value_type v)
+constexpr int error_traits<int, system_category_tag>::map_to<generic_error_traits>(value_type v)
 {
     return int(v);
 }
@@ -102,7 +95,7 @@ public:
 
     // 27JUL26 MB DEBT: This still just doesn't line up with std flavor's philosophy,
     // though we aren't far now (a subclass may do the trick... ?)
-    template <class ErrorTraits2>
+    template <class ErrorTraits2 = generic_error_traits>
     static constexpr error_condition<ErrorTraits2> default_error_condition(int val)
     {
         return map_to(in_place_type_t<ErrorTraits2>{}, val);
