@@ -57,12 +57,13 @@ public:
 
 
 // this represents traditional std::basic_streambuf implementations
-template <class TChar, class TCharTraits>
-struct basic_streambuf
+template <class Char, class CharTraits>
+struct basic_streambuf :
+    streambuf_base_policy
 {
-    typedef TChar char_type;
+    typedef Char char_type;
     // DEBT: A little clumsy.  See FEATURE_ESTD_STREAMBUF_TRAITS
-    using traits_type = typename streambuf_base<TCharTraits>::traits_type;
+    using traits_type = typename streambuf_base<CharTraits>::traits_type;
     typedef typename traits_type::int_type int_type;
 
 protected:

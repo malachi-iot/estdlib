@@ -34,6 +34,21 @@ struct out_stringbuf : stringbuf_base<String>
 
     ESTD_CPP_FORWARDING_CTOR_MEMBER(out_stringbuf, str_)
 
+#if FEATURE_ESTD_STREAMBUF_POLICY
+    struct policy : base_type::policy
+    {
+        using rfc = internal::rfc::rfc2119;
+
+        struct use
+        {
+            static constexpr rfc gptr = rfc::must_not;
+            static constexpr rfc pptr = rfc::should_not;
+            static constexpr rfc seekoff = rfc::should_not;
+            static constexpr rfc seekpos = rfc::must_not;
+        };
+    };
+#endif
+
     streamsize xsputn(const char_type* s, streamsize count)
     {
         int remaining_free = str_.max_size() - str_.size();
@@ -106,6 +121,7 @@ struct basic_stringbuf :
 
     using base_type::str_;
     using in_base_type::pos;
+    using typename base_type::policy;
 
     ESTD_CPP_FORWARDING_CTOR(basic_stringbuf)
 

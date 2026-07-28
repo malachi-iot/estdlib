@@ -27,8 +27,8 @@ namespace internal {
 // in which case 'never blocking' mode may be utilized for streambuf
 template<class Impl, class Policy>
 class streambuf :
-        public streambuf_baseline,
-        public Impl
+    public streambuf_baseline,
+    public Impl
 {
     using base_type = Impl;
     using this_type = streambuf;
@@ -39,6 +39,13 @@ public:
     using char_type = typename traits_type::char_type;
 
     using impl_type = Impl;
+    // 28JUL26 MB DEBT: Confusing policy vs policy_type.  See
+    // https://github.com/malachi-iot/estdlib/issues/219
+    // For the time being we demand incoming Policy be void to avoid confusion
+#if FEATURE_ESTD_STREAMBUF_POLICY
+    static_assert(is_void<Policy>::value);
+    using policy = typename Impl::policy;
+#endif
     using policy_type = Policy;
 
     using int_type = typename traits_type::int_type;
