@@ -51,6 +51,7 @@ These tests are all for variants of Espressif ESP32
 | 19FEB24 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.2.0   | Pass   |
 | 09DEC24 | unity    | UM FeatherS3         | ESP32S3        | v5.3.2   | Pass   |
 | 20JUL26 | unity    | UM FeatherS3         | ESP32S3        | v6.0.2   | Pass   |
+| 28JUL26 | unity    | ESP32-S31 Coreboard  | ESP32S31       | v6.1.0b  | Pass   |
 
 [^1]: Fails on `test_std_system_clock`.  Likely 18NOV23 commit repairs this
 
