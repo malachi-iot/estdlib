@@ -1,4 +1,4 @@
-# v0.8.12 - XXXXX26
+# v0.8.12 - 28JUL26
 
 ## Added Features
 
