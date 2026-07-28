@@ -15,7 +15,7 @@ static void test_ostringstream()
     // 16 bits minimum size expected
     TEST_ASSERT_GREATER_THAN(4, len);
 
-    experimental::ostringstream<32> out;
+    layer1::ostringstream<32> out;
 
     const int val1 = 123;
 

@@ -563,7 +563,7 @@ TEST_CASE("locale")
                     unsigned val;
                     ios_base::iostate err = ios_base::goodbit;
 
-                    typedef experimental::istringstream<64> istream_type;
+                    typedef layer1::istringstream<64> istream_type;
                     istream_type istream(input);
                     typedef estd::istreambuf_iterator<decltype(istream)::streambuf_type>
                         iterator_type;

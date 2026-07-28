@@ -271,7 +271,7 @@ TEST_CASE("ostream")
         char buf[128];
         estd::span<char> span(buf);
 
-        estd::detail::ospanstream out(span);
+        estd::ospanstream out(span);
 
         out << "hi2u";
 

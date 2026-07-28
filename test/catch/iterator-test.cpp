@@ -88,7 +88,7 @@ TEST_CASE("iterator")
     }
     SECTION("istream_iterator")
     {
-        estd::experimental::istringstream<32> istream;
+        estd::layer1::istringstream<32> istream;
         ESTD_CPP_ATTR_MAYBE_UNUSED
         estd::experimental::istream_iterator<unsigned, decltype(istream)> in(istream), end;
     }
@@ -116,7 +116,7 @@ TEST_CASE("iterator")
     }
     SECTION("ostream_iterator")
     {
-        estd::experimental::ostringstream<128> out;
+        estd::layer1::ostringstream<128> out;
         estd::experimental::ostream_iterator<char, decltype(out)> it{out};
 
         *it++ = 'H';

@@ -270,14 +270,8 @@ template <class Char, class Traits = estd::char_traits<Char>>
 using basic_ospanbuf = estd::detail::streambuf<
     estd::internal::impl::out_span_streambuf<Traits>>;
 
-// DEPRECATED
-using ospanbuf = basic_ospanbuf<char>;
-
 template <class Char, class Traits = estd::char_traits<Char>>
 using basic_ospanstream = basic_ostream<basic_ospanbuf<Char, Traits>>;
-
-// DEPRECATED
-using ospanstream = basic_ospanstream<char>;
 
 }
 
