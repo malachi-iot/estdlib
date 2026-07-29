@@ -35,12 +35,32 @@ def split(desc: str):
     # We assume SemVer core is always x.y.z
     parts = desc.split("-", 1)
 
+    # Incoming desc takes on a few forms, but mainly:
+    # 1. #.#.#-prerel-distance-hash-dirty
+    # 2. #.#.#-prerel-distance-hash
+    # 3. #.#.#-distance-hash-dirty
+    # 4. #.#.#-distance-hash
+
+    # We cheat a little and inspect the first token after '-' and if
+    # he's numeric, we presume it's distance meaning we're NOT a prerelease
+
     if len(parts) == 1:
         suffix = ""
         id = (None, 0)
     else:
         suffix = parts[1]
-        id = parse_prerelease(suffix.split("-", 1)[0])
+        prerelease = suffix.split('-', 1)
+        try:
+            # Finding a numeric git distance means we are full release
+            # not prerelease
+            distance = int(prerelease[0])
+            # 28JUL26 MB DEBT: "release" is stopgap, we may not have
+            # identifier of consequence when in actual release mode
+            id = "rel", "ease"
+        except ValueError:
+            # No numeric distance means alpha, beta, rc was found
+            # (hopefully)
+            id = parse_prerelease(prerelease[0])
 
     return parts[0], id, suffix
 
