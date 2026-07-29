@@ -126,6 +126,8 @@ def main():
 
     now = dt.datetime.now(dt.timezone.utc)
 
+    # TODO: Look into whether we can query branch name and embed that also,
+    # especially useful for before we even tag as prerelease
     output = template.substitute(
         # DEBT: Un-hardwire from ESTD
         PROJECT_NAME_UPPER=project_name.upper(),

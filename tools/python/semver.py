@@ -45,6 +45,8 @@ def split(desc: str):
     # he's numeric, we presume it's distance meaning we're NOT a prerelease
 
     if len(parts) == 1:
+        # 28JUL26 MB DEBT: We never actually git here due to extensive
+        # git-describe info
         suffix = ""
         id = (None, 0)
     else:
@@ -54,9 +56,9 @@ def split(desc: str):
             # Finding a numeric git distance means we are full release
             # not prerelease
             distance = int(prerelease[0])
-            # 28JUL26 MB DEBT: "release" is stopgap, we may not have
-            # identifier of consequence when in actual release mode
-            id = "rel", "ease"
+            # d# is a crude way to say no prerelease tag has been
+            # specified.  d0 means probably you are on the release commit
+            id = "d", distance
         except ValueError:
             # No numeric distance means alpha, beta, rc was found
             # (hopefully)
