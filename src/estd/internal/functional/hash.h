@@ -4,6 +4,7 @@
 #include "../fwd/functional.h"
 #include "../../cstdint.h"
 #include "../raw/type_traits.h"
+#include "../size.h"
 
 namespace estd {
 
@@ -185,12 +186,19 @@ struct integral_hash
 template <typename Precision = uint32_t>
 struct container_hash
 {
+    using hasher = fnv_hash<Precision>;
+
     // TODO: Put a 'concept' in here.  Not quite debt since this is 'internal' namespace *and*
     // the name of the struct is container_hash
     template <class Container>
-    constexpr size_t operator()(const Container& c) const
+    constexpr Precision operator()(const Container& c, Precision init = hasher::INIT) const
     {
-        return fnv_hash<Precision>::hash(c.begin(), c.end());
+        using traits = container_traits<Container>;
+
+        // cast8 does this too, but doing this again up the chain flexes traits which is a soft-concept
+        static_assert(sizeof(typename traits::value_type) == 1, "Only 8-bit values are supported");
+
+        return hasher::hash(c.begin(), c.end(), init);
     }
 };
 
