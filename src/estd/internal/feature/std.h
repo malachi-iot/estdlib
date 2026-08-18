@@ -46,6 +46,9 @@
 #if __cplusplus >= 201703L
 #define FEATURE_STD_CHARCONV 1
 #define FEATURE_STD_OPTIONAL 1
+// __cpp_lib_string_view is less interesting for us because GCC defines that in <string_view> itself, leading
+// us to a chicken-and-the-egg decision
+#define FEATURE_STD_STRING_VIEW 1
 #endif
 
 #if __cplusplus >= 202002L || __cpp_lib_span

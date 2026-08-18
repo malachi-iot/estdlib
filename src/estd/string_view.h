@@ -1,10 +1,17 @@
 #pragma once
 
+#include "internal/macros.h"
 #include "internal/string.h"
 #include "internal/fwd/string_view.h"
 #include "policy/string.h"
 
+#if FEATURE_STD_STRING_VIEW
+#include <string_view>
+#endif
+
 namespace estd { namespace detail {
+
+// Not aliasing this guy to std::string_view since shared base class with basic_string is a nice feature
 
 template <ESTD_CPP_CONCEPT(internal::StringPolicy) Policy>
 class basic_string_view :
@@ -26,6 +33,7 @@ public:
     using base_type::data;
     using typename base_type::size_type;
 
+    using typename base_type::value_type;
     using typename base_type::pointer;
     using typename base_type::const_pointer;
 
@@ -73,6 +81,18 @@ public:
 
     }
 
+#if __cpp_lib_string_view
+    // UNTESTED
+    constexpr basic_string_view(const std::basic_string_view<value_type>& copy_from) :
+        basic_string_view(copy_from.begin(), copy_from.end())
+    {}
+
+    // UNTESTED
+    constexpr operator std::basic_string_view<value_type>() const
+    {
+        return { begin(), end() };
+    }
+#endif
 
     //basic_string_view(const basic_string_view& other) = default;
 
