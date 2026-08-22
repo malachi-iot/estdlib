@@ -2,6 +2,8 @@
 
 ## Quality Updates & Bug Fixes
 
+* https://github.com/malachi-iot/estdlib/issues/233 repair string lexicographic compare glitch.  Includes also `basic_string::compare` optimizations
+
 # v0.8.12 - 28JUL26
 
 ## Added Features

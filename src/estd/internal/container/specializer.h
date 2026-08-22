@@ -260,14 +260,30 @@ struct dynamic_array_helper<Impl, enable_if_t<
     }
 
     // Similar to above, but both lhs and rhs are null terminated
+    // UNTESTED, UNUSED
     template <class RhsIt>
     ESTD_CPP_CONSTEXPR(14) static int compare_null_term(const detail::basic_string<Impl>& lhs, RhsIt rhs)
     {
         static_assert(detail::basic_string<Impl>::is_null_terminated, "Requires null terminated");
 
-        // TBD: Not ready yet
+        const_pointer raw = lhs.clock();
 
-        return -1;
+        for(;*raw != 0; ++rhs, ++raw)
+        {
+            // If we reach end rhs first, that means we're a bigger string, meaning
+            // we are "larger"
+            if(*rhs == 0) return 1;
+
+            int r = *raw - *rhs;
+
+            if(r != 0) return r;
+        }
+
+        lhs.cunlock();
+
+        // If we both are null terminated, return a 0
+        // Otherwise we are "smaller" than rhs, return some value < 0
+        return *raw - *rhs;
     }
 
     // rhs = null terminated C string
