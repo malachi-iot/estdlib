@@ -11,6 +11,7 @@ namespace estd { namespace layer3 {
 // NOTE: Slowly phasing this guy out in favor of basic_string_view.
 // Keep in mind though he supports a size 0 (infinite) for null terminated strings.  Also
 // he differs in that '=' does a deep copy
+// 22AUG26 MB DEBT: Perhaps we ought to take -1 for a null terminated string so that 0 can mate to nullptr data
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<estd::remove_const_t<CharT>>,
          class Policy = internal::string_policy_helper<CharT, Traits,
