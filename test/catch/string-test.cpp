@@ -824,6 +824,12 @@ TEST_CASE("string tests")
         REQUIRE(r < 0);
         r = lhs.compare("ab");
         REQUIRE(r > 0);
+        r = rhs.compare("defg");
+        REQUIRE(r < 0);
+        r = rhs.compare("def");
+        REQUIRE(r == 0);
+        r = rhs.compare("de");
+        REQUIRE(r > 0);
 
 #if __cplusplus >= 201703L
         constexpr layer3::const_string s = "abc";
