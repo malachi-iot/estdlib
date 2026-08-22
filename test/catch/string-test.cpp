@@ -788,7 +788,7 @@ TEST_CASE("string tests")
 
         REQUIRE(v == 1234);
     }
-    SECTION("lexical compare")
+    SECTION("lexicographic compare")
     {
         layer3::const_string lhs = "abc";
         layer1::string<16> rhs = "def";
@@ -843,6 +843,11 @@ TEST_CASE("string tests")
             copy[3] = 0;
 
             REQUIRE(copy == "123");
+
+            int r;
+            r = s.compare("1234");
+            r = s.compare("123");
+            r = s.compare("12");
 
             REQUIRE(s.compare("hello") == -1);
             REQUIRE(s.compare("123") == 0);
