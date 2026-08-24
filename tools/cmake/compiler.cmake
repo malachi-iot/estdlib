@@ -13,6 +13,11 @@ macro(estd_gcc_compile_options)
     # Run, don't walk, do your nearest absent return type
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
 
+    # GCC had a bug fix and it affects linkage.  Disabling this warning since
+    # our use cases tend to compile and link everything every time.
+    # https://github.com/malachi-iot/estdlib/issues/170
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wno-psabi)
+
     # As per
     # https://stackoverflow.com/questions/31890021/mingw-too-many-sections-bug-while-compiling-huge-header-file-in-qt
     if(MSYS OR MINGW)
