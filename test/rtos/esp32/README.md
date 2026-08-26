@@ -34,8 +34,10 @@ These tests are all for variants of Espressif ESP32
 | 21JUL25 | unity    | QEMU                 | ESP32          | v5.4.2   | Pass   |
 | 04APR26 | unity    | QEMU                 | ESP32          | v5.5.3   | Pass   |
 | 20APR26 | unity    | QEMU                 | ESP32          | v6.0     | Pass   |
+| 26AUG26 | unity    | QEMU                 | ESP32          | v6.1     | Pass   |
 | 29APR26 | unity    | QEMU                 | ESP32C3        | v6.0.1   | Pass   |
 | 06MAR26 | unity    | QEMU                 | ESP32S3        | v5.5.3   | Pass   |
+| 06MAR26 | unity    | QEMU                 | ESP32S3        | v6.1     | Pass   |
 | 07DEC22 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v4.4.3   | Pass   |
 | 03JAN23 | unity    | ESP-WROVER-KIT v4.1  | ESP32-WROVER-E | v5.0     | Pass   |
 | 07FEB26 | unity    | ESP32-C3-DevKitM-1   | ESP32C3        | v5.5.2   | Pass   |
