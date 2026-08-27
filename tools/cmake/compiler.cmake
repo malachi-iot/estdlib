@@ -6,40 +6,40 @@ include_guard()
 
 # -Wno-unused-variable want this too, remember .H files aren't compiled independently
 #   so we have to report unused variables in unit tests fused with headers
-# -Wextra) not ready for this just yet, but want it
+# -Wextra not ready for this just yet, but want it
 
 
-macro(estd_gcc_compile_options)
+function(estd_gcc_compile_options target)
     # Run, don't walk, do your nearest absent return type
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror=return-type)
+    target_compile_options(${target} PRIVATE -Wall -Werror=return-type)
 
     # GCC had a bug fix and it affects linkage.  Disabling this warning since
     # our use cases tend to compile and link everything every time.
     # https://github.com/malachi-iot/estdlib/issues/170
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wno-psabi)
+    target_compile_options(${target} PRIVATE -Wno-psabi)
 
     # As per
     # https://stackoverflow.com/questions/31890021/mingw-too-many-sections-bug-while-compiling-huge-header-file-in-qt
     if(MSYS OR MINGW)
         message(STATUS "MSYS mode")
-        target_compile_options(${PROJECT_NAME} PRIVATE -Wa,-mbig-obj)
+        target_compile_options(${target} PRIVATE -Wa,-mbig-obj)
     endif()
-endmacro()
+endfunction()
 
-macro(estd_msvc_compile_options)
+function(estd_msvc_compile_options target)
     # Kind of a blunt tool, but we're exporting so little anyway it's not too bad
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
     # As per https://developercommunity.visualstudio.com/t/msvc-incorrectly-defines-cplusplus/139261
     # DEBT: We'll likely want this PUBLIC or INTERFACE
-    target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
-endmacro()
+    target_compile_options(${target} PRIVATE /Zc:__cplusplus)
+endfunction()
 
-macro(estd_compile_options)
+function(estd_compile_options target)
     # DEBT: Make a macro/function so we can compare "GNU-like" and include Clang, LLVM, etc.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        estd_gcc_compile_options()
+        estd_gcc_compile_options(${target})
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        estd_msvc_compile_options()
+        estd_msvc_compile_options(${target})
     endif()
-endmacro()
+endfunction()

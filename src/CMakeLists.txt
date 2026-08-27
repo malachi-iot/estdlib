@@ -52,7 +52,7 @@ else()
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${ESTD_INCLUDE_DIRECTORY})
 
-    estd_compile_options()
+    estd_compile_options(${PROJECT_NAME})
 endif()
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})
