@@ -22,7 +22,7 @@ class unordered_map : public unordered_base<Container, Traits>
     using base_type::index;
     using base_type::match;
     using base_type::container_;
-    using base_type::is_sparse;
+    using base_type::is_tombstone;
     //using base_type::skip_empty_old;
     using base_type::skip_empty_new;
     //using base_type::skip_empty;
@@ -187,7 +187,7 @@ public:
 #endif
     //
     ///
-    /// @brief prune_sparse_ll null out trailing sparse entries, moving backward
+    /// @brief prune_sparse_ll null out trailing tombstones, moving backward
     /// @param start DEBT: rename - this is end point
     /// @param pos where to begin nulling from
     /// @param n
@@ -196,7 +196,7 @@ public:
     {
         --start;
 
-        for(; is_sparse(*pos, n) && pos != start; --pos)
+        for(; is_tombstone(*pos) && pos != start; --pos)
             tombstone_to_null(pos);
     }
 
@@ -220,7 +220,7 @@ public:
 
 public:
     template <class ...Args>
-    constexpr unordered_map(Args&&...args) :
+    explicit constexpr unordered_map(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
 
@@ -327,6 +327,8 @@ public:
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(value);
+
+        // TODO: probably do find_and_mark_eol here
 
         return wrap_result(ret);
     }
