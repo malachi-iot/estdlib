@@ -321,7 +321,9 @@ public:
 
     pair<iterator, bool> insert(const_reference value, bool permit_duplicates = false)
     {
-        const insert_result ret = insert_precheck(value.first, permit_duplicates);
+        const key_type& key = value.first;
+        const size_type n = index(key);
+        const insert_result ret = insert_precheck(key, n, permit_duplicates);
 
         if(ret.second)
             // We've made it here without reaching the end or bonking into another bucket,
@@ -397,15 +399,12 @@ public:
     /// @return true when eol actually got marked
     bool find_and_mark_eol(control_pointer control, unsigned n)
     {
-        // assert(index(control) == n)
-
-        control_pointer start = container_.begin() + n;
         control_pointer tombstone = nullptr;
 
-        while(control != start)
+        for(control_pointer start = container_.begin() + n; control != start;
+            control = bump(control))
         {
-            // DEBT: Refactor below into cleaner is_empty block
-            if(traits::is_empty(*control))
+            if(is_empty(*control))
             {
                 const typename traits::meta& meta = control->second;
 
@@ -440,8 +439,6 @@ public:
                 // no longer viable
                 if(control_bucket == n) tombstone = nullptr;
             }
-
-            control = bump(control);
         }
 
         return false;
@@ -480,9 +477,6 @@ public:
             // "mark and sweep" erase rather than erase (and swap) immediately in place.
             // More inline with spec, namely doesn't disrupt other iterators
             control->second.tombstone = true;
-            //control->second.bucket = n;
-
-            //index(control);
 
             // Look for last tombstone and mark it as eol
             find_and_mark_eol(control, n);

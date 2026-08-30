@@ -284,20 +284,21 @@ protected:
     ///
     /// @tparam K
     /// @param key
+    /// @param n - bucket in which key resides, undefined behavior if mismatched
     /// @param permit_duplicates
     /// @return control_pointer + true = success.
     ///         nullptr + false = no insert can occur.
     ///         control_pointer + false = duplicate found, and here it is
+    /// @remarks passing in 'n' since it's not free to calculate n from key (not expensive either, but
+    ///          we're counting on the overhead of passing it in to be totally negligible)
     template <class K>
-    ESTD_CPP_CONSTEXPR(14) insert_result insert_precheck(const K& key, bool permit_duplicates)
+    ESTD_CPP_CONSTEXPR(14) insert_result insert_precheck(const K& key, const size_type n, bool permit_duplicates)
     {
         constexpr insert_result null { nullptr, false };
 
 #if ESTD_UNORDERED_MAP_STRICT
         if(nullable::is_null(key))  return null;
 #endif
-
-        const size_type n = index(key);
 
         // linear probing-ish
         // See https://github.com/malachi-iot/estdlib/issues/211
@@ -308,7 +309,7 @@ protected:
         control_pointer start = it;
 #endif
 
-        // Move over occupied spots.  Sparse does NOT count as occupied
+        // Move past occupied spots.  Sparse does NOT count as occupied
         // DEBT: optimize is_null/is_sparse together
         while(traits::is_empty(*it) == false)
         {
@@ -322,6 +323,7 @@ protected:
 
             if(!permit_duplicates)
             {
+                // 30AUG26 DEBT: Document what's going on here with key comparison
                 if(key_eq_c(key, *it))
                     // "value set to true if and only if the insertion took place."
                     return { it, false };
@@ -343,6 +345,11 @@ protected:
         return { it, true };
     }
 
+    template <class K>
+    ESTD_CPP_CONSTEXPR(14) insert_result insert_precheck(const K& key, bool permit_duplicates)
+    {
+        return insert_precheck(key, index(key), permit_duplicates);
+    }
 
     // semi-smart, skips empty spots
     // does NOT wrap around
