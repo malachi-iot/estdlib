@@ -18,6 +18,13 @@ using namespace estd;
 constexpr const char* test_str = "hello";
 constexpr const char* test_str2 = "hi2u";
 
+static_assert(layer1::string<32>::is_null_terminated, "Null term check");
+static_assert(layer1::string<32, false>::is_null_terminated == false, "Null term check");
+static_assert(layer2::string<32>::is_null_terminated, "Null term check");
+static_assert(layer2::string<32, false>::is_null_terminated == false, "Null term check");
+static_assert(layer3::string::is_null_terminated, "Null term check");
+static_assert(layer3::basic_string<char, false>::is_null_terminated == false, "Null term check");
+
 TEST_CASE("string tests")
 {
     SECTION("string tests")
@@ -788,7 +795,7 @@ TEST_CASE("string tests")
 
         REQUIRE(v == 1234);
     }
-    SECTION("lexical compare")
+    SECTION("lexicographic compare")
     {
         layer3::const_string lhs = "abc";
         layer1::string<16> rhs = "def";
@@ -811,6 +818,18 @@ TEST_CASE("string tests")
         b1 = "abc" <= rhs;
 
         REQUIRE(b1);
+
+        int r;
+        r = lhs.compare("abcd");
+        REQUIRE(r < 0);
+        r = lhs.compare("ab");
+        REQUIRE(r > 0);
+        r = rhs.compare("defg");
+        REQUIRE(r < 0);
+        r = rhs.compare("def");
+        REQUIRE(r == 0);
+        r = rhs.compare("de");
+        REQUIRE(r > 0);
 
 #if __cplusplus >= 201703L
         constexpr layer3::const_string s = "abc";
@@ -844,7 +863,7 @@ TEST_CASE("string tests")
 
             REQUIRE(copy == "123");
 
-            REQUIRE(s.compare("hello") == -1);
+            REQUIRE(s.compare("hello") < 0);
             REQUIRE(s.compare("123") == 0);
         }
     }

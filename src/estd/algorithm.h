@@ -22,6 +22,7 @@ namespace estd {
 #if FEATURE_ESTD_STD_ALGORITHM_ALIAS
 using std::copy;
 using std::copy_n;
+using std::equal;
 using std::move;
 using std::fill;
 using std::fill_n;
@@ -47,7 +48,6 @@ inline ESTD_CPP_CONSTEXPR(14) void fill(ForwardIt first, ForwardIt last, const T
         *first = value;
     }
 }
-#endif
 
 // https://en.cppreference.com/w/cpp/algorithm/equal
 template<class InputIt1, class InputIt2>
@@ -61,6 +61,20 @@ ESTD_CPP_CONSTEXPR(14) bool equal(InputIt1 first1, InputIt1 last1,
     }
     return true;
 }
+
+// https://en.cppreference.com/w/cpp/algorithm/equal
+template<class InputIt1, class InputIt2>
+ESTD_CPP_CONSTEXPR(14) bool equal(
+    InputIt1 first1, InputIt1 last1,
+    InputIt2 first2, InputIt2 last2)
+{
+    for (; first1 != last1 && first2 != last2; ++first1, ++first2)
+        if (!(*first1 == *first2))
+            return false;
+
+    return first1 == last1 && first2 == last2;
+}
+#endif
 
 template<class ForwardIt, class Compare>
 ESTD_CPP_CONSTEXPR(14) ForwardIt min_element(ForwardIt first, ForwardIt last,

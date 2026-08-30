@@ -11,7 +11,7 @@
 #endif
 
 #if FEATURE_ESTD_EXCEPTIONS
-#include <exception>
+#include <stdexcept>
 #endif
 
 namespace estd { namespace internal {

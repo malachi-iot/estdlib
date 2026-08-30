@@ -136,6 +136,7 @@ public:
 
 
 using const_string = basic_string<const char, 0>;
+using const_wstring = basic_string<const wchar_t, 0>;
 
 namespace experimental {
 

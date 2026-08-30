@@ -11,6 +11,7 @@ namespace estd { namespace layer3 {
 // NOTE: Slowly phasing this guy out in favor of basic_string_view.
 // Keep in mind though he supports a size 0 (infinite) for null terminated strings.  Also
 // he differs in that '=' does a deep copy
+// 22AUG26 MB DEBT: Perhaps we ought to take -1 for a null terminated string so that 0 can mate to nullptr data
 template<class CharT, bool null_terminated = true,
          class Traits = estd::char_traits<estd::remove_const_t<CharT>>,
          class Policy = internal::string_policy_helper<CharT, Traits,
@@ -66,8 +67,19 @@ public:
         base_t::impl().size(initial_size);
     }
 
+    /*
+     * 26JUL26 MB - Disabling this perfectly functional constructor.  Reason being
+     * buffer_size really ought to have come first.  So, use the new below
+     * basic_string(start, end) as a workaround.  I may just sunset this guy forever,
+     * it's easy to get confused with those two size parameters.
     basic_string(CharT* buffer, size_type initial_size, size_type buffer_size) :
         base_t(init_t(buffer, buffer_size))
+    {
+        base_t::impl().size(initial_size);
+    }   */
+
+    basic_string(CharT* start, CharT* end, size_type initial_size) :
+        base_t(init_t(start, start - end))
     {
         base_t::impl().size(initial_size);
     }

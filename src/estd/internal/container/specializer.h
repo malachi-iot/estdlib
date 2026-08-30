@@ -216,10 +216,12 @@ struct dynamic_array_helper<Impl, enable_if_t<
     }
 
 
-    /// Low-level compare - does NOT check for matching size!
+    /// Low-level lexicographic compare - does NOT check for matching size!
+    /// Helper for https://en.cppreference.com/cpp/string/char_traits/compare
     ESTD_CPP_CONSTEXPR(14) static int compare(const detail::basic_string<Impl>& lhs, const_pointer s, size_type s_size)
     {
-        typedef typename detail::basic_string<Impl>::traits_type traits_type;
+        using traits_type = typename detail::basic_string<Impl>::traits_type;
+
         const_pointer raw = lhs.clock();
 
         const int result = traits_type::compare(raw, s, s_size);
@@ -227,6 +229,61 @@ struct dynamic_array_helper<Impl, enable_if_t<
         lhs.cunlock();
 
         return result;
+    }
+
+
+    /// Low-level lexicographic compare - DOES check for matching size and presumes lhs is null terminated
+    /// Helper for https://en.cppreference.com/cpp/string/basic_string/compare
+    template <class RhsIt>
+    ESTD_CPP_CONSTEXPR(14) static int compare_null_term(const detail::basic_string<Impl>& lhs, RhsIt rhs, size_type s_size)
+    {
+        static_assert(detail::basic_string<Impl>::is_null_terminated, "Requires null terminated");
+
+        const_pointer raw = lhs.clock();
+        int our_pos = 0;
+
+        for(;*raw != 0; ++rhs, ++raw, ++our_pos)
+        {
+            // if our_pos (0 based) == s_size (somewhat 1 based) that means we've gone
+            // one past rhs, meaning we qualify as larger
+            if(our_pos == s_size)   return 1;
+
+            int r = *raw - *rhs;
+
+            if(r != 0) return r;
+        }
+
+        lhs.cunlock();
+
+        // Reaching here means our_pos (grown to 1 based) <= s_size after an otherwise lexicographic match
+        return our_pos - s_size;
+    }
+
+    // Similar to above, but both lhs and rhs are null terminated
+    // UNTESTED, UNUSED
+    template <class RhsIt>
+    ESTD_CPP_CONSTEXPR(14) static int compare_null_term(const detail::basic_string<Impl>& lhs, RhsIt rhs)
+    {
+        static_assert(detail::basic_string<Impl>::is_null_terminated, "Requires null terminated");
+
+        const_pointer raw = lhs.clock();
+
+        for(;*raw != 0; ++rhs, ++raw)
+        {
+            // If we reach end rhs first, that means we're a bigger string, meaning
+            // we are "larger"
+            if(*rhs == 0) return 1;
+
+            int r = *raw - *rhs;
+
+            if(r != 0) return r;
+        }
+
+        lhs.cunlock();
+
+        // If we both are null terminated, return a 0
+        // Otherwise we are "smaller" than rhs, return some value < 0
+        return *raw - *rhs;
     }
 
     // rhs = null terminated C string

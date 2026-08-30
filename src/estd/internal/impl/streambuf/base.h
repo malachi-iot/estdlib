@@ -8,6 +8,29 @@
 
 namespace estd { namespace internal { namespace impl {
 
+struct streambuf_base_policy
+{
+#if FEATURE_ESTD_STREAMBUF_POLICY
+    // 21JUL25 MB EXPERIMENTAL, displaces FEATURE_ESTD_STREAMBUF_TRAITS
+    // See https://github.com/malachi-iot/estdlib/issues/219
+    struct policy
+    {
+        using rfc = internal::rfc::rfc2119;
+
+        static constexpr bool blocking = false;
+
+        struct use
+        {
+            static constexpr rfc gptr = rfc::must_not;
+            static constexpr rfc pptr = rfc::must_not;
+            static constexpr rfc seekoff = rfc::must_not;
+            static constexpr rfc seekpos = rfc::must_not;
+        };
+    };
+#endif
+};
+
+
 /// @brief contains base noop-ish implementation, suitable for hiding (think override,
 /// but without the virtual since we're all templated)
 /// Derived out classes MUST implement:
@@ -19,7 +42,8 @@ namespace estd { namespace internal { namespace impl {
 /// - sputc
 /// - gbump
 template <ESTD_CPP_CONCEPT(concepts::v1::CharTraits) Traits, class Signal>
-struct streambuf_base
+struct streambuf_base :
+    streambuf_base_policy
 {
 #if FEATURE_ESTD_STREAMBUF_TRAITS
     // 29JUN25 MB - NOTE: This has been disabled for a while but was coming along before I disabled it.
@@ -68,23 +92,6 @@ struct streambuf_base
     typedef typename traits_type::pos_type pos_type;
     typedef typename traits_type::off_type off_type;
 
-#if FEATURE_ESTD_STREAMBUF_POLICY
-    // 21JUL25 MB EXPERIMENTAL, displaces FEATURE_ESTD_STREAMBUF_TRAITS
-    struct policy
-    {
-        using rfc = internal::rfc::rfc2119;
-
-        static constexpr bool blocking = false;
-
-        struct use
-        {
-            static constexpr rfc gptr = rfc::must_not;
-            static constexpr rfc pptr = rfc::must_not;
-            static constexpr rfc seekoff = rfc::must_not;
-            static constexpr rfc seekpos = rfc::must_not;
-        };
-    };
-#endif
 
 protected:
     static constexpr int sync() { return 0; }

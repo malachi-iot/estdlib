@@ -43,6 +43,14 @@ void true_buffered_test(Streambuf& sb)
     REQUIRE(str.size() == 9);
 }
 
+using rfc = estd::internal::rfc::rfc2119;
+#if FEATURE_ESTD_STREAMBUF_POLICY
+static_assert(ispanbuf::policy::use::pptr == rfc::must_not);
+static_assert(ispanbuf::policy::use::gptr >= rfc::may);
+static_assert(ospanbuf::policy::use::pptr >= rfc::may);
+static_assert(layer3::stringbuf::policy::use::pptr == rfc::should_not);
+#endif
+
 TEST_CASE("streambuf")
 {
     const char raw_str[] = "raw 'traditional' output\n";
@@ -177,11 +185,14 @@ TEST_CASE("streambuf")
     {
         char buf[128];
 
+        constexpr char binary_stuff[] { 0x1, (char)0xF0, (char)0xFF };      // NOLINT
+
         using sb_type = estd::detail::basic_ispanbuf<const char>;
 
         typedef typename sb_type::traits_type traits_type;
 
         sb_type sb(raw_str);
+        sb_type sb_binary(binary_stuff);
 
         SECTION("sgetn")
         {
@@ -197,6 +208,18 @@ TEST_CASE("streambuf")
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[0]));
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[1]));
             REQUIRE(sb.sbumpc() == traits_type::to_int_type(raw_str[2]));
+
+            // std::char_traits<const char> upsets to_int_type it since that one's not specialized,
+            // semi-corrupting binary char data
+            // therefore for ispanbuf we default to estd::detail::char_traits who DOES specialize
+            int c;
+            c = traits_type::to_int_type(binary_stuff[1]);
+            //c = detail::char_traits<const char>::to_int_type(binary_stuff[1]);
+            //c = std::char_traits<char>::to_int_type(binary_stuff[1]);
+            REQUIRE(c == 0xF0);
+            // Glitch as per https://github.com/malachi-iot/estdlib/issues/220
+            REQUIRE(sb_binary.sbumpc() == binary_stuff[0]);
+            //REQUIRE(sb_binary.sbumpc() == (unsigned)binary_stuff[1]);
         }
         SECTION("pubseekoff")
         {
@@ -254,6 +277,30 @@ TEST_CASE("streambuf")
 
                 REQUIRE(pos == 1);
                 REQUIRE(layer2::const_string(sb1.gptr()) == "i2u");
+            }
+            SECTION("pbase, pptr")
+            {
+                // Doing pptr ops on a stringbuf takes precision.  You'll
+                // need to manually indicate what your new desired size is
+                char* pbase = sb1.pbase();
+                char* pptr = sb1.pptr();
+
+                REQUIRE(pptr < sb1.egptr());
+
+                estd::string_view v(pbase, pptr);
+
+                REQUIRE(v == "hi2u");
+
+                // A pbump would be kind of interesting too, but arguably a poor fit
+                // for string (a much more low level resize interaction may be required
+                // for that)
+                sb1.resize(5);
+
+                *pptr = '!';
+
+                v = { pbase, sb1.pptr() };
+
+                REQUIRE(v == "hi2u!");
             }
         }
         SECTION("layer2")

@@ -148,6 +148,9 @@ class basic_string;
 template <size_t N, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
 
+template <size_t N, bool null_terminated = true>
+using wstring = basic_string<wchar_t, N, null_terminated>;
+
 }
 
 namespace layer2 {
@@ -161,6 +164,9 @@ class basic_string;
 
 template <size_t N = 0, bool null_terminated = true>
 using string = basic_string<char, N, null_terminated>;
+
+template <size_t N = 0, bool null_terminated = true>
+using wstring = basic_string<wchar_t, N, null_terminated>;
 
 }
 

@@ -1,13 +1,22 @@
-# v0.8.12 - XXXXX26
+# v0.8.13 - XXXXX26
+
+## Quality Updates & Bug Fixes
+
+* https://github.com/malachi-iot/estdlib/issues/233 repair string lexicographic compare glitch.  Includes also `basic_string::compare` optimizations
+* TBD (unordered): misc unordered fixes: one-past-end insert detect glitch, npos glitch
+* TBD (unordered_map): upgrading gc_active_ll to be linear-probe-friendly
+
+# v0.8.12 - 28JUL26
 
 ## Added Features
 
 * https://github.com/malachi-iot/estdlib/issues/181 `uninitialized_move` and friends
 * https://github.com/malachi-iot/estdlib/issues/187 added `find`
 * https://github.com/malachi-iot/estdlib/issues/191 added string lexical compare operators
-* https://github.com/malachi-iot/estdlib/issues/192 partial: layer1 implementation for begin/end constructor
+* https://github.com/malachi-iot/estdlib/issues/192 strings now have begin/end constructor
 * https://github.com/malachi-iot/estdlib/issues/199 abs, min, max cleanup
 * https://github.com/malachi-iot/estdlib/issues/201 aliased/added `errc` codes
+* https://github.com/malachi-iot/estdlib/issues/207 make_error_code now usable for to_string style operations on errc
 
 ## Quality Updates & Bug Fixes
 
@@ -15,12 +24,15 @@
 * Cleanup of `flags` conversion operators, LLVM compatibility
 * https://github.com/malachi-iot/estdlib/issues/127 general internal container scrubbing
 * https://github.com/malachi-iot/estdlib/issues/206 `expected` assignment operator fix
-* TBD (unordered): misc unordered fixes: one-past-end insert detect glitch, npos glitch
-* TBD (unordered_map): upgrading gc_active_ll to be linear-probe-friendly
 
 ## Known Issues and Limitations
 
 * `expected` comparison operators present but a bit anemic
+* `unordered_map` has significant issues and is not fit for use.  A rework is underway.
+  See https://github.com/malachi-iot/estdlib/issues/211 and
+   https://github.com/malachi-iot/estdlib/issues/217
+* https://github.com/malachi-iot/estdlib/issues/192 from above has breaking change, layer3::string loses a constructor.  See associated PR for details
+* https://github.com/malachi-iot/estdlib/issues/207 largely internal API as I familiarize myself with std::error_code
 
 # v0.8.11 - 10APR26
 

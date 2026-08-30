@@ -2,32 +2,40 @@
 # -*- coding: utf-8 -*-
 
 """
+Part of https://github.com/malachi-iot/estdlib and subject to its APACHE license
+
 Emit git describe parts in c++ header file format
 Usage:
 git-describe-to-header [project_name] [template-file]
 """
 
-#!/usr/bin/env python3
+script_version = "0.0.0"
 
 import argparse
 import datetime as dt
+import estd
+import git
 import logging
 import re
+import semver as sv
 import subprocess
 import sys
 
-import git_describe
-
+from pathlib import Path
 from typing import TextIO
 
-script_version = "0.0.0"
+script_dir = Path(__file__).resolve().parent
+root_dir = script_dir.parent.parent
 
 parser = argparse.ArgumentParser(
     description="git-describe C++ header repackager"
 )
 
 parser.add_argument('project_name', help="Name of project (#define prefix)");
-parser.add_argument('template_file', help="Name of input .h template file");
+parser.add_argument('template_file',
+    # Neat idea, but positional arguments naturally don't want to have defaults
+    #default=root_dir / "tools" / "cmake" / "in" / "git-version.in.h",
+    help="Name of input .h template file");
 
 parser.add_argument(
     "--version",
@@ -70,46 +78,10 @@ parser.add_argument(
 
 from string import Template
 
-def split_semver(desc: str):
-    # Find first "-" after semantic version prefix
-    # We assume SemVer core is always x.y.z
-    parts = desc.split("-", 1)
-
-    if len(parts) == 1:
-        suffix = ""
-        word = ""
-    else:
-        suffix = parts[1]
-        word = suffix.split("-", 1)[0]
-
-    return parts[0], suffix, word
-
 def emit_cmake_helper(core: str, word: str, ostream: TextIO) -> None:
     ostream.write(f'GIT_TAG_SEMVER={core}\n')
     ostream.write(f'GIT_TAG_SEMVER_IDENTIFIER={word}\n')
 
-
-def configure_logging(verbosity: int, timestamps: bool) -> None:
-    levels = [
-        logging.WARNING,
-        logging.INFO,
-        logging.DEBUG,
-    ]
-
-    level = levels[min(verbosity, len(levels) - 1)]
-
-    if timestamps:
-        log_format = "%(asctime)s %(levelname)s %(message)s"
-        date_format = "%Y-%m-%dT%H:%M:%S%z"
-    else:
-        log_format = "%(levelname)s %(message)s"
-        date_format = None
-
-    logging.basicConfig(
-        level=level,
-        format=log_format,
-        datefmt=date_format
-    )
 
 def main():
     # 06JUN26 MB - TODO: Beef up argument parsing so we can do things like:
@@ -118,23 +90,25 @@ def main():
     # 3. Emit other forms of git describe breakdown such as cmake or env flavors
     args = parser.parse_args()
 
-    configure_logging(args.verbose, args.timestamps)
+    estd.logging.configure(args.verbose, args.timestamps)
 
     logging.info("git-describe-to-header v%s", script_version)
 
     project_name = args.project_name
     infile = args.template_file
 
-    desc = git_describe.run_git_describe()
-
-    semver = re.findall(git_describe.regex, desc)[0]
-    #print(semver)
+    desc = git.describe(dirty=True)
 
     # Remove leading 'v' only (convention, not semantic)
     if desc.startswith("v"):
         desc = desc[1:]
+    else:
+        logging.warning("Expected prepending 'v' on %s", desc)
 
-    core, suffix, word = split_semver(desc)
+    semver = sv.parse(desc)
+    logging.debug("semver: %s", semver)
+
+    core, prerelease, suffix = sv.split(desc)
 
     #emit_cmake_helper(core, word, sys.stdout)
 
@@ -152,6 +126,8 @@ def main():
 
     now = dt.datetime.now(dt.timezone.utc)
 
+    # TODO: Look into whether we can query branch name and embed that also,
+    # especially useful for before we even tag as prerelease
     output = template.substitute(
         # DEBT: Un-hardwire from ESTD
         PROJECT_NAME_UPPER=project_name.upper(),
@@ -160,8 +136,8 @@ def main():
         GIT_TAG_SEMVER_MAJOR=semver[0],
         GIT_TAG_SEMVER_MINOR=semver[1],
         GIT_TAG_SEMVER_PATCH=semver[2],
-        GIT_TAG_SEMVER_PRERELEASE=suffix,
-        GIT_TAG_SEMVER_IDENTIFIER=word,
+        GIT_TAG_SEMVER_SUFFIX=suffix,
+        GIT_TAG_SEMVER_IDENTIFIER=f"{prerelease[0]}{prerelease[1]}",
         GIT_DESCRIBED=desc,
         GIT_HASH="abc123",
     )

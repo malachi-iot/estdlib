@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(estd VERSION 0.8.11 LANGUAGES C CXX
+project(estd VERSION 0.8.12 LANGUAGES C CXX
     DESCRIPTION "Embedded oriented std library"
     HOMEPAGE_URL "https://github.com/malachi-iot/estdlib")
 
@@ -19,6 +19,7 @@ set(SOURCE_FILES ${SOURCE_FILES}
     port/posix/streambuf.cpp
     )
 
+# DEBT: Rework this as per https://github.com/malachi-iot/estdlib/issues/225
 list(TRANSFORM SOURCE_FILES PREPEND estd/)
 
 
@@ -51,7 +52,7 @@ else()
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${ESTD_INCLUDE_DIRECTORY})
 
-    estd_compile_options()
+    estd_compile_options(${PROJECT_NAME})
 endif()
 
 add_library(malachi-iot::estd ALIAS ${PROJECT_NAME})

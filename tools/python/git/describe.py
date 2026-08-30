@@ -2,19 +2,28 @@
 # -*- coding: utf-8 -*-
 
 """
+Part of https://github.com/malachi-iot/estdlib and subject to its APACHE license
+
 Emit git describe parts
 """
 
 import logging
 import subprocess
 import sys
+from typing import Optional
 
-regex=r"^v([0-9]+)\.([0-9]+)\.([0-9]+)?(-)?([0-9A-Za-z.-]+)"
+def describe(abbrev: Optional[int] = None, dirty: bool = False) -> str:
+    cmd = ["git", "describe", "--tags", "--long"]
 
-def run_git_describe():
+    if abbrev is not None:
+        cmd.append(f"--abbrev={abbrev}")
+
+    if dirty:
+        cmd.append("--dirty")
+
     try:
         result = subprocess.run(
-            ["git", "describe", "--tags", "--long", "--dirty"],
+            cmd,
             capture_output=True,
             text=True,
             check=True,

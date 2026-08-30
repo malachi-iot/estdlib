@@ -28,6 +28,21 @@ struct out_span_streambuf :
     typedef typename base_out_type::pos_type pos_type;
     typedef typename traits_type::int_type int_type;
 
+#if FEATURE_ESTD_STREAMBUF_POLICY
+    struct policy : base_out_type::policy
+    {
+        using rfc = internal::rfc::rfc2119;
+
+        struct use
+        {
+            static constexpr rfc gptr = rfc::must_not;
+            static constexpr rfc pptr = rfc::should;
+            static constexpr rfc seekoff = rfc::should;
+            static constexpr rfc seekpos = rfc::should;
+        };
+    };
+#endif
+
     ESTD_CPP_CONSTEXPR(14) span_type& out() { return base_type::value(); }
     constexpr const span_type& out() const { return base_type::value(); }
 
@@ -117,10 +132,9 @@ public:
 
 // just the fundamental pieces, overflow/sync device handling will have to
 // be implemented in a derived class
-// DEBT: Refactor this to take CharTraits directly
 template <class CharTraits,
-        size_t Extent = detail::dynamic_extent::value,
-        class Base = estd::experimental::instance_provider<estd::span<typename CharTraits::char_type, Extent> > >
+    size_t Extent = detail::dynamic_extent::value,
+    class Base = estd::experimental::instance_provider<estd::span<typename CharTraits::char_type, Extent> > >
 struct in_span_streambuf :
         in_pos_streambuf_base<CharTraits>,
 
@@ -142,11 +156,11 @@ struct in_span_streambuf :
     typedef typename remove_const<char_type>::type nonconst_char_type;
 
 #if FEATURE_ESTD_STREAMBUF_POLICY
-    struct policy : base_type::policy
+    struct policy : base_pos_type::policy
     {
         using rfc = internal::rfc::rfc2119;
 
-        struct use : base_type::policy::use
+        struct use : base_pos_type::policy::use
         {
             static constexpr rfc gptr = rfc::should;
             static constexpr rfc seekoff = rfc::may;

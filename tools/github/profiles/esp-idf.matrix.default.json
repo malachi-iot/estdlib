@@ -1,4 +1,4 @@
 {
-  "version": ["v5.5.4", "v6.0.1"],
+  "version": ["v5.5.4", "v6.0.2"],
   "target": ["esp32", "esp32s3", "esp32p4"]
 }

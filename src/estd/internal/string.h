@@ -59,21 +59,38 @@ public:
 
     static constexpr auto npos = (size_type) -1;
 
+    // 22AUG26 MB DEBT: DO NOT USE - for internal use only, and although useful, one really ought to
+    // directly query policy - who is in turn full of DEBT
+    static constexpr bool is_null_terminated = internal::impl::is_nulltag_present<policy_type>::value;
+
 protected:
     ESTD_CPP_FORWARDING_CTOR(basic_string)
 
+    // Compare incoming string with awareness that we are null-terminated (true_type)
     template <typename InputIt>
-    ESTD_CPP_CONSTEXPR(14) int compare(InputIt s, size_type s_size) const
+    ESTD_CPP_CONSTEXPR(14) int compare_ll(InputIt s, size_type s_size, true_type) const
     {
-        // DEBT: Augment helper to be a little more null-terminated aware and not demand
-        // raw_size here in that case
-        size_type raw_size = base_type::size();
+        return helper::compare_null_term(*this, s, s_size);
+    }
 
-        if(raw_size < s_size) return -1;
-        if(raw_size > s_size) return 1;
+    template <typename InputIt>
+    ESTD_CPP_CONSTEXPR(14) int compare_ll(InputIt s, size_type s_size, false_type) const
+    {
+        const size_type raw_size = base_type::size();
 
-        // gets here if size matches
-        return helper::compare(*this, s, s_size);
+        const int r = helper::compare(*this, s, min(s_size, raw_size));
+
+        if(r != 0) return r;
+
+        return raw_size - s_size;
+    }
+
+    template <typename InputIt>
+    constexpr int compare(InputIt s, size_type s_size) const
+    {
+        using selector = bool_constant<is_null_terminated>;
+
+        return compare_ll(s, s_size, selector{});
     }
 
     // +++ non-locking helpers, public = OK since static_assert protects us
@@ -129,6 +146,8 @@ public:
     // compare to a C-style string
     constexpr int compare(const_pointer s) const
     {
+        // 22AUG26 MB DEBT: Underyling compare could be tuned to compare against an incoming null
+        // terminated string rather than demanding strlen
         return compare(s, strlen(s));
     }
 

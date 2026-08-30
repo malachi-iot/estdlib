@@ -116,19 +116,17 @@ inline detail::basic_istream<Streambuf, Base>& ws(
 
 // 05NOV24 MB - perhaps these would more comfortably
 // live in estd itself rather than estd::detail
+// 19JUL26 MB - align with relatively new https://en.cppreference.com/cpp/io/basic_spanbuf
 namespace detail {
 
-template <class Char, class CharTraits = estd::char_traits<Char>, size_t Extent = detail::dynamic_extent::value>
+// We prefer our own detail::char_traits regardless of FEATURE_ESTD_CHARTRAITS because ispanbuf in
+// particular wants const specialization (see https://github.com/malachi-iot/estdlib/issues/220)
+
+template <class Char, class CharTraits = estd::detail::char_traits<Char>, size_t Extent = detail::dynamic_extent::value>
 using basic_ispanbuf = estd::internal::streambuf<estd::internal::impl::in_span_streambuf<CharTraits, Extent>>;
 
-// DEPRECATED
-using ispanbuf = basic_ispanbuf<char>;
-
-template <class Char, class CharTraits = estd::char_traits<Char>, size_t Extent = detail::dynamic_extent::value>
-using basic_ispanstream = estd::detail::basic_istream<basic_ispanbuf<Char, CharTraits, Extent>>;
-
-// DEPRECATED
-using ispanstream = basic_ispanstream<char>;
+template <class Char, class CharTraits = estd::detail::char_traits<Char>, size_t Extent = detail::dynamic_extent::value>
+using basic_ispanstream = basic_istream<basic_ispanbuf<Char, CharTraits, Extent>>;
 
 // EXPERIMENTAL
 // Seems unhappy since it's a perfect forward Args&& situation and can't directly match

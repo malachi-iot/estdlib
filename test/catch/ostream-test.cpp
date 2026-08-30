@@ -149,10 +149,9 @@ TEST_CASE("ostream")
                 REQUIRE(s[0] == ' ');
             }
         }
-        SECTION("int (hex)")
+        SECTION("int (hex) + uppercase")
         {
-            out.setf(ios_base::uppercase);
-            out << hex;
+            out << uppercase << hex;
 
             const auto& s = out.rdbuf()->str();
 
@@ -190,6 +189,12 @@ TEST_CASE("ostream")
                 // ... "Overloads of basic_ostream::operator<<() that take arithmetic type"
                 // https://en.cppreference.com/w/cpp/io/manip/setw#Notes
                 REQUIRE(s == "0F:F");
+            }
+            SECTION("clear uppercase")
+            {
+                out << nouppercase << 12;
+
+                REQUIRE(s[0] == 'c');
             }
         }
         SECTION("clock style")
@@ -266,7 +271,7 @@ TEST_CASE("ostream")
         char buf[128];
         estd::span<char> span(buf);
 
-        estd::detail::ospanstream out(span);
+        estd::ospanstream out(span);
 
         out << "hi2u";
 
@@ -303,9 +308,24 @@ TEST_CASE("ostream")
             out.seekp(0);
             out.put(4);
 
+            REQUIRE(out.good());
+
             // DEBT: Use Catch2 proper array compares
             REQUIRE(buf[0] == 4);
             REQUIRE(buf[1] == test1[1]);
+
+            out.seekp(-1, ios_base::cur);
+
+            REQUIRE(out.good());
+
+            out.put(5);
+
+            REQUIRE(buf[0] == 5);
+
+            out.seekp(1);
+            out.put(6);
+
+            REQUIRE(buf[1] == 6);
         }
     }
 }

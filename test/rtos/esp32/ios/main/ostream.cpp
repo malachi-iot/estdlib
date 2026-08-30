@@ -16,7 +16,7 @@ extern "C" void test_task(void* pv)
         this_thread::sleep_for(chrono::milliseconds(1000));
         printf("Got here: %d - ", ++counter);
 
-        experimental::ostringstream<32> out;
+        layer1::ostringstream<32> out;
 
         out << "hi2u: ";
         out << counter;

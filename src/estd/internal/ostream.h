@@ -19,6 +19,7 @@ class basic_ostream :
 
 public:
     using base_type::rdbuf;
+    using base_type::setstate;
 
     typedef typename base_type::streambuf_type streambuf_type;
     typedef typename Base::char_type char_type;
@@ -147,10 +148,10 @@ public:
 
     typedef basic_ostream<Streambuf, Base> __ostream_type;
 
-    __ostream_type& flush()
+    this_type& flush()
     {
-        if (this->rdbuf()->pubsync() == -1)
-            this->setstate(base_type::badbit);
+        if (rdbuf()->pubsync() == -1)
+            setstate(base_type::badbit);
 
         return *this;
     }
@@ -159,7 +160,7 @@ public:
     this_type& seekp(off_type off)
     {
         pos_type ret = rdbuf()->pubseekpos(off, ios_base::out);
-        if(ret == -1) base_type::setstate(ios_base::failbit);
+        if(ret == -1) setstate(ios_base::failbit);
         return *this;
     }
 
@@ -167,7 +168,7 @@ public:
     this_type& seekp(off_type off, ios_base::seekdir dir)
     {
         pos_type ret = rdbuf()->pubseekoff(off, dir, ios_base::out);
-        if(ret == -1) base_type::setstate(ios_base::failbit);
+        if(ret == -1) setstate(ios_base::failbit);
         return *this;
     }
 

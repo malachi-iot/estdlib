@@ -2,7 +2,7 @@
 
 // DEBT: move this to file named chars_result
 
-#include "../../system_error.h"
+#include "../errc.h"
 
 #include "fwd.h"
 

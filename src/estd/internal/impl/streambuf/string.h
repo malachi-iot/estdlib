@@ -34,11 +34,28 @@ struct out_stringbuf : stringbuf_base<String>
 
     ESTD_CPP_FORWARDING_CTOR_MEMBER(out_stringbuf, str_)
 
+#if FEATURE_ESTD_STREAMBUF_POLICY
+    struct policy : base_type::policy
+    {
+        using rfc = internal::rfc::rfc2119;
+
+        struct use
+        {
+            static constexpr rfc gptr = rfc::must_not;
+            static constexpr rfc pptr = rfc::should_not;
+            static constexpr rfc seekoff = rfc::should_not;
+            static constexpr rfc seekpos = rfc::must_not;
+        };
+    };
+#endif
+
     streamsize xsputn(const char_type* s, streamsize count)
     {
-        // FIX: normal strings throw an exception if we exceed internal
-        // buffer size, but here we should instead have an optional error
-        // facility
+        int remaining_free = str_.max_size() - str_.size();
+        if(count > remaining_free)  count = remaining_free;
+        // DEBT: normal strings throw an exception if we exceed internal
+        // buffer size.  'append' just asserts, thus the extra check above.
+        // ideally we'd have an augmented append to also choose an estd::expected result
         str_.append(s, count);
         return count;
     }
@@ -49,9 +66,15 @@ struct out_stringbuf : stringbuf_base<String>
         return traits_type::to_int_type(ch);
     }
 
+    char_type* pbase() { return str_.data(); }
+    char_type* pptr() { return str_.data() + str_.size(); }
+    char_type* egptr() { return str_.data() + str_.max_size(); }
+
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
     constexpr const string_type& str() const { return str_; }
+
+    void resize(unsigned sz) { str_.resize(sz); }
 
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
     {
@@ -98,6 +121,7 @@ struct basic_stringbuf :
 
     using base_type::str_;
     using in_base_type::pos;
+    using typename base_type::policy;
 
     ESTD_CPP_FORWARDING_CTOR(basic_stringbuf)
 

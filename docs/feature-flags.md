@@ -12,6 +12,18 @@ See comments in `feature/estd.h`
 
 See comments in `feature/estd.h`
 
+## FEATURE_ESTD_CHARTRAITS
+
+Our own char_traits with a lighter (and likely less powerful) `pos_type`.  Also, our supported Char types include ones std doesn't do:
+
+- `uint8_t`
+- `const char`
+- `const uint8_t`
+
+Things like ispanbuf like these.
+
+`std` likes fpos for `pos_type`, we use a simple integer.  So far so good.
+
 ## FEATURE_ESTD_CHRONO
 
 If off, estd::chrono largely aliases to std::chrono

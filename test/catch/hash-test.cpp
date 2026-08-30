@@ -76,10 +76,21 @@ TEST_CASE("hash")
     {
         // Verified with https://fnvhash.github.io/fnv-calculator-online/
 
-        constexpr estd::layer2::const_string s = "hi2u";
+        SECTION("regular 8-bit")
+        {
+            constexpr estd::layer2::const_string s = "hi2u";
 
-        unsigned hashed = estd::hash<decltype(s)>{}(s);
+            unsigned hashed = estd::hash<decltype(s)>{}(s);
 
-        REQUIRE(hashed == 0x4c0a9277);
+            REQUIRE(hashed == 0x4c0a9277);
+        }
+        SECTION("wide char")
+        {
+            constexpr estd::layer2::const_wstring s = L"hi2u";
+
+            unsigned hashed = estd::hash<decltype(s)>{}(s);
+
+            REQUIRE(hashed == 0x059cae0e3);
+        }
     }
 }

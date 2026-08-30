@@ -25,7 +25,6 @@ public:
     static constexpr fmtflags oct = 0x03;
 #endif
     static constexpr fmtflags basefield = dec | hex;
-    // Not supported yet
     static constexpr fmtflags uppercase = 0x04;
 
     // NOTE: "Has no effect on input"

@@ -93,6 +93,7 @@ else()
         streambuf-test.cpp
         string-test.cpp
         string-view-test.cpp
+        system-error-test.cpp
         ratio-test.cpp
         rtto-test.cpp
         test-data.h
@@ -150,7 +151,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE FEATURE_ESTD_STD_MEMORY_ALIAS
 # Issue# 211 is very correlated to stronger linear probing behavior
 target_compile_definitions(${PROJECT_NAME} PRIVATE ISSUE_211_BRINGUP=1)
 
-estd_compile_options()
+estd_compile_options(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} estd testrc Catch2::Catch2WithMain)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
