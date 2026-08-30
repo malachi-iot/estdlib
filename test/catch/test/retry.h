@@ -126,7 +126,7 @@ public:
             // so yet because we need to document why we have separate mark/gc phases - especially
             // since the mark phase eagerly destructs
             tracked_.erase_ll(it);
-            tracked_.gc_sparse_ll(it);
+            tracked_.tombstone_to_null(it);
 
             return 1;
         }

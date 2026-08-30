@@ -202,7 +202,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
                 // old non-null data
                 //REQUIRE(found.first->second.mapped() == "hello1.1");
 
-                map.gc_sparse_ll(found.first);
+                map.tombstone_to_null(found.first);
             }
             SECTION("duplicate")
             {

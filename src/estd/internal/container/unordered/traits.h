@@ -160,10 +160,20 @@ struct unordered_map_traits :
         return is_empty(v) ? v.second.tombstone == false : false;
     }
 
+
+    /// Determines if this ref is tombstoned
+    /// @param v
+    /// @return
+    static constexpr bool is_tombstone(const control_type& v)
+    {
+        return is_empty(v) && v.second.tombstone;
+    }
+
     /// Determines if this ref is sparse - bucket must match also
     /// @param v
     /// @param n bucket#
     /// @return
+    [[deprecated]]
     static constexpr bool is_sparse(const control_type& v, unsigned n)
     {
         return is_empty(v) &&

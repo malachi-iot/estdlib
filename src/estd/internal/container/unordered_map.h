@@ -197,7 +197,7 @@ public:
         --start;
 
         for(; is_sparse(*pos, n) && pos != start; --pos)
-            gc_sparse_ll(pos);
+            tombstone_to_null(pos);
     }
 
     // for every trailing marked_for_gc (doesn't have an active slot after him) turn to null
@@ -369,7 +369,7 @@ public:
     }
 
     // Demotes this sparse 'pos' to completely deleted 'null'
-    void gc_sparse_ll(control_pointer control)
+    void tombstone_to_null(control_pointer control)
     {
         //const key_type& key = pos->first;
         //const size_type n = index(key);
@@ -382,10 +382,72 @@ public:
         //prune_sparse_ll(control_pointer);
     }
 
-    // Demotes this sparse 'pos' to completely deleted 'null'
-    void gc_sparse_ll(pointer pos)
+    // Turn this tombstone 'pos' to completely deleted 'null'
+    void tombstone_to_null(pointer pos)
     {
-        gc_sparse_ll(cast_control(pos));
+        tombstone_to_null(cast_control(pos));
+    }
+
+    /// For a given bucket, search until null or wraparound occurs and if a
+    /// tombstone is found along the way, mark it with eol
+    /// @param control - where to start search from
+    /// @param n - bucket
+    /// @return
+    bool find_and_mark_eol(control_pointer control, unsigned n)
+    {
+        // assert(index(control) == n)
+
+        control_pointer start = container_.begin() + n;
+        control_pointer tombstone = nullptr;
+
+        //             (!is_null_not_sparse(*control)
+
+        // While:
+        // - not wrapped around
+        // - still within bucket OR
+        // - tombstone entry
+        while(control != start)
+        {
+            // DEBT: Refactor below into cleaner is_empty block
+            if(traits::is_empty(*control))
+            {
+
+            }
+
+            if(traits::is_null_not_sparse(*control))
+            {
+                // Reaching here means foreign buckets reside inbetween here and previous
+                // tombstone, meaning previous tombstone is the new eol
+                tombstone->second.bucket = n;
+                tombstone->second.eol = true;
+            }
+            else if(traits::is_tombstone(*control))
+            {
+                if(control->second.eol && control->second.bucket == n)
+                {
+                    // Reaching here means foreign buckets reside inbetween here and previous
+                    // tombstone, meaning previous tombstone is the new eol
+                    tombstone->second.bucket = n;
+                    tombstone->second.eol = true;
+                    return false;
+                }
+
+                // Track last sparse found
+                tombstone = control;
+            }
+            else
+            {
+                unsigned control_bucket = index(traits::key(*control));
+
+                // If bucket extends this far, then whatever tombstone eol candidate we found is
+                // no longer viable
+                if(control_bucket == n) tombstone = nullptr;
+            }
+
+            control = bump(control);
+        }
+
+        return false;
     }
 
     // Conforms to spec in that:
@@ -407,7 +469,8 @@ public:
         // then we are clear to null out trailing sparse entries
         if(auto_prune && is_null_not_sparse(*next))
         {
-            gc_sparse_ll(control);      // nullify this entry
+            // DEBT: Can probably use prune_sparse_ll exclusively and remove explicit tombstone_to_null call
+            tombstone_to_null(control);      // nullify this entry
             control_pointer start = container_.begin() + n;
             // nullify previous entries down to 'start'
             prune_sparse_ll(start, control - 1, n);
@@ -418,6 +481,11 @@ public:
             // More inline with spec, namely doesn't disrupt other iterators
             control->second.tombstone = true;
             //control->second.bucket = n;
+
+            //index(control);
+
+            // Look for last tombstone and mark it as eol
+            find_and_mark_eol(control, n);
         }
     }
 
