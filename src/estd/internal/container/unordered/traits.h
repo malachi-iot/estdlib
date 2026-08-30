@@ -105,6 +105,14 @@ struct unordered_map_traits_control
 
         ESTD_CPP_CONSTEXPR(14) mapped_type& mapped() { return * (mapped_type*) storage; }
         constexpr const mapped_type& mapped() const { return * (const mapped_type*) storage; }
+
+        // DEBT: Depends on type-punning, but we ought to be ok
+        /// When representing an empty node, this clears out the control data.  Undefined
+        /// behavior if node has a value
+        void reset_empty()
+        {
+            raw = 0;
+        }
     };
 
     using control_type = pair<key_type, meta>;

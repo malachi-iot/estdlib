@@ -392,7 +392,7 @@ public:
     /// tombstone is found along the way, mark it with eol
     /// @param control - where to start search from
     /// @param n - bucket
-    /// @return
+    /// @return true when eol actually got marked
     bool find_and_mark_eol(control_pointer control, unsigned n)
     {
         // assert(index(control) == n)
@@ -400,46 +400,41 @@ public:
         control_pointer start = container_.begin() + n;
         control_pointer tombstone = nullptr;
 
-        //             (!is_null_not_sparse(*control)
-
-        // While:
-        // - not wrapped around
-        // - still within bucket OR
-        // - tombstone entry
         while(control != start)
         {
             // DEBT: Refactor below into cleaner is_empty block
             if(traits::is_empty(*control))
             {
+                const typename traits::meta& meta = control->second;
 
-            }
-
-            if(traits::is_null_not_sparse(*control))
-            {
-                // Reaching here means foreign buckets reside inbetween here and previous
-                // tombstone, meaning previous tombstone is the new eol
-                tombstone->second.bucket = n;
-                tombstone->second.eol = true;
-            }
-            else if(traits::is_tombstone(*control))
-            {
-                if(control->second.eol && control->second.bucket == n)
+                // if null entry OR matching eol
+                if(!meta.tombstone ||
+                    (meta.tombstone && meta.eol && meta.bucket == n))
                 {
                     // Reaching here means foreign buckets reside inbetween here and previous
                     // tombstone, meaning previous tombstone is the new eol
+
+                    // If no previous tombstone candidate found, then we already have the closest EOL/null
+                    // we can get
+                    if(tombstone == nullptr) return false;
+
                     tombstone->second.bucket = n;
                     tombstone->second.eol = true;
-                    return false;
+                    return true;
                 }
-
-                // Track last sparse found
-                tombstone = control;
+                else if(tombstone == nullptr && !meta.eol)
+                {
+                    // Reaching here means we've not yet got a tombstone candidate, and
+                    // current identified tombstone has no eol,
+                    // making it a viable candidate to be tagged with eol later
+                    tombstone = control;
+                }
             }
             else
             {
                 unsigned control_bucket = index(traits::key(*control));
 
-                // If bucket extends this far, then whatever tombstone eol candidate we found is
+                // If bucket extends this far, then the tombstone eol candidate we found is
                 // no longer viable
                 if(control_bucket == n) tombstone = nullptr;
             }
@@ -459,6 +454,9 @@ public:
         control_pointer control = pos.first;
 
         destruct(control);
+
+        // DEBT: Kind of crude, but cleaner than the still-present side-effecty set_null buried in destruct
+        control->second.reset_empty();
 
         const const_control_pointer next = bump(control);
 
