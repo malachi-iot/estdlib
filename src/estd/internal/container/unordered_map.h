@@ -116,7 +116,7 @@ private:
                 // data was corrupted or 'pos' is invalid, since 'pos' MUST exist
                 // in a linear-probe-discoverable way in bucket 'n'.  Therefore,
                 // empty entries MUST be sparse
-                assert(it->second.marked_for_gc);
+                assert(it->second.tombstone);
 
                 // Whatever sparse bucket was tracked is not material since linear
                 // probing rules dictate 'pos' doesn't have to sit in the ideal bucket area
@@ -377,7 +377,7 @@ public:
         assert(is_empty(*control));
 
         //control->second.bucket = npos();
-        control->second.marked_for_gc = false;
+        control->second.tombstone = false;
 
         //prune_sparse_ll(control_pointer);
     }
@@ -416,7 +416,7 @@ public:
         {
             // "mark and sweep" erase rather than erase (and swap) immediately in place.
             // More inline with spec, namely doesn't disrupt other iterators
-            control->second.marked_for_gc = 1;
+            control->second.tombstone = true;
             //control->second.bucket = n;
         }
     }

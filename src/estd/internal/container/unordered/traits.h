@@ -89,20 +89,13 @@ struct unordered_map_traits_control
 
         struct
         {
-            // 04JUL26 MB - marked as a "tombstone" or "deleted" entry, consider changing
-            // API surface to reflect this more common terminology than "sparse"
-            // aka "sparse" - exists specifically to mark as deleted, but physically unmoved
-            uint16_t marked_for_gc : 1;
-            // which bucket this empty slot *used to* belong to
-            // 18JUN26 MB DEBT: Needs better docs - IIRC this 'bucket' is a convenience
-            // variable so that GC already knows where this item lives, even though you
-            // could probably deduce it by doing some pointer math.
-            // 29JUN26 MB NOTE: 'bucket' may be on the way out.  With deeper linear-probing
-            // behavior, the following no longer need it:
-            // 1. prune_sparse_ll
-            // 2. gc_active_ll
-            // That said, 'skip_sparse' gets some real mileage out of it
-            //uint16_t bucket : 6;
+            // Only active when EOL = true
+            uint16_t bucket : 8;
+
+            uint16_t tombstone : 1;
+
+            // EOL = last entry in the specified bucket
+            uint16_t eol : 1;
         };
 
         uint16_t raw;
@@ -164,7 +157,7 @@ struct unordered_map_traits :
     template <class K, class T2>
     static constexpr bool is_null_not_sparse(const pair<K, T2>& v)
     {
-        return is_empty(v) ? v.second.marked_for_gc == false : false;
+        return is_empty(v) ? v.second.tombstone == false : false;
     }
 
     /// Determines if this ref is sparse - bucket must match also
@@ -174,7 +167,7 @@ struct unordered_map_traits :
     static constexpr bool is_sparse(const control_type& v, unsigned n)
     {
         return is_empty(v) &&
-            v.second.marked_for_gc &&
+            v.second.tombstone &&
             true;
             //v.second.bucket == n;
     }

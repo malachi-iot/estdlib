@@ -195,13 +195,12 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
                 REQUIRE(found.second != map.npos());
                 REQUIRE(found.first->second.mapped() == "hello1.1");
 
-                // FIX: Although it's undefined behavior to read an object post-destruction,
-                // I don't think that's what's causing https://github.com/malachi-iot/estdlib/issues/197.
-                // Still, we ought to roll in destruction at gc phase not erase phase if we can
                 map.erase_ll(found);
 
                 REQUIRE(found.second != map.npos());
-                REQUIRE(found.first->second.mapped() == "hello1.1");
+                // Used to do this, but obviously null metadata overwrites
+                // old non-null data
+                //REQUIRE(found.first->second.mapped() == "hello1.1");
 
                 map.gc_sparse_ll(found.first);
             }
