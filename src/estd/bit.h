@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cstdint.h"
+#include "internal/container/bit.h"
 #include "internal/feature/bit.h"
 
 namespace estd {

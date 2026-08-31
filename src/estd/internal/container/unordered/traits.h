@@ -3,6 +3,7 @@
 #include "../../../cstdint.h"
 #include "../../../utility.h"
 #include "../../platform.h"
+#include "../bit.h"
 
 #include "../../macro/push.h"
 
@@ -94,12 +95,20 @@ struct unordered_map_traits_control
     {
         byte storage[sizeof(mapped_type)];
 
+        struct packed
+        {
+            using bucket = bit_packed<0, 8>;
+            using mode = bit_packed<8, 2>;
+        };
+
         struct
         {
             // Only active when EOL = true
             uint16_t bucket : 8;
 
             // 31AUG26 MB DEBT: Refactor to use mode instead of tombstone/eol flags
+            // However to do so we have to leave bit-packed struct behind, since its alignment
+            // can change willy-nilly
             //modes mode : 2;
 
             uint16_t tombstone : 1;
@@ -109,6 +118,22 @@ struct unordered_map_traits_control
         };
 
         uint16_t raw;
+
+        constexpr unsigned bucket_exp() const
+        {
+            return packed::bucket::read((uint8_t*)storage);
+            //return bit_packed_read<packed::bucket_pos, packed::bucket_width>((uint8_t*)storage);
+        }
+
+        constexpr modes mode() const
+        {
+            return packed::mode::read((uint8_t*)storage);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) void mode(modes v) const
+        {
+            return packed::mode::write((uint8_t*)storage, v);
+        }
 
         //operator mapped_type& () { return * (mapped_type*) storage; }
         //constexpr operator const mapped_type& () const { return * (mapped_type*) storage; }
