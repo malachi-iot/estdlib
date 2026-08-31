@@ -762,6 +762,18 @@ protected:
     }
 
     // EXPERIMENTAL
+    template <class It, class F, class ...Args>
+    ESTD_CPP_CONSTEXPR(14) It foreach_reverse(It it, F&& f, Args&&...args)
+    {
+        for(It begin = it; f(*it, std::forward<Args>(args)...);)
+        {
+            if((it = rbump(it)) == begin) return nullptr;
+        }
+
+        return it;
+    }
+
+    // EXPERIMENTAL
     // Wraparound foreach
     template <class It, class F, class ...Args>
     ESTD_CPP_CONSTEXPR(14) It foreach(It it, F&& f, Args&&...args) const

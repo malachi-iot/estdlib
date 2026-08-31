@@ -82,6 +82,13 @@ struct unordered_map_traits_control
         align_mapped_value > align_key_value ?
         align_mapped_value : align_key_value;
 
+    enum modes
+    {
+        NULLED = 0,
+        TOMBSTONE,
+        EOL
+    };
+
     // Mainly used for unordered_map since it has an unused area when key is null
     union alignas(align_value) meta
     {
@@ -91,6 +98,9 @@ struct unordered_map_traits_control
         {
             // Only active when EOL = true
             uint16_t bucket : 8;
+
+            // 31AUG26 MB DEBT: Refactor to use mode instead of tombstone/eol flags
+            //modes mode : 2;
 
             uint16_t tombstone : 1;
 

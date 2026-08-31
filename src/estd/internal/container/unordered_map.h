@@ -331,7 +331,7 @@ public:
             // we're good to go
             new (ret.first) value_type(value);
 
-        // TODO: probably do find_and_mark_eol here
+        find_and_mark_eol(bump(ret.first), n);
 
         return wrap_result(ret);
     }
@@ -340,12 +340,16 @@ public:
     auto insert(P&& value, bool permit_duplicates = false) ->
         enable_if_t<is_constructible<value_type, P&&>::value, pair<iterator, bool>>
     {
-        const insert_result ret = insert_precheck(value.first, permit_duplicates);
+        const key_type& key = value.first;
+        const size_type n = index(key);
+        const insert_result ret = insert_precheck(value.first, n, permit_duplicates);
 
         if(ret.second)
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(std::forward<P>(value));
+
+        find_and_mark_eol(bump(ret.first), n);
 
         return wrap_result(ret);
     }
