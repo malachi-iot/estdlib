@@ -160,6 +160,10 @@ protected:
 
 
 public:
+#if UNIT_TESTING
+    constexpr const Container& container() const { return container_; }
+#endif
+
     // 30JUN26 MB - Perhaps a sentinel, if a sentinel can have instance variables
     struct end_local_iterator
     {

@@ -127,7 +127,7 @@ struct unordered_map_traits_control
 
         constexpr modes mode() const
         {
-            return packed::mode::read((uint8_t*)storage);
+            return (modes) packed::mode::read((uint8_t*)storage);
         }
 
         ESTD_CPP_CONSTEXPR(14) void mode(modes v) const
