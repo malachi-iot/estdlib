@@ -43,6 +43,7 @@ public:
 
 public:
     using base_type::bump;
+    using base_type::rbump;
     using base_type::cast_control;
     using base_type::is_null_not_sparse;
     using base_type::is_empty;
@@ -192,11 +193,11 @@ public:
     /// @param pos where to begin nulling from
     /// @param n
     ///
-    void prune_sparse_ll(control_pointer start, control_pointer pos, size_type n)
+    void prune_sparse_ll(control_pointer start, control_pointer pos)
     {
-        --start;
+        start = rbump(start);
 
-        for(; is_tombstone(*pos) && pos != start; --pos)
+        for(; is_tombstone(*pos) && pos != start; pos = rbump(pos))
             tombstone_to_null(pos);
     }
 
@@ -401,9 +402,13 @@ public:
     {
         control_pointer tombstone = nullptr;
 
-        for(control_pointer start = container_.begin() + n; control != start;
+        for(control_pointer start = nullptr; control != start;
             control = bump(control))
         {
+            // DEBT: Crude but effective way to avoid do/while for
+            // begin & end being the same pointer
+            if(start == nullptr)    start = container_.begin() + n;
+
             if(is_empty(*control))
             {
                 const typename traits::meta& meta = control->second;
@@ -466,11 +471,9 @@ public:
         // then we are clear to null out trailing sparse entries
         if(auto_prune && is_null_not_sparse(*next))
         {
-            // DEBT: Can probably use prune_sparse_ll exclusively and remove explicit tombstone_to_null call
-            tombstone_to_null(control);      // nullify this entry
             control_pointer start = container_.begin() + n;
-            // nullify previous entries down to 'start'
-            prune_sparse_ll(start, control - 1, n);
+            // nullify this and previous tombstones down to and including 'start'
+            prune_sparse_ll(start, control);
         }
         else
         {

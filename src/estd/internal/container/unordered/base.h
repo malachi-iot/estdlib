@@ -184,6 +184,8 @@ public:
 protected:
     /// Given a key, return the physical index one may use in the container
     // DEBT: Doesn't handle non-empty hasher
+    // 30AUG26 MB DEBT: Strongly consider dumping bucket_depth - it's a kind of fake quadratic encoder and
+    // I don't think it's helping us
     template <class K>
     constexpr size_type index(const K& key) const
     {
@@ -655,6 +657,21 @@ protected:
 
     template <class Pointer>
     ESTD_CPP_CONSTEXPR(17) Pointer bump(Pointer i) const { return cbump(i); }
+
+    // reverse bump
+    // Not well tested
+    template <class Pointer>
+    ESTD_CPP_CONSTEXPR(17) Pointer rbump(Pointer i)
+    {
+        static_assert(
+            is_same<Pointer, control_pointer>::value ||
+            is_same<Pointer, pointer>::value);
+
+        auto end = (Pointer) container_.cend();
+        auto begin = (Pointer) container_.begin();
+
+        return i == begin ? end : i - 1;
+    }
 
     // represents invalid bucket
     // pointer and bucket
