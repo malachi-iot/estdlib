@@ -269,10 +269,15 @@ public:
     template <class K, class ...Args>
     pair<iterator, bool> emplace(K&& key, Args&&...args)
     {
-        const insert_result ret = insert_precheck(std::forward<K>(key), false);
+        const size_type n = index(key);
+        const insert_result ret = insert_precheck(std::forward<K>(key), n, false);
 
         if(ret.second)
+        {
             new (ret.first) value_type(std::forward<K>(key), std::forward<Args>(args)...);
+
+            find_and_mark_eol(bump(ret.first), n);
+        }
 
         return wrap_result(ret);
     }
@@ -327,11 +332,13 @@ public:
         const insert_result ret = insert_precheck(key, n, permit_duplicates);
 
         if(ret.second)
+        {
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(value);
 
-        find_and_mark_eol(bump(ret.first), n);
+            find_and_mark_eol(bump(ret.first), n);
+        }
 
         return wrap_result(ret);
     }
@@ -345,11 +352,13 @@ public:
         const insert_result ret = insert_precheck(value.first, n, permit_duplicates);
 
         if(ret.second)
+        {
             // We've made it here without reaching the end or bonking into another bucket,
             // we're good to go
             new (ret.first) value_type(std::forward<P>(value));
 
-        find_and_mark_eol(bump(ret.first), n);
+            find_and_mark_eol(bump(ret.first), n);
+        }
 
         return wrap_result(ret);
     }
