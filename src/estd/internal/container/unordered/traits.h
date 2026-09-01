@@ -98,50 +98,36 @@ struct unordered_map_traits_control : unordered_map_control_enum
     // Mainly used for unordered_map since it has an unused area when key is null
     union alignas(align_value) meta
     {
-        byte storage[sizeof(mapped_type)];
+        uint8_t storage[sizeof(mapped_type)];
 
+        // Used to use bit-packed struct fields but compiler gets its own ideas how to align it and
+        // screws up our value_type vs control_type mapping
         struct packed
         {
             using bucket = bit_packed<0, 8>;
             using mode = bit_packed<8, 2>;
         };
 
-        struct
-        {
-            // Only active when EOL = true
-            //uint16_t bucket : 8;
-
-            // 31AUG26 MB DEBT: Refactor to use mode instead of tombstone/eol flags
-            // However to do so we have to leave bit-packed struct behind, since its alignment
-            // can change willy-nilly
-            //modes mode : 2;
-
-            //uint16_t tombstone : 1;
-
-            // EOL = last entry in the specified bucket
-            //uint16_t eol : 1;
-        };
-
         uint16_t raw;
 
         constexpr unsigned bucket() const
         {
-            return packed::bucket::read((uint8_t*)storage);
+            return packed::bucket::read(storage);
         }
 
         ESTD_CPP_CONSTEXPR(14) void bucket(unsigned v)
         {
-            return packed::bucket::write((uint8_t*)storage, v);
+            return packed::bucket::write(storage, v);
         }
 
         constexpr modes mode() const
         {
-            return (modes) packed::mode::read((uint8_t*)storage);
+            return (modes) packed::mode::read(storage);
         }
 
-        ESTD_CPP_CONSTEXPR(14) void mode(modes v) const
+        ESTD_CPP_CONSTEXPR(14) void mode(modes v)
         {
-            return packed::mode::write((uint8_t*)storage, v);
+            return packed::mode::write(storage, v);
         }
 
         //operator mapped_type& () { return * (mapped_type*) storage; }
@@ -151,9 +137,9 @@ struct unordered_map_traits_control : unordered_map_control_enum
         constexpr const mapped_type& mapped() const { return * (const mapped_type*) storage; }
 
         // DEBT: Depends on type-punning, but we ought to be ok
-        /// When representing an empty node, this clears out the control data.  Undefined
-        /// behavior if node has a value
-        void reset_empty()
+        /// When representing an empty node, this clears out the control data resuling in NULLED state.
+        /// Undefined behavior if node has a value
+        ESTD_CPP_CONSTEXPR(14) void reset()
         {
             raw = 0;
         }
@@ -211,7 +197,7 @@ struct unordered_map_traits :
     {
         using modes = unordered_map_control_enum::modes;
 
-        return is_empty(v) ? v.second.mode() == modes::NULLED : false;
+        return is_empty(v) && v.second.mode() == modes::NULLED;
     }
 
 
@@ -239,17 +225,16 @@ struct unordered_map_traits :
         return v.second.mapped();
     }
 
-    /// Nulls out key
+    /// Nulls out key and value
     /// @remark Does not run destructor
-    /// FIX: Really ought to be set_empty.  This does NOT set null in control portion
     static ESTD_CPP_CONSTEXPR(14) void set_null(control_type* v)
     {
         nullable{}.set(&v->first);
+        v->second.reset();
     }
 
     /// Nulls out key
     /// @remark Does not run destructor
-    /// UNUSED
     static ESTD_CPP_CONSTEXPR(14) void set_empty(control_type* v)
     {
         nullable{}.set(&v->first);
@@ -303,6 +288,11 @@ struct unordered_set_traits : unordered_traits<Key, Key, Hash, KeyEqual ESTD_UNO
     using mapped_type = Key;
 
     static ESTD_CPP_CONSTEXPR(14) void set_null(value_type* v)
+    {
+        nullable{}.set(v);
+    }
+
+    static ESTD_CPP_CONSTEXPR(14) void set_empty(value_type* v)
     {
         nullable{}.set(v);
     }

@@ -53,7 +53,6 @@ public:
     using base_type::end;
     using base_type::key_eq;
     using base_type::set_null;
-    using base_type::set_empty;
     using base_type::destruct;
     using typename base_type::key_type;
     using typename base_type::mapped_type;
@@ -79,6 +78,7 @@ public:
     using typename base_type::const_local_iterator;
 
 private:
+    /// Destroys key and value, and nulls out key (but leaves control portion in undefined state)
     ESTD_CPP_CONSTEXPR(14) static void destruct(control_pointer v)
     {
         base_type::destruct_ll(traits::key(*v));
@@ -231,10 +231,9 @@ public:
     {
         for(control_type& v : container_)
         {
-            if(traits::is_empty(v))
-                traits::set_null(&v);       // Just incase he's sparse  FIX: Only clears out key right now, which is already clear here
-            else
-                destruct(&v);
+            if(!is_empty(v))    destruct(&v);
+
+            set_null(&v);       // Just incase he's tombstoned
         }
     }
 
@@ -479,9 +478,7 @@ public:
         // side-effects Key to be empty
         destruct(control);
 
-        // DEBT: Kind of crude, but cleaner than the still-present side-effecty set_null buried in destruct
         // if block below either nulls or tombstones things, accordingly
-        //control->second.reset_empty();
 
         const const_control_pointer next = bump(control);
 

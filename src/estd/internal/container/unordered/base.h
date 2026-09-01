@@ -42,6 +42,7 @@ class unordered_base : public Traits,
 public:
     using traits = Traits;
     using base_type::key_eq;
+    using base_type::set_empty;
     using typename base_type::mapped_type;
     using typename base_type::control_type;
     using typename base_type::nullable;
@@ -88,7 +89,7 @@ protected:
     static ESTD_CPP_CONSTEXPR(14) void destruct(control_pointer v)
     {
         destruct_ll(traits::mapped(*v));
-        base_type::set_null(v);
+        set_empty(v);
     }
 
     static constexpr pointer cast(control_pointer p)
