@@ -40,10 +40,17 @@ TEST_CASE("bit operations")
         }
         SECTION("bit_packed")
         {
-            using type = bit_packed<2, 2>;
+            using type = bit_packed<10, 2>;
 
             type::write(data, FNV_1A);
             REQUIRE(type::read(data) == FNV_1A);
+
+            REQUIRE(data[0] == 0);
+            REQUIRE(data[1] == 4);
+
+            type::write(data, FNV_1);
+
+            REQUIRE(data[1] == 0);
         }
     }
 }

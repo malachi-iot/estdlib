@@ -19,6 +19,8 @@ ESTD_CPP_CONSTEXPR(14) Unsigned bit_packed_read(const uint8_t* data)
     constexpr unsigned mask = (1 << width) - 1;
     constexpr unsigned bit_pos = pos % 8;
 
+    static_assert(bit_pos + width <= 8, "Spanning bytes not yet supported");
+
     Unsigned v;
 
     data += byte_pos;
@@ -37,11 +39,13 @@ ESTD_CPP_CONSTEXPR(14) void bit_packed_write(uint8_t* data, Int value)
     constexpr unsigned mask = (1 << width) - 1;
     constexpr unsigned bit_pos = pos % 8;
 
+    static_assert(bit_pos + width <= 8, "Spanning bytes not yet supported");
+
     data += byte_pos;
 
     value <<= bit_pos;
 
-    *data &= ~mask;
+    *data &= ~(mask << bit_pos);
     *data |= value;
 }
 
