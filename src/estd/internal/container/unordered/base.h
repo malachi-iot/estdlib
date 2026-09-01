@@ -205,7 +205,18 @@ protected:
     }
 
 #if ESTD_UNORDERED_MAP_RESERVE_SLOT_OPT
-    unsigned null_slots_;
+    static constexpr unsigned reserve_width = 15;
+
+    struct
+    {
+        unsigned index_ : reserve_width;
+        // When null slots goes to 0, pos_mode activates and now slot# represents which slot WOULD have
+        // had null
+        bool pos_mode_ : 1;
+
+    }   null_{};
+
+    constexpr bool null_pos_mode() const { return null_.pos_mode_; }
 
     // To help mitigate tombstone saturation.  Don't go below 1 null slot.  This
     // way GC has a real marker for end of linear probing.  That way incrementally
@@ -214,7 +225,8 @@ protected:
     // location to convert tombstones to null slots
     unsigned null_slots() const
     {
-        return null_slots_;
+        assert(null_.pos_mode_ == false);
+        return null_.index_;
     }
 #endif
 
