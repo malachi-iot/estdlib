@@ -7,6 +7,7 @@ using namespace estd;
 TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 {
     using map_type = estd::layer1::unordered_map<uint8_t, double, 16>;
+    using modes = estd::internal::unordered_map_control_enum::modes;
 
     map_type map;
 
@@ -23,10 +24,8 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
         map.erase(it.first);
         map_type::control_pointer control = map.cast_control(it.first.operator->());
         const map_type::meta& meta = control->second;
-        REQUIRE(meta.tombstone == true);
-        REQUIRE(meta.eol == false);
-        meta.mode();
-        meta.bucket_exp();
+        REQUIRE(meta.mode() == modes::TOMBSTONE);
+        meta.bucket();
         // bucket_depth makes this a little annoying
         //REQUIRE((void*)map.container().begin() == (void*)it.first.operator ->());
     }

@@ -53,6 +53,7 @@ public:
     using base_type::end;
     using base_type::key_eq;
     using base_type::set_null;
+    using base_type::set_empty;
     using base_type::destruct;
     using typename base_type::key_type;
     using typename base_type::mapped_type;
@@ -104,20 +105,21 @@ private:
         control_pointer pos,
         control_pointer begin, const size_type n)
     {
+        using modes = unordered_map_control_enum::modes;
         const_control_pointer begin_n = container_.cbegin() + n;
 
         assert(index(traits::key(*pos)) == n);        // Verify pos really is part of 'n'
 
         for(control_pointer it = begin; it != pos;)
         {
-            // if item is null or sparse
+            // if item is null or tombstoned
             if(is_empty(*it))
             {
                 // true null = end of bucket.  If we see true null, that means
                 // data was corrupted or 'pos' is invalid, since 'pos' MUST exist
                 // in a linear-probe-discoverable way in bucket 'n'.  Therefore,
                 // empty entries MUST be sparse
-                assert(it->second.tombstone);
+                assert(it->second.mode() != modes::NULLED);
 
                 // Whatever sparse bucket was tracked is not material since linear
                 // probing rules dictate 'pos' doesn't have to sit in the ideal bucket area
@@ -230,7 +232,7 @@ public:
         for(control_type& v : container_)
         {
             if(traits::is_empty(v))
-                traits::set_null(&v);       // Just incase he's sparse
+                traits::set_null(&v);       // Just incase he's sparse  FIX: Only clears out key right now, which is already clear here
             else
                 destruct(&v);
         }
@@ -394,8 +396,10 @@ public:
 
         assert(is_empty(*control));
 
+        using modes = unordered_map_control_enum::modes;
+
         //control->second.bucket = npos();
-        control->second.tombstone = false;
+        control->second.mode(modes::NULLED);
 
         //prune_sparse_ll(control_pointer);
     }
@@ -425,10 +429,12 @@ public:
             if(is_empty(*control))
             {
                 const typename traits::meta& meta = control->second;
+                using modes = unordered_map_control_enum::modes;
+                const modes mode = meta.mode();
 
                 // if null entry OR matching eol
-                if(!meta.tombstone ||
-                    (meta.tombstone && meta.eol && meta.bucket == n))
+                if(mode == modes::NULLED ||
+                    (mode == modes::EOL && meta.bucket() == n))
                 {
                     // Reaching here means foreign buckets reside inbetween here and previous
                     // tombstone, meaning previous tombstone is the new eol
@@ -437,11 +443,11 @@ public:
                     // we can get
                     if(tombstone == nullptr) return false;
 
-                    tombstone->second.bucket = n;
-                    tombstone->second.eol = true;
+                    tombstone->second.bucket(n);
+                    tombstone->second.mode(modes::EOL);
                     return true;
                 }
-                else if(tombstone == nullptr && !meta.eol)
+                else if(tombstone == nullptr && mode == modes::TOMBSTONE)
                 {
                     // Reaching here means we've not yet got a tombstone candidate, and
                     // current identified tombstone has no eol,
@@ -470,10 +476,12 @@ public:
         const size_type n = pos.second;
         control_pointer control = pos.first;
 
+        // side-effects Key to be empty
         destruct(control);
 
         // DEBT: Kind of crude, but cleaner than the still-present side-effecty set_null buried in destruct
-        control->second.reset_empty();
+        // if block below either nulls or tombstones things, accordingly
+        //control->second.reset_empty();
 
         const const_control_pointer next = bump(control);
 
@@ -490,9 +498,11 @@ public:
         }
         else
         {
+            using modes = unordered_map_control_enum::modes;
+
             // "mark and sweep" erase rather than erase (and swap) immediately in place.
             // More inline with spec, namely doesn't disrupt other iterators
-            control->second.tombstone = true;
+            control->second.mode(modes::TOMBSTONE);
 
             // Look for last tombstone and mark it as eol
             find_and_mark_eol(control, n);

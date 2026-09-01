@@ -83,7 +83,8 @@ protected:
     {
     }
 
-    // runs destructor + nulls out key - does NOT run key destructor
+    // runs destructor + nulls out key - does NOT run key destructor.
+    // does NOT null out control portion (leaves it in undefined state)
     static ESTD_CPP_CONSTEXPR(14) void destruct(control_pointer v)
     {
         destruct_ll(traits::mapped(*v));

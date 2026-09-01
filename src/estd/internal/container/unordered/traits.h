@@ -64,9 +64,21 @@ public:
     static constexpr unsigned bucket_depth = ESTD_UNORDERED_MAP_BUCKET_SIZE;
 };
 
+struct unordered_map_control_enum
+{
+    enum modes
+    {
+        NULLED = 0,
+        TOMBSTONE,
+        // EOL is tombstoned also, but with denotation that this is the termination
+        // of a particular bucket.  Used since assigning true NULL can be non-trivial
+        EOL
+    };
+};
+
 // Sets up key + meta entry where meta tracks gc flag, storage
 template <class Key, class Mapped>
-struct unordered_map_traits_control
+struct unordered_map_traits_control : unordered_map_control_enum
 {
     using key_type = Key;
     using mapped_type = Mapped;
@@ -83,13 +95,6 @@ struct unordered_map_traits_control
         align_mapped_value > align_key_value ?
         align_mapped_value : align_key_value;
 
-    enum modes
-    {
-        NULLED = 0,
-        TOMBSTONE,
-        EOL
-    };
-
     // Mainly used for unordered_map since it has an unused area when key is null
     union alignas(align_value) meta
     {
@@ -104,25 +109,29 @@ struct unordered_map_traits_control
         struct
         {
             // Only active when EOL = true
-            uint16_t bucket : 8;
+            //uint16_t bucket : 8;
 
             // 31AUG26 MB DEBT: Refactor to use mode instead of tombstone/eol flags
             // However to do so we have to leave bit-packed struct behind, since its alignment
             // can change willy-nilly
             //modes mode : 2;
 
-            uint16_t tombstone : 1;
+            //uint16_t tombstone : 1;
 
             // EOL = last entry in the specified bucket
-            uint16_t eol : 1;
+            //uint16_t eol : 1;
         };
 
         uint16_t raw;
 
-        constexpr unsigned bucket_exp() const
+        constexpr unsigned bucket() const
         {
             return packed::bucket::read((uint8_t*)storage);
-            //return bit_packed_read<packed::bucket_pos, packed::bucket_width>((uint8_t*)storage);
+        }
+
+        ESTD_CPP_CONSTEXPR(14) void bucket(unsigned v)
+        {
+            return packed::bucket::write((uint8_t*)storage, v);
         }
 
         constexpr modes mode() const
@@ -200,7 +209,9 @@ struct unordered_map_traits :
     template <class K, class T2>
     static constexpr bool is_null_not_sparse(const pair<K, T2>& v)
     {
-        return is_empty(v) ? v.second.tombstone == false : false;
+        using modes = unordered_map_control_enum::modes;
+
+        return is_empty(v) ? v.second.mode() == modes::NULLED : false;
     }
 
 
@@ -209,20 +220,10 @@ struct unordered_map_traits :
     /// @return
     static constexpr bool is_tombstone(const control_type& v)
     {
-        return is_empty(v) && v.second.tombstone;
-    }
+        using modes = unordered_map_control_enum::modes;
 
-    /// Determines if this ref is sparse - bucket must match also
-    /// @param v
-    /// @param n bucket#
-    /// @return
-    [[deprecated]]
-    static constexpr bool is_sparse(const control_type& v, unsigned n)
-    {
         return is_empty(v) &&
-            v.second.tombstone &&
-            true;
-            //v.second.bucket == n;
+            (v.second.mode() == modes::TOMBSTONE || v.second.mode() == modes::EOL);
     }
 
     template <class K, class T2>
@@ -240,7 +241,16 @@ struct unordered_map_traits :
 
     /// Nulls out key
     /// @remark Does not run destructor
+    /// FIX: Really ought to be set_empty.  This does NOT set null in control portion
     static ESTD_CPP_CONSTEXPR(14) void set_null(control_type* v)
+    {
+        nullable{}.set(&v->first);
+    }
+
+    /// Nulls out key
+    /// @remark Does not run destructor
+    /// UNUSED
+    static ESTD_CPP_CONSTEXPR(14) void set_empty(control_type* v)
     {
         nullable{}.set(&v->first);
     }
