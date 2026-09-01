@@ -101,6 +101,15 @@ struct promote_type<float>
     using type = double;
 };
 
+static_assert(is_same<promote_type_t<int>, long>::value);
+
+#if __SIZEOF_INT128__ && __SIZEOF_LONG_LONG__ == 8
+// FIX: Some trouble here, we can't yet tell if platform 100% aliases int64_t to long long or not.  We know Clang doesn't,
+// but it seems like GCC does sometimes and doesn't others.  Or perhaps it's limited to __int128_t itself?
+//static_assert(is_same<promote_type_t<long long>, __int128_t>::value);
+#endif
+
+
 }
 
 // DEBT: Fix name - auto_promote means, if necessary, move
@@ -146,7 +155,7 @@ struct promoted_type
             estd::numeric_limits<less_bits_type>::is_signed &&
             !estd::numeric_limits<more_bits_type>::is_signed &&
             auto_promote,
-            typename internal::promote_type<aligned_more_bits_type>::type,
+            internal::promote_type_t<aligned_more_bits_type>,
             aligned_more_bits_type>::type type;
 };
 

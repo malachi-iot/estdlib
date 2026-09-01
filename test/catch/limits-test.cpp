@@ -153,7 +153,7 @@ TEST_CASE("limits & common_type tests")
 
         REQUIRE(digits == 32);
     }
-    SECTION("promote_type")
+    SECTION("promoted_type")
     {
         SECTION("1:1")
         {
