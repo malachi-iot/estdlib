@@ -19,7 +19,7 @@ struct common_type<
 private:
     // gracefully promote (or not) types used.  non-specialized common_type is very
     // aggressive about promoting and almost always adds bits - otherwise we'd use it
-    typedef typename promoted_type<Dur1Int, Dur2Int>::type common_int_type;
+    using common_int_type = typename promoted_type<Dur1Int, Dur2Int>::type;
 
 // Old bugged code
 #if LEGACY

@@ -45,10 +45,10 @@ void true_buffered_test(Streambuf& sb)
 
 using rfc = estd::internal::rfc::rfc2119;
 #if FEATURE_ESTD_STREAMBUF_POLICY
-static_assert(ispanbuf::policy::use::pptr == rfc::must_not);
-static_assert(ispanbuf::policy::use::gptr >= rfc::may);
-static_assert(ospanbuf::policy::use::pptr >= rfc::may);
-static_assert(layer3::stringbuf::policy::use::pptr == rfc::should_not);
+static_assert(ispanbuf::policy::use::pptr == rfc::must_not, "");
+static_assert(ispanbuf::policy::use::gptr >= rfc::may, "");
+static_assert(ospanbuf::policy::use::pptr >= rfc::may, "");
+static_assert(layer3::stringbuf::policy::use::pptr == rfc::should_not, "");
 #endif
 
 TEST_CASE("streambuf")

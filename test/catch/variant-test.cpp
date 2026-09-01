@@ -550,9 +550,9 @@ TEST_CASE("variant")
         using type1 = estd::experimental::variant_storage<1, 0, char, int, int64_t>;
         using type2 = estd::experimental::variant_storage<2, 0, char, int, int64_t>;
 
-        static_assert(sizeof(type) == sizeof(char));
-        static_assert(sizeof(type1) == sizeof(int));
-        static_assert(sizeof(type2) == sizeof(int64_t));
+        static_assert(sizeof(type) == sizeof(char), "Must be 1 byte large");
+        static_assert(sizeof(type1) == sizeof(int), "Must be size of int");
+        static_assert(sizeof(type2) == sizeof(int64_t), "Must be 8 bytes large");
     }
 }
 

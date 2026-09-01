@@ -53,6 +53,11 @@ struct promote_type<int64_t>
 #endif
 };
 
+#if __SIZEOF_LONG_LONG__ == 8
+template<>
+struct promote_type<long long> : promote_type<int64_t>  {};
+#endif
+
 template<>
 struct promote_type<uint8_t>
 {

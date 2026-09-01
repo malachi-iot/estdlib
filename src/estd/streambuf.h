@@ -43,7 +43,7 @@ public:
     // https://github.com/malachi-iot/estdlib/issues/219
     // For the time being we demand incoming Policy be void to avoid confusion
 #if FEATURE_ESTD_STREAMBUF_POLICY
-    static_assert(is_void<Policy>::value);
+    static_assert(is_void<Policy>::value, "Policy must be void, for now");
     using policy = typename Impl::policy;
 #endif
     using policy_type = Policy;

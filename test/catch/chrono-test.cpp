@@ -519,6 +519,8 @@ TEST_CASE("chrono tests")
         }
         SECTION("std::chrono::duration -> hh_mm_ss")
         {
+            static_assert(sizeof(long long) == 8, "");
+
             std::chrono::seconds s{3601};
             //estd::chrono::duration<int64_t> s{3601};
             //estd::chrono::duration<int64_t> s{std::chrono::seconds{3601}};

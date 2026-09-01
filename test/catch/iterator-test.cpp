@@ -3,6 +3,8 @@
 #include <estd/iterator.h>
 #include <estd/sstream.h>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 TEST_CASE("iterator")
 {
     SECTION("istreambuf_iterator")
