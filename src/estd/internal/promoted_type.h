@@ -53,7 +53,9 @@ struct promote_type<int64_t>
 #endif
 };
 
-#if __SIZEOF_LONG_LONG__ == 8
+// clang's typedef/aliasing of int64_t is not interchangeable with long long
+// 31AUG26 MB DEBT: Probably need this for int, long, etc. also
+#if __clang__ && __SIZEOF_LONG_LONG__ == 8
 template<>
 struct promote_type<long long> : promote_type<int64_t>  {};
 #endif
@@ -75,6 +77,23 @@ struct promote_type<uint32_t>
 {
     typedef uint64_t type;
 };
+
+template<>
+struct promote_type<uint64_t>
+{
+#if __SIZEOF_INT128__
+    using type = __uint128_t;
+#else
+    // Can't promote past 64 bit, but some of the conditional-template logic
+    // touches the struct so we do need it
+    typedef void type;
+#endif
+};
+
+#if __clang__ && __SIZEOF_LONG_LONG__ == 8
+template<>
+struct promote_type<unsigned long long> : promote_type<uint64_t>  {};
+#endif
 
 template<>
 struct promote_type<float>
