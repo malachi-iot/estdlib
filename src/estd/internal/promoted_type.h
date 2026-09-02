@@ -101,7 +101,21 @@ struct promote_type<float>
     using type = double;
 };
 
-static_assert(is_same<promote_type_t<int>, long>::value);
+// 01SEP26 DEBT: I cannot account for this.  int is definitely 4 bytes wide on ESP32, yet
+// int32 specialization doesn't pick this up.  No need for a short/long flavor, those
+// do get picked up by int16_t.  Presumably this has something to do with long being
+// same size as int
+#if ESP_PLATFORM
+template<>
+struct promote_type<int>
+{
+    using type = long;
+};
+#endif
+
+// 01SEP26 DEBT: No actual guarantee that our stdint specializations match up to
+// int -> long.  But so far so good
+static_assert(is_same<promote_type_t<int>, long>::value, "Cannot promote int -> long");
 
 #if __SIZEOF_INT128__ && __SIZEOF_LONG_LONG__ == 8
 // FIX: Some trouble here, we can't yet tell if platform 100% aliases int64_t to long long or not.  We know Clang doesn't,
