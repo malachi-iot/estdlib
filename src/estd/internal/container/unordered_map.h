@@ -233,7 +233,7 @@ public:
         {
             if(!is_empty(v))    destruct(&v);
 
-            set_null(&v);       // Just incase he's tombstoned
+            set_null(&v);       // Just in case he's tombstoned
         }
     }
 

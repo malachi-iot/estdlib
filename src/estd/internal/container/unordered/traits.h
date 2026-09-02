@@ -7,6 +7,10 @@
 
 #include "../../macro/push.h"
 
+#if FEATURE_STD_OSTREAM
+#include <ostream>
+#endif
+
 #include "fwd.h"
 
 namespace estd {
@@ -75,6 +79,26 @@ struct unordered_map_control_enum
         EOL
     };
 };
+
+ESTD_CPP_CONSTEXPR(14) const char* to_string(unordered_map_control_enum::modes v, const char* default_value = "N/A")
+{
+    using E = unordered_map_control_enum::modes;
+
+    switch(v)
+    {
+        case E::NULLED:     return "NULLED";
+        case E::TOMBSTONE:  return "TOMBSTONE";
+        case E::EOL:        return "EOL";
+        default:            return default_value;
+    }
+}
+
+#if FEATURE_STD_OSTREAM
+inline std::ostream& operator<<(std::ostream& out, unordered_map_control_enum::modes v)
+{
+    return out << to_string(v);
+}
+#endif
 
 // Sets up key + meta entry where meta tracks gc flag, storage
 template <class Key, class Mapped>
@@ -178,6 +202,8 @@ struct unordered_map_traits :
     using key_type = typename base_type::key_type;
 
     using value_type = pair<const key_type, mapped_type>;
+
+    static constexpr bool permit_duplicates = false;    // UNUSED
 
     /// @brief Checks for null OR sparse
     /// @param v

@@ -152,7 +152,7 @@ TEST_CASE("unordered_map", "[unordered][map][unordered_map]")
         SECTION("operator[] assignment")
         {
             map[5] = "hello4";
-            map.contains(5);
+            REQUIRE(map.contains(5));
             REQUIRE(map[5] == "hello4");
         }
         SECTION("try_emplace")
