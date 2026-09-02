@@ -403,6 +403,10 @@ public:
     /// @return true when eol actually got marked
     bool find_and_mark_eol(control_pointer control, unsigned n);
 
+    /// For a given bucket, search until null or wraparound occurs and move
+    /// null forward if possible
+    bool find_and_mark_null(control_pointer control, unsigned n);
+
     // Conforms to spec in that:
     // "References and iterators to the erased elements are invalidated.
     //  Other iterators and references are not invalidated. "

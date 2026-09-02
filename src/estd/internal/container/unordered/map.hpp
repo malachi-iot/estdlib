@@ -64,7 +64,7 @@ bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control
             if(mode == modes::NULLED ||
                 (mode == modes::EOL && meta.bucket() == n))
             {
-                // Reaching here means foreign buckets reside inbetween here and previous
+                // Reaching here means foreign buckets reside in between here and previous
                 // tombstone, meaning previous tombstone is the new eol
 
                 // If no previous tombstone candidate found, then we already have the closest EOL/null
@@ -90,6 +90,53 @@ bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control
             // If bucket extends this far, then the tombstone eol candidate we found is
             // no longer viable
             if(control_bucket == n) tombstone = nullptr;
+        }
+    }
+
+    return false;
+}
+
+// NOT READY YET
+template <class Container, class Traits>
+bool unordered_map<Container, Traits>::find_and_mark_null(control_pointer control, unsigned n)
+{
+    // Presumes EOL calculation already occurred
+    // TODO: Move forward from this position and investigate whether linear probing precludes
+    // replacing an observed tombstone with null
+
+    // Usually we'll expect the first 'control' to be EOL, but that's not a prerequisite
+    // (but maybe it should be?)
+    control_pointer candidate = nullptr;
+
+    for(control_pointer start = nullptr; control != start;
+        control = bump(control))
+    {
+        // DEBT: Crude but effective way to avoid do/while for
+        // begin & end being the same pointer
+        if(start == nullptr)    start = container_.begin() + n;
+
+        if(is_empty(*control))
+        {
+            const typename traits::meta& meta = control->second;
+            using modes = unordered_map_control_enum::modes;
+            const modes mode = meta.mode();
+
+            if(mode == modes::EOL && meta.bucket() == n)
+            {
+                assert(candidate == nullptr);
+                candidate = control;
+            }
+        }
+        else
+        {
+            unsigned control_bucket = index(traits::key(*control));
+
+            // If no EOL found, assert is happy.  If EOL is found,
+            // observed bucket must not be ours
+            assert(candidate == nullptr || control_bucket != n);
+
+            // TODO: Observe to see if encountered entries depend on linear probe supported
+            // by our candidate - i.e., is our candidate anchored?
         }
     }
 
