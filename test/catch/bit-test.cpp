@@ -33,9 +33,9 @@ TEST_CASE("bit operations")
 
         SECTION("basic")
         {
-            bit_packed_write<2, 2>(data, 3);
+            bit_packed_write_be_lsb<2, 2>(data, 3);
             REQUIRE(data[0] == 0xC);
-            unsigned v = bit_packed_read<2, 2>(data);
+            unsigned v = bit_packed_read_be_lsb<2, 2>(data);
             REQUIRE(v == 3);
         }
         SECTION("bit_packed")

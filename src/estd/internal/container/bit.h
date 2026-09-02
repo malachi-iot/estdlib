@@ -13,10 +13,10 @@ namespace estd { namespace internal {
 // - treat integers as big endian (network order)
 
 template <unsigned pos, unsigned width, class Unsigned = unsigned>
-ESTD_CPP_CONSTEXPR(14) Unsigned bit_packed_read(const uint8_t* data)
+ESTD_CPP_CONSTEXPR(14) Unsigned bit_packed_read_be_lsb(const uint8_t* data)
 {
     constexpr unsigned byte_pos = pos / 8;
-    constexpr unsigned mask = (1 << width) - 1;
+    constexpr unsigned mask = (1U << width) - 1;
     constexpr unsigned bit_pos = pos % 8;
 
     static_assert(bit_pos + width <= 8, "Spanning bytes not yet supported");
@@ -33,10 +33,10 @@ ESTD_CPP_CONSTEXPR(14) Unsigned bit_packed_read(const uint8_t* data)
 }
 
 template <unsigned pos, unsigned width, class Int>
-ESTD_CPP_CONSTEXPR(14) void bit_packed_write(uint8_t* data, Int value)
+ESTD_CPP_CONSTEXPR(14) void bit_packed_write_be_lsb(uint8_t* data, Int value)
 {
     constexpr unsigned byte_pos = pos / 8;
-    constexpr unsigned mask = (1 << width) - 1;
+    constexpr unsigned mask = (1U << width) - 1;
     constexpr unsigned bit_pos = pos % 8;
 
     static_assert(bit_pos + width <= 8, "Spanning bytes not yet supported");
@@ -54,12 +54,12 @@ struct bit_packed
 {
     static constexpr Int read(const uint8_t* data)
     {
-        return bit_packed_read<pos, width, Int>(data);
+        return bit_packed_read_be_lsb<pos, width, Int>(data);
     }
 
     static ESTD_CPP_CONSTEXPR(14) void write(uint8_t* data, Int value)
     {
-        bit_packed_write<pos, width>(data, value);
+        bit_packed_write_be_lsb<pos, width>(data, value);
     }
 };
 
