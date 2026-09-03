@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base.hpp"
 #include "map.h"
 
 namespace estd { namespace internal {
