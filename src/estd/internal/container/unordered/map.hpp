@@ -38,14 +38,20 @@ void unordered_map<Container, Traits>::erase_ll(
         // More inline with spec, namely doesn't disrupt other iterators
         control->second.mode(modes::TOMBSTONE);
 
+        eol_helper helper;
+
         // Look for last tombstone and mark it as eol
-        find_and_mark_eol(control, n);
+        find_and_mark_eol(control, n, &helper);
+
+        if(helper.null)    null_boomerang(helper, n);
     }
 }
 
 template <class Container, class Traits>
-bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control, unsigned n)
+bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control, unsigned n,
+    eol_helper* helper)
 {
+    // EOL candidate
     control_pointer tombstone = nullptr;
 
     for(control_pointer start = nullptr; control != start;
@@ -68,10 +74,18 @@ bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control
                 // Reaching here means foreign buckets reside in between here and previous
                 // tombstone, meaning previous tombstone is the new eol
 
+                if(helper)
+                {
+                    if(mode == modes::NULLED)   helper->null = tombstone;
+
+                    helper->eol = tombstone;
+                }
+
                 // If no previous tombstone candidate found, then we already have the closest EOL/null
                 // we can get
                 if(tombstone == nullptr) return false;
 
+                // Subsequent call to null_boomerang might then convert this into a NULL
                 tombstone->second.bucket(n);
                 tombstone->second.mode(modes::EOL);
                 return true;
@@ -95,6 +109,56 @@ bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control
     }
 
     return false;
+}
+
+template <class Container, class Traits>
+void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, unsigned n)
+{
+    control_pointer start = container_.begin() + n;
+    [[maybe_unused]]
+    control_pointer candidate = nullptr;
+    control_pointer control = helper.null;
+
+    // if null slot right at the beginning, we're already done
+    if(control == start)    return;
+
+    // Tombstones encountered in this direction might be convertible to EOL/null
+    // Walk down to and including starting bucket entry
+    do
+    {
+        control = rbump(control);
+
+        if(is_empty(*control))
+        {
+            const typename traits::meta& meta = control->second;
+            using modes = unordered_map_control_enum::modes;
+            const modes mode = meta.mode();
+
+            // null_boomerang expects that there are NO nulls between initial 'control'
+            // and bucket start
+            assert(mode != modes::NULLED);
+
+            candidate = control;
+        }
+        else
+        {
+            /*
+            unsigned natural_bucket = control - container_.begin();
+            unsigned control_bucket = index(traits::key(*control));
+
+            if(control_bucket < natural_bucket)
+            {
+                // Reaching here means aggressive linear probing occurred and placed items outside of their
+                // natural location.  That means
+            }
+
+            // If bucket extends this far, then the tombstone eol candidate we found is
+            // no longer viable
+            if(control_bucket == n) candidate = nullptr;    */
+        }
+
+    }
+    while(control != start);
 }
 
 // NOT READY YET

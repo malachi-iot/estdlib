@@ -396,12 +396,25 @@ public:
         tombstone_to_null(cast_control(pos));
     }
 
+    struct eol_helper
+    {
+        control_pointer eol;    // find_and_mark_eol's found eol
+        control_pointer null{}; // find_and_mark_eol's found null
+
+        // TODO: Put a circular queue in here to track last X tombstones found to make null_boomerang
+        // happier
+    };
+
     /// For a given bucket, search until null or wraparound occurs and if a
     /// tombstone is found along the way, mark it with eol
     /// @param control - where to start search from
     /// @param n - bucket
     /// @return true when eol actually got marked
-    bool find_and_mark_eol(control_pointer control, unsigned n);
+    bool find_and_mark_eol(control_pointer control, unsigned n, eol_helper* = nullptr);
+
+    /// DEBT: Rename and document
+    /// After a find_and_mark_eol, call this to then search backwards and turn eol into null
+    void null_boomerang(const eol_helper&, unsigned n);
 
     /// For a given bucket, search until null or wraparound occurs and move
     /// null forward if possible
