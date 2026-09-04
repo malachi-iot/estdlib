@@ -114,6 +114,15 @@ bool unordered_map<Container, Traits>::find_and_mark_eol(control_pointer control
 template <class Container, class Traits>
 void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, unsigned n)
 {
+    // Key:bucket
+    // T = Tombstone
+    // N = Null
+    // 1.  A:1, B:1, EOL:1, N
+    // 2.  A:1, B:1, EOL:1, C:4, T, D:6, N
+    // 3.  A:1, B:1, EOL:1, C:4, EOL:4, D:6, N
+    // 4.  A:1, B:2, EOL:2, C:1, EOL:1, D:6, N
+    // 5.  A:1, B:2, EOL:2, C:1, N
+
     control_pointer start = container_.begin() + n;
     [[maybe_unused]]
     control_pointer candidate = nullptr;
@@ -122,15 +131,20 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // if null slot right at the beginning, we're already done
     if(control == start)    return;
 
+    // where one more more displaced values are bunched together
+    bool intermingled = false;
+    int last_bucket = -1;
+
     // Tombstones encountered in this direction might be convertible to EOL/null
     // Walk down to and including starting bucket entry
     do
     {
+        control_pointer trailing = control;
         control = rbump(control);
 
         if(is_empty(*control))
         {
-            const typename traits::meta& meta = control->second;
+            typename traits::meta& meta = control->second;
             using modes = unordered_map_control_enum::modes;
             const modes mode = meta.mode();
 
@@ -138,14 +152,26 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             // and bucket start
             assert(mode != modes::NULLED);
 
-            candidate = control;
+            // Any EOL next to a NULLED is automatically converted to NULLED also
+            // (Scenario 1)
+            if(mode == modes::EOL && is_null_not_sparse(*trailing))
+            {
+                meta.mode(modes::NULLED);
+                candidate = nullptr;
+            }
+            else
+                candidate = control;
         }
         else
         {
-            /*
             unsigned natural_bucket = control - container_.begin();
             unsigned control_bucket = index(traits::key(*control));
 
+            if(control_bucket != last_bucket)   {}
+
+            last_bucket = static_cast<int>(control_bucket);
+
+            /*
             if(control_bucket < natural_bucket)
             {
                 // Reaching here means aggressive linear probing occurred and placed items outside of their
