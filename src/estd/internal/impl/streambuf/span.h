@@ -1,7 +1,10 @@
 #pragma once
 
-#include "../streambuf.h"
 #include "pos.h"
+#include "tags.h"
+
+#include "../../fwd/span.h"
+#include "../../value_evaporator.h"
 
 #include "../../macro/push.h"
 

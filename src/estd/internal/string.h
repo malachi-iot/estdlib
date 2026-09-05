@@ -308,7 +308,7 @@ public:
     }
 
     template <class Impl2>
-    basic_string& insert(size_type index, const basic_string<Impl2>& str)
+    ESTD_CPP_CONSTEXPR(14) basic_string& insert(size_type index, const basic_string<Impl2>& str)
     {
         assert_mutable();
 

@@ -133,7 +133,7 @@ public:
 
     // NOTE: Deviation from spec, as xsputn itself is expected to do all the
     // overflow trickery
-    streamsize sputn(const char_type *s, streamsize count)
+    ESTD_CPP_CONSTEXPR(17) streamsize sputn(const char_type *s, streamsize count)
     {
         verify_ostream();
 

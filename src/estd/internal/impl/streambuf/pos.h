@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../streambuf.h"
-#include "helpers.h"
+#include "base.h"
 
 namespace estd { namespace internal { namespace impl {
 

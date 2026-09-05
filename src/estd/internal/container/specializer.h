@@ -89,7 +89,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
     // to = this -> other
 
     // copies into da at specified pos
-    static void copy_from(array& da, unsigned pos, const_pointer from, unsigned len)
+    ESTD_CPP_CONSTEXPR(17) static void copy_from(array& da, unsigned pos, const_pointer from, unsigned len)
     {
         pointer raw = da.lock(pos);
 
@@ -100,7 +100,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // copies into da a specified allocated array
     template <class Impl2>
-    static void copy_from(array& da, unsigned pos, const allocated_array<Impl2>& from, unsigned len)
+    ESTD_CPP_CONSTEXPR(17) static void copy_from(array& da, unsigned pos, const allocated_array<Impl2>& from, unsigned len)
     {
         pointer raw = da.lock(pos);
 
@@ -111,7 +111,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
     // copies into da from first to last
     template <class InputIt>
-    static void copy_from(array& da, unsigned pos, InputIt first, InputIt last)
+    ESTD_CPP_CONSTEXPR(17) static void copy_from(array& da, unsigned pos, InputIt first, InputIt last)
     {
         pointer raw = da.lock(pos);
 
@@ -125,7 +125,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
     template <class Impl2>
     //static typename dynamic_array::append_result
     // DEBT: This return type won't always match, depending on feature flags
-    static size_type
+    ESTD_CPP_CONSTEXPR(17) static size_type
         append(dynamic_array& a, const allocated_array<Impl2>& copy_from)
     {
         size_type len = copy_from.size();
@@ -141,7 +141,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
     }
 
     template <class Impl2>
-    static bool starts_with(const array& a, const allocated_array<Impl2>& compare_to)
+    ESTD_CPP_CONSTEXPR(17) static bool starts_with(const array& a, const allocated_array<Impl2>& compare_to)
     {
         const value_type* s = a.clock();
 
@@ -158,7 +158,7 @@ struct dynamic_array_helper<Impl, enable_if_t<
 
 
     template <class Impl2>
-    static bool ends_with(const array& a, const allocated_array<Impl2>& compare_to)
+    ESTD_CPP_CONSTEXPR(17) static bool ends_with(const array& a, const allocated_array<Impl2>& compare_to)
     {
         const_pointer s = a.clock();
 

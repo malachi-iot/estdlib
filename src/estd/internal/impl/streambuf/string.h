@@ -49,7 +49,7 @@ struct out_stringbuf : stringbuf_base<String>
     };
 #endif
 
-    streamsize xsputn(const char_type* s, streamsize count)
+    ESTD_CPP_CONSTEXPR(17) streamsize xsputn(const char_type* s, streamsize count)
     {
         int remaining_free = str_.max_size() - str_.size();
         if(count > remaining_free)  count = remaining_free;
@@ -60,7 +60,7 @@ struct out_stringbuf : stringbuf_base<String>
         return count;
     }
 
-    int_type sputc(char_type ch)
+    ESTD_CPP_CONSTEXPR(17) int_type sputc(char_type ch)
     {
         str_ += ch;
         return traits_type::to_int_type(ch);

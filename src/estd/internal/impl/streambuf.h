@@ -3,7 +3,6 @@
 #include "../ios.h"
 #include "streambuf/base.h"
 #include "../../queue.h" // for out_queue_streambuf
-#include "../../span.h" // for span streambuf
 #include "streambuf/bipbuf.h"
 #include "streambuf/buffer.h"
 #include "streambuf/span.h"

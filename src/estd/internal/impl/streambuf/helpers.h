@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../streambuf.h"
+#include "fwd.h"
 #include "tags.h"
 
 // Helper area exists to:
