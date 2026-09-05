@@ -48,6 +48,17 @@ TEST_CASE("ostringstream")
 
             test_out(out);
         }
+        SECTION("seek")
+        {
+            layer1::ostringstream<128> out;
+
+            // out_stringbuf doesn't actually handle seeking.  Eventually, perhaps
+            out << "Hello";
+            out.seekp(0);
+            REQUIRE(out.fail());
+            //out << 'J';
+            //REQUIRE(out_s == "Jello");
+        }
     }
     SECTION("layer2")
     {

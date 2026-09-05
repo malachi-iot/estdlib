@@ -46,19 +46,19 @@ using l1_test = sstream_crtp<layer1::ostringstream<64>>;
 TEST_CASE("ostream")
 {
     layer1::ostringstream<64> out;
-    const auto& out_s = out.rdbuf()->str();
+    const layer1::string<64>& out_s = out.rdbuf()->str();
 
     SECTION("output character")
     {
         out << 'A';
 
-        REQUIRE(out.rdbuf()->str()[0] == 'A');
+        REQUIRE(out_s[0] == 'A');
     }
     SECTION("output integer literal")
     {
         out << 7;
 
-        REQUIRE(out.rdbuf()->str()[0] == '7');
+        REQUIRE(out_s[0] == '7');
     }
     SECTION("output integer variable")
     {
@@ -66,7 +66,7 @@ TEST_CASE("ostream")
 
         out << v;
 
-        REQUIRE(out.rdbuf()->str()[0] == '7');
+        REQUIRE(out_s[0] == '7');
     }
     SECTION("output double variable")
     {
@@ -287,15 +287,6 @@ TEST_CASE("ostream")
     }
     SECTION("repositioning")
     {
-        SECTION("string")
-        {
-            // out_stringbuf doesn't actually handle seeking
-            out << "Hello";
-            out.seekp(0);
-            REQUIRE(out.fail());
-            //out << 'J';
-            //REQUIRE(out_s == "Jello");
-        }
         SECTION("span")
         {
             uint8_t buf[128];
