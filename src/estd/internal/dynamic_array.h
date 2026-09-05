@@ -458,7 +458,7 @@ public:
     // somewhat non standard, but considered a real API in estd
     // in theory this might go a little faster than the iterator
     // version
-    append_result append(const value_type* buf, size_type len)
+    ESTD_CPP_CONSTEXPR(17) append_result append(const value_type* buf, size_type len)
     {
         grow_result r = grow(len);
         const size_type current_size = r.starting_size;

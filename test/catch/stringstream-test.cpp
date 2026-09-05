@@ -11,27 +11,43 @@ TEST_CASE("istringstream")
 
 }
 
+//template <class Streambuf>
 template <class Impl>
-void test_out(detail::basic_ostream<Impl>& out)
+void test_out(detail::basic_ostream<detail::streambuf<Impl>>& out)
 {
-    const auto& str = out.rdbuf()->str();
+    using string_type = typename Impl::string_type;
+    const string_type& str = out.rdbuf()->str();
 
     out << "Hello";
 
     REQUIRE(str == "Hello");
 
     // NOTE: Doesn't work, because stringstream is very append-centric
-    out.seekp(0, ios_base::beg);
-    out << hex << 0x10 << ':' << 0x20;
+    //out.seekp(0, ios_base::beg);
+    // 'str' is always const, so can't do this either
+    //str.clear();
+    out.rdbuf()->clear();
+    out << hex << 0x10 << ':' << 0x20 << endl;
 
-    //REQUIRE(wrapped == "10:20");
+    REQUIRE(str == "10:20\n");
 }
 
 TEST_CASE("ostringstream")
 {
     SECTION("layer1")
     {
+        SECTION("null term")
+        {
+            layer1::ostringstream<128> out;
 
+            test_out(out);
+        }
+        SECTION("sized")
+        {
+            layer1::ostringstream<128, false> out;
+
+            test_out(out);
+        }
     }
     SECTION("layer2")
     {

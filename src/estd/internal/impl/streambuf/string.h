@@ -8,11 +8,11 @@
 namespace estd { namespace internal { namespace impl {
 
 template <ESTD_CPP_CONCEPT(concepts::v1::String) String>
-struct stringbuf_base : streambuf_base<typename remove_reference<String>::type::traits_type>
+struct stringbuf_base : streambuf_base<typename remove_reference_t<String>::traits_type>
 {
     ESTD_CPP_DEFAULT_CTOR(stringbuf_base)
 
-    typedef typename remove_reference<String>::type string_type;
+    using string_type = remove_reference_t<String>;
 };
 
 // 17JUN26 - No seek support at this time

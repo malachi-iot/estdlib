@@ -356,7 +356,7 @@ public:
 
     // DEBT: Does not conform to 'strong exception safety guarantee'
     template <class AppendResult>
-    static void assert_append(AppendResult) //typename base_type::append_result r)
+    ESTD_CPP_CONSTEXPR(14) static void assert_append(AppendResult) //typename base_type::append_result r)
     {
         assert_mutable();
 
@@ -396,7 +396,7 @@ public:
         return *this;
     }
 
-    basic_string& append(size_type count, value_type c) // NOLINT
+    ESTD_CPP_CONSTEXPR(14) basic_string& append(size_type count, value_type c) // NOLINT
     {
         // NOTE: Minor optimization opportunity (don't push around size/null term a bunch of times)
         while(count--) *this += c;
@@ -405,13 +405,13 @@ public:
     }
 
     template <class Impl2>
-    basic_string& append(const internal::allocated_array<Impl2>& str)   // NOLINT
+    ESTD_CPP_CONSTEXPR(17) basic_string& append(const internal::allocated_array<Impl2>& str)   // NOLINT
     {
         assert_append(base_type::append(str));
         return *this;
     }
 
-    basic_string& append(const_pointer s, size_type count)  // NOLINT
+    ESTD_CPP_CONSTEXPR(17) basic_string& append(const_pointer s, size_type count)  // NOLINT
     {
         assert_append(base_type::append(s, count));
         return *this;
