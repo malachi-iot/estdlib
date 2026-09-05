@@ -147,8 +147,11 @@ public:
 
     // DEBT: Underlying allocator sometimes has higher precision on its max_size,
     // causing potential issues here - especially when limits::max() is used
-    ESTD_CPP_CONSTEXPR_RET size_type max_size() const
-    { return base_type::get_allocator().max_size(); }
+    // See https://github.com/malachi-iot/estdlib/issues/222 -
+    // Brute force static_cast inelegant.  Really underlying allocator ought to be
+    // also increasing or decreasing precision on its size
+    constexpr size_type max_size() const
+    { return static_cast<size_type>(base_type::get_allocator().max_size()); }
 
     // DEBT: Feels like the wrong place to put this, but not harmful
     constexpr bool empty() const

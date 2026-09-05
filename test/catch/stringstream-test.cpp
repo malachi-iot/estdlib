@@ -11,13 +11,14 @@ TEST_CASE("istringstream")
 
 }
 
-template <class Impl, class Impl2>
-void test_out(detail::basic_ostream<Impl>& out,
-    const detail::basic_string<Impl2>& wrapped)
+template <class Impl>
+void test_out(detail::basic_ostream<Impl>& out)
 {
+    const auto& str = out.rdbuf()->str();
+
     out << "Hello";
 
-    REQUIRE(wrapped == "Hello");
+    REQUIRE(str == "Hello");
 
     // NOTE: Doesn't work, because stringstream is very append-centric
     out.seekp(0, ios_base::beg);
@@ -38,25 +39,21 @@ TEST_CASE("ostringstream")
 
         SECTION("explicit, null term")
         {
-            layer2::string<> wrapped(buf);
             layer2::ostringstream<128> out(buf);
 
-            test_out(out, wrapped);
+            test_out(out);
         }
         SECTION("implicit, null term")
         {
-            layer2::string<> wrapped(buf);
             layer2::ostringstream<> out(buf);
 
-            test_out(out, wrapped);
+            test_out(out);
         }
         SECTION("explicit, sized")
         {
-            layer2::string<128, false> wrapped(buf);
             layer2::ostringstream<128, false> out(buf);
 
-            // FIX:
-            //test_out(out, wrapped);
+            test_out(out);
         }
     }
     SECTION("layer3")
@@ -65,18 +62,15 @@ TEST_CASE("ostringstream")
 
         SECTION("null term")
         {
-            layer3::string wrapped(buf);
             layer3::ostringstream<true> out(buf);
 
-            test_out(out, wrapped);
+            test_out(out);
         }
         SECTION("sized")
         {
-            layer3::basic_string<char, false> wrapped(buf);
             layer3::ostringstream<false> out(buf);
 
-            // FIX:
-            //test_out(out, wrapped);
+            test_out(out);
         }
     }
 }
