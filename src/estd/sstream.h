@@ -58,6 +58,19 @@ template <class Char, size_t N = 0, bool null_terminated = true, class Traits = 
 using basic_istringstream =
     detail::basic_istream<basic_stringbuf<Char, N, null_terminated, Traits>>;
 
+// Lightly tested
+template <class Char, size_t N = 0, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_ostringstream =
+    detail::basic_ostream<basic_stringbuf<Char, N, null_terminated, Traits>>;
+
+// Lightly tested
+template<size_t N = 0, bool null_terminated = true>
+using istringstream = basic_istringstream<char, N, null_terminated>;
+
+// Lightly tested
+template<size_t N = 0, bool null_terminated = true>
+using ostringstream = basic_ostringstream<char, N, null_terminated>;
+
 }
 
 
@@ -78,6 +91,11 @@ typedef basic_stringbuf<char, false> stringbuf;
 
 template<class Char, bool null_terminated, class Traits = estd::char_traits<Char> >
 using basic_ostringstream = estd::detail::basic_ostream<basic_stringbuf<Char, null_terminated, Traits> >;
+
+// Lightly tested
+template <bool null_terminated>
+using ostringstream = basic_ostringstream<char, null_terminated>;
+
 }
 
 }
