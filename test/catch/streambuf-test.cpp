@@ -285,7 +285,7 @@ TEST_CASE("streambuf")
                 char* pbase = sb1.pbase();
                 char* pptr = sb1.pptr();
 
-                REQUIRE(pptr < sb1.egptr());
+                REQUIRE(pptr < sb1.epptr());
 
                 estd::string_view v(pbase, pptr);
 

@@ -68,7 +68,7 @@ struct out_stringbuf : stringbuf_base<String>
 
     char_type* pbase() { return str_.data(); }
     char_type* pptr() { return str_.data() + str_.size(); }
-    char_type* egptr() { return str_.data() + str_.max_size(); }
+    char_type* epptr() { return str_.data() + str_.max_size(); }
 
     // deviates from spec in that this is NOT a copy, but rather a direct reference
     // to the tracked string.  Take care
