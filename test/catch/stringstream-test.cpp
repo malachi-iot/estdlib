@@ -21,7 +21,7 @@ TEST_CASE("istringstream")
     {
         SECTION("null terminated")
         {
-            layer2::istringstream<> in(test_str1);
+            layer2::istringstream in(test_str1);
 
             in >> buf;
 
@@ -29,7 +29,7 @@ TEST_CASE("istringstream")
         }
         SECTION("sized")
         {
-            layer2::istringstream<sizeof(test_str1), false> in(test_str1);
+            layer2::basic_istringstream<const char, sizeof(test_str1), false> in(test_str1);
 
             in >> buf;
 
@@ -102,19 +102,19 @@ TEST_CASE("ostringstream")
 
         SECTION("explicit, null term")
         {
-            layer2::ostringstream<128> out(buf);
+            layer2::basic_ostringstream<char, 128> out(buf);
 
             test_out(out);
         }
         SECTION("implicit, null term")
         {
-            layer2::ostringstream<> out(buf);
+            layer2::ostringstream out(buf);
 
             test_out(out);
         }
         SECTION("explicit, sized")
         {
-            layer2::ostringstream<128, false> out(buf);
+            layer2::basic_ostringstream<char, 128, false> out(buf);
 
             test_out(out);
         }

@@ -63,13 +63,9 @@ template <class Char, size_t N = 0, bool null_terminated = true, class Traits = 
 using basic_ostringstream =
     detail::basic_ostream<basic_stringbuf<Char, N, null_terminated, Traits>>;
 
-// Lightly tested
-template<size_t N = 0, bool null_terminated = true>
-using istringstream = basic_istringstream<const char, N, null_terminated>;
+using istringstream = basic_istringstream<const char>;
 
-// Lightly tested
-template<size_t N = 0, bool null_terminated = true>
-using ostringstream = basic_ostringstream<char, N, null_terminated>;
+using ostringstream = basic_ostringstream<char>;
 
 }
 
