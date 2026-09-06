@@ -6,9 +6,19 @@ using namespace estd;
 
 #include "macro/push.h"
 
+namespace {
+
+constexpr char test_str1[] = "Hello";
+constexpr char test_str2[] = "10:20\n";
+
+}
+
 TEST_CASE("istringstream")
 {
+    SECTION("layer3")
+    {
 
+    }
 }
 
 //template <class Streambuf>
@@ -18,9 +28,9 @@ void test_out(detail::basic_ostream<detail::streambuf<Impl>>& out)
     using string_type = typename Impl::string_type;
     const string_type& str = out.rdbuf()->str();
 
-    out << "Hello";
+    out << test_str1;
 
-    REQUIRE(str == "Hello");
+    REQUIRE(str == test_str1);
 
     // NOTE: Doesn't work, because stringstream is very append-centric
     //out.seekp(0, ios_base::beg);
@@ -29,7 +39,7 @@ void test_out(detail::basic_ostream<detail::streambuf<Impl>>& out)
     out.rdbuf()->clear();
     out << hex << 0x10 << ':' << 0x20 << endl;
 
-    REQUIRE(str == "10:20\n");
+    REQUIRE(str == test_str2);
 }
 
 TEST_CASE("ostringstream")
@@ -89,13 +99,13 @@ TEST_CASE("ostringstream")
 
         SECTION("null term")
         {
-            layer3::ostringstream<true> out(buf);
+            layer3::basic_ostringstream<char, true> out(buf);
 
             test_out(out);
         }
         SECTION("sized")
         {
-            layer3::ostringstream<false> out(buf);
+            layer3::basic_ostringstream<char, false> out(buf);
 
             test_out(out);
         }

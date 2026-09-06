@@ -12,8 +12,9 @@ TEST_CASE("iterator")
         // FIX: layer3::stringbuf is fiddly.  Needs:
         // - better const awareness
         // -- maybe a specialization replacing layer3::const_string into layer3::basic_string<const char>
+        // 06SEP26 MB FIX: null_terminated = true variant segfaults this test
         //estd::layer3::stringbuf in("hello");
-        using streambuf_legacy_type = estd::layer3::stringbuf;
+        using streambuf_legacy_type = estd::layer3::basic_stringbuf<char, false>;
         /*
          * Almost, but something about the init_t/InitParam chain gets confused
          * when const char is used here.  Noting that in https://github.com/malachi-iot/estdlib/issues/223
@@ -23,7 +24,7 @@ TEST_CASE("iterator")
                 estd::detail::char_traits<const char>>;
         using streambuf_type = streambuf_good_type; */
         using streambuf_type = streambuf_legacy_type;
-        estd::layer3::stringbuf::size_type sz = 11;
+        streambuf_type::size_type sz = 11;
         const char* s = "hello world";
         // FIX: Relating to the FIX above, clearly don't be casting away const here
         streambuf_type in((char*)s, (char*)s + sz, sz);

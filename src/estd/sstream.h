@@ -76,25 +76,23 @@ using ostringstream = basic_ostringstream<char, N, null_terminated>;
 
 namespace layer3 {
 
-// NOTE: not defaulting null_terminated yet as I'm not sure if we want to lean one way or the
-// other for layer3 ostringstream
-// also - code compiles but is untested
-template<class Char, bool null_terminated, class Traits = estd::char_traits<Char> >
+// Default to null terminated to align with C/C++ convention (even std::string c_str gives us this)
+template<class Char, bool null_terminated = true, class Traits = estd::char_traits<Char> >
 using basic_stringbuf = estd::detail::streambuf <
     estd::internal::impl::basic_stringbuf<
         layer3::basic_string <Char, null_terminated, Traits> > >;
 
-// DEBT: Deviation from norm where 'null terminated' is expected.  Does make sense
-// for layer3 since it innately tracks a runtime size anyway.  Still, document our
-// thinking here to remove debt
-typedef basic_stringbuf<char, false> stringbuf;
+using stringbuf = basic_stringbuf<char>;
 
-template<class Char, bool null_terminated, class Traits = estd::char_traits<Char> >
-using basic_ostringstream = estd::detail::basic_ostream<basic_stringbuf<Char, null_terminated, Traits> >;
+template<class Char, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_istringstream =
+    detail::basic_istream<basic_stringbuf<Char, null_terminated, Traits> >;
 
-// Lightly tested
-template <bool null_terminated>
-using ostringstream = basic_ostringstream<char, null_terminated>;
+template<class Char, bool null_terminated = true, class Traits = estd::char_traits<Char> >
+using basic_ostringstream =
+    detail::basic_ostream<basic_stringbuf<Char, null_terminated, Traits> >;
+
+using ostringstream = basic_ostringstream<char>;
 
 }
 
