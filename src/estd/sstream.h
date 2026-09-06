@@ -78,12 +78,13 @@ namespace layer3 {
 
 // Default to null terminated to align with C/C++ convention (even std::string c_str gives us this)
 template<class Char, bool null_terminated = true, class Traits = estd::char_traits<Char> >
-using basic_stringbuf = estd::detail::streambuf <
+using basic_stringbuf = detail::streambuf <
     estd::internal::impl::basic_stringbuf<
         layer3::basic_string <Char, null_terminated, Traits> > >;
 
 using stringbuf = basic_stringbuf<char>;
 
+// Not ready yet
 template<class Char, bool null_terminated = true, class Traits = estd::char_traits<Char> >
 using basic_istringstream =
     detail::basic_istream<basic_stringbuf<Char, null_terminated, Traits> >;
