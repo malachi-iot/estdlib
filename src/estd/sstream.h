@@ -65,7 +65,7 @@ using basic_ostringstream =
 
 // Lightly tested
 template<size_t N = 0, bool null_terminated = true>
-using istringstream = basic_istringstream<char, N, null_terminated>;
+using istringstream = basic_istringstream<const char, N, null_terminated>;
 
 // Lightly tested
 template<size_t N = 0, bool null_terminated = true>

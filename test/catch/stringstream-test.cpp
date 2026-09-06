@@ -15,6 +15,27 @@ constexpr char test_str2[] = "10:20\n";
 
 TEST_CASE("istringstream")
 {
+    char buf[128]{};
+
+    SECTION("layer2")
+    {
+        SECTION("null terminated")
+        {
+            layer2::istringstream<> in(test_str1);
+
+            in >> buf;
+
+            REQUIRE(string_view(buf) == test_str1);
+        }
+        SECTION("sized")
+        {
+            layer2::istringstream<sizeof(test_str1), false> in(test_str1);
+
+            in >> buf;
+
+            REQUIRE(string_view(buf) == test_str1);
+        }
+    }
     SECTION("layer3")
     {
         // Unhappy, presumably due to debt of:
