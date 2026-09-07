@@ -168,6 +168,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 if(!intermingled && hopeful_mode.has_value())
                 {
                     candidate->second.mode(*hopeful_mode);
+                    candidate = nullptr;
                 }
             }
 
@@ -180,7 +181,11 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 candidate = nullptr;
             }
             else
+            {
+                // FIX: We can't be sure null will be valid here without extra checking
+                hopeful_mode = modes::NULLED;
                 candidate = control;
+            }
         }
         else
         {
@@ -195,6 +200,19 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 // current active item's bucket is a greater number than the last one we saw
                 intermingled = true;
                 hopeful_mode.reset();
+            }
+
+            if(candidate &&
+                control == start &&
+                hopeful_mode.has_value())
+            {
+                // DEBT: Do a broader bucket container check, not just for our starting bucket
+                // If we're at the beginning of our bucket, see if we have an unaddressed candidate
+                // and tend to him if so
+                candidate->second.mode(*hopeful_mode);
+                // DEBT: Only assign this if it's EOL
+                // DEBT: Pick up bucket from control_bucket, filtering out by intermingled somehow
+                candidate->second.bucket(n);
             }
 
             /*
