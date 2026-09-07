@@ -163,6 +163,9 @@ protected:
 
 public:
 #if UNIT_TESTING
+    using container_type = Container;
+
+    Container& container() { return container_; }
     constexpr const Container& container() const { return container_; }
 #endif
 

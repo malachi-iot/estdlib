@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../../optional.h"
+
 #include "base.hpp"
 #include "map.h"
 
@@ -131,13 +133,22 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // if null slot right at the beginning, we're already done
     if(control == start)    return;
 
-    // where one more more displaced values are bunched together
+    using modes = unordered_map_control_enum::modes;
+
+    // where one more more displaced values are bunched together OR
+    // there's a tombstone in the middle of a bucket (vs the end).
+    // needs a better name
     bool intermingled = false;
-    int last_bucket = -1;
+    estd::layer1::optional<modes, static_cast<modes>(-1)> hopeful_mode;
+    // bucket (hashed key) of last active entry
+    estd::layer1::optional<unsigned, 0xFFFF> last_bucket;
+    // indicates the next empty slot is null vs a tombstone
+    // since we expect a null entry from the start, we set this to true
+    //bool next_empty_is_null = true;
 
     // Tombstones encountered in this direction might be convertible to EOL/null
     // Walk down to and including starting bucket entry
-    do
+    do  // NOLINT
     {
         control_pointer trailing = control;
         control = rbump(control);
@@ -145,18 +156,27 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         if(is_empty(*control))
         {
             typename traits::meta& meta = control->second;
-            using modes = unordered_map_control_enum::modes;
             const modes mode = meta.mode();
 
             // null_boomerang expects that there are NO nulls between initial 'control'
             // and bucket start
             assert(mode != modes::NULLED);
 
+            // Previous candidate was selected, let's see what we can do about him
+            if(candidate)
+            {
+                if(!intermingled && hopeful_mode.has_value())
+                {
+                    candidate->second.mode(*hopeful_mode);
+                }
+            }
+
             // Any EOL next to a NULLED is automatically converted to NULLED also
             // (Scenario 1)
             if(mode == modes::EOL && is_null_not_sparse(*trailing))
             {
                 meta.mode(modes::NULLED);
+                hopeful_mode = modes::NULLED;
                 candidate = nullptr;
             }
             else
@@ -164,10 +184,25 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         }
         else
         {
-            unsigned natural_bucket = control - container_.begin();
+            //unsigned natural_bucket = control - container_.begin();
             unsigned control_bucket = index(traits::key(*control));
 
-            if(control_bucket != last_bucket)   {}
+            // DEBT: https://github.com/malachi-iot/estdlib/issues/235
+            if(last_bucket.has_value() && control_bucket > *last_bucket)
+            {
+                // since we're going backward, buckets naturally decrease.  Heavy linear probing
+                // can intermingle items into foreign bucket space though.  We detect that if the
+                // current active item's bucket is a greater number than the last one we saw
+                intermingled = true;
+                hopeful_mode.reset();
+            }
+
+            /*
+            if(control_bucket != last_bucket)
+            {
+                // if bucket changeover occurs after we've left natural bucket spot, then that
+                // means a tagged tombstone can be an EOL
+            }   */
 
             last_bucket = static_cast<int>(control_bucket);
 

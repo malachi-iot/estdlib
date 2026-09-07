@@ -4,6 +4,10 @@
 
 using namespace estd;
 
+namespace test {
+
+}
+
 // 02AUG26 MB DEBT: Really at this point ESTD_UNORDERED_MAP_BUCKET_SIZE probably should be 1 by default
 // Prior to #211, we needed a bigger bucket size.  Now, it's only interesting if we anticipate low randomness
 // on key hash - and even then, might not be too big a bother - occasional colliding entries in linear
@@ -27,6 +31,66 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
     static_assert(bucket == 1, "1:1 mapping with key to bucket# expected for this test");
     static_assert(map.bucket(2) == 2, "1:1 mapping with key to bucket# expected for this test");
 
+    SECTION("low level")
+    {
+        using modes = map_type::modes;
+        map_type::container_type& c = map.container();
+        using meta_type = map_type::meta;
+        //using control = typename map_type::control_type;
+        meta_type test;
+
+        auto active = [&](double v)
+        {
+            test.mapped() = v;
+            return test;
+        };
+
+        auto tombstone = [&]()
+        {
+            test.mode(modes::TOMBSTONE);
+            return test;
+        };
+
+        auto eol = [&](unsigned n)
+        {
+            test.bucket(n);
+            test.mode(modes::EOL);
+            return test;
+        };
+
+        SECTION("boomerang")
+        {
+            map_type::eol_helper eh;
+
+            // Be mindful we have to start at '1' to match specified key (who is 1:1 with bucket#)
+            c[1] = { 1, active(0) };
+
+            REQUIRE(map.size() == 1);
+            REQUIRE(map.bucket_size(1) == 1);
+
+            SECTION("condition 1")
+            {
+                c[2] = { 1, active(1) };
+                c[3] = { 0, eol(1) };
+
+                REQUIRE(map.size() == 2);
+                REQUIRE(map.bucket_size(1) == 2);
+            }
+            SECTION("condition 2")
+            {
+                c[2] = { 1, active(1) };
+                c[3] = { 0, eol(1) };
+                c[4] = { 4, active(3) };
+                c[5] = { 0, tombstone() };
+                c[6] = { 6, active(5) };
+
+                REQUIRE(map.bucket_size(1) == 2);
+                REQUIRE(map.bucket_size(4) == 1);
+                REQUIRE(map.bucket_size(6) == 1);
+
+            }
+        }
+    }
     // NOTE: Doing inserts not emplace to gain access to permit_duplicates
     SECTION("insert, remove: all same bucket")
     {
