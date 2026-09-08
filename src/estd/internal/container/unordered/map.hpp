@@ -142,6 +142,24 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     estd::layer1::optional<modes, static_cast<modes>(-1)> hopeful_mode;
     // bucket (hashed key) of last active entry
     estd::layer1::optional<unsigned, 0xFFFF> last_bucket;
+
+    // In fact multiple buckets can be active at once with enough intermingling.  We are not
+    // advanced enough for that case just yet.  For the time being, active_bucket is the lowest
+    // encountered bucket# whose domain we are still inside
+    estd::layer1::optional<unsigned, 0xFFFF> active_bucket;
+
+    auto assign_candidate = [&](unsigned n)
+    {
+        if(hopeful_mode.has_value() == false) return;
+
+        candidate->second.mode(*hopeful_mode);
+        // DEBT: Only assign this if it's EOL
+        candidate->second.bucket(n);
+
+        hopeful_mode.reset();
+        candidate = nullptr;
+    };
+
     // indicates the next empty slot is null vs a tombstone
     // since we expect a null entry from the start, we set this to true
     //bool next_empty_is_null = true;
@@ -165,11 +183,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             // Previous candidate was selected, let's see what we can do about him
             if(candidate)
             {
-                if(!intermingled && hopeful_mode.has_value())
-                {
-                    candidate->second.mode(*hopeful_mode);
-                    candidate = nullptr;
-                }
+                if(!intermingled)   assign_candidate(n);
             }
 
             // Any EOL next to a NULLED is automatically converted to NULLED also
@@ -189,31 +203,50 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         }
         else
         {
-            //unsigned natural_bucket = control - container_.begin();
+            unsigned natural_bucket = control - container_.begin();
             unsigned control_bucket = index(traits::key(*control));
 
-            // DEBT: https://github.com/malachi-iot/estdlib/issues/235
-            if(last_bucket.has_value() && control_bucket > *last_bucket)
+            // Active bucket changes if:
+            // 1.  We had none yet
+            // 2.  Encountered bucket index is smaller than current active one
+            if(active_bucket.has_value() == false)
             {
-                // since we're going backward, buckets naturally decrease.  Heavy linear probing
-                // can intermingle items into foreign bucket space though.  We detect that if the
-                // current active item's bucket is a greater number than the last one we saw
+                active_bucket = control_bucket;
+            }
+            else if(natural_bucket < *active_bucket)
+            {
+                // Moving to new bucket boundary.  Not innately intermingled due to
+                // https://malachi.atlassian.net/wiki/x/AYD0DQ section 3.3.3.
+                intermingled = false;
+
+                // Fully leaving one bucket region for another means it's time to try to
+                // write our null/eol candidate
+                if(candidate)   assign_candidate(*active_bucket);
+
+                // Observe that we don't assign to active_bucket.  active_bucket
+                // mainly helps us determine what to do next, but we still are interested
+                // in actual active item hash
+                active_bucket = control_bucket;
+
+                // We could deduce some level of intermingling by seeing if control_bucket ==
+                // natural bucket.  However, that could yield a hard false but not much conclusive
+                // if it's true (might still be false), so starting with false and letting
+                // further investigation prove us wrong
+            }
+            else if(control_bucket > *active_bucket)
+            {
+                // intermingled buckets, we only support one, so keep the lowest#
+                // since we only track ONE active_bucket, we can't easily determine null, so
+                // we are stuck with EOL mode of just one of the many simultanoues buckets
                 intermingled = true;
-                hopeful_mode.reset();
+                // we already have lowest bucket#
+                //active_bucket = control_bucket;
+                hopeful_mode = modes::EOL;
             }
 
-            if(candidate &&
-                control == start &&
-                hopeful_mode.has_value())
-            {
-                // DEBT: Do a broader bucket container check, not just for our starting bucket
-                // If we're at the beginning of our bucket, see if we have an unaddressed candidate
-                // and tend to him if so
-                candidate->second.mode(*hopeful_mode);
-                // DEBT: Only assign this if it's EOL
+            if(candidate && control == start)
                 // DEBT: Pick up bucket from control_bucket, filtering out by intermingled somehow
-                candidate->second.bucket(n);
-            }
+                assign_candidate(n);
 
             /*
             if(control_bucket != last_bucket)
