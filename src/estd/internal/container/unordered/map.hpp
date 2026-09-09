@@ -126,12 +126,13 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // 5.  A:1, B:2, EOL:2, C:1, N
 
     control_pointer start = container_.begin() + n;
-    [[maybe_unused]]
-    control_pointer candidate = nullptr;
     control_pointer control = helper.null;
 
-    // if null slot right at the beginning, we're already done
+    // if we're at the very start of the bucket (null slot right at the beginning),
+    // we're already done
     if(control == start)    return;
+
+    control_pointer candidate = nullptr;
 
     using modes = unordered_map_control_enum::modes;
 
@@ -139,9 +140,9 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // there's a tombstone in the middle of a bucket (vs the end).
     // needs a better name
     bool intermingled = false;
-    estd::layer1::optional<modes, static_cast<modes>(-1)> hopeful_mode;
-    // bucket (hashed key) of last active entry
-    estd::layer1::optional<unsigned, 0xFFFF> last_bucket;
+    using optional_modes = estd::layer1::optional<modes, modes::MODES_MAX>;
+    optional_modes hopeful_mode;
+    modes prev_mode = modes::NULLED;
 
     // In fact multiple buckets can be active at once with enough intermingling.  We are not
     // advanced enough for that case just yet.  For the time being, active_bucket is the lowest
@@ -160,16 +161,14 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         candidate = nullptr;
     };
 
-    // indicates the next empty slot is null vs a tombstone
-    // since we expect a null entry from the start, we set this to true
-    //bool next_empty_is_null = true;
-
     // Tombstones encountered in this direction might be convertible to EOL/null
     // Walk down to and including starting bucket entry
     do  // NOLINT
     {
         control_pointer trailing = control;
         control = rbump(control);
+
+        const unsigned natural_bucket = control - container_.begin();
 
         if(is_empty(*control))
         {
@@ -186,24 +185,47 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 if(!intermingled)   assign_candidate(n);
             }
 
-            // Any EOL next to a NULLED is automatically converted to NULLED also
+            // Any tombstone next to a NULLED is automatically converted to NULLED also
             // (Scenario 1)
-            if(mode == modes::EOL && is_null_not_sparse(*trailing))
+            if(is_null_not_sparse(*trailing))
             {
                 meta.mode(modes::NULLED);
                 hopeful_mode = modes::NULLED;
+                // null is our ideal, so no need to further investigate any
+                // upgrade or treatment for this slot as a candidate
                 candidate = nullptr;
             }
+            // We may be leaving a bucket
+            else if(active_bucket.has_value())
+            {
+                // If we are truly, fully leaving a bucket AND previous empty was a null,
+                // then we can be a null too
+                if(natural_bucket < *active_bucket && prev_mode == modes::NULLED)
+                {
+                    active_bucket.reset();
+                    meta.mode(modes::NULLED);
+                    candidate = nullptr;
+                }
+                else
+                {
+                    // FIX: Do some extra thinking to see if we can reset active_bucket here
+                    // FIX: We can't be sure null will be valid here without extra checking
+                    hopeful_mode = modes::NULLED;
+                    candidate = control;
+                }
+            }
+            // Otherwise, trailing entry was empty also but not null
             else
             {
-                // FIX: We can't be sure null will be valid here without extra checking
-                hopeful_mode = modes::NULLED;
+                // FIX: We can't be what empty mode is valid here without extra checking
+                hopeful_mode = modes::TOMBSTONE;
                 candidate = control;
             }
+
+            prev_mode = mode;
         }
         else
         {
-            unsigned natural_bucket = control - container_.begin();
             unsigned control_bucket = index(traits::key(*control));
 
             // Active bucket changes if:
@@ -237,40 +259,19 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             {
                 // intermingled buckets, we only support one, so keep the lowest#
                 // since we only track ONE active_bucket, we can't easily determine null, so
-                // we are stuck with EOL mode of just one of the many simultanoues buckets
+                // we are stuck with EOL mode of just one of the many simultaneous buckets
                 intermingled = true;
                 // we already have lowest bucket#
                 //active_bucket = control_bucket;
                 hopeful_mode = modes::EOL;
             }
-
-            if(candidate && control == start)
-                // DEBT: Pick up bucket from control_bucket, filtering out by intermingled somehow
-                assign_candidate(n);
-
-            /*
-            if(control_bucket != last_bucket)
-            {
-                // if bucket changeover occurs after we've left natural bucket spot, then that
-                // means a tagged tombstone can be an EOL
-            }   */
-
-            last_bucket = static_cast<int>(control_bucket);
-
-            /*
-            if(control_bucket < natural_bucket)
-            {
-                // Reaching here means aggressive linear probing occurred and placed items outside of their
-                // natural location.  That means
-            }
-
-            // If bucket extends this far, then the tombstone eol candidate we found is
-            // no longer viable
-            if(control_bucket == n) candidate = nullptr;    */
         }
-
     }
     while(control != start);
+
+    if(candidate)
+        // DEBT: Pick up bucket from control_bucket, filtering out by intermingled somehow
+        assign_candidate(n);
 }
 
 // NOT READY YET

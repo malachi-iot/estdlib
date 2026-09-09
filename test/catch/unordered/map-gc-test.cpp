@@ -68,7 +68,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             REQUIRE(map.size() == 1);
             REQUIRE(map.bucket_size(1) == 1);
 
-            SECTION("condition 1")
+            SECTION("scenario 1")
             {
                 c[2] = { 1, active(1) };
                 c[3] = { 0, eol(1) };
@@ -83,7 +83,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 REQUIRE(c[3].second.mode() == modes::NULLED);
             }
-            SECTION("condition 2")
+            SECTION("scenario 2")
             {
                 c[2] = { 1, active(1) };
                 c[3] = { 0, eol(1) };
@@ -97,7 +97,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 eh.null = &c[7];
 
-                // Turn trailing tombstone into null (not ready yet)
+                // Turn trailing tombstone into null
                 map.null_boomerang(eh, 4);
 
                 REQUIRE(c[5].second.mode() == modes::NULLED);

@@ -76,7 +76,9 @@ struct unordered_map_control_enum
         TOMBSTONE,
         // EOL is tombstoned also, but with denotation that this is the termination
         // of a particular bucket.  Used since assigning true NULL can be non-trivial
-        EOL
+        EOL,
+
+        MODES_MAX
     };
 };
 
