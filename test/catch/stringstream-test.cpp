@@ -17,6 +17,26 @@ TEST_CASE("istringstream")
 {
     char buf[128]{};
 
+    SECTION("layer1")
+    {
+        // layer1 istringstream is kind of a limited case
+        // istringstream hosts its own buffer for others to read out of
+        // could be useful if you want to combine the place that you build up the buffer then
+        // consume it back out again
+        SECTION("null term")
+        {
+            // Copy content in
+            layer1::basic_istringstream<char, 128> in(test_str1);
+
+            // Note you can't do this (it's const), thus interrupting the above claim of building out
+            // a buffer in place
+            //in.rdbuf()->str() = "Hello";
+
+            in >> buf;
+
+            REQUIRE(string_view(buf) == test_str1);
+        }
+    }
     SECTION("layer2")
     {
         SECTION("null terminated")
