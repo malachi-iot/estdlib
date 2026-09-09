@@ -97,9 +97,26 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 eh.null = &c[7];
 
-                // Turn trailing tombstone into null
-                map.null_boomerang(eh, 4);
+                // Turn trailing tombstones into null
+                map.null_boomerang(eh, 1);
 
+                REQUIRE(c[3].second.mode() == modes::NULLED);
+                REQUIRE(c[5].second.mode() == modes::NULLED);
+            }
+            SECTION("scenario 4")
+            {
+                c[2] = { 2, active(2) };
+                c[3] = { 0, eol(2) };
+                c[4] = { 1, active(3) };
+                c[5] = { 0, eol(1) };
+                c[6] = { 6, active(5) };
+
+                eh.null = &c[7];
+
+                // c[3] EOL must stay EOL for linear probing to stay happy
+                map.null_boomerang(eh, 1);
+
+                REQUIRE(c[3].second.mode() == modes::EOL);
                 REQUIRE(c[5].second.mode() == modes::NULLED);
             }
         }
