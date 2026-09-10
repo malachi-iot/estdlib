@@ -124,6 +124,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // 3.  A:1, B:1, EOL:1, C:4, EOL:4, D:6, N
     // 4.  A:1, B:2, EOL:2, C:1, EOL:1, D:6, N
     // 5.  A:1, B:2, EOL:2, C:1, N
+    // 6.  A:1, T, B:1, T, C:2, EOL:1, D:2, N
 
     control_pointer start = container_.begin() + n;
     control_pointer control = helper.null;
@@ -142,7 +143,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     bool intermingled = false;
     using optional_modes = estd::layer1::optional<modes, modes::MODES_MAX>;
     optional_modes hopeful_mode;
-    modes prev_mode = modes::NULLED;
+    modes trailing_mode = modes::NULLED;
 
     // In fact multiple buckets can be active at once with enough intermingling.  We are not
     // advanced enough for that case just yet.  For the time being, active_bucket is the lowest
@@ -200,7 +201,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             {
                 // If we are truly, fully leaving a bucket AND previous empty was a null,
                 // then we can be a null too
-                if(natural_bucket < *active_bucket && prev_mode == modes::NULLED)
+                if(natural_bucket < *active_bucket && trailing_mode == modes::NULLED)
                 {
                     active_bucket.reset();
                     meta.mode(modes::NULLED);
@@ -222,7 +223,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 candidate = control;
             }
 
-            prev_mode = mode;
+            trailing_mode = mode;
         }
         else
         {

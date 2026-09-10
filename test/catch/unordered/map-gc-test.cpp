@@ -63,14 +63,14 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             map_type::eol_helper eh;
 
             // Be mindful we have to start at '1' to match specified key (who is 1:1 with bucket#)
-            c[1] = { 1, active(0) };
+            c[1] = { 1, active(1) };
 
             REQUIRE(map.size() == 1);
             REQUIRE(map.bucket_size(1) == 1);
 
             SECTION("scenario 1")
             {
-                c[2] = { 1, active(1) };
+                c[2] = { 1, active(2) };
                 c[3] = { 0, eol(1) };
 
                 REQUIRE(map.size() == 2);
@@ -85,15 +85,31 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             }
             SECTION("scenario 2")
             {
-                c[2] = { 1, active(1) };
+                c[2] = { 1, active(2) };
                 c[3] = { 0, eol(1) };
                 c[4] = { 4, active(3) };
                 c[5] = { 0, tombstone() };
-                c[6] = { 6, active(5) };
+                c[6] = { 6, active(4) };
 
                 REQUIRE(map.bucket_size(1) == 2);
                 REQUIRE(map.bucket_size(4) == 1);
                 REQUIRE(map.bucket_size(6) == 1);
+
+                eh.null = &c[7];
+
+                // Turn trailing tombstones into null
+                map.null_boomerang(eh, 1);
+
+                REQUIRE(c[3].second.mode() == modes::NULLED);
+                REQUIRE(c[5].second.mode() == modes::NULLED);
+            }
+            SECTION("scenario 3")
+            {
+                c[2] = { 1, active(2) };
+                c[3] = { 0, eol(1) };
+                c[4] = { 4, active(3) };
+                c[5] = { 0, eol(4) };
+                c[6] = { 6, active(4) };
 
                 eh.null = &c[7];
 
@@ -109,7 +125,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
                 c[3] = { 0, eol(2) };
                 c[4] = { 1, active(3) };
                 c[5] = { 0, eol(1) };
-                c[6] = { 6, active(5) };
+                c[6] = { 6, active(4) };
 
                 eh.null = &c[7];
 
@@ -118,6 +134,19 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 REQUIRE(c[3].second.mode() == modes::EOL);
                 REQUIRE(c[5].second.mode() == modes::NULLED);
+            }
+            SECTION("scenario 6")
+            {
+                c[2] = { 0, tombstone() };
+                c[3] = { 1, active(2) };
+                c[4] = { 0, tombstone() };
+                c[5] = { 2, active(3) };
+                c[6] = { 0, eol(1) };
+                c[7] = { 2, active(4) };
+
+                eh.null = &c[8];
+
+                map.null_boomerang(eh, 1);
             }
         }
     }
