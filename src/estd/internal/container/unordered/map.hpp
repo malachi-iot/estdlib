@@ -134,6 +134,8 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // we're already done
     if(control == start)    return;
 
+    // candidate to see if we can translate him to a eol from a tombstone
+    // or a null from an eol
     control_pointer candidate = nullptr;
 
     using modes = unordered_map_control_enum::modes;
@@ -220,10 +222,10 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                     // aka anchored.  Remember even when == natural_bucket, active_bucket
                     // comes from tailing active item - so it's displaced
                     // (Scenario 6)
-                    // *perhaps* we can turn it into an eol if it's not one already
+                    // *perhaps* we can turn it into an eol if it's not one already.
+                    // To do that, active_bucket has to change to a new one
                     if(mode == modes::TOMBSTONE)
                     {
-                        hopeful_mode = modes::EOL;
                         candidate = control;
                     }
                     else
@@ -234,10 +236,21 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                     // Reaching here means:
                     // 1. natural_bucket < *active_bucket
                     // 2. trailing_mode != NULLED
-                    // FIX: Do some extra thinking to see if we can reset active_bucket here
-                    // FIX: We can't be sure if we want EOL/TOMBSTONE without extra checking
-                    hopeful_mode = modes::NULLED;
-                    candidate = control;
+
+                    // FIX: Doesn't activate yet
+                    if(mode == modes::TOMBSTONE &&
+                        trailing_meta->mode() == modes::EOL &&
+                        trailing_meta->bucket() < *active_bucket)
+                    {
+                        // Getting here means EOL for an earlier bucket is nestled in an
+                        // active bucket.  Remember active_buckets are singular right now (not
+                        // intermingling aware),
+                        // so that means NO elements of trailing_meta->bucket() appear in
+                        // the active_bucket, meaning we can move EOL forward
+                        meta = *trailing_meta;
+                    }
+
+                    candidate = nullptr;
                 }
             }
             // Otherwise, trailing entry was empty also but not null
@@ -281,15 +294,23 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 // if it's true (might still be false), so starting with false and letting
                 // further investigation prove us wrong
             }
-            else if(control_bucket > *active_bucket)
+            else if(control_bucket != *active_bucket)
             {
+                // Track the lowest as the active_bucket
+                // DEBT: Put in deeper description why, I'm a little too fried to remember
+                if(control_bucket < *active_bucket) *active_bucket = control_bucket;
+
                 // intermingled buckets, we only support one, so keep the lowest#
                 // since we only track ONE active_bucket, we can't easily determine null, so
                 // we are stuck with EOL mode of just one of the many simultaneous buckets
                 intermingled = true;
-                // we already have lowest bucket#
-                //active_bucket = control_bucket;
-                hopeful_mode = modes::EOL;
+
+                //hopeful_mode = modes::EOL;
+                if(candidate && trailing_meta->mode() == modes::TOMBSTONE)
+                {
+                    trailing_meta->mode(modes::EOL);
+                    trailing_meta->bucket(control_bucket);
+                }
             }
         }
     }
