@@ -166,6 +166,12 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         candidate = nullptr;
     };
 
+    // TODO: Add extra provision for noting the first occurence of searched-for 'n'
+    // to be sure we EOL tag him, regardless of intermingled/eol-tag logic.  NOTE,
+    // intermingled/eol-tag logic MIGHT be smart enough to not need that but I am skeptical.
+    // But it may be, considering 'n' is going to be the lowest bucket considered and
+    // intermingling focuses on the lowst bucket.
+
     // Tombstones encountered in this direction might be convertible to EOL/null
     // Walk down to and including starting bucket entry
     do  // NOLINT
