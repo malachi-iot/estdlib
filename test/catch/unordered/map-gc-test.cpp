@@ -146,7 +146,12 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 eh.null = &c[8];
 
+                // Nobody can change in this one
                 map.null_boomerang(eh, 1);
+
+                //REQUIRE(c[2].second.mode() == modes::TOMBSTONE);
+                //REQUIRE(c[4].second.mode() == modes::TOMBSTONE);
+                REQUIRE(c[6].second.mode() == modes::EOL);
             }
         }
     }

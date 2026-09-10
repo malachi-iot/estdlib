@@ -125,6 +125,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // 4.  A:1, B:2, EOL:2, C:1, EOL:1, D:6, N
     // 5.  A:1, B:2, EOL:2, C:1, N
     // 6.  A:1, T, B:1, T, C:2, EOL:1, D:2, N
+    // 7.  A:1, T, B:2, EOL:2, C:1, T, D:2, N
 
     control_pointer start = container_.begin() + n;
     control_pointer control = helper.null;
@@ -136,6 +137,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     control_pointer candidate = nullptr;
 
     using modes = unordered_map_control_enum::modes;
+    using meta_type = typename traits::meta;
 
     // where one more more displaced values are bunched together OR
     // there's a tombstone in the middle of a bucket (vs the end).
@@ -143,7 +145,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     bool intermingled = false;
     using optional_modes = estd::layer1::optional<modes, modes::MODES_MAX>;
     optional_modes hopeful_mode;
-    modes trailing_mode = modes::NULLED;
+    meta_type* trailing_meta = &control->second;
 
     // In fact multiple buckets can be active at once with enough intermingling.  We are not
     // advanced enough for that case just yet.  For the time being, active_bucket is the lowest
@@ -173,7 +175,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
 
         if(is_empty(*control))
         {
-            typename traits::meta& meta = control->second;
+            meta_type& meta = control->second;
             const modes mode = meta.mode();
 
             // null_boomerang expects that there are NO nulls between initial 'control'
@@ -199,18 +201,41 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             // We may be leaving a bucket
             else if(active_bucket.has_value())
             {
-                // If we are truly, fully leaving a bucket AND previous empty was a null,
+                // If we are truly, fully leaving a bucket AND trailing empty was a null,
                 // then we can be a null too
-                if(natural_bucket < *active_bucket && trailing_mode == modes::NULLED)
+                if(natural_bucket < *active_bucket && trailing_meta->mode() == modes::NULLED)
                 {
                     active_bucket.reset();
                     meta.mode(modes::NULLED);
                     candidate = nullptr;
                 }
+                else if(natural_bucket >= *active_bucket)
+                {
+                    // As with https://malachi.atlassian.net/wiki/x/AYD0DQ section 3.3.3
+                    // we can be sure that no further entries are in this bucket
+                    // DEBT: A more unified active_bucket.reset() would be appropriate
+                    if(natural_bucket == *active_bucket)    active_bucket.reset();
+
+                    // active bucket is displaced, meaning a tombstone has got to stay put
+                    // aka anchored.  Remember even when == natural_bucket, active_bucket
+                    // comes from tailing active item - so it's displaced
+                    // (Scenario 6)
+                    // *perhaps* we can turn it into an eol if it's not one already
+                    if(mode == modes::TOMBSTONE)
+                    {
+                        hopeful_mode = modes::EOL;
+                        candidate = control;
+                    }
+                    else
+                        candidate = nullptr;
+                }
                 else
                 {
+                    // Reaching here means:
+                    // 1. natural_bucket < *active_bucket
+                    // 2. trailing_mode != NULLED
                     // FIX: Do some extra thinking to see if we can reset active_bucket here
-                    // FIX: We can't be sure null will be valid here without extra checking
+                    // FIX: We can't be sure if we want EOL/TOMBSTONE without extra checking
                     hopeful_mode = modes::NULLED;
                     candidate = control;
                 }
@@ -223,7 +248,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 candidate = control;
             }
 
-            trailing_mode = mode;
+            trailing_meta = &meta;
         }
         else
         {
