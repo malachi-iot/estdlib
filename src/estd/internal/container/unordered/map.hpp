@@ -216,17 +216,18 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 // null is our ideal, so no need to further investigate any
                 // upgrade or treatment for this slot as a candidate
             }
-            // We may be leaving a bucket
+            // We may be leaving a bucket.  We are an EOL or TOMBSTONE
             else if(active_bucket.has_value())
             {
                 // If we are truly, fully leaving a bucket AND trailing empty was a null,
                 // then we can be a null too
-                if(natural_bucket < *active_bucket && *trailing_meta == modes::NULLED)
+                if(natural_bucket < *active_bucket)
                 {
                     active_bucket.reset();
-                    meta.mode(modes::NULLED);
+
+                    if(*trailing_meta == modes::NULLED) meta.mode(modes::NULLED);
                 }
-                else if(natural_bucket >= *active_bucket)
+                else
                 {
                     // As with https://malachi.atlassian.net/wiki/x/AYD0DQ section 3.3.3
                     // we can be sure that no further entries are in this bucket
@@ -241,14 +242,6 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                     // To do that, active_bucket has to change to a new one
                     if(mode == modes::TOMBSTONE)
                         candidate = control;
-                }
-                else
-                {
-                    // Reaching here means:
-                    // 1. natural_bucket < *active_bucket
-                    // 2. trailing_mode != NULLED
-
-                    active_bucket.reset();
                 }
 
                 if(mode == modes::EOL)  trailing_eol = &meta;
@@ -321,8 +314,14 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     while(control != start);
 
     if(candidate)
-        // DEBT: Pick up bucket from control_bucket, filtering out by intermingled somehow
-        assign_candidate(n);
+    {
+        // We expect active_bucket to be natural_bucket because we've moved all the way
+        // back to start, and natural_bucket when we reach the end is start.
+        // DEBT: May have an issue if no actual bucket entries for n# exist
+        assert(active_bucket == n);
+
+        assign_candidate(*active_bucket);
+    }
 }
 
 // NOT READY YET
