@@ -149,6 +149,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     using optional_modes = estd::layer1::optional<modes, modes::MODES_MAX>;
     optional_modes hopeful_mode;
     meta_type* trailing_meta = &control->second;
+    meta_type* trailing_eol = nullptr;
 
     // In fact multiple buckets can be active at once with enough intermingling.  We are not
     // advanced enough for that case just yet.  For the time being, active_bucket is the lowest
@@ -160,8 +161,17 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         if(hopeful_mode.has_value() == false) return;
 
         candidate->second.mode(*hopeful_mode);
-        // DEBT: Only assign this if it's EOL
-        candidate->second.bucket(n);
+
+        if(hopeful_mode == modes::EOL)
+        {
+            // If we're moving an EOL forward, tombstone-ize the old EOL
+            if(trailing_eol && trailing_eol->bucket() == n)
+            {
+                trailing_eol->mode(modes::TOMBSTONE);
+            }
+
+            candidate->second.bucket(n);
+        }
 
         hopeful_mode.reset();
         candidate = nullptr;
@@ -256,6 +266,8 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
 
                     candidate = nullptr;
                 }
+
+                if(mode == modes::EOL)  trailing_eol = &meta;
             }
             // Otherwise, trailing entry was empty also but not null
             else

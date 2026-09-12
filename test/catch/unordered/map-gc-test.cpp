@@ -150,7 +150,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
                 REQUIRE(c[2].second.mode() == modes::TOMBSTONE);
                 REQUIRE(c[4].second.mode() == modes::EOL);
                 REQUIRE(c[4].second.bucket() == 1);
-                REQUIRE(c[6].second.mode() == modes::EOL);
+                REQUIRE(c[6].second.mode() == modes::TOMBSTONE);
             }
             SECTION("scenario 7")
             {
@@ -163,7 +163,12 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
                 eh.null = &c[8];
 
+                // We can change c[6] tombstone -> EOL
                 map.null_boomerang(eh, 1);
+
+                REQUIRE(c[2].second.mode() == modes::TOMBSTONE);
+                REQUIRE(c[6].second.mode() == modes::EOL);
+                REQUIRE(c[6].second.bucket() == 1);
             }
         }
     }
