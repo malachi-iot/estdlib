@@ -21,6 +21,7 @@ struct traits : internal::unordered_map_traits<uint8_t, double>
 TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 {
     using map_type = estd::layer1::detail::unordered_map<16, traits>;
+    using control_type = map_type::control_type;
     using modes = estd::internal::unordered_map_control_enum::modes;
 
     map_type map;
@@ -37,25 +38,22 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
         map_type::container_type& c = map.container();
         using meta_type = map_type::meta;
         //using control = typename map_type::control_type;
-        meta_type test;
 
-        auto active = [&](double v)
+        auto active = [](double v)
         {
+            meta_type test;
             test.mapped() = v;
             return test;
         };
 
-        auto tombstone = [&]()
+        auto tombstone = []()
         {
-            test.mode(modes::TOMBSTONE);
-            return test;
+            return control_type{ 0, meta_type::create_tombstone() };
         };
 
-        auto eol = [&](unsigned n)
+        auto eol = [](unsigned n)
         {
-            test.bucket(n);
-            test.mode(modes::EOL);
-            return test;
+            return control_type{ 0, meta_type::create_eol(n) };
         };
 
         SECTION("boomerang")
@@ -71,7 +69,7 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             SECTION("scenario 1")
             {
                 c[2] = { 1, active(2) };
-                c[3] = { 0, eol(1) };
+                c[3] = eol(1);
 
                 REQUIRE(map.size() == 2);
                 REQUIRE(map.bucket_size(1) == 2);
@@ -86,9 +84,9 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             SECTION("scenario 2")
             {
                 c[2] = { 1, active(2) };
-                c[3] = { 0, eol(1) };
+                c[3] = eol(1);
                 c[4] = { 4, active(3) };
-                c[5] = { 0, tombstone() };
+                c[5] = tombstone();
                 c[6] = { 6, active(4) };
 
                 REQUIRE(map.bucket_size(1) == 2);
@@ -106,9 +104,9 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             SECTION("scenario 3")
             {
                 c[2] = { 1, active(2) };
-                c[3] = { 0, eol(1) };
+                c[3] = eol(1);
                 c[4] = { 4, active(3) };
-                c[5] = { 0, eol(4) };
+                c[5] = eol(4);
                 c[6] = { 6, active(4) };
 
                 eh.null = &c[7];
@@ -122,9 +120,9 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             SECTION("scenario 4")
             {
                 c[2] = { 2, active(2) };
-                c[3] = { 0, eol(2) };
+                c[3] = eol(2);
                 c[4] = { 1, active(3) };
-                c[5] = { 0, eol(1) };
+                c[5] = eol(1);
                 c[6] = { 6, active(4) };
 
                 eh.null = &c[7];
@@ -137,11 +135,11 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             }
             SECTION("scenario 6")
             {
-                c[2] = { 0, tombstone() };
+                c[2] = tombstone();
                 c[3] = { 1, active(2) };
-                c[4] = { 0, tombstone() };
+                c[4] = tombstone();
                 c[5] = { 2, active(3) };
-                c[6] = { 0, eol(1) };
+                c[6] = eol(1);
                 c[7] = { 2, active(4) };
 
                 eh.null = &c[8];
@@ -156,11 +154,11 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             }
             SECTION("scenario 7")
             {
-                c[2] = { 0, tombstone() };
+                c[2] = tombstone();
                 c[3] = { 2, active(2) };
-                c[4] = { 0, eol(2) };
+                c[4] = eol(2);
                 c[5] = { 1, active(3) };
-                c[6] = { 0, tombstone() };
+                c[6] = tombstone();
                 c[7] = { 2, active(4) };
 
                 eh.null = &c[8];

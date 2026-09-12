@@ -144,6 +144,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
     // where one more more displaced values are bunched together OR
     // there's a tombstone in the middle of a bucket (vs the end).
     // needs a better name
+    [[maybe_unused]]    // Currently unused but I have a feeling he's coming back
     bool intermingled = false;
     using optional_modes = estd::layer1::optional<modes, modes::MODES_MAX>;
     optional_modes hopeful_mode;

@@ -80,6 +80,9 @@ struct unordered_map_control_enum
 
         MODES_MAX
     };
+
+    template <modes m>
+    using modes_constant = integral_constant<modes, m>;
 };
 
 ESTD_CPP_CONSTEXPR(14) const char* to_string(unordered_map_control_enum::modes v, const char* default_value = "N/A")
@@ -106,6 +109,7 @@ inline std::ostream& operator<<(std::ostream& out, unordered_map_control_enum::m
 template <class Key, class Mapped>
 struct unordered_map_traits_control : unordered_map_control_enum
 {
+    using this_type = unordered_map_traits_control;
     using key_type = Key;
     using mapped_type = Mapped;
 
@@ -168,6 +172,32 @@ struct unordered_map_traits_control : unordered_map_control_enum
         ESTD_CPP_CONSTEXPR(14) void reset()
         {
             raw = 0;
+        }
+
+        ESTD_CPP_CONSTEXPR(20) meta() = default;
+
+        // Only c++20 permits constexpr w/o fully initializing union
+        ESTD_CPP_CONSTEXPR(20) explicit meta(modes_constant<TOMBSTONE>)
+        {
+            mode(TOMBSTONE);
+        }
+
+        ESTD_CPP_CONSTEXPR(20) explicit meta(modes_constant<EOL>, unsigned bucket)
+        {
+            mode(EOL);
+            this->bucket(bucket);
+        }
+
+
+        // Pseudo factory helpers.  Probably only useful for diagnostics
+        static constexpr meta create_tombstone()
+        {
+            return meta(modes_constant<TOMBSTONE>{});
+        }
+
+        static constexpr meta create_eol(unsigned bucket)
+        {
+            return meta(modes_constant<EOL>{}, bucket);
         }
     };
 
