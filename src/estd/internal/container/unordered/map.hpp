@@ -280,6 +280,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             {
                 active_bucket = control_bucket;
             }
+            // DEBT: https://github.com/malachi-iot/estdlib/issues/235
             else if(natural_bucket < *active_bucket)
             {
                 // Moving to new bucket boundary.  Not innately intermingled due to
@@ -302,9 +303,10 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             }
             else if(control_bucket != *active_bucket)
             {
-                // Track the lowest as the active_bucket
-                // DEBT: Put in deeper description why, I'm a little too fried to remember
-                if(control_bucket < *active_bucket) *active_bucket = control_bucket;
+                // Track the lowest as the active_bucket to optimize start-of-bucket
+                // detection and EOL tagging
+                // See https://malachi.atlassian.net/wiki/x/AYD0DQ Section 4.2.2.
+                if(control_bucket < *active_bucket) active_bucket = control_bucket;
 
                 // intermingled buckets, we only support one, so keep the lowest#
                 // since we only track ONE active_bucket, we can't easily determine null, so
@@ -312,8 +314,14 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 intermingled = true;
 
                 //hopeful_mode = modes::EOL;
+                // https://malachi.atlassian.net/wiki/x/AYD0DQ Section 3.3.4 -
+                // but we may not really want to do this
                 if(candidate && trailing_meta->mode() == modes::TOMBSTONE)
                 {
+                    assert(trailing_meta == &candidate->second);
+
+                    //hopeful_mode = modes::EOL;
+
                     trailing_meta->mode(modes::EOL);
                     trailing_meta->bucket(control_bucket);
                 }

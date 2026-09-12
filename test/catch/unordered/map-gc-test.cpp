@@ -154,6 +154,10 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
                 REQUIRE(c[4].second.bucket() == 1);
                 REQUIRE(c[6].second.mode() == modes::EOL);
             }
+            SECTION("scenario 7")
+            {
+
+            }
         }
     }
     // NOTE: Doing inserts not emplace to gain access to permit_duplicates
