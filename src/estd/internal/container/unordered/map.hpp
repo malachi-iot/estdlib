@@ -191,10 +191,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             assert(mode != modes::NULLED);
 
             // Previous candidate was selected, let's see what we can do about him
-            if(candidate)
-            {
-                if(!intermingled)   assign_candidate(n);
-            }
+            if(candidate)   assign_candidate(active_bucket ? *active_bucket : n);
 
             // Any tombstone next to a NULLED is automatically converted to NULLED also
             // (Scenario 1)
@@ -320,10 +317,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 {
                     assert(trailing_meta == &candidate->second);
 
-                    //hopeful_mode = modes::EOL;
-
-                    trailing_meta->mode(modes::EOL);
-                    trailing_meta->bucket(control_bucket);
+                    hopeful_mode = modes::EOL;
                 }
             }
         }

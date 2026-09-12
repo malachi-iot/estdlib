@@ -156,7 +156,16 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
             }
             SECTION("scenario 7")
             {
+                c[2] = { 0, tombstone() };
+                c[3] = { 2, active(2) };
+                c[4] = { 0, eol(2) };
+                c[5] = { 1, active(3) };
+                c[6] = { 0, tombstone() };
+                c[7] = { 2, active(4) };
 
+                eh.null = &c[8];
+
+                map.null_boomerang(eh, 1);
             }
         }
     }
