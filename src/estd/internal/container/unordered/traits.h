@@ -199,6 +199,11 @@ struct unordered_map_traits_control : unordered_map_control_enum
         {
             return meta(modes_constant<EOL>{}, bucket);
         }
+
+        constexpr bool operator==(modes m) const
+        {
+            return m == mode();
+        }
     };
 
     using control_type = pair<key_type, meta>;

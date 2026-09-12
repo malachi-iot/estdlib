@@ -174,7 +174,6 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         }
 
         hopeful_mode.reset();
-        candidate = nullptr;
     };
 
     // TODO: Add extra provision for noting the first occurence of searched-for 'n'
@@ -202,7 +201,11 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
             assert(mode != modes::NULLED);
 
             // Previous candidate was selected, let's see what we can do about him
-            if(candidate)   assign_candidate(active_bucket ? *active_bucket : n);
+            if(candidate)
+            {
+                assign_candidate(active_bucket ? *active_bucket : n);
+                candidate = nullptr;
+            }
 
             // Any tombstone next to a NULLED is automatically converted to NULLED also
             // (Scenario 1)
@@ -212,18 +215,16 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 hopeful_mode = modes::NULLED;
                 // null is our ideal, so no need to further investigate any
                 // upgrade or treatment for this slot as a candidate
-                candidate = nullptr;
             }
             // We may be leaving a bucket
             else if(active_bucket.has_value())
             {
                 // If we are truly, fully leaving a bucket AND trailing empty was a null,
                 // then we can be a null too
-                if(natural_bucket < *active_bucket && trailing_meta->mode() == modes::NULLED)
+                if(natural_bucket < *active_bucket && *trailing_meta == modes::NULLED)
                 {
                     active_bucket.reset();
                     meta.mode(modes::NULLED);
-                    candidate = nullptr;
                 }
                 else if(natural_bucket >= *active_bucket)
                 {
@@ -239,11 +240,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                     // *perhaps* we can turn it into an eol if it's not one already.
                     // To do that, active_bucket has to change to a new one
                     if(mode == modes::TOMBSTONE)
-                    {
                         candidate = control;
-                    }
-                    else
-                        candidate = nullptr;
                 }
                 else
                 {
@@ -251,28 +248,16 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                     // 1. natural_bucket < *active_bucket
                     // 2. trailing_mode != NULLED
 
-                    // FIX: Doesn't activate yet
-                    if(mode == modes::TOMBSTONE &&
-                        trailing_meta->mode() == modes::EOL &&
-                        trailing_meta->bucket() < *active_bucket)
-                    {
-                        // Getting here means EOL for an earlier bucket is nestled in an
-                        // active bucket.  Remember active_buckets are singular right now (not
-                        // intermingling aware),
-                        // so that means NO elements of trailing_meta->bucket() appear in
-                        // the active_bucket, meaning we can move EOL forward
-                        meta = *trailing_meta;
-                    }
-
-                    candidate = nullptr;
+                    active_bucket.reset();
                 }
 
                 if(mode == modes::EOL)  trailing_eol = &meta;
             }
-            // Otherwise, trailing entry was empty also but not null
+            // Otherwise, trailing entry was an EOL or TOMBSTONE
+            // Reaching here also means no active_bucket is present
             else
             {
-                // FIX: We can't be what empty mode is valid here without extra checking
+                // FIX: We can't know what empty mode is valid here without extra checking
                 hopeful_mode = modes::TOMBSTONE;
                 candidate = control;
             }
@@ -281,7 +266,7 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
         }
         else
         {
-            unsigned control_bucket = index(traits::key(*control));
+            const unsigned control_bucket = index(traits::key(*control));
 
             // Active bucket changes if:
             // 1.  We had none yet
@@ -299,7 +284,11 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
 
                 // Fully leaving one bucket region for another means it's time to try to
                 // write our null/eol candidate
-                if(candidate)   assign_candidate(*active_bucket);
+                if(candidate)
+                {
+                    assign_candidate(*active_bucket);
+                    candidate = nullptr;
+                }
 
                 // Observe that we don't assign to active_bucket.  active_bucket
                 // mainly helps us determine what to do next, but we still are interested
@@ -323,15 +312,9 @@ void unordered_map<Container, Traits>::null_boomerang(const eol_helper& helper, 
                 // we are stuck with EOL mode of just one of the many simultaneous buckets
                 intermingled = true;
 
-                //hopeful_mode = modes::EOL;
-                // https://malachi.atlassian.net/wiki/x/AYD0DQ Section 3.3.4 -
-                // but we may not really want to do this
-                if(candidate && trailing_meta->mode() == modes::TOMBSTONE)
-                {
-                    assert(trailing_meta == &candidate->second);
-
+                // https://malachi.atlassian.net/wiki/x/AYD0DQ Section 3.3.4 and 3.3.5
+                if(candidate && candidate->second == modes::TOMBSTONE)
                     hopeful_mode = modes::EOL;
-                }
             }
         }
     }
