@@ -22,6 +22,7 @@ struct exp_manipulator : detail::ostream_functor_tag
 };
 
 // EXPERIMENTAL
+// See https://github.com/malachi-iot/estdlib/issues/178
 template <class Derived>
 class sstream_crtp : public Derived
 {
