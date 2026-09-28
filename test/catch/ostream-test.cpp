@@ -1,8 +1,8 @@
 #include <catch2/catch_all.hpp>
 
+#include <estd/iomanip.h>
 #include <estd/ostream.h>
 #include <estd/sstream.h>
-#include <estd/iomanip.h>
 
 using namespace estd;
 

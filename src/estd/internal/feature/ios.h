@@ -6,6 +6,8 @@
 #define FEATURE_ESTD_IOS_GCOUNT 1
 #endif
 
+// 28SEP26 MB DEBT: Should only be on for 16-bit architectures, otherwise
+// ios_base is usually gonna expand out to 32+ bits anyway
 #ifndef FEATURE_ESTD_AGGRESSIVE_BITFIELD
 #define FEATURE_ESTD_AGGRESSIVE_BITFIELD 1
 #endif

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../type_traits.h"
-#include "locale.h"
 #include "../cstdint.h"
 #include "iosfwd.h"
 
@@ -12,7 +11,7 @@ namespace estd {
 class ios_base
 {
 public:
-    typedef uint8_t fmtflags;
+    using fmtflags = uint8_t;
 
     // NOTE: Spec appears to conflict with itself.
     // https://en.cppreference.com/w/cpp/io/ios_base/fmtflags suggests we have carte blanche
