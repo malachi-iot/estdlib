@@ -30,7 +30,7 @@ template <class T, std::size_t N>
 class memory_pool<T, N, pool_types::linked_list>
 {
 private:
-    union item
+    union alignas(void*) item
     {
         item* next;
         // NOTE: Usage of estd::array may implicitly bring along
@@ -78,7 +78,15 @@ public:
 
     void deallocate(value_type* value)
     {
-        item* i = reinterpret_cast<item*>(value);
+        // Generally not necessary since we ourselves are providing the pointer in the first place.
+        // If this assert triggers, then some kind of pointer corruption occurred
+        assert(is_sufficiently_aligned<sizeof(void*)>(value));
+
+        auto address = reinterpret_cast<uintptr_t>(value);  // NOLINT
+        auto i = reinterpret_cast<item*>(address);          // NOLINT
+
+        // Compiler is annoyed with this guy because he can't tell if alignments match
+        //item* i = reinterpret_cast<item*>(value);
 
         i->next = head;
         head = i;
