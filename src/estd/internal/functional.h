@@ -82,7 +82,7 @@ namespace experimental {
 // kind of a blend of reference_wrapper and aligned_storage
 // experimental, but very useful (abusing raw_instance_provider for this right now)
 // NOTE: This in theory could be 1:1 with a fixed allocator, who should be using aligned_storage too
-// DEBT: Rework all this with new 'variant_storage' behavior in mind
+// DEBT: Rework all this with variant's 'instance_storage' behavior in mind
 template <class T, size_t Align = alignof(T)>
 class instance_wrapper
 {

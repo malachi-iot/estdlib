@@ -405,16 +405,27 @@ TEST_CASE("variant")
         }
         SECTION("single instance")
         {
-            internal::instance_storage<test::NonTrivial> storage;
+            SECTION("trivial")
+            {
+                internal::instance_storage<test::NonCopyable> storage;
 
-            storage.emplace(0);
+                storage->val = 5;
 
-            REQUIRE(storage.get()->initialized_ == true);
-            REQUIRE(storage.get()->destroyed_ == false);
+                REQUIRE(storage->val == 5);
+            }
+            SECTION("non-trivial")
+            {
+                internal::instance_storage<test::NonTrivial> storage;
 
-            storage.destroy();
+                storage.emplace(0);
 
-            REQUIRE(storage.get()->destroyed_);
+                REQUIRE(storage.get()->initialized_ == true);
+                REQUIRE(storage.get()->destroyed_ == false);
+
+                storage.destroy();
+
+                REQUIRE(storage.get()->destroyed_);
+            }
         }
         SECTION("assign into")
         {

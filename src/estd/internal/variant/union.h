@@ -42,6 +42,9 @@ struct variant_storage<I_active, I, Head, Tail...>
 
 namespace estd { namespace internal {
 
+// 30SEP26 MB DEBT: Either augment these unions to heed alignment of ...T *or* document
+// why we don't need to (probabably unions know to do this already)
+
 // Catches both trivial and non-trivial so that our debug friendly specializations below
 // have a fallback when things get too large
 template <bool trivial, class ...T>

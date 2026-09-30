@@ -235,6 +235,7 @@ struct instance_provider
 // DEBT: std C++ has a thing akin to this, aligned_storage - but that is
 // deprecated.  Our particular flavor does not currently attempt to align
 // storage... but maybe it should?
+// 30SEP26 MB DEBT: Likely we should phase this out in favor of our variant's instance_storage
 /**
  * Useful for scenarios where one can't do RAII pattern
  * @tparam T
