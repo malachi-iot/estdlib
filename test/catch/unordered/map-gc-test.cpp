@@ -34,7 +34,6 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
 
     SECTION("low level")
     {
-        using modes = map_type::modes;
         map_type::container_type& c = map.container();
         using meta_type = map_type::meta;
         //using control = typename map_type::control_type;
@@ -192,14 +191,17 @@ TEST_CASE("unordered_map gc", "[unordered][map][unordered_map][gc]")
     {
         map.insert({ 1, 1.1 }, true);
         it = map.insert({1, 1.2}, true);
-        map.insert({2, 2.1}, true);
+        map.insert({2, 2.1}, false);
         map.erase(it.first);
         REQUIRE(map.bucket_size(bucket) == 1);
+
+        // Erasing 'it' ultimately calls find_and_mark_eol which will tag us as EOL at a minimum
         map_type::control_pointer control = map.cast_control(it.first.operator->());
         const map_type::meta& meta = control->second;
         // FIX: In fact, this ought to be NULLED since he can deduce that no other bucket 1's appear.
         // If we operate in an abbreviated mode, EOL is OK - but we haven't coded out an abbreviated
-        // mode yet
+        // mode yet.  "Abbreviated" means some combination of auto_prune = false OR null_boomerang
+        // doesn't get called, I don't fully remember
         REQUIRE(meta.mode() == modes::EOL);
         REQUIRE(meta.bucket() == bucket);
     }

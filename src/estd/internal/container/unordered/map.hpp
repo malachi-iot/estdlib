@@ -45,6 +45,8 @@ void unordered_map<Container, Traits>::erase_ll(
         // Look for last tombstone and mark it as eol
         find_and_mark_eol(control, n, &helper);
 
+        // Go backward from discovered null and see if we can null out additional
+        // entries
         if(helper.null)    null_boomerang(helper, n);
     }
 }

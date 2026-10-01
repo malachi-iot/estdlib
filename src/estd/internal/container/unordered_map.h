@@ -406,10 +406,14 @@ public:
     };
 
     /// For a given bucket, search until null or wraparound occurs and if a
-    /// tombstone is found along the way, mark it with eol
+    /// tombstone is found along the way, mark it with eol.  NULLED entry, if
+    /// present, is indicated in output eol_helper->null
     /// @param control - where to start search from
     /// @param n - bucket
     /// @return true when eol actually got marked
+    /// DEBT: Perhaps this should be named find_or_mark_eol since an existing eol in the right spot
+    /// will be left alone.  However this feels like an English vagueness - we're finding, then marking,
+    /// the found tombstone.  That IS an and
     bool find_and_mark_eol(control_pointer control, unsigned n, eol_helper* = nullptr);
 
     /// DEBT: Rename and document
@@ -425,7 +429,7 @@ public:
     //  Other iterators and references are not invalidated. "
     void erase_ll(find_result<control_pointer> pos, bool auto_prune = true);
 
-    // equivelant to erase with iterator, but merely takes direct value_type*
+    // equivalent to erase with iterator, but merely takes direct value_type*
     void erase_ll(pointer pos)
     {
         erase_ll({ cast_control(pos), index(traits::key(*pos)) });
