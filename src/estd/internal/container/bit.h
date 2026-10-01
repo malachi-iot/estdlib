@@ -49,6 +49,24 @@ ESTD_CPP_CONSTEXPR(14) void bit_packed_write_be_lsb(uint8_t* data, Int value)
     *data |= value;
 }
 
+/// Set all bits to zero
+template <unsigned pos, unsigned width, class Int>
+ESTD_CPP_CONSTEXPR(14) void bit_packed_reset_lsb(uint8_t* data)
+{
+    static_assert(pos == 0, "Only byte-aligned support at this time");
+    static_assert(width % 8 == 0, "Only byte aligned supported at this time");
+
+    //constexpr unsigned byte_pos = pos / 8;
+    //constexpr unsigned mask = (1U << width) - 1;
+    //constexpr unsigned bit_pos = pos % 8;
+
+    // UNTESTED
+    for(unsigned byte_width = width % 8; byte_width != 0; --byte_width, --data)
+    {
+        *data = 0;
+    }
+}
+
 template <unsigned pos, unsigned width, class Int = unsigned>
 struct bit_packed
 {
@@ -60,6 +78,12 @@ struct bit_packed
     static ESTD_CPP_CONSTEXPR(14) void write(uint8_t* data, Int value)
     {
         bit_packed_write_be_lsb<pos, width>(data, value);
+    }
+
+    // UNTESTED
+    static ESTD_CPP_CONSTEXPR(14) void reset(uint8_t* data)
+    {
+        bit_packed_reset_lsb<pos, width>(data);
     }
 };
 

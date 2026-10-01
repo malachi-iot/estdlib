@@ -128,6 +128,8 @@ struct unordered_map_traits_control : unordered_map_control_enum
     // Mainly used for unordered_map since it has an unused area when key is null
     union alignas(align_value) meta
     {
+        // 01OCT26 DEBT: Double check that we don't need to pad out storage size too
+        // for alignment (probably above alignas is sufficient)
         uint8_t storage[sizeof(mapped_type)];
 
         // Used to use bit-packed struct fields but compiler gets its own ideas how to align it and
@@ -138,6 +140,9 @@ struct unordered_map_traits_control : unordered_map_control_enum
             using mode = bit_packed<8, 2>;
         };
 
+        // DEBT: Somewhat convenient spot to zero out/reserve minimum size.  However, mainly
+        // a holdover from bit-packed struct which we don't do anymore so we can likely remove
+        // this thus turning 'meta' into a struct
         uint16_t raw;
 
         constexpr unsigned bucket() const
