@@ -3,6 +3,8 @@
 Usage:
   python3 -m estd.unity.decode < log.txt
 """
+
+# Authored by Grok OSS Bot on behalf of Malachi Burke
 from __future__ import annotations
 
 import sys
