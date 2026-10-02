@@ -57,7 +57,6 @@ jobs:
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
         command: idf.py qemu --qemu-extra-args="-no-reboot" | tee qemu_output.txt
-    # Authored by Grok OSS Bot on behalf of Malachi Burke
     - name: Install estd build-tooling
       if: env.ENABLE_QEMU=='true'
       run: python3 -m pip install ./tools

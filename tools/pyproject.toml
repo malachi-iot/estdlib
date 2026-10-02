@@ -1,6 +1,5 @@
 # Exposes 'python' folder as consumable tools for other repos
 
-# Authored by Grok OSS Bot on behalf of Malachi Burke
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
