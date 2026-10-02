@@ -57,8 +57,9 @@ jobs:
         target: ${{ matrix.target }}
         path: 'test/esp-idf/unity'
         command: idf.py qemu --qemu-extra-args="-no-reboot" | tee qemu_output.txt
-    - name: "QEMU output inspection"
+    - name: Install estd build-tooling
       if: env.ENABLE_QEMU=='true'
-      # 29APR26 MB: Almost there.  Python looks to be parsing well, just doing nothing
-      # with it.
-      run: cat test/esp-idf/unity/qemu_output.txt | tools/esp-idf/unity-gh-action.py
+      run: python3 -m pip install ./tools
+    - name: Unity output inspection
+      if: env.ENABLE_QEMU=='true'
+      run: python3 -m estd.unity.decode < test/esp-idf/unity/qemu_output.txt

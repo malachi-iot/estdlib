@@ -6,9 +6,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "build-tooling"
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.10"
-description = "estd semver and git helpers"
+description = "estd semver, git helpers, and Unity test-summary decode"
+
+# Optional PATH launcher (unused for now — CI uses: python3 -m estd.unity.decode)
+# [project.scripts]
+# estd-unity-decode = "estd.unity.decode:main"
 
 [tool.setuptools.packages.find]
 where = ["python"]
