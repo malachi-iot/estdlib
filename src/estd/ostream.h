@@ -50,6 +50,17 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
     return out.write(s, traits_type::length(s));
 }
 
+
+template <class Streambuf, class Base>
+enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostream<Streambuf, Base>>& operator <<(
+    basic_ostream<Streambuf, Base>& out,
+    const char* s)
+{
+    using traits_type = char_traits<char>;
+    using char_type = typename Base::char_type;
+    return out.write(reinterpret_cast<const char_type*>(s), traits_type::length(s));
+}
+
 #if __cplusplus >= 201103L
 template <class TStreambuf, class TBase, typename T,
         class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
@@ -123,6 +134,14 @@ inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base
 #endif
 
     return out.put(ch);
+}
+
+template <class Streambuf, class Base>
+enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostream<Streambuf, Base>>&
+    operator <<(basic_ostream<Streambuf, Base>& out, char ch)
+{
+    // DEBT: Apply above SETW things too
+    return out.put(out.widen(ch));
 }
 
 

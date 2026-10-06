@@ -320,6 +320,20 @@ TEST_CASE("ostream")
             REQUIRE(buf[1] == 6);
         }
     }
+    SECTION("uint8_t char type")
+    {
+        union
+        {
+            uint8_t buf[128]{};
+            char buf_ch[128];
+        };
+        estd::span<uint8_t> span(buf);
+
+        estd::detail::basic_ospanstream<uint8_t> out(span);
+
+        out << "Hello";
+        out << '!';
+    }
 }
 
 #include "macro/pop.h"
