@@ -117,7 +117,7 @@ public:
     char_type fill() const { return ' '; }
 #endif
 
-    // DEBT: Make protected, and also -- I really think std has something like this already
+    // Non-standard call, put 'fill' character n times
     void fill_n(streamsize n)
     {
         return fill_n(fill(), n);

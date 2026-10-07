@@ -47,6 +47,7 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
                                                          const typename TBase::char_type* s)
 {
     typedef typename TBase::traits_type traits_type;
+    // DEBT: Doesn't do width/fill alignment yet.  See https://github.com/malachi-iot/estdlib/issues/242
     return out.write(s, traits_type::length(s));
 }
 
@@ -58,7 +59,20 @@ enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostre
 {
     using traits_type = char_traits<char>;
     using char_type = typename Base::char_type;
-    return out.write(reinterpret_cast<const char_type*>(s), traits_type::length(s));
+
+    // DEBT: Doesn't do width/fill alignment yet.  See https://github.com/malachi-iot/estdlib/issues/242
+
+    ESTD_CPP_IF_CONSTEXPR(sizeof(char_type) == sizeof(char))
+    {
+        // 07OCT26 DEBT MB: Technically even matching character sizes ought to get the widen treatment.  However,
+        // usually implicitly treating char as whatever 8-bit char_type is is probably good enough
+        return out.write(reinterpret_cast<const char_type*>(s), traits_type::length(s));
+    }
+    else
+    {
+        // 07OCT26 DEBT MB: Explore ways to optimize this
+        for(; *s; ++s)  out.put(out.widen(*s));
+    }
 }
 
 #if __cplusplus >= 201103L
@@ -126,7 +140,8 @@ template <class Streambuf, class Base>
 inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
     typename Base::char_type ch)
 {
-    // DEBT: fill_n silently eats < 0 so this is safe, but could be clearer
+    // DEBT: fill_n silently eats < 0 so this is safe, but could be clearer.  Also this presumes
+    // ios_base::left.  See https://github.com/malachi-iot/estdlib/issues/242
     out.fill_n(out.width() - 1);
     out.width(0);
 

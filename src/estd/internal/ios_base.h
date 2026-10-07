@@ -243,6 +243,7 @@ protected:
 
     // DEBT: Ancient code, not even AVR is gonna pack a struct in a hierarchy down to 8 bits and the
     // consequence is lowercase ASCII fillchar is not supported
+    // See https://github.com/malachi-iot/estdlib/issues/242
     struct ostream_internal
     {
         // NOTE: Hitting compiler warning bug

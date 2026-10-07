@@ -336,6 +336,10 @@ TEST_CASE("ostream")
         {
             out << "Hello";
             out << '!';
+
+            REQUIRE_THAT(span_type(span.data(), 5),
+                Catch::Matchers::RangeEquals(
+                    estd::span<const char>("Hello!", 5)));
         }
         SECTION("fill_n")
         {
