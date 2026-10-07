@@ -339,14 +339,12 @@ TEST_CASE("ostream")
         }
         SECTION("fill_n")
         {
-            out.fill('x');
+            out.fill('X');
             out.fill_n(4);
 
-            // FIX: ADL collision
-            /*
-            REQUIRE_THAT(span_type(span.data(), 4),
+            REQUIRE_THAT(span_type(span.data(), 5),
                 Catch::Matchers::RangeEquals(
-                    estd::span<const uint8_t>((const uint8_t*)"xxxx", 4))); */
+                    estd::span<const char>("XXXX\0", 5)));
         }
     }
 }

@@ -12,6 +12,14 @@
 #include <span>
 #endif
 
+#if FEATURE_STD_ITERATOR && !defined(FEATURE_ESTD_STD_ITERATOR_ALIAS)
+#define FEATURE_ESTD_STD_ITERATOR_ALIAS 1
+#endif
+
+#if FEATURE_ESTD_STD_ITERATOR_ALIAS
+#include <iterator>
+#endif
+
 namespace estd {
 
 namespace internal {
@@ -141,6 +149,14 @@ struct container_traits<T[N]> : type_identity<T[N]>, container_traits_core<T, N>
 
 }
 
+#if FEATURE_ESTD_STD_ITERATOR_ALIAS
+using std::cbegin;
+using std::cend;
+using std::begin;
+using std::end;
+using std::data;
+using std::size;
+#else
 #pragma push_macro("CTRAITS")
 #define CTRAITS internal::container_traits<estd::remove_const_t<C>>
 
@@ -209,5 +225,6 @@ constexpr typename CTRAITS::size_type size(const C& c)
 }
 
 #pragma pop_macro("CTRAITS")
+#endif
 
 }

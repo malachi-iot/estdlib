@@ -241,6 +241,8 @@ protected:
     typedef typename positioning_type::values positioning;
 #endif
 
+    // DEBT: Ancient code, not even AVR is gonna pack a struct in a hierarchy down to 8 bits and the
+    // consequence is lowercase ASCII fillchar is not supported
     struct ostream_internal
     {
         // NOTE: Hitting compiler warning bug
@@ -248,8 +250,8 @@ protected:
         // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
         positioning alignment : 2;  // DEBT: Unused
 
-        // DEBT: Presumes ASCII, 7-bit.  Unicode and friends are out
-        char fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
+        // DEBT: Presumes ASCII, 7-bit.  Unicode, lowercase and friends are out
+        unsigned fillchar : 6;          // + 32 (from ' ' to '`' ASCII)
         //bool showbase : 1;          // DEBT: Unused
 
         ESTD_CPP_CONSTEXPR_RET ostream_internal() :

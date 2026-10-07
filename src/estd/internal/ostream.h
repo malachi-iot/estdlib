@@ -93,7 +93,6 @@ private:
 protected:
     void fill_n(char_type c, streamsize n)
     {
-        // DEBT: Does n - 1 'c' characters
         while(n-- > 0) put(c);
     }
 
@@ -105,10 +104,11 @@ public:
         return 0x20 + ostream_.fillchar;
     }
 
+    // DEBT: ASCII only
     char_type fill(char_type ch)
     {
         char_type old_fill = fill();
-        ostream_.fillchar = 0x20 + ch;
+        ostream_.fillchar = (unsigned)ch - 0x20;
         return old_fill;
     }
 #else

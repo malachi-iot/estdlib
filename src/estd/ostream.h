@@ -126,12 +126,9 @@ template <class Streambuf, class Base>
 inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
     typename Base::char_type ch)
 {
-#if FEATURE_ESTD_OSTREAM_SETW
-    const streamsize pad = out.width();
-
-    out.fill_n(pad - 1);
+    // DEBT: fill_n silently eats < 0 so this is safe, but could be clearer
+    out.fill_n(out.width() - 1);
     out.width(0);
-#endif
 
     return out.put(ch);
 }
@@ -140,7 +137,9 @@ template <class Streambuf, class Base>
 enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostream<Streambuf, Base>>&
     operator <<(basic_ostream<Streambuf, Base>& out, char ch)
 {
-    // DEBT: Apply above SETW things too
+    out.fill_n(out.width() - 1);
+    out.width(0);
+
     return out.put(out.widen(ch));
 }
 
