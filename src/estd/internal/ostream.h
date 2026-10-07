@@ -107,6 +107,7 @@ public:
     // DEBT: ASCII only
     char_type fill(char_type ch)
     {
+        assert(ch <= 96);       // DEBT: Only 6 bits supported at this time
         char_type old_fill = fill();
         ostream_.fillchar = (unsigned)ch - 0x20;
         return old_fill;
