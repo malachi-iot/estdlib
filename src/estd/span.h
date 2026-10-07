@@ -152,7 +152,6 @@ public:
     constexpr span(std::array<T, N>& array) : base_type(array.data(), N) {}
 #endif
 
-#ifdef FEATURE_CPP_DEFAULT_TARGS
     // ExtendLocal needed because SFINAE function selection needs that
     // fluidity
     // dynamic flavor
@@ -179,14 +178,6 @@ public:
         class ExtentOnly = typename enable_if<ExtentLocal == detail::dynamic_extent::value>::type>
     constexpr span(const estd::span<T, N>& other) :
         base_type(other.data(), N) {}
-#else
-    // Only works with dynamic extend mode
-    template <estd::size_t N>
-    span(element_type (&data)) : base_type(data, N) {}
-
-    span(pointer data, index_type count) :
-            base_type(data, count) {}
-#endif
 
     // most definitely a 'shallow clone'
     // utilizing 'base_type' enables clever init constructors of compatible base to

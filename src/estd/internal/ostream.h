@@ -90,9 +90,15 @@ private:
     }
 
 
-#if FEATURE_ESTD_OSTREAM_SETW
+protected:
+    void fill_n(char_type c, streamsize n)
+    {
+        // DEBT: Does n - 1 'c' characters
+        while(n-- > 0) put(c);
+    }
 
 public:
+#if FEATURE_ESTD_OSTREAM_SETW
     // DEBT: ASCII only
     char_type fill() const
     {
@@ -105,21 +111,16 @@ public:
         ostream_.fillchar = 0x20 + ch;
         return old_fill;
     }
-
-    // DEBT: Make protected, and also -- I really think std has something like this already
-    void fill_n(char_type c, streamsize n)
-    {
-        // DEBT: Does n - 1 'c' characters
-        while(n-- > 0) put(c);
-    }
+#else
+    // 07OCT26 - UNTESTED
+    char_type fill() const { return ' '; }
+#endif
 
     // DEBT: Make protected, and also -- I really think std has something like this already
     void fill_n(streamsize n)
     {
         return fill_n(fill(), n);
     }
-
-#endif
 
 
 public:

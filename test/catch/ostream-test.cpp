@@ -327,12 +327,27 @@ TEST_CASE("ostream")
             uint8_t buf[128]{};
             char buf_ch[128];
         };
-        estd::span<uint8_t> span(buf);
+        using span_type = estd::span<uint8_t>;
+        span_type span(buf);
 
         estd::detail::basic_ospanstream<uint8_t> out(span);
 
-        out << "Hello";
-        out << '!';
+        SECTION("basics")
+        {
+            out << "Hello";
+            out << '!';
+        }
+        SECTION("fill_n")
+        {
+            out.fill('x');
+            out.fill_n(4);
+
+            // FIX: ADL collision
+            /*
+            REQUIRE_THAT(span_type(span.data(), 4),
+                Catch::Matchers::RangeEquals(
+                    estd::span<const uint8_t>((const uint8_t*)"xxxx", 4))); */
+        }
     }
 }
 
