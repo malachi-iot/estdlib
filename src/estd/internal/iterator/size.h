@@ -4,9 +4,9 @@
 // https://github.com/malachi-iot/estdlib/issues/166
 // https://en.cppreference.com/w/cpp/iterator/size.html
 
-#include "fwd/span.h"
-#include "type_traits.h"
-#include "fwd/utility.h"
+#include "../fwd/span.h"
+#include "../type_traits.h"
+#include "../fwd/utility.h"
 
 #if FEATURE_STD_SPAN
 #include <span>
@@ -149,14 +149,10 @@ struct container_traits<T[N]> : type_identity<T[N]>, container_traits_core<T, N>
 
 }
 
-#if FEATURE_ESTD_STD_ITERATOR_ALIAS
-using std::cbegin;
-using std::cend;
-using std::begin;
-using std::end;
-using std::data;
-using std::size;
-#else
+// Do not do a using on this namespace.  We choose this oddball unique name so as to avoid
+// collisions with real std:: flavor of these
+namespace __estd_range {    // NOLINT shh don't tell c++ we encroached on its reserve namespace
+
 #pragma push_macro("CTRAITS")
 #define CTRAITS internal::container_traits<estd::remove_const_t<C>>
 
@@ -206,7 +202,7 @@ constexpr auto data(const C& c) -> decltype(c.data())
 }
 
 template <class T, size_t N>
-ESTD_CPP_CONSTEXPR(17) T* data(T(&c)[N])
+ESTD_CPP_CONSTEXPR(14) T* data(T(&c)[N])
 {
     return c;
 }
@@ -225,6 +221,29 @@ constexpr typename CTRAITS::size_type size(const C& c)
 }
 
 #pragma pop_macro("CTRAITS")
+
+}
+
+#if FEATURE_ESTD_STD_ITERATOR_ALIAS
+using std::begin;
+using std::end;
+#else
+using __estd_range::begin;
+using __estd_range::end;
+#endif
+#if FEATURE_ESTD_STD_ITERATOR_ALIAS && __cplusplus >= 201402L
+using std::cbegin;
+using std::cend;
+#else
+using __estd_range::cbegin;
+using __estd_range::cend;
+#endif
+#if FEATURE_ESTD_STD_ITERATOR_ALIAS && __cplusplus >= 201703L
+using std::data;
+using std::size;
+#else
+using __estd_range::data;
+using __estd_range::size;
 #endif
 
 }

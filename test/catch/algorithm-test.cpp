@@ -4,7 +4,7 @@
 
 #include <estd/array.h>
 #include <estd/algorithm.h>
-#include <estd/internal/size.h> // This is where we define begin/end
+#include <estd/internal/iterator/size.h> // This is where we define begin/end
 #include <estd/vector.h>
 
 #include "test-data.h"

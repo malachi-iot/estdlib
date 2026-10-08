@@ -1,7 +1,7 @@
 #include <estd/span.h>
 #include <estd/internal/buffer.h>
 #include <estd/internal/bip/buffer.h>
-#include <estd/internal/size.h>
+#include <estd/internal/iterator/size.h>
 #include <estd/expected.h>
 
 #include "test-data.h"
