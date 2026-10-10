@@ -61,7 +61,7 @@ public:
     /// @param value
     /// @return
     template <class OutputIt, class T>
-    static detail::to_chars_result<OutputIt> to_chars(OutputIt first, OutputIt last,
+    static ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<OutputIt> to_chars(OutputIt first, OutputIt last,
         const ios_base& str,
         const T& value)
     {

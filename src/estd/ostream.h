@@ -73,17 +73,14 @@ enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostre
         // 07OCT26 DEBT MB: Explore ways to optimize this
         for(; *s; ++s)  out.put(out.widen(*s));
     }
+
+    return out;
 }
 
-#if __cplusplus >= 201103L
-template <class TStreambuf, class TBase, typename T,
-        class enabled = enable_if_t<(estd::numeric_limits<T>::is_integer)> >
-basic_ostream<TStreambuf, TBase>&
-#else
-template <class TStreambuf, class TBase, typename T>
-typename estd::enable_if<estd::numeric_limits<T>::is_integer, basic_ostream<TStreambuf, TBase>&>::type
-#endif
-    operator<<(basic_ostream<TStreambuf, TBase>& out, T value)
+template <class Streambuf, class Base, typename T,
+        class = enable_if_t<numeric_limits<T>::is_integer>>
+ESTD_CPP_CONSTEXPR(14) basic_ostream<Streambuf, Base>&
+    operator <<(basic_ostream<Streambuf, Base>& out, const T& value)
 {
     return out_int_helper(out, value);
 }

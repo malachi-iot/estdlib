@@ -1,5 +1,9 @@
 #pragma once
 
+#if __cpp_lib_concepts
+#include <concepts>
+#endif
+
 #include "../ios.h"
 
 namespace estd {
@@ -63,7 +67,10 @@ inline detail::basic_ostream<Streambuf, Base>& write_int(detail::basic_ostream<S
 #endif
 
 template <class Streambuf, class Base, typename Int>
-detail::basic_ostream<Streambuf, Base>& out_int_helper(
+#if __cpp_lib_concepts
+    requires numeric_limits<Int>::is_integer
+#endif
+ESTD_CPP_CONSTEXPR(14) detail::basic_ostream<Streambuf, Base>& out_int_helper(
     detail::basic_ostream<Streambuf, Base>& out, const Int& value)
 {
     using policy = typename Base::policy_type;
@@ -71,9 +78,9 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
     using char_type = typename remove_cvref<Streambuf>::type::char_type;
     using num_put = internal::integer_put<locale_type, policy::cbase_policy>;
 
-    // base 8 for biggest possible string
     // +1 for potential - sign
     // +0 for null terminator, none required
+    // base 8, if enabled, is biggest possible string
 #if FEATURE_ESTD_OSTREAM_OCTAL
     constexpr unsigned N = estd::numeric_limits<Int>::template length<8>::value + 1;
 #else
@@ -81,7 +88,7 @@ detail::basic_ostream<Streambuf, Base>& out_int_helper(
 #endif
     char_type buffer[N];
 
-    const to_chars_result result = num_put::to_chars(buffer, buffer + N, out, value);
+    const detail::to_chars_result<char_type*> result = num_put::to_chars(buffer, buffer + N, out, value);
 
     if(result.ec == errc{})
     {

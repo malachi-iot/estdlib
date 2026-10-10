@@ -329,6 +329,7 @@ TEST_CASE("ostream")
         };
         using span_type = estd::span<uint8_t>;
         span_type span(buf);
+        layer2::string<128> str(buf_ch);
 
         estd::detail::basic_ospanstream<uint8_t> out(span);
 
@@ -349,6 +350,14 @@ TEST_CASE("ostream")
             REQUIRE_THAT(span_type(span.data(), 5),
                 Catch::Matchers::RangeEquals(
                     estd::span<const char>("XXXX\0", 5)));
+        }
+        SECTION("numeric")
+        {
+            constexpr int v = 7;
+
+            out << v;
+
+            REQUIRE(str == "7");
         }
     }
 }
