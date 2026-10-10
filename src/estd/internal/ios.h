@@ -205,12 +205,12 @@ public:
     // NOTE: spec calls for this actually in ios_base, but for now putting it
     // here so that it can reach into streambuf to grab it.  A slight but notable
     // deviation from standard C++
-    locale_type getloc() const
+    constexpr locale_type getloc() const
     {
         return locale_provider_type::value();
     }
 
-    char_type widen(char c) const
+    constexpr char_type widen(char c) const
     {
         return use_facet<estd::ctype<char_type> >(getloc()).widen(c);
     }

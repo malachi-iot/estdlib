@@ -331,7 +331,7 @@ TEST_CASE("ostream")
         span_type span(buf);
         layer2::string<128> str(buf_ch);
 
-        estd::detail::basic_ospanstream<uint8_t> out(span);
+        detail::basic_ospanstream<uint8_t> out(span);
 
         SECTION("basics")
         {
@@ -341,6 +341,8 @@ TEST_CASE("ostream")
             REQUIRE_THAT(span_type(span.data(), 5),
                 Catch::Matchers::RangeEquals(
                     estd::span<const char>("Hello!", 5)));
+
+            static_assert(out.widen(' ') == 0x20, "");
         }
         SECTION("fill_n")
         {

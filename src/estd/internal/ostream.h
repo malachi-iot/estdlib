@@ -91,7 +91,7 @@ private:
 
 
 protected:
-    void fill_n(char_type c, streamsize n)
+    ESTD_CPP_CONSTEXPR(14) void fill_n(char_type c, streamsize n)
     {
         while(n-- > 0) put(c);
     }
@@ -105,7 +105,7 @@ public:
     }
 
     // DEBT: ASCII only
-    char_type fill(char_type ch)
+    ESTD_CPP_CONSTEXPR(14) char_type fill(char_type ch)
     {
         assert(ch <= 96);       // DEBT: Only 6 bits supported at this time
         char_type old_fill = fill();
@@ -118,7 +118,7 @@ public:
 #endif
 
     // Non-standard call, put 'fill' character n times
-    void fill_n(streamsize n)
+    constexpr void fill_n(streamsize n)
     {
         return fill_n(fill(), n);
     }
