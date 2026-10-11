@@ -1,5 +1,9 @@
 # v0.8.13 - XXXXX26
 
+## Added Features
+
+* https://github.com/malachi-iot/estdlib/issues/240 adding `uint8_t` char type support to ostream
+
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/229 fixing typo in `stringbuf` API

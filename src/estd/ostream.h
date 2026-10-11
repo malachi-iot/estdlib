@@ -52,39 +52,6 @@ inline basic_ostream<TStreambuf, TBase>& operator <<(basic_ostream<TStreambuf, T
 }
 
 
-template <class Streambuf, class Base>
-enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostream<Streambuf, Base>>& operator <<(
-    basic_ostream<Streambuf, Base>& out,
-    const char* s)
-{
-    using traits_type = char_traits<char>;
-    using char_type = typename Base::char_type;
-
-    // DEBT: Doesn't do width/fill alignment yet.  See https://github.com/malachi-iot/estdlib/issues/242
-
-    ESTD_CPP_IF_CONSTEXPR(sizeof(char_type) == sizeof(char))
-    {
-        // 07OCT26 DEBT MB: Technically even matching character sizes ought to get the widen treatment.  However,
-        // usually implicitly treating char as whatever 8-bit char_type is is probably good enough
-        return out.write(reinterpret_cast<const char_type*>(s), traits_type::length(s));
-    }
-    else
-    {
-        // 07OCT26 DEBT MB: Explore ways to optimize this
-        for(; *s; ++s)  out.put(out.widen(*s));
-    }
-
-    return out;
-}
-
-template <class Streambuf, class Base, typename T,
-        class = enable_if_t<numeric_limits<T>::is_integer>>
-ESTD_CPP_CONSTEXPR(14) basic_ostream<Streambuf, Base>&
-    operator <<(basic_ostream<Streambuf, Base>& out, const T& value)
-{
-    return out_int_helper(out, value);
-}
-
 // Keeping this kludgey FP converter around.  In the event we encounter a non-std,
 // non-AVR environment (can't think of one), this might come in handy
 #if REFERENCE
@@ -130,43 +97,6 @@ operator <<(basic_ostream<Streambuf, Base>& out, T v)
     static_assert(!is_floating_point<T>::value, "Not yet supported");
 #endif
     return out;
-}
-
-
-template <class Streambuf, class Base>
-inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
-    typename Base::char_type ch)
-{
-    // DEBT: fill_n silently eats < 0 so this is safe, but could be clearer.  Also this presumes
-    // ios_base::left.  See https://github.com/malachi-iot/estdlib/issues/242
-    out.fill_n(out.width() - 1);
-    out.width(0);
-
-    return out.put(ch);
-}
-
-template <class Streambuf, class Base>
-enable_if_t<is_same<typename Base::char_type, char>::value == false, basic_ostream<Streambuf, Base>>&
-    operator <<(basic_ostream<Streambuf, Base>& out, char ch)
-{
-    out.fill_n(out.width() - 1);
-    out.width(0);
-
-    return out.put(out.widen(ch));
-}
-
-
-template <class Streambuf, class Base>
-inline basic_ostream<Streambuf, Base>& operator <<(basic_ostream<Streambuf, Base>& out,
-    bool v)
-{
-    // DEBT: Very crude.  Needs bounds check, width/padding, and maybe locale
-    layer1::string<16> s;
-    num_put<char, char*> n;
-
-    *n.put(s.data(), out, ' ', v) = 0;
-
-    return out << s;
 }
 
 

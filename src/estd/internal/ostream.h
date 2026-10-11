@@ -2,6 +2,7 @@
 
 #include "ios.h"
 #include "ostream/integer.h"
+#include "ostream/operators.h"
 
 namespace estd { namespace detail {
 
