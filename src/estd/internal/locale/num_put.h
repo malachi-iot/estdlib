@@ -190,11 +190,9 @@ public:
         if(str.flags() & ios_base::boolalpha)
         {
             using np = numpunct<char_type, Locale>;
-            // DEBT: We may prefer plain old const char* instead, also there's no strict
-            // guarantee that string_type will be null terminated, though so far they are
-            const typename np::string_type _v = value ? np::truename() : np::falsename();
-            const char_type* v = _v.data();
-            while(*v != 0) *out++ = *v++;
+            using string_type = typename np::string_type;
+            const string_type s = value ? np::truename() : np::falsename();
+            out += s.copy(out, string_type::npos);
         }
         else
         {
