@@ -86,6 +86,14 @@ inline detail::basic_ostream<Streambuf, Base>& right(
     return os;
 }
 
-
+template <class Streambuf, class Base>
+detail::basic_ostream<Streambuf, Base>& skipws(
+    detail::basic_ostream<Streambuf, Base>& os)
+{
+    // 12OCT26 MB - not functional yet AND will fail badly on aggressive-bitfield
+    // mode
+    os.setf(os.skipws);
+    return os;
+}
 
 }
