@@ -95,7 +95,7 @@ private:
 #if FEATURE_ESTD_OSTREAM_FLOAT
         unsigned precision_ : 6;
 #endif
-        iostate iostate_ : 8;
+        iostate iostate_ : 6;
 
         constexpr state() :
             width_{0},
@@ -212,6 +212,7 @@ inline ios_base& nounitbuf(ios_base& s)
     return s;
 }
 
+//static_assert(sizeof(ios_base) == __SIZEOF_INT__, "");
 
 namespace internal {
 
@@ -249,7 +250,8 @@ protected:
         // NOTE: Hitting compiler warning bug
         // https://stackoverflow.com/questions/36005063/gcc-suppress-warning-too-small-to-hold-all-values-of
         // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242#c31
-        positioning alignment : 2;  // DEBT: Unused
+        // DEBT: Unusued + We already allocated space in fmtfl_ for this, not helping us at all
+        positioning alignment : 2;
 
         // DEBT: Presumes ASCII, 7-bit.  Unicode, lowercase and friends are out
         unsigned fillchar : 6;          // + 32 (from ' ' to '`' ASCII)

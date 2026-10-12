@@ -1,7 +1,10 @@
 menu "estdlib Unity"
 
 config ESTD_CI_MODE
-    bool "TBD"
-    default false
+    bool "Automated Testing Mode"
+    default n
+    help
+        IDF 6.0+ interacts with QEMU and notices an exit signal, making automated
+        testing easier.  See --qemu-extra-args="-no-reboot"
 
 endmenu
