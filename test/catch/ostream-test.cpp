@@ -25,7 +25,7 @@ struct exp_manipulator : detail::ostream_functor_tag
 // See https://github.com/malachi-iot/estdlib/issues/178
 // Started life as CRTP, but that's a pain due to Derived::streambuf_type not being
 // readily available, and in a hierarchy sense CRTP isn't more convenient than a wrapper anyway
-// for streams.
+// for streams.  Counterpoint is down below
 template <class Base>
 class sstream_wrap : public Base
 {
@@ -53,7 +53,43 @@ public:
     }
 };
 
+// EXPERIMENTAL
+// Trying to bring back crtp, thinking entire under structure of ostream could be crtp'd maybe and
+// compose it all together
+template <class Derived>
+class sstream_crtp
+{
+    friend Derived;
+    sstream_crtp() = default;
+
+public:
+    template <class D = Derived>
+    ESTD_CPP_CONSTEXPR(14) const typename D::streambuf_type::string_type& str()
+    {
+        auto self = static_cast<Derived*>(this);
+
+        return self->rdbuf()->str();
+    }
+
+    template <class D = Derived>
+    ESTD_CPP_CONSTEXPR(14) typename D::streambuf_type::view_type view()
+    {
+        auto self = static_cast<Derived*>(this);
+
+        return self->rdbuf()->view();
+    }
+};
+
+
 using l1_test = sstream_wrap<layer1::ostringstream<64>>;
+
+template <unsigned N>
+struct l1_test2 : layer1::ostringstream<N>, sstream_crtp<l1_test2<N>>
+{
+    using base_type = layer1::ostringstream<N>;
+
+    ESTD_CPP_FORWARDING_CTOR(l1_test2)
+};
 
 TEST_CASE("ostream")
 {
@@ -289,9 +325,18 @@ TEST_CASE("ostream")
 
         REQUIRE(out.tellp() == 4);
     }
-    SECTION("crtp (EXPERIMENTAL)")
+    SECTION("wrap (EXPERIMENTAL)")
     {
         l1_test l1;
+
+        l1 << "Hello";
+
+        REQUIRE(l1.str() == "Hello");
+        REQUIRE(l1.view() == "Hello");
+    }
+    SECTION("crtp (EXPERIMENTAL)")
+    {
+        l1_test2<32> l1;
 
         l1 << "Hello";
 
