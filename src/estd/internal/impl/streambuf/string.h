@@ -13,6 +13,7 @@ struct stringbuf_base : streambuf_base<typename remove_reference_t<String>::trai
     ESTD_CPP_DEFAULT_CTOR(stringbuf_base)
 
     using string_type = remove_reference_t<String>;
+    using view_type = typename string_type::view_type;
 };
 
 // 17JUN26 - No seek support at this time

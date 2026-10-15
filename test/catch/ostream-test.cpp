@@ -23,9 +23,15 @@ struct exp_manipulator : detail::ostream_functor_tag
 
 // EXPERIMENTAL
 // See https://github.com/malachi-iot/estdlib/issues/178
-template <class Derived>
-class sstream_crtp : public Derived
+// Started life as CRTP, but that's a pain due to Derived::streambuf_type not being
+// readily available, and in a hierarchy sense CRTP isn't more convenient than a wrapper anyway
+// for streams.
+template <class Base>
+class sstream_wrap : public Base
 {
+    using base_type = Base;
+    using typename base_type::streambuf_type;
+
     template <class T>
     struct helper
     {
@@ -34,15 +40,20 @@ class sstream_crtp : public Derived
     };
 
 public:
-    const typename Derived::streambuf_type::string_type& str()
-    {
-        auto self = static_cast<Derived*>(this);
+    ESTD_CPP_FORWARDING_CTOR(sstream_wrap)
 
-        return self->rdbuf()->str();
+    constexpr const typename streambuf_type::string_type& str()
+    {
+        return base_type::rdbuf()->str();
+    }
+
+    typename streambuf_type::view_type view()
+    {
+        return base_type::rdbuf()->view();
     }
 };
 
-using l1_test = sstream_crtp<layer1::ostringstream<64>>;
+using l1_test = sstream_wrap<layer1::ostringstream<64>>;
 
 TEST_CASE("ostream")
 {
@@ -285,6 +296,7 @@ TEST_CASE("ostream")
         l1 << "Hello";
 
         REQUIRE(l1.str() == "Hello");
+        REQUIRE(l1.view() == "Hello");
     }
     SECTION("repositioning")
     {
