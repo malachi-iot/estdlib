@@ -61,7 +61,14 @@ jobs:
   # Doing unity test also purely for c++11 compliance, since Catch2 is c++14
   # onward
   unity:
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ubuntu-26.04-arm
+          - ubuntu-26.04
+
+    runs-on: ${{ matrix.runner }}
 
     steps:
     - uses: actions/checkout@v6
