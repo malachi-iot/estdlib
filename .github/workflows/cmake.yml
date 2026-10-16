@@ -16,7 +16,7 @@ jobs:
       working-directory: tools/github
       run: ./get-matrix cmake ${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
 
-  build:
+  catch:
     needs: select-profile
     strategy:
       fail-fast: false
@@ -58,3 +58,23 @@ jobs:
       with:
         test-dir: ${{ steps.cmake-build.outputs.build-dir }}
 
+  # Doing unity test also purely for c++11 compliance, since Catch2 is c++14
+  # onward
+  unity:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        submodules: recursive
+        # Reach deep enough to grab latest tags, though unity doesn't care
+        fetch-depth: 1000
+        fetch-tags: true
+
+    - id: cmake-build
+      uses: threeal/cmake-action@v2.1.0
+      with:
+        source-dir: ${{github.workspace}}/test/unity
+        options: |
+          CMAKE_CXX_STANDARD=11
+          CMAKE_CXX_STANDARD_REQUIRED=ON

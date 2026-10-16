@@ -317,7 +317,7 @@ public:
 
     template <size_t I, class T_i, class T,
         enable_if_t<is_assignable<T_i&, T>::value, bool> = true>
-    constexpr type_at_index<I>& assignment_helper(T&& t)
+    ESTD_CPP_CONSTEXPR(14) type_at_index<I>& assignment_helper(T&& t)
     {
         //assign<I>(std::forward<T>(t));
         return *get<I>() = std::forward<T>(t);
@@ -338,7 +338,7 @@ public:
         enable_if_t<
             is_convertible<T, T_i>::value &&
             estd::is_trivial<T_i>::value, bool> = true>
-    constexpr type_at_index<I>& direct_init_helper(T&& t)
+    ESTD_CPP_CONSTEXPR(14) type_at_index<I>& direct_init_helper(T&& t)
     {
         return *get<I>() = std::forward<T>(t);
     }

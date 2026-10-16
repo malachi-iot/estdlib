@@ -119,7 +119,7 @@ public:
 #endif
 
     // Non-standard call, put 'fill' character n times
-    constexpr void fill_n(streamsize n)
+    ESTD_CPP_CONSTEXPR(14) void fill_n(streamsize n)
     {
         return fill_n(fill(), n);
     }
