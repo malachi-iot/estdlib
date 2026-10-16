@@ -50,7 +50,7 @@ static void test_limits_least64()
     TEST_ASSERT_GREATER_OR_EQUAL(8, sizeof(estd::int_least64_t));
     TEST_ASSERT_EQUAL(19, estd::numeric_limits<uint_least64_t>::digits10);
 
-#if !UNITY_SUPPORT_64
+#ifndef UNITY_SUPPORT_64
     TEST_ASSERT_TRUE(UINT_LEAST64_MAX == estd::numeric_limits<uint_least64_t>::max());
     TEST_ASSERT_TRUE(INT_LEAST64_MAX == estd::numeric_limits<int_least64_t>::max());
 #else

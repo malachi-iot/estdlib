@@ -5,6 +5,7 @@ project(unit-tests LANGUAGES C CXX)
 include(../../tools/cmake/setvars.cmake)
 
 Set(FETCHCONTENT_QUIET FALSE)
+set(ESTD_UNITY_STANDALONE ON CACHE BOOL "Whether to build test executable in addition to lib")
 
 FetchContent_Declare(
     Unity
@@ -59,3 +60,9 @@ target_sources(${PROJECT_NAME} INTERFACE ${SOURCES})
 target_include_directories(${PROJECT_NAME} INTERFACE .)
 
 target_link_libraries(${PROJECT_NAME} INTERFACE unity estd)
+
+if(ESTD_UNITY_STANDALONE)
+    add_executable(estd-unity main.cpp)
+
+    target_link_libraries(estd-unity ${PROJECT_NAME})
+endif()

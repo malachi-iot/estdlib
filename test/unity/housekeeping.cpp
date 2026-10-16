@@ -4,7 +4,7 @@
 static const char* TAG = "unity::housekeeping";
 #endif
 
-void __attribute__((weak)) setUp_chrono();
+void __attribute__((weak)) setUp_chrono()   {}
 
 //#error GOT HERE
 
@@ -34,14 +34,14 @@ extern "C" void setUp()
 }
 
 
-#ifdef ESP_PLATFORM
 extern "C" void tearDown()
 {
     static bool deinitialized = false;
 
     if(deinitialized)    return;
 
+#ifdef ESP_PLATFORM
     ESP_LOGV(TAG, "tearDown");
+#endif
     deinitialized = true;
 }
-#endif
