@@ -80,7 +80,7 @@ class optional_has_value
     bool initialized_;
 
 protected:
-    optional_has_value(bool initialized = false) :
+    constexpr optional_has_value(bool initialized = false) :
         initialized_(initialized) {}
 
     void reset() { initialized_ = false; }
@@ -268,22 +268,20 @@ class optional_base<T, 0, null_value_> : public optional_value_provider<T>
 protected:
 //public:
 
-#if __cpp_rvalue_references
     constexpr explicit optional_base(in_place_t, T&& value) :
         base_type(in_place_t{}, std::forward<T>(value))
     {}
-#endif
 
     // DEBT: #ifdef this out for scenarios only when rvalue is not available
-    ESTD_CPP_CONSTEXPR_RET optional_base(in_place_t, const T& value) :
+    constexpr optional_base(in_place_t, const T& value) :
         base_type(in_place_t(), value) {}
 
     // should always bool == true here
     //optional_base(bool) {}
 
-    ESTD_CPP_CONSTEXPR_RET optional_base() : base_type(in_place_t(), null_value_) {}
+    constexpr optional_base() : base_type(in_place_t(), null_value_) {}
 
-    ESTD_CPP_CONSTEXPR_RET optional_base(const optional_base& copy_from) :
+    constexpr optional_base(const optional_base& copy_from) :
         base_type(in_place_t(), copy_from.value())
     {}
 
@@ -297,11 +295,7 @@ public:
     typedef T value_type;
 
     ESTD_CPP_CONSTEXPR_RET bool has_value() const { return base_type::value() != null_value_; }
-#if __cpp_constexpr
     static constexpr bool has_value(bool) { return{}; }
-#else
-    static inline void has_value(bool) {}
-#endif
     void reset() { base_type::value(null_value_); }
 
     static constexpr value_type null_value = null_value_;
@@ -322,15 +316,13 @@ protected:
     void value(T v) { value_ = v; }
     void has_value(bool initialized) { has_value_ = initialized; }
 
-    static CONSTEXPR bool real_reference = false;
+    static constexpr bool real_reference = false;
 
-#if __cpp_rvalue_references
     template <class U>
     void assign_value(bool, U&& u)
     {
         value_ = std::forward<U>(u);
     }
-#endif
 
     template <class U>
     void assign_value(bool, const U& u)
@@ -366,10 +358,8 @@ public:
     static ESTD_CPP_CONSTEXPR_RET unsigned bitsize() { return bitsize_; }
 };
 
-#if __cpp_alias_templates
 template <class T, T null_value_>
 using optional = optional_base<T, is_same<T, bool>::value ? 1 : 0, null_value_>;
-#endif
 
 }
 

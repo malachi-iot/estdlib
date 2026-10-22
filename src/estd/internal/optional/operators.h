@@ -60,9 +60,7 @@ ESTD_CPP_CONSTEXPR(14) bool optional_compare(
 
     // Not seeing a specification for this condition exactly, but I think it's safe to say if
     // lhs has a value and rhs doesn't, then it's not a match
-    if(!rhs)    return false;
-
-    return f();
+    return rhs ? f() : false;
 }
 
 }
@@ -83,15 +81,17 @@ template <class T, class T2, class Base, class Base2>
 constexpr bool operator<=(const optional<T, Base>& lhs, const optional<T2, Base2>& rhs)
 { return internal::optional_compare(lhs, rhs, [&] { return *lhs <= *rhs; }); }
 
-// DEBT: Use gcc push/pop here and also filter 'U' by is_optional
+#pragma push_macro("OPERATOR_INTRINSIC_LEFT_OPT")
+#pragma push_macro("OPERATOR_INTRINSIC_RIGHT_OPT")
+#pragma push_macro("OPERATOR_INTRINSIC")
 
 #define OPERATOR_INTRINSIC_LEFT_OPT(op)     \
-template <class T, class U, class Base>     \
+template <class T, class U, class Base, class = enable_if_t<internal::is_optional<U>::value == false>>     \
 constexpr bool operator op(const optional<T, Base>& opt, const U& value)  \
 { return opt && *opt op value; }
 
 #define OPERATOR_INTRINSIC_RIGHT_OPT(op)    \
-template <class T, class U, class Base>     \
+template <class T, class U, class Base, class = enable_if_t<internal::is_optional<U>::value == false>>     \
 constexpr bool operator op(const U& value, const optional<T, Base>& opt)  \
 { return opt && value op *opt; }
 
@@ -105,9 +105,9 @@ OPERATOR_INTRINSIC(>=)
 OPERATOR_INTRINSIC(<=)
 OPERATOR_INTRINSIC(==)
 
-#undef OPERATOR_INTRINSIC
-#undef OPERATOR_INTRINSIC_RIGHT_OP
-#undef OPERATOR_INTRINSIC_LEFT_OP
+#pragma pop_macro("OPERATOR_INTRINSIC")
+#pragma pop_macro("OPERATOR_INTRINSIC_RIGHT_OPT")
+#pragma pop_macro("OPERATOR_INTRINSIC_LEFT_OPT")
 
 
 }

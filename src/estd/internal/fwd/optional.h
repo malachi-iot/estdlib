@@ -1,13 +1,9 @@
 #pragma once
 
 #include "../feature/cpp.h"
+#include "../feature/optional.h"
 #include "../feature/std.h"
 #include "../macro/c++/const.h"
-
-// DEBT: Combine or at least match convention to FEATURE_ESTD_STD_ALIAS
-#ifndef FEATURE_ESTD_STD_NULLOPT_ALIAS
-#define FEATURE_ESTD_STD_NULLOPT_ALIAS FEATURE_STD_OPTIONAL
-#endif
 
 #if FEATURE_ESTD_STD_NULLOPT_ALIAS
 #include <optional>

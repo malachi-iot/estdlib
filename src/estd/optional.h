@@ -51,12 +51,14 @@ class optional :
 #endif
 
 public:
-    typedef typename base_type::value_type value_type;
+    using typename base_type::value_type;
+
+    using base_type::has_value;
 
 protected:
     // Determines if we're returning a true reference to underlying value (std optional
     // behavior) or a value/copy (such as with bitwise flavor)
-    static CONSTEXPR bool real_reference = base_type::real_reference;
+    static constexpr bool real_reference = base_type::real_reference;
         // DEBT: Seemed to be working, but now it doesn't
         //is_same<add_rvalue_reference<value_type>, return_type>::value;
 
@@ -67,9 +69,9 @@ protected:
     void assert_has_value() const
     {
 #if __cpp_exceptions
-        if(!base_type::has_value()) throw bad_optional_access();
+        if(!has_value()) throw bad_optional_access();
 #else
-        if(!base_type::has_value()) abort();
+        if(!has_value()) abort();
 #endif
     }
 
@@ -78,11 +80,10 @@ public:
     // We depend on base class to initialize default to has_value() == false
     ESTD_CPP_DEFAULT_CTOR(optional)
 
-    ESTD_CPP_CONSTEXPR_RET optional(nullopt_t) {}
+    constexpr optional(nullopt_t) {}
 
-#ifdef __cpp_rvalue_references
-    template < class U, class TUBase >
-    constexpr optional(optional<U, TUBase>&& move_from) :
+    template <class U, class Base2>
+    constexpr optional(optional<U, Base2>&& move_from) :
         base_type(std::move(move_from))
     {
     }
@@ -106,29 +107,18 @@ public:
     constexpr optional(U&& value) : base_type(in_place_t{}, std::forward<U>(value))
     {
     }
-#else
-    optional(const value_type& copy_from) :
-        base_type(in_place_t(), copy_from) {}
-#endif
 
     // DEBT: I was hoping default of this would cascade down to the
     // user defined one for optional_base but so far no dice
-    ESTD_CPP_CONSTEXPR_RET optional(const optional& copy_from) :
+    constexpr optional(const optional& copy_from) :
         base_type(copy_from)
     {
     }
 
-#if __cpp_variadic_templates
-    template <class ...TArgs>
-    constexpr explicit optional(in_place_t, TArgs&&...args) :
-        base_type(in_place_t{}, std::forward<TArgs>(args)...)
+    template <class ...Args>
+    constexpr explicit optional(in_place_t, Args&&...args) :
+        base_type(in_place_t{}, std::forward<Args>(args)...)
     {}
-#else
-    template <class T1>
-    optional(in_place_t, const T1& v1) :
-        base_type(in_place_t(), v1)
-    {}
-#endif
 
     template <class U, class TUBase>
     optional(const optional<U, TUBase>& copy_from) :
@@ -212,23 +202,21 @@ public:
 #endif
 
 
-#ifdef __cpp_variadic_templates
     // NOTE: This one won't work with bitwise version.  In theory
     // it could work with layer1 version, but doesn't currently.
     // In both cases, it's better to use assignment operator when
     // possible since they are trivial
-    template<class... TArgs>
-    T& emplace(TArgs&&... args)
+    template<class... Args>
+    T& emplace(Args&&... args)
     {
         base_type::destroy();
 
-        T& v = base_type::emplace(std::forward<TArgs>(args)...);
+        T& v = base_type::emplace(std::forward<Args>(args)...);
 
-        base_type::has_value(true);
+        has_value(true);
 
         return v;
     }
-#endif
 
     // -- getters
 
@@ -267,32 +255,26 @@ public:
 
 #ifdef __cpp_rvalue_references
     template <class U>
-#ifdef FEATURE_CPP_CONSTEXPR_METHOD
-    constexpr
-#endif
-    T value_or(U&& default_value) &&
+    constexpr T value_or(U&& default_value) &&
     {
-        return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
+        return has_value() ? base_type::value() : std::forward<U>(default_value);
     }
 
     template <class U>
     constexpr T value_or(U&& default_value) const&
     {
-        return base_type::has_value() ? base_type::value() : std::forward<U>(default_value);
+        return has_value() ? base_type::value() : std::forward<U>(default_value);
     }
 #else
     // Untested
     template <class U>
     const T& value_or(const U& default_value) const
     {
-        return base_type::has_value() ? base_type::value() : default_value;
+        return has_value() ? base_type::value() : default_value;
     }
 #endif
 
-#if __cpp_constexpr
-    constexpr explicit
-#endif
-    operator bool() const { return base_type::has_value(); }
+    constexpr explicit operator bool() const { return has_value(); }
 
     typename type_morph::reference operator*() { return base_type::value(); }
     typename type_morph::const_reference operator*() const { return base_type::value(); }
