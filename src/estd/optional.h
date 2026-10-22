@@ -382,58 +382,6 @@ public:
 
 }
 
-template <class T, class U, class Base>
-constexpr bool operator==(const optional<T, Base>& opt, const U& value)
-{
-    return opt.has_value() ? *opt == value : false;
-}
-
-
-template <class T, class U, class Base>
-constexpr bool operator==(const U& value, const optional<T, Base>& opt)
-{
-    return opt.has_value() ? value == *opt : false;
-}
-
-template <class T, class T2, class Base, class Base2>
-constexpr bool operator==(const optional<T, Base>& lhs, const optional<T2, Base2>& rhs)
-{
-    return lhs.has_value() && rhs.has_value() ?
-        *lhs == *rhs :
-        !lhs.has_value() && !rhs.has_value();
-}
-
-template <class T, class U, class TBase>
-ESTD_CPP_CONSTEXPR_RET bool operator!=(const optional<T, TBase>& opt, const U& value)
-{
-    return opt.has_value() ? *opt != value : true;
-}
-
-
-template <class T, class U, class TBase>
-ESTD_CPP_CONSTEXPR_RET bool operator>(const optional<T, TBase>& opt, const U& value)
-{
-    return opt && *opt > value;
-}
-
-
-template <class T, class U, class TBase>
-ESTD_CPP_CONSTEXPR_RET bool operator<(const optional<T, TBase>& opt, const U& value)
-{
-    return opt && *opt < value;
-}
-
-template <class T, class U, class TBase>
-ESTD_CPP_CONSTEXPR_RET bool operator<=(const optional<T, TBase>& opt, const U& value)
-{
-    return opt && *opt <= value;
-}
-
-template <class T, class U, class TBase>
-ESTD_CPP_CONSTEXPR_RET bool operator>=(const optional<T, TBase>& opt, const U& value)
-{
-    return opt && *opt >= value;
-}
 
 template <class T, class Base>
 struct hash<optional<T, Base>>

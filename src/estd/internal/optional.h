@@ -4,6 +4,7 @@
 #include "type_traits.h"
 #include "fwd/optional.h"
 #include "variant/storage.h"
+#include "optional/operators.h"
 
 namespace estd {
 

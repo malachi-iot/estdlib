@@ -1,10 +1,24 @@
-#include <catch2/catch_all.hpp>
-
 #include <estd/optional.h>
+
+#include <ostream>
 
 #include "test-data.h"
 
 using namespace estd;
+
+// DEBT: Put this into optional.h
+template <typename T, class Base>
+std::ostream& operator <<(std::ostream& out, const estd::optional<T, Base>& o)
+{
+    if(o.has_value())
+        out << o.value();
+    else
+        out << "(null)";
+
+    return out;
+}
+
+#include <catch2/catch_all.hpp>
 
 estd::optional<int> returning_optional(int val)
 {
@@ -15,8 +29,8 @@ estd::optional<int> returning_optional(int val)
     return val;
 }
 
-template <typename T, class TBase>
-static void suite(estd::optional<T, TBase> o, T compare_to)
+template <typename T, class Base>
+static void suite(estd::optional<T, Base> o, T compare_to)
 {
     REQUIRE(!o);
     bool result = o != T();
@@ -29,6 +43,9 @@ static void suite(estd::optional<T, TBase> o, T compare_to)
     o = compare_to;
 
     result = o == compare_to;
+
+    REQUIRE(o >= compare_to);
+    REQUIRE(o <= compare_to);
 
     //REQUIRE(val > 4);
     REQUIRE(result);
@@ -139,6 +156,7 @@ TEST_CASE("optional")
         int v = *val;
 
         REQUIRE(v == 5);
+        //REQUIRE(10 > val);
 
         REQUIRE(val.null_value == -1);
 
@@ -165,6 +183,17 @@ TEST_CASE("optional")
             int v = *val2;
 
             REQUIRE(v == 3);
+        }
+        SECTION("comparison with traditional")
+        {
+            optional<int> val2(1);
+
+            REQUIRE(val > val2);
+            REQUIRE(val >= val2);
+            REQUIRE(!(val2 > val));
+            REQUIRE(val2 < val);
+            REQUIRE(val2 <= val);
+            REQUIRE(!(val < val2));
         }
         SECTION("nullopt")
         {
@@ -217,6 +246,11 @@ TEST_CASE("optional")
             option_value_type v2 = t1.opt().value();
 
             REQUIRE(v2 == Unregister);
+        }
+        SECTION("suite")
+        {
+            val.reset();
+            suite(val, 0);
         }
     }
     SECTION("comparisons / equality")
