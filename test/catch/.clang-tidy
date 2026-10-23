@@ -1,46 +1,15 @@
-# Nice try but no banana - CLion defaults to .clang-tidy being the ONLY tidy indicator,
-# regardless
-#InheritParentConfig: true
-
-#Checks: '*,-misc-random-seed'
-
-# Sorry folks, I like:
-# - protected member variables
-# - #define statements
-# - two variable defines on one line
-# - const member variables, even if it makes assignment operator harder
-
-Checks: >-
-  bugprone-*,
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  modernize-*,
-  performance-*,
-  portability-*,
-  -bugprone-return-const-ref-from-parameter,
-  -*-avoid-c-arrays,
-  -cert-msc51-cpp,
-  -misc-non-private-member-variables-in-classes,
-  -cppcoreguidelines-avoid-const-or-ref-data-members,
-  -cppcoreguidelines-owning-memory,
-  -cppcoreguidelines-init-variables,
-  -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-macro-usage,
-  -cppcoreguidelines-non-private-member-variables-in-classes,
-  -cppcoreguidelines-pro-type-union-access,
-  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-  -cppcoreguidelines-pro-bounds-constant-array-index,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-  -misc-random-seed,
-  -modernize-avoid-macro,
-  -modernize-macro-to-constexpr,
-  -modernize-unary-static-assert,
-  -modernize-use-constraints,
-  -modernize-use-trailing-return-type,
-  -readability-*,
-
-
-WarningsAsErrors: ''   # promote warnings if you like: 'bugprone-*,clang-analyzer-*'
-HeaderFilterRegex: ''  # restrict analysis to your project headers
-FormatStyle: none
-CheckOptions: {}
+# Malachi clang-tidy convention: catch v0.2.0
+# Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
+# NOTE: folded block scalar gives me a ton of grief, so not using that form
+InheritParentConfig: true
+Checks:
+  # Catch2 does fancy loop tricks that trigger this warning
+  - '-altera-id-dependent-backward-branch'
+  # Catch2 macros trigger this
+  - '-readability-function-cognitive-complexity'
+  # Unit Testing has unusual data hiding behavior
+  - '-misc-non-private-member-variables-in-classes'
+  - '-misc-include-cleaner'
+  - '-readability-redundant-access-specifiers'
+  # Cross c++ version testing makes room for static_assert(bool, "")
+  - '-*-unary-static-assert'

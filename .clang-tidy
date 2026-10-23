@@ -1,0 +1,66 @@
+# Malachi clang-tidy convention: core v0.2.0
+# Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
+# NOTE: folded block scalar gives me a ton of grief, so not using that form
+Checks:
+  # Baseline - not enabling '*' because that brings in oddballs like 'fuchsia'
+  - bugprone-*
+  - cppcoreguidelines-*
+  - clang-analyzer-*
+  - google-*
+  - performance-*
+  - portability-*
+  - misc-*
+  - modernize-*
+  - readability-*
+
+  # c++ style casting is appreciated but warnings are overstated
+  - '-*avoid-c-style-cast'
+  - '-cppcoreguidelines-pro-type-cstyle-cast'
+  - '-cppcoreguidelines-pro-type-reinterpret-cast'
+  - '-google-readability-casting'
+
+  # buffer management is a c++ superpower.  this warning is so damned odd.
+  - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'
+
+  # regular old enums are correct under the right circumstances
+  - '-cppcoreguidelines-use-enum-class'
+  - '-readability-enum-initial-value'
+  - '-readability-identifier-length'
+  # Just in case '*' returns
+  - '-cert-int09-c'
+
+  # yes we know, but sometimes we specifically don't want to
+  - '-*-concat-nested-namespaces'
+  - '-modernize-concat-nested-namespaces'
+
+  # CLion losing its mind over these
+  # (defunct now that we don't do '*' but keeping around just in case)
+  - '-llvmlibc-implementation-in-namespace'
+  - '-llvmlibc-callee-namespace'
+  - '-*inline-function-decl'
+
+  # I am 100% OK with this.  However, it's to displace 'static' keyword and yet
+  # if I use anonymous namespaces, THEN i get warnings that I SHOULD use static
+  # keyword.  So you lose, linter.  Disabled.
+  - '-misc-use-anonymous-namespace'
+
+  # Thanks but no thanks.  I'll choose when.
+  - '-*use-trailing-return-type'
+  - '-*-braces-around-statements'
+  - '-*-avoid-c-arrays'
+  - '-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
+  - '-cppcoreguidelines-pro-type-union-access'
+  - '-google-build-using-namespace'
+  - '-google-readability-braces-around-statements'
+  - '-readability-inconsistent-ifelse-braces'
+  - '-readability-named-parameter'
+  - '-readability-trailing-comma'
+  - '-readability-implicit-bool-conversion'
+
+  # Const correctness is so great.  Yet, receiving a warning EVERY
+  # time is just too much.
+  - '-misc-const-correctness'
+
+  # No thank you
+  - '-google-readability-todo'
+  - '-readability-qualified-auto'

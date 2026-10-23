@@ -1,0 +1,17 @@
+# Malachi clang-tidy convention: embedded v0.2.0
+# Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
+
+InheritParentConfig: true
+
+Checks:
+  # Low level library, this can't be helped
+  - '-bugprone-easily-swappable-parameters'
+  # General avoidance of std in favor of estd means we use legacy headers sometimes
+  - '-modernize-deprecated-headers'
+  # nodiscard is not a bad idea, but I personally find it annoying
+  - '-modernize-use-nodiscard'
+  # Embedded space undefined/uninitialized variables are more common
+  - '-cppcoreguidelines-init-variables'
+  - '-cppcoreguidelines-pro-type-member-init'
+  # Not *that* bad
+  - '-cppcoreguidelines-avoid-do-while'
