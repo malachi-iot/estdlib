@@ -30,33 +30,6 @@ struct test_scoped
 ESTD_FLAGS(test1::flags)
 ESTD_FLAGS(test_scoped::flags)
 
-// 24OCT26 MB DEBT: Temporarily living here while we sort this feature out
-// (flags doesn't seem to fully support |= like this yet)
-#define ESTD_FLAGS_DUAL_OP(Enum, op, op2)    \
-ESTD_CPP_CONSTEXPR(14) Enum& operator op (Enum& lhs, Enum rhs)   \
-{\
-    using flags = estd::detail::flags<Enum>;\
-    return lhs = static_cast<Enum>(lhs op2 rhs);\
-}
-
-ESTD_FLAGS_DUAL_OP(test1::flags, |=, |)
-ESTD_FLAGS_DUAL_OP(test1::flags, &=, &)
-ESTD_FLAGS_DUAL_OP(test_scoped::flags, |=, |)
-ESTD_FLAGS_DUAL_OP(test_scoped::flags, &=, &)
-
-/*
-inline test1::flags& operator |=(estd::detail::flags<test1::flags>& lhs, test1::flags rhs)
-{
-    return lhs |= rhs;
-} */
-
-#if __cplusplus >= 201402L
-static constexpr void test_flags_constexpr()
-{
-    // TBD
-}
-#endif
-
 static void test_flags_integration()
 {
     using namespace estd;

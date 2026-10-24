@@ -37,6 +37,18 @@ void assert_double(test1<f>)
 }
 
 
+static constexpr synthetic_flags test_flags_constexpr(synthetic_flags f)
+{
+    synthetic_flags f2{};
+
+    f2 |= f;
+
+    return f2;
+}
+
+static_assert(test_flags_constexpr(SN_CONST) == SN_CONST, "constexpr compound assignment test fails");
+
+
 TEST_CASE("flags (compile-time capable)", "[flags]")
 {
     using t1 = test1<SN_NONE>;
