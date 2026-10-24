@@ -30,9 +30,6 @@ using is_trivial
 
 }
 #else
-namespace estd {
-
-// 24OCT26 MB TODO: If GCC, make our own alias to __underlying_type(type) as per https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
-
-}
+// !FEATURE_ESTD_TYPE_TRAITS_ALIASED handled in port/gcc/type_traits when GCC
+// DEBT: That's a little confusing, though is working well
 #endif

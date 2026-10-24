@@ -142,11 +142,11 @@ using Enum ## _enable_if_t = typename Enum ## _enable_if<v>::type;
 #endif
 
 
-// Compount assignment auto-converts to estd::detail::flags by way of regular bitwise operator
+// Compound assignment auto-converts to estd::detail::flags by way of regular bitwise operator
 #define ESTD_FLAGS_OP(Enum, bitwise_op)    \
 constexpr estd::detail::v1::flags<Enum> operator bitwise_op(Enum lhs, Enum rhs)    \
 { return estd::detail::v1::flags<Enum>(lhs) bitwise_op rhs; }     \
-ESTD_CPP_CONSTEXPR(14) Enum& operator bitwise_op##= (Enum& lhs, Enum rhs)   \
+ESTD_CPP14_CONSTEXPR_OR_INLINE Enum& operator bitwise_op##= (Enum& lhs, Enum rhs)   \
 { return lhs = lhs bitwise_op rhs; }
 
 // Auto-promotes 'Enum' to flags<Enum> during these operations

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../internal/feature/std.h"
+#include "../../internal/raw/type_traits.h" // For integral_constant
 
 // TODO: Check compiler version to ensure we indeed can support this
 

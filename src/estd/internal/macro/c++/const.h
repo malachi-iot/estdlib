@@ -25,6 +25,19 @@
 #define ESTD_CPP11_CONSTEXPR
 #endif
 
+#if __cpp_constexpr >= 201703L
+#define ESTD_CPP17_CONSTEXPR_OR_INLINE constexpr
+#else
+#define ESTD_CPP17_CONSTEXPR_OR_INLINE inline
+#endif
+
+#if __cpp_constexpr >= 201304L
+#define ESTD_CPP14_CONSTEXPR_OR_INLINE constexpr
+#else
+#define ESTD_CPP14_CONSTEXPR_OR_INLINE inline
+#endif
+
+
 #define ESTD_CPP_CONSTEXPR(v)    ESTD_CPP ## v ## _CONSTEXPR
 
 // 23FEB25 MB DEBT: Inconsistency between ESTD_CPP_ prefix and lack of prefix
