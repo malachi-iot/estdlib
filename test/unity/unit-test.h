@@ -24,6 +24,7 @@ void test_cpp();
 void test_chrono();
 void test_cstddef();
 void test_expected();
+void test_flags();
 void test_functional();
 void test_hash();
 void test_limits();

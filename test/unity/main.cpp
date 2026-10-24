@@ -12,6 +12,7 @@ int main()
     test_chrono();
     test_cpp();
     test_cstddef();
+    test_flags();
     test_limits();
     test_locale();
     test_optional();

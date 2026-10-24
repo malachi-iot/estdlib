@@ -20,7 +20,7 @@ struct ctype_base
     {
         space = 0x01,
         digit = 0x02,
-        alpha = 0x04,
+        alpha = 0x04,   // DEBT: Not available yet
         punct = 0x08,
         upper = 0x10,
         lower = 0x20,
