@@ -29,4 +29,10 @@ using is_trivial
 #define FEATURE_ESTD_IS_TRIVIAL 1
 
 }
+#else
+namespace estd {
+
+// 24OCT26 MB TODO: If GCC, make our own alias to __underlying_type(type) as per https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
+
+}
 #endif

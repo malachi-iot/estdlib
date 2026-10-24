@@ -13,9 +13,6 @@ namespace estd { namespace detail { inline namespace v1 {
 
 // NOLINTBEGIN(*-explicit-constructor)
 
-///
-/// Designed really to be fully consteval friendly, but works as intended merely as constexpr
-///
 template <class Enum>
 class flags
 {
@@ -89,13 +86,6 @@ public:
 // NOLINTEND(*-explicit-constructor)
 
 template <class Enum>
-constexpr bool operator==(const flags<Enum>& lhs, const Enum& rhs)
-{
-    return lhs.value() == rhs;
-}
-
-
-template <class Enum>
 constexpr bool operator==(const flags<Enum>& lhs, const flags<Enum>& rhs)
 {
     return lhs.value() == rhs.value();
@@ -125,13 +115,13 @@ namespace detail {
 // support it.
 
 template <typename Enum>
-constexpr bool is_set(const detail::flags<Enum>& f)
+constexpr bool is_set(const flags<Enum>& f)
 {
     return f.is_set();
 }
 
 template <typename Enum>
-constexpr Enum to_enum(const detail::flags<Enum>& f)
+constexpr Enum to_enum(const flags<Enum>& f)
 {
     return f.value();
 }

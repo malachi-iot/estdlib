@@ -2,11 +2,20 @@
 
 #include <estd/flags.h>
 
+using namespace estd;
+
 enum synthetic_flags    // NOLINT
 {
     SN_NONE = 0x00,
     SN_CONST = 0x01,
     SN_DOUBLE = 0x02
+};
+
+enum class scoped_flags
+{
+    none = 0,
+    f1 = 0x01,
+    f2 = 0x02,
 };
 
 ESTD_FLAGS(synthetic_flags)
@@ -19,7 +28,7 @@ struct test1
 
 
 template <synthetic_flags f>
-struct test1<f, estd::enable_if_t<is_set(f & SN_DOUBLE)>>
+struct test1<f, enable_if_t<is_set(f & SN_DOUBLE)>>
 {
     static constexpr synthetic_flags flags = f;
     static constexpr bool is_const = f & SN_CONST;
@@ -47,6 +56,10 @@ static constexpr synthetic_flags test_flags_constexpr(synthetic_flags f)
 }
 
 static_assert(test_flags_constexpr(SN_CONST) == SN_CONST, "constexpr compound assignment test fails");
+static_assert(SN_CONST == detail::flags<synthetic_flags>(SN_CONST), "");
+static_assert(detail::flags<synthetic_flags>(SN_CONST) == SN_CONST, "");
+static_assert(detail::flags<scoped_flags>(scoped_flags::f1) == scoped_flags::f1, "");
+static_assert(scoped_flags::f1 == detail::flags<scoped_flags>(scoped_flags::f1), "");
 
 
 TEST_CASE("flags (compile-time capable)", "[flags]")
@@ -60,4 +73,10 @@ TEST_CASE("flags (compile-time capable)", "[flags]")
     static_assert(t3::is_const, "");    // NOLINT
 
     assert_double(t2{});
+
+    detail::flags<synthetic_flags> s1{0};
+
+    s1 = SN_DOUBLE;
+
+    REQUIRE(s1 & SN_DOUBLE);
 }
