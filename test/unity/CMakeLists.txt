@@ -27,6 +27,7 @@ set(SOURCES
     cpp.cpp
     cstddef.cpp
     expected.cpp
+    flags.cpp
     functional.cpp
     housekeeping.cpp
     limits.cpp

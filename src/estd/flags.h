@@ -72,17 +72,17 @@ public:
 
     constexpr flags operator ^(value_type v) const
     {
-        return flags{int_type(v) ^ int_type(value_)};
+        return flags{int_type(int_type(v) ^ int_type(value_))};
     }
 
     constexpr flags operator |(value_type v) const
     {
-        return flags{int_type(v) | int_type(value_)};
+        return flags{int_type(int_type(v) | int_type(value_))};
     }
 
     constexpr flags operator &(value_type v) const
     {
-        return flags{int_type(v) & int_type(value_)};
+        return flags{int_type(int_type(v) & int_type(value_))};
     }
 };
 

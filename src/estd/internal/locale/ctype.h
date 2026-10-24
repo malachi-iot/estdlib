@@ -10,27 +10,31 @@
 
 #include "cbase.h"
 #include "facet.h"
+#include "../../flags.h"
 
 namespace estd {
 
 struct ctype_base
 {
-    using mask = uint8_t;
+    enum mask : uint8_t
+    {
+        space = 0x01,
+        digit = 0x02,
+        alpha = 0x04,
+        punct = 0x08,
+        upper = 0x10,
+        lower = 0x20,
+        xdigit = 0x40,
 
-    static constexpr mask space = 0x01;
-    static constexpr mask digit = 0x02;
-    static constexpr mask alpha = 0x04;
-    static constexpr mask punct = 0x08;
-    static constexpr mask upper = 0x10;
-    static constexpr mask lower = 0x20;
-    static constexpr mask xdigit = 0x40;
+        // Not yet used - see https://en.cppreference.com/w/cpp/string/byte/isblank.html
+        blank = 0x80,
 
-    // Not yet used - see https://en.cppreference.com/w/cpp/string/byte/isblank.html
-    static constexpr mask blank = 0x80;
-
-    static constexpr mask alnum = alpha | digit;
-    static constexpr mask graph = alnum | punct;
+        alnum = alpha | digit,
+        graph = alnum | punct,
+    };
 };
+
+ESTD_FLAGS(ctype_base::mask)
 
 namespace internal {
 
