@@ -1,4 +1,4 @@
-# Malachi clang-tidy convention: embedded v0.2.0
+# Malachi clang-tidy convention: embedded v0.2.1
 # Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
 
 InheritParentConfig: true
@@ -10,8 +10,16 @@ Checks:
   - '-modernize-deprecated-headers'
   # nodiscard is not a bad idea, but I personally find it annoying
   - '-modernize-use-nodiscard'
-  # Embedded space undefined/uninitialized variables are more common
+  # Embedded space undefined/uninitialized variables are common, as are globals
+  - '-cppcoreguidelines-avoid-non-const-global-variables'
   - '-cppcoreguidelines-init-variables'
   - '-cppcoreguidelines-pro-type-member-init'
   # Not *that* bad
   - '-cppcoreguidelines-avoid-do-while'
+
+  # Low level embedded uses so many magic numbers, we tolerate it
+  - '-cppcoreguidelines-avoid-magic-numbers'
+  - '-readability-magic-numbers'
+
+  # Frequently we're cross platform so c++17 isn't always available
+  - '-modernize-type-traits'
