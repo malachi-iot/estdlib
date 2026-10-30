@@ -89,6 +89,7 @@ else()
         port-test.cpp
         priority-queue-test.cpp
         queue-test.cpp
+        span-test.cpp
         stack-test.cpp
         streambuf-test.cpp
         string-test.cpp
