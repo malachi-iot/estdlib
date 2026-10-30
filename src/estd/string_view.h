@@ -42,13 +42,14 @@ public:
     // basic_string may generate a similarly constrained string_view (perhaps with
     // compile time sizing)
     using view_type = basic_string_view;
+    using span_type = span<value_type>;
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
     constexpr basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
 
     constexpr basic_string_view(const_pointer s, size_type count) :
-        base_type(init_param_t(s, count))
+        base_type(span_type(s, count))
     {
 
     }

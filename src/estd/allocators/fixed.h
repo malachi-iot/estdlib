@@ -11,6 +11,7 @@
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"
 #include "../limits.h"
+#include "../span.h"
 #ifdef FEATURE_CPP_STATIC_ASSERT
 // DEBT: Change over to cassert - first have to see if AVR permits that
 #include <assert.h>
@@ -302,7 +303,7 @@ protected:
         m_buffer_size = size;
     }
 
-    ESTD_CPP_CONSTEXPR_RET EXPLICIT single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
+    constexpr explicit single_fixedbuf_runtimesize_allocator(T* buffer, size_type size) :
         base_type(buffer),
         m_buffer_size(size)
     {
@@ -320,6 +321,11 @@ public:
 
     constexpr explicit single_fixedbuf_runtimesize_allocator(const InitParam& p)
         : base_type(p.buffer), m_buffer_size(p.size)
+    {}
+
+    template <size_t N>
+    constexpr explicit single_fixedbuf_runtimesize_allocator(const estd::span<T, N>& span)
+        : base_type(span.data()), m_buffer_size(span.size())
     {}
 
     constexpr size_type size(handle_with_size h) const { return m_buffer_size; }

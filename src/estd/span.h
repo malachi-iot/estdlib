@@ -4,9 +4,12 @@
 // but really spans are very much not allocated.  So "redoing" that work here,
 // which turns out to be slightly less code and easier to understand.
 
-#include "type_traits.h"
-#include "cstddef.h"
+// 30OCT26 - Be careful to keep the header dependencies very light here, because we are
+// angling for fixed.h to use span instead of InitParam
+
 #include "internal/fwd/span.h"
+#include "internal/raw/cstddef.h"
+#include "internal/raw/type_traits.h"
 
 #if FEATURE_STD_ARRAY
 #include <array>
@@ -201,10 +204,6 @@ public:
     }
 };
 
-
-/// @deprecated - use span instead
-typedef span<const uint8_t> const_buffer;
-typedef span<uint8_t> mutable_buffer;
 
 template <class T>
 constexpr span<const byte> as_bytes(span<T> s) NOEXCEPT
