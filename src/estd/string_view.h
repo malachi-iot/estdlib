@@ -4,6 +4,7 @@
 #include "internal/string.h"
 #include "internal/fwd/string_view.h"
 #include "policy/string.h"
+#include "span.h"
 
 #if FEATURE_STD_STRING_VIEW
 #include <string_view>
@@ -24,13 +25,9 @@ class basic_string_view :
 
     using typename base_type::allocator_type;
 
-    // DEBT: InitParam works, but are probably better served by something like
-    // in_place_t.  InitParam was done to get around lack of variadic forwarding
-    // https://github.com/malachi-iot/estdlib/issues/223
-    typedef typename allocator_type::InitParam init_param_t;
-
 public:
     using base_type::data;
+    using base_type::npos;
     using typename base_type::size_type;
 
     using typename base_type::value_type;
@@ -46,7 +43,7 @@ public:
 
     // As per spec, a no-constructor basic_string_view creates a null/null
     // scenario
-    constexpr basic_string_view() : base_type(init_param_t(NULLPTR, 0)) {}
+    constexpr basic_string_view() : base_type(span_type{}) {}
 
     constexpr basic_string_view(const_pointer s, size_type count) :
         base_type(span_type(s, count))
@@ -55,7 +52,7 @@ public:
     }
 
     constexpr basic_string_view(const_pointer begin, const_pointer end) :
-        base_type(init_param_t(begin, end - begin))
+        base_type(span_type(begin, end))
     {
 
     }
@@ -64,9 +61,9 @@ public:
     constexpr basic_string_view(const_pointer s) :  // NOLINT
         // char_traits::length only constexpr with c++17 on
 #if __cplusplus >= 201703L
-        base_type(init_param_t(s, traits_type::length(s)))
+        basic_string_view(s, traits_type::length(s))
 #else
-        base_type(init_param_t(s, estd::strlen(s)))
+        basic_string_view(s, estd::strlen(s))
 #endif
     {
 
@@ -77,7 +74,7 @@ public:
         const basic_string_view<Policy2>& other) :
         // NOTE: Similar to layer3::string init issue, other.size() may properly result
         // in narrowing warnings
-        base_type(init_param_t(other.data(), other.size()))
+        base_type(span_type(other.data(), other.size()))
     {
 
     }
@@ -136,9 +133,9 @@ public:
     constexpr const_iterator begin() const { return data(); }
     constexpr const_iterator end() const { return data() + base_type::size(); }
 
-    ESTD_CPP_CONSTEXPR(17) basic_string_view substr(
-            size_type pos = 0,
-            size_type count = base_type::npos) const
+    ESTD_CPP_CONSTEXPR(14) basic_string_view substr(
+        size_type pos = 0,
+        size_type count = npos) const
     {
         // DEBT: Use underlying data()/clock(), although it's noteworthy that
         // this seemingly clumsy approach *might* work for private/moveable basic_string_view
@@ -147,7 +144,7 @@ public:
         basic_string_view copy(*this);
 
         copy.remove_prefix(pos);
-        if(count != base_type::npos)
+        if(count != npos)
         {
             allocator_type& a = copy.get_allocator();
 
@@ -156,6 +153,11 @@ public:
 
         return copy;
     }
+
+    ESTD_CPP_CONSTEXPR(14) basic_string_view subview(
+        size_type pos = 0,
+        size_type count = npos) const
+    { return substr(pos, count); }
 };
 
 }}
@@ -163,5 +165,6 @@ public:
 namespace estd {
 
 using string_view = basic_string_view<char>;
+using wstring_view = basic_string_view<wchar_t>;
 
 }

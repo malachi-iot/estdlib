@@ -11,7 +11,7 @@
 #include "../allocators/handle_desc.h"
 #include "../initializer_list.h"
 #include "../limits.h"
-#include "../span.h"
+#include "../internal/fwd/span.h"
 #ifdef FEATURE_CPP_STATIC_ASSERT
 // DEBT: Change over to cassert - first have to see if AVR permits that
 #include <assert.h>

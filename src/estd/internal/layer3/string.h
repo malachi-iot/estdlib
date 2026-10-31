@@ -5,6 +5,7 @@
 #include "../../policy/string.h"
 #include "../../allocators/fixed.h"
 #include "../string.h"
+#include "../../span.h"
 
 namespace estd { namespace layer3 {
 
@@ -37,12 +38,12 @@ public:
     using base_type::data;
 
 protected:
-    typedef typename allocator_type::InitParam init_t;
+    using span_type = span<CharT>;
 
     // certain varieties (such as basic_string_view and layer3::const_string) only have one size, the initial
     // buffer size
     constexpr basic_string(CharT* buffer, size_type buffer_size, bool) :
-        base_type(init_t(buffer, buffer_size))
+        base_type(span_type(buffer, buffer_size))
     {
     }
 
@@ -57,7 +58,7 @@ public:
 
     template <size_type N>
     basic_string(CharT (&buffer) [N], size_type initial_size = base_type::npos) :
-        base_t(init_t(buffer, N))
+        base_t(span<CharT, N>(buffer))
     {
         if(initial_size == base_type::npos)
             initial_size = strlen(buffer);
@@ -78,8 +79,8 @@ public:
         base_t::impl().size(initial_size);
     }   */
 
-    basic_string(CharT* start, CharT* end, size_type initial_size) :
-        base_t(init_t(start, start - end))
+    ESTD_CPP_CONSTEXPR(14) basic_string(CharT* start, CharT* end, size_type initial_size) :
+        base_type(span_type(start, end))
     {
         base_t::impl().size(initial_size);
     }
@@ -89,7 +90,7 @@ public:
         // DEBT: Precision loss here generates warnings and rightly so.  This whole
         // init mechanism needs a rework - or a deprecation completely, since layer3::basic_string
         // is more or less a basic_string_view
-        : base_t(init_t(copy_from.clock(), copy_from.max_size()))
+        : base_type(span_type(copy_from.clock(), copy_from.max_size()))
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         static_assert(helper_type::uses_termination(), "Only supports null terminated at this time");
