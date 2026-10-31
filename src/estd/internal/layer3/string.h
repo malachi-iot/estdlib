@@ -48,14 +48,6 @@ protected:
     }
 
 public:
-    /*
-    template <size_type N>
-    basic_string(const CharT (&buffer) [N], bool source_null_terminated = true) :
-        base_t(typename allocator_type::InitParam(buffer, N))
-    {
-        base_t::helper.size(N - (source_null_terminated ? 1 : 0));
-    } */
-
     template <size_type N>
     basic_string(CharT (&buffer) [N], size_type initial_size = base_type::npos) :
         base_t(span<CharT, N>(buffer))

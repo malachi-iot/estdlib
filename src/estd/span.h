@@ -4,8 +4,8 @@
 // but really spans are very much not allocated.  So "redoing" that work here,
 // which turns out to be slightly less code and easier to understand.
 
-// 30OCT26 - Be careful to keep the header dependencies very light here, because we are
-// angling for fixed.h to use span instead of InitParam
+// 31OCT26 - Be careful to keep the header dependencies very light here, since feeders
+// of fixed.h (basic_string_view, for example) want to consume this
 
 #include "internal/fwd/span.h"
 #include "internal/raw/cstddef.h"

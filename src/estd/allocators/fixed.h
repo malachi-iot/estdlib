@@ -311,18 +311,6 @@ protected:
     }
 
 public:
-    struct InitParam
-    {
-        T* buffer;      // incoming layer3 buffer
-        size_type size; // size of layer3 buffer (remember this represents allocated size)
-
-        ESTD_CPP_CONSTEXPR_RET InitParam(T* buffer, size_type size) : buffer(buffer), size(size) {}
-    };
-
-    constexpr explicit single_fixedbuf_runtimesize_allocator(const InitParam& p)
-        : base_type(p.buffer), m_buffer_size(p.size)
-    {}
-
     template <size_t N>
     constexpr explicit single_fixedbuf_runtimesize_allocator(const estd::span<T, N>& span)
         : base_type(span.data()), m_buffer_size(span.size())

@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "internal/dynamic_array.h"
 #include "allocators/fixed.h"
+#include "span.h"
 
 namespace estd {
 
@@ -106,33 +107,32 @@ class vector : public estd::vector<T,
         >
 
 {
-    typedef estd::vector<T,
+    using base_type = estd::vector<T,
 #ifdef FEATURE_ESTD_STRICT_DYNAMIC_ARRAY
         estd::layer3::allocator<T>
 #else
         estd::internal::single_fixedbuf_runtimesize_allocator<T>
 #endif
-        > base_t;
-    typedef typename base_t::impl_type impl_type;
-    typedef typename base_t::allocator_type allocator_type;
-    typedef typename allocator_type::InitParam init_t;
+        >;
+    using typename base_type::impl_type;
+    using typename base_type::allocator_type;
     typedef typename allocator_type::size_type size_type;
 
 public:
-    vector(T* underlying_buffer, size_type n) :
-            base_t(init_t(underlying_buffer, n)) {}
+    constexpr vector(T* underlying_buffer, size_type n) :
+        base_type(span<T>(underlying_buffer, n)) {}
 
     template <size_type N>
-    vector(T (&buffer)[N]) :
-            base_t(init_t(buffer, N)) {}
+    constexpr vector(T (&buffer)[N]) :
+        base_type(span<T, N>(buffer)) {}
 
-#ifdef FEATURE_CPP_INITIALIZER_LIST
-    vector(std::initializer_list<T> initlist) : base_t(initlist) {}
+#ifdef FEATURE_STD_INITIALIZER_LIST
+    constexpr vector(std::initializer_list<T> init_list) : base_type(init_list) {}
 #endif
 
     // Because layer3 is *always* a simple pointer, enable data() call here
-    T* data() { return base_t::lock(); }
-    const T* data() const { return base_t::clock(); }
+    T* data() { return base_type::lock(); }
+    constexpr const T* data() const { return base_type::clock(); }
 };
 
 }
