@@ -154,15 +154,7 @@ struct variant_storage_base : variant_storage_tag
 
 
 private:
-    union
-    {
-        variant_union<trivial, Types...> storage;
-
-        // constexpr constructors need to init some guy during construct_at.  Note that
-        // construct_at is only c++17 friendly at the moment, so the notion is either DEBT
-        // or flawed
-        monostate dummy;
-    };
+    variant_union<trivial, Types...> storage;
 
 protected:
     byte* raw() { return storage.raw; }
@@ -460,7 +452,7 @@ public:
     }
 
     template <typename F, class ...Args>
-    static monostate visit(F&& f, size_type* index, Args&&...args)
+    ESTD_CPP_CONSTEXPR(14) static monostate visit(F&& f, size_type* index, Args&&...args)
     {
         const size_type i = visitor::visit(std::forward<F>(f),
             std::forward<Args>(args)...);
@@ -472,14 +464,15 @@ public:
     // DEBT: unsigned/signed int needs to be ironed out here, mismatch is gonna
     // continue to be a thorn in our side otherwise
     template <class F, class ...Args>
-    constexpr variant_storage_base(in_place_visit_t, F&& f, size_type* index, Args&&...args) :
-        dummy{visit(std::forward<F>(f), index, *this, std::forward<Args>(args)...)}
-    {}
+    ESTD_CPP_CONSTEXPR(14) variant_storage_base(in_place_visit_t, F&& f, size_type* index, Args&&...args)
+    {
+        visit(std::forward<F>(f), index, *this, std::forward<Args>(args)...);
+    }
 
-    constexpr variant_storage_base(const variant_storage_base& copy_from, size_type index) :
-        //dummy{visit_instance(copying_constructor_functor{}, nullptr, copy_from, index)}
-        dummy{visit(copying_constructor_functor{}, nullptr, *this, copy_from, index)}
-    {}
+    ESTD_CPP_CONSTEXPR(14) variant_storage_base(const variant_storage_base& copy_from, size_type index)
+    {
+        visit(copying_constructor_functor{}, nullptr, *this, copy_from, index);
+    }
 };
 
 

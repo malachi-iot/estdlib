@@ -20,11 +20,11 @@ class bad_variant_access;
 
 namespace internal {
 
-template <bool trivial, class ...Args>
+template <bool trivial, class ...>
 union variant_union;
 
 
-template <bool trivial, class ...ypes>
+template <bool trivial, class ...>
 struct variant_storage_base;
 
 template <class ...Types>
@@ -33,7 +33,9 @@ class variant;
 struct variant_storage_tag {};
 
 template <class ...T>
-using variant_storage = variant_storage_base<are_trivial<T...>::value, T...>;
+using variant_storage = variant_storage_base<are_trivial<T...>::value &&
+    // Wants to be a union, and a const value precludes triviality in that case
+    !has_const<T...>::value, T...>;
 
 template <int index, class ...Types>
 inline ESTD_CPP_CONSTEXPR(14) type_at_index<index, Types...>* get_ll(variant<Types...>& vs) noexcept;

@@ -76,13 +76,26 @@ struct are_trivial<> : bool_constant<true>
 {
 };
 
-template <class T, class ...TArgs>
-struct are_trivial<T, TArgs...>
+template <class T, class ...Args>
+struct are_trivial<T, Args...>
 {
     static constexpr bool value = estd::is_trivial<T>::value &
-        are_trivial<TArgs...>::value;
+        are_trivial<Args...>::value;
 };
 
+template <>
+struct has_const<> : bool_constant<false>
+{
+};
+
+template <class T, class ...Args>
+struct has_const<T, Args...>
+{
+    static constexpr bool value = is_const<T>::value |
+        has_const<Args...>::value;
+};
+
+static_assert(has_const<int, const int>::value, "");
 
 // DEBT: Naming not clear, in conflict with above convention from are_trivial
 // Projects an is_same per item in TArgs

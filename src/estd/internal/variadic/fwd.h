@@ -22,6 +22,8 @@ using type_at_index = typename get_type_at_index<index, Types...>::type;
 template <class ...TArgs>
 struct are_trivial;
 
+template <class ...> struct has_const;
+
 // Indicates the function/constructor expects a functor for iterating
 // over all the variadic possibilities
 struct in_place_visit_t : in_place_tag {};
