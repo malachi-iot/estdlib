@@ -2,6 +2,7 @@
 
 ## Added Features
 
+* https://github.com/malachi-iot/estdlib/issues/235 adding missing `estd::optional` comparison operators
 * https://github.com/malachi-iot/estdlib/issues/240 adding `uint8_t` char type support to ostream
 
 ## Quality Updates & Bug Fixes

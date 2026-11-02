@@ -80,7 +80,7 @@ class optional_has_value
     bool initialized_;
 
 protected:
-    constexpr optional_has_value(bool initialized = false) :
+    constexpr explicit optional_has_value(bool initialized = false) :
         initialized_(initialized) {}
 
     void reset() { initialized_ = false; }
@@ -92,6 +92,7 @@ public:
 };
 
 
+// 02NOV26 MB DEBT: Issue# 211 work has its own flavor of this, consolidate
 template <class T>
 struct optional_value_provider
 {
@@ -164,13 +165,11 @@ protected:
         get<0>(storage) = v;
     }
 
-#if __cpp_rvalue_references
     template <class U>
     void assign_value(bool has_value, U&& u)
     {
         storage.template assign_or_init<0, 1>(has_value, std::forward<U>(u));
     }
-#endif
 
     template <class U>
     void assign_value(bool has_value, const U& u)

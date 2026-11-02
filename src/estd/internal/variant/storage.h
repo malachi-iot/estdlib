@@ -18,7 +18,7 @@ template <bool trivial, class ...Types>
 struct variant_storage_base : variant_storage_tag
 {
     using size_type = std::size_t;
-    using this_type = variant_storage_base<trivial, Types...>;
+    using this_type = variant_storage_base;
     using types = variadic::types<Types...>;
 
     struct index_visitor
@@ -198,7 +198,7 @@ public:
     }
 
     template <size_t index>
-    ESTD_CPP_CONSTEXPR(20) void destroy()
+    ESTD_CPP_CONSTEXPR(14) void destroy()
     {
         using t = type_at_index<index>;
         get<index>()->~t();
@@ -494,8 +494,6 @@ class instance_storage : protected variant_storage_base<is_trivially_constructib
     ESTD_CPP_STD_VALUE_TYPE(T)
 
 public:
-    // NOLINTBEGIN
-
     template <class ...Args>
     constexpr explicit instance_storage(in_place_t, Args&&...args) :
         base_type(in_place_index_t<0>{}, std::forward<Args>(args)...)
@@ -521,9 +519,17 @@ public:
     {
         return base_type::template assign<0>(copy_from);
     }
-
-    // NOLINTEND
 };
+
+// UNUSED, UNTESTED
+template <bool trivial, class T, class ...Args>
+ESTD_CPP_CONSTEXPR(14) T& emplace(
+    variant_storage_base<trivial, T>& storage, bool destroy_first, Args&&...args)
+{
+    if(destroy_first)   storage.template destroy<0>();
+
+    return *storage.template emplace<0>(std::forward<Args>(args)...);
+}
 
 }   // namespace internal
 
