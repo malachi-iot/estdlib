@@ -23,6 +23,11 @@ protected:
     constexpr semaphore_base(SemaphoreHandle_t s) :
         s{s} {}
 
+    // Not copyable (like std::mutex).  Copy would share live handle (and for
+    // mutex<true> memcpy StaticSemaphore_t), then its dtor would delete it
+    semaphore_base(const semaphore_base&) = delete;
+    semaphore_base& operator=(const semaphore_base&) = delete;
+
     ~semaphore_base()
     {
         // From the source code:
