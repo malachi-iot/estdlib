@@ -2,7 +2,8 @@
 
 #include <estd/functional.h>
 
-using func = estd::detail::function<void()>;
+using func = estd::detail::v2::function<void(), estd::detail::impl::function_fnptr2>;
+using func_virt = estd::detail::v2::function<void(), estd::detail::impl::function_virtual>;
 
 static void test_detail_function()
 {
@@ -15,11 +16,12 @@ static void test_detail_function()
     TEST_ASSERT_EQUAL(1, counter);
 }
 
+template <class Func>
 static void test_function()
 {
     int counter = 0;
 
-    auto m = func::make_model([&](){++counter;});
+    auto m = Func::make_model([&](){++counter;});
     func f(&m);
 
     f();
@@ -65,7 +67,8 @@ TEST_CASE("runtime function tests", "[functional]")
 void test_functional()
 #endif
 {
-    RUN_TEST(test_function);
+    RUN_TEST(test_function<func>);
+    //RUN_TEST(test_function<func_virt>);
     RUN_TEST(test_detail_function);
 	RUN_TEST(test_inline_function);
 }
