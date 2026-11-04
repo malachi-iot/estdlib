@@ -2,15 +2,27 @@
 
 #include <estd/functional.h>
 
+using func = estd::detail::function<void()>;
+
 static void test_detail_function()
 {
     int counter = 0;
 
-    using func = estd::detail::function<void()>;
-
     auto m = func::make_model([&](){++counter;});
 
     m.invoke();
+
+    TEST_ASSERT_EQUAL(1, counter);
+}
+
+static void test_function()
+{
+    int counter = 0;
+
+    auto m = func::make_model([&](){++counter;});
+    func f(&m);
+
+    f();
 
     TEST_ASSERT_EQUAL(1, counter);
 }
@@ -53,9 +65,8 @@ TEST_CASE("runtime function tests", "[functional]")
 void test_functional()
 #endif
 {
-#if defined (FEATURE_CPP_VARIADIC)
+    RUN_TEST(test_function);
     RUN_TEST(test_detail_function);
-#endif
 	RUN_TEST(test_inline_function);
 }
 
