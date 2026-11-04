@@ -30,7 +30,7 @@ void test_lock_guard()
     estd::mutex m;
     estd::lock_guard<estd::mutex> _m(m);
 
-    //estd::internal::lock_guard<estd::monostate> _m2(estd::monostate{});
+    estd::lock_guard<estd::internal::noop_mutex> _m2({});
 }
 
 // DEBT: Move most (all?) of this to freertos.cpp proper

@@ -12,6 +12,8 @@
 #endif
 #include "internal/value_evaporator.h"
 
+// TODO: Do up FEATURE_STD_MUTEX_ALIAS for these defer_lock_t and friends
+
 namespace estd {
 
 // do not acquire ownership of the mutex
@@ -102,58 +104,76 @@ public:
 
 namespace internal {
 
-template <class Mutex, class = void>
+template <class Mutex, bool is_empty = is_empty<Mutex>::value>
 class lock_guard;
+
+struct noop_mutex
+{
+    static constexpr bool lock() { return true; }
+    static constexpr bool try_lock() { return true; }
+
+    static ESTD_CPP_CONSTEXPR(14) void unlock() { }
+};
+
 
 // 03NOV26 MB DEBT: Consolidate with EBO/evaporators
 template <class Mutex>
-class lock_guard<Mutex, enable_if_t<sizeof(Mutex) == 0>>
+class lock_guard<Mutex, true>
 {
 protected:
-    using mutex_type = Mutex;
+    using arg_type = Mutex;
 
-    constexpr mutex_type mutex() { return {}; }
+    constexpr Mutex mutex() { return {}; }
+
+    ESTD_CPP_CONSTEXPR(14) explicit lock_guard(Mutex)
+    {
+        Mutex{}.lock();
+    }
+
+    ESTD_CPP_CONSTEXPR(14) ~lock_guard() { Mutex{}.unlock(); }
 };
 
 template <class Mutex>
-class lock_guard<Mutex, enable_if_t<sizeof(Mutex) != 0>>
+class lock_guard<Mutex, false>
 {
-public:
-    using mutex_type = Mutex;
-
 protected:
-    mutex_type mutex_;
-
-    mutex_type& mutex() { return mutex_; }
-
-    constexpr explicit lock_guard(mutex_type& m) : mutex_(m) {}
-};
-
-}
-
-template <class Mutex>
-class lock_guard
-{
-    typedef Mutex mutex_type;
+    using arg_type =  Mutex&;
 
     // needs to be a reference so that mutex ctor/dtor
     // doesn't accidentally spin up/spin down a 2nd mutex
     // TODO: Look into RVO's pass-in relative to see
     // if that indeed is going to happen
-    mutex_type& m;
+    arg_type mutex_;
 
-public:
-    lock_guard(const lock_guard&) = delete;
-
-    explicit lock_guard(mutex_type& m) : m(m)
+    ESTD_CPP_CONSTEXPR(14) explicit lock_guard(arg_type m) : mutex_(m)
     {
         m.lock();
     }
 
-    ~lock_guard()
+    ESTD_CPP_CONSTEXPR(14) ~lock_guard() { mutex_.unlock(); }
+};
+
+}
+
+// Not doing a 'using' just because it's friendlier to debugger to wrap it
+// and not hard to do so
+template <class Mutex>
+class lock_guard : public internal::lock_guard<Mutex>
+{
+    using base_type = internal::lock_guard<Mutex>;
+    using typename base_type::arg_type;
+
+public:
+    using mutex_type = Mutex;
+
+    lock_guard(const lock_guard&) = delete;
+
+    ESTD_CPP_CONSTEXPR(14) explicit lock_guard(arg_type m) :
+        base_type(m)
     {
-        m.unlock();
     }
+
+    // TODO: Add in adopt_lock_t flavor
 };
 
 
