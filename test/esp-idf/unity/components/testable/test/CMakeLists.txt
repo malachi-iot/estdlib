@@ -25,6 +25,11 @@ register_component()
 # of stack usage
 target_compile_options(${COMPONENT_LIB} PRIVATE -fstack-usage)
 target_compile_options(${COMPONENT_LIB} PRIVATE -Wstack-usage=128 -Wno-error=stack-usage=)
+# "tell us whether GCC considered these objects and why it retained them."
+target_compile_options(${COMPONENT_LIB} PRIVATE
+    -fdump-tree-all-details
+    -fdump-tree-sra-details
+    -fdump-tree-optimized)
 
 # FEATURE_ESTD_CHARTRAITS works well.  Leaving it off in pursuit of getting to the
 # bottom of std::char_traits bloat
