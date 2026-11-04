@@ -21,8 +21,10 @@ set(COMPONENT_EMBED_FILES ${RESOURCES})
 
 register_component()
 
-component_compile_options("-Wstack-usage=128")
-component_compile_options("-Wno-error=stack-usage=")
+# For diagnostics only.  Generate .su stack usage reports and warnings if > 128 bytes
+# of stack usage
+target_compile_options(${COMPONENT_LIB} PRIVATE -fstack-usage)
+target_compile_options(${COMPONENT_LIB} PRIVATE -Wstack-usage=128 -Wno-error=stack-usage=)
 
 # FEATURE_ESTD_CHARTRAITS works well.  Leaving it off in pursuit of getting to the
 # bottom of std::char_traits bloat

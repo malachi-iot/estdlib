@@ -1,15 +1,14 @@
 #include "unit-test.h"
 
-#if defined (FEATURE_CPP_VARIADIC)
 #include <estd/functional.h>
 
 static void test_detail_function()
 {
     int counter = 0;
 
-    estd::detail::function<void()> fb;
+    using func = estd::detail::function<void()>;
 
-    auto m = fb.make_model([&](){++counter;});
+    auto m = func::make_model([&](){++counter;});
 
     m.invoke();
 
@@ -47,12 +46,6 @@ static void test_inline_function()
 
     TEST_ASSERT_EQUAL(3, counter);
 }
-#else
-static void test_inline_function()
-{
-    
-}
-#endif
 
 #ifdef ESP_IDF_TESTING
 TEST_CASE("runtime function tests", "[functional]")

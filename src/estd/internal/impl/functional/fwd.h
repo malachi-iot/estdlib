@@ -2,6 +2,10 @@
 
 #include "../../../flags.h"
 
+// EXPERIMENTAL
+#define ESTD_FN_INLINE inline __attribute__((always_inline, optimize("tree-sra")))
+#define ESTD_FN_INLINE_FLATTEN inline __attribute__((always_inline, flatten, optimize("tree-sra")))
+
 namespace estd { namespace detail { namespace impl {
 
 enum fn_options

@@ -81,6 +81,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
     protected:
         function_type fptr_;
 
+        ESTD_FN_INLINE
         constexpr explicit model_ptr(function_type f) : fptr_(f) {}
 
         // Prepending _ because normally nobody should be calling this guy - only mixin
@@ -96,6 +97,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
 
     struct model_base : base, model_ptr, mixin<model_base>
     {
+        ESTD_FN_INLINE
         constexpr explicit model_base(
             typename model_ptr::function_type f,
             utility_type u) :
@@ -128,6 +130,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         using utility = rtto::utility;
 #endif
 
+        ESTD_FN_INLINE
         //template <typename U>
 #if !__GNUC__ || __clang__ || __GNUC__ > 8
         ESTD_CPP_CONSTEXPR(14)
@@ -141,6 +144,7 @@ struct function_fnptr2<Result(Args...), o> : public internal::rtto_base
         {
         }
 
+        ESTD_FN_INLINE
 #if __clang__ || __GNUC__ > 8
 #endif
         explicit model(const F& u) :

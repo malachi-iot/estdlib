@@ -229,13 +229,13 @@ public:
 
     // See above 'model' CTAD comments
     template <typename F>
-    constexpr static model<F> make_model(F&& f)
+    ESTD_FN_INLINE constexpr static model<F> make_model(F&& f)
     {
         return model<F>(std::forward<F>(f));
     }
 
     template <typename F>
-    constexpr static model<F> make_model(const F& f)
+    ESTD_FN_INLINE constexpr static model<F> make_model(const F& f)
     {
         return model<F>(f);
     }

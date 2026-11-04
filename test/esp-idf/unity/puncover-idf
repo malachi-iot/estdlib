@@ -1,0 +1,7 @@
+#!/bin/bash
+
+ELF=estd-unity
+TARGET=xtensa-esp32
+
+puncover --gcc-tools-base "$(dirname "$(which ${TARGET}-elf-objdump)")/xtensa-esp32-elf-" \
+    --elf_file build/${ELF}.elf --build_dir build --src_root="$PWD/../.."
