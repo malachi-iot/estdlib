@@ -100,7 +100,36 @@ public:
 #endif
 };
 
+namespace internal {
 
+template <class Mutex, class = void>
+class lock_guard;
+
+// 03NOV26 MB DEBT: Consolidate with EBO/evaporators
+template <class Mutex>
+class lock_guard<Mutex, enable_if_t<sizeof(Mutex) == 0>>
+{
+protected:
+    using mutex_type = Mutex;
+
+    constexpr mutex_type mutex() { return {}; }
+};
+
+template <class Mutex>
+class lock_guard<Mutex, enable_if_t<sizeof(Mutex) != 0>>
+{
+public:
+    using mutex_type = Mutex;
+
+protected:
+    mutex_type mutex_;
+
+    mutex_type& mutex() { return mutex_; }
+
+    constexpr explicit lock_guard(mutex_type& m) : mutex_(m) {}
+};
+
+}
 
 template <class Mutex>
 class lock_guard
@@ -114,9 +143,8 @@ class lock_guard
     mutex_type& m;
 
 public:
-#ifdef FEATURE_CPP_DELETE_CTOR
     lock_guard(const lock_guard&) = delete;
-#endif
+
     explicit lock_guard(mutex_type& m) : m(m)
     {
         m.lock();
