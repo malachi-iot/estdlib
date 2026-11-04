@@ -2,9 +2,14 @@
 
 #include "../../../flags.h"
 
-// EXPERIMENTAL
-#define ESTD_FN_INLINE inline __attribute__((always_inline, optimize("tree-sra")))
-#define ESTD_FN_INLINE_FLATTEN inline __attribute__((always_inline, flatten, optimize("tree-sra")))
+#ifndef FEATURE_ESTD_FN_AGGRESSIVE_INLINE
+#define FEATURE_ESTD_FN_AGGRESSIVE_INLINE 1
+#endif
+
+#if defined(__GNUC__) and !defined(__clang__) and FEATURE_ESTD_FN_AGGRESSIVE_INLINE
+#define ESTD_FN_INLINE inline __attribute__((always_inline, optimize("tree-sra,dse")))
+#define ESTD_FN_INLINE_FLATTEN inline __attribute__((always_inline, flatten, optimize("tree-sra,dse")))
+#endif
 
 namespace estd { namespace detail { namespace impl {
 
