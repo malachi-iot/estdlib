@@ -104,6 +104,20 @@ public:
 
 namespace internal {
 
+#if __cpp_concepts
+// DEBT: Belongs elsewhere
+namespace concepts {
+
+template <class T>
+concept Mutex = requires(T m)
+{
+    m.lock();
+    m.unlock();
+};
+
+}
+#endif
+
 template <class Mutex, bool is_empty = is_empty<Mutex>::value>
 class lock_guard;
 
@@ -122,8 +136,6 @@ class lock_guard<Mutex, true>
 {
 protected:
     using arg_type = Mutex;
-
-    constexpr Mutex mutex() { return {}; }
 
     ESTD_CPP_CONSTEXPR(14) explicit lock_guard(Mutex)
     {
@@ -157,7 +169,7 @@ protected:
 
 // Not doing a 'using' just because it's friendlier to debugger to wrap it
 // and not hard to do so
-template <class Mutex>
+template <ESTD_CPP_CONCEPT(internal::concepts::Mutex) Mutex>
 class lock_guard : public internal::lock_guard<Mutex>
 {
     using base_type = internal::lock_guard<Mutex>;
