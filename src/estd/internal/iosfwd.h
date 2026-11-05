@@ -27,7 +27,7 @@ template <class Streambuf, bool use_pointer>
 class basic_ios_base;
 
 
-template<ESTD_CPP_CONCEPT(concepts::v1::impl::StreambufBase) Streambuf, bool use_pointer = false,
+template<ESTD_CPP_CONCEPT(estd::concepts::v1::impl::StreambufBase) Streambuf, bool use_pointer = false,
         class Policy = ios_base_policy<Streambuf> >
 class basic_ios;
 
@@ -48,16 +48,9 @@ template <class Streambuf>
 class basic_iostream;
 
 }
-    
-namespace internal {
 
-// NOTE: Deprecated, use detail flavor
-using ostream_functor_tag = detail::ostream_functor_tag;
-
-}
-
-template <class TStreambuf, class TBase>
-detail::basic_istream<TStreambuf, TBase>&
-    ws(detail::basic_istream<TStreambuf, TBase>& __is);
+template <class Streambuf, class Base>
+detail::basic_istream<Streambuf, Base>&
+    ws(detail::basic_istream<Streambuf, Base>&);
 
 }
