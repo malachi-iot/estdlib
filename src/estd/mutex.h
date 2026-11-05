@@ -102,7 +102,9 @@ public:
 #endif
 };
 
-namespace internal {
+// 05NOV26 MB - estd::internal::concepts is dangerous, because all our
+// ESTD_CPP_CONCEPTS(concepts::xxx) risk getting broken
+//namespace internal {
 
 #if __cpp_concepts
 // DEBT: Belongs elsewhere
@@ -116,7 +118,10 @@ concept Mutex = requires(T m)
 };
 
 }
+
 #endif
+
+namespace internal {
 
 template <class Mutex, bool is_empty = is_empty<Mutex>::value>
 class lock_guard;
@@ -169,7 +174,7 @@ protected:
 
 // Not doing a 'using' just because it's friendlier to debugger to wrap it
 // and not hard to do so
-template <ESTD_CPP_CONCEPT(internal::concepts::Mutex) Mutex>
+template <ESTD_CPP_CONCEPT(concepts::Mutex) Mutex>
 class lock_guard : public internal::lock_guard<Mutex>
 {
     using base_type = internal::lock_guard<Mutex>;

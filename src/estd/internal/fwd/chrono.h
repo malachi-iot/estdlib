@@ -31,6 +31,8 @@ template<
 > class time_point;
 
 #if __cpp_concepts
+// 05NOV26 MB - estd::internal::concepts is dangerous, because all our
+// ESTD_CPP_CONCEPTS(concepts::xxx) risk getting broken
 namespace internal { namespace concepts { inline namespace v1 {
 
 // these concepts may be useful in cases where std vs estd time_point
