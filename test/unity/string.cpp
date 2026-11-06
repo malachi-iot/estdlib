@@ -202,6 +202,19 @@ static void test_string_hash()
     TEST_ASSERT_EQUAL_HEX32(0x4c0a9277, hashed);
 }
 
+// Misc tests just to excercise stack usage
+static void test_string_stack_1()
+{
+    estd::layer1::string<32> s;
+
+    // FIX: Aborts due to fixed allocator.  Should noop instead really
+    //s.reserve(10);
+
+    // Just a dummy operation, placeholder for when we want to actually do some
+    // stack testing
+    s.clear();
+}
+
 #ifdef __AVR__
 
 #endif
@@ -221,4 +234,5 @@ void test_string()
     RUN_TEST(test_to_string_opt);
     RUN_TEST(test_char_traits);
     RUN_TEST(test_string_hash);
+    RUN_TEST(test_string_stack_1);
 }

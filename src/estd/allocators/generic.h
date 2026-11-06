@@ -8,6 +8,8 @@
 #include <memory> // for std::allocator_traits and friends
 #endif
 
+#include "fwd.h"
+
 namespace estd {
 
 // Non standard
