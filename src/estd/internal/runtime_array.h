@@ -76,21 +76,25 @@ public:
 
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
+    ESTD_ALLOC_INLINE
     ESTD_CPP_CONSTEXPR(17) pointer lock(size_type pos = 0, size_type count = 0)
     {
         return &impl_.lock(pos, count);
     }
 
+    ESTD_ALLOC_INLINE
     constexpr const_pointer clock(size_type pos = 0, size_type count = 0) const
     {
         return &impl_.clock(pos, count);
     }
 
+    ESTD_ALLOC_INLINE
     ESTD_CPP_CONSTEXPR(14) void unlock()
     {
         impl_.unlock();
     }
 
+    ESTD_ALLOC_INLINE
     ESTD_CPP_CONSTEXPR(14) void cunlock() const
     {
         impl_.cunlock();
@@ -214,6 +218,7 @@ public:
 #if FEATURE_ESTD_ALLOCATED_ARRAY_TRADITIONAL
     typedef value_type& accessor;
 
+    ESTD_ALLOC_INLINE
     accessor create_accessor(unsigned o = 0) const
     {
         accessor v(get_allocator().lock(offset(o)));
@@ -225,6 +230,7 @@ public:
     //typedef traditional_accessor<value_type> accessor;
 
     //ESTD_CPP_CONSTEXPR_RET
+    ESTD_ALLOC_INLINE
     accessor create_accessor(unsigned o = 0) const
     {
         // DEBT: using temp variable here because accessor ctor signature REQUIRES a reference,
@@ -236,9 +242,9 @@ public:
 
     typedef pointer traditional_iterator;
 
-    constexpr size_type size() const { return impl_.size(); }
+    ESTD_ALLOC_INLINE constexpr size_type size() const { return impl_.size(); }
 
-    allocator_valref get_allocator() const
+    ESTD_ALLOC_INLINE allocator_valref get_allocator() const
     {
         // FIX: Hate this, but since we have stateful allocators flying around everywhere, even
         // embedded within dynamic array, we are forced to do this so that we conform to std::get_allocator
