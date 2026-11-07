@@ -100,6 +100,7 @@ else()
         rtto-test.cpp
         test-data.h
         type-traits-test.cpp
+        thread-test.cpp
         tuple-test.cpp
         units-test.cpp
         utility-test.cpp

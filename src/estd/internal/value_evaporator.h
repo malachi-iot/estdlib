@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "../utility.h"
 #include "../type_traits.h"
+#include "../allocators/fwd.h"
 
 namespace estd { namespace internal {
 
@@ -71,8 +72,9 @@ class struct_evaporator<T, false>
 public:
     typedef T value_type;
     typedef const value_type evaporated_type;
+    using const_evaporated_type = evaporated_type;
 
-    constexpr evaporated_type value() const { return value_type(); }
+    ESTD_ALLOC_INLINE constexpr evaporated_type value() const { return value_type(); }
 
     ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
 
@@ -94,8 +96,8 @@ private:
     value_type value_;
 
 public:
-    ESTD_CPP_CONSTEXPR(14) evaporated_type value() { return value_; }
-    constexpr const_evaporated_type value() const { return value_; }
+    ESTD_ALLOC_INLINE ESTD_CPP_CONSTEXPR(14) evaporated_type value() { return value_; }
+    ESTD_ALLOC_INLINE constexpr const_evaporated_type value() const { return value_; }
 
     ESTD_CPP_DEFAULT_CTOR(struct_evaporator)
     constexpr explicit struct_evaporator(const value_type& value) :
@@ -104,11 +106,14 @@ public:
 
     }
 
-#ifdef __cpp_rvalue_reference
     constexpr explicit struct_evaporator(value_type&& value) :
         value_(std::move(value))
     {}
-#endif
+
+    template <class ...Args>
+    constexpr explicit struct_evaporator(Args&& ...args) :
+        value_(std::forward<Args>(args)...)
+    {}
 
     static constexpr bool is_evaporated = false;
 };

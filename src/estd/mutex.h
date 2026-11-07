@@ -147,7 +147,7 @@ protected:
         Mutex{}.lock();
     }
 
-    ESTD_CPP_CONSTEXPR(14) ~lock_guard() { Mutex{}.unlock(); }
+    ESTD_CPP_CONSTEXPR(20) ~lock_guard() { Mutex{}.unlock(); }
 };
 
 template <class Mutex>
@@ -167,7 +167,7 @@ protected:
         m.lock();
     }
 
-    ESTD_CPP_CONSTEXPR(14) ~lock_guard() { mutex_.unlock(); }
+    ESTD_CPP_CONSTEXPR(20) ~lock_guard() { mutex_.unlock(); }
 };
 
 }
