@@ -4,11 +4,13 @@
 
 * https://github.com/malachi-iot/estdlib/issues/235 adding missing `estd::optional` comparison operators
 * https://github.com/malachi-iot/estdlib/issues/240 adding `uint8_t` char type support to ostream
+* Adding ESTD_ALLOC_INLINE, ESTD_FN_INLINE in choice places to help GCC -Og stack usage
 
 ## Quality Updates & Bug Fixes
 
 * https://github.com/malachi-iot/estdlib/issues/229 fixing typo in `stringbuf` API
 * https://github.com/malachi-iot/estdlib/issues/233 repair string lexicographic compare glitch.  Includes also `basic_string::compare` optimizations
+* BREAKING: FreeRTOS semaphore wrapper no longer permits copying
 
 ## Known Issues and Limitations
 

@@ -2,13 +2,13 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(estd VERSION 0.8.12 LANGUAGES C CXX
+project(estd VERSION 0.8.13 LANGUAGES C CXX
     DESCRIPTION "Embedded oriented std library"
     HOMEPAGE_URL "https://github.com/malachi-iot/estdlib")
 
 # Manually enable when in prelease mode
 # 17OCT26 MB DEBT: See if we can fuse this with git-describe plumbing
-#set(PROJECT_VERSION_PRERELEASE "alpha1")
+set(PROJECT_VERSION_PRERELEASE "alpha1")
 
 include(../tools/cmake/setvars.cmake)
 
