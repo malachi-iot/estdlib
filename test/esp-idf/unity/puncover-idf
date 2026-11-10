@@ -1,7 +1,12 @@
 #!/bin/bash
 
 ELF=estd-unity
+#TARGET=riscv32-esp
 TARGET=xtensa-esp32
+# xtensa has s3 variant
+SUBTARGET=${TARGET}
+GCC_TOOLS_DIR=$(dirname "$(which ${TARGET}-elf-objdump)")
+GCC_TOOLS_BASE="${GCC_TOOLS_DIR}/${SUBTARGET}-elf-"
 
-puncover --gcc-tools-base "$(dirname "$(which ${TARGET}-elf-objdump)")/xtensa-esp32-elf-" \
+puncover --gcc-tools-base ${GCC_TOOLS_BASE} \
     --elf_file build/${ELF}.elf --build_dir build --src_root="$PWD/../.."
