@@ -1,12 +1,24 @@
 #!/bin/bash
 
-ELF=estd-unity
-#TARGET=riscv32-esp
-TARGET=xtensa-esp32
-# xtensa has s3 variant
-SUBTARGET=${TARGET}
-GCC_TOOLS_DIR=$(dirname "$(which ${TARGET}-elf-objdump)")
-GCC_TOOLS_BASE="${GCC_TOOLS_DIR}/${SUBTARGET}-elf-"
+# Tested against puncover v0.8.0
+
+ELF_FILES=(build/*.elf)
+ELF=$(basename ${ELF_FILES[0]} .elf)
+#FAMILY=riscv32-esp
+FAMILY=${1:-xtensa-esp32}
+# xtensa has s2, s3 variant
+TARGET=${FAMILY}
+OBJDUMP="$(which ${FAMILY}-elf-objdump)"
+
+if [[ -z "${OBJDUMP}" ]]; then
+    echo "Error: ${FAMILY}-elf-objdump not found in PATH" >&2
+    exit 1
+fi
+
+echo "ELF: ${ELF} TARGET=${TARGET}"
+
+GCC_TOOLS_DIR=$(dirname $(which ${OBJDUMP}))
+GCC_TOOLS_BASE="${GCC_TOOLS_DIR}/${TARGET}-elf-"
 
 puncover --gcc-tools-base ${GCC_TOOLS_BASE} \
     --elf_file build/${ELF}.elf --build_dir build --src_root="$PWD/../.."
