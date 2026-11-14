@@ -9,6 +9,7 @@ set(ESTD_DIR ${ROOT_DIR}/src)
 set(WORKING_DIR ${TOOLS_DIR}/temp)
 
 include(${TOOLS_DIR}/CPM.cmake)
+include(${TOOLS_DIR}/functions.cmake)
 include(${TOOLS_DIR}/fetchcontent.cmake)
 include(${TOOLS_DIR}/options.cmake)
 include(${TOOLS_DIR}/compiler.cmake)

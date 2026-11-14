@@ -6,11 +6,12 @@ project(estd VERSION 0.8.13 LANGUAGES C CXX
     DESCRIPTION "Embedded oriented std library"
     HOMEPAGE_URL "https://github.com/malachi-iot/estdlib")
 
-# Manually enable when in prelease mode
-# 17OCT26 MB DEBT: See if we can fuse this with git-describe plumbing
-set(PROJECT_VERSION_PRERELEASE "alpha1")
-
 include(../tools/cmake/setvars.cmake)
+
+# Manually specify prelease string, or empty for real release
+# 17OCT26 MB DEBT: See if we can fuse this with git-describe plumbing
+estd_add_project_semver("alpha1")
+#estd_add_project_semver()
 
 include(${TOOLS_DIR}/platform.cmake)
 include(${TOOLS_DIR}/includes.cmake)
