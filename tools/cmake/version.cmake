@@ -6,20 +6,28 @@ set(IN_DIR ${CMAKE_CURRENT_LIST_DIR}/in)
 include(${CMAKE_CURRENT_LIST_DIR}/git-describe.cmake)
 #include(${WORKING_DIR}/git-described.cmake)
 
-string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
-
 message(DEBUG "version.cmake: ${CMAKE_CURRENT_SOURCE_DIR} / ${WORKING_DIR}")
 
-set(PROJECT_SEMVER ${PROJECT_VERSION})
+function(estd_add_project_semver prerelease)
+    string(TOUPPER ${PROJECT_NAME} upper)
 
-if(PROJECT_VERSION_PRERELEASE)
-    string(APPEND PROJECT_SEMVER "-${PROJECT_VERSION_PRERELEASE}")
-    # Fancy full C-line to avoid embedding this line every time.  This way
-    # interested parties can do an #ifdef on XYZ_PRERELEASE
-    string(CONCAT PROJECT_VERSION_PRERELEASE_C
-        "#define ${PROJECT_NAME_UPPER}_VER_PRERELEASE "
-        "\"${PROJECT_VERSION_PRERELEASE}\"")
-endif()
+    set(semver ${PROJECT_VERSION})
+
+    if(prerelease)
+        string(APPEND semver "-${prerelease}")
+        # Fancy full C-line to avoid embedding this line every time.  This way
+        # interested parties can do an #ifdef on XYZ_PRERELEASE
+        string(CONCAT prerelease_c
+            "#define ${upper}_VER_PRERELEASE "
+            "\"${prerelease}\"")
+        set(PROJECT_VERSION_PRERELEASE_C ${prerelease_c} PARENT_SCOPE)
+    endif()
+
+    set(PROJECT_NAME_UPPER ${upper} PARENT_SCOPE)
+    set(PROJECT_SEMVER ${semver} PARENT_SCOPE)
+endfunction()
+
+estd_add_project_semver(${PROJECT_VERSION_PRERELEASE})
 
 # DEBT: 'port' is not a great destination
 configure_file(
