@@ -55,12 +55,13 @@ inline ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<CharIt> to_chars_integer_o
     typedef Cbase cbase_type;
     typedef detail::to_chars_result<CharIt> result_type;
     using numeric_limits = estd::numeric_limits<Int>;
-    const bool negative = numeric_limits::is_signed && value < 0;
+    constexpr bool is_signed = numeric_limits::is_signed;
+    const bool negative = is_signed && value < 0;
 
-    typedef typename iterator_traits<CharIt>::value_type char_type;
+    using char_type = typename iterator_traits<CharIt>::value_type;
     static_assert(is_same<typename cbase_type::char_type, char_type>::value, "CharIt must align with cbase");
 
-    if(numeric_limits::is_signed && negative) value *= -1;
+    if(is_signed && negative) value *= -1;
 
     while(first != last--)
     {
@@ -73,14 +74,15 @@ inline ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<CharIt> to_chars_integer_o
 #else
         // DEBT: Pretty sure there's a div and mod combined operation, use that
         // i.e. https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf page 36 section 6.2
+        // Also for base 16 (maybe base 8 too?) we could explicitly do bit masking and shifting.  Hopefully
+        // optimizer does that for us though.
         *last = cbase.to_char(value % base());
         value /= base();
 #endif
 
         if(value == 0)
         {
-            if(numeric_limits::is_signed && negative)
-                *--last = '-';
+            if(is_signed && negative)   *--last = '-';
 
             return result_type{last, errc{}};
         }

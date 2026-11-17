@@ -292,15 +292,21 @@ TEST_CASE("charconv")
                 estd::to_chars_result result = estd::detail::to_chars<16>(buffer, buffer + 2, 0x10);
 
                 REQUIRE(result.ec == estd::errc{});
+                REQUIRE(result.ptr == buffer);
                 REQUIRE(*result.ptr == '1');
 
-                result = estd::detail::to_chars<16>(buffer, buffer + sizeof(buffer) - 1, 10);
+                result = estd::detail::to_chars<16>(buffer, buffer + sizeof(buffer), 10);
 
                 REQUIRE(*result.ptr == 'a');
 
                 result = estd::detail::to_chars<16>(buffer, buffer + 2, 0x100);
 
                 REQUIRE(result.ec == estd::errc::value_too_large);
+
+                result = estd::detail::to_chars_upper<16>(buffer, buffer + 2, 10);
+
+                REQUIRE(result.ptr == buffer + 1);
+                REQUIRE(*result.ptr == 'A');
             }
         }
     }

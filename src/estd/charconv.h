@@ -47,7 +47,8 @@ to_chars(CharIt first, CharIt last, Int value, unsigned base, bool uppercase)
 
 namespace detail {
 
-// This is of the "opt" variety, where last character truly is at 'last'
+// This is of the "opt" variety, where last character truly is at 'last' (right justified)
+// Standard lowercase version
 template <unsigned b, class Int, class CharIt>
 ESTD_CHARCONV_INLINE
 constexpr enable_if_t<estd::numeric_limits<Int>::is_integer, to_chars_result<CharIt> >
@@ -55,6 +56,19 @@ to_chars(CharIt first, CharIt last, Int value)
 {
     using char_type = typename iterator_traits<CharIt>::value_type;
     using cbase_type = cbase<char_type, b, internal::classic_locale_type>;
+    return internal::to_chars_integer_opt(
+        first, last, value, internal::base_provider<b>(), cbase_type());
+}
+
+// This is of the "opt" variety, where last character truly is at 'last' (right justified)
+// Non standard uppercase version
+template <unsigned b, class Int, class CharIt>
+ESTD_CHARCONV_INLINE
+    constexpr enable_if_t<estd::numeric_limits<Int>::is_integer, to_chars_result<CharIt> >
+    to_chars_upper(CharIt first, CharIt last, Int value)
+{
+    using char_type = typename iterator_traits<CharIt>::value_type;
+    using cbase_type = internal::cbase_ascii<char_type, b, internal::CBASE_POLICY_CASE_UPPER>;
     return internal::to_chars_integer_opt(
         first, last, value, internal::base_provider<b>(), cbase_type());
 }
