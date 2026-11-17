@@ -7,16 +7,16 @@
 
 namespace estd { namespace layer1 {
 
-template<class CharT, size_t N, bool null_terminated, class Traits,
+template<class Char, size_t N, bool null_terminated, class Traits,
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
 class basic_string : public estd::internal::basic_string<
     // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
     // light of https://github.com/malachi-iot/estdlib/issues/88
-    estd::layer1::allocator<CharT, N, CharT[N]>,
+    estd::layer1::allocator<Char, N, Char[N]>,
     StringPolicy>
 {
     using base_type = estd::internal::basic_string<
-        estd::layer1::allocator<CharT, N, CharT[N]>,
+        estd::layer1::allocator<Char, N, Char[N]>,
         StringPolicy>;
 
 public:
@@ -63,7 +63,7 @@ public:
         return *this;
     }
 
-    CharT* c_str()
+    Char* c_str()
     {
         static_assert(null_terminated, "Only works for null terminated strings");
 
@@ -77,10 +77,19 @@ public:
         return data();
     }
 
+    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
+
     constexpr operator view_type() const
     {
         return { data(), base_type::size() };
     }
+
+#if FEATURE_STD_STRING_VIEW
+    constexpr operator std::basic_string_view<Char>() const
+    {
+        return { data(), size_t(base_type::size()) };
+    }
+#endif
 };
 
 
