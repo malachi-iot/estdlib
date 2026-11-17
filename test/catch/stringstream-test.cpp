@@ -61,9 +61,10 @@ TEST_CASE("istringstream")
         // Unhappy, presumably due to debt of:
         // https://github.com/malachi-iot/estdlib/issues/88
         // https://github.com/malachi-iot/estdlib/issues/127
+        // Specifically causes issues due to (null terminated+fixed size) flavor
         //layer3::basic_istringstream<const char> in(test_str1);
 
-        //in >> test_str1;
+        //in >> buf;
     }
 }
 

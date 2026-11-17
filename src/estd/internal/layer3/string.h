@@ -48,6 +48,14 @@ protected:
     }
 
 public:
+#if EXP
+    template <size_type N>
+    basic_string(const CharT (&buffer) [N]) : base_type(span<CharT, N>(buffer))
+    { }
+#endif
+
+    /// Pass in full backing storage (fixed size) then also a clue about initial size
+    /// @param initial_size - explicit size of string, or npos (default) to do a strlen
     template <size_type N>
     basic_string(CharT (&buffer) [N], size_type initial_size = base_type::npos) :
         base_t(span<CharT, N>(buffer))
@@ -56,6 +64,7 @@ public:
             initial_size = strlen(buffer);
 
         // TODO: Enable for a string-mode version
+        // FIX: Causes issues for (null terminated+fixed size) flavor
         //base_t::ensure_total_size(initial_size);
         base_t::impl().size(initial_size);
     }
