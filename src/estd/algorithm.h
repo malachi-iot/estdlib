@@ -19,17 +19,43 @@ namespace estd {
 // NOTE: Aliasing these out as best we can because std copy/fill operations may have some nice
 // optimizations depending on your environment
 
-#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
-using std::copy;
-using std::copy_n;
-using std::equal;
-using std::move;
-using std::fill;
-using std::fill_n;
-#endif
+namespace detail {
+
+template<class InputIt, class OutputIt>
+ESTD_CPP_CONSTEXPR(14) inline OutputIt copy_backward(InputIt first, InputIt last,
+    OutputIt d_last)
+{
+    while (first != last)
+        *--d_last = *--last;
+
+    return d_last;
+}
+
+
+// https://en.cppreference.com/w/cpp/algorithm/copy_n
+// has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
+// iterator unnecessarily?
+template <class InputIt, class Size, class OutputIt>
+ESTD_CPP_CONSTEXPR(14) OutputIt copy_n(InputIt first, Size count, OutputIt result)
+{
+    while(count--)
+        *result++ = *first++;
+
+    return result;
+}
+
+template<class InputIt, class OutputIt>
+ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
+    OutputIt d_first)
+{
+    while (first != last) {
+        *d_first++ = *first++;
+    }
+    return d_first;
+}
+
 
 // Shamelessly lifted from https://en.cppreference.com/w/cpp/algorithm/fill_n
-#if FEATURE_ESTD_STD_ALGORITHM_ALIAS == 0
 template<class OutputIt, class Size, class T>
 inline ESTD_CPP_CONSTEXPR(14) OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
@@ -74,6 +100,36 @@ ESTD_CPP_CONSTEXPR(14) bool equal(
 
     return first1 == last1 && first2 == last2;
 }
+
+template<class InputIt, class OutputIt>
+ESTD_CPP_CONSTEXPR(14) OutputIt move(InputIt first, InputIt last,
+    OutputIt d_first)
+{
+    for (;first != last; ++d_first, ++first)
+    {
+        *d_first = std::move(*first);
+    }
+    return d_first;
+}
+
+}
+
+#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
+using std::copy_backward;
+using std::copy_n;
+using std::copy;
+using std::equal;
+using std::fill;
+using std::fill_n;
+using std::move;
+#else
+using detail::copy_backward;
+using detail::copy_n;
+using detail::copy;
+using detail::equal;
+using detail::fill;
+using detail::fill_n;
+using detail::move;
 #endif
 
 template<class ForwardIt, class Compare>
@@ -93,55 +149,6 @@ ESTD_CPP_CONSTEXPR(14) ForwardIt min_element(ForwardIt first, ForwardIt last,
 }
 
 
-
-#if FEATURE_ESTD_STD_ALGORITHM_ALIAS == 0
-template<class InputIt, class OutputIt>
-ESTD_CPP_CONSTEXPR(14) OutputIt copy(InputIt first, InputIt last,
-              OutputIt d_first)
-{
-    while (first != last) {
-        *d_first++ = *first++;
-    }
-    return d_first;
-}
-
-template<class InputIt, class OutputIt>
-ESTD_CPP_CONSTEXPR(14) OutputIt move(InputIt first, InputIt last,
-              OutputIt d_first)
-{
-    for (;first != last; ++d_first, ++first)
-    {
-        *d_first = std::move(*first);
-    }
-    return d_first;
-}
-
-// https://en.cppreference.com/w/cpp/algorithm/copy_n
-// has a more complex implementation, but unsure why.  Maybe they want to avoid incrementing the source
-// iterator unnecessarily?
-template <class InputIt, class Size, class OutputIt>
-ESTD_CPP_CONSTEXPR(14) OutputIt copy_n(InputIt first, Size count, OutputIt result)
-{
-    while(count--)
-        *result++ = *first++;
-
-    return result;
-}
-#endif
-
-template<class InputIt, class OutputIt>
-ESTD_CPP_CONSTEXPR(14) inline OutputIt copy_backward(InputIt first, InputIt last,
-              OutputIt d_last)
-{
-#if FEATURE_ESTD_STD_ALGORITHM_ALIAS
-    return std::copy_backward(first, last, d_last);
-#else
-    while (first != last)
-        *--d_last = *--last;
-
-    return d_last;
-#endif
-}
 
 #if __cpp_rvalue_references
 template<class InputIt, class OutputIt>
