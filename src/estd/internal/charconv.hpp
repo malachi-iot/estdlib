@@ -47,6 +47,7 @@ ESTD_CPP_CONSTEXPR(14) estd::detail::from_chars_result<CharIt> from_chars_intege
 /// DEBT: Strongly consider disallowing negative hex and oct renderings
 /// DEBT: Move this out to charconv/to_chars.hpp
 template <class Cbase, class Int, class CharIt, int base_>
+ESTD_CHARCONV_TREE_SRA
 inline ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<CharIt> to_chars_integer_opt(
         CharIt first,
         CharIt last, Int value, base_provider<base_> base,

@@ -123,6 +123,18 @@ static void test_to_chars()
     TEST_ASSERT_EQUAL('9', s[10]);
 }
 
+static void test_to_chars_detail()
+{
+    using namespace estd;
+
+    char out[32]{};
+
+    to_chars_result r = detail::to_chars_upper<16>(out, out + 2, 0xAF);
+
+    TEST_ASSERT_EQUAL(errc{}, r.ec);
+    TEST_ASSERT_EQUAL_STRING("AF", out);
+}
+
 static void test_to_string_opt()
 {
     char buffer[64];
@@ -230,6 +242,7 @@ void test_string()
     RUN_TEST(test_layer2_string);
     RUN_TEST(test_from_chars);
     RUN_TEST(test_to_chars);
+    RUN_TEST(test_to_chars_detail);
     RUN_TEST(test_to_string);
     RUN_TEST(test_to_string_opt);
     RUN_TEST(test_char_traits);

@@ -22,6 +22,8 @@
 
 #if FEATURE_ESTD_CHARCONV_AGGRESSIVE_INLINE
 #define ESTD_CHARCONV_INLINE inline __attribute__((always_inline, optimize("tree-sra,dse")))
+#define ESTD_CHARCONV_TREE_SRA __attribute__((optimize("tree-sra,dse")))
 #else
 #define ESTD_CHARCONV_INLINE
+#define ESTD_CHARCONV_TREE_SRA
 #endif
