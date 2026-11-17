@@ -98,6 +98,8 @@ TEST_CASE("ostringstream")
             layer1::ostringstream<128> out;
 
             test_out(out);
+
+            //std::string_view sv = out.rdbuf()->str();
         }
         SECTION("sized")
         {
@@ -138,6 +140,8 @@ TEST_CASE("ostringstream")
             layer2::basic_ostringstream<char, 128, false> out(buf);
 
             test_out(out);
+
+            std::string_view sv = out.rdbuf()->str();
         }
     }
     SECTION("layer3")
@@ -149,12 +153,18 @@ TEST_CASE("ostringstream")
             layer3::basic_ostringstream<char, true> out(buf);
 
             test_out(out);
+
+            REQUIRE(std::string_view(buf) == test_str2);
         }
         SECTION("sized")
         {
             layer3::basic_ostringstream<char, false> out(buf);
 
             test_out(out);
+
+            std::string_view sv = out.rdbuf()->str();
+
+            REQUIRE(sv == test_str2);
         }
     }
 }

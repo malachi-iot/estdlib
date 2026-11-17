@@ -128,10 +128,19 @@ public:
         return data();
     }
 
+    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
+
     constexpr operator typename base_type::view_type() const
     {
         return { data(), base_type::size() };
     }
+
+#if FEATURE_STD_STRING_VIEW
+    constexpr operator std::basic_string_view<Char>() const
+    {
+        return { data(), size_t(base_type::size()) };
+    }
+#endif
 };
 
 

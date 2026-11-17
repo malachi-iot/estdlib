@@ -7,6 +7,10 @@
 #include "../string.h"
 #include "../../span.h"
 
+#if FEATURE_STD_STRING_VIEW
+#include <string_view>
+#endif
+
 namespace estd { namespace layer3 {
 
 // NOTE: Slowly phasing this guy out in favor of basic_string_view.
@@ -125,10 +129,19 @@ public:
     // so if we are converting from a const_string we have to remove const from CharT
     //typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
 
+    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
+
     constexpr operator view_type() const
     {
         return { data(), typename view_type::size_type(base_type::size()) };
     }
+
+#if FEATURE_STD_STRING_VIEW
+    constexpr operator std::basic_string_view<CharT>() const
+    {
+        return { data(), size_t(base_type::size()) };
+    }
+#endif
 };
 
 
