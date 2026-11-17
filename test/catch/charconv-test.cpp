@@ -285,11 +285,23 @@ TEST_CASE("charconv")
             //REQUIRE(result.ec == estd::errc(0));
             REQUIRE(result.ec == estd::errc{});
         }
-        SECTION("base 16")
+        SECTION("detail")   // always in opt/right justified mode
         {
-            estd::to_chars_result result = estd::detail::to_chars<16>(buffer, buffer + sizeof(buffer) - 1, 10);
+            SECTION("base 16")
+            {
+                estd::to_chars_result result = estd::detail::to_chars<16>(buffer, buffer + 2, 0x10);
 
-            REQUIRE(*result.ptr == 'a');
+                REQUIRE(result.ec == estd::errc{});
+                REQUIRE(*result.ptr == '1');
+
+                result = estd::detail::to_chars<16>(buffer, buffer + sizeof(buffer) - 1, 10);
+
+                REQUIRE(*result.ptr == 'a');
+
+                result = estd::detail::to_chars<16>(buffer, buffer + 2, 0x100);
+
+                REQUIRE(result.ec == estd::errc::value_too_large);
+            }
         }
     }
     SECTION("char_traits")

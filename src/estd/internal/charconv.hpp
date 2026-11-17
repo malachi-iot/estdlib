@@ -54,17 +54,15 @@ inline ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<CharIt> to_chars_integer_o
 {
     typedef Cbase cbase_type;
     typedef detail::to_chars_result<CharIt> result_type;
-    typedef estd::numeric_limits<Int> numeric_limits;
+    using numeric_limits = estd::numeric_limits<Int>;
     const bool negative = numeric_limits::is_signed && value < 0;
 
-#if __cpp_static_assert
     typedef typename iterator_traits<CharIt>::value_type char_type;
     static_assert(is_same<typename cbase_type::char_type, char_type>::value, "CharIt must align with cbase");
-#endif
 
     if(numeric_limits::is_signed && negative) value *= -1;
 
-    while(first != --last)
+    while(first != last--)
     {
 // EXPERIMENTAL, not sure if this helps at all
 #if FEATURE_ESTD_TO_CHARS_LIBC_DIV
@@ -84,19 +82,11 @@ inline ESTD_CPP_CONSTEXPR(14) detail::to_chars_result<CharIt> to_chars_integer_o
             if(numeric_limits::is_signed && negative)
                 *--last = '-';
 
-#ifdef __cpp_initializer_lists
-            return result_type{last, estd::errc(0)};
-#else
-            return result_type(last, estd::errc(0));
-#endif
+            return result_type{last, errc{}};
         }
     }
 
-#ifdef __cpp_initializer_lists
-    return result_type{last, estd::errc::value_too_large};
-#else
-    return result_type(last, estd::errc::value_too_large);
-#endif
+    return result_type{last, errc::value_too_large};
 }
 
 

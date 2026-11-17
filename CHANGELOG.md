@@ -9,6 +9,7 @@
 
 ## Quality Updates & Bug Fixes
 
+* fixing to_chars conversion glitch where buffer was treated one char too small.  i.e. a 2 character buffer couldn't fit conversion of 20.
 * https://github.com/malachi-iot/estdlib/issues/229 fixing typo in `stringbuf` API
 * https://github.com/malachi-iot/estdlib/issues/233 repair string lexicographic compare glitch.  Includes also `basic_string::compare` optimizations
 * BREAKING: FreeRTOS semaphore wrapper no longer permits copying

@@ -49,6 +49,7 @@ namespace detail {
 
 // This is of the "opt" variety, where last character truly is at 'last'
 template <unsigned b, class Int, class CharIt>
+ESTD_CHARCONV_INLINE
 constexpr enable_if_t<estd::numeric_limits<Int>::is_integer, to_chars_result<CharIt> >
 to_chars(CharIt first, CharIt last, Int value)
 {
@@ -62,6 +63,7 @@ to_chars(CharIt first, CharIt last, Int value)
 
 
 template <class Int, bool sto_mode>
+ESTD_CHARCONV_INLINE
 ESTD_CPP_CONSTEXPR(14) enable_if_t<numeric_limits<Int>::is_integer, from_chars_result>
     from_chars(const char* first,
         const char* last,
@@ -75,6 +77,7 @@ ESTD_CPP_CONSTEXPR(14) enable_if_t<numeric_limits<Int>::is_integer, from_chars_r
 }
 
 template <class Float>
+ESTD_CHARCONV_INLINE
 constexpr enable_if_t<!numeric_limits<Float>::is_integer, from_chars_result>
 from_chars(const char* first,
     const char* last,

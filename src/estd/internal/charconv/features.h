@@ -15,3 +15,13 @@
 #ifndef FEATURE_ESTD_FROM_CHARS_STOI
 #define FEATURE_ESTD_FROM_CHARS_STOI 1
 #endif
+
+#ifndef FEATURE_ESTD_CHARCONV_AGGRESSIVE_INLINE
+#define FEATURE_ESTD_CHARCONV_AGGRESSIVE_INLINE 1
+#endif
+
+#if FEATURE_ESTD_CHARCONV_AGGRESSIVE_INLINE
+#define ESTD_CHARCONV_INLINE inline __attribute__((always_inline, optimize("tree-sra,dse")))
+#else
+#define ESTD_CHARCONV_INLINE
+#endif
