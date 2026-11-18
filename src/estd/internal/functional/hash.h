@@ -35,8 +35,10 @@ struct fnv_hash_base
     static constexpr uint64_t FNV1_64_INIT = 0xcbf29ce484222325ULL;
     static constexpr uint64_t FNV1A_64_INIT = FNV1_64_INIT;
 
-    static constexpr uint32_t FNV1A_32_PRIME = 16777619u;
-    static constexpr uint32_t FNV1A_32_OFFSET_BASIS = 2166136261u;
+    static constexpr uint32_t FNV1_32_PRIME = 16777619u;
+    static constexpr uint32_t FNV1_32_OFFSET_BASIS = 2166136261u;
+    static constexpr uint32_t FNV1A_32_PRIME = FNV1_32_PRIME;
+    static constexpr uint32_t FNV1A_32_OFFSET_BASIS = FNV1_32_OFFSET_BASIS;
 
     static constexpr uint64_t shift_sum(uint64_t hashval)
     {
@@ -71,7 +73,7 @@ struct fnv_hash_base
 template <>
 struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
 {
-    static constexpr uint32_t INIT = FNV1A_32_OFFSET_BASIS;
+    static constexpr uint32_t INIT = FNV1_32_OFFSET_BASIS;
 
     template <class It>
     ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
@@ -79,7 +81,7 @@ struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
     {
         for(It current = begin; current != end; ++current)
         {
-            hashval *= FNV1A_32_PRIME;
+            hashval *= FNV1_32_PRIME;
             hashval ^= cast32(*current);
         }
 
