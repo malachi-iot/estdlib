@@ -141,7 +141,11 @@ TEST_CASE("ostringstream")
 
             test_out(out);
 
+#if FEATURE_STD_STRING_VIEW
             std::string_view sv = out.rdbuf()->str();
+
+            REQUIRE(sv == test_str2);
+#endif
         }
     }
     SECTION("layer3")
@@ -154,7 +158,7 @@ TEST_CASE("ostringstream")
 
             test_out(out);
 
-            REQUIRE(std::string_view(buf) == test_str2);
+            REQUIRE(string_view(buf) == test_str2);
         }
         SECTION("sized")
         {
@@ -162,9 +166,11 @@ TEST_CASE("ostringstream")
 
             test_out(out);
 
+#if FEATURE_STD_STRING_VIEW
             std::string_view sv = out.rdbuf()->str();
 
             REQUIRE(sv == test_str2);
+#endif
         }
     }
 }
