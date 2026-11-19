@@ -57,7 +57,7 @@ public:
     using policy_type = typename base_type::impl_type::policy_type;
     using traits_type = typename policy_type::char_traits ;
 
-    static constexpr auto npos = (size_type) -1;
+    static constexpr auto npos = (size_type) -1;    // NOLINT
 
     // 22AUG26 MB DEBT: DO NOT USE - for internal use only, and although useful, one really ought to
     // directly query policy - who is in turn full of DEBT
@@ -345,7 +345,7 @@ public:
         return *this;
     }
 
-    basic_string& operator=(const_pointer s)
+    ESTD_CPP_CONSTEXPR(14) basic_string& operator=(const_pointer s)
     {
         assert_mutable();
 

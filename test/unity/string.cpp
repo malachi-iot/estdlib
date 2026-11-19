@@ -22,6 +22,13 @@ void _test_string_assignment()
     TEST_ASSERT_EQUAL_INT8_ARRAY(TEST_STR, data, s.size());
 }
 
+static ESTD_CHARCONV_INLINE estd::layer1::string<16> rvo()
+{
+    //constexpr  // almost, but not quite
+    estd::layer1::string<16> s(TEST_STR);
+    return s;
+}
+
 
 template <class String>
 static void test_string_concat()
@@ -37,7 +44,15 @@ static void test_string_concat()
     TEST_ASSERT_EQUAL_STRING(TEST_STR ":" TEST_STR2, data);
 }
 
-void test_layer1_string()
+static void test_layer1_string_rvo()
+{
+    auto s = rvo();
+
+    TEST_ASSERT_EQUAL_STRING(TEST_STR, s.c_str());
+}
+
+
+static void test_layer1_string()
 {
     _test_string_assignment<estd::layer1::string<32, true> >();
     _test_string_assignment<estd::layer1::string<32, false> >();
@@ -180,7 +195,9 @@ void test_string()
 #endif
 {
     RUN_TEST(test_layer1_string);
+    RUN_TEST(test_layer1_string_rvo);
     RUN_TEST(test_layer2_string);
+    RUN_TEST(test_layer3_string);
     RUN_TEST(test_to_string);
     RUN_TEST(test_to_string_opt);
     RUN_TEST(test_char_traits);

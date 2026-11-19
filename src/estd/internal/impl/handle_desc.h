@@ -78,7 +78,7 @@ public:
     typedef typename allocator_type::value_type value_type;
 
     // Would be nice if we could const this, but for stateful allocators that's not reasonable
-    allocator_type& get_allocator() { return allocator; }
+    ESTD_CPP_CONSTEXPR(14) allocator_type& get_allocator() { return allocator; }
 
     constexpr const allocator_type& get_allocator() const { return allocator; }
 
@@ -198,16 +198,16 @@ public:
         handle_base_t(h)
     {}
 
-    ESTD_CPP_CONSTEXPR_RET allocator_and_handle_descriptor(const handle_type& h) :
+    constexpr allocator_and_handle_descriptor(const handle_type& h) :
         handle_base_t(h) {}
 
 
     // Indicates whether this handle can be invalid or not.
     // FALSE = invalid is possible (typical dynamic allocation behavior)
     // TRUE = invalid is impossible (fixed/singular behavior)
-    static bool CONSTEXPR is_always_allocated() { return is_singular; }
+    static bool constexpr is_always_allocated() { return is_singular; }
 
-    value_type& lock(size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(14) value_type& lock(size_type pos = 0, size_type count = 0)
     {
         return handle_base_t::lock(base_t::get_allocator(), pos, count);
     }

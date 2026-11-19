@@ -82,7 +82,7 @@ struct dynamic_array_length<Allocator, true, false>
         a.unlock(h);
     }
 
-    ESTD_CPP_CONSTEXPR(17) void size(handle_descriptor& hd, size_type len)
+    ESTD_CPP_CONSTEXPR(14) void size(handle_descriptor& hd, size_type len)
     {
         /*
         if(len > base_t::capacity())

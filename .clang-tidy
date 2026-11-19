@@ -1,4 +1,4 @@
-# Malachi clang-tidy convention: core v0.2.1
+# Malachi clang-tidy convention: core v0.2.3
 # Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
 # NOTE: folded block scalar gives me a ton of grief, so not using that form
 Checks:
@@ -60,6 +60,7 @@ Checks:
   - '-readability-named-parameter'
   - '-readability-trailing-comma'
   - '-readability-implicit-bool-conversion'
+  - '-readability-simplify-boolean-expr'
 
   # Const correctness is so great.  Yet, receiving a warning EVERY
   # time is just too much.
@@ -68,3 +69,4 @@ Checks:
   # No thank you
   - '-google-readability-todo'
   - '-readability-qualified-auto'
+  - '-*-non-private-member-variables-in-classes'

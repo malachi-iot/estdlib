@@ -135,7 +135,7 @@ protected:
     // - traditional dynamic memory scenarios (i.e. classic malloc/realloc/free behaviors)
     // - advanced and not yet implemented fragmented locking dynamic memory
 
-    bool ensure_total_capacity(size_type new_size, size_type pad = 0)
+    ESTD_CPP_CONSTEXPR(14) bool ensure_total_capacity(size_type new_size, size_type pad = 0)
     {
         if(new_size > base_type::capacity())
         {
@@ -190,7 +190,7 @@ protected:
     // (standard version also inserts or removes characters if requested,
     //  this one ONLY replaces the entire buffer)
     // TODO: change to assign
-    void assign(const_pointer buf, size_type len)   // NOLINT
+    ESTD_CPP_CONSTEXPR(14) void assign(const_pointer buf, size_type len)   // NOLINT
     {
         ensure_total_size(len);
 
@@ -369,8 +369,8 @@ public:
     constexpr dynamic_array(dynamic_array&) = default;
     constexpr dynamic_array(dynamic_array&&) = default;
 
-    dynamic_array& operator=(const dynamic_array&) = default;
-    dynamic_array& operator=(dynamic_array&&) = default;
+    constexpr dynamic_array& operator=(const dynamic_array&) = default;
+    constexpr dynamic_array& operator=(dynamic_array&&) = default;
 
     template <class ...Args>
     constexpr explicit dynamic_array(Args&&...args) :
