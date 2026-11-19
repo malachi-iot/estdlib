@@ -8,6 +8,9 @@
 
 namespace estd {
 
+// 19NOV26 TODO: Do fnv_hash and container_hash<Hasher> in estd::detail or even estd if we're feeling bold.  Or perhaps
+// estd::fnv namespace?  That might be good
+
 namespace internal {
 
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
@@ -185,10 +188,13 @@ struct integral_hash
 
 
 // 'Container' must be composed of 8-bit values
-template <typename Precision = uint32_t>
+// 19NOV26 MB DEBT: Change this to container_hash<Hasher> directly.  Not doing so yet to avoid merge conflicts
+// with https://github.com/malachi-iot/estdlib/issues/211.  Also means things will probably fall apart\
+// if you don't use actual fnv_hash due to hasher::INIT
+template <typename Precision = uint32_t, class Hasher = fnv_hash<Precision>>
 struct container_hash
 {
-    using hasher = fnv_hash<Precision>;
+    using hasher = Hasher;
 
     // TODO: Put a 'concept' in here.  Not quite debt since this is 'internal' namespace *and*
     // the name of the struct is container_hash
