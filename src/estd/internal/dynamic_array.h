@@ -190,7 +190,7 @@ protected:
     // (standard version also inserts or removes characters if requested,
     //  this one ONLY replaces the entire buffer)
     // TODO: change to assign
-    ESTD_CPP_CONSTEXPR(14) void assign(const_pointer buf, size_type len)   // NOLINT
+    ESTD_ALLOC_INLINE ESTD_CPP_CONSTEXPR(14) void assign(const_pointer buf, size_type len)   // NOLINT
     {
         ensure_total_size(len);
 

@@ -164,9 +164,9 @@ public:
         return *data(h.offset() + pos);
     }
 
-    ESTD_CPP_CONSTEXPR(17) void unlock(handle_type) {}
+    ESTD_CPP_CONSTEXPR(14) void unlock(handle_type) {}
 
-    ESTD_CPP_CONSTEXPR(17) void cunlock(handle_type) const {}
+    ESTD_CPP_CONSTEXPR(14) void cunlock(handle_type) const {}
 
     handle_with_offset offset(handle_type h, size_t pos) const
     {
@@ -178,7 +178,7 @@ public:
     {
     } */
 
-    handle_type reallocate(handle_type h, size_t)
+    ESTD_ALLOC_INLINE ESTD_CPP_CONSTEXPR(14) handle_type reallocate(handle_type h, size_t)
     {
 #ifdef FEATURE_CPP_STATIC_ASSERT
         // Not supported operation

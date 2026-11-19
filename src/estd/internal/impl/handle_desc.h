@@ -253,7 +253,7 @@ public:
                 source, pos, len);
     }
 
-    bool reallocate(size_type size)
+    ESTD_ALLOC_INLINE bool reallocate(size_type size)
     {
         handle_base_t::handle(base_t::get_allocator().reallocate(handle_base_t::handle(), size));
         return handle_base_t::handle() != allocator_traits::invalid();
