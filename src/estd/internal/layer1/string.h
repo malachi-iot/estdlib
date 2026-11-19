@@ -26,6 +26,7 @@ public:
     using base_type::data;
 
     constexpr basic_string() = default;
+    constexpr basic_string(const basic_string&) = default;
 
     // DEBT: As implied by https://github.com/malachi-iot/estdlib/issues/88 and
     // https://github.com/malachi-iot/estdlib/issues/127, base level allocator/dynamic_array

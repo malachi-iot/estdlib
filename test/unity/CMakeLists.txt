@@ -23,6 +23,8 @@ set(SOURCES
     align.cpp
     array.cpp
     bipbuf.cpp
+    bit.cpp
+    charconv.cpp
     chrono.cpp
     cpp.cpp
     cstddef.cpp
