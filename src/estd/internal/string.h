@@ -115,6 +115,7 @@ public:
     // A little clumsy since basic_string_view treats everything as const already,
     // so if we are converting from a const_string we have to remove const from CharT
     //using view_type = basic_string_view<policy_type>;
+    // DEBT: Needed by stringbuf_base, but really just clunky.  Get rid of this
     using view_type = estd::basic_string_view<value_type, traits_type>;
 
     // ---

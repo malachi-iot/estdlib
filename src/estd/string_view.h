@@ -34,11 +34,6 @@ public:
     using typename base_type::pointer;
     using typename base_type::const_pointer;
 
-    // DEBT: Mainly to satisfy constraints observed by v0::impl::basic_sviewbuf.
-    // There theoretically could be utility here in that a highly constrained
-    // basic_string may generate a similarly constrained string_view (perhaps with
-    // compile time sizing)
-    using view_type = basic_string_view;
     using span_type = span<value_type>;
 
     // As per spec, a no-constructor basic_string_view creates a null/null

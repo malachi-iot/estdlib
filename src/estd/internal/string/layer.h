@@ -14,7 +14,6 @@ struct string
     // Using non-standard char_type on purpose to avoid confusing concepts::Container
     // (amibiguity)
     using char_type = typename Traits::char_type;
-    //using view_type = basic_string_view<char_type, Traits>;
 
     template <class Impl>
     ESTD_CPP_CONSTEXPR(14) Derived& operator=(const estd::detail::basic_string<Impl>& copy_from)
