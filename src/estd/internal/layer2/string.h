@@ -25,10 +25,9 @@ class basic_string :
             estd::layer2::allocator<Char, N>,
             StringPolicy>;
     using base_t = base_type;
-    typedef typename base_t::impl_type helper_type;
+    typedef typename base_type::impl_type helper_type;
 
 public:
-    using typename base_type::view_type;
     using typename base_type::allocator_type;
     using typename base_type::size_type;
     using base_type::data;

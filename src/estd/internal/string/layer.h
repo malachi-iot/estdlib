@@ -11,7 +11,10 @@ namespace mixins {
 template <class Derived, class Traits>
 struct string
 {
-    using value_type = typename Traits::char_type;
+    // Using non-standard char_type on purpose to avoid confusing concepts::Container
+    // (amibiguity)
+    using char_type = typename Traits::char_type;
+    //using view_type = basic_string_view<char_type, Traits>;
 
     template <class Impl>
     ESTD_CPP_CONSTEXPR(14) Derived& operator=(const estd::detail::basic_string<Impl>& copy_from)
@@ -22,7 +25,7 @@ struct string
     }
 
     ESTD_ALLOC_INLINE
-    ESTD_CPP_CONSTEXPR(14) operator basic_string_view<value_type, Traits>() const
+    ESTD_CPP_CONSTEXPR(14) operator basic_string_view<char_type, Traits>() const
     {
         auto self = static_cast<const Derived*>(this);
 
@@ -31,7 +34,7 @@ struct string
 
 #if FEATURE_STD_STRING_VIEW
     ESTD_ALLOC_INLINE
-    ESTD_CPP_CONSTEXPR(14) operator std::basic_string_view<value_type, Traits>() const
+    ESTD_CPP_CONSTEXPR(14) operator std::basic_string_view<char_type, Traits>() const
     {
         auto self = static_cast<const Derived*>(this);
 

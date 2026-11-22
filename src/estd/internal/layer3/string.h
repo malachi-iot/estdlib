@@ -41,7 +41,6 @@ class basic_string :
 
 public:
     using typename base_type::size_type;
-    using typename base_type::view_type;
     using base_type::data;
 
 protected:

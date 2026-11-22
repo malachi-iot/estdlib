@@ -26,7 +26,6 @@ class basic_string :
 public:
     using typename base_type::const_pointer;
     using typename base_type::size_type;
-    using typename base_type::view_type;
     using base_type::data;
 
     constexpr basic_string() = default;

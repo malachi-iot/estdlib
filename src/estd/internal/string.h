@@ -117,12 +117,6 @@ public:
     //using view_type = basic_string_view<policy_type>;
     using view_type = estd::basic_string_view<value_type, traits_type>;
 
-    /*
-    constexpr operator view_type() const
-    {
-        return view_type(data(), base_type::size());
-    }   */
-
     // ---
 
     // 28MAY26 MB DEBT: There are edge cases where we want uninitialized strings, and
