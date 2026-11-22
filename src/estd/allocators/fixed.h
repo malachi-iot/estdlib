@@ -144,12 +144,12 @@ public:
     typedef void is_singular_tag;
     typedef void is_stateful_tag;
 
-    ESTD_CPP_CONSTEXPR(17) value_type& lock(handle_type, int pos = 0, int = 0)
+    ESTD_CPP_CONSTEXPR(14) value_type& lock(handle_type, int pos = 0, int = 0)
     {
         return *data(pos);
     }
 
-    ESTD_CPP_CONSTEXPR(17) value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
+    ESTD_CPP_CONSTEXPR(14) value_type& lock(const handle_with_offset& h, int pos = 0, int = 0)
     {
         return *data(h.offset() + pos);
     }

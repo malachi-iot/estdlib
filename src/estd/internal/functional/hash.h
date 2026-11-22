@@ -189,7 +189,7 @@ struct integral_hash
 
 // 'Container' must be composed of 8-bit values
 // 19NOV26 MB DEBT: Change this to container_hash<Hasher> directly.  Not doing so yet to avoid merge conflicts
-// with https://github.com/malachi-iot/estdlib/issues/211.  Also means things will probably fall apart\
+// with https://github.com/malachi-iot/estdlib/issues/211.  Also means things will probably fall apart
 // if you don't use actual fnv_hash due to hasher::INIT
 template <typename Precision = uint32_t, class Hasher = fnv_hash<Precision>>
 struct container_hash

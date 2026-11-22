@@ -77,7 +77,7 @@ public:
     // Always try to avoid explicit locking and unlocking ... but sometimes
     // you gotta do it, so these are public
     ESTD_ALLOC_INLINE
-    ESTD_CPP_CONSTEXPR(17) pointer lock(size_type pos = 0, size_type count = 0)
+    ESTD_CPP_CONSTEXPR(14) pointer lock(size_type pos = 0, size_type count = 0)
     {
         return &impl_.lock(pos, count);
     }

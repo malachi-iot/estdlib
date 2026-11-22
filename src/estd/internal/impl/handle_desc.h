@@ -141,7 +141,7 @@ protected:
 
     constexpr explicit handle_descriptor(const handle_type& h) : base_t(h) {}
 
-    ESTD_CPP_CONSTEXPR(14) value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0)
+    ESTD_CPP_CONSTEXPR(14) value_type& lock(allocator_ref a, size_type pos = 0, size_type len = 0) const
     {
         return allocator_traits::lock(a, handle(), pos, len);
     }
