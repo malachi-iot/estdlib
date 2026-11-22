@@ -92,6 +92,7 @@ public:
         base_t::impl().size(initial_size);
     }
 
+    // DEBT: This whole thing needs to filter by non-locking allocator
     template <class Impl>
     basic_string(const estd::detail::basic_string<Impl>& copy_from)
         // DEBT: Precision loss here generates warnings and rightly so.  This whole
@@ -99,9 +100,8 @@ public:
         // is more or less a basic_string_view
         : base_type(span_type(copy_from.clock(), copy_from.max_size()))
     {
-#ifdef FEATURE_CPP_STATIC_ASSERT
+        static_assert(is_const<typename Impl::value_type>::value, "Only const supported at this time");
         static_assert(helper_type::uses_termination(), "Only supports null terminated at this time");
-#endif
 
         // can't do following right now since compiler still tries to compile null
         // terminated flavor for this, which will fail when using const char
