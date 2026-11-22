@@ -138,10 +138,7 @@ protected:
     ESTD_CPP_CONSTEXPR(14) bool ensure_total_capacity(size_type new_size, size_type pad = 0)
     {
         if(new_size > base_type::capacity())
-        {
-            // TODO: Do an assert here, or return true/false to indicate success
-            if(!reserve(new_size + pad)) return false;
-        }
+            return reserve(new_size + pad);
 
         return true;
     }

@@ -123,9 +123,7 @@ template<class T> struct is_const<const T> : true_type {};
 
 template <class T> struct is_reference      : false_type {};
 template <class T> struct is_reference<T&>  : true_type {};
-#ifdef __cpp_rvalue_references
 template <class T> struct is_reference<T&&> : true_type {};
-#endif
 
 template<class T> struct is_lvalue_reference     : false_type {};
 template<class T> struct is_lvalue_reference<T&> : true_type {};
@@ -133,9 +131,12 @@ template<class T> struct is_lvalue_reference<T&> : true_type {};
 template<class T> struct is_volatile             : false_type {};
 template<class T> struct is_volatile<volatile T> : true_type {};
 
-#ifdef FEATURE_CPP_MOVESEMANTIC
 template <class T> struct is_rvalue_reference      : false_type {};
 template <class T> struct is_rvalue_reference<T&&> : true_type {};
+
+#if __cpp_inline_variables
+template <class T>
+inline constexpr bool is_const_v = is_const<T>::value;
 #endif
 
 // lifted from http://en.cppreference.com/w/cpp/types/conditional
@@ -186,10 +187,8 @@ template <class T> struct remove_pointer<T* const> { typedef T type; };
 template <class T> struct remove_pointer<T* volatile> { typedef T type; };
 template <class T> struct remove_pointer<T* const volatile> { typedef T type; };
 
-#if __cpp_alias_templates
 template <class T>
 using remove_pointer_t = typename remove_pointer<T>::type;
-#endif
 
 
 #ifdef FEATURE_CPP_ALIGN
