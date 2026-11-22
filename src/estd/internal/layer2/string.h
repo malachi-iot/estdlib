@@ -4,6 +4,7 @@
 #include "../fwd/string_view.h"
 #include "../../policy/string.h"
 #include "../string.h"
+#include "../string/layer.h"
 
 // TODO: refactor layer2 & layer3 to utilize a handle and not a CharT*
 namespace estd { namespace layer2 {
@@ -14,9 +15,11 @@ namespace estd { namespace layer2 {
 template<class Char, size_t N, bool null_terminated,
          class Traits,
          ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
-class basic_string : public estd::internal::basic_string<
-    estd::layer2::allocator<Char, N>,
-    StringPolicy >
+class basic_string :
+    public estd::internal::basic_string<
+        estd::layer2::allocator<Char, N>,
+        StringPolicy>,
+    public estd::internal::mixins::string<basic_string<Char, N, null_terminated, Traits, StringPolicy>, Traits>
 {
     using base_type = estd::internal::basic_string<
             estd::layer2::allocator<Char, N>,
@@ -127,20 +130,6 @@ public:
 
         return data();
     }
-
-    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
-
-    constexpr operator typename base_type::view_type() const
-    {
-        return { data(), base_type::size() };
-    }
-
-#if FEATURE_STD_STRING_VIEW
-    constexpr operator std::basic_string_view<Char>() const
-    {
-        return { data(), size_t(base_type::size()) };
-    }
-#endif
 };
 
 

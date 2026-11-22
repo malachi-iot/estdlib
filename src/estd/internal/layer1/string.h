@@ -1,19 +1,23 @@
+#pragma once
+
 #include "../../allocators/fixed.h"
 #include "../fwd/string_view.h"
 #include "../fwd/string.h"
 #include "../string.h"
-
-#pragma once
+#include "../string/layer.h"
 
 namespace estd { namespace layer1 {
 
 template<class Char, size_t N, bool null_terminated, class Traits,
     ESTD_CPP_CONCEPT(internal::StringPolicy) StringPolicy>
-class basic_string : public estd::internal::basic_string<
-    // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
-    // light of https://github.com/malachi-iot/estdlib/issues/88
-    estd::layer1::allocator<Char, N, Char[N]>,
-    StringPolicy>
+class basic_string :
+    public estd::internal::basic_string<
+        // DEBT: underlying conditional_t deduces CharT[N], just taking extra precautions in
+        // light of https://github.com/malachi-iot/estdlib/issues/88
+        estd::layer1::allocator<Char, N, Char[N]>,
+        StringPolicy>,
+    public internal::mixins::string<basic_string<Char, N, null_terminated, Traits, StringPolicy>, Traits>
+    //internal::mixins::string<estd::internal::basic_string<allocator<Char, N, Char[N]>, StringPolicy>>
 {
     using base_type = estd::internal::basic_string<
         estd::layer1::allocator<Char, N, Char[N]>,
@@ -77,20 +81,6 @@ public:
 
         return data();
     }
-
-    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
-
-    constexpr operator view_type() const
-    {
-        return { data(), base_type::size() };
-    }
-
-#if FEATURE_STD_STRING_VIEW
-    constexpr operator std::basic_string_view<Char>() const
-    {
-        return { data(), size_t(base_type::size()) };
-    }
-#endif
 };
 
 

@@ -5,6 +5,7 @@
 #include "../../policy/string.h"
 #include "../../allocators/fixed.h"
 #include "../string.h"
+#include "../string/layer.h"
 #include "../../span.h"
 
 #if FEATURE_STD_STRING_VIEW
@@ -22,9 +23,11 @@ template<class CharT, bool null_terminated = true,
          class Policy = internal::string_policy_helper<CharT, Traits,
             null_terminated ? internal::string_options::null_terminated : internal::string_options::none,
             uint16_t>>
-class basic_string : public estd::internal::basic_string<
-                estd::layer3::allocator<CharT, typename Policy::size_type>,
-                Policy>
+class basic_string :
+    public estd::internal::basic_string<
+        estd::layer3::allocator<CharT, typename Policy::size_type>,
+        Policy>,
+    public estd::internal::mixins::string<basic_string<CharT, null_terminated, Traits, Policy>, Traits>
 {
     using base_type = estd::internal::basic_string<
         estd::layer3::allocator<CharT, typename Policy::size_type>,
@@ -124,24 +127,6 @@ public:
         base_type::operator =(copy_from);
         return *this;
     }
-
-    // A little clumsy since basic_string_view treats everything as const already,
-    // so if we are converting from a const_string we have to remove const from CharT
-    //typedef basic_string_view<typename estd::remove_const<CharT>::type, Traits> view_type;
-
-    // 17NOB26 DEBT: Feeling strongly these string view operators could be at base class level
-
-    constexpr operator view_type() const
-    {
-        return { data(), typename view_type::size_type(base_type::size()) };
-    }
-
-#if FEATURE_STD_STRING_VIEW
-    constexpr operator std::basic_string_view<CharT>() const
-    {
-        return { data(), size_t(base_type::size()) };
-    }
-#endif
 };
 
 
