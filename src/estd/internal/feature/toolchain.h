@@ -5,6 +5,10 @@
 // feature area different from toolchain/gnuc.h - the latter focuses more
 // on compiler compatibility
 
+#if __GNUC__ >= 10 || __clang__
+#define FEATURE_TOOLCHAIN_HAS_HAS_BUILTIN 1
+#endif
+
 #if defined(__GNUC_PREREQ)
 
 // AVR compiler appears to have incomplete implementation of __has_builtin
@@ -21,7 +25,7 @@
 #endif
 #endif
 
-#if __AVR__
+#if FEATURE_TOOLCHAIN_HAS_HAS_BUILTIN == 0 && __GNUC__ >= 5
 #define FEATURE_TOOLCHAIN_BUILTIN_BSWAP16  1
 #define FEATURE_TOOLCHAIN_BUILTIN_BSWAP32  1
 #define FEATURE_TOOLCHAIN_BUILTIN_BSWAP64  1

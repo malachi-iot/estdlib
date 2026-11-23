@@ -17,8 +17,25 @@
 namespace estd {
 namespace internal {
 
-template<class T>
+template <unsigned bytes, bool is_signed>
+struct promote_by_width;
+
+template <> struct promote_by_width<1, true>    { using type = int16_t; };
+template <> struct promote_by_width<1, false>   { using type = uint16_t; };
+template <> struct promote_by_width<2, true>    { using type = int32_t; };
+template <> struct promote_by_width<2, false>   { using type = uint32_t; };
+template <> struct promote_by_width<4, true>    { using type = int64_t; };
+template <> struct promote_by_width<4, false>   { using type = uint64_t; };
+
+// Non-integral types stay incomplete unless specialized below
+// is_integral guard keeps double, enums, pointers out of promote_by_width
+template<class T, bool = is_integral<T>::value>
 struct promote_type;
+
+// 23NOV26 DEBT: Catches integers no intN_t/uintN_t alias covers: int/unsigned where
+// int32_t is long (arm-none-eabi, IDF 5+ xtensa), short on AVR
+template<class T>
+struct promote_type<T, true> : promote_by_width<sizeof(T), is_signed<T>::value> {};
 
 template<class T>
 using promote_type_t = typename promote_type<T>::type;
@@ -101,21 +118,9 @@ struct promote_type<float>
     using type = double;
 };
 
-// 01SEP26 DEBT: I cannot account for this.  int is definitely 4 bytes wide on ESP32, yet
-// int32 specialization doesn't pick this up.  No need for a short/long flavor, those
-// do get picked up by int16_t.  Presumably this has something to do with long being
-// same size as int
-#if ESP_PLATFORM
-template<>
-struct promote_type<int>
-{
-    using type = long;
-};
-#endif
-
-// 01SEP26 DEBT: No actual guarantee that our stdint specializations match up to
-// int -> long.  But so far so good
-static_assert(is_same<promote_type_t<int>, long>::value, "Cannot promote int -> long");
+static_assert(sizeof(promote_type_t<short>) > sizeof(short), "Cannot promote short");
+static_assert(sizeof(promote_type_t<int>) > sizeof(int), "Cannot promote int");
+static_assert(sizeof(promote_type_t<unsigned>) > sizeof(unsigned), "Cannot promote unsigned");
 
 #if __SIZEOF_INT128__ && __SIZEOF_LONG_LONG__ == 8
 // FIX: Some trouble here, we can't yet tell if platform 100% aliases int64_t to long long or not.  We know Clang doesn't,
@@ -209,9 +214,12 @@ template <> struct is_safe_arithmetic_conversion<int, double> : true_type {};
 
 static_assert(is_safe_arithmetic_conversion<int, double>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<float, double>::value, "Sanity check");
-static_assert(!is_safe_arithmetic_conversion<double, float>::value, "Sanity check");
+// 23NOV26 DEBT: AVR double is float width and int is short width, so skip those there
+static_assert(sizeof(double) == sizeof(float) ||
+    !is_safe_arithmetic_conversion<double, float>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<int, long>::value, "Sanity check");
-static_assert(!is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
+static_assert(sizeof(int) == sizeof(short) ||
+    !is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<short, unsigned long>::value, "Sanity check");
 static_assert(!is_safe_arithmetic_conversion<unsigned long, int>::value, "Sanity check");
 static_assert(!is_safe_arithmetic_conversion<unsigned long, float>::value, "Sanity check");

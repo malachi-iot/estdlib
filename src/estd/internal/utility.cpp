@@ -4,7 +4,10 @@
 #include "platform.h"
 #include "utility.h"
 
+// ESP targets use the real esp_log.h, same as the emulation below
+#ifndef ESP_PLATFORM
 #include "../port/esp-idf/fake/esp_log.h"
+#endif
 
 #ifndef FEATURE_CPP_INLINE_STATIC
 namespace estd { namespace internal {
