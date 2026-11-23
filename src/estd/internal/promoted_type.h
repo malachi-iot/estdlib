@@ -28,6 +28,7 @@ template <> struct promote_by_width<4, true>    { using type = int64_t; };
 template <> struct promote_by_width<4, false>   { using type = uint64_t; };
 
 // Non-integral types stay incomplete unless specialized below
+// is_integral guard keeps double, enums, pointers out of promote_by_width
 template<class T, bool = is_integral<T>::value>
 struct promote_type;
 
