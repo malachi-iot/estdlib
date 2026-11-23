@@ -213,9 +213,12 @@ template <> struct is_safe_arithmetic_conversion<int, double> : true_type {};
 
 static_assert(is_safe_arithmetic_conversion<int, double>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<float, double>::value, "Sanity check");
-static_assert(!is_safe_arithmetic_conversion<double, float>::value, "Sanity check");
+// 23NOV26 DEBT: AVR double is float width and int is short width, so skip those there
+static_assert(sizeof(double) == sizeof(float) ||
+    !is_safe_arithmetic_conversion<double, float>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<int, long>::value, "Sanity check");
-static_assert(!is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
+static_assert(sizeof(int) == sizeof(short) ||
+    !is_safe_arithmetic_conversion<int, short>::value, "Sanity check");
 static_assert(is_safe_arithmetic_conversion<short, unsigned long>::value, "Sanity check");
 static_assert(!is_safe_arithmetic_conversion<unsigned long, int>::value, "Sanity check");
 static_assert(!is_safe_arithmetic_conversion<unsigned long, float>::value, "Sanity check");

@@ -366,7 +366,8 @@ public:
     constexpr dynamic_array(dynamic_array&) = default;
     constexpr dynamic_array(dynamic_array&&) = default;
 
-    // C++11 makes constexpr members implicitly const, which a defaulted operator= can't be
+    // C++11 constexpr members are implicitly const, which breaks a defaulted (non-const)
+    // operator=.  C++14 dropped that rule
     ESTD_CPP_CONSTEXPR(14) dynamic_array& operator=(const dynamic_array&) = default;
     ESTD_CPP_CONSTEXPR(14) dynamic_array& operator=(dynamic_array&&) = default;
 
