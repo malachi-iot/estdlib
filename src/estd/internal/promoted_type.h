@@ -17,8 +17,24 @@
 namespace estd {
 namespace internal {
 
-template<class T>
+template <unsigned bytes, bool is_signed>
+struct promote_by_width;
+
+template <> struct promote_by_width<1, true>    { using type = int16_t; };
+template <> struct promote_by_width<1, false>   { using type = uint16_t; };
+template <> struct promote_by_width<2, true>    { using type = int32_t; };
+template <> struct promote_by_width<2, false>   { using type = uint32_t; };
+template <> struct promote_by_width<4, true>    { using type = int64_t; };
+template <> struct promote_by_width<4, false>   { using type = uint64_t; };
+
+// Non-integral types stay incomplete unless specialized below
+template<class T, bool = is_integral<T>::value>
 struct promote_type;
+
+// 23NOV26 DEBT: Catches integers no intN_t/uintN_t alias covers: int/unsigned where
+// int32_t is long (arm-none-eabi, IDF 5+ xtensa), short on AVR
+template<class T>
+struct promote_type<T, true> : promote_by_width<sizeof(T), is_signed<T>::value> {};
 
 template<class T>
 using promote_type_t = typename promote_type<T>::type;
@@ -101,25 +117,7 @@ struct promote_type<float>
     using type = double;
 };
 
-// Stands in for int/unsigned when an intN_t/uintN_t alias already covers them
-template <bool is_unsigned>
-struct promote_type_covered;
-
-// 23NOV26 DEBT: int32_t is long on arm-none-eabi and IDF 5+ xtensa, but int on older
-// xtensa, AVR (int16_t) and most hosts.  When no alias covers int/unsigned, route
-// them through the same-width alias
-template<>
-struct promote_type<conditional_t<
-    is_same<int, int16_t>::value || is_same<int, int32_t>::value,
-    promote_type_covered<false>, int>> :
-    promote_type<conditional_t<sizeof(int) == 2, int16_t, int32_t>> {};
-
-template<>
-struct promote_type<conditional_t<
-    is_same<unsigned, uint16_t>::value || is_same<unsigned, uint32_t>::value,
-    promote_type_covered<true>, unsigned>> :
-    promote_type<conditional_t<sizeof(unsigned) == 2, uint16_t, uint32_t>> {};
-
+static_assert(sizeof(promote_type_t<short>) > sizeof(short), "Cannot promote short");
 static_assert(sizeof(promote_type_t<int>) > sizeof(int), "Cannot promote int");
 static_assert(sizeof(promote_type_t<unsigned>) > sizeof(unsigned), "Cannot promote unsigned");
 
