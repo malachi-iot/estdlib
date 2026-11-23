@@ -101,21 +101,27 @@ struct promote_type<float>
     using type = double;
 };
 
-// 01SEP26 DEBT: I cannot account for this.  int is definitely 4 bytes wide on ESP32, yet
-// int32 specialization doesn't pick this up.  No need for a short/long flavor, those
-// do get picked up by int16_t.  Presumably this has something to do with long being
-// same size as int
-#if ESP_PLATFORM
-template<>
-struct promote_type<int>
-{
-    using type = long;
-};
-#endif
+// Stands in for int/unsigned when an intN_t/uintN_t alias already covers them
+template <bool is_unsigned>
+struct promote_type_covered;
 
-// 01SEP26 DEBT: No actual guarantee that our stdint specializations match up to
-// int -> long.  But so far so good
-static_assert(is_same<promote_type_t<int>, long>::value, "Cannot promote int -> long");
+// 23NOV26 DEBT: int32_t is long on arm-none-eabi and IDF 5+ xtensa, but int on older
+// xtensa, AVR (int16_t) and most hosts.  When no alias covers int/unsigned, route
+// them through the same-width alias
+template<>
+struct promote_type<conditional_t<
+    is_same<int, int16_t>::value || is_same<int, int32_t>::value,
+    promote_type_covered<false>, int>> :
+    promote_type<conditional_t<sizeof(int) == 2, int16_t, int32_t>> {};
+
+template<>
+struct promote_type<conditional_t<
+    is_same<unsigned, uint16_t>::value || is_same<unsigned, uint32_t>::value,
+    promote_type_covered<true>, unsigned>> :
+    promote_type<conditional_t<sizeof(unsigned) == 2, uint16_t, uint32_t>> {};
+
+static_assert(sizeof(promote_type_t<int>) > sizeof(int), "Cannot promote int");
+static_assert(sizeof(promote_type_t<unsigned>) > sizeof(unsigned), "Cannot promote unsigned");
 
 #if __SIZEOF_INT128__ && __SIZEOF_LONG_LONG__ == 8
 // FIX: Some trouble here, we can't yet tell if platform 100% aliases int64_t to long long or not.  We know Clang doesn't,

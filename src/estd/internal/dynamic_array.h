@@ -366,8 +366,9 @@ public:
     constexpr dynamic_array(dynamic_array&) = default;
     constexpr dynamic_array(dynamic_array&&) = default;
 
-    constexpr dynamic_array& operator=(const dynamic_array&) = default;
-    constexpr dynamic_array& operator=(dynamic_array&&) = default;
+    // C++11 makes constexpr members implicitly const, which a defaulted operator= can't be
+    ESTD_CPP_CONSTEXPR(14) dynamic_array& operator=(const dynamic_array&) = default;
+    ESTD_CPP_CONSTEXPR(14) dynamic_array& operator=(dynamic_array&&) = default;
 
     template <class ...Args>
     constexpr explicit dynamic_array(Args&&...args) :
