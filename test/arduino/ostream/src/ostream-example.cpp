@@ -1,1 +1,0 @@
-../../../../examples/pio/ostream/src/ostream-example.cpp

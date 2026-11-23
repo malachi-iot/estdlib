@@ -1,0 +1,9 @@
+{
+    "name": "ostream-example",
+    "version": "0.0.0",
+    "description": "Builds examples/pio/ostream alongside this test project",
+    "build":
+    {
+        "srcDir": "../../../../../examples/pio/ostream/src"
+    }
+}
