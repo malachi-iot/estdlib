@@ -2,15 +2,15 @@
 
 #include "internal/numeric.h"
 #include "internal/utility.h"
-#include "internal/feature/algorithm.h"
+#include "internal/feature/numeric.h"
 
-#if FEATURE_ESTD_ALGORITHM_OPT
+#if FEATURE_ESTD_STD_NUMERIC_ALIAS
 #include <numeric>
 #endif
 
 namespace estd {
 
-#if FEATURE_ESTD_ALGORITHM_OPT
+#if FEATURE_ESTD_STD_NUMERIC_ALIAS
 using std::accumulate;
 #else
 // Cheap and nasty copy/paste direct from

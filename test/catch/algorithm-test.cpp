@@ -1,7 +1,5 @@
 #include <catch2/catch_all.hpp>
 
-#define FEATURE_ESTD_ALGORITHM_OPT 0
-
 #include <estd/array.h>
 #include <estd/algorithm.h>
 #include <estd/internal/iterator/size.h> // This is where we define begin/end
