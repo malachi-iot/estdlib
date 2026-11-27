@@ -19,6 +19,7 @@ TEST_CASE("hash")
     SECTION("fowler-noll-vo")
     {
         using namespace estd::internal;
+        using namespace estd::fnv;
 
         // Verified with https://fnvhash.github.io/fnv-calculator-online/
 

@@ -11,6 +11,27 @@ namespace estd {
 // 19NOV26 TODO: Do fnv_hash and container_hash<Hasher> in estd::detail or even estd if we're feeling bold.  Or perhaps
 // estd::fnv namespace?  That might be good
 
+namespace fnv {
+
+enum modes
+{
+    FNV_1,
+    FNV_1A
+};
+
+template <class Precision, modes = FNV_1A>
+struct hasher;
+
+template <modes mode = FNV_1A, class T>
+T hash(const T* begin, const T* end)
+{
+    using h = hasher<T, mode>;
+
+    return h::hash(begin, end);
+}
+
+}
+
 namespace internal {
 
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
@@ -19,19 +40,15 @@ namespace internal {
 // While looking for 16-bit variants, found none.  Instead, came across this:
 // https://www.reddit.com/r/RNG/comments/jqnq20/the_wang_and_jenkins_integer_hash_functions_just/
 
-enum fnv_modes
-{
-    FNV_1,
-    FNV_1A
-};
+using fnv_modes = fnv::modes;
 
 // Adapted from:
 // https://github.com/fabiogaluppo/fnv/blob/main/fnv64.hpp
 // https://gist.github.com/hwei/1950649d523afd03285c
 
 // GCC and Clang informally rely on FNV_1A, so so will we
-template <class Precision, fnv_modes = FNV_1A>
-struct fnv_hash;
+template <class Precision, fnv_modes mode = fnv::FNV_1A>
+using fnv_hash = fnv::hasher<Precision, mode>;
 
 struct fnv_hash_base
 {
@@ -73,80 +90,7 @@ struct fnv_hash_base
     }
 };
 
-template <>
-struct fnv_hash<uint32_t, FNV_1> : fnv_hash_base
-{
-    static constexpr uint32_t INIT = FNV1_32_OFFSET_BASIS;
 
-    template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
-        uint32_t hashval = INIT)
-    {
-        for(It current = begin; current != end; ++current)
-        {
-            hashval *= FNV1_32_PRIME;
-            hashval ^= cast32(*current);
-        }
-
-        return hashval;
-    }
-};
-
-
-template <>
-struct fnv_hash<uint32_t, FNV_1A> : fnv_hash_base
-{
-    static constexpr uint32_t INIT = FNV1A_32_OFFSET_BASIS;
-
-    template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
-        uint32_t hashval = INIT)
-    {
-        for(It current = begin; current != end; ++current)
-        {
-            hashval ^= cast32(*current);
-            hashval *= FNV1A_32_PRIME;
-        }
-
-        return hashval;
-    }
-};
-
-template <>
-struct fnv_hash<uint64_t, FNV_1> : fnv_hash_base
-{
-    static constexpr uint64_t INIT = FNV1_64_INIT;
-
-    template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
-    {
-        It current = begin;
-        for (; current != end; ++current)
-        {
-            hashval += shift_sum(hashval);
-            hashval ^= cast64(*current);
-        }
-        return hashval;
-    }
-};
-
-template <>
-struct fnv_hash<uint64_t, FNV_1A> : fnv_hash_base
-{
-    static constexpr uint64_t INIT = FNV1A_64_INIT;
-
-    template <class It>
-    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
-    {
-        It current = begin;
-        for (; current != end; ++current)
-        {
-            hashval ^= cast64(*current);
-            hashval += shift_sum(hashval);
-        }
-        return hashval;
-    }
-};
 
 /*
 template <>
@@ -207,6 +151,85 @@ struct container_hash
         static_assert(sizeof(typename traits::value_type) == 1, "Only 8-bit values are supported");
 
         return hasher::hash(c.begin(), c.end(), init);
+    }
+};
+
+}
+
+namespace fnv {
+
+template <>
+struct hasher<uint32_t, FNV_1> : internal::fnv_hash_base
+{
+    static constexpr uint32_t INIT = FNV1_32_OFFSET_BASIS;
+
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
+        uint32_t hashval = INIT)
+    {
+        for(It current = begin; current != end; ++current)
+        {
+            hashval *= FNV1_32_PRIME;
+            hashval ^= cast32(*current);
+        }
+
+        return hashval;
+    }
+};
+
+
+template <>
+struct hasher<uint32_t, FNV_1A> : internal::fnv_hash_base
+{
+    static constexpr uint32_t INIT = FNV1A_32_OFFSET_BASIS;
+
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) static uint32_t hash(It begin, It end,
+        uint32_t hashval = INIT)
+    {
+        for(It current = begin; current != end; ++current)
+        {
+            hashval ^= cast32(*current);
+            hashval *= FNV1A_32_PRIME;
+        }
+
+        return hashval;
+    }
+};
+
+template <>
+struct hasher<uint64_t, FNV_1> : internal::fnv_hash_base
+{
+    static constexpr uint64_t INIT = FNV1_64_INIT;
+
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
+    {
+        It current = begin;
+        for (; current != end; ++current)
+        {
+            hashval += shift_sum(hashval);
+            hashval ^= cast64(*current);
+        }
+        return hashval;
+    }
+};
+
+template <>
+struct hasher<uint64_t, FNV_1A> : internal::fnv_hash_base
+{
+    static constexpr uint64_t INIT = FNV1A_64_INIT;
+
+    template <class It>
+    ESTD_CPP_CONSTEXPR(14) static uint64_t hash(It begin, It end, uint64_t hashval = INIT)
+    {
+        It current = begin;
+        for (; current != end; ++current)
+        {
+            hashval ^= cast64(*current);
+            hashval += shift_sum(hashval);
+        }
+        return hashval;
     }
 };
 
